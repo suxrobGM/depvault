@@ -1,7 +1,6 @@
 import { getRequestConfig } from "next-intl/server";
 import { cookies } from "next/headers";
 import enMessages from "../../messages/en";
-import enMessages from "../../messages/en";
 import ruMessages from "../../messages/ru";
 import { defaultLocale, type Locale } from "./config";
 
