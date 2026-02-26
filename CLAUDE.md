@@ -8,10 +8,6 @@ DepVault is a web dashboard that analyzes dependencies, detects vulnerabilities,
 - **Web**: Next.js 16 + MUI + Tailwind v4
 - **Shared**: `@depvault/shared` package in `packages/shared/`
 
-## PRD file
-
-The PRD file is located at `docs/prd.md`. It contains the product requirements, user stories, and acceptance criteria for the DepVault platform. Refer to it for any questions about the product's functionality or features.
-
 ## PRD & Design References
 
 - **PRD**: `docs/prd.md` — user stories US-01 through US-10, sprint plan, acceptance criteria
