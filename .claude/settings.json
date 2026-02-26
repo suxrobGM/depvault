@@ -18,6 +18,7 @@
       "Bash(bun add:*)",
       "Bash(bun remove:*)",
       "Bash(bun install)",
+      "Bash(bun test)",
       "Bash(mkdir:*)",
       "Bash(ls:*)",
       "Bash(dir:*)",

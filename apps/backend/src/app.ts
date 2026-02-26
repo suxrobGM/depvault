@@ -6,7 +6,7 @@ import { corsPlugin, swaggerPlugin } from "@/common/plugins";
 import { logger } from "@/common/utils/logger";
 import { validateEnv } from "@/env";
 import { authController } from "@/modules/auth";
-import { ErrorResponseSchema, HttpErrorResponses } from "./types/response";
+import { HttpErrorResponses } from "./types/response";
 
 // Validate environment
 const env = validateEnv();

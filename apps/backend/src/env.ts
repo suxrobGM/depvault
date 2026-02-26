@@ -2,6 +2,9 @@ import { t, type Static } from "elysia";
 
 const EnvSchema = t.Object({
   DATABASE_URL: t.String(),
+  JWT_SECRET: t.String(),
+  JWT_EXPIRY: t.Optional(t.String({ default: "15m" })),
+  REFRESH_TOKEN_EXPIRY: t.Optional(t.String({ default: "30d" })),
   PORT: t.Optional(t.String({ default: "3000" })),
   NODE_ENV: t.Optional(
     t.Union([t.Literal("development"), t.Literal("production"), t.Literal("staging")]),
@@ -28,6 +31,8 @@ declare global {
 export function validateEnv(): Env {
   const env = {
     DATABASE_URL: process.env.DATABASE_URL,
+    JWT_SECRET: process.env.JWT_SECRET,
+    JWT_EXPIRY: process.env.JWT_EXPIRY ?? "15m",
     REFRESH_TOKEN_EXPIRY: process.env.REFRESH_TOKEN_EXPIRY ?? "30d",
     PORT: process.env.PORT ?? "4000",
     NODE_ENV: process.env.NODE_ENV ?? "development",
@@ -40,6 +45,10 @@ export function validateEnv(): Env {
 
   if (!env.DATABASE_URL) {
     throw new Error("DATABASE_URL is required");
+  }
+
+  if (!env.JWT_SECRET) {
+    throw new Error("JWT_SECRET is required");
   }
 
   return env as Env;
