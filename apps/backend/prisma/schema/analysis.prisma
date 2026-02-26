@@ -1,0 +1,81 @@
+enum Ecosystem {
+  NODEJS
+  PYTHON
+  RUST
+  DOTNET
+  GO
+  JAVA
+  RUBY
+  PHP
+}
+
+enum DependencyStatus {
+  UP_TO_DATE
+  MINOR_UPDATE
+  MAJOR_UPDATE
+  DEPRECATED
+}
+
+enum VulnerabilitySeverity {
+  NONE
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum LicensePolicy {
+  ALLOW
+  WARN
+  BLOCK
+}
+
+model Analysis {
+  id          String    @id @default(uuid()) @db.Uuid
+  projectId   String    @db.Uuid
+  userId      String    @db.Uuid
+  fileName    String
+  ecosystem   Ecosystem
+  healthScore Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id])
+  dependencies Dependency[]
+}
+
+model Dependency {
+  id             String           @id @default(uuid()) @db.Uuid
+  analysisId     String           @db.Uuid
+  name           String
+  currentVersion String
+  latestVersion  String?
+  status         DependencyStatus @default(UP_TO_DATE)
+  license        String?
+  licensePolicy  LicensePolicy    @default(ALLOW)
+  isDirect       Boolean          @default(true)
+  parentId       String?          @db.Uuid
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  analysis        Analysis        @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  parent          Dependency?     @relation("DependencyTree", fields: [parentId], references: [id])
+  children        Dependency[]    @relation("DependencyTree")
+  vulnerabilities Vulnerability[]
+}
+
+model Vulnerability {
+  id           String                @id @default(uuid()) @db.Uuid
+  dependencyId String                @db.Uuid
+  cveId        String?
+  title        String
+  description  String?
+  severity     VulnerabilitySeverity @default(NONE)
+  fixedIn      String?
+  url          String?
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  dependency Dependency @relation(fields: [dependencyId], references: [id], onDelete: Cascade)
+}

@@ -1,0 +1,21 @@
+enum NotificationType {
+  VULNERABILITY_FOUND
+  SECRET_ROTATION
+  ENV_DRIFT
+  TEAM_INVITE
+  ROLE_CHANGE
+}
+
+model Notification {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @db.Uuid
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  metadata  Json?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

@@ -22,6 +22,13 @@
       "Bash(ls:*)",
       "Bash(dir:*)",
 
+      "Bash(gh issue:*)",
+      "Bash(gh project:*)",
+      "Bash(gh label:*)",
+      "Bash(gh api:*)",
+      "Bash(gh repo:*)",
+      "Bash(gh pr:*)",
+
       "mcp__plugin_playwright_playwright__browser_*",
       "mcp__plugin_context7_context7__*"
     ],
