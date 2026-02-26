@@ -15,6 +15,7 @@ The PRD file is located at `docs/prd.md`. It contains the product requirements, 
 ## PRD & Design References
 
 - **PRD**: `docs/prd.md` — user stories US-01 through US-10, sprint plan, acceptance criteria
+- **UI Mockups**: `docs/ui-mockups.md` — ASCII wireframes for every screen (app shell, auth, dashboard, analysis, env vault, diff, secrets, settings, members, notifications, profile, converter)
 - **Sprint Plan**: PRD Section 9 — Sprint 1 (Foundation & Core Analysis), Sprint 2 (Env Vault & Polish)
 
 ### UI Component Guidelines
