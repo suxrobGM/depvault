@@ -1,0 +1,21 @@
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "prettier.configPath": "./prettier.config.js",
+  "editor.formatOnSave": true,
+  "files.exclude": {
+    "node_modules": true,
+    "**/*/node_modules": true,
+    "**/*/next-env.d.ts": true,
+    "**/*/.next": true
+  },
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  },
+  "VSCodeCounter.exclude": ["bun.lock"]
+}
