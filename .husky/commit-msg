@@ -1,1 +1,0 @@
-sed -i "/^Co-[Aa]uthored-[Bb]y:.*anthropic\.com/d" "$1"
