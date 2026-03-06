@@ -31,6 +31,10 @@ jobs:
       - name: Format check
         run: bun run prettier --check "**/*.{js,jsx,ts,tsx,css,json,md}"
 
+      - name: Generate Prisma client
+        run: bun run db:generate
+        working-directory: apps/backend
+
       - name: Typecheck backend
         run: bun run typecheck
         working-directory: apps/backend
