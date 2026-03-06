@@ -34,6 +34,8 @@ jobs:
       - name: Generate Prisma client
         run: bun run db:generate
         working-directory: apps/backend
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
 
       - name: Typecheck backend
         run: bun run typecheck
