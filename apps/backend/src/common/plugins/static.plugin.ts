@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { staticPlugin } from "@elysiajs/static";
 import { Elysia } from "elysia";
 
-const UPLOADS_DIR = resolve(process.env.DATA_DIR, "uploads");
+const UPLOADS_DIR = resolve(process.env.UPLOAD_DIR!);
 mkdirSync(UPLOADS_DIR, { recursive: true });
 
 /**
