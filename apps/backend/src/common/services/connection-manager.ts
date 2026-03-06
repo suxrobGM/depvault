@@ -1,4 +1,4 @@
-import { logger } from "@/common/utils/logger";
+import { logger } from "@/common/logger/logger";
 
 export interface WsHandle {
   send: (data: string) => void;

@@ -1,8 +1,11 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
+import { authGuard } from "@/common/middleware/auth.middleware";
 import {
   AuthResponseSchema,
   ForgotPasswordBodySchema,
+  GitHubCallbackQuerySchema,
+  LinkGitHubBodySchema,
   LoginBodySchema,
   MessageResponseSchema,
   RefreshBodySchema,
@@ -11,8 +14,10 @@ import {
   VerifyEmailBodySchema,
 } from "./auth.schema";
 import { AuthService } from "./auth.service";
+import { GitHubService } from "./github.service";
 
 const authService = container.resolve(AuthService);
+const githubService = container.resolve(GitHubService);
 
 export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Auth"] } })
   .post("/register", ({ body }) => authService.register(body), {
@@ -44,4 +49,26 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
     body: VerifyEmailBodySchema,
     response: MessageResponseSchema,
     detail: { summary: "Verify email with token" },
+  })
+  .get(
+    "/github",
+    ({ set }) => {
+      const url = githubService.getAuthUrl();
+      set.status = 302;
+      set.headers.location = url;
+    },
+    {
+      detail: { summary: "Initiate GitHub OAuth redirect" },
+    },
+  )
+  .get("/github/callback", ({ query }) => githubService.callback(query), {
+    query: GitHubCallbackQuerySchema,
+    response: AuthResponseSchema,
+    detail: { summary: "Handle GitHub OAuth callback" },
+  })
+  .use(authGuard)
+  .post("/link-github", ({ body, user }) => githubService.linkAccount(body, user.id), {
+    body: LinkGitHubBodySchema,
+    response: MessageResponseSchema,
+    detail: { summary: "Link GitHub account to existing user" },
   });
