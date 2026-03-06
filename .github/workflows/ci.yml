@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -30,6 +32,12 @@ jobs:
 
       - name: Format check
         run: bun run prettier --check "**/*.{js,jsx,ts,tsx,css,json,md}"
+
+      - name: Generate Prisma client
+        run: bun run db:generate
+        working-directory: apps/backend
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
 
       - name: Typecheck backend
         run: bun run typecheck
@@ -50,7 +58,7 @@ jobs:
       - name: Secret scanning
         uses: gitleaks/gitleaks-action@v2
         env:
-          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+          #GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Dependency audit

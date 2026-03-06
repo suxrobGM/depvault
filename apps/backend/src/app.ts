@@ -1,9 +1,9 @@
 import "@/common/di/container";
 import { Elysia } from "elysia";
 import { prisma } from "@/common/database";
+import { logger } from "@/common/logger";
 import { errorMiddleware } from "@/common/middleware";
 import { corsPlugin, swaggerPlugin } from "@/common/plugins";
-import { logger } from "@/common/utils/logger";
 import { validateEnv } from "@/env";
 import { authController } from "@/modules/auth";
 import { projectsController } from "@/modules/projects";
@@ -11,7 +11,6 @@ import { HttpErrorResponses } from "./types/response";
 
 // Validate environment
 const env = validateEnv();
-const port = parseInt(env.PORT ?? "4000");
 
 const app = new Elysia()
   // Infrastructure plugins
@@ -34,14 +33,14 @@ const app = new Elysia()
       .use(authController)
       .use(projectsController),
   )
-  .listen(port);
+  .listen(process.env.PORT!);
 
 // Export app type for Eden Treaty
 export type App = typeof app;
 
 logger.info(`Connect API running at http://${app.server?.hostname}:${app.server?.port}`);
 
-if (env.NODE_ENV === "development") {
+if (process.env.NODE_ENV === "development") {
   logger.info(
     `Swagger docs available at http://${app.server?.hostname}:${app.server?.port}/swagger`,
   );

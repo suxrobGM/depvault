@@ -1,8 +1,8 @@
 import { randomUUID } from "crypto";
 import { singleton } from "tsyringe";
 import { BadRequestError, ConflictError, UnauthorizedError } from "@/common/errors";
-import { signAccessToken, signRefreshToken, verifyRefreshToken } from "@/common/utils/jwt";
-import { logger } from "@/common/utils/logger";
+import { logger } from "@/common/logger/logger";
+import { verifyRefreshToken } from "@/common/utils/jwt";
 import { hashPassword, verifyPassword } from "@/common/utils/password";
 import { PrismaClient } from "@/generated/prisma";
 import type {
@@ -14,13 +14,17 @@ import type {
   ResetPasswordBody,
   VerifyEmailBody,
 } from "./auth.schema";
+import { TokenService } from "./token.service";
 
 const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 const PASSWORD_RESET_EXPIRY_MS = 60 * 60 * 1000; // 1 hour
 
 @singleton()
 export class AuthService {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly tokenService: TokenService,
+  ) {}
 
   async register(body: RegisterBody): Promise<AuthResponse> {
     if (!PASSWORD_REGEX.test(body.password)) {
@@ -63,34 +67,12 @@ export class AuthService {
     // TODO: Send verification email with emailVerificationToken
     logger.info({ userId: user.id }, "Verification email pending");
 
-    const [accessToken, refreshToken] = await Promise.all([
-      signAccessToken({ sub: user.id, email: user.email, role: user.role }),
-      signRefreshToken(user.id),
-    ]);
-
-    const hashedRefreshToken = await hashPassword(refreshToken);
-    await this.prisma.account.update({
-      where: { provider_providerAccountId: { provider: "EMAIL", providerAccountId: user.email } },
-      data: { refreshToken: hashedRefreshToken },
-    });
-
-    return {
-      accessToken,
-      refreshToken,
-      user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        role: user.role,
-        emailVerified: user.emailVerified,
-      },
-    };
+    return this.tokenService.issueTokens(user, "EMAIL", body.email);
   }
 
   async login(body: LoginBody): Promise<AuthResponse> {
     const user = await this.prisma.user.findUnique({
       where: { email: body.email },
-      include: { accounts: { where: { provider: "EMAIL" } } },
     });
 
     if (!user || !user.passwordHash || user.deletedAt) {
@@ -106,33 +88,7 @@ export class AuthService {
       throw new UnauthorizedError("Invalid email or password");
     }
 
-    const tokenFamily = randomUUID();
-    const [accessToken, refreshToken] = await Promise.all([
-      signAccessToken({ sub: user.id, email: user.email, role: user.role }),
-      signRefreshToken(user.id),
-    ]);
-
-    const hashedRefreshToken = await hashPassword(refreshToken);
-    const emailAccount = user.accounts[0];
-
-    if (emailAccount) {
-      await this.prisma.account.update({
-        where: { id: emailAccount.id },
-        data: { refreshToken: hashedRefreshToken, tokenFamily },
-      });
-    }
-
-    return {
-      accessToken,
-      refreshToken,
-      user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        role: user.role,
-        emailVerified: user.emailVerified,
-      },
-    };
+    return this.tokenService.issueTokens(user, "EMAIL", user.email);
   }
 
   async refresh(body: RefreshBody): Promise<AuthResponse> {
@@ -145,52 +101,23 @@ export class AuthService {
 
     const user = await this.prisma.user.findUnique({
       where: { id: sub },
-      include: { accounts: { where: { provider: "EMAIL" } } },
+      include: { accounts: true },
     });
 
     if (!user || user.deletedAt) {
       throw new UnauthorizedError("User not found");
     }
 
-    const emailAccount = user.accounts[0];
-    if (!emailAccount?.refreshToken) {
-      throw new UnauthorizedError("No active session");
-    }
-
-    const isValid = await verifyPassword(body.refreshToken, emailAccount.refreshToken);
-    if (!isValid) {
-      // Possible replay attack — revoke the entire token family
-      await this.prisma.account.update({
-        where: { id: emailAccount.id },
-        data: { refreshToken: null, tokenFamily: null },
-      });
-      logger.warn({ userId: user.id }, "Refresh token replay detected, revoked token family");
+    const matchedAccount = await this.findMatchingAccount(user.accounts, body.refreshToken);
+    if (!matchedAccount) {
       throw new UnauthorizedError("Invalid refresh token");
     }
 
-    const newTokenFamily = emailAccount.tokenFamily ?? randomUUID();
-    const [accessToken, newRefreshToken] = await Promise.all([
-      signAccessToken({ sub: user.id, email: user.email, role: user.role }),
-      signRefreshToken(user.id),
-    ]);
-
-    const hashedRefreshToken = await hashPassword(newRefreshToken);
-    await this.prisma.account.update({
-      where: { id: emailAccount.id },
-      data: { refreshToken: hashedRefreshToken, tokenFamily: newTokenFamily },
-    });
-
-    return {
-      accessToken,
-      refreshToken: newRefreshToken,
-      user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        role: user.role,
-        emailVerified: user.emailVerified,
-      },
-    };
+    return this.tokenService.issueTokens(
+      user,
+      matchedAccount.provider,
+      matchedAccount.providerAccountId,
+    );
   }
 
   async forgotPassword(body: ForgotPasswordBody): Promise<{ message: string }> {
@@ -278,5 +205,34 @@ export class AuthService {
     });
 
     return { message: "Email verified successfully" };
+  }
+
+  private async findMatchingAccount(
+    accounts: {
+      id: string;
+      userId: string;
+      provider: "EMAIL" | "GITHUB";
+      providerAccountId: string;
+      refreshToken: string | null;
+    }[],
+    rawRefreshToken: string,
+  ) {
+    for (const account of accounts) {
+      if (!account.refreshToken) continue;
+      const isValid = await verifyPassword(rawRefreshToken, account.refreshToken);
+      if (isValid) return account;
+    }
+
+    // Possible replay attack — revoke all tokens
+    const first = accounts[0];
+    if (first) {
+      await this.prisma.account.updateMany({
+        where: { userId: first.userId },
+        data: { refreshToken: null, tokenFamily: null },
+      });
+      logger.warn({ userId: first.userId }, "Refresh token replay detected, revoked all tokens");
+    }
+
+    return null;
   }
 }

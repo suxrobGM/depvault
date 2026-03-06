@@ -51,13 +51,33 @@ function createMockPrisma() {
   } as any;
 }
 
+function createMockTokenService() {
+  return {
+    issueTokens: mock(() =>
+      Promise.resolve({
+        accessToken: "mock-access-token",
+        refreshToken: "mock-refresh-token",
+        user: {
+          id: "user-uuid",
+          email: "test@example.com",
+          username: "testuser",
+          role: "USER",
+          emailVerified: false,
+        },
+      }),
+    ),
+  } as any;
+}
+
 describe("AuthService", () => {
   let service: AuthService;
   let mockPrisma: ReturnType<typeof createMockPrisma>;
+  let mockTokenService: ReturnType<typeof createMockTokenService>;
 
   beforeEach(() => {
     mockPrisma = createMockPrisma();
-    service = new AuthService(mockPrisma);
+    mockTokenService = createMockTokenService();
+    service = new AuthService(mockPrisma, mockTokenService);
   });
 
   describe("register", () => {
@@ -135,7 +155,6 @@ describe("AuthService", () => {
       emailVerified: true,
       passwordHash: "hashed-password",
       deletedAt: null,
-      accounts: [{ id: "account-uuid", refreshToken: "old-hash", tokenFamily: "old-family" }],
     };
 
     it("should return tokens for valid credentials", async () => {
@@ -192,7 +211,14 @@ describe("AuthService", () => {
       emailVerified: true,
       deletedAt: null,
       accounts: [
-        { id: "account-uuid", refreshToken: "hashed-refresh-token", tokenFamily: "family-uuid" },
+        {
+          id: "account-uuid",
+          userId: "user-uuid",
+          provider: "EMAIL",
+          providerAccountId: "test@example.com",
+          refreshToken: "hashed-refresh-token",
+          tokenFamily: "family-uuid",
+        },
       ],
     };
 
@@ -234,7 +260,16 @@ describe("AuthService", () => {
     it("should throw UnauthorizedError when no stored refresh token exists", async () => {
       mockPrisma.user.findUnique.mockResolvedValueOnce({
         ...validUser,
-        accounts: [{ id: "account-uuid", refreshToken: null, tokenFamily: null }],
+        accounts: [
+          {
+            id: "account-uuid",
+            userId: "user-uuid",
+            provider: "EMAIL",
+            providerAccountId: "test@example.com",
+            refreshToken: null,
+            tokenFamily: null,
+          },
+        ],
       });
 
       expect(service.refresh({ refreshToken: "valid-refresh-token" })).rejects.toBeInstanceOf(
@@ -242,18 +277,27 @@ describe("AuthService", () => {
       );
     });
 
-    it("should revoke token family on replay attack and throw UnauthorizedError", async () => {
+    it("should revoke all tokens on replay attack and throw UnauthorizedError", async () => {
       mockPrisma.user.findUnique.mockResolvedValueOnce({
         ...validUser,
-        accounts: [{ id: "account-uuid", refreshToken: "wrong-hash", tokenFamily: "family-uuid" }],
+        accounts: [
+          {
+            id: "account-uuid",
+            userId: "user-uuid",
+            provider: "EMAIL",
+            providerAccountId: "test@example.com",
+            refreshToken: "wrong-hash",
+            tokenFamily: "family-uuid",
+          },
+        ],
       });
 
       await expect(service.refresh({ refreshToken: "valid-refresh-token" })).rejects.toBeInstanceOf(
         UnauthorizedError,
       );
 
-      expect(mockPrisma.account.update).toHaveBeenCalledWith({
-        where: { id: "account-uuid" },
+      expect(mockPrisma.account.updateMany).toHaveBeenCalledWith({
+        where: { userId: "user-uuid" },
         data: { refreshToken: null, tokenFamily: null },
       });
     });

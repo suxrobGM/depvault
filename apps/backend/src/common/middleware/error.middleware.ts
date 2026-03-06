@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { HttpError } from "@/common/errors";
-import { logger } from "@/common/utils/logger";
+import { logger } from "@/common/logger/logger";
 
 /**
  * Global error handling plugin.
