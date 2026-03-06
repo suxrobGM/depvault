@@ -6,6 +6,7 @@ import { corsPlugin, swaggerPlugin } from "@/common/plugins";
 import { logger } from "@/common/utils/logger";
 import { validateEnv } from "@/env";
 import { authController } from "@/modules/auth";
+import { projectsController } from "@/modules/projects";
 import { HttpErrorResponses } from "./types/response";
 
 // Validate environment
@@ -30,7 +31,8 @@ const app = new Elysia()
       .guard({
         response: HttpErrorResponses,
       })
-      .use(authController),
+      .use(authController)
+      .use(projectsController),
   )
   .listen(port);
 

@@ -164,7 +164,7 @@ src/
 
 ## DI Pattern
 
-- Services: `@injectable()` class, constructor-injects `PrismaClient` (or a repository)
+- Services: `@singleton` or `@injectable()` class, constructor-injects `PrismaClient` (or a repository)
 - Repositories: `@injectable()` class with pure Prisma queries
 - Controllers: resolve service via `container.resolve(ServiceClass)`
 - PrismaClient registered in `common/di/container.ts` via `container.registerInstance()`

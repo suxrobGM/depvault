@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v5
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Format check
+        run: bun run prettier --check "**/*.{js,jsx,ts,tsx,css,json,md}"
+
+      - name: Typecheck backend
+        run: bun run typecheck
+        working-directory: apps/backend
+
+      - name: Typecheck frontend
+        run: bun run typecheck
+        working-directory: apps/frontend
+
+      - name: Test backend
+        run: bun test
+        working-directory: apps/backend
+
+      - name: Build frontend
+        run: bun run build
+        working-directory: apps/frontend
+
+      - name: Secret scanning
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Dependency audit
+        run: bun audit || echo "bun audit found issues (non-blocking for now)"

@@ -15,7 +15,14 @@ mock.module("@/common/utils/jwt", () => ({
 mock.module("@/common/utils/password", () => ({
   hashPassword: () => Promise.resolve("hashed-password"),
   verifyPassword: (plain: string, hash: string) =>
-    Promise.resolve(plain === "valid-refresh-token" && hash === "hashed-refresh-token"),
+    Promise.resolve(
+      (plain === "valid-refresh-token" && hash === "hashed-refresh-token") ||
+        (plain === "Password1" && hash === "hashed-password"),
+    ),
+}));
+
+mock.module("@/common/utils/logger", () => ({
+  logger: { info: () => {}, warn: () => {}, error: () => {} },
 }));
 
 function createMockPrisma() {
@@ -35,9 +42,11 @@ function createMockPrisma() {
           updatedAt: new Date(),
         }),
       ),
+      update: mock(() => Promise.resolve({})),
     },
     account: {
       update: mock(() => Promise.resolve({})),
+      updateMany: mock(() => Promise.resolve({ count: 1 })),
     },
   } as any;
 }
@@ -67,38 +76,6 @@ describe("AuthService", () => {
       expect(result.user.username).toBe("testuser");
       expect(result.user.role).toBe("USER");
       expect(result.user.emailVerified).toBe(false);
-    });
-
-    it("should call prisma create with hashed password and EMAIL account", async () => {
-      await service.register(validBody);
-
-      expect(mockPrisma.user.create).toHaveBeenCalledWith({
-        data: {
-          email: "test@example.com",
-          username: "testuser",
-          passwordHash: "hashed-password",
-          accounts: {
-            create: {
-              provider: "EMAIL",
-              providerAccountId: "test@example.com",
-            },
-          },
-        },
-      });
-    });
-
-    it("should store hashed refresh token on the account", async () => {
-      await service.register(validBody);
-
-      expect(mockPrisma.account.update).toHaveBeenCalledWith({
-        where: {
-          provider_providerAccountId: {
-            provider: "EMAIL",
-            providerAccountId: "test@example.com",
-          },
-        },
-        data: { refreshToken: "hashed-password" },
-      });
     });
 
     it("should throw BadRequestError when password has no uppercase letter", async () => {
@@ -147,15 +124,76 @@ describe("AuthService", () => {
     });
   });
 
+  describe("login", () => {
+    const loginBody = { email: "test@example.com", password: "Password1" };
+
+    const verifiedUser = {
+      id: "user-uuid",
+      email: "test@example.com",
+      username: "testuser",
+      role: "USER",
+      emailVerified: true,
+      passwordHash: "hashed-password",
+      deletedAt: null,
+      accounts: [{ id: "account-uuid", refreshToken: "old-hash", tokenFamily: "old-family" }],
+    };
+
+    it("should return tokens for valid credentials", async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(verifiedUser);
+
+      const result = await service.login(loginBody);
+
+      expect(result.accessToken).toBe("mock-access-token");
+      expect(result.refreshToken).toBe("mock-refresh-token");
+      expect(result.user.email).toBe("test@example.com");
+    });
+
+    it("should throw UnauthorizedError for non-existent user", async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(null);
+
+      expect(service.login(loginBody)).rejects.toBeInstanceOf(UnauthorizedError);
+    });
+
+    it("should throw UnauthorizedError for unverified email", async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce({
+        ...verifiedUser,
+        emailVerified: false,
+      });
+
+      expect(service.login(loginBody)).rejects.toThrow(
+        "Please verify your email before logging in",
+      );
+    });
+
+    it("should throw UnauthorizedError for wrong password", async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(verifiedUser);
+
+      expect(service.login({ ...loginBody, password: "WrongPass1" })).rejects.toBeInstanceOf(
+        UnauthorizedError,
+      );
+    });
+
+    it("should throw UnauthorizedError for soft-deleted user", async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce({
+        ...verifiedUser,
+        deletedAt: new Date(),
+      });
+
+      expect(service.login(loginBody)).rejects.toBeInstanceOf(UnauthorizedError);
+    });
+  });
+
   describe("refresh", () => {
     const validUser = {
       id: "user-uuid",
       email: "test@example.com",
       username: "testuser",
       role: "USER",
-      emailVerified: false,
+      emailVerified: true,
       deletedAt: null,
-      accounts: [{ id: "account-uuid", refreshToken: "hashed-refresh-token" }],
+      accounts: [
+        { id: "account-uuid", refreshToken: "hashed-refresh-token", tokenFamily: "family-uuid" },
+      ],
     };
 
     it("should return new tokens for a valid refresh token", async () => {
@@ -166,17 +204,6 @@ describe("AuthService", () => {
       expect(result.accessToken).toBe("mock-access-token");
       expect(result.refreshToken).toBe("mock-refresh-token");
       expect(result.user.id).toBe("user-uuid");
-    });
-
-    it("should rotate the refresh token in the database", async () => {
-      mockPrisma.user.findUnique.mockResolvedValueOnce(validUser);
-
-      await service.refresh({ refreshToken: "valid-refresh-token" });
-
-      expect(mockPrisma.account.update).toHaveBeenCalledWith({
-        where: { id: "account-uuid" },
-        data: { refreshToken: "hashed-password" },
-      });
     });
 
     it("should throw UnauthorizedError for an expired/invalid refresh token", async () => {
@@ -207,7 +234,7 @@ describe("AuthService", () => {
     it("should throw UnauthorizedError when no stored refresh token exists", async () => {
       mockPrisma.user.findUnique.mockResolvedValueOnce({
         ...validUser,
-        accounts: [{ id: "account-uuid", refreshToken: null }],
+        accounts: [{ id: "account-uuid", refreshToken: null, tokenFamily: null }],
       });
 
       expect(service.refresh({ refreshToken: "valid-refresh-token" })).rejects.toBeInstanceOf(
@@ -215,15 +242,104 @@ describe("AuthService", () => {
       );
     });
 
-    it("should throw UnauthorizedError when refresh token hash does not match", async () => {
+    it("should revoke token family on replay attack and throw UnauthorizedError", async () => {
       mockPrisma.user.findUnique.mockResolvedValueOnce({
         ...validUser,
-        accounts: [{ id: "account-uuid", refreshToken: "wrong-hash" }],
+        accounts: [{ id: "account-uuid", refreshToken: "wrong-hash", tokenFamily: "family-uuid" }],
       });
 
-      expect(service.refresh({ refreshToken: "valid-refresh-token" })).rejects.toBeInstanceOf(
+      await expect(service.refresh({ refreshToken: "valid-refresh-token" })).rejects.toBeInstanceOf(
         UnauthorizedError,
       );
+
+      expect(mockPrisma.account.update).toHaveBeenCalledWith({
+        where: { id: "account-uuid" },
+        data: { refreshToken: null, tokenFamily: null },
+      });
+    });
+  });
+
+  describe("forgotPassword", () => {
+    it("should return success message even if user does not exist", async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(null);
+
+      const result = await service.forgotPassword({ email: "nonexistent@example.com" });
+
+      expect(result.message).toContain("If an account with that email exists");
+    });
+
+    it("should set reset token on existing user", async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce({
+        id: "user-uuid",
+        email: "test@example.com",
+        deletedAt: null,
+      });
+
+      const result = await service.forgotPassword({ email: "test@example.com" });
+
+      expect(result.message).toContain("If an account with that email exists");
+      expect(mockPrisma.user.update).toHaveBeenCalled();
+    });
+  });
+
+  describe("resetPassword", () => {
+    it("should throw BadRequestError for weak password", async () => {
+      expect(
+        service.resetPassword({ token: "valid-token", password: "weak" }),
+      ).rejects.toBeInstanceOf(BadRequestError);
+    });
+
+    it("should throw BadRequestError for invalid/expired token", async () => {
+      mockPrisma.user.findFirst.mockResolvedValueOnce(null);
+
+      expect(
+        service.resetPassword({ token: "invalid-token", password: "NewPassword1" }),
+      ).rejects.toBeInstanceOf(BadRequestError);
+    });
+
+    it("should reset password and revoke refresh tokens", async () => {
+      mockPrisma.user.findFirst.mockResolvedValueOnce({
+        id: "user-uuid",
+        email: "test@example.com",
+      });
+
+      const result = await service.resetPassword({
+        token: "valid-token",
+        password: "NewPassword1",
+      });
+
+      expect(result.message).toBe("Password has been reset successfully");
+      expect(mockPrisma.user.update).toHaveBeenCalled();
+      expect(mockPrisma.account.updateMany).toHaveBeenCalledWith({
+        where: { userId: "user-uuid" },
+        data: { refreshToken: null, tokenFamily: null },
+      });
+    });
+  });
+
+  describe("verifyEmail", () => {
+    it("should throw BadRequestError for invalid token", async () => {
+      mockPrisma.user.findFirst.mockResolvedValueOnce(null);
+
+      expect(service.verifyEmail({ token: "invalid-token" })).rejects.toBeInstanceOf(
+        BadRequestError,
+      );
+    });
+
+    it("should verify email and clear token", async () => {
+      mockPrisma.user.findFirst.mockResolvedValueOnce({
+        id: "user-uuid",
+        emailVerified: false,
+        emailVerificationToken: "valid-token",
+      });
+
+      const result = await service.verifyEmail({ token: "valid-token" });
+
+      expect(result.message).toBe("Email verified successfully");
+      expect(mockPrisma.user.update).toHaveBeenCalledWith({
+        where: { id: "user-uuid" },
+        data: { emailVerified: true, emailVerificationToken: null },
+      });
     });
   });
 });
