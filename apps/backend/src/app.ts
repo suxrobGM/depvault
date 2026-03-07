@@ -5,6 +5,7 @@ import { logger } from "@/common/logger";
 import { errorMiddleware } from "@/common/middleware";
 import { corsPlugin, swaggerPlugin } from "@/common/plugins";
 import { validateEnv } from "@/env";
+import { analysisController } from "@/modules/analysis";
 import { auditLogController } from "@/modules/audit-log";
 import { authController } from "@/modules/auth";
 import { envVariableController } from "@/modules/env-variable";
@@ -40,7 +41,8 @@ const app = new Elysia()
       .use(secretFileController)
       .use(secretController)
       .use(userController)
-      .use(auditLogController),
+      .use(auditLogController)
+      .use(analysisController),
   )
   .listen(process.env.PORT!);
 
