@@ -165,7 +165,7 @@ src/
 ## DI Pattern
 
 - Services: `@singleton` or `@injectable()` class, constructor-injects `PrismaClient` (or a repository)
-- Repositories: `@injectable()` class with pure Prisma queries
+- Repositories: `@singleton()` class with pure Prisma queries
 - Controllers: resolve service via `container.resolve(ServiceClass)`
 - PrismaClient registered in `common/di/container.ts` via `container.registerInstance()`
 
@@ -212,7 +212,7 @@ bun run db:migrate:apply  # Apply pending migrations
 Each module uses a 3-file core with optional extras:
 
 - `{module}.controller.ts` — Elysia route group (thin HTTP layer), resolves service via `container.resolve()`
-- `{module}.service.ts` — `@injectable()` class with business logic, injects `PrismaClient` for simple queries
+- `{module}.service.ts` — `@singleton()` or `@injectable()` class with business logic, injects `PrismaClient` for simple queries
 - `{module}.schema.ts` — Elysia `t.*` (TypeBox) request/response schemas, type aliases grouped at end of file
 
 ### Optional Files
@@ -237,7 +237,7 @@ app.use(ordersController);
 
 ### Do
 
-- Use `@injectable()` on all service and repository classes
+- Use `@singleton()` or `@injectable()` on all service and repository classes
 - Use `container.resolve()` in controllers to get service instances
 - Use TypeBox (`t.*`) schemas for all request/response validation in Elysia
 - Use error classes from `common/errors/` — never throw raw `Error`

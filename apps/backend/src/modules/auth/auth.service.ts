@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import { isValidPassword, PASSWORD_REQUIREMENTS } from "@shared/utils/validators";
 import { singleton } from "tsyringe";
 import { BadRequestError, ConflictError, UnauthorizedError } from "@/common/errors";
 import { logger } from "@/common/logger/logger";
@@ -16,7 +17,6 @@ import type {
 } from "./auth.schema";
 import { TokenService } from "./token.service";
 
-const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 const PASSWORD_RESET_EXPIRY_MS = 60 * 60 * 1000; // 1 hour
 
 @singleton()
@@ -27,10 +27,8 @@ export class AuthService {
   ) {}
 
   async register(body: RegisterBody): Promise<AuthResponse> {
-    if (!PASSWORD_REGEX.test(body.password)) {
-      throw new BadRequestError(
-        "Password must be at least 8 characters with one uppercase letter and one number",
-      );
+    if (!isValidPassword(body.password)) {
+      throw new BadRequestError(PASSWORD_REQUIREMENTS);
     }
 
     const existingUser = await this.prisma.user.findFirst({
@@ -146,10 +144,8 @@ export class AuthService {
   }
 
   async resetPassword(body: ResetPasswordBody): Promise<{ message: string }> {
-    if (!PASSWORD_REGEX.test(body.password)) {
-      throw new BadRequestError(
-        "Password must be at least 8 characters with one uppercase letter and one number",
-      );
+    if (!isValidPassword(body.password)) {
+      throw new BadRequestError(PASSWORD_REQUIREMENTS);
     }
 
     const user = await this.prisma.user.findFirst({

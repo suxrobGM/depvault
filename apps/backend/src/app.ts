@@ -8,6 +8,7 @@ import { validateEnv } from "@/env";
 import { authController } from "@/modules/auth";
 import { projectsController } from "@/modules/projects";
 import { secretsController } from "@/modules/secrets";
+import { userController } from "@/modules/user";
 import { HttpErrorResponses } from "./types/response";
 
 // Validate environment
@@ -33,7 +34,8 @@ const app = new Elysia()
       })
       .use(authController)
       .use(projectsController)
-      .use(secretsController),
+      .use(secretsController)
+      .use(userController),
   )
   .listen(process.env.PORT!);
 
