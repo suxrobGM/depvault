@@ -2,10 +2,10 @@ import { singleton } from "tsyringe";
 import { ForbiddenError, NotFoundError } from "@/common/errors";
 import { PrismaClient } from "@/generated/prisma";
 import type { PaginatedResponse } from "@/types/response";
-import type { CreateProjectBody, ProjectResponse, UpdateProjectBody } from "./projects.schema";
+import type { CreateProjectBody, ProjectResponse, UpdateProjectBody } from "./project.schema";
 
 @singleton()
-export class ProjectsService {
+export class ProjectService {
   constructor(private readonly prisma: PrismaClient) {}
 
   async create(body: CreateProjectBody, userId: string): Promise<ProjectResponse> {

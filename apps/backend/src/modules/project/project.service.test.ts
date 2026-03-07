@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { ForbiddenError, NotFoundError } from "@/common/errors";
-import { ProjectsService } from "./projects.service";
+import { ProjectService } from "./project.service";
 
 const now = new Date();
 
@@ -30,13 +30,13 @@ function createMockPrisma() {
   } as any;
 }
 
-describe("ProjectsService", () => {
-  let service: ProjectsService;
+describe("ProjectService", () => {
+  let service: ProjectService;
   let mockPrisma: ReturnType<typeof createMockPrisma>;
 
   beforeEach(() => {
     mockPrisma = createMockPrisma();
-    service = new ProjectsService(mockPrisma);
+    service = new ProjectService(mockPrisma);
   });
 
   describe("create", () => {

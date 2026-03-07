@@ -9,38 +9,38 @@ import {
   ProjectListResponseSchema,
   ProjectResponseSchema,
   UpdateProjectBodySchema,
-} from "./projects.schema";
-import { ProjectsService } from "./projects.service";
+} from "./project.schema";
+import { ProjectService } from "./project.service";
 
-const projectsService = container.resolve(ProjectsService);
+const projectService = container.resolve(ProjectService);
 
-export const projectsController = new Elysia({
+export const projectController = new Elysia({
   prefix: "/projects",
   detail: { tags: ["Projects"] },
 })
   .use(authGuard)
-  .post("/", ({ body, user }) => projectsService.create(body, user.id), {
+  .post("/", ({ body, user }) => projectService.create(body, user.id), {
     body: CreateProjectBodySchema,
     response: ProjectResponseSchema,
     detail: { summary: "Create a new project" },
   })
-  .get("/", ({ query, user }) => projectsService.list(user.id, query.page, query.limit), {
+  .get("/", ({ query, user }) => projectService.list(user.id, query.page, query.limit), {
     query: ProjectListQuerySchema,
     response: ProjectListResponseSchema,
     detail: { summary: "List projects for current user" },
   })
-  .get("/:id", ({ params, user }) => projectsService.getById(params.id, user.id), {
+  .get("/:id", ({ params, user }) => projectService.getById(params.id, user.id), {
     params: StringIdParamSchema,
     response: ProjectResponseSchema,
     detail: { summary: "Get project details" },
   })
-  .put("/:id", ({ params, body, user }) => projectsService.update(params.id, body, user.id), {
+  .put("/:id", ({ params, body, user }) => projectService.update(params.id, body, user.id), {
     params: StringIdParamSchema,
     body: UpdateProjectBodySchema,
     response: ProjectResponseSchema,
     detail: { summary: "Update project" },
   })
-  .delete("/:id", ({ params, user }) => projectsService.delete(params.id, user.id), {
+  .delete("/:id", ({ params, user }) => projectService.delete(params.id, user.id), {
     params: StringIdParamSchema,
     response: MessageResponseSchema,
     detail: { summary: "Delete project" },

@@ -2,7 +2,7 @@ import { Elysia, t } from "elysia";
 import { authGuard } from "@/common/middleware/auth.middleware";
 import { rateLimiter } from "@/common/middleware/rate-limiter";
 
-export const secretsController = new Elysia({
+export const secretController = new Elysia({
   prefix: "/secrets",
   detail: { tags: ["Secrets"] },
 })
