@@ -1,0 +1,127 @@
+import { Elysia } from "elysia";
+import { container } from "@/common/di/container";
+import { authGuard } from "@/common/middleware";
+import { StringIdParamSchema } from "@/types/request";
+import { MessageResponseSchema } from "@/types/response";
+import {
+  SecretFileListQuerySchema,
+  SecretFileListResponseSchema,
+  SecretFileParamsSchema,
+  SecretFileResponseSchema,
+  SecretFileRollbackParamsSchema,
+  SecretFileVersionListResponseSchema,
+  UploadSecretFileBodySchema,
+} from "./secret-file.schema";
+import { SecretFileService } from "./secret-file.service";
+
+const secretFileService = container.resolve(SecretFileService);
+
+export const secretFileController = new Elysia({
+  prefix: "/projects/:id/secret-files",
+  detail: { tags: ["Secret Files"] },
+})
+  .use(authGuard)
+  .post(
+    "/",
+    async ({ params, body, user }) => {
+      return secretFileService.upload(
+        params.id,
+        user.id,
+        body.file,
+        body.environment,
+        body.description,
+      );
+    },
+    {
+      params: StringIdParamSchema,
+      body: UploadSecretFileBodySchema,
+      response: SecretFileResponseSchema,
+      detail: {
+        summary: "Upload a secret file",
+        description:
+          "Upload and encrypt a secret file for the project. Executable file types (.exe, .sh, .bat, .cmd, .ps1) are rejected. Max file size is 25 MB. Only owners and editors can upload.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .get(
+    "/",
+    ({ params, query, user }) =>
+      secretFileService.list(params.id, user.id, query.environment, query.page, query.limit),
+    {
+      params: StringIdParamSchema,
+      query: SecretFileListQuerySchema,
+      response: SecretFileListResponseSchema,
+      detail: {
+        summary: "List secret files",
+        description:
+          "List secret file metadata for a project, optionally filtered by environment. File contents are not included — use the download endpoint to retrieve decrypted content.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .get(
+    "/:fileId/download",
+    async ({ params, user, set }) => {
+      const { buffer, name, mimeType } = await secretFileService.download(
+        params.id,
+        params.fileId,
+        user.id,
+      );
+      set.headers["content-type"] = mimeType;
+      set.headers["content-disposition"] = `attachment; filename="${name}"`;
+      return buffer;
+    },
+    {
+      params: SecretFileParamsSchema,
+      detail: {
+        summary: "Download a secret file",
+        description:
+          "Download and decrypt a secret file. Only owners and editors can download file contents. Viewers can only see metadata via the list endpoint.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .delete(
+    "/:fileId",
+    ({ params, user }) => secretFileService.delete(params.id, params.fileId, user.id),
+    {
+      params: SecretFileParamsSchema,
+      response: MessageResponseSchema,
+      detail: {
+        summary: "Delete a secret file",
+        description:
+          "Permanently delete a secret file and all its version history. Only owners and editors can delete.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .get(
+    "/:fileId/versions",
+    ({ params, user }) => secretFileService.listVersions(params.id, params.fileId, user.id),
+    {
+      params: SecretFileParamsSchema,
+      response: SecretFileVersionListResponseSchema,
+      detail: {
+        summary: "List secret file versions",
+        description:
+          "List all version history entries for a secret file. Any project member can view version metadata.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .post(
+    "/:fileId/rollback/:versionId",
+    ({ params, user }) =>
+      secretFileService.rollback(params.id, params.fileId, params.versionId, user.id),
+    {
+      params: SecretFileRollbackParamsSchema,
+      response: SecretFileResponseSchema,
+      detail: {
+        summary: "Rollback to a previous version",
+        description:
+          "Rollback a secret file to a previous version. The current content is saved as a new version before restoring. Only owners and editors can rollback.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  );

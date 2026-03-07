@@ -6,8 +6,9 @@ import { errorMiddleware } from "@/common/middleware";
 import { corsPlugin, swaggerPlugin } from "@/common/plugins";
 import { validateEnv } from "@/env";
 import { authController } from "@/modules/auth";
+import { envVariableController } from "@/modules/env-variable";
 import { projectController } from "@/modules/project";
-import { secretController } from "@/modules/secret";
+import { secretController, secretFileController } from "@/modules/secret";
 import { userController } from "@/modules/user";
 import { HttpErrorResponses } from "./types/response";
 
@@ -34,6 +35,8 @@ const app = new Elysia()
       })
       .use(authController)
       .use(projectController)
+      .use(envVariableController)
+      .use(secretFileController)
       .use(secretController)
       .use(userController),
   )
