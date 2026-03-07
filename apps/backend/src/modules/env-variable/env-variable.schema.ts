@@ -69,8 +69,50 @@ export const EnvVariableParamsSchema = t.Object({
   varId: t.String(),
 });
 
+const ConfigFormatSchema = t.Union([
+  t.Literal("env"),
+  t.Literal("appsettings.json"),
+  t.Literal("secrets.yaml"),
+  t.Literal("config.toml"),
+]);
+
+export const ImportEnvVariablesBodySchema = t.Object({
+  environment: t.String({ minLength: 1, maxLength: 100 }),
+  environmentType: t.Optional(EnvironmentTypeSchema),
+  format: ConfigFormatSchema,
+  content: t.String({ minLength: 1 }),
+});
+
+export const ImportEnvVariablesResponseSchema = t.Object({
+  imported: t.Number(),
+  skipped: t.Number(),
+  variables: t.Array(EnvVariableWithValueResponseSchema),
+});
+
+export const ExportEnvVariablesQuerySchema = t.Object({
+  environment: t.String({ minLength: 1 }),
+  format: ConfigFormatSchema,
+});
+
+export const ExportEnvVariablesResponseSchema = t.Object({
+  content: t.String(),
+  format: t.String(),
+  environment: t.String(),
+});
+
+export const EnvExampleResponseSchema = t.Object({
+  content: t.String(),
+  environment: t.String(),
+});
+
+export const EnvExampleQuerySchema = t.Object({
+  environment: t.String({ minLength: 1 }),
+});
+
 export type CreateEnvVariableBody = Static<typeof CreateEnvVariableBodySchema>;
 export type UpdateEnvVariableBody = Static<typeof UpdateEnvVariableBodySchema>;
 export type EnvVariableResponse = Static<typeof EnvVariableResponseSchema>;
 export type EnvVariableWithValueResponse = Static<typeof EnvVariableWithValueResponseSchema>;
 export type EnvVariableListQuery = Static<typeof EnvVariableListQuerySchema>;
+export type ImportEnvVariablesBody = Static<typeof ImportEnvVariablesBodySchema>;
+export type ExportEnvVariablesQuery = Static<typeof ExportEnvVariablesQuerySchema>;

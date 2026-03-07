@@ -1,2 +1,1 @@
-export { envVariableController } from "./env-variable.controller";
-export { EnvVariableService } from "./env-variable.service";
+export * from "./env-variable.controller";

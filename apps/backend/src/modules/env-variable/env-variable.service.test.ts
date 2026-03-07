@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 import { ForbiddenError, NotFoundError } from "@/common/errors";
 import * as encryption from "@/common/utils/encryption";
@@ -81,7 +80,9 @@ describe("EnvVariableService", () => {
   beforeEach(() => {
     mockPrisma = createMockPrisma();
     mockAuditLog = createMockAuditLogService();
-    service = new EnvVariableService(mockPrisma, mockAuditLog);
+    const { EnvironmentRepository } = require("./environment.repository");
+    const envHelper = new EnvironmentRepository(mockPrisma);
+    service = new EnvVariableService(mockPrisma, mockAuditLog, envHelper);
 
     spyOn(encryption, "deriveProjectKey").mockReturnValue(fakeProjectKey);
     spyOn(encryption, "encrypt").mockReturnValue(mockEncrypted);

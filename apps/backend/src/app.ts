@@ -8,6 +8,7 @@ import { validateEnv } from "@/env";
 import { analysisController } from "@/modules/analysis";
 import { auditLogController } from "@/modules/audit-log";
 import { authController } from "@/modules/auth";
+import { convertController } from "@/modules/convert";
 import { envVariableController } from "@/modules/env-variable";
 import { projectController } from "@/modules/project";
 import { secretController, secretFileController } from "@/modules/secret";
@@ -42,7 +43,8 @@ const app = new Elysia()
       .use(secretController)
       .use(userController)
       .use(auditLogController)
-      .use(analysisController),
+      .use(analysisController)
+      .use(convertController),
   )
   .listen(process.env.PORT!);
 

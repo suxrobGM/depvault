@@ -4,17 +4,25 @@ import { authGuard } from "@/common/middleware";
 import { getClientIp } from "@/common/utils/ip";
 import { StringIdParamSchema } from "@/types/request";
 import { MessageResponseSchema } from "@/types/response";
+import { EnvVariableIOService } from "./env-variable-io.service";
 import {
   CreateEnvVariableBodySchema,
+  EnvExampleQuerySchema,
+  EnvExampleResponseSchema,
   EnvVariableListQuerySchema,
   EnvVariableListResponseSchema,
   EnvVariableParamsSchema,
   EnvVariableWithValueResponseSchema,
+  ExportEnvVariablesQuerySchema,
+  ExportEnvVariablesResponseSchema,
+  ImportEnvVariablesBodySchema,
+  ImportEnvVariablesResponseSchema,
   UpdateEnvVariableBodySchema,
 } from "./env-variable.schema";
 import { EnvVariableService } from "./env-variable.service";
 
 const envVariableService = container.resolve(EnvVariableService);
+const envVariableIOService = container.resolve(EnvVariableIOService);
 
 export const envVariableController = new Elysia({
   prefix: "/projects/:id/env-variables",
@@ -93,6 +101,60 @@ export const envVariableController = new Elysia({
         summary: "Delete an environment variable",
         description:
           "Permanently delete an environment variable and all its version history. Only owners and editors can delete.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .post(
+    "/import",
+    ({ params, body, user, request, server }) =>
+      envVariableIOService.bulkImport(params.id, body, user.id, getClientIp(request, server)),
+    {
+      params: StringIdParamSchema,
+      body: ImportEnvVariablesBodySchema,
+      response: ImportEnvVariablesResponseSchema,
+      detail: {
+        summary: "Bulk import environment variables",
+        description:
+          "Import environment variables from a config file (.env, appsettings.json, secrets.yaml, config.toml). Existing keys are skipped. Only owners and editors can import.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .get(
+    "/export",
+    ({ params, query, user, request, server }) =>
+      envVariableIOService.export(
+        params.id,
+        query.environment,
+        query.format,
+        user.id,
+        getClientIp(request, server),
+      ),
+    {
+      params: StringIdParamSchema,
+      query: ExportEnvVariablesQuerySchema,
+      response: ExportEnvVariablesResponseSchema,
+      detail: {
+        summary: "Export environment variables",
+        description:
+          "Export all environment variables for a given environment in the specified format (.env, appsettings.json, secrets.yaml, config.toml). Only owners and editors can export.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .get(
+    "/example",
+    ({ params, query, user }) =>
+      envVariableIOService.generateExample(params.id, query.environment, user.id),
+    {
+      params: StringIdParamSchema,
+      query: EnvExampleQuerySchema,
+      response: EnvExampleResponseSchema,
+      detail: {
+        summary: "Generate .env.example template",
+        description:
+          "Generate a .env.example template with keys and placeholder annotations but no real values. Any project member can access this.",
         security: [{ bearerAuth: [] }],
       },
     },

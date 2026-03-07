@@ -1,20 +1,23 @@
-import { injectable, singleton } from "tsyringe";
-import { ForbiddenError, NotFoundError } from "@/common/errors";
-import { decrypt, deriveProjectKey, encrypt } from "@/common/utils/encryption";
+import { singleton } from "tsyringe";
+import { NotFoundError } from "@/common/errors";
+import { deriveProjectKey, encrypt } from "@/common/utils/encryption";
 import { PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log/audit-log.service";
 import type { PaginatedResponse } from "@/types/response";
+import { toDecryptedResponse, toMaskedResponse, toResponseWithValue } from "./env-variable.mapper";
 import type {
   CreateEnvVariableBody,
   EnvVariableWithValueResponse,
   UpdateEnvVariableBody,
 } from "./env-variable.schema";
+import { EnvironmentRepository } from "./environment.repository";
 
 @singleton()
 export class EnvVariableService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly auditLogService: AuditLogService,
+    private readonly envHelper: EnvironmentRepository,
   ) {}
 
   async create(
@@ -23,9 +26,9 @@ export class EnvVariableService {
     userId: string,
     ipAddress: string,
   ): Promise<EnvVariableWithValueResponse> {
-    await this.requireEditorOrOwner(projectId, userId);
+    await this.envHelper.requireEditorOrOwner(projectId, userId);
 
-    const environment = await this.findOrCreateEnvironment(
+    const environment = await this.envHelper.findOrCreateEnvironment(
       projectId,
       body.environment,
       body.environmentType,
@@ -57,7 +60,7 @@ export class EnvVariableService {
       metadata: { key: body.key },
     });
 
-    return this.toResponseWithValue(variable, body.value);
+    return toResponseWithValue(variable, body.value);
   }
 
   async list(
@@ -68,14 +71,12 @@ export class EnvVariableService {
     limit = 20,
     ipAddress = "unknown",
   ): Promise<PaginatedResponse<EnvVariableWithValueResponse>> {
-    const member = await this.requireMember(projectId, userId);
+    const member = await this.envHelper.requireMember(projectId, userId);
     const canReadValues = member.role === "OWNER" || member.role === "EDITOR";
 
-    const environmentFilter = environmentName
+    const where = environmentName
       ? { environment: { projectId, name: environmentName } }
       : { environment: { projectId } };
-
-    const where = { ...environmentFilter };
 
     const [variables, total] = await Promise.all([
       this.prisma.envVariable.findMany({
@@ -88,18 +89,9 @@ export class EnvVariableService {
     ]);
 
     const projectKey = canReadValues ? deriveProjectKey(projectId) : null;
-
-    const items = variables.map((v) => ({
-      id: v.id,
-      environmentId: v.environmentId,
-      key: v.key,
-      value: projectKey ? decrypt(v.encryptedValue, v.iv, v.authTag, projectKey) : "********",
-      description: v.description,
-      isRequired: v.isRequired,
-      validationRule: v.validationRule,
-      createdAt: v.createdAt,
-      updatedAt: v.updatedAt,
-    }));
+    const items = variables.map((v) =>
+      projectKey ? toDecryptedResponse(v, projectKey) : toMaskedResponse(v),
+    );
 
     if (canReadValues && variables.length > 0) {
       await this.auditLogService.log({
@@ -131,7 +123,7 @@ export class EnvVariableService {
     userId: string,
     ipAddress: string,
   ): Promise<EnvVariableWithValueResponse> {
-    await this.requireEditorOrOwner(projectId, userId);
+    await this.envHelper.requireEditorOrOwner(projectId, userId);
 
     const variable = await this.prisma.envVariable.findFirst({
       where: { id: varId, environment: { projectId } },
@@ -180,8 +172,7 @@ export class EnvVariableService {
       metadata: { key: updated.key },
     });
 
-    const decryptedValue = decrypt(updated.encryptedValue, updated.iv, updated.authTag, projectKey);
-    return this.toResponseWithValue(updated, decryptedValue);
+    return toDecryptedResponse(updated, projectKey);
   }
 
   async delete(
@@ -190,7 +181,7 @@ export class EnvVariableService {
     userId: string,
     ipAddress: string,
   ): Promise<{ message: string }> {
-    await this.requireEditorOrOwner(projectId, userId);
+    await this.envHelper.requireEditorOrOwner(projectId, userId);
 
     const variable = await this.prisma.envVariable.findFirst({
       where: { id: varId, environment: { projectId } },
@@ -213,69 +204,5 @@ export class EnvVariableService {
     });
 
     return { message: "Environment variable deleted successfully" };
-  }
-
-  private async findOrCreateEnvironment(projectId: string, name: string, type?: string) {
-    const existing = await this.prisma.environment.findUnique({
-      where: { projectId_name: { projectId, name } },
-    });
-
-    if (existing) return existing;
-
-    return this.prisma.environment.create({
-      data: {
-        projectId,
-        name,
-        type: (type as "DEVELOPMENT" | "STAGING" | "PRODUCTION" | "CUSTOM") ?? "DEVELOPMENT",
-      },
-    });
-  }
-
-  private async requireMember(projectId: string, userId: string) {
-    const member = await this.prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId } },
-    });
-
-    if (!member) {
-      throw new NotFoundError("Project not found");
-    }
-
-    return member;
-  }
-
-  private async requireEditorOrOwner(projectId: string, userId: string) {
-    const member = await this.requireMember(projectId, userId);
-
-    if (member.role !== "OWNER" && member.role !== "EDITOR") {
-      throw new ForbiddenError("Only owners and editors can modify environment variables");
-    }
-
-    return member;
-  }
-
-  private toResponseWithValue(
-    variable: {
-      id: string;
-      environmentId: string;
-      key: string;
-      description: string | null;
-      isRequired: boolean;
-      validationRule: string | null;
-      createdAt: Date;
-      updatedAt: Date;
-    },
-    value: string,
-  ): EnvVariableWithValueResponse {
-    return {
-      id: variable.id,
-      environmentId: variable.environmentId,
-      key: variable.key,
-      value,
-      description: variable.description,
-      isRequired: variable.isRequired,
-      validationRule: variable.validationRule,
-      createdAt: variable.createdAt,
-      updatedAt: variable.updatedAt,
-    };
   }
 }
