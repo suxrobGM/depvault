@@ -1,6 +1,7 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
 import { authGuard } from "@/common/middleware/auth.middleware";
+import { rateLimiter } from "@/common/middleware/rate-limiter";
 import {
   AuthResponseSchema,
   ForgotPasswordBodySchema,
@@ -20,26 +21,38 @@ const authService = container.resolve(AuthService);
 const githubService = container.resolve(GitHubService);
 
 export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Auth"] } })
-  .post("/register", ({ body }) => authService.register(body), {
-    body: RegisterBodySchema,
-    response: AuthResponseSchema,
-    detail: { summary: "Register with email and password" },
-  })
-  .post("/login", ({ body }) => authService.login(body), {
-    body: LoginBodySchema,
-    response: AuthResponseSchema,
-    detail: { summary: "Login with email and password" },
-  })
+  .use(
+    new Elysia()
+      .use(rateLimiter({ max: 5, windowMs: 60 * 60 * 1000 }))
+      .post("/register", ({ body }) => authService.register(body), {
+        body: RegisterBodySchema,
+        response: AuthResponseSchema,
+        detail: { summary: "Register with email and password" },
+      }),
+  )
+  .use(
+    new Elysia()
+      .use(rateLimiter({ max: 5, windowMs: 60 * 1000 }))
+      .post("/login", ({ body }) => authService.login(body), {
+        body: LoginBodySchema,
+        response: AuthResponseSchema,
+        detail: { summary: "Login with email and password" },
+      }),
+  )
   .post("/refresh", ({ body }) => authService.refresh(body), {
     body: RefreshBodySchema,
     response: AuthResponseSchema,
     detail: { summary: "Refresh access token using refresh token" },
   })
-  .post("/forgot-password", ({ body }) => authService.forgotPassword(body), {
-    body: ForgotPasswordBodySchema,
-    response: MessageResponseSchema,
-    detail: { summary: "Request password reset email" },
-  })
+  .use(
+    new Elysia()
+      .use(rateLimiter({ max: 3, windowMs: 60 * 60 * 1000 }))
+      .post("/forgot-password", ({ body }) => authService.forgotPassword(body), {
+        body: ForgotPasswordBodySchema,
+        response: MessageResponseSchema,
+        detail: { summary: "Request password reset email" },
+      }),
+  )
   .post("/reset-password", ({ body }) => authService.resetPassword(body), {
     body: ResetPasswordBodySchema,
     response: MessageResponseSchema,

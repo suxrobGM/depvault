@@ -7,6 +7,7 @@ import { corsPlugin, swaggerPlugin } from "@/common/plugins";
 import { validateEnv } from "@/env";
 import { authController } from "@/modules/auth";
 import { projectsController } from "@/modules/projects";
+import { secretsController } from "@/modules/secrets";
 import { HttpErrorResponses } from "./types/response";
 
 // Validate environment
@@ -31,7 +32,8 @@ const app = new Elysia()
         response: HttpErrorResponses,
       })
       .use(authController)
-      .use(projectsController),
+      .use(projectsController)
+      .use(secretsController),
   )
   .listen(process.env.PORT!);
 

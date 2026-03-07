@@ -37,3 +37,9 @@ export class ConflictError extends HttpError {
     super(409, message);
   }
 }
+
+export class TooManyRequestsError extends HttpError {
+  constructor(message = "Too many requests, please try again later") {
+    super(429, message);
+  }
+}
