@@ -2,7 +2,7 @@ import { singleton } from "tsyringe";
 import { PARSERS, SERIALIZERS, type ConfigFormat } from "@/common/parsers";
 import { decrypt, deriveProjectKey, encrypt } from "@/common/utils/encryption";
 import { PrismaClient } from "@/generated/prisma";
-import { AuditLogService } from "@/modules/audit-log/audit-log.service";
+import { AuditLogService } from "@/modules/audit-log";
 import { toExampleLine, toResponseWithValue } from "./env-variable.mapper";
 import type { EnvVariableWithValueResponse, ImportEnvVariablesBody } from "./env-variable.schema";
 import { EnvironmentRepository } from "./environment.repository";

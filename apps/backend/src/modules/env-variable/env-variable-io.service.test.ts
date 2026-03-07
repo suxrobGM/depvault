@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 import { ForbiddenError, NotFoundError } from "@/common/errors";
 import * as encryption from "@/common/utils/encryption";

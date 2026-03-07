@@ -1,5 +1,6 @@
 import { singleton } from "tsyringe";
 import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
+import { logger } from "@/common/logger";
 import { PrismaClient } from "@/generated/prisma";
 import type { PaginatedResponse } from "@/types/response";
 import type {
@@ -7,12 +8,17 @@ import type {
   AnalysisSummaryResponse,
   CreateAnalysisBody,
 } from "./analysis.schema";
+import { checkVersions, scanVulnerabilities } from "./checkers";
 import { nodejsParser, pythonParser, type DependencyParser } from "./parsers";
 
 const PARSERS: Record<string, DependencyParser> = {
   NODEJS: nodejsParser,
   PYTHON: pythonParser,
 };
+
+const INCLUDE_DEPS_WITH_VULNS = {
+  dependencies: { include: { vulnerabilities: true } },
+} as const;
 
 @singleton()
 export class AnalysisService {
@@ -58,10 +64,74 @@ export class AnalysisService {
           })),
         },
       },
-      include: { dependencies: true },
+      include: INCLUDE_DEPS_WITH_VULNS,
     });
 
-    return analysis;
+    const depInputs = analysis.dependencies.map((d) => ({
+      name: d.name,
+      currentVersion: d.currentVersion,
+    }));
+
+    const [versionResults, vulnResults] = await Promise.all([
+      checkVersions(depInputs, body.ecosystem).catch((err) => {
+        logger.warn(`Version check failed: ${err}`);
+        return [];
+      }),
+      scanVulnerabilities(depInputs, body.ecosystem).catch((err) => {
+        logger.warn(`Vulnerability scan failed: ${err}`);
+        return [];
+      }),
+    ]);
+
+    const versionByName = new Map(versionResults.map((v) => [v.name, v]));
+    const vulnsByName = new Map<string, typeof vulnResults>();
+    for (const vuln of vulnResults) {
+      const existing = vulnsByName.get(vuln.packageName) ?? [];
+      existing.push(vuln);
+      vulnsByName.set(vuln.packageName, existing);
+    }
+
+    const updateOps = analysis.dependencies.map((dep) => {
+      const version = versionByName.get(dep.name);
+      const vulns = vulnsByName.get(dep.name) ?? [];
+
+      return this.prisma.dependency.update({
+        where: { id: dep.id },
+        data: {
+          latestVersion: version?.latestVersion ?? null,
+          status: version?.status ?? "UP_TO_DATE",
+          ...(vulns.length > 0 && {
+            vulnerabilities: {
+              create: vulns.map((v) => ({
+                cveId: v.cveId,
+                title: v.title,
+                description: v.description,
+                severity: v.severity,
+                fixedIn: v.fixedIn,
+                url: v.url,
+              })),
+            },
+          }),
+        },
+        include: { vulnerabilities: true },
+      });
+    });
+
+    const updatedDeps = await Promise.all(updateOps);
+
+    const healthScore = this.calculateHealthScore(updatedDeps);
+    if (healthScore !== null) {
+      await this.prisma.analysis.update({
+        where: { id: analysis.id },
+        data: { healthScore },
+      });
+    }
+
+    return {
+      ...analysis,
+      healthScore,
+      dependencies: updatedDeps,
+    };
   }
 
   async list(
@@ -112,7 +182,7 @@ export class AnalysisService {
 
     const analysis = await this.prisma.analysis.findFirst({
       where: { id: analysisId, projectId },
-      include: { dependencies: true },
+      include: INCLUDE_DEPS_WITH_VULNS,
     });
 
     if (!analysis) {
@@ -150,5 +220,27 @@ export class AnalysisService {
     await this.prisma.analysis.delete({ where: { id: analysisId } });
 
     return { message: "Analysis deleted successfully" };
+  }
+
+  private calculateHealthScore(
+    dependencies: Array<{ status: string; vulnerabilities: unknown[] }>,
+  ): number | null {
+    if (dependencies.length === 0) return null;
+
+    let score = 100;
+    for (const dep of dependencies) {
+      if (dep.status === "MAJOR_UPDATE") score -= 5;
+      else if (dep.status === "MINOR_UPDATE") score -= 2;
+      else if (dep.status === "DEPRECATED") score -= 10;
+
+      for (const vuln of dep.vulnerabilities as Array<{ severity: string }>) {
+        if (vuln.severity === "CRITICAL") score -= 15;
+        else if (vuln.severity === "HIGH") score -= 10;
+        else if (vuln.severity === "MEDIUM") score -= 5;
+        else if (vuln.severity === "LOW") score -= 2;
+      }
+    }
+
+    return Math.max(0, Math.min(100, score));
   }
 }

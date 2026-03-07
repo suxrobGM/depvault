@@ -10,6 +10,18 @@ export const CreateAnalysisBodySchema = t.Object({
   ecosystem: EcosystemEnum,
 });
 
+export const VulnerabilityResponseSchema = t.Object({
+  id: t.String(),
+  cveId: t.Nullable(t.String()),
+  title: t.String(),
+  description: t.Nullable(t.String()),
+  severity: t.String(),
+  fixedIn: t.Nullable(t.String()),
+  url: t.Nullable(t.String()),
+  createdAt: t.Date(),
+  updatedAt: t.Date(),
+});
+
 export const DependencyResponseSchema = t.Object({
   id: t.String(),
   name: t.String(),
@@ -22,6 +34,7 @@ export const DependencyResponseSchema = t.Object({
   parentId: t.Nullable(t.String()),
   createdAt: t.Date(),
   updatedAt: t.Date(),
+  vulnerabilities: t.Array(VulnerabilityResponseSchema),
 });
 
 export const AnalysisResponseSchema = t.Object({

@@ -3,7 +3,7 @@ import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors"
 import { logger } from "@/common/logger";
 import { decryptBinary, deriveProjectKey, encryptBinary } from "@/common/utils/encryption";
 import { PrismaClient } from "@/generated/prisma";
-import { AuditLogService } from "@/modules/audit-log/audit-log.service";
+import { AuditLogService } from "@/modules/audit-log";
 import type { PaginatedResponse } from "@/types/response";
 import { FORBIDDEN_EXTENSIONS, MAX_FILE_SIZE, type SecretFileResponse } from "./secret-file.schema";
 
