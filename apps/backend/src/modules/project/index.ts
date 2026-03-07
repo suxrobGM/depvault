@@ -1,2 +1,3 @@
-export { projectController } from "./project.controller";
-export { ProjectService } from "./project.service";
+export * from "./member.service";
+export * from "./project.controller";
+export * from "./project.service";
