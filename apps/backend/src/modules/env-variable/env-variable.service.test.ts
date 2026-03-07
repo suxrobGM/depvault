@@ -1,0 +1,296 @@
+import "reflect-metadata";
+import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
+import { ForbiddenError, NotFoundError } from "@/common/errors";
+import * as encryption from "@/common/utils/encryption";
+import { EnvVariableService } from "./env-variable.service";
+
+const now = new Date();
+const projectId = "project-uuid";
+const userId = "user-uuid";
+const envId = "env-uuid";
+const varId = "var-uuid";
+
+const fakeProjectKey = Buffer.alloc(32, 1);
+
+const mockEncrypted = {
+  ciphertext: "encrypted-base64",
+  iv: "iv-base64",
+  authTag: "tag-base64",
+};
+
+const mockVariable = {
+  id: varId,
+  environmentId: envId,
+  key: "DATABASE_URL",
+  encryptedValue: "encrypted-base64",
+  iv: "iv-base64",
+  authTag: "tag-base64",
+  description: "The database URL",
+  isRequired: true,
+  validationRule: null,
+  rotationDays: null,
+  lastRotatedAt: null,
+  createdAt: now,
+  updatedAt: now,
+};
+
+const mockEnvironment = {
+  id: envId,
+  projectId,
+  name: "development",
+  type: "DEVELOPMENT",
+  createdAt: now,
+  updatedAt: now,
+};
+
+function createMockPrisma() {
+  return {
+    projectMember: {
+      findUnique: mock(() => Promise.resolve(null)),
+    },
+    environment: {
+      findUnique: mock(() => Promise.resolve(null)),
+      create: mock(() => Promise.resolve(mockEnvironment)),
+    },
+    envVariable: {
+      create: mock(() => Promise.resolve(mockVariable)),
+      findMany: mock(() => Promise.resolve([mockVariable])),
+      findFirst: mock(() => Promise.resolve(null)),
+      count: mock(() => Promise.resolve(1)),
+      update: mock(() => Promise.resolve(mockVariable)),
+      delete: mock(() => Promise.resolve(mockVariable)),
+    },
+    envVariableVersion: {
+      create: mock(() => Promise.resolve({})),
+    },
+  } as any;
+}
+
+describe("EnvVariableService", () => {
+  let service: EnvVariableService;
+  let mockPrisma: ReturnType<typeof createMockPrisma>;
+
+  beforeEach(() => {
+    mockPrisma = createMockPrisma();
+    service = new EnvVariableService(mockPrisma);
+
+    spyOn(encryption, "deriveProjectKey").mockReturnValue(fakeProjectKey);
+    spyOn(encryption, "encrypt").mockReturnValue(mockEncrypted);
+    spyOn(encryption, "decrypt").mockReturnValue("postgres://localhost/db");
+  });
+
+  describe("create", () => {
+    it("should create an env variable with encryption", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
+      mockPrisma.environment.findUnique.mockResolvedValueOnce(mockEnvironment);
+
+      const result = await service.create(
+        projectId,
+        {
+          environment: "development",
+          key: "DATABASE_URL",
+          value: "postgres://localhost/db",
+          description: "The database URL",
+          isRequired: true,
+        },
+        userId,
+      );
+
+      expect(result.id).toBe(varId);
+      expect(result.key).toBe("DATABASE_URL");
+      expect(result.value).toBe("postgres://localhost/db");
+      expect(encryption.encrypt).toHaveBeenCalledWith("postgres://localhost/db", fakeProjectKey);
+      expect(mockPrisma.envVariable.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          environmentId: envId,
+          key: "DATABASE_URL",
+          encryptedValue: "encrypted-base64",
+          iv: "iv-base64",
+          authTag: "tag-base64",
+        }),
+      });
+    });
+
+    it("should auto-create environment if it doesn't exist", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "EDITOR" });
+      mockPrisma.environment.findUnique.mockResolvedValueOnce(null);
+
+      await service.create(
+        projectId,
+        { environment: "staging", key: "API_KEY", value: "secret" },
+        userId,
+      );
+
+      expect(mockPrisma.environment.create).toHaveBeenCalledWith({
+        data: { projectId, name: "staging", type: "DEVELOPMENT" },
+      });
+    });
+
+    it("should throw ForbiddenError for VIEWER", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
+
+      expect(
+        service.create(projectId, { environment: "dev", key: "K", value: "V" }, userId),
+      ).rejects.toBeInstanceOf(ForbiddenError);
+    });
+
+    it("should throw NotFoundError when user is not a member", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce(null);
+
+      expect(
+        service.create(projectId, { environment: "dev", key: "K", value: "V" }, userId),
+      ).rejects.toBeInstanceOf(NotFoundError);
+    });
+  });
+
+  describe("list", () => {
+    it("should return decrypted values for OWNER", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
+
+      const result = await service.list(projectId, userId, "development");
+
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0]!.value).toBe("postgres://localhost/db");
+      expect(encryption.decrypt).toHaveBeenCalled();
+    });
+
+    it("should return masked values for VIEWER", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
+      const decryptSpy = spyOn(encryption, "decrypt");
+      decryptSpy.mockClear();
+
+      const result = await service.list(projectId, userId, "development");
+
+      expect(result.items[0]!.value).toBe("********");
+      expect(decryptSpy).not.toHaveBeenCalled();
+    });
+
+    it("should filter by environment name when provided", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "EDITOR" });
+
+      await service.list(projectId, userId, "staging", 1, 10);
+
+      expect(mockPrisma.envVariable.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { environment: { projectId, name: "staging" } },
+        }),
+      );
+    });
+
+    it("should list all environments when no filter provided", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
+
+      await service.list(projectId, userId, undefined, 1, 20);
+
+      expect(mockPrisma.envVariable.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { environment: { projectId } },
+        }),
+      );
+    });
+
+    it("should return correct pagination", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
+      mockPrisma.envVariable.count.mockResolvedValueOnce(25);
+
+      const result = await service.list(projectId, userId, undefined, 2, 10);
+
+      expect(result.pagination).toEqual({
+        page: 2,
+        limit: 10,
+        total: 25,
+        totalPages: 3,
+      });
+    });
+  });
+
+  describe("update", () => {
+    it("should update key and value with version snapshot", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
+      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
+
+      await service.update(projectId, varId, { key: "NEW_KEY", value: "new-value" }, userId);
+
+      expect(mockPrisma.envVariableVersion.create).toHaveBeenCalledWith({
+        data: {
+          variableId: varId,
+          encryptedValue: mockVariable.encryptedValue,
+          iv: mockVariable.iv,
+          authTag: mockVariable.authTag,
+          changedBy: userId,
+        },
+      });
+      expect(mockPrisma.envVariable.update).toHaveBeenCalled();
+    });
+
+    it("should update metadata without creating version snapshot", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "EDITOR" });
+      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
+
+      await service.update(projectId, varId, { description: "Updated desc" }, userId);
+
+      expect(mockPrisma.envVariableVersion.create).not.toHaveBeenCalled();
+      expect(mockPrisma.envVariable.update).toHaveBeenCalledWith({
+        where: { id: varId },
+        data: { description: "Updated desc" },
+      });
+    });
+
+    it("should throw NotFoundError when variable doesn't exist", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
+      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(null);
+
+      expect(service.update(projectId, varId, { key: "X" }, userId)).rejects.toBeInstanceOf(
+        NotFoundError,
+      );
+    });
+
+    it("should throw ForbiddenError for VIEWER", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
+
+      expect(service.update(projectId, varId, { key: "X" }, userId)).rejects.toBeInstanceOf(
+        ForbiddenError,
+      );
+    });
+  });
+
+  describe("delete", () => {
+    it("should delete variable when user is OWNER", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
+      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
+
+      const result = await service.delete(projectId, varId, userId);
+
+      expect(result.message).toBe("Environment variable deleted successfully");
+      expect(mockPrisma.envVariable.delete).toHaveBeenCalledWith({ where: { id: varId } });
+    });
+
+    it("should delete variable when user is EDITOR", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "EDITOR" });
+      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
+
+      await service.delete(projectId, varId, userId);
+
+      expect(mockPrisma.envVariable.delete).toHaveBeenCalled();
+    });
+
+    it("should throw NotFoundError when variable doesn't exist", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
+      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(null);
+
+      expect(service.delete(projectId, varId, userId)).rejects.toBeInstanceOf(NotFoundError);
+    });
+
+    it("should throw ForbiddenError for VIEWER", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
+
+      expect(service.delete(projectId, varId, userId)).rejects.toBeInstanceOf(ForbiddenError);
+    });
+
+    it("should throw NotFoundError when user is not a member", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce(null);
+
+      expect(service.delete(projectId, varId, userId)).rejects.toBeInstanceOf(NotFoundError);
+    });
+  });
+});
