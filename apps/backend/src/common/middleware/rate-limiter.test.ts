@@ -90,11 +90,11 @@ describe("rateLimiter middleware", () => {
     store.destroy();
   });
 
-  function createApp(max: number, windowMs: number) {
+  const createApp = (max: number, windowMs: number) => {
     return new Elysia()
       .use(rateLimiter({ max, windowMs, store, keyFn: () => "test-ip" }))
       .get("/test", () => ({ ok: true }));
-  }
+  };
 
   it("should allow requests within the limit", async () => {
     const app = createApp(3, 60_000);

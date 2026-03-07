@@ -5,8 +5,8 @@ const envSchema = t.Object({
   DATABASE_URL: t.String(),
   JWT_SECRET: t.String(),
   JWT_EXPIRY: t.Optional(t.String({ default: "15m" })),
-  REFRESH_TOKEN_EXPIRY: t.Optional(t.String({ default: "30d" })),
-  PORT: t.Optional(t.String({ default: "3000" })),
+  REFRESH_TOKEN_EXPIRY: t.Optional(t.String({ default: "7d" })),
+  PORT: t.Optional(t.String({ default: "4000" })),
   NODE_ENV: t.Optional(
     t.Union([t.Literal("development"), t.Literal("production"), t.Literal("staging")]),
   ),
@@ -20,6 +20,7 @@ const envSchema = t.Object({
   GITHUB_CALLBACK_URL: t.Optional(
     t.String({ default: "http://localhost:4000/api/auth/github/callback" }),
   ),
+  MASTER_ENCRYPTION_KEY: t.String({ minLength: 64, maxLength: 64 }),
 });
 
 export type Env = Static<typeof envSchema>;
