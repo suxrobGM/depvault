@@ -6,17 +6,29 @@ const KEY_LENGTH = 32;
 const AUTH_TAG_LENGTH = 16;
 
 export interface EncryptedData {
+  /** The encrypted data, encoded in base64. */
   ciphertext: string;
+  /** The initialization vector used during encryption, encoded in base64. */
   iv: string;
+  /** The authentication tag from encryption, encoded in base64. */
   authTag: string;
 }
 
 export interface EncryptedBinaryData {
+  /** The encrypted data as a Buffer. This is not base64-encoded to avoid unnecessary overhead for binary data. */
   ciphertext: Buffer;
+  /** The initialization vector used during encryption, encoded in base64. */
   iv: string;
+  /** The authentication tag from encryption, encoded in base64. */
   authTag: string;
 }
 
+/**
+ * Retrieves the master encryption key from the environment variable and returns it as a Buffer.
+ * @throws If the MASTER_ENCRYPTION_KEY environment variable is not set.
+ * @returns The master key as a Buffer.
+ * @remarks The master key should be a 64-character hexadecimal string (32 bytes) defined in the .env file.
+ */
 function getMasterKey(): Buffer {
   const key = process.env.MASTER_ENCRYPTION_KEY;
   if (!key) {
@@ -47,7 +59,6 @@ export function deriveProjectKey(projectId: string): Buffer {
 export function encrypt(plaintext: string, projectKey: Buffer): EncryptedData {
   const iv = randomBytes(IV_LENGTH);
   const cipher = createCipheriv(ALGORITHM, projectKey, iv, { authTagLength: AUTH_TAG_LENGTH });
-
   const encrypted = Buffer.concat([cipher.update(plaintext, "utf-8"), cipher.final()]);
 
   return {

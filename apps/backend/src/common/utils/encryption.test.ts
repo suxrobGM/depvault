@@ -8,7 +8,7 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  delete process.env.MASTER_ENCRYPTION_KEY;
+  process.env.MASTER_ENCRYPTION_KEY = undefined as unknown as string;
 });
 
 function getProjectKey(id = "test-project"): Buffer {
@@ -122,7 +122,7 @@ describe("encrypt / decrypt", () => {
   it("should fail decryption with tampered ciphertext", () => {
     const encrypted = encrypt("secret", getProjectKey());
     const tampered = Buffer.from(encrypted.ciphertext, "base64");
-    tampered[0] ^= 0xff;
+    tampered[0]! ^= 0xff;
     expect(() =>
       decrypt(tampered.toString("base64"), encrypted.iv, encrypted.authTag, getProjectKey()),
     ).toThrow();
@@ -131,7 +131,7 @@ describe("encrypt / decrypt", () => {
   it("should fail decryption with tampered authTag", () => {
     const encrypted = encrypt("secret", getProjectKey());
     const tampered = Buffer.from(encrypted.authTag, "base64");
-    tampered[0] ^= 0xff;
+    tampered[0]! ^= 0xff;
     expect(() =>
       decrypt(encrypted.ciphertext, encrypted.iv, tampered.toString("base64"), getProjectKey()),
     ).toThrow();

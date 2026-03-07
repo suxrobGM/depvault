@@ -32,7 +32,7 @@ export async function signAccessToken(payload: JwtPayload): Promise<string> {
  * @returns Signed JWT string with `type: "refresh"` claim
  */
 export async function signRefreshToken(userId: string): Promise<string> {
-  const expiry = process.env.REFRESH_TOKEN_EXPIRY ?? "30d";
+  const expiry = process.env.REFRESH_TOKEN_EXPIRY ?? "7d";
 
   return new SignJWT({ type: "refresh" })
     .setProtectedHeader({ alg: "HS256" })
