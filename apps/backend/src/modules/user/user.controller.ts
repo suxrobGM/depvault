@@ -16,24 +16,49 @@ export const userController = new Elysia({ prefix: "/users", detail: { tags: ["U
   .use(authGuard)
   .get("/me", ({ user }) => userService.getProfile(user.id), {
     response: UserProfileResponseSchema,
-    detail: { summary: "Get current user profile" },
+    detail: {
+      summary: "Get current user profile",
+      description:
+        "Return the authenticated user's profile including email, username, avatar, and linked accounts.",
+      security: [{ bearerAuth: [] }],
+    },
   })
   .patch("/me", ({ user, body }) => userService.updateProfile(user.id, body), {
     body: UpdateProfileBodySchema,
     response: UserProfileResponseSchema,
-    detail: { summary: "Update profile (username, avatar)" },
+    detail: {
+      summary: "Update profile",
+      description:
+        "Update the authenticated user's username and/or avatar URL. Username must be unique.",
+      security: [{ bearerAuth: [] }],
+    },
   })
   .patch("/me/password", ({ user, body }) => userService.changePassword(user.id, body), {
     body: ChangePasswordBodySchema,
     response: MessageResponseSchema,
-    detail: { summary: "Change password" },
+    detail: {
+      summary: "Change password",
+      description:
+        "Change the authenticated user's password. Requires the current password for verification. Not available for OAuth-only accounts.",
+      security: [{ bearerAuth: [] }],
+    },
   })
   .patch("/me/email", ({ user, body }) => userService.changeEmail(user.id, body), {
     body: ChangeEmailBodySchema,
     response: MessageResponseSchema,
-    detail: { summary: "Change email address" },
+    detail: {
+      summary: "Change email address",
+      description:
+        "Change the authenticated user's email. Requires password verification. A new verification email is sent to the updated address.",
+      security: [{ bearerAuth: [] }],
+    },
   })
   .delete("/me", ({ user }) => userService.deleteAccount(user.id), {
     response: MessageResponseSchema,
-    detail: { summary: "Delete account (soft delete)" },
+    detail: {
+      summary: "Delete account",
+      description:
+        "Soft-delete the authenticated user's account and revoke all refresh tokens. The account can no longer be used to log in.",
+      security: [{ bearerAuth: [] }],
+    },
   });

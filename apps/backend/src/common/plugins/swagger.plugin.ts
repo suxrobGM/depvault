@@ -1,21 +1,20 @@
 import { swagger } from "@elysiajs/swagger";
 import { Elysia } from "elysia";
 
-/**
- * Elysia plugin for Swagger/OpenAPI documentation.
- */
 export const swaggerPlugin = new Elysia({ name: "swagger" }).use(
   swagger({
     documentation: {
       info: {
-        title: "Connect API",
+        title: "DepVault API",
         version: "1.0.0",
-        description: "Connect platform API — paid 1-on-1 communication between fans and creators",
+        description:
+          "DepVault platform API — dependency analysis, vulnerability scanning, and encrypted secret management across any tech stack",
       },
       tags: [
-        { name: "Auth", description: "Authentication & authorization" },
-        { name: "Users", description: "User profile management" },
-        { name: "Admin", description: "Admin management" },
+        { name: "Auth", description: "Registration, login, OAuth, token management" },
+        { name: "Users", description: "User profile and account management" },
+        { name: "Projects", description: "Project CRUD and team membership" },
+        { name: "Secrets", description: "One-time secret sharing and file downloads" },
       ],
       components: {
         securitySchemes: {
@@ -23,7 +22,7 @@ export const swaggerPlugin = new Elysia({ name: "swagger" }).use(
             type: "http",
             scheme: "bearer",
             bearerFormat: "JWT",
-            description: "JWT access token obtained from /auth/login or /auth/register",
+            description: "JWT access token obtained from /api/auth/login or /api/auth/register",
           },
         },
       },

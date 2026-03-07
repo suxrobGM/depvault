@@ -27,7 +27,11 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
       .post("/register", ({ body }) => authService.register(body), {
         body: RegisterBodySchema,
         response: AuthResponseSchema,
-        detail: { summary: "Register with email and password" },
+        detail: {
+          summary: "Register with email and password",
+          description:
+            "Create a new account with email, username, and password. Returns JWT tokens. A verification email is sent to confirm the address.",
+        },
       }),
   )
   .use(
@@ -36,13 +40,21 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
       .post("/login", ({ body }) => authService.login(body), {
         body: LoginBodySchema,
         response: AuthResponseSchema,
-        detail: { summary: "Login with email and password" },
+        detail: {
+          summary: "Login with email and password",
+          description:
+            "Authenticate with email and password. Returns JWT access and refresh tokens. Email must be verified before login is allowed.",
+        },
       }),
   )
   .post("/refresh", ({ body }) => authService.refresh(body), {
     body: RefreshBodySchema,
     response: AuthResponseSchema,
-    detail: { summary: "Refresh access token using refresh token" },
+    detail: {
+      summary: "Refresh access token",
+      description:
+        "Exchange a valid refresh token for a new access/refresh token pair. The old refresh token is invalidated (rotation).",
+    },
   })
   .use(
     new Elysia()
@@ -50,18 +62,30 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
       .post("/forgot-password", ({ body }) => authService.forgotPassword(body), {
         body: ForgotPasswordBodySchema,
         response: MessageResponseSchema,
-        detail: { summary: "Request password reset email" },
+        detail: {
+          summary: "Request password reset email",
+          description:
+            "Send a password reset link to the provided email. Always returns success to prevent email enumeration.",
+        },
       }),
   )
   .post("/reset-password", ({ body }) => authService.resetPassword(body), {
     body: ResetPasswordBodySchema,
     response: MessageResponseSchema,
-    detail: { summary: "Reset password with token" },
+    detail: {
+      summary: "Reset password with token",
+      description:
+        "Set a new password using the reset token from the email link. Revokes all existing refresh tokens for security.",
+    },
   })
   .post("/verify-email", ({ body }) => authService.verifyEmail(body), {
     body: VerifyEmailBodySchema,
     response: MessageResponseSchema,
-    detail: { summary: "Verify email with token" },
+    detail: {
+      summary: "Verify email address",
+      description:
+        "Confirm email ownership using the verification token sent during registration or email change.",
+    },
   })
   .get(
     "/github",
@@ -71,17 +95,29 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
       set.headers.location = url;
     },
     {
-      detail: { summary: "Initiate GitHub OAuth redirect" },
+      detail: {
+        summary: "Initiate GitHub OAuth",
+        description:
+          "Redirect the user to GitHub's OAuth authorization page to begin the login flow.",
+      },
     },
   )
   .get("/github/callback", ({ query }) => githubService.callback(query), {
     query: GitHubCallbackQuerySchema,
     response: AuthResponseSchema,
-    detail: { summary: "Handle GitHub OAuth callback" },
+    detail: {
+      summary: "GitHub OAuth callback",
+      description:
+        "Handle the OAuth callback from GitHub. Creates a new account on first login or authenticates an existing user.",
+    },
   })
   .use(authGuard)
   .post("/link-github", ({ body, user }) => githubService.linkAccount(body, user.id), {
     body: LinkGitHubBodySchema,
     response: MessageResponseSchema,
-    detail: { summary: "Link GitHub account to existing user" },
+    detail: {
+      summary: "Link GitHub account",
+      description: "Link a GitHub account to the current authenticated user for OAuth login.",
+      security: [{ bearerAuth: [] }],
+    },
   });

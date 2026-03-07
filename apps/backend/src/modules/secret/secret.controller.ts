@@ -15,7 +15,11 @@ export const secretController = new Elysia({
       },
       {
         params: t.Object({ token: t.String() }),
-        detail: { summary: "Access a shared secret by token" },
+        detail: {
+          summary: "Access a shared secret",
+          description:
+            "Retrieve a shared secret by its one-time token. The secret is destroyed after first access and cannot be read again.",
+        },
       },
     ),
   )
@@ -31,7 +35,12 @@ export const secretController = new Elysia({
         },
         {
           params: t.Object({ token: t.String() }),
-          detail: { summary: "Download a shared secret file" },
+          detail: {
+            summary: "Download a shared secret file",
+            description:
+              "Download the file attached to a shared secret. Requires authentication. The file is decrypted in-memory and streamed to the client.",
+            security: [{ bearerAuth: [] }],
+          },
         },
       ),
   );
