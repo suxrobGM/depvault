@@ -78,6 +78,12 @@ function createMockPrisma() {
   } as any;
 }
 
+function createMockAuditLogService() {
+  return {
+    log: mock(() => Promise.resolve()),
+  } as any;
+}
+
 function createMockFile(name: string, size = 1024, type = "application/json"): File {
   const content = new Uint8Array(size);
   return new File([content], name, { type });
@@ -89,7 +95,7 @@ describe("SecretFileService", () => {
 
   beforeEach(() => {
     mockPrisma = createMockPrisma();
-    service = new SecretFileService(mockPrisma);
+    service = new SecretFileService(mockPrisma, createMockAuditLogService());
 
     spyOn(encryption, "deriveProjectKey").mockReturnValue(fakeProjectKey);
     spyOn(encryption, "encryptBinary").mockReturnValue({

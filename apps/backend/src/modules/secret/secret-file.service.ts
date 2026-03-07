@@ -1,16 +1,20 @@
-import { singleton } from "tsyringe";
+import { injectable } from "tsyringe";
 import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { decryptBinary, deriveProjectKey, encryptBinary } from "@/common/utils/encryption";
 import { PrismaClient } from "@/generated/prisma";
+import { AuditLogService } from "@/modules/audit-log/audit-log.service";
 import type { PaginatedResponse } from "@/types/response";
 import { FORBIDDEN_EXTENSIONS, MAX_FILE_SIZE, type SecretFileResponse } from "./secret-file.schema";
 
 const PATH_TRAVERSAL_PATTERN = /(\.\.|[/\\])/;
 
-@singleton()
+@injectable()
 export class SecretFileService {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly auditLogService: AuditLogService,
+  ) {}
 
   async upload(
     projectId: string,
@@ -18,6 +22,7 @@ export class SecretFileService {
     file: File,
     environmentName: string,
     description?: string,
+    ipAddress = "unknown",
   ): Promise<SecretFileResponse> {
     await this.requireEditorOrOwner(projectId, userId);
 
@@ -44,6 +49,16 @@ export class SecretFileService {
     });
 
     await this.logAudit(projectId, userId, "UPLOADED", secretFile.id);
+
+    await this.auditLogService.log({
+      userId,
+      projectId,
+      action: "UPLOAD",
+      resourceType: "SECRET_FILE",
+      resourceId: secretFile.id,
+      ipAddress,
+      metadata: { fileName: file.name },
+    });
 
     return this.toResponse(secretFile);
   }
@@ -99,6 +114,7 @@ export class SecretFileService {
     projectId: string,
     fileId: string,
     userId: string,
+    ipAddress = "unknown",
   ): Promise<{ buffer: Buffer; name: string; mimeType: string }> {
     await this.requireEditorOrOwner(projectId, userId);
 
@@ -120,10 +136,25 @@ export class SecretFileService {
 
     await this.logAudit(projectId, userId, "DOWNLOADED", fileId);
 
+    await this.auditLogService.log({
+      userId,
+      projectId,
+      action: "DOWNLOAD",
+      resourceType: "SECRET_FILE",
+      resourceId: fileId,
+      ipAddress,
+      metadata: { fileName: file.name },
+    });
+
     return { buffer: decrypted, name: file.name, mimeType: file.mimeType };
   }
 
-  async delete(projectId: string, fileId: string, userId: string): Promise<{ message: string }> {
+  async delete(
+    projectId: string,
+    fileId: string,
+    userId: string,
+    ipAddress = "unknown",
+  ): Promise<{ message: string }> {
     await this.requireEditorOrOwner(projectId, userId);
 
     const file = await this.prisma.secretFile.findFirst({
@@ -137,6 +168,16 @@ export class SecretFileService {
     await this.prisma.secretFile.delete({ where: { id: fileId } });
 
     await this.logAudit(projectId, userId, "DELETED", fileId);
+
+    await this.auditLogService.log({
+      userId,
+      projectId,
+      action: "DELETE",
+      resourceType: "SECRET_FILE",
+      resourceId: fileId,
+      ipAddress,
+      metadata: { fileName: file.name },
+    });
 
     return { message: "Secret file deleted successfully" };
   }

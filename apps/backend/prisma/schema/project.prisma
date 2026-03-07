@@ -16,6 +16,7 @@ model Project {
   members      ProjectMember[]
   analyses     Analysis[]
   environments Environment[]
+  auditLogs    AuditLog[]
 
   @@map("projects")
 }

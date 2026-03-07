@@ -1,6 +1,7 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
 import { authGuard } from "@/common/middleware";
+import { getClientIp } from "@/common/utils/ip";
 import { StringIdParamSchema } from "@/types/request";
 import { MessageResponseSchema } from "@/types/response";
 import {
@@ -20,21 +21,33 @@ export const envVariableController = new Elysia({
   detail: { tags: ["Environment Variables"] },
 })
   .use(authGuard)
-  .post("/", ({ params, body, user }) => envVariableService.create(params.id, body, user.id), {
-    params: StringIdParamSchema,
-    body: CreateEnvVariableBodySchema,
-    response: EnvVariableWithValueResponseSchema,
-    detail: {
-      summary: "Create an environment variable",
-      description:
-        "Create a new encrypted environment variable for the project. The environment is auto-created if it doesn't exist. Only owners and editors can create variables.",
-      security: [{ bearerAuth: [] }],
+  .post(
+    "/",
+    ({ params, body, user, request, server }) =>
+      envVariableService.create(params.id, body, user.id, getClientIp(request, server)),
+    {
+      params: StringIdParamSchema,
+      body: CreateEnvVariableBodySchema,
+      response: EnvVariableWithValueResponseSchema,
+      detail: {
+        summary: "Create an environment variable",
+        description:
+          "Create a new encrypted environment variable for the project. The environment is auto-created if it doesn't exist. Only owners and editors can create variables.",
+        security: [{ bearerAuth: [] }],
+      },
     },
-  })
+  )
   .get(
     "/",
-    ({ params, query, user }) =>
-      envVariableService.list(params.id, user.id, query.environment, query.page, query.limit),
+    ({ params, query, user, request, server }) =>
+      envVariableService.list(
+        params.id,
+        user.id,
+        query.environment,
+        query.page,
+        query.limit,
+        getClientIp(request, server),
+      ),
     {
       params: StringIdParamSchema,
       query: EnvVariableListQuerySchema,
@@ -49,7 +62,14 @@ export const envVariableController = new Elysia({
   )
   .put(
     "/:varId",
-    ({ params, body, user }) => envVariableService.update(params.id, params.varId, body, user.id),
+    ({ params, body, user, request, server }) =>
+      envVariableService.update(
+        params.id,
+        params.varId,
+        body,
+        user.id,
+        getClientIp(request, server),
+      ),
     {
       params: EnvVariableParamsSchema,
       body: UpdateEnvVariableBodySchema,
@@ -64,7 +84,8 @@ export const envVariableController = new Elysia({
   )
   .delete(
     "/:varId",
-    ({ params, user }) => envVariableService.delete(params.id, params.varId, user.id),
+    ({ params, user, request, server }) =>
+      envVariableService.delete(params.id, params.varId, user.id, getClientIp(request, server)),
     {
       params: EnvVariableParamsSchema,
       response: MessageResponseSchema,

@@ -9,6 +9,7 @@ const projectId = "project-uuid";
 const userId = "user-uuid";
 const envId = "env-uuid";
 const varId = "var-uuid";
+const ipAddress = "127.0.0.1";
 
 const fakeProjectKey = Buffer.alloc(32, 1);
 
@@ -66,13 +67,21 @@ function createMockPrisma() {
   } as any;
 }
 
+function createMockAuditLogService() {
+  return {
+    log: mock(() => Promise.resolve()),
+  } as any;
+}
+
 describe("EnvVariableService", () => {
   let service: EnvVariableService;
   let mockPrisma: ReturnType<typeof createMockPrisma>;
+  let mockAuditLog: ReturnType<typeof createMockAuditLogService>;
 
   beforeEach(() => {
     mockPrisma = createMockPrisma();
-    service = new EnvVariableService(mockPrisma);
+    mockAuditLog = createMockAuditLogService();
+    service = new EnvVariableService(mockPrisma, mockAuditLog);
 
     spyOn(encryption, "deriveProjectKey").mockReturnValue(fakeProjectKey);
     spyOn(encryption, "encrypt").mockReturnValue(mockEncrypted);
@@ -94,6 +103,7 @@ describe("EnvVariableService", () => {
           isRequired: true,
         },
         userId,
+        ipAddress,
       );
 
       expect(result.id).toBe(varId);
@@ -111,6 +121,28 @@ describe("EnvVariableService", () => {
       });
     });
 
+    it("should write audit log on create", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
+      mockPrisma.environment.findUnique.mockResolvedValueOnce(mockEnvironment);
+
+      await service.create(
+        projectId,
+        { environment: "development", key: "API_KEY", value: "secret" },
+        userId,
+        ipAddress,
+      );
+
+      expect(mockAuditLog.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId,
+          projectId,
+          action: "UPLOAD",
+          resourceType: "ENV_VARIABLE",
+          ipAddress,
+        }),
+      );
+    });
+
     it("should auto-create environment if it doesn't exist", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "EDITOR" });
       mockPrisma.environment.findUnique.mockResolvedValueOnce(null);
@@ -119,6 +151,7 @@ describe("EnvVariableService", () => {
         projectId,
         { environment: "staging", key: "API_KEY", value: "secret" },
         userId,
+        ipAddress,
       );
 
       expect(mockPrisma.environment.create).toHaveBeenCalledWith({
@@ -130,7 +163,7 @@ describe("EnvVariableService", () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
 
       expect(
-        service.create(projectId, { environment: "dev", key: "K", value: "V" }, userId),
+        service.create(projectId, { environment: "dev", key: "K", value: "V" }, userId, ipAddress),
       ).rejects.toBeInstanceOf(ForbiddenError);
     });
 
@@ -138,7 +171,7 @@ describe("EnvVariableService", () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce(null);
 
       expect(
-        service.create(projectId, { environment: "dev", key: "K", value: "V" }, userId),
+        service.create(projectId, { environment: "dev", key: "K", value: "V" }, userId, ipAddress),
       ).rejects.toBeInstanceOf(NotFoundError);
     });
   });
@@ -152,6 +185,21 @@ describe("EnvVariableService", () => {
       expect(result.items).toHaveLength(1);
       expect(result.items[0]!.value).toBe("postgres://localhost/db");
       expect(encryption.decrypt).toHaveBeenCalled();
+    });
+
+    it("should write audit log when reading decrypted values", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
+
+      await service.list(projectId, userId, "development", 1, 20, ipAddress);
+
+      expect(mockAuditLog.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId,
+          projectId,
+          action: "READ",
+          resourceType: "ENV_VARIABLE",
+        }),
+      );
     });
 
     it("should return masked values for VIEWER", async () => {
@@ -209,7 +257,13 @@ describe("EnvVariableService", () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
       mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
 
-      await service.update(projectId, varId, { key: "NEW_KEY", value: "new-value" }, userId);
+      await service.update(
+        projectId,
+        varId,
+        { key: "NEW_KEY", value: "new-value" },
+        userId,
+        ipAddress,
+      );
 
       expect(mockPrisma.envVariableVersion.create).toHaveBeenCalledWith({
         data: {
@@ -223,11 +277,26 @@ describe("EnvVariableService", () => {
       expect(mockPrisma.envVariable.update).toHaveBeenCalled();
     });
 
+    it("should write audit log on update", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
+      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
+
+      await service.update(projectId, varId, { key: "NEW_KEY" }, userId, ipAddress);
+
+      expect(mockAuditLog.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: "UPDATE",
+          resourceType: "ENV_VARIABLE",
+          resourceId: varId,
+        }),
+      );
+    });
+
     it("should update metadata without creating version snapshot", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "EDITOR" });
       mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
 
-      await service.update(projectId, varId, { description: "Updated desc" }, userId);
+      await service.update(projectId, varId, { description: "Updated desc" }, userId, ipAddress);
 
       expect(mockPrisma.envVariableVersion.create).not.toHaveBeenCalled();
       expect(mockPrisma.envVariable.update).toHaveBeenCalledWith({
@@ -240,17 +309,17 @@ describe("EnvVariableService", () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
       mockPrisma.envVariable.findFirst.mockResolvedValueOnce(null);
 
-      expect(service.update(projectId, varId, { key: "X" }, userId)).rejects.toBeInstanceOf(
-        NotFoundError,
-      );
+      expect(
+        service.update(projectId, varId, { key: "X" }, userId, ipAddress),
+      ).rejects.toBeInstanceOf(NotFoundError);
     });
 
     it("should throw ForbiddenError for VIEWER", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
 
-      expect(service.update(projectId, varId, { key: "X" }, userId)).rejects.toBeInstanceOf(
-        ForbiddenError,
-      );
+      expect(
+        service.update(projectId, varId, { key: "X" }, userId, ipAddress),
+      ).rejects.toBeInstanceOf(ForbiddenError);
     });
   });
 
@@ -259,17 +328,32 @@ describe("EnvVariableService", () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
       mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
 
-      const result = await service.delete(projectId, varId, userId);
+      const result = await service.delete(projectId, varId, userId, ipAddress);
 
       expect(result.message).toBe("Environment variable deleted successfully");
       expect(mockPrisma.envVariable.delete).toHaveBeenCalledWith({ where: { id: varId } });
+    });
+
+    it("should write audit log on delete", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
+      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
+
+      await service.delete(projectId, varId, userId, ipAddress);
+
+      expect(mockAuditLog.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: "DELETE",
+          resourceType: "ENV_VARIABLE",
+          resourceId: varId,
+        }),
+      );
     });
 
     it("should delete variable when user is EDITOR", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "EDITOR" });
       mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
 
-      await service.delete(projectId, varId, userId);
+      await service.delete(projectId, varId, userId, ipAddress);
 
       expect(mockPrisma.envVariable.delete).toHaveBeenCalled();
     });
@@ -278,19 +362,25 @@ describe("EnvVariableService", () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
       mockPrisma.envVariable.findFirst.mockResolvedValueOnce(null);
 
-      expect(service.delete(projectId, varId, userId)).rejects.toBeInstanceOf(NotFoundError);
+      expect(service.delete(projectId, varId, userId, ipAddress)).rejects.toBeInstanceOf(
+        NotFoundError,
+      );
     });
 
     it("should throw ForbiddenError for VIEWER", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
 
-      expect(service.delete(projectId, varId, userId)).rejects.toBeInstanceOf(ForbiddenError);
+      expect(service.delete(projectId, varId, userId, ipAddress)).rejects.toBeInstanceOf(
+        ForbiddenError,
+      );
     });
 
     it("should throw NotFoundError when user is not a member", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce(null);
 
-      expect(service.delete(projectId, varId, userId)).rejects.toBeInstanceOf(NotFoundError);
+      expect(service.delete(projectId, varId, userId, ipAddress)).rejects.toBeInstanceOf(
+        NotFoundError,
+      );
     });
   });
 });

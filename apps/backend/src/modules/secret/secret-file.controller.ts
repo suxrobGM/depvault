@@ -1,6 +1,7 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
 import { authGuard } from "@/common/middleware";
+import { getClientIp } from "@/common/utils/ip";
 import { StringIdParamSchema } from "@/types/request";
 import { MessageResponseSchema } from "@/types/response";
 import {
@@ -23,13 +24,14 @@ export const secretFileController = new Elysia({
   .use(authGuard)
   .post(
     "/",
-    async ({ params, body, user }) => {
+    async ({ params, body, user, request, server }) => {
       return secretFileService.upload(
         params.id,
         user.id,
         body.file,
         body.environment,
         body.description,
+        getClientIp(request, server),
       );
     },
     {
@@ -62,11 +64,12 @@ export const secretFileController = new Elysia({
   )
   .get(
     "/:fileId/download",
-    async ({ params, user, set }) => {
+    async ({ params, user, set, request, server }) => {
       const { buffer, name, mimeType } = await secretFileService.download(
         params.id,
         params.fileId,
         user.id,
+        getClientIp(request, server),
       );
       set.headers["content-type"] = mimeType;
       set.headers["content-disposition"] = `attachment; filename="${name}"`;
@@ -84,7 +87,8 @@ export const secretFileController = new Elysia({
   )
   .delete(
     "/:fileId",
-    ({ params, user }) => secretFileService.delete(params.id, params.fileId, user.id),
+    ({ params, user, request, server }) =>
+      secretFileService.delete(params.id, params.fileId, user.id, getClientIp(request, server)),
     {
       params: SecretFileParamsSchema,
       response: MessageResponseSchema,

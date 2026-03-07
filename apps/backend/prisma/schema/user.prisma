@@ -33,6 +33,7 @@ model User {
   sharedSecrets      SharedSecret[]
   notifications      Notification[]
   uploadedFiles      SecretFile[]
+  auditLogs          AuditLog[]
 
   @@map("users")
 }
