@@ -32,50 +32,56 @@ enum LicensePolicy {
 
 model Analysis {
   id          String    @id @default(uuid()) @db.Uuid
-  projectId   String    @db.Uuid
-  userId      String    @db.Uuid
-  fileName    String
+  projectId   String    @map("project_id") @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  fileName    String    @map("file_name")
   ecosystem   Ecosystem
-  healthScore Int?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  healthScore Int?      @map("health_score")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
 
   project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
   user         User         @relation(fields: [userId], references: [id])
   dependencies Dependency[]
+
+  @@map("analyses")
 }
 
 model Dependency {
   id             String           @id @default(uuid()) @db.Uuid
-  analysisId     String           @db.Uuid
+  analysisId     String           @map("analysis_id") @db.Uuid
   name           String
-  currentVersion String
-  latestVersion  String?
+  currentVersion String           @map("current_version")
+  latestVersion  String?          @map("latest_version")
   status         DependencyStatus @default(UP_TO_DATE)
   license        String?
-  licensePolicy  LicensePolicy    @default(ALLOW)
-  isDirect       Boolean          @default(true)
-  parentId       String?          @db.Uuid
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
+  licensePolicy  LicensePolicy    @default(ALLOW) @map("license_policy")
+  isDirect       Boolean          @default(true) @map("is_direct")
+  parentId       String?          @map("parent_id") @db.Uuid
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
 
   analysis        Analysis        @relation(fields: [analysisId], references: [id], onDelete: Cascade)
   parent          Dependency?     @relation("DependencyTree", fields: [parentId], references: [id])
   children        Dependency[]    @relation("DependencyTree")
   vulnerabilities Vulnerability[]
+
+  @@map("dependencies")
 }
 
 model Vulnerability {
   id           String                @id @default(uuid()) @db.Uuid
-  dependencyId String                @db.Uuid
-  cveId        String?
+  dependencyId String                @map("dependency_id") @db.Uuid
+  cveId        String?               @map("cve_id")
   title        String
   description  String?
   severity     VulnerabilitySeverity @default(NONE)
-  fixedIn      String?
+  fixedIn      String?               @map("fixed_in")
   url          String?
-  createdAt    DateTime              @default(now())
-  updatedAt    DateTime              @updatedAt
+  createdAt    DateTime              @default(now()) @map("created_at")
+  updatedAt    DateTime              @updatedAt @map("updated_at")
 
   dependency Dependency @relation(fields: [dependencyId], references: [id], onDelete: Cascade)
+
+  @@map("vulnerabilities")
 }

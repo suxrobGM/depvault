@@ -8,14 +8,16 @@ enum NotificationType {
 
 model Notification {
   id        String           @id @default(uuid()) @db.Uuid
-  userId    String           @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
   type      NotificationType
   title     String
   message   String
   read      Boolean          @default(false)
   metadata  Json?
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
 }
