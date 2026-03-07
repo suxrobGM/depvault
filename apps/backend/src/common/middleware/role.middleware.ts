@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { ForbiddenError } from "@/common/errors";
-import type { UserRole } from "@/generated/prisma";
+import { UserRole } from "@/generated/prisma";
 import { authGuard } from "./auth.middleware";
 
 /**
@@ -14,7 +14,12 @@ export const requireRole = (...roles: UserRole[]) =>
   new Elysia({ name: `role-${roles.join("-")}` })
     .use(authGuard)
     .onBeforeHandle({ as: "scoped" }, ({ user }) => {
-      if (!roles.includes(user?.role as UserRole)) {
+      const userRole = user?.role as UserRole;
+
+      if (userRole === UserRole.SUPER_ADMIN) {
+        return;
+      }
+      if (!roles.includes(userRole)) {
         throw new ForbiddenError("Insufficient permissions");
       }
     });

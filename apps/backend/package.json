@@ -11,7 +11,7 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev --create-only",
     "db:migrate:apply": "prisma migrate deploy",
-    "db:seed": "prisma db seed",
+    "db:seed": "bun run prisma/seed/index.ts",
     "build:linux": "bun build --compile --minify-whitespace --minify-syntax --target bun-linux-x64 --outfile dist/server src/app.ts",
     "build:win": "bun build --compile --minify-whitespace --minify-syntax --target bun-windows-x64 --outfile dist/server.exe src/app.ts",
     "build:types": "tsc --emitDeclarationOnly",
