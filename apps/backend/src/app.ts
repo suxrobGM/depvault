@@ -6,7 +6,7 @@ import { errorMiddleware } from "@/common/middleware";
 import { corsPlugin, swaggerPlugin } from "@/common/plugins";
 import { validateEnv } from "@/env";
 import { analysisController } from "@/modules/analysis";
-import { auditLogController } from "@/modules/audit-log";
+import { auditLogController } from "@/modules/audit-log/audit-log.controller";
 import { authController } from "@/modules/auth";
 import { convertController } from "@/modules/convert";
 import { envVariableController } from "@/modules/env-variable";
