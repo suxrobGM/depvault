@@ -15,6 +15,12 @@ paths: [apps/frontend/src/**]
 - **Named exports** for all components, hooks, providers: `export function Sidebar()`
 - **Default exports** only for Next.js pages and layouts (`page.tsx`, `layout.tsx`)
 
+## Server Components by Default
+
+- **Never** add `"use client"` to `page.tsx` or `layout.tsx` files. Pages and layouts must be React Server Components
+- Extract interactive logic (hooks, state, event handlers) into `"use client"` feature components under `src/components/features/`
+- Page files are thin wrappers that compose server-fetched data with client components
+
 ## Component Props
 
 Destructure props inside the function body, not in parameters:

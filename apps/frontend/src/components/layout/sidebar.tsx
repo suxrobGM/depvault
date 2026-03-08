@@ -6,20 +6,26 @@ import {
   ChevronRight as ChevronRightIcon,
   Dashboard as DashboardIcon,
   Person as PersonIcon,
+  Shield as ShieldIcon,
   SwapHoriz as SwapHorizIcon,
 } from "@mui/icons-material";
 import {
   Box,
+  Chip,
+  Divider,
   Drawer,
   IconButton,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Stack,
   Toolbar,
   Typography,
 } from "@mui/material";
 import { usePathname, useRouter } from "next/navigation";
+import { GradientText } from "@/components/ui/gradient-text";
+import { useAuth } from "@/hooks/use-auth";
 import { ROUTES } from "@/lib/constants";
 
 const SIDEBAR_WIDTH = 240;
@@ -42,9 +48,10 @@ export function Sidebar(props: SidebarProps): ReactElement {
   const { open, mobileOpen, onToggle, onMobileClose } = props;
   const pathname = usePathname();
   const router = useRouter();
+  const { user } = useAuth();
 
   const drawerContent = (
-    <>
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <Toolbar
         sx={{
           display: "flex",
@@ -53,16 +60,22 @@ export function Sidebar(props: SidebarProps): ReactElement {
           px: open ? 2 : 0,
         }}
       >
-        {open && (
-          <Typography variant="h6" fontWeight={700} noWrap>
-            DepVault
-          </Typography>
+        {open ? (
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <ShieldIcon sx={{ color: "primary.main", fontSize: 24 }} />
+            <GradientText variant="h6" component="span">
+              DepVault
+            </GradientText>
+          </Stack>
+        ) : (
+          <ShieldIcon sx={{ color: "primary.main", fontSize: 24 }} />
         )}
         <IconButton onClick={onToggle} sx={{ display: { xs: "none", md: "flex" } }}>
           {open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
         </IconButton>
       </Toolbar>
-      <List sx={{ px: open ? 1 : 0.5 }}>
+      <Divider />
+      <List sx={{ px: open ? 1 : 0.5, flex: 1 }}>
         {navItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
@@ -74,7 +87,6 @@ export function Sidebar(props: SidebarProps): ReactElement {
                 onMobileClose();
               }}
               sx={{
-                borderRadius: 1,
                 mb: 0.5,
                 justifyContent: open ? "initial" : "center",
                 px: open ? 2 : 1.5,
@@ -84,6 +96,7 @@ export function Sidebar(props: SidebarProps): ReactElement {
                 sx={{
                   minWidth: open ? 40 : "auto",
                   justifyContent: "center",
+                  color: isActive ? "primary.main" : "text.secondary",
                 }}
               >
                 {item.icon}
@@ -93,12 +106,29 @@ export function Sidebar(props: SidebarProps): ReactElement {
           );
         })}
       </List>
-    </>
+      {open && user && (
+        <>
+          <Divider />
+          <Box sx={{ px: 2, py: 1.5 }}>
+            <Typography variant="body2" noWrap fontWeight={600}>
+              {user.username}
+            </Typography>
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 0.5 }}>
+              <Typography variant="caption" color="text.secondary" noWrap>
+                {user.email}
+              </Typography>
+              {user.role && (
+                <Chip label={user.role} size="small" color="primary" variant="outlined" />
+              )}
+            </Stack>
+          </Box>
+        </>
+      )}
+    </Box>
   );
 
   return (
     <Box component="nav">
-      {/* Mobile drawer */}
       <Drawer
         variant="temporary"
         open={mobileOpen}
@@ -111,7 +141,6 @@ export function Sidebar(props: SidebarProps): ReactElement {
       >
         {drawerContent}
       </Drawer>
-      {/* Desktop drawer */}
       <Drawer
         variant="permanent"
         sx={{

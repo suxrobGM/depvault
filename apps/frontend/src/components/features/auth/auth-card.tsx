@@ -1,4 +1,5 @@
 import type { PropsWithChildren, ReactElement } from "react";
+import { Shield as ShieldIcon } from "@mui/icons-material";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 
 interface AuthCardProps extends PropsWithChildren {
@@ -10,9 +11,23 @@ export function AuthCard(props: AuthCardProps): ReactElement {
   const { title, subtitle, children } = props;
 
   return (
-    <Card sx={{ width: "100%", maxWidth: 440 }}>
-      <CardContent sx={{ p: 4 }}>
+    <Card className="vault-fade-up" sx={{ width: "100%", maxWidth: 440 }}>
+      <CardContent sx={{ p: 5 }}>
         <Box sx={{ textAlign: "center", mb: 3 }}>
+          <Box
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: "50%",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              bgcolor: "vault.glowPrimary",
+              mb: 2,
+            }}
+          >
+            <ShieldIcon sx={{ color: "primary.main", fontSize: 24 }} />
+          </Box>
           <Typography variant="h5" fontWeight={700} gutterBottom>
             {title}
           </Typography>

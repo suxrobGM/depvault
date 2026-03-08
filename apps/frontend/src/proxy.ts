@@ -9,9 +9,9 @@ const AUTH_ROUTES = [
   ROUTES.verifyEmail,
 ];
 
-const PUBLIC_ROUTES = [ROUTES.home, "/secrets"];
+const PUBLIC_ROUTES = [ROUTES.home, ROUTES.secrets];
 
-export default function proxy(request: NextRequest) {
+export function proxy(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
   const hasToken = request.cookies.has(COOKIE_NAMES.accessToken);
 
@@ -28,3 +28,13 @@ export default function proxy(request: NextRequest) {
 
   return NextResponse.next();
 }
+
+/**
+ * Apply middleware to all routes except static files and API routes.
+ */
+export const config = {
+  matcher: [
+    // Skip static files and Next.js internals
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
+};

@@ -8,9 +8,6 @@
     "**/*/next-env.d.ts": true,
     "**/*/.next": true
   },
-  "files.associations": {
-    "*.css": "tailwindcss"
-  },
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },

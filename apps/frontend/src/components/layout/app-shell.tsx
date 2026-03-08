@@ -8,12 +8,14 @@ import { TopBar } from "./topbar";
 const SIDEBAR_WIDTH = 240;
 const SIDEBAR_COLLAPSED_WIDTH = 64;
 
-export function AppShell({ children }: PropsWithChildren): ReactElement {
+export function AppShell(props: PropsWithChildren): ReactElement {
+  const { children } = props;
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh", position: "relative" }}>
+      <Box className="vault-dot-grid" />
       <TopBar onMenuClick={() => setMobileOpen(true)} sidebarOpen={sidebarOpen} />
       <Sidebar
         open={sidebarOpen}
@@ -28,6 +30,8 @@ export function AppShell({ children }: PropsWithChildren): ReactElement {
           width: { md: `calc(100% - ${sidebarOpen ? SIDEBAR_WIDTH : SIDEBAR_COLLAPSED_WIDTH}px)` },
           transition: "width 225ms",
           p: 3,
+          position: "relative",
+          zIndex: 1,
         }}
       >
         <Toolbar />

@@ -9,6 +9,7 @@ export const ROUTES = {
   profile: "/profile",
   converter: "/converter",
   project: (id: string) => `/projects/${id}`,
+  secrets: "/secrets",
 } as const;
 
 export const COOKIE_NAMES = {

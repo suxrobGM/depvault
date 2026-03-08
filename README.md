@@ -6,16 +6,16 @@ DepVault is a web dashboard that analyzes dependencies, detects vulnerabilities,
 
 ## Tech Stack
 
-| Layer      | Technology              |
-| ---------- | ----------------------- |
-| Runtime    | Bun                     |
-| Backend    | Elysia.js               |
-| Frontend   | Next.js 16              |
-| UI         | MUI 7 + Tailwind CSS v4 |
-| Database   | PostgreSQL + Prisma 7   |
-| DI         | tsyringe                |
-| Auth       | JWT + GitHub OAuth      |
-| Encryption | AES-256-GCM             |
+| Layer      | Technology            |
+| ---------- | --------------------- |
+| Runtime    | Bun                   |
+| Backend    | Elysia.js             |
+| Frontend   | Next.js 16            |
+| UI         | MUI 7                 |
+| Database   | PostgreSQL + Prisma 7 |
+| DI         | tsyringe              |
+| Auth       | JWT + GitHub OAuth    |
+| Encryption | AES-256-GCM           |
 
 ## Project Structure
 

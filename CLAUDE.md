@@ -5,7 +5,7 @@ DepVault is a web dashboard that analyzes dependencies, detects vulnerabilities,
 ## Tech Stack
 
 - **Runtime**: Bun - **Backend**: Elysia.js - **DB**: PostgreSQL + Prisma 7 - **DI**: tsyringe
-- **Web**: Next.js 16 + MUI + Tailwind v4
+- **Web**: Next.js 16 + MUI 7
 - **Shared**: `@depvault/shared` package in `packages/shared/`
 
 ## PRD & Design References
@@ -17,7 +17,7 @@ DepVault is a web dashboard that analyzes dependencies, detects vulnerabilities,
 ### UI Component Guidelines
 
 - **Component library**: MUI 7 — prefer MUI components over custom HTML elements
-- **Styling**: Tailwind v4 utilities for spacing, layout, responsive. MUI `sx` prop or `styled()` for component theming
+- **Styling**: MUI `sx` prop for all styling. Custom CSS utility classes in `globals.css` for animations
 - **Data tables**: MUI DataGrid for analysis results, project lists, env variable tables
 - **Forms**: MUI TextField, Select, Checkbox with `react-hook-form` + `zod` for validation
 - **Layout**: MUI Box, Stack, Grid2. App shell uses persistent sidebar + top app bar

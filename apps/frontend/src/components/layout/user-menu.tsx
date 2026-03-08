@@ -10,6 +10,7 @@ import {
   ListItemText,
   Menu,
   MenuItem,
+  Typography,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
@@ -28,7 +29,9 @@ export function UserMenu(): ReactElement {
   return (
     <>
       <IconButton onClick={handleOpen} size="small">
-        <Avatar sx={{ width: 32, height: 32, fontSize: 14 }}>{initials}</Avatar>
+        <Avatar sx={{ width: 32, height: 32, fontSize: 14, bgcolor: "primary.dark" }}>
+          {initials}
+        </Avatar>
       </IconButton>
       <Menu
         anchorEl={anchorEl}
@@ -36,7 +39,16 @@ export function UserMenu(): ReactElement {
         onClose={handleClose}
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+        slotProps={{ paper: { sx: { minWidth: 200 } } }}
       >
+        {user && (
+          <MenuItem disabled sx={{ opacity: 1 }}>
+            <Typography variant="body2" fontWeight={600}>
+              {user.email}
+            </Typography>
+          </MenuItem>
+        )}
+        <Divider />
         <MenuItem
           onClick={() => {
             handleClose();

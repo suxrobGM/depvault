@@ -9,7 +9,16 @@ export function LoadingScreen(props: LoadingScreenProps): ReactElement {
   const { message } = props;
 
   return (
-    <Box className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "50vh",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 2,
+      }}
+    >
       <CircularProgress />
       {message && (
         <Typography variant="body2" color="text.secondary">
