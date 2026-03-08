@@ -1,1 +1,4 @@
-export { default as ThemeProvider } from "./ThemeProvider";
+export { ThemeProvider } from "./theme-provider";
+export { QueryProvider } from "./query-provider";
+export { NotificationProvider } from "./notification-provider";
+export { AuthProvider } from "./auth-provider";

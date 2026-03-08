@@ -1,6 +1,6 @@
 import { singleton } from "tsyringe";
 import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from "@/common/errors";
-import type { PrismaClient } from "@/generated/prisma";
+import { PrismaClient } from "@/generated/prisma";
 import type { PaginatedResponse } from "@/types/response";
 import type {
   InviteMemberBody,

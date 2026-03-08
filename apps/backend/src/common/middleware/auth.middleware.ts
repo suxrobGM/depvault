@@ -16,13 +16,19 @@ export const authGuard = new Elysia({ name: "auth-guard" })
       secret: process.env.JWT_SECRET!,
     }),
   )
-  .derive({ as: "scoped" }, async ({ headers, jwt }) => {
+  .derive({ as: "scoped" }, async ({ headers, cookie, jwt }) => {
     const authorization = headers.authorization;
-    if (!authorization?.startsWith("Bearer ")) {
+    const cookieToken = cookie.access_token?.value;
+
+    const token = authorization?.startsWith("Bearer ")
+      ? authorization.slice(7)
+      : typeof cookieToken === "string"
+        ? cookieToken
+        : undefined;
+
+    if (!token) {
       throw new UnauthorizedError("Missing or invalid authorization header");
     }
-
-    const token = authorization.slice(7);
     const payload = await jwt.verify(token);
 
     if (!payload) {

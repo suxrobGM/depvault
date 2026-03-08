@@ -10,18 +10,25 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@depvault/shared": "workspace:*",
     "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.8",
     "@mui/material": "^7.3.8",
     "@mui/material-nextjs": "^7.3.8",
+    "@mui/x-data-grid": "^8.27.4",
+    "@tanstack/react-form": "^1.28.4",
+    "@tanstack/react-query": "^5.90.21",
     "next": "^16.1.6",
     "next-intl": "^4.8.3",
+    "notistack": "^3.0.2",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react-dom": "^19.2.4",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@elysiajs/eden": "^1.4.8",
     "@tailwindcss/postcss": "^4.2.1",
     "@types/node": "^25.3.0",
     "@types/react": "^19.2.14",

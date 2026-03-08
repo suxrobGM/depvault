@@ -15,6 +15,7 @@ import {
   VerifyEmailBodySchema,
 } from "./auth.schema";
 import { AuthService } from "./auth.service";
+import { clearAuthCookies, setAuthCookies } from "./auth.utils";
 import { GitHubService } from "./github.service";
 
 const authService = container.resolve(AuthService);
@@ -22,9 +23,14 @@ const githubService = container.resolve(GitHubService);
 
 export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Auth"] } })
   .use(
-    new Elysia()
-      .use(rateLimiter({ max: 5, windowMs: 60 * 60 * 1000 }))
-      .post("/register", ({ body }) => authService.register(body), {
+    new Elysia().use(rateLimiter({ max: 5, windowMs: 60 * 60 * 1000 })).post(
+      "/register",
+      async ({ body, cookie }) => {
+        const result = await authService.register(body);
+        setAuthCookies(cookie, result);
+        return result;
+      },
+      {
         body: RegisterBodySchema,
         response: AuthResponseSchema,
         detail: {
@@ -32,12 +38,18 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
           description:
             "Create a new account with email, username, and password. Returns JWT tokens. A verification email is sent to confirm the address.",
         },
-      }),
+      },
+    ),
   )
   .use(
-    new Elysia()
-      .use(rateLimiter({ max: 5, windowMs: 60 * 1000 }))
-      .post("/login", ({ body }) => authService.login(body), {
+    new Elysia().use(rateLimiter({ max: 5, windowMs: 60 * 1000 })).post(
+      "/login",
+      async ({ body, cookie }) => {
+        const result = await authService.login(body);
+        setAuthCookies(cookie, result);
+        return result;
+      },
+      {
         body: LoginBodySchema,
         response: AuthResponseSchema,
         detail: {
@@ -45,17 +57,40 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
           description:
             "Authenticate with email and password. Returns JWT access and refresh tokens. Email must be verified before login is allowed.",
         },
-      }),
+      },
+    ),
   )
-  .post("/refresh", ({ body }) => authService.refresh(body), {
-    body: RefreshBodySchema,
-    response: AuthResponseSchema,
-    detail: {
-      summary: "Refresh access token",
-      description:
-        "Exchange a valid refresh token for a new access/refresh token pair. The old refresh token is invalidated (rotation).",
+  .post(
+    "/refresh",
+    async ({ body, cookie }) => {
+      const result = await authService.refresh(body);
+      setAuthCookies(cookie, result);
+      return result;
     },
-  })
+    {
+      body: RefreshBodySchema,
+      response: AuthResponseSchema,
+      detail: {
+        summary: "Refresh access token",
+        description:
+          "Exchange a valid refresh token for a new access/refresh token pair. The old refresh token is invalidated (rotation).",
+      },
+    },
+  )
+  .post(
+    "/logout",
+    ({ cookie }) => {
+      clearAuthCookies(cookie);
+      return { message: "Logged out successfully" };
+    },
+    {
+      response: MessageResponseSchema,
+      detail: {
+        summary: "Logout and clear auth cookies",
+        description: "Clears httpOnly auth cookies from the browser.",
+      },
+    },
+  )
   .use(
     new Elysia()
       .use(rateLimiter({ max: 3, windowMs: 60 * 60 * 1000 }))
@@ -102,15 +137,23 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
       },
     },
   )
-  .get("/github/callback", ({ query }) => githubService.callback(query), {
-    query: GitHubCallbackQuerySchema,
-    response: AuthResponseSchema,
-    detail: {
-      summary: "GitHub OAuth callback",
-      description:
-        "Handle the OAuth callback from GitHub. Creates a new account on first login or authenticates an existing user.",
+  .get(
+    "/github/callback",
+    async ({ query, cookie }) => {
+      const result = await githubService.callback(query);
+      setAuthCookies(cookie, result);
+      return result;
     },
-  })
+    {
+      query: GitHubCallbackQuerySchema,
+      response: AuthResponseSchema,
+      detail: {
+        summary: "GitHub OAuth callback",
+        description:
+          "Handle the OAuth callback from GitHub. Creates a new account on first login or authenticates an existing user.",
+      },
+    },
+  )
   .use(authGuard)
   .post("/link-github", ({ body, user }) => githubService.linkAccount(body, user.id), {
     body: LinkGitHubBodySchema,
