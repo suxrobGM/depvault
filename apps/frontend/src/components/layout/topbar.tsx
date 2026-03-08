@@ -2,8 +2,7 @@
 
 import type { ReactElement } from "react";
 import { Menu as MenuIcon } from "@mui/icons-material";
-import { AppBar, Box, IconButton, Stack, Toolbar } from "@mui/material";
-import { ThemeToggle } from "./theme-toggle";
+import { AppBar, Box, IconButton, Toolbar } from "@mui/material";
 import { UserMenu } from "./user-menu";
 
 interface TopBarProps {
@@ -33,10 +32,7 @@ export function TopBar(props: TopBarProps): ReactElement {
           <MenuIcon />
         </IconButton>
         <Box sx={{ flexGrow: 1 }} />
-        <Stack direction="row" spacing={1} alignItems="center">
-          <ThemeToggle />
-          <UserMenu />
-        </Stack>
+        <UserMenu />
       </Toolbar>
     </AppBar>
   );

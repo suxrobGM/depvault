@@ -1,5 +1,3 @@
-"use client";
-
 import { alpha, createTheme } from "@mui/material/styles";
 
 declare module "@mui/material/styles" {
@@ -23,49 +21,25 @@ declare module "@mui/material/styles" {
   }
 }
 
-const lightPalette = {
-  primary: { main: "#059669", light: "#10b981", dark: "#047857" },
-  secondary: { main: "#d97706", light: "#f59e0b", dark: "#b45309" },
-  error: { main: "#dc2626", light: "#f87171", dark: "#b91c1c" },
-  warning: { main: "#d97706", light: "#fbbf24", dark: "#b45309" },
-  success: { main: "#059669", light: "#34d399", dark: "#047857" },
-  info: { main: "#0891b2", light: "#22d3ee", dark: "#0e7490" },
-  background: { default: "#f0f4f8", paper: "#ffffff" },
-  divider: "rgba(0, 0, 0, 0.08)",
-  vault: {
-    surface: "#ffffff",
-    glassBg: "rgba(255, 255, 255, 0.7)",
-    glassBorder: "rgba(0, 0, 0, 0.08)",
-    glowPrimary: "rgba(5, 150, 105, 0.12)",
-    glowSecondary: "rgba(217, 119, 6, 0.12)",
-  },
-};
-
-const darkPalette = {
-  primary: { main: "#10b981", light: "#34d399", dark: "#059669" },
-  secondary: { main: "#f59e0b", light: "#fbbf24", dark: "#d97706" },
-  error: { main: "#f87171", light: "#fca5a5", dark: "#dc2626" },
-  warning: { main: "#fbbf24", light: "#fde68a", dark: "#f59e0b" },
-  success: { main: "#34d399", light: "#6ee7b7", dark: "#10b981" },
-  info: { main: "#22d3ee", light: "#67e8f9", dark: "#06b6d4" },
-  background: { default: "#0a0e17", paper: "#0f1420" },
-  text: { primary: "#f1f5f9", secondary: "#94a3b8" },
-  divider: "rgba(255, 255, 255, 0.08)",
-  vault: {
-    surface: "#161c2e",
-    glassBg: "rgba(22, 28, 46, 0.6)",
-    glassBorder: "rgba(255, 255, 255, 0.08)",
-    glowPrimary: "rgba(16, 185, 129, 0.15)",
-    glowSecondary: "rgba(245, 158, 11, 0.15)",
-  },
-};
-
 export const theme = createTheme({
-  cssVariables: { colorSchemeSelector: "class" },
-  defaultColorScheme: "dark",
-  colorSchemes: {
-    light: { palette: lightPalette },
-    dark: { palette: darkPalette },
+  palette: {
+    mode: "dark",
+    primary: { main: "#10b981", light: "#34d399", dark: "#059669" },
+    secondary: { main: "#f59e0b", light: "#fbbf24", dark: "#d97706" },
+    error: { main: "#f87171", light: "#fca5a5", dark: "#dc2626" },
+    warning: { main: "#fbbf24", light: "#fde68a", dark: "#f59e0b" },
+    success: { main: "#34d399", light: "#6ee7b7", dark: "#10b981" },
+    info: { main: "#22d3ee", light: "#67e8f9", dark: "#06b6d4" },
+    background: { default: "#0a0e17", paper: "#0f1420" },
+    text: { primary: "#f1f5f9", secondary: "#94a3b8" },
+    divider: "rgba(255, 255, 255, 0.08)",
+    vault: {
+      surface: "#161c2e",
+      glassBg: "rgba(22, 28, 46, 0.6)",
+      glassBorder: "rgba(255, 255, 255, 0.08)",
+      glowPrimary: "rgba(16, 185, 129, 0.15)",
+      glowSecondary: "rgba(245, 158, 11, 0.15)",
+    },
   },
   typography: {
     fontFamily: "var(--font-geist-sans), sans-serif",
