@@ -37,9 +37,8 @@ export function LoginForm(): ReactElement {
       <Stack spacing={2.5}>
         {serverError && <Alert severity="error">{serverError}</Alert>}
 
-        <form.Field
-          name="email"
-          children={(field) => (
+        <form.Field name="email">
+          {(field) => (
             <TextField
               label="Email"
               type="email"
@@ -53,11 +52,10 @@ export function LoginForm(): ReactElement {
               helperText={field.state.meta.errors[0]?.toString()}
             />
           )}
-        />
+        </form.Field>
 
-        <form.Field
-          name="password"
-          children={(field) => (
+        <form.Field name="password">
+          {(field) => (
             <TextField
               label="Password"
               type="password"
@@ -70,7 +68,7 @@ export function LoginForm(): ReactElement {
               helperText={field.state.meta.errors[0]?.toString()}
             />
           )}
-        />
+        </form.Field>
 
         <Button
           type="submit"

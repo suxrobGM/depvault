@@ -30,7 +30,7 @@ export function ForgotPasswordForm(): ReactElement {
     return (
       <Stack spacing={2} alignItems="center">
         <Alert severity="success" sx={{ width: "100%" }}>
-          If an account with that email exists, we've sent a password reset link.
+          If an account with that email exists, we&apos;ve sent a password reset link.
         </Alert>
         <Typography variant="body2">
           <Link href={ROUTES.login}>Back to sign in</Link>
@@ -49,9 +49,8 @@ export function ForgotPasswordForm(): ReactElement {
       <Stack spacing={2.5}>
         {serverError && <Alert severity="error">{serverError}</Alert>}
 
-        <form.Field
-          name="email"
-          children={(field) => (
+        <form.Field name="email">
+          {(field) => (
             <TextField
               label="Email"
               type="email"
@@ -65,7 +64,7 @@ export function ForgotPasswordForm(): ReactElement {
               helperText={field.state.meta.errors[0]?.toString()}
             />
           )}
-        />
+        </form.Field>
 
         <Button
           type="submit"

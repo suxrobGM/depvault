@@ -55,9 +55,8 @@ export function ResetPasswordForm(props: ResetPasswordFormProps): ReactElement {
       <Stack spacing={2.5}>
         {serverError && <Alert severity="error">{serverError}</Alert>}
 
-        <form.Field
-          name="password"
-          children={(field) => (
+        <form.Field name="password">
+          {(field) => (
             <TextField
               label="New Password"
               type="password"
@@ -71,11 +70,10 @@ export function ResetPasswordForm(props: ResetPasswordFormProps): ReactElement {
               helperText={field.state.meta.errors[0]?.toString()}
             />
           )}
-        />
+        </form.Field>
 
-        <form.Field
-          name="confirmPassword"
-          children={(field) => (
+        <form.Field name="confirmPassword">
+          {(field) => (
             <TextField
               label="Confirm New Password"
               type="password"
@@ -88,7 +86,7 @@ export function ResetPasswordForm(props: ResetPasswordFormProps): ReactElement {
               helperText={field.state.meta.errors[0]?.toString()}
             />
           )}
-        />
+        </form.Field>
 
         <Button
           type="submit"

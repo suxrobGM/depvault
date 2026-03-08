@@ -37,9 +37,8 @@ export function RegisterForm(): ReactElement {
       <Stack spacing={2.5}>
         {serverError && <Alert severity="error">{serverError}</Alert>}
 
-        <form.Field
-          name="email"
-          children={(field) => (
+        <form.Field name="email">
+          {(field) => (
             <TextField
               label="Email"
               type="email"
@@ -53,11 +52,10 @@ export function RegisterForm(): ReactElement {
               helperText={field.state.meta.errors[0]?.toString()}
             />
           )}
-        />
+        </form.Field>
 
-        <form.Field
-          name="username"
-          children={(field) => (
+        <form.Field name="username">
+          {(field) => (
             <TextField
               label="Username"
               fullWidth
@@ -69,11 +67,10 @@ export function RegisterForm(): ReactElement {
               helperText={field.state.meta.errors[0]?.toString()}
             />
           )}
-        />
+        </form.Field>
 
-        <form.Field
-          name="password"
-          children={(field) => (
+        <form.Field name="password">
+          {(field) => (
             <TextField
               label="Password"
               type="password"
@@ -86,11 +83,10 @@ export function RegisterForm(): ReactElement {
               helperText={field.state.meta.errors[0]?.toString()}
             />
           )}
-        />
+        </form.Field>
 
-        <form.Field
-          name="confirmPassword"
-          children={(field) => (
+        <form.Field name="confirmPassword">
+          {(field) => (
             <TextField
               label="Confirm Password"
               type="password"
@@ -103,7 +99,7 @@ export function RegisterForm(): ReactElement {
               helperText={field.state.meta.errors[0]?.toString()}
             />
           )}
-        />
+        </form.Field>
 
         <Button
           type="submit"
