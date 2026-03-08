@@ -1,15 +1,14 @@
-import { injectable } from "tsyringe";
-import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
+import { singleton } from "tsyringe";
+import { ForbiddenError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { decryptBinary, deriveProjectKey, encryptBinary } from "@/common/utils/encryption";
 import { PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import type { PaginatedResponse } from "@/types/response";
-import { FORBIDDEN_EXTENSIONS, MAX_FILE_SIZE, type SecretFileResponse } from "./secret-file.schema";
+import type { SecretFileResponse, UpdateSecretFileBody } from "./secret-file.schema";
+import { validateFile, validateFileName } from "./secret-file.validator";
 
-const PATH_TRAVERSAL_PATTERN = /(\.\.|[/\\])/;
-
-@injectable()
+@singleton()
 export class SecretFileService {
   constructor(
     private readonly prisma: PrismaClient,
@@ -26,7 +25,7 @@ export class SecretFileService {
   ): Promise<SecretFileResponse> {
     await this.requireEditorOrOwner(projectId, userId);
 
-    this.validateFile(file);
+    validateFile(file);
 
     const environment = await this.findOrCreateEnvironment(projectId, environmentName);
     const projectKey = deriveProjectKey(projectId);
@@ -118,13 +117,7 @@ export class SecretFileService {
   ): Promise<{ buffer: Buffer; name: string; mimeType: string }> {
     await this.requireEditorOrOwner(projectId, userId);
 
-    const file = await this.prisma.secretFile.findFirst({
-      where: { id: fileId, environment: { projectId } },
-    });
-
-    if (!file) {
-      throw new NotFoundError("Secret file not found");
-    }
+    const file = await this.findFileOrThrow(projectId, fileId);
 
     const projectKey = deriveProjectKey(projectId);
     const decrypted = decryptBinary(
@@ -149,6 +142,38 @@ export class SecretFileService {
     return { buffer: decrypted, name: file.name, mimeType: file.mimeType };
   }
 
+  async update(
+    projectId: string,
+    fileId: string,
+    userId: string,
+    data: UpdateSecretFileBody,
+  ): Promise<SecretFileResponse> {
+    await this.requireEditorOrOwner(projectId, userId);
+
+    const file = await this.findFileOrThrow(projectId, fileId);
+
+    if (data.name) {
+      validateFileName(data.name);
+    }
+
+    let environmentId = file.environmentId;
+    if (data.environment) {
+      const environment = await this.findOrCreateEnvironment(projectId, data.environment);
+      environmentId = environment.id;
+    }
+
+    const updated = await this.prisma.secretFile.update({
+      where: { id: fileId },
+      data: {
+        ...(data.name && { name: data.name }),
+        ...(data.description !== undefined && { description: data.description }),
+        ...(data.environment && { environmentId }),
+      },
+    });
+
+    return this.toResponse(updated);
+  }
+
   async delete(
     projectId: string,
     fileId: string,
@@ -157,13 +182,7 @@ export class SecretFileService {
   ): Promise<{ message: string }> {
     await this.requireEditorOrOwner(projectId, userId);
 
-    const file = await this.prisma.secretFile.findFirst({
-      where: { id: fileId, environment: { projectId } },
-    });
-
-    if (!file) {
-      throw new NotFoundError("Secret file not found");
-    }
+    const file = await this.findFileOrThrow(projectId, fileId);
 
     await this.prisma.secretFile.delete({ where: { id: fileId } });
 
@@ -182,9 +201,7 @@ export class SecretFileService {
     return { message: "Secret file deleted successfully" };
   }
 
-  async listVersions(projectId: string, fileId: string, userId: string) {
-    await this.requireMember(projectId, userId);
-
+  private async findFileOrThrow(projectId: string, fileId: string) {
     const file = await this.prisma.secretFile.findFirst({
       where: { id: fileId, environment: { projectId } },
     });
@@ -193,86 +210,7 @@ export class SecretFileService {
       throw new NotFoundError("Secret file not found");
     }
 
-    const versions = await this.prisma.secretFileVersion.findMany({
-      where: { secretFileId: fileId },
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        secretFileId: true,
-        fileSize: true,
-        changedBy: true,
-        createdAt: true,
-      },
-    });
-
-    return { items: versions };
-  }
-
-  async rollback(
-    projectId: string,
-    fileId: string,
-    versionId: string,
-    userId: string,
-  ): Promise<SecretFileResponse> {
-    await this.requireEditorOrOwner(projectId, userId);
-
-    const file = await this.prisma.secretFile.findFirst({
-      where: { id: fileId, environment: { projectId } },
-    });
-
-    if (!file) {
-      throw new NotFoundError("Secret file not found");
-    }
-
-    const version = await this.prisma.secretFileVersion.findFirst({
-      where: { id: versionId, secretFileId: fileId },
-    });
-
-    if (!version) {
-      throw new NotFoundError("Version not found");
-    }
-
-    await this.prisma.secretFileVersion.create({
-      data: {
-        secretFileId: fileId,
-        encryptedContent: file.encryptedContent,
-        iv: file.iv,
-        authTag: file.authTag,
-        fileSize: file.fileSize,
-        changedBy: userId,
-      },
-    });
-
-    const updated = await this.prisma.secretFile.update({
-      where: { id: fileId },
-      data: {
-        encryptedContent: version.encryptedContent,
-        iv: version.iv,
-        authTag: version.authTag,
-        fileSize: version.fileSize,
-      },
-    });
-
-    return this.toResponse(updated);
-  }
-
-  private validateFile(file: File) {
-    if (file.size > MAX_FILE_SIZE) {
-      throw new BadRequestError(`File size exceeds the maximum limit of 25 MB`);
-    }
-
-    const fileName = file.name;
-
-    if (PATH_TRAVERSAL_PATTERN.test(fileName)) {
-      throw new BadRequestError("Invalid filename: path traversal patterns are not allowed");
-    }
-
-    const lowerName = fileName.toLowerCase();
-    for (const ext of FORBIDDEN_EXTENSIONS) {
-      if (lowerName.endsWith(ext)) {
-        throw new BadRequestError(`Executable file type "${ext}" is not allowed`);
-      }
-    }
+    return file;
   }
 
   private async findOrCreateEnvironment(projectId: string, name: string) {

@@ -10,8 +10,6 @@ const projectId = "project-uuid";
 const userId = "user-uuid";
 const envId = "env-uuid";
 const fileId = "file-uuid";
-const versionId = "version-uuid";
-
 const fakeProjectKey = Buffer.alloc(32, 1);
 const fakeEncryptedContent = Buffer.from("encrypted-content");
 
@@ -39,17 +37,6 @@ const mockSecretFile = {
   updatedAt: now,
 };
 
-const mockVersion = {
-  id: versionId,
-  secretFileId: fileId,
-  encryptedContent: Buffer.from("old-encrypted"),
-  iv: "old-iv",
-  authTag: "old-tag",
-  fileSize: 512,
-  changedBy: userId,
-  createdAt: now,
-};
-
 function createMockPrisma() {
   return {
     projectMember: {
@@ -66,11 +53,6 @@ function createMockPrisma() {
       count: mock(() => Promise.resolve(1)),
       update: mock(() => Promise.resolve(mockSecretFile)),
       delete: mock(() => Promise.resolve(mockSecretFile)),
-    },
-    secretFileVersion: {
-      create: mock(() => Promise.resolve({})),
-      findMany: mock(() => Promise.resolve([mockVersion])),
-      findFirst: mock(() => Promise.resolve(null)),
     },
     secretFileAuditLog: {
       create: mock(() => Promise.resolve({})),
@@ -255,70 +237,83 @@ describe("SecretFileService", () => {
     });
   });
 
-  describe("listVersions", () => {
-    it("should list versions for any project member", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.VIEWER });
+  describe("update", () => {
+    it("should update file name and description", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
+      mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
+      mockPrisma.secretFile.update.mockResolvedValueOnce({
+        ...mockSecretFile,
+        name: "updated.json",
+        description: "Updated desc",
+      });
+
+      const result = await service.update(projectId, fileId, userId, {
+        name: "updated.json",
+        description: "Updated desc",
+      });
+
+      expect(result.name).toBe("updated.json");
+      expect(result.description).toBe("Updated desc");
+      expect(mockPrisma.secretFile.update).toHaveBeenCalledWith({
+        where: { id: fileId },
+        data: { name: "updated.json", description: "Updated desc" },
+      });
+    });
+
+    it("should move file to a different environment", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.EDITOR });
+      mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
+      mockPrisma.environment.findUnique.mockResolvedValueOnce({
+        ...mockEnvironment,
+        id: "new-env-id",
+        name: "staging",
+      });
+      mockPrisma.secretFile.update.mockResolvedValueOnce({
+        ...mockSecretFile,
+        environmentId: "new-env-id",
+      });
+
+      await service.update(projectId, fileId, userId, { environment: "staging" });
+
+      expect(mockPrisma.secretFile.update).toHaveBeenCalledWith({
+        where: { id: fileId },
+        data: { environmentId: "new-env-id" },
+      });
+    });
+
+    it("should reject path traversal in new name", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
 
-      const result = await service.listVersions(projectId, fileId, userId);
+      expect(
+        service.update(projectId, fileId, userId, { name: "../etc/passwd" }),
+      ).rejects.toBeInstanceOf(BadRequestError);
+    });
 
-      expect(result.items).toHaveLength(1);
-      expect(result.items[0]!.id).toBe(versionId);
+    it("should reject executable extension in new name", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
+      mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
+
+      expect(
+        service.update(projectId, fileId, userId, { name: "script.exe" }),
+      ).rejects.toBeInstanceOf(BadRequestError);
+    });
+
+    it("should throw ForbiddenError for VIEWER", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.VIEWER });
+
+      expect(
+        service.update(projectId, fileId, userId, { name: "new.json" }),
+      ).rejects.toBeInstanceOf(ForbiddenError);
     });
 
     it("should throw NotFoundError when file doesn't exist", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(null);
 
-      expect(service.listVersions(projectId, fileId, userId)).rejects.toBeInstanceOf(NotFoundError);
-    });
-  });
-
-  describe("rollback", () => {
-    it("should rollback to previous version and save current as version", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
-      mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
-      mockPrisma.secretFileVersion.findFirst.mockResolvedValueOnce(mockVersion);
-
-      await service.rollback(projectId, fileId, versionId, userId);
-
-      expect(mockPrisma.secretFileVersion.create).toHaveBeenCalledWith({
-        data: {
-          secretFileId: fileId,
-          encryptedContent: mockSecretFile.encryptedContent,
-          iv: mockSecretFile.iv,
-          authTag: mockSecretFile.authTag,
-          fileSize: mockSecretFile.fileSize,
-          changedBy: userId,
-        },
-      });
-      expect(mockPrisma.secretFile.update).toHaveBeenCalledWith({
-        where: { id: fileId },
-        data: {
-          encryptedContent: mockVersion.encryptedContent,
-          iv: mockVersion.iv,
-          authTag: mockVersion.authTag,
-          fileSize: mockVersion.fileSize,
-        },
-      });
-    });
-
-    it("should throw NotFoundError when version doesn't exist", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
-      mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
-      mockPrisma.secretFileVersion.findFirst.mockResolvedValueOnce(null);
-
-      expect(service.rollback(projectId, fileId, versionId, userId)).rejects.toBeInstanceOf(
-        NotFoundError,
-      );
-    });
-
-    it("should throw ForbiddenError for VIEWER", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.VIEWER });
-
-      expect(service.rollback(projectId, fileId, versionId, userId)).rejects.toBeInstanceOf(
-        ForbiddenError,
-      );
+      expect(
+        service.update(projectId, fileId, userId, { name: "new.json" }),
+      ).rejects.toBeInstanceOf(NotFoundError);
     });
   });
 });

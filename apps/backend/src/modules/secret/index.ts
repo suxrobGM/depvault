@@ -1,3 +1,2 @@
-export { secretController } from "./secret.controller";
-export { secretFileController } from "./secret-file.controller";
-export { SecretFileService } from "./secret-file.service";
+export * from "./secret.controller";
+export * from "./secret-file.controller";

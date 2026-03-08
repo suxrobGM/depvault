@@ -62,6 +62,13 @@ export const SecretFileRollbackParamsSchema = t.Object({
   versionId: t.String(),
 });
 
+export const UpdateSecretFileBodySchema = t.Object({
+  name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
+  description: t.Optional(t.String({ maxLength: 500 })),
+  environment: t.Optional(t.String({ minLength: 1 })),
+});
+
 export type SecretFileResponse = Static<typeof SecretFileResponseSchema>;
 export type SecretFileListQuery = Static<typeof SecretFileListQuerySchema>;
 export type SecretFileVersionResponse = Static<typeof SecretFileVersionResponseSchema>;
+export type UpdateSecretFileBody = Static<typeof UpdateSecretFileBodySchema>;

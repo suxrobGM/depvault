@@ -1,9 +1,11 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
 import { authGuard } from "@/common/middleware";
+import { rateLimiter } from "@/common/middleware/rate-limiter";
 import { getClientIp } from "@/common/utils/ip";
 import { StringIdParamSchema } from "@/types/request";
 import { MessageResponseSchema } from "@/types/response";
+import { SecretFileVersionService } from "./secret-file-version.service";
 import {
   SecretFileListQuerySchema,
   SecretFileListResponseSchema,
@@ -11,40 +13,47 @@ import {
   SecretFileResponseSchema,
   SecretFileRollbackParamsSchema,
   SecretFileVersionListResponseSchema,
+  UpdateSecretFileBodySchema,
   UploadSecretFileBodySchema,
 } from "./secret-file.schema";
 import { SecretFileService } from "./secret-file.service";
 
 const secretFileService = container.resolve(SecretFileService);
+const secretFileVersionService = container.resolve(SecretFileVersionService);
 
 export const secretFileController = new Elysia({
-  prefix: "/projects/:id/secret-files",
+  prefix: "/projects/:id/secrets",
   detail: { tags: ["Secret Files"] },
 })
   .use(authGuard)
-  .post(
-    "/",
-    async ({ params, body, user, request, server }) => {
-      return secretFileService.upload(
-        params.id,
-        user.id,
-        body.file,
-        body.environment,
-        body.description,
-        getClientIp(request, server),
-      );
-    },
-    {
-      params: StringIdParamSchema,
-      body: UploadSecretFileBodySchema,
-      response: SecretFileResponseSchema,
-      detail: {
-        summary: "Upload a secret file",
-        description:
-          "Upload and encrypt a secret file for the project. Executable file types (.exe, .sh, .bat, .cmd, .ps1) are rejected. Max file size is 25 MB. Only owners and editors can upload.",
-        security: [{ bearerAuth: [] }],
-      },
-    },
+  .use(
+    new Elysia()
+      .use(authGuard)
+      .use(rateLimiter({ max: 20, windowMs: 60 * 1000 }))
+      .post(
+        "/",
+        async ({ params, body, user, request, server }) => {
+          return secretFileService.upload(
+            params.id,
+            user.id,
+            body.file,
+            body.environment,
+            body.description,
+            getClientIp(request, server),
+          );
+        },
+        {
+          params: StringIdParamSchema,
+          body: UploadSecretFileBodySchema,
+          response: SecretFileResponseSchema,
+          detail: {
+            summary: "Upload a secret file",
+            description:
+              "Upload and encrypt a secret file for the project. Executable file types (.exe, .sh, .bat, .cmd, .ps1) are rejected. Max file size is 25 MB. Only owners and editors can upload.",
+            security: [{ bearerAuth: [] }],
+          },
+        },
+      ),
   )
   .get(
     "/",
@@ -85,6 +94,21 @@ export const secretFileController = new Elysia({
       },
     },
   )
+  .put(
+    "/:fileId",
+    ({ params, body, user }) => secretFileService.update(params.id, params.fileId, user.id, body),
+    {
+      params: SecretFileParamsSchema,
+      body: UpdateSecretFileBodySchema,
+      response: SecretFileResponseSchema,
+      detail: {
+        summary: "Update secret file metadata",
+        description:
+          "Update the name, description, or environment of a secret file. Only owners and editors can update.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
   .delete(
     "/:fileId",
     ({ params, user, request, server }) =>
@@ -102,7 +126,7 @@ export const secretFileController = new Elysia({
   )
   .get(
     "/:fileId/versions",
-    ({ params, user }) => secretFileService.listVersions(params.id, params.fileId, user.id),
+    ({ params, user }) => secretFileVersionService.listVersions(params.id, params.fileId, user.id),
     {
       params: SecretFileParamsSchema,
       response: SecretFileVersionListResponseSchema,
@@ -117,7 +141,7 @@ export const secretFileController = new Elysia({
   .post(
     "/:fileId/rollback/:versionId",
     ({ params, user }) =>
-      secretFileService.rollback(params.id, params.fileId, params.versionId, user.id),
+      secretFileVersionService.rollback(params.id, params.fileId, params.versionId, user.id),
     {
       params: SecretFileRollbackParamsSchema,
       response: SecretFileResponseSchema,
