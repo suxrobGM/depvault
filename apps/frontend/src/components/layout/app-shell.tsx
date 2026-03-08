@@ -13,6 +13,7 @@ export function AppShell(props: PropsWithChildren): ReactElement {
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", position: "relative" }}>
+      <Box className="vault-gradient-mesh-subtle" />
       <Box className="vault-dot-grid" />
       <TopBar onMenuClick={() => setMobileOpen(true)} sidebarOpen={sidebarOpen} />
       <Sidebar

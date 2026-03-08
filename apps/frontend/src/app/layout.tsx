@@ -39,7 +39,10 @@ export default function RootLayout(props: PropsWithChildren): ReactElement {
         className={`${geistSans.variable} ${geistMono.variable} ${jetbrainsMono.variable} ${syne.variable}`}
       >
         <AppRouterCacheProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            <div className="vault-noise" />
+            {children}
+          </ThemeProvider>
         </AppRouterCacheProvider>
       </body>
     </html>

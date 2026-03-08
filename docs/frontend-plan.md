@@ -382,3 +382,5 @@ Phase 0 (deps)
 - Phase 0: Dependencies
 - Phase 1: Foundation Infrastructure
 - Phase 2: Auth Pages
+- Phase 10: Landing Page & Public Routes
+- Phase 11: Error Handling & Polish
