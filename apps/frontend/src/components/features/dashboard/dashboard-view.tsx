@@ -19,21 +19,21 @@ const quickActions = [
   {
     icon: <AddIcon />,
     title: "Create Project",
-    description: "Start a new project to track dependencies and secrets",
+    description: "Set up a project to organize dependencies, secrets, and secure files",
     color: "#10b981",
     href: ROUTES.dashboard,
   },
   {
     icon: <SearchIcon />,
     title: "Analyze Dependencies",
-    description: "Upload a dependency file to scan for vulnerabilities",
+    description: "Upload a dependency file to scan for vulnerabilities and license issues",
     color: "#f59e0b",
     href: ROUTES.converter,
   },
   {
     icon: <VpnKeyIcon />,
-    title: "Manage Secrets",
-    description: "Store and share environment variables securely",
+    title: "Manage Vault",
+    description: "Store environment variables and secret files with AES-256-GCM encryption",
     color: "#06b6d4",
     href: ROUTES.secrets,
   },
@@ -109,7 +109,7 @@ export function DashboardView(): ReactElement {
           <EmptyState
             icon={<FolderOpenIcon />}
             title="No projects yet"
-            description="Create your first project to start analyzing dependencies and managing secrets."
+            description="Create your first project to analyze dependencies, manage secrets, and store encrypted files."
             actionLabel="Create Project"
             actionHref={ROUTES.dashboard}
           />

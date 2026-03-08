@@ -3,7 +3,6 @@
 import type { ReactElement } from "react";
 import {
   ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon,
   Dashboard as DashboardIcon,
   Person as PersonIcon,
   Shield as ShieldIcon,
@@ -56,21 +55,26 @@ export function Sidebar(props: SidebarProps): ReactElement {
           alignItems: "center",
           justifyContent: open ? "space-between" : "center",
           px: open ? 2 : 0,
+          minHeight: open ? undefined : 56,
         }}
       >
         {open ? (
-          <Stack direction="row" alignItems="center" spacing={1}>
-            <ShieldIcon sx={{ color: "primary.main", fontSize: 24 }} />
-            <GradientText variant="h6" component="span">
-              DepVault
-            </GradientText>
-          </Stack>
+          <>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <ShieldIcon sx={{ color: "primary.main", fontSize: 24 }} />
+              <GradientText variant="h6" component="span">
+                DepVault
+              </GradientText>
+            </Stack>
+            <IconButton onClick={onToggle} sx={{ display: { xs: "none", md: "flex" } }}>
+              <ChevronLeftIcon />
+            </IconButton>
+          </>
         ) : (
-          <ShieldIcon sx={{ color: "primary.main", fontSize: 24 }} />
+          <IconButton onClick={onToggle} sx={{ display: { xs: "none", md: "flex" } }}>
+            <ShieldIcon sx={{ color: "primary.main", fontSize: 24 }} />
+          </IconButton>
         )}
-        <IconButton onClick={onToggle} sx={{ display: { xs: "none", md: "flex" } }}>
-          {open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-        </IconButton>
       </Toolbar>
       <Divider />
       <List sx={{ px: open ? 1 : 0.5, flex: 1 }}>

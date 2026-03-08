@@ -26,13 +26,16 @@ export function TypingEffect(props: TypingEffectProps): ReactElement {
       return () => clearTimeout(pause);
     }
 
-    if (displayed.length > 0) {
-      const timeout = setTimeout(() => setDisplayed(displayed.slice(0, -1)), 30);
-      return () => clearTimeout(timeout);
-    }
+    const next = displayed.slice(0, -1);
 
-    setIndex((i) => (i + 1) % words.length);
-    setTyping(true);
+    const timeout = setTimeout(() => {
+      setDisplayed(next);
+      if (next.length === 0) {
+        setIndex((i) => (i + 1) % words.length);
+        setTyping(true);
+      }
+    }, 30);
+    return () => clearTimeout(timeout);
   }, [displayed, typing, index, words, interval]);
 
   return (

@@ -29,9 +29,7 @@ export function UserMenu(): ReactElement {
   return (
     <>
       <IconButton onClick={handleOpen} size="small">
-        <Avatar sx={{ width: 32, height: 32, fontSize: 14, bgcolor: "primary.dark" }}>
-          {initials}
-        </Avatar>
+        <Avatar sx={{ width: 32, height: 32, fontSize: 14 }}>{initials}</Avatar>
       </IconButton>
       <Menu
         anchorEl={anchorEl}

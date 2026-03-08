@@ -1,30 +1,21 @@
 "use client";
 
 import { useSnackbar } from "notistack";
-import { useCallback, useMemo } from "react";
 
-export function useNotification() {
+interface UseNotificationReturn {
+  success: (message: string) => void;
+  error: (message: string) => void;
+  warning: (message: string) => void;
+  info: (message: string) => void;
+}
+
+export function useNotification(): UseNotificationReturn {
   const { enqueueSnackbar } = useSnackbar();
 
-  const success = useCallback(
-    (message: string) => enqueueSnackbar(message, { variant: "success" }),
-    [enqueueSnackbar],
-  );
+  const success = (message: string) => enqueueSnackbar(message, { variant: "success" });
+  const error = (message: string) => enqueueSnackbar(message, { variant: "error" });
+  const warning = (message: string) => enqueueSnackbar(message, { variant: "warning" });
+  const info = (message: string) => enqueueSnackbar(message, { variant: "info" });
 
-  const error = useCallback(
-    (message: string) => enqueueSnackbar(message, { variant: "error" }),
-    [enqueueSnackbar],
-  );
-
-  const warning = useCallback(
-    (message: string) => enqueueSnackbar(message, { variant: "warning" }),
-    [enqueueSnackbar],
-  );
-
-  const info = useCallback(
-    (message: string) => enqueueSnackbar(message, { variant: "info" }),
-    [enqueueSnackbar],
-  );
-
-  return useMemo(() => ({ success, error, warning, info }), [success, error, warning, info]);
+  return { success, error, warning, info };
 }

@@ -19,12 +19,12 @@ const ECOSYSTEM_FILES = [
 ];
 
 const TERMINAL_LINES = [
-  { prefix: "$", text: "depvault scan ./project", color: "text.primary" },
+  { prefix: "→", text: "Connected github.com/acme/api-service", color: "text.primary" },
   { prefix: "→", text: "Detected package.json (Node.js)", color: "text.secondary" },
   { prefix: "→", text: "Analyzing 142 dependencies...", color: "text.secondary" },
   { prefix: "✓", text: "3 critical vulnerabilities found", color: "error.main" },
   { prefix: "✓", text: "12 outdated packages flagged", color: "warning.main" },
-  { prefix: "✓", text: "Vault synced — 8 secrets encrypted", color: "primary.main" },
+  { prefix: "✓", text: "Vault synced — 8 secrets + 3 files encrypted", color: "primary.main" },
 ];
 
 export function HeroSection(): ReactElement {
@@ -72,7 +72,7 @@ export function HeroSection(): ReactElement {
             sx={{ fontSize: { xs: "1rem", md: "1.25rem" } }}
           >
             Scan <TypingEffect words={ECOSYSTEM_FILES} interval={2000} /> and 8+ ecosystems — detect
-            vulnerabilities, vault secrets, and ship with confidence.
+            vulnerabilities, store encrypted secrets and files, and ship with confidence.
           </Typography>
 
           <Stack
@@ -135,7 +135,7 @@ export function HeroSection(): ReactElement {
               color="text.secondary"
               sx={{ ml: 1.5, fontFamily: "var(--font-jetbrains), monospace", fontSize: "0.7rem" }}
             >
-              terminal
+              depvault — analysis
             </Typography>
           </Box>
 

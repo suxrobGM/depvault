@@ -1,9 +1,70 @@
-import type { ReactElement } from "react";
-import { Box, Stack, Typography } from "@mui/material";
+import type { ReactElement, ReactNode } from "react";
+import {
+  Rocket as CiCdIcon,
+  SwapHoriz as ConverterIcon,
+  GitHub as GitIcon,
+  Description as LicenseIcon,
+  Autorenew as RotationIcon,
+  ContentCopy as TemplateIcon,
+} from "@mui/icons-material";
+import { Box, CardContent, Grid, Stack, Typography } from "@mui/material";
+import { GlassCard } from "@/components/ui/glass-card";
 import { SectionContainer } from "@/components/ui/section-container";
 import { FeatureAnalysis } from "./feature-analysis";
 import { FeatureSharing } from "./feature-sharing";
 import { FeatureVault } from "./feature-vault";
+
+interface MoreFeature {
+  icon: ReactNode;
+  title: string;
+  description: string;
+  color: string;
+}
+
+const moreFeatures: MoreFeature[] = [
+  {
+    icon: <LicenseIcon />,
+    title: "License Compliance",
+    description:
+      "Detect license types per dependency, configure allow/warn/block policies, and export audit reports.",
+    color: "#10b981",
+  },
+  {
+    icon: <GitIcon />,
+    title: "Git Secret Detection",
+    description:
+      "Scan connected repos for accidentally committed secrets with built-in and custom regex patterns.",
+    color: "#f87171",
+  },
+  {
+    icon: <CiCdIcon />,
+    title: "CI/CD Secret Injection",
+    description:
+      "Generate scoped, short-lived tokens for pipelines to pull secrets at build time — no .env files in CI.",
+    color: "#22d3ee",
+  },
+  {
+    icon: <RotationIcon />,
+    title: "Secret Rotation & Alerts",
+    description:
+      "Set rotation policies per variable, track age with visual indicators, and receive email reminders.",
+    color: "#f59e0b",
+  },
+  {
+    icon: <ConverterIcon />,
+    title: "Format Converter",
+    description:
+      "Convert between .env, appsettings.json, YAML, TOML, and more with preview before download.",
+    color: "#a78bfa",
+  },
+  {
+    icon: <TemplateIcon />,
+    title: "Environment Templates",
+    description:
+      "Clone an environment's variable structure to bootstrap new stages. Diff templates against live environments.",
+    color: "#fb923c",
+  },
+];
 
 export function LandingFeatureCards(): ReactElement {
   return (
@@ -19,7 +80,7 @@ export function LandingFeatureCards(): ReactElement {
           className="vault-fade-up vault-delay-1"
           sx={{ mb: 8, maxWidth: 520, mx: "auto" }}
         >
-          Three powerful tools, one unified platform
+          Dependency analysis, encrypted vaults, secret sharing, and more — one unified platform
         </Typography>
         <Stack spacing={8}>
           <Box className="vault-fade-up vault-delay-2">
@@ -32,6 +93,49 @@ export function LandingFeatureCards(): ReactElement {
             <FeatureSharing />
           </Box>
         </Stack>
+
+        <Typography variant="h3" textAlign="center" sx={{ mt: { xs: 10, md: 14 }, mb: 1 }}>
+          And that&apos;s not all
+        </Typography>
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          textAlign="center"
+          sx={{ mb: 6, maxWidth: 480, mx: "auto" }}
+        >
+          Built-in tools for every stage of your security workflow
+        </Typography>
+        <Grid container spacing={3}>
+          {moreFeatures.map((feature) => (
+            <Grid key={feature.title} size={{ xs: 12, sm: 6, md: 4 }}>
+              <GlassCard glowColor={feature.color} sx={{ height: "100%" }}>
+                <CardContent sx={{ p: 3 }}>
+                  <Box
+                    sx={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 2,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      bgcolor: `${feature.color}1a`,
+                      color: feature.color,
+                      mb: 2,
+                    }}
+                  >
+                    {feature.icon}
+                  </Box>
+                  <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 0.5 }}>
+                    {feature.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                    {feature.description}
+                  </Typography>
+                </CardContent>
+              </GlassCard>
+            </Grid>
+          ))}
+        </Grid>
       </SectionContainer>
     </Box>
   );

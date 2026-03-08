@@ -1,4 +1,4 @@
-import type { PropsWithChildren, ReactElement } from "react";
+import { Suspense, type PropsWithChildren, type ReactElement } from "react";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/app-shell";
 import { getServerClient } from "@/lib/api-server";
@@ -12,9 +12,8 @@ async function getUser() {
   return data;
 }
 
-export default async function DashboardLayout({
-  children,
-}: PropsWithChildren): Promise<ReactElement> {
+async function AuthenticatedShell(props: PropsWithChildren): Promise<ReactElement> {
+  const { children } = props;
   const user = await getUser();
 
   if (!user) {
@@ -22,11 +21,20 @@ export default async function DashboardLayout({
   }
 
   return (
+    <AuthProvider initialUser={user}>
+      <AppShell>{children}</AppShell>
+    </AuthProvider>
+  );
+}
+
+export default function DashboardLayout(props: PropsWithChildren): ReactElement {
+  const { children } = props;
+  return (
     <QueryProvider>
       <NotificationProvider>
-        <AuthProvider initialUser={user}>
-          <AppShell>{children}</AppShell>
-        </AuthProvider>
+        <Suspense>
+          <AuthenticatedShell>{children}</AuthenticatedShell>
+        </Suspense>
       </NotificationProvider>
     </QueryProvider>
   );

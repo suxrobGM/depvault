@@ -82,9 +82,14 @@ export const theme = createTheme({
       styleOverrides: {
         root: { textTransform: "none", fontWeight: 600, borderRadius: 10 },
         contained: ({ theme: t }) => ({
+          backgroundColor: alpha(t.palette.primary.main, 0.15),
+          color: t.palette.primary.main,
+          border: `1px solid ${alpha(t.palette.primary.main, 0.25)}`,
+          backdropFilter: "blur(8px)",
           boxShadow: "none",
           "&:hover": {
-            boxShadow: `0 0 20px ${alpha(t.palette.primary.main, 0.25)}`,
+            backgroundColor: alpha(t.palette.primary.main, 0.25),
+            boxShadow: `0 0 20px ${alpha(t.palette.primary.main, 0.2)}`,
           },
         }),
         outlined: ({ theme: t }) => ({
@@ -149,6 +154,13 @@ export const theme = createTheme({
           },
           "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
             borderColor: t.palette.primary.main,
+          },
+        }),
+        input: ({ theme: t }) => ({
+          "&:-webkit-autofill, &:-webkit-autofill:hover, &:-webkit-autofill:focus": {
+            WebkitBoxShadow: `0 0 0 100px ${t.palette.background.paper} inset`,
+            WebkitTextFillColor: t.palette.text.primary,
+            caretColor: t.palette.text.primary,
           },
         }),
       },
@@ -217,7 +229,12 @@ export const theme = createTheme({
     },
     MuiAvatar: {
       styleOverrides: {
-        root: { fontWeight: 600 },
+        root: ({ theme: t }) => ({
+          fontWeight: 600,
+          backgroundColor: alpha(t.palette.primary.main, 0.12),
+          color: t.palette.primary.main,
+          border: `1px solid ${alpha(t.palette.primary.main, 0.2)}`,
+        }),
       },
     },
     MuiAlert: {

@@ -35,7 +35,7 @@ const steps = [
 
 export function HowItWorksSection(): ReactElement {
   return (
-    <Box component="section" id="how-it-works" sx={{ position: "relative" }}>
+    <Box component="section" id="how-it-works" sx={{ position: "relative", height: "100%" }}>
       <SectionContainer>
         <Typography variant="h2" textAlign="center" sx={{ mb: 1 }}>
           How it works
@@ -51,7 +51,7 @@ export function HowItWorksSection(): ReactElement {
         <Grid container spacing={4}>
           {steps.map((step, i) => (
             <Grid key={step.number} size={{ xs: 12, md: 4 }}>
-              <Stack alignItems="center" sx={{ position: "relative" }}>
+              <Stack alignItems="center" sx={{ position: "relative", height: "100%" }}>
                 {i < steps.length - 1 && (
                   <Box
                     sx={{
@@ -69,6 +69,7 @@ export function HowItWorksSection(): ReactElement {
                   hoverGlow={false}
                   sx={{
                     width: "100%",
+                    height: "100%",
                     textAlign: "center",
                     p: 3,
                   }}

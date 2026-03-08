@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, type ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import {
   CheckCircle as CheckIcon,
+  Download as DownloadIcon,
   CreateNewFolder as ProjectIcon,
   Share as ShareIcon,
   RadioButtonUnchecked as UncheckedIcon,
@@ -26,25 +27,32 @@ const steps: OnboardingStep[] = [
     id: "create-project",
     icon: <ProjectIcon sx={{ fontSize: 20 }} />,
     title: "Create your first project",
-    description: "Set up a project to organize your dependencies and secrets",
+    description: "Set up a project to organize dependencies, secrets, and secure files",
   },
   {
     id: "upload-deps",
     icon: <UploadIcon sx={{ fontSize: 20 }} />,
     title: "Upload a dependency file",
-    description: "Scan package.json, requirements.txt, or any dependency file",
+    description: "Scan package.json, requirements.txt, or any supported dependency file",
   },
   {
     id: "setup-vault",
     icon: <VaultIcon sx={{ fontSize: 20 }} />,
     title: "Set up your environment vault",
-    description: "Store your first set of encrypted environment variables",
+    description:
+      "Store encrypted environment variables and secret files (certs, keys, credentials)",
+  },
+  {
+    id: "download-env",
+    icon: <DownloadIcon sx={{ fontSize: 20 }} />,
+    title: "Download .env.example",
+    description: "Generate a template with placeholders for required variables",
   },
   {
     id: "share-secret",
     icon: <ShareIcon sx={{ fontSize: 20 }} />,
     title: "Share a secret",
-    description: "Generate a one-time link to securely share credentials",
+    description: "Generate a one-time encrypted link to securely share credentials",
   },
 ];
 
@@ -54,17 +62,16 @@ function getStorageKey(userId: string): string {
 
 export function DashboardOnboarding(): ReactElement {
   const { user } = useAuth();
-  const [completed, setCompleted] = useState<Set<string>>(new Set());
-
-  useEffect(() => {
-    if (!user?.id) return;
+  const [completed, setCompleted] = useState<Set<string>>(() => {
+    if (!user?.id) return new Set();
     try {
       const stored = localStorage.getItem(getStorageKey(user.id));
-      if (stored) setCompleted(new Set(JSON.parse(stored)));
+      if (stored) return new Set(JSON.parse(stored));
     } catch {
       /* ignore parse errors */
     }
-  }, [user?.id]);
+    return new Set();
+  });
 
   const toggle = (id: string) => {
     if (!user?.id) {

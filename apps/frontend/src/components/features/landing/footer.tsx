@@ -11,13 +11,15 @@ import { ROUTES } from "@/lib/constants";
 const footerLinks = {
   Product: [
     { label: "Dashboard", href: ROUTES.dashboard },
-    { label: "Converter", href: ROUTES.converter },
-    { label: "Pricing", href: "#" },
+    { label: "Dependency Analysis", href: "#features" },
+    { label: "Environment Vault", href: "#features" },
+    { label: "Format Converter", href: ROUTES.converter },
   ],
   Security: [
-    { label: "AES-256 Encryption", href: "#features" },
-    { label: "One-Time Links", href: "#features" },
-    { label: "Zero-Knowledge", href: "#features" },
+    { label: "AES-256-GCM Encryption", href: "#features" },
+    { label: "Secret File Storage", href: "#features" },
+    { label: "One-Time Sharing", href: "#features" },
+    { label: "Git Secret Detection", href: "#features" },
   ],
   Account: [
     { label: "Sign In", href: ROUTES.login },
@@ -45,7 +47,7 @@ export function LandingFooter(): ReactElement {
               sx={{ maxWidth: 280, lineHeight: 1.7 }}
             >
               Analyze dependencies, detect vulnerabilities, and securely store environment variables
-              across any tech stack.
+              and secret files across any tech stack.
             </Typography>
           </Grid>
           {Object.entries(footerLinks).map(([category, links]) => (

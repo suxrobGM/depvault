@@ -3,6 +3,7 @@
 import type { ReactElement, ReactNode } from "react";
 import {
   BugReport as BugIcon,
+  InsertDriveFile as FileIcon,
   Folder as FolderIcon,
   Inventory as InventoryIcon,
   VpnKey as SecretIcon,
@@ -21,14 +22,15 @@ const stats: StatCard[] = [
   { icon: <FolderIcon />, label: "Projects", value: 0, color: "#10b981" },
   { icon: <InventoryIcon />, label: "Dependencies", value: 0, color: "#22d3ee" },
   { icon: <BugIcon />, label: "Vulnerabilities", value: 0, color: "#f87171" },
-  { icon: <SecretIcon />, label: "Secrets", value: 0, color: "#f59e0b" },
+  { icon: <SecretIcon />, label: "Env Variables", value: 0, color: "#f59e0b" },
+  { icon: <FileIcon />, label: "Secret Files", value: 0, color: "#a78bfa" },
 ];
 
 export function DashboardStats(): ReactElement {
   return (
     <Grid container spacing={2} sx={{ mb: 3 }}>
       {stats.map((stat, i) => (
-        <Grid key={stat.label} size={{ xs: 6, md: 3 }}>
+        <Grid key={stat.label} size={{ xs: 6, sm: 4, md: "grow" }}>
           <GlassCard glowColor={stat.color} sx={{ height: "100%" }}>
             <CardContent
               className={`vault-fade-up vault-delay-${i + 1}`}
