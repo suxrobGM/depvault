@@ -77,4 +77,5 @@ const form = useForm({
 
 ## React 19
 
-Use `use()` hook for async data in client components instead of `useEffect` + `useState` pattern. This avoids React compiler `set-state-in-effect` warnings.
+- Use `use()` hook for async data in client components instead of `useEffect` + `useState` pattern. This avoids React compiler `set-state-in-effect` warnings.
+- **Never** use `useCallback`, `useMemo`, or `memo` — the React 19 compiler handles memoization automatically.

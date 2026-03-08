@@ -24,7 +24,7 @@ declare module "@mui/material/styles" {
 export const theme = createTheme({
   palette: {
     mode: "dark",
-    primary: { main: "#10b981", light: "#34d399", dark: "#059669" },
+    primary: { main: "#10b981", light: "#34d399", dark: "#059669", contrastText: "#fff" },
     secondary: { main: "#f59e0b", light: "#fbbf24", dark: "#d97706" },
     error: { main: "#f87171", light: "#fca5a5", dark: "#dc2626" },
     warning: { main: "#fbbf24", light: "#fde68a", dark: "#f59e0b" },
@@ -43,8 +43,18 @@ export const theme = createTheme({
   },
   typography: {
     fontFamily: "var(--font-geist-sans), sans-serif",
-    h1: { fontSize: "2.25rem", fontWeight: 700, letterSpacing: "-0.02em" },
-    h2: { fontSize: "1.875rem", fontWeight: 700, letterSpacing: "-0.02em" },
+    h1: {
+      fontFamily: "var(--font-display), var(--font-geist-sans), sans-serif",
+      fontSize: "2.25rem",
+      fontWeight: 700,
+      letterSpacing: "-0.02em",
+    },
+    h2: {
+      fontFamily: "var(--font-display), var(--font-geist-sans), sans-serif",
+      fontSize: "1.875rem",
+      fontWeight: 700,
+      letterSpacing: "-0.02em",
+    },
     h3: { fontSize: "1.5rem", fontWeight: 600, letterSpacing: "-0.01em" },
     h4: { fontSize: "1.25rem", fontWeight: 600 },
     h5: { fontSize: "1.125rem", fontWeight: 600 },

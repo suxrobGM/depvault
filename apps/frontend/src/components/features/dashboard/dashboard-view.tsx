@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 import {
   Add as AddIcon,
+  ChevronRight as ChevronIcon,
   FolderOpen as FolderOpenIcon,
   Search as SearchIcon,
   VpnKey as VpnKeyIcon,
@@ -11,6 +12,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { GlassCard } from "@/components/ui/glass-card";
 import { ROUTES } from "@/lib/constants";
 import { DashboardGreeting } from "./dashboard-greeting";
+import { DashboardOnboarding } from "./dashboard-onboarding";
+import { DashboardStats } from "./dashboard-stats";
 
 const quickActions = [
   {
@@ -25,14 +28,14 @@ const quickActions = [
     title: "Analyze Dependencies",
     description: "Upload a dependency file to scan for vulnerabilities",
     color: "#f59e0b",
-    href: ROUTES.dashboard,
+    href: ROUTES.converter,
   },
   {
     icon: <VpnKeyIcon />,
     title: "Manage Secrets",
     description: "Store and share environment variables securely",
     color: "#06b6d4",
-    href: ROUTES.dashboard,
+    href: ROUTES.secrets,
   },
 ];
 
@@ -40,8 +43,9 @@ export function DashboardView(): ReactElement {
   return (
     <Box>
       <DashboardGreeting />
+      <DashboardStats />
 
-      <Typography variant="h6" sx={{ mb: 2 }} className="vault-fade-up vault-delay-1">
+      <Typography variant="h6" sx={{ mb: 2 }} className="vault-fade-up vault-delay-5">
         Quick Actions
       </Typography>
       <Grid container spacing={2} sx={{ mb: 4 }}>
@@ -51,24 +55,34 @@ export function DashboardView(): ReactElement {
               href={action.href}
               style={{ textDecoration: "none", display: "block", height: "100%" }}
             >
-              <GlassCard glowColor={action.color} sx={{ height: "100%", cursor: "pointer" }}>
-                <CardContent className={`vault-fade-up vault-delay-${index + 1}`} sx={{ p: 3 }}>
-                  <Box
-                    sx={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 2,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      bgcolor: `${action.color}1a`,
-                      color: action.color,
-                      mb: 2,
-                    }}
-                  >
-                    {action.icon}
-                  </Box>
-                  <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+              <GlassCard
+                glowColor={action.color}
+                sx={{
+                  height: "100%",
+                  cursor: "pointer",
+                  transition: "transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease",
+                  "&:hover": { transform: "translateY(-2px)" },
+                }}
+              >
+                <CardContent className={`vault-fade-up vault-delay-${index + 5}`} sx={{ p: 3 }}>
+                  <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    <Box
+                      sx={{
+                        width: 56,
+                        height: 56,
+                        borderRadius: 2,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        bgcolor: `${action.color}1a`,
+                        color: action.color,
+                      }}
+                    >
+                      {action.icon}
+                    </Box>
+                    <ChevronIcon sx={{ color: "text.secondary", fontSize: 20 }} />
+                  </Stack>
+                  <Typography variant="subtitle1" fontWeight={600} sx={{ mt: 2 }} gutterBottom>
                     {action.title}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
@@ -81,22 +95,31 @@ export function DashboardView(): ReactElement {
         ))}
       </Grid>
 
-      <Stack
-        className="vault-fade-up vault-delay-4"
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={{ mb: 2 }}
-      >
-        <Typography variant="h6">Recent Projects</Typography>
-      </Stack>
-      <EmptyState
-        icon={<FolderOpenIcon />}
-        title="No projects yet"
-        description="Create your first project to start analyzing dependencies and managing secrets."
-        actionLabel="Create Project"
-        actionHref={ROUTES.dashboard}
-      />
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, md: 7 }}>
+          <Stack
+            className="vault-fade-up vault-delay-8"
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            sx={{ mb: 2 }}
+          >
+            <Typography variant="h6">Recent Projects</Typography>
+          </Stack>
+          <EmptyState
+            icon={<FolderOpenIcon />}
+            title="No projects yet"
+            description="Create your first project to start analyzing dependencies and managing secrets."
+            actionLabel="Create Project"
+            actionHref={ROUTES.dashboard}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, md: 5 }}>
+          <Box className="vault-fade-up vault-delay-8">
+            <DashboardOnboarding />
+          </Box>
+        </Grid>
+      </Grid>
     </Box>
   );
 }

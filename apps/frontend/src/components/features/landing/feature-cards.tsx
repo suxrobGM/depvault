@@ -1,61 +1,37 @@
 import type { ReactElement } from "react";
-import {
-  Lock as LockIcon,
-  Security as SecurityIcon,
-  Share as ShareIcon,
-} from "@mui/icons-material";
-import { Box, Grid, Typography } from "@mui/material";
-import { FeatureCard } from "@/components/ui/feature-card";
+import { Box, Stack, Typography } from "@mui/material";
 import { SectionContainer } from "@/components/ui/section-container";
-
-const features = [
-  {
-    icon: <SecurityIcon />,
-    title: "Dependency Analysis",
-    description:
-      "Upload any dependency file — package.json, requirements.txt, Cargo.toml, and more. Instantly detect outdated packages, known vulnerabilities, and license issues across your entire stack.",
-    accentColor: "#10b981",
-    delay: "vault-delay-1",
-  },
-  {
-    icon: <LockIcon />,
-    title: "Environment Vault",
-    description:
-      "Store environment variables with AES-256-GCM encryption. Compare environments side-by-side, detect missing variables, and keep your team in sync with onboarding checklists.",
-    accentColor: "#f59e0b",
-    delay: "vault-delay-2",
-  },
-  {
-    icon: <ShareIcon />,
-    title: "Secret Sharing",
-    description:
-      "Generate one-time encrypted links for sharing secrets. Set expiration times, add optional passwords, and ensure zero-knowledge delivery to your team.",
-    accentColor: "#06b6d4",
-    delay: "vault-delay-3",
-  },
-];
+import { FeatureAnalysis } from "./feature-analysis";
+import { FeatureSharing } from "./feature-sharing";
+import { FeatureVault } from "./feature-vault";
 
 export function LandingFeatureCards(): ReactElement {
   return (
-    <Box id="features" sx={{ position: "relative" }}>
-      <SectionContainer>
-        <Typography variant="h3" textAlign="center" className="vault-fade-up" sx={{ mb: 6 }}>
+    <Box component="section" id="features" sx={{ position: "relative" }}>
+      <SectionContainer sx={{ pt: { xs: 10, md: 16 } }}>
+        <Typography variant="h2" textAlign="center" className="vault-fade-up" sx={{ mb: 1 }}>
           Everything you need to ship securely
         </Typography>
-        <Grid container spacing={3}>
-          {features.map((feature) => (
-            <Grid key={feature.title} size={{ xs: 12, md: 4 }}>
-              <Box className={`vault-fade-up ${feature.delay}`}>
-                <FeatureCard
-                  icon={feature.icon}
-                  title={feature.title}
-                  description={feature.description}
-                  accentColor={feature.accentColor}
-                />
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          textAlign="center"
+          className="vault-fade-up vault-delay-1"
+          sx={{ mb: 8, maxWidth: 520, mx: "auto" }}
+        >
+          Three powerful tools, one unified platform
+        </Typography>
+        <Stack spacing={8}>
+          <Box className="vault-fade-up vault-delay-2">
+            <FeatureAnalysis />
+          </Box>
+          <Box className="vault-fade-up vault-delay-3">
+            <FeatureVault />
+          </Box>
+          <Box className="vault-fade-up vault-delay-4">
+            <FeatureSharing />
+          </Box>
+        </Stack>
       </SectionContainer>
     </Box>
   );

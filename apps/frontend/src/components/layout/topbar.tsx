@@ -3,15 +3,13 @@
 import type { ReactElement } from "react";
 import { Menu as MenuIcon } from "@mui/icons-material";
 import { AppBar, Box, IconButton, Toolbar } from "@mui/material";
+import { SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH } from "./constants";
 import { UserMenu } from "./user-menu";
 
 interface TopBarProps {
   onMenuClick: () => void;
   sidebarOpen: boolean;
 }
-
-const SIDEBAR_WIDTH = 240;
-const SIDEBAR_COLLAPSED_WIDTH = 64;
 
 export function TopBar(props: TopBarProps): ReactElement {
   const { onMenuClick, sidebarOpen } = props;

@@ -41,6 +41,26 @@
   }
 }
 
+@keyframes typingCursor {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
 /* Vault Noir — Utility Classes */
 .vault-dot-grid {
   background-image: radial-gradient(circle, var(--mui-palette-primary-main) 1px, transparent 1px);
@@ -71,6 +91,25 @@
     radial-gradient(ellipse 50% 60% at 50% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 70%);
 }
 
+.vault-gradient-mesh-alt {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(
+      ellipse 70% 60% at 75% 60%,
+      var(--mui-palette-vault-glowPrimary) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 50% 50% at 25% 30%,
+      var(--mui-palette-vault-glowSecondary) 0%,
+      transparent 70%
+    ),
+    radial-gradient(ellipse 60% 40% at 50% 10%, rgba(6, 182, 212, 0.06) 0%, transparent 70%);
+}
+
 /* Animation utilities */
 .vault-fade-up {
   animation: fadeUp 0.5s ease-out both;
@@ -94,4 +133,52 @@
 
 .vault-delay-4 {
   animation-delay: 400ms;
+}
+
+.vault-delay-5 {
+  animation-delay: 500ms;
+}
+
+.vault-delay-6 {
+  animation-delay: 600ms;
+}
+
+.vault-delay-7 {
+  animation-delay: 700ms;
+}
+
+.vault-delay-8 {
+  animation-delay: 800ms;
+}
+
+/* Scroll-triggered: hidden until in view */
+.vault-reveal {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.vault-reveal.vault-in-view {
+  animation: fadeUp 0.5s ease-out both;
+}
+
+/* Accessibility: respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .vault-fade-up,
+  .vault-fade-in,
+  .vault-reveal.vault-in-view {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .vault-delay-1,
+  .vault-delay-2,
+  .vault-delay-3,
+  .vault-delay-4,
+  .vault-delay-5,
+  .vault-delay-6,
+  .vault-delay-7,
+  .vault-delay-8 {
+    animation-delay: 0ms !important;
+  }
 }

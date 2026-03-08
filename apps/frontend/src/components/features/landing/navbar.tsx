@@ -16,6 +16,13 @@ export function LandingNavbar(): ReactElement {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const scrollTo = (id: string) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.scrollY - 80;
+    window.scrollTo({ top, behavior: "smooth" });
+  };
+
   return (
     <AppBar
       position="fixed"
@@ -38,7 +45,38 @@ export function LandingNavbar(): ReactElement {
             </GradientText>
           </Stack>
         </Link>
-        <Box sx={{ flexGrow: 1 }} />
+        <Stack
+          direction="row"
+          spacing={3}
+          alignItems="center"
+          sx={{ display: { xs: "none", md: "flex" }, flexGrow: 1, justifyContent: "center" }}
+        >
+          <Button
+            onClick={() => scrollTo("features")}
+            color="inherit"
+            size="small"
+            sx={{ fontWeight: 500 }}
+          >
+            Features
+          </Button>
+          <Button
+            onClick={() => scrollTo("how-it-works")}
+            color="inherit"
+            size="small"
+            sx={{ fontWeight: 500 }}
+          >
+            How It Works
+          </Button>
+          <Button
+            onClick={() => scrollTo("ecosystems")}
+            color="inherit"
+            size="small"
+            sx={{ fontWeight: 500 }}
+          >
+            Ecosystems
+          </Button>
+        </Stack>
+        <Box sx={{ flexGrow: { xs: 1, md: 0 } }} />
         <Stack direction="row" spacing={1.5} alignItems="center">
           <Button component={Link} href={ROUTES.login} color="inherit" size="small">
             Sign in

@@ -27,9 +27,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { GradientText } from "@/components/ui/gradient-text";
 import { useAuth } from "@/hooks/use-auth";
 import { ROUTES } from "@/lib/constants";
-
-const SIDEBAR_WIDTH = 240;
-const SIDEBAR_COLLAPSED_WIDTH = 64;
+import { SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH } from "./constants";
 
 interface SidebarProps {
   open: boolean;

@@ -2,7 +2,7 @@ import "./globals.css";
 import type { PropsWithChildren, ReactElement } from "react";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
+import { Geist, Geist_Mono, JetBrains_Mono, Syne } from "next/font/google";
 import { ThemeProvider } from "@/providers";
 
 const geistSans = Geist({
@@ -20,6 +20,11 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
 });
 
+const syne = Syne({
+  variable: "--font-display",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
   title: "DepVault",
   description:
@@ -30,7 +35,9 @@ export default function RootLayout(props: PropsWithChildren): ReactElement {
   const { children } = props;
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} ${jetbrainsMono.variable}`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} ${jetbrainsMono.variable} ${syne.variable}`}
+      >
         <AppRouterCacheProvider>
           <ThemeProvider>{children}</ThemeProvider>
         </AppRouterCacheProvider>

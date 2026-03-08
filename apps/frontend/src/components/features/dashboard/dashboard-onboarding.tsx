@@ -1,0 +1,173 @@
+"use client";
+
+import { useEffect, useState, type ReactElement } from "react";
+import {
+  CheckCircle as CheckIcon,
+  CreateNewFolder as ProjectIcon,
+  Share as ShareIcon,
+  RadioButtonUnchecked as UncheckedIcon,
+  CloudUpload as UploadIcon,
+  VpnKey as VaultIcon,
+} from "@mui/icons-material";
+import { Box, CardContent, Stack, Typography } from "@mui/material";
+import { GlassCard } from "@/components/ui/glass-card";
+import { GradientText } from "@/components/ui/gradient-text";
+import { useAuth } from "@/hooks/use-auth";
+
+interface OnboardingStep {
+  id: string;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}
+
+const steps: OnboardingStep[] = [
+  {
+    id: "create-project",
+    icon: <ProjectIcon sx={{ fontSize: 20 }} />,
+    title: "Create your first project",
+    description: "Set up a project to organize your dependencies and secrets",
+  },
+  {
+    id: "upload-deps",
+    icon: <UploadIcon sx={{ fontSize: 20 }} />,
+    title: "Upload a dependency file",
+    description: "Scan package.json, requirements.txt, or any dependency file",
+  },
+  {
+    id: "setup-vault",
+    icon: <VaultIcon sx={{ fontSize: 20 }} />,
+    title: "Set up your environment vault",
+    description: "Store your first set of encrypted environment variables",
+  },
+  {
+    id: "share-secret",
+    icon: <ShareIcon sx={{ fontSize: 20 }} />,
+    title: "Share a secret",
+    description: "Generate a one-time link to securely share credentials",
+  },
+];
+
+function getStorageKey(userId: string): string {
+  return `depvault-onboarding-${userId}`;
+}
+
+export function DashboardOnboarding(): ReactElement {
+  const { user } = useAuth();
+  const [completed, setCompleted] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!user?.id) return;
+    try {
+      const stored = localStorage.getItem(getStorageKey(user.id));
+      if (stored) setCompleted(new Set(JSON.parse(stored)));
+    } catch {
+      /* ignore parse errors */
+    }
+  }, [user?.id]);
+
+  const toggle = (id: string) => {
+    if (!user?.id) {
+      return;
+    }
+
+    setCompleted((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      localStorage.setItem(getStorageKey(user.id), JSON.stringify([...next]));
+      return next;
+    });
+  };
+
+  const progress = steps.length > 0 ? Math.round((completed.size / steps.length) * 100) : 0;
+
+  return (
+    <GlassCard hoverGlow={false}>
+      <CardContent sx={{ p: 3 }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2.5 }}>
+          <GradientText variant="h6" component="h2">
+            Getting Started
+          </GradientText>
+          <Typography variant="caption" color="text.secondary">
+            {progress}% complete
+          </Typography>
+        </Stack>
+        <Box
+          sx={{
+            width: "100%",
+            height: 4,
+            borderRadius: 2,
+            bgcolor: "rgba(255,255,255,0.06)",
+            mb: 3,
+            overflow: "hidden",
+          }}
+        >
+          <Box
+            sx={{
+              width: `${progress}%`,
+              height: "100%",
+              borderRadius: 2,
+              background: "linear-gradient(90deg, #10b981, #34d399)",
+              transition: "width 0.3s ease",
+            }}
+          />
+        </Box>
+        <Stack spacing={1.5}>
+          {steps.map((step) => {
+            const done = completed.has(step.id);
+            return (
+              <Box
+                key={step.id}
+                onClick={() => toggle(step.id)}
+                sx={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 2,
+                  p: 1.5,
+                  borderRadius: 1.5,
+                  cursor: "pointer",
+                  transition: "background 0.2s",
+                  "&:hover": { bgcolor: "rgba(255,255,255,0.03)" },
+                }}
+              >
+                <Box sx={{ color: done ? "primary.main" : "text.secondary", mt: 0.25 }}>
+                  {done ? (
+                    <CheckIcon sx={{ fontSize: 22 }} />
+                  ) : (
+                    <UncheckedIcon sx={{ fontSize: 22 }} />
+                  )}
+                </Box>
+                <Box sx={{ flex: 1 }}>
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                    <Box sx={{ color: done ? "text.secondary" : "text.primary" }}>{step.icon}</Box>
+                    <Typography
+                      variant="body2"
+                      fontWeight={600}
+                      sx={{
+                        textDecoration: done ? "line-through" : "none",
+                        color: done ? "text.secondary" : "text.primary",
+                      }}
+                    >
+                      {step.title}
+                    </Typography>
+                  </Stack>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ mt: 0.25, display: "block" }}
+                  >
+                    {step.description}
+                  </Typography>
+                </Box>
+              </Box>
+            );
+          })}
+        </Stack>
+      </CardContent>
+    </GlassCard>
+  );
+}
