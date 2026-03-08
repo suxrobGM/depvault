@@ -1,6 +1,5 @@
 import type { ReactElement } from "react";
-import { AuthCard } from "@/components/features/auth/auth-card";
-import { ForgotPasswordForm } from "@/components/features/auth/forgot-password-form";
+import { AuthCard, ForgotPasswordForm } from "@/components/features/auth";
 
 export default function ForgotPasswordPage(): ReactElement {
   return (

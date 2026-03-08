@@ -1,16 +1,16 @@
-"use client";
-
 import type { ReactElement } from "react";
 import { Alert, Typography } from "@mui/material";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { AuthCard } from "@/components/features/auth/auth-card";
-import { ResetPasswordForm } from "@/components/features/auth/reset-password-form";
+import { AuthCard, ResetPasswordForm } from "@/components/features/auth";
 import { ROUTES } from "@/lib/constants";
 
-export default function ResetPasswordPage(): ReactElement {
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+interface Props {
+  searchParams: Promise<{ token: string | null }>;
+}
+
+export default async function ResetPasswordPage(props: Props): Promise<ReactElement> {
+  const searchParams = await props.searchParams;
+  const token = searchParams.token;
 
   if (!token) {
     return (

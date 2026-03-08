@@ -1,72 +1,53 @@
 "use server";
 
-import { API_BASE_URL } from "@/lib/constants";
+import { getServerClient } from "@/lib/api-server";
+import type { ActionResult } from "@/types/action";
 
-interface ActionResult<T = unknown> {
-  success: boolean;
-  data?: T;
-  error?: string;
-}
-
-interface AuthUser {
-  id: string;
-  email: string;
-  username: string;
-  role: string;
-  emailVerified: boolean;
-}
-
-interface AuthResponseData {
-  accessToken: string;
-  refreshToken: string;
-  user: AuthUser;
-}
-
-async function authFetch<T>(endpoint: string, body: unknown): Promise<ActionResult<T>> {
-  const res = await fetch(`${API_BASE_URL}/api/auth${endpoint}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-    credentials: "include",
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    return { success: false, error: data.message || "Something went wrong" };
+export async function loginAction(email: string, password: string): Promise<ActionResult> {
+  const client = await getServerClient();
+  const { data, error } = await client.api.auth.login.post({ email, password });
+  if (error) {
+    return { success: false, error: error.value.message ?? "Login failed" };
   }
-
   return { success: true, data };
-}
-
-export async function loginAction(
-  email: string,
-  password: string,
-): Promise<ActionResult<AuthResponseData>> {
-  return authFetch("/login", { email, password });
 }
 
 export async function registerAction(
   email: string,
   username: string,
   password: string,
-): Promise<ActionResult<AuthResponseData>> {
-  return authFetch("/register", { email, username, password });
+): Promise<ActionResult> {
+  const client = await getServerClient();
+  const { data, error } = await client.api.auth.register.post({ email, username, password });
+  if (error) {
+    return { success: false, error: error.value.message ?? "Registration failed" };
+  }
+  return { success: true, data };
 }
 
-export async function forgotPasswordAction(
-  email: string,
-): Promise<ActionResult<{ message: string }>> {
-  return authFetch("/forgot-password", { email });
+export async function forgotPasswordAction(email: string): Promise<ActionResult> {
+  const client = await getServerClient();
+  const { data, error } = await client.api.auth["forgot-password"].post({ email });
+  if (error) {
+    return { success: false, error: error.value.message ?? "Failed to request password reset" };
+  }
+  return { success: true, data };
 }
 
-export async function resetPasswordAction(
-  token: string,
-  password: string,
-): Promise<ActionResult<{ message: string }>> {
-  return authFetch("/reset-password", { token, password });
+export async function resetPasswordAction(token: string, password: string): Promise<ActionResult> {
+  const client = await getServerClient();
+  const { data, error } = await client.api.auth["reset-password"].post({ token, password });
+  if (error) {
+    return { success: false, error: error.value.message ?? "Failed to reset password" };
+  }
+  return { success: true, data };
 }
 
-export async function verifyEmailAction(token: string): Promise<ActionResult<{ message: string }>> {
-  return authFetch("/verify-email", { token });
+export async function verifyEmailAction(token: string): Promise<ActionResult> {
+  const client = await getServerClient();
+  const { data, error } = await client.api.auth["verify-email"].post({ token });
+  if (error) {
+    return { success: false, error: error.value.message ?? "Failed to verify email" };
+  }
+  return { success: true, data };
 }

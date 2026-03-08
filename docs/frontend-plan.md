@@ -376,3 +376,9 @@ Phase 0 (deps)
 - **`@depvault/shared`** must be added explicitly to `apps/frontend/package.json` as a workspace dependency
 - **`IntlMessages` type augmentation** needed in `global.d.ts` for type-safe `useTranslations()`
 - Analysis upload uses raw text content (`content: string`), not file upload — the textarea approach is correct
+
+## Completed phases
+
+- Phase 0: Dependencies
+- Phase 1: Foundation Infrastructure
+- Phase 2: Auth Pages

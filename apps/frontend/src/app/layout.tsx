@@ -22,7 +22,8 @@ export const metadata: Metadata = {
     "Analyze dependencies, detect vulnerabilities, and securely store environment variables across any tech stack.",
 };
 
-export default function RootLayout({ children }: PropsWithChildren): ReactElement {
+export default function RootLayout(props: PropsWithChildren): ReactElement {
+  const { children } = props;
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>

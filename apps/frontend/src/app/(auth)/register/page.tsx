@@ -1,6 +1,5 @@
 import type { ReactElement } from "react";
-import { AuthCard } from "@/components/features/auth/auth-card";
-import { RegisterForm } from "@/components/features/auth/register-form";
+import { AuthCard, RegisterForm } from "@/components/features/auth";
 
 export default function RegisterPage(): ReactElement {
   return (

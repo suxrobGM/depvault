@@ -9,6 +9,7 @@ import {
   type ReactElement,
 } from "react";
 import { useRouter } from "next/navigation";
+import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 
 export interface AuthUser {
@@ -43,10 +44,7 @@ export function AuthProvider(props: AuthProviderProps): ReactElement {
   const logout = useCallback(async () => {
     setIsLoading(true);
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
+      await client.api.auth.logout.post();
     } finally {
       setUser(null);
       setIsLoading(false);

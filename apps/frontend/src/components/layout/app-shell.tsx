@@ -3,7 +3,7 @@
 import { useState, type PropsWithChildren, type ReactElement } from "react";
 import { Box, Toolbar } from "@mui/material";
 import { Sidebar } from "./sidebar";
-import { TopBar } from "./top-bar";
+import { TopBar } from "./topbar";
 
 const SIDEBAR_WIDTH = 240;
 const SIDEBAR_COLLAPSED_WIDTH = 64;

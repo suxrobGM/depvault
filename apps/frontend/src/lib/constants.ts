@@ -14,7 +14,6 @@ export const ROUTES = {
 export const COOKIE_NAMES = {
   accessToken: "access_token",
   refreshToken: "refresh_token",
-  locale: "locale",
   timezone: "timezone",
 } as const;
 

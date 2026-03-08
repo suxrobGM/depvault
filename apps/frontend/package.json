@@ -21,7 +21,6 @@
     "@tanstack/react-form": "^1.28.4",
     "@tanstack/react-query": "^5.90.21",
     "next": "^16.1.6",
-    "next-intl": "^4.8.3",
     "notistack": "^3.0.2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
