@@ -6,7 +6,7 @@ import { Alert, Button, Divider, Stack, TextField, Typography } from "@mui/mater
 import { useForm } from "@tanstack/react-form";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { loginAction } from "@/actions/auth";
+import { client } from "@/lib/api";
 import { API_BASE_URL, ROUTES } from "@/lib/constants";
 import { loginSchema } from "./schemas";
 
@@ -19,9 +19,9 @@ export function LoginForm(): ReactElement {
     validators: { onSubmit: loginSchema },
     onSubmit: async ({ value }) => {
       setServerError(null);
-      const result = await loginAction(value.email, value.password);
-      if (!result.success) {
-        setServerError(result.error ?? "Login failed");
+      const { error } = await client.api.auth.login.post(value);
+      if (error) {
+        setServerError(error.value.message ?? "Login failed");
         return;
       }
       router.push(ROUTES.dashboard);

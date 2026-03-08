@@ -1,8 +1,6 @@
 import type { ReactElement } from "react";
-import { Alert, Stack, Typography } from "@mui/material";
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { AuthCard } from "@/components/features/auth";
+import { AuthStatus } from "@/components/features/auth";
 import { getServerClient } from "@/lib/api-server";
 import { ROUTES } from "@/lib/constants";
 
@@ -16,16 +14,12 @@ export default async function GitHubCallbackPage(props: Props): Promise<ReactEle
 
   if (!code) {
     return (
-      <AuthCard title="GitHub Sign In">
-        <Stack spacing={2} alignItems="center">
-          <Alert severity="error" sx={{ width: "100%" }}>
-            Missing authorization code from GitHub.
-          </Alert>
-          <Typography variant="body2">
-            <Link href={ROUTES.login}>Back to sign in</Link>
-          </Typography>
-        </Stack>
-      </AuthCard>
+      <AuthStatus
+        title="GitHub Sign In"
+        message="Missing authorization code from GitHub."
+        linkHref={ROUTES.login}
+        linkText="Back to sign in"
+      />
     );
   }
 
@@ -37,15 +31,11 @@ export default async function GitHubCallbackPage(props: Props): Promise<ReactEle
   }
 
   return (
-    <AuthCard title="GitHub Sign In">
-      <Stack spacing={2} alignItems="center">
-        <Alert severity="error" sx={{ width: "100%" }}>
-          {error.value.message ?? "GitHub authentication failed."}
-        </Alert>
-        <Typography variant="body2">
-          <Link href={ROUTES.login}>Back to sign in</Link>
-        </Typography>
-      </Stack>
-    </AuthCard>
+    <AuthStatus
+      title="GitHub Sign In"
+      message={error.value.message ?? "GitHub authentication failed."}
+      linkHref={ROUTES.login}
+      linkText="Back to sign in"
+    />
   );
 }

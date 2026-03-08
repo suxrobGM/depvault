@@ -1,4 +1,5 @@
 export * from "./auth-card";
+export * from "./auth-status";
 export * from "./forgot-password-form";
 export * from "./login-form";
 export * from "./register-form";

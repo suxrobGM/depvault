@@ -1,6 +1,7 @@
 import { Elysia } from "elysia";
 import { HttpError } from "@/common/errors";
 import { logger } from "@/common/logger/logger";
+import type { ErrorResponse } from "@/types/response";
 
 const SENSITIVE_PATTERN =
   /(?:password|secret|token|key|encrypted|ciphertext|plaintext|authorization|apikey|private_key)\s*[=:]\s*\S+/gi;
@@ -19,6 +20,10 @@ function isPrismaError(error: Error): boolean {
   return error.constructor?.name?.startsWith("Prisma") || error.message?.includes("prisma");
 }
 
+function createErrorResponse(code: number, message: string, details?: unknown): ErrorResponse {
+  return details !== undefined ? { code, message, details } : { code, message };
+}
+
 /**
  * Global error handling plugin.
  * Catches unhandled errors and returns consistent JSON error responses.
@@ -26,25 +31,29 @@ function isPrismaError(error: Error): boolean {
  * In production, stack traces are never returned to clients.
  */
 export const errorMiddleware = new Elysia({ name: "error-handler" }).onError(
+  { as: "global" },
   ({ code, error, set }) => {
     if (error instanceof HttpError) {
       set.status = error.statusCode;
       const safeMessage = sanitizeErrorMessage(error.message);
       logger.warn({ statusCode: error.statusCode, message: safeMessage }, "HTTP error");
-      return { code: error.statusCode, message: safeMessage };
+      return createErrorResponse(error.statusCode, safeMessage);
     }
 
     switch (code) {
       case "VALIDATION":
         set.status = 400;
-        return {
-          code: 400,
-          message: "Validation error",
-          details: isProduction ? undefined : sanitizeErrorMessage(error.message),
-        };
+        return createErrorResponse(
+          400,
+          "Validation error",
+          isProduction ? undefined : sanitizeErrorMessage(error.message),
+        );
+      case "PARSE":
+        set.status = 400;
+        return createErrorResponse(400, "Malformed request body");
       case "NOT_FOUND":
         set.status = 404;
-        return { code: 404, message: "Not found" };
+        return createErrorResponse(404, "Not found");
       default: {
         const safeMessage = isPrismaError(error as Error)
           ? "Internal server error"
@@ -60,7 +69,7 @@ export const errorMiddleware = new Elysia({ name: "error-handler" }).onError(
         );
 
         set.status = 500;
-        return { code: 500, message: "Internal server error" };
+        return createErrorResponse(500, "Internal server error");
       }
     }
   },

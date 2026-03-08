@@ -1,8 +1,6 @@
 import type { ReactElement } from "react";
-import { Alert, Stack, Typography } from "@mui/material";
-import Link from "next/link";
 import { verifyEmailAction } from "@/actions/auth";
-import { AuthCard } from "@/components/features/auth";
+import { AuthStatus } from "@/components/features/auth";
 import { ROUTES } from "@/lib/constants";
 
 interface Props {
@@ -15,31 +13,26 @@ export default async function VerifyEmailPage(props: Props): Promise<ReactElemen
 
   if (!token) {
     return (
-      <AuthCard title="Email Verification">
-        <Stack spacing={2} alignItems="center">
-          <Alert severity="error" sx={{ width: "100%" }}>
-            Invalid verification link.
-          </Alert>
-          <Typography variant="body2">
-            <Link href={ROUTES.login}>Back to sign in</Link>
-          </Typography>
-        </Stack>
-      </AuthCard>
+      <AuthStatus
+        title="Email Verification"
+        message="Invalid verification link."
+        linkHref={ROUTES.login}
+        linkText="Back to sign in"
+      />
     );
   }
 
   const result = await verifyEmailAction(token);
 
   return (
-    <AuthCard title="Email Verification">
-      <Stack spacing={2} alignItems="center">
-        <Alert severity={result.success ? "success" : "error"} sx={{ width: "100%" }}>
-          {result.success ? "Your email has been verified successfully." : "Verification failed."}
-        </Alert>
-        <Typography variant="body2">
-          <Link href={ROUTES.login}>{result.success ? "Go to sign in" : "Back to sign in"}</Link>
-        </Typography>
-      </Stack>
-    </AuthCard>
+    <AuthStatus
+      title="Email Verification"
+      severity={result.success ? "success" : "error"}
+      message={
+        result.success ? "Your email has been verified successfully." : "Verification failed."
+      }
+      linkHref={ROUTES.login}
+      linkText={result.success ? "Go to sign in" : "Back to sign in"}
+    />
   );
 }

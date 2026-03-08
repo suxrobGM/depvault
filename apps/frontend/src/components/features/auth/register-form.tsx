@@ -1,32 +1,55 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import { GitHub as GitHubIcon } from "@mui/icons-material";
+import { GitHub as GitHubIcon, MarkEmailRead as MarkEmailReadIcon } from "@mui/icons-material";
 import { Alert, Button, Divider, Stack, TextField, Typography } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { registerAction } from "@/actions/auth";
+import { client } from "@/lib/api";
 import { API_BASE_URL, ROUTES } from "@/lib/constants";
 import { registerSchema } from "./schemas";
 
 export function RegisterForm(): ReactElement {
-  const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [registered, setRegistered] = useState(false);
 
   const form = useForm({
     defaultValues: { email: "", username: "", password: "", confirmPassword: "" },
     validators: { onSubmit: registerSchema },
     onSubmit: async ({ value }) => {
       setServerError(null);
-      const result = await registerAction(value.email, value.username, value.password);
-      if (!result.success) {
-        setServerError(result.error ?? "Registration failed");
+      const { error } = await client.api.auth.register.post({
+        email: value.email,
+        username: value.username,
+        password: value.password,
+      });
+      if (error) {
+        setServerError(error.value.message ?? "Registration failed");
         return;
       }
-      router.push(ROUTES.dashboard);
+      setRegistered(true);
     },
   });
+
+  if (registered) {
+    return (
+      <Stack spacing={2.5} alignItems="center">
+        <MarkEmailReadIcon sx={{ fontSize: 48, color: "primary.main" }} />
+        <Typography variant="h6" fontWeight={600}>
+          Check your email
+        </Typography>
+        <Typography variant="body2" color="text.secondary" textAlign="center">
+          We&apos;ve sent a verification link to your email address. Please verify your email to
+          activate your account.
+        </Typography>
+        <Typography variant="body2">
+          <Link href={ROUTES.login} style={{ color: "inherit" }}>
+            Go to sign in
+          </Link>
+        </Typography>
+      </Stack>
+    );
+  }
 
   return (
     <Stack spacing={2.5}>
