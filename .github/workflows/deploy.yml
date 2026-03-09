@@ -13,10 +13,12 @@
 name: Build and Deploy
 
 on:
-  workflow_run:
-    workflows: ["CI"]
+  # workflow_run:
+  #   workflows: ["CI"]
+  #   branches: [prod]
+  #   types: [completed]
+  push:
     branches: [prod]
-    types: [completed]
   workflow_dispatch:
 
 env:
@@ -27,7 +29,7 @@ jobs:
   build:
     name: Build ${{ matrix.image }}
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    # if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     concurrency:
       group: build-${{ matrix.image }}
       cancel-in-progress: true
