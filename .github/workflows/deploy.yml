@@ -23,7 +23,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  APP_DIR: ~/depvault
+  APP_DIR: ~/deploy/depvault
 
 jobs:
   build:
