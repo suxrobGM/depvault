@@ -1,4 +1,4 @@
-import { Suspense, type ReactElement } from "react";
+import type { ReactElement } from "react";
 import { Box } from "@mui/material";
 import {
   CtaSection,
@@ -8,6 +8,7 @@ import {
   LandingFeatureCards,
   LandingFooter,
   LandingNavbar,
+  StatsSection,
 } from "@/components/features/landing";
 
 export default function Home(): ReactElement {
@@ -15,13 +16,12 @@ export default function Home(): ReactElement {
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
       <LandingNavbar />
       <HeroSection />
-      <LandingFeatureCards />
       <HowItWorksSection />
+      <LandingFeatureCards />
       <EcosystemsSection />
+      <StatsSection />
       <CtaSection />
-      <Suspense>
-        <LandingFooter />
-      </Suspense>
+      <LandingFooter />
     </Box>
   );
 }

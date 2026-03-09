@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, type ReactElement } from "react";
+import type { ReactElement } from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 import { GradientText } from "@/components/ui/gradient-text";
 import { SectionContainer } from "@/components/ui/section-container";
 import { TypingEffect } from "@/components/ui/typing-effect";
+import { useScrollTo } from "@/hooks/use-scroll-to";
 import { ROUTES } from "@/lib/constants";
 
 const ECOSYSTEM_FILES = [
@@ -28,12 +29,7 @@ const TERMINAL_LINES = [
 ];
 
 export function HeroSection(): ReactElement {
-  const scrollTo = useCallback((id: string) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const top = el.getBoundingClientRect().top + window.scrollY - 80;
-    window.scrollTo({ top, behavior: "smooth" });
-  }, []);
+  const scrollTo = useScrollTo();
 
   return (
     <Box sx={{ position: "relative", overflow: "hidden" }}>
@@ -71,8 +67,8 @@ export function HeroSection(): ReactElement {
             className="vault-fade-up vault-delay-1"
             sx={{ fontSize: { xs: "1rem", md: "1.25rem" } }}
           >
-            Scan <TypingEffect words={ECOSYSTEM_FILES} interval={2000} /> and 8+ ecosystems — detect
-            vulnerabilities, store encrypted secrets and files, and ship with confidence.
+            Scan dependencies across <TypingEffect words={ECOSYSTEM_FILES} interval={2000} /> and 8+
+            ecosystems — detect vulnerabilities, store encrypted secrets, and ship with confidence.
           </Typography>
 
           <Stack

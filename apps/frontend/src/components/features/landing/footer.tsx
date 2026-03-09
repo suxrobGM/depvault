@@ -1,14 +1,20 @@
 "use client";
 
-import type { ReactElement } from "react";
-import { Shield as ShieldIcon } from "@mui/icons-material";
-import { Box, Divider, Grid, Link as MuiLink, Stack, Typography } from "@mui/material";
+import type { MouseEvent, ReactElement } from "react";
+import { GitHub as GitHubIcon, Shield as ShieldIcon } from "@mui/icons-material";
+import { Box, Divider, Grid, IconButton, Link as MuiLink, Stack, Typography } from "@mui/material";
 import NextLink from "next/link";
 import { GradientText } from "@/components/ui/gradient-text";
 import { SectionContainer } from "@/components/ui/section-container";
+import { useScrollTo } from "@/hooks/use-scroll-to";
 import { ROUTES } from "@/lib/constants";
 
-const footerLinks = {
+interface FooterLink {
+  label: string;
+  href: string;
+}
+
+const footerLinks: Record<string, FooterLink[]> = {
   Product: [
     { label: "Dashboard", href: ROUTES.dashboard },
     { label: "Dependency Analysis", href: "#features" },
@@ -26,9 +32,23 @@ const footerLinks = {
     { label: "Register", href: ROUTES.register },
     { label: "Profile", href: ROUTES.profile },
   ],
+  Resources: [
+    { label: "Documentation", href: "#" },
+    { label: "Changelog", href: "#" },
+    { label: "Status", href: "#" },
+  ],
 };
 
 export function LandingFooter(): ReactElement {
+  const scrollTo = useScrollTo();
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith("#") && href.length > 1) {
+      e.preventDefault();
+      scrollTo(href.slice(1));
+    }
+  };
+
   return (
     <Box component="footer">
       <Divider />
@@ -44,14 +64,25 @@ export function LandingFooter(): ReactElement {
             <Typography
               variant="body2"
               color="text.secondary"
-              sx={{ maxWidth: 280, lineHeight: 1.7 }}
+              sx={{ maxWidth: 280, lineHeight: 1.7, mb: 2 }}
             >
               Analyze dependencies, detect vulnerabilities, and securely store environment variables
               and secret files across any tech stack.
             </Typography>
+            <IconButton
+              component="a"
+              href="https://github.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              size="small"
+              sx={{ color: "text.secondary", "&:hover": { color: "primary.main" } }}
+              aria-label="GitHub"
+            >
+              <GitHubIcon fontSize="small" />
+            </IconButton>
           </Grid>
           {Object.entries(footerLinks).map(([category, links]) => (
-            <Grid key={category} size={{ xs: 6, sm: 4, md: 2 }}>
+            <Grid key={category} size={{ xs: 6, sm: 3, md: 2 }}>
               <Typography
                 variant="overline"
                 color="text.secondary"
@@ -67,6 +98,7 @@ export function LandingFooter(): ReactElement {
                     href={link.href}
                     underline="none"
                     variant="body2"
+                    onClick={(e: MouseEvent<HTMLAnchorElement>) => handleClick(e, link.href)}
                     sx={{
                       color: "text.secondary",
                       transition: "color 0.2s",
@@ -82,7 +114,7 @@ export function LandingFooter(): ReactElement {
         </Grid>
         <Divider sx={{ my: 4 }} />
         <Typography variant="caption" color="text.secondary">
-          &copy; {new Date().getFullYear()} DepVault. All rights reserved.
+          &copy; 2026 DepVault. All rights reserved.
         </Typography>
       </SectionContainer>
     </Box>

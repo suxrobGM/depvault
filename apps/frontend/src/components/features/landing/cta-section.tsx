@@ -28,10 +28,13 @@ export function CtaSection(): ReactElement {
             <Typography
               variant="body1"
               color="text.secondary"
-              sx={{ mb: 4, maxWidth: 480, mx: "auto", lineHeight: 1.7 }}
+              sx={{ mb: 1.5, maxWidth: 480, mx: "auto", lineHeight: 1.7 }}
             >
               Start analyzing dependencies and managing secrets in minutes. Free for individual
               developers, scalable for teams.
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ mb: 4, display: "block" }}>
+              No credit card required. Set up in under 2 minutes.
             </Typography>
             <Stack direction={{ xs: "column", sm: "row" }} spacing={2} justifyContent="center">
               <Link href={ROUTES.register} style={{ textDecoration: "none" }}>

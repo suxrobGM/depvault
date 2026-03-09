@@ -37,13 +37,13 @@ export function FeatureSharing(): ReactElement {
         </Box>
         <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8, mb: 2 }}>
           Generate one-time encrypted links for env variables and secret files. Set expiration
-          times, add optional passwords, and share credentials without them sitting in Slack or
-          email history.
+          times, add optional passwords, and stop credentials from sitting in Slack or email
+          history. Every link creation, access, and expiration is tracked in the audit log.
         </Typography>
         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
           <Chip label="One-Time Links" size="small" variant="outlined" color="info" />
           <Chip label="Auto-Expiration" size="small" variant="outlined" color="info" />
-          <Chip label="Password Protected" size="small" variant="outlined" color="info" />
+          <Chip label="Audit Trail" size="small" variant="outlined" color="info" />
         </Stack>
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
