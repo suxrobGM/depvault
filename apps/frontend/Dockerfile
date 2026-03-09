@@ -17,7 +17,7 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 COPY --from=deps /app/node_modules node_modules
 COPY --from=deps /app/apps/frontend/node_modules apps/frontend/node_modules
 COPY --from=deps /app/packages/shared/node_modules packages/shared/node_modules
-COPY bun.lock package.json ./
+COPY bun.lock package.json tsconfig.json ./
 COPY packages/shared/ packages/shared/
 COPY apps/frontend/ apps/frontend/
 

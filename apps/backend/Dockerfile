@@ -21,7 +21,7 @@ COPY packages/shared/ packages/shared/
 COPY apps/backend/ apps/backend/
 
 WORKDIR /app/apps/backend
-RUN bunx prisma generate
+RUN DATABASE_URL="postgresql://build:build@localhost:5432/build" bun db:generate
 
 # Production
 FROM base AS runner
