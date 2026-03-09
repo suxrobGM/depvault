@@ -34,6 +34,11 @@ COPY --from=build /app/package.json package.json
 
 WORKDIR /app/apps/backend
 
+RUN mkdir -p uploads
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD bun -e "fetch('http://localhost:4000/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+
 EXPOSE 4000
 
 CMD ["bun", "run", "start"]

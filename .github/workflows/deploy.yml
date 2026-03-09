@@ -1,0 +1,154 @@
+# Docker-based deployment to VPS via GitHub Container Registry
+#
+# Required GitHub Secrets:
+# - VPS_HOST: VPS IP address or hostname
+# - VPS_USER: SSH username
+# - VPS_SSH_KEY: SSH private key for VPS access
+# - GHCR_PAT: Personal Access Token with read:packages, write:packages scope
+# - ENV_DOCKER: Full .env file content for docker-compose
+#
+# Required GitHub Variables (Settings → Secrets and variables → Actions → Variables tab):
+# - NEXT_PUBLIC_API_URL: Public backend API URL (e.g. https://api.depvault.example.com)
+
+name: Build and Deploy
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    branches: [prod]
+    types: [completed]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  APP_DIR: ~/depvault
+
+jobs:
+  build:
+    name: Build ${{ matrix.image }}
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    concurrency:
+      group: build-${{ matrix.image }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: backend
+            file: ./apps/backend/Dockerfile
+          - image: frontend
+            file: ./apps/frontend/Dockerfile
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set lowercase repository name
+        id: repo
+        run: echo "name=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Build and push ${{ matrix.image }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.file }}
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ steps.repo.outputs.name }}/${{ matrix.image }}:latest
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ steps.repo.outputs.name }}/${{ matrix.image }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ steps.repo.outputs.name }}/${{ matrix.image }}:buildcache,mode=max
+
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    needs: build
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Copy docker-compose to VPS
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "docker-compose.yml"
+          target: ${{ env.APP_DIR }}
+
+      - name: Deploy with Docker Compose
+        uses: appleboy/ssh-action@v1
+        env:
+          ENV_DOCKER: ${{ secrets.ENV_DOCKER }}
+          GHCR_PAT: ${{ secrets.GHCR_PAT }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          envs: ENV_DOCKER,GHCR_PAT,GITHUB_REPOSITORY
+          script: |
+            cd ${{ env.APP_DIR }}
+
+            # Create .env file from secret
+            echo "$ENV_DOCKER" > .env
+
+            # Add GHCR variables for docker-compose image references
+            REPO_LOWER=$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')
+            echo "GITHUB_REPOSITORY=$REPO_LOWER" >> .env
+
+            # Login to GitHub Container Registry
+            echo "$GHCR_PAT" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Stop existing containers
+            docker compose down
+
+            # Remove old images
+            docker images --format "{{.ID}}" --filter "reference=ghcr.io/$REPO_LOWER/*" | xargs -r docker rmi -f || true
+
+            # Pull latest images and deploy
+            docker compose pull
+            docker compose up -d --force-recreate --remove-orphans
+
+            # Clean up dangling images
+            docker image prune -f
+
+            echo "=== Running Containers ==="
+            docker compose ps --format "table {{.Name}}\t{{.Status}}"
+
+      - name: Health check
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            echo "Waiting for services to start..."
+            sleep 15
+
+            echo "=== Backend Health Check ==="
+            curl -sf http://localhost:4000/health || echo "Backend not responding yet"
+
+            echo "=== Container Status ==="
+            docker compose -f ${{ env.APP_DIR }}/docker-compose.yml ps --format "table {{.Name}}\t{{.Status}}"
+
+            echo "=== Recent Logs ==="
+            docker compose -f ${{ env.APP_DIR }}/docker-compose.yml logs --tail=10 2>/dev/null || true

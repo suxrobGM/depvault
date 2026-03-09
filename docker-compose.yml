@@ -1,31 +1,42 @@
 services:
   backend:
-    build:
-      context: .
-      dockerfile: apps/backend/Dockerfile
+    image: ghcr.io/suxrobgm/depvault/backend:latest
     ports:
-      - "${BACKEND_PORT:-4000}:4000"
+      - "127.0.0.1:${BACKEND_PORT:-4000}:4000"
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - JWT_SECRET=${JWT_SECRET}
+      - MASTER_ENCRYPTION_KEY=${MASTER_ENCRYPTION_KEY}
       - JWT_EXPIRY=${JWT_EXPIRY:-15m}
       - REFRESH_TOKEN_EXPIRY=${REFRESH_TOKEN_EXPIRY:-7d}
       - PORT=4000
       - NODE_ENV=production
-      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:4001}
+      - CORS_ORIGINS=${CORS_ORIGINS}
       - LOG_LEVEL=${LOG_LEVEL:-info}
+      - UPLOAD_DIR=${UPLOAD_DIR:-./uploads}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      - GITHUB_CALLBACK_URL=${GITHUB_CALLBACK_URL}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - EMAIL_FROM_NAME=${EMAIL_FROM_NAME:-DepVault}
+      - EMAIL_FROM_ADDRESS=${EMAIL_FROM_ADDRESS:-noreply@depvault.dev}
+      - FRONTEND_URL=${FRONTEND_URL}
+    volumes:
+      - backend-uploads:/app/apps/backend/uploads
     restart: unless-stopped
 
   frontend:
-    build:
-      context: .
-      dockerfile: apps/frontend/Dockerfile
+    image: ghcr.io/suxrobgm/depvault/frontend:latest
     ports:
-      - "${FRONTEND_PORT:-4001}:4001"
+      - "127.0.0.1:${FRONTEND_PORT:-4001}:4001"
     environment:
       - NODE_ENV=production
       - PORT=4001
       - HOSTNAME=0.0.0.0
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: unless-stopped
+
+volumes:
+  backend-uploads:
