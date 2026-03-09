@@ -36,8 +36,10 @@ export class AuthService {
       throw new BadRequestError(PASSWORD_REQUIREMENTS);
     }
 
+    const email = body.email.toLowerCase();
+
     const existingUser = await this.prisma.user.findUnique({
-      where: { email: body.email },
+      where: { email },
     });
 
     if (existingUser) {
@@ -50,7 +52,7 @@ export class AuthService {
 
     const user = await this.prisma.user.create({
       data: {
-        email: body.email,
+        email,
         firstName: body.firstName,
         lastName: body.lastName,
         passwordHash,
@@ -58,7 +60,7 @@ export class AuthService {
         accounts: {
           create: {
             provider: "EMAIL",
-            providerAccountId: body.email,
+            providerAccountId: email,
             tokenFamily,
           },
         },
@@ -73,12 +75,12 @@ export class AuthService {
       react: VerifyEmailTemplate({ firstName: body.firstName, verificationUrl }),
     });
 
-    return this.tokenService.issueTokens(user, "EMAIL", body.email);
+    return this.tokenService.issueTokens(user, "EMAIL", email);
   }
 
   async login(body: LoginBody): Promise<AuthResponse> {
     const user = await this.prisma.user.findUnique({
-      where: { email: body.email },
+      where: { email: body.email.toLowerCase() },
     });
 
     if (!user || !user.passwordHash || user.deletedAt) {
@@ -128,7 +130,7 @@ export class AuthService {
 
   async forgotPassword(body: ForgotPasswordBody): Promise<{ message: string }> {
     const user = await this.prisma.user.findUnique({
-      where: { email: body.email },
+      where: { email: body.email.toLowerCase() },
     });
 
     // Always return success to prevent email enumeration

@@ -116,9 +116,11 @@ export class UserService {
       throw new UnauthorizedError("Password is incorrect");
     }
 
+    const newEmail = body.newEmail.toLowerCase();
+
     const existing = await this.prisma.user.findFirst({
       where: {
-        email: body.newEmail,
+        email: newEmail,
         id: { not: userId },
         deletedAt: null,
       },
@@ -133,7 +135,7 @@ export class UserService {
     await this.prisma.user.update({
       where: { id: userId },
       data: {
-        email: body.newEmail,
+        email: newEmail,
         emailVerified: false,
         emailVerificationToken,
       },
@@ -142,11 +144,11 @@ export class UserService {
     const verificationUrl = `${this.frontendUrl}/verify-email?token=${emailVerificationToken}`;
 
     void this.emailService.send({
-      to: body.newEmail,
+      to: newEmail,
       subject: "Verify your new email — DepVault",
       react: EmailChangeVerificationTemplate({
         firstName: user.firstName,
-        newEmail: body.newEmail,
+        newEmail,
         verificationUrl,
       }),
     });

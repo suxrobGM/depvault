@@ -41,12 +41,14 @@ export class GitHubService {
       return this.loginUser(existingByGithubId, ghAccessToken);
     }
 
-    const email = profile.email ?? (await this.fetchPrimaryEmail(ghAccessToken));
-    if (!email) {
+    const rawEmail = profile.email ?? (await this.fetchPrimaryEmail(ghAccessToken));
+
+    if (!rawEmail) {
       throw new BadRequestError(
         "No email associated with your GitHub account. Please add a public email to GitHub or register with email first.",
       );
     }
+    const email = rawEmail.toLowerCase();
 
     const existingByEmail = await this.prisma.user.findUnique({
       where: { email },
