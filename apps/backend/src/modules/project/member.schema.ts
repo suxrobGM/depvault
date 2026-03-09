@@ -39,7 +39,8 @@ export const MemberResponseSchema = t.Object({
   user: t.Object({
     id: t.String(),
     email: t.String(),
-    username: t.Nullable(t.String()),
+    firstName: t.String(),
+    lastName: t.String(),
     avatarUrl: t.Nullable(t.String()),
   }),
 });

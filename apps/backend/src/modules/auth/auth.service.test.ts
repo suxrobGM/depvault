@@ -21,7 +21,7 @@ mock.module("@/common/utils/password", () => ({
     ),
 }));
 
-mock.module("@/common/utils/logger", () => ({
+mock.module("@/common/logger/logger", () => ({
   logger: { info: () => {}, warn: () => {}, error: () => {} },
 }));
 
@@ -71,15 +71,21 @@ function createMockTokenService() {
   } as any;
 }
 
+function createMockEmailService() {
+  return { send: mock(() => Promise.resolve()) } as any;
+}
+
 describe("AuthService", () => {
   let service: AuthService;
   let mockPrisma: ReturnType<typeof createMockPrisma>;
   let mockTokenService: ReturnType<typeof createMockTokenService>;
+  let mockEmailService: ReturnType<typeof createMockEmailService>;
 
   beforeEach(() => {
     mockPrisma = createMockPrisma();
     mockTokenService = createMockTokenService();
-    service = new AuthService(mockPrisma, mockTokenService);
+    mockEmailService = createMockEmailService();
+    service = new AuthService(mockPrisma, mockTokenService, mockEmailService);
   });
 
   describe("register", () => {
@@ -100,6 +106,17 @@ describe("AuthService", () => {
       expect(result.user.lastName).toBe("User");
       expect(result.user.role).toBe("USER");
       expect(result.user.emailVerified).toBe(false);
+    });
+
+    it("should send a verification email on registration", async () => {
+      await service.register(validBody);
+
+      expect(mockEmailService.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: "test@example.com",
+          subject: expect.stringContaining("Verify"),
+        }),
+      );
     });
 
     it("should throw BadRequestError when password has no uppercase letter", async () => {
@@ -311,6 +328,7 @@ describe("AuthService", () => {
       mockPrisma.user.findUnique.mockResolvedValueOnce({
         id: "user-uuid",
         email: "test@example.com",
+        firstName: "Test",
         deletedAt: null,
       });
 
@@ -318,6 +336,24 @@ describe("AuthService", () => {
 
       expect(result.message).toContain("If an account with that email exists");
       expect(mockPrisma.user.update).toHaveBeenCalled();
+    });
+
+    it("should send a password reset email when user exists", async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce({
+        id: "user-uuid",
+        email: "test@example.com",
+        firstName: "Test",
+        deletedAt: null,
+      });
+
+      await service.forgotPassword({ email: "test@example.com" });
+
+      expect(mockEmailService.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: "test@example.com",
+          subject: expect.stringContaining("Reset"),
+        }),
+      );
     });
   });
 

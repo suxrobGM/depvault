@@ -5,6 +5,8 @@
     "outDir": "./dist",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
     "declaration": true,
     "declarationMap": true,
     "noEmit": false,

@@ -41,13 +41,19 @@ function createMockPrisma() {
   } as any;
 }
 
+function createMockEmailService() {
+  return { send: mock(() => Promise.resolve()) } as any;
+}
+
 describe("UserService", () => {
   let service: UserService;
   let mockPrisma: ReturnType<typeof createMockPrisma>;
+  let mockEmailService: ReturnType<typeof createMockEmailService>;
 
   beforeEach(() => {
     mockPrisma = createMockPrisma();
-    service = new UserService(mockPrisma);
+    mockEmailService = createMockEmailService();
+    service = new UserService(mockPrisma, mockEmailService);
   });
 
   describe("getProfile", () => {
@@ -169,6 +175,19 @@ describe("UserService", () => {
       expect(updateCall.data.email).toBe("new@example.com");
       expect(updateCall.data.emailVerified).toBe(false);
       expect(updateCall.data.emailVerificationToken).toBeDefined();
+    });
+
+    it("should send a verification email to the new address", async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(baseUser);
+
+      await service.changeEmail("user-uuid", validBody);
+
+      expect(mockEmailService.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: "new@example.com",
+          subject: expect.stringContaining("Verify"),
+        }),
+      );
     });
 
     it("should throw NotFoundError when user does not exist", async () => {

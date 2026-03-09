@@ -1,5 +1,7 @@
 import { singleton } from "tsyringe";
+import { RoleChangeTemplate, TeamInviteTemplate } from "@/common/emails";
 import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from "@/common/errors";
+import { EmailService } from "@/common/services/email.service";
 import { PrismaClient } from "@/generated/prisma";
 import type { PaginatedResponse } from "@/types/response";
 import type {
@@ -10,12 +12,17 @@ import type {
 } from "./member.schema";
 
 const MEMBER_INCLUDE = {
-  user: { select: { id: true, email: true, username: true, avatarUrl: true } },
+  user: { select: { id: true, email: true, firstName: true, lastName: true, avatarUrl: true } },
 } as const;
 
 @singleton()
 export class MemberService {
-  constructor(private readonly prisma: PrismaClient) {}
+  private readonly frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:4001";
+
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly emailService: EmailService,
+  ) {}
 
   async invite(projectId: string, body: InviteMemberBody, userId: string): Promise<MemberResponse> {
     const actor = await this.requireOwner(projectId, userId);
@@ -40,13 +47,35 @@ export class MemberService {
       throw new ConflictError("User is already a member of this project");
     }
 
-    const member = await this.prisma.projectMember.create({
-      data: {
-        projectId,
-        userId: invitee.id,
+    const [member, project, inviter] = await Promise.all([
+      this.prisma.projectMember.create({
+        data: {
+          projectId,
+          userId: invitee.id,
+          role: body.role,
+        },
+        include: MEMBER_INCLUDE,
+      }),
+      this.prisma.project.findUnique({ where: { id: projectId }, select: { name: true } }),
+      this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { firstName: true, lastName: true },
+      }),
+    ]);
+
+    const inviterName = inviter
+      ? `${inviter.firstName} ${inviter.lastName}`.trim()
+      : "A team member";
+
+    void this.emailService.send({
+      to: body.email,
+      subject: `You've been invited to ${project?.name ?? "a project"} — DepVault`,
+      react: TeamInviteTemplate({
+        inviterName,
+        projectName: project?.name ?? "Unknown",
         role: body.role,
-      },
-      include: MEMBER_INCLUDE,
+        dashboardUrl: `${this.frontendUrl}/dashboard`,
+      }),
     });
 
     return this.toResponse(member);
@@ -104,11 +133,32 @@ export class MemberService {
       throw new ForbiddenError("Cannot change the owner's role");
     }
 
-    const updated = await this.prisma.projectMember.update({
-      where: { id: memberId },
-      data: { role: body.role },
-      include: MEMBER_INCLUDE,
-    });
+    const [updated, targetUser, project] = await Promise.all([
+      this.prisma.projectMember.update({
+        where: { id: memberId },
+        data: { role: body.role },
+        include: MEMBER_INCLUDE,
+      }),
+      this.prisma.user.findUnique({
+        where: { id: target.userId },
+        select: { email: true, firstName: true },
+      }),
+      this.prisma.project.findUnique({ where: { id: projectId }, select: { name: true } }),
+    ]);
+
+    if (targetUser && project) {
+      void this.emailService.send({
+        to: targetUser.email,
+        subject: `Your role changed in ${project.name} — DepVault`,
+        react: RoleChangeTemplate({
+          firstName: targetUser.firstName,
+          projectName: project.name,
+          oldRole: target.role,
+          newRole: body.role,
+          dashboardUrl: `${this.frontendUrl}/dashboard`,
+        }),
+      });
+    }
 
     return this.toResponse(updated);
   }
@@ -201,7 +251,13 @@ export class MemberService {
     role: string;
     createdAt: Date;
     updatedAt: Date;
-    user: { id: string; email: string; username: string | null; avatarUrl: string | null };
+    user: {
+      id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      avatarUrl: string | null;
+    };
   }): MemberResponse {
     return {
       id: member.id,

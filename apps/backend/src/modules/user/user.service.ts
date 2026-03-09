@@ -1,8 +1,9 @@
 import { randomUUID } from "crypto";
 import { isValidPassword, PASSWORD_REQUIREMENTS } from "@shared/utils/validators";
 import { singleton } from "tsyringe";
+import { EmailChangeVerificationTemplate } from "@/common/emails";
 import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from "@/common/errors";
-import { logger } from "@/common/logger/logger";
+import { EmailService } from "@/common/services/email.service";
 import { hashPassword, verifyPassword } from "@/common/utils/password";
 import { PrismaClient } from "@/generated/prisma";
 import type {
@@ -14,7 +15,12 @@ import type {
 
 @singleton()
 export class UserService {
-  constructor(private readonly prisma: PrismaClient) {}
+  private readonly frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:4001";
+
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly emailService: EmailService,
+  ) {}
 
   async getProfile(userId: string): Promise<UserProfileResponse> {
     const user = await this.prisma.user.findUnique({
@@ -133,8 +139,17 @@ export class UserService {
       },
     });
 
-    // TODO: Send verification email with emailVerificationToken
-    logger.info({ userId }, "Email change verification email pending");
+    const verificationUrl = `${this.frontendUrl}/verify-email?token=${emailVerificationToken}`;
+
+    void this.emailService.send({
+      to: body.newEmail,
+      subject: "Verify your new email — DepVault",
+      react: EmailChangeVerificationTemplate({
+        firstName: user.firstName,
+        newEmail: body.newEmail,
+        verificationUrl,
+      }),
+    });
 
     return { message: "Email updated. Please verify your new email address" };
   }

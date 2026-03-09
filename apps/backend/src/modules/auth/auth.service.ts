@@ -1,8 +1,10 @@
 import { randomUUID } from "crypto";
 import { isValidPassword, PASSWORD_REQUIREMENTS } from "@shared/utils/validators";
 import { singleton } from "tsyringe";
+import { PasswordResetTemplate, VerifyEmailTemplate } from "@/common/emails";
 import { BadRequestError, ConflictError, UnauthorizedError } from "@/common/errors";
 import { logger } from "@/common/logger/logger";
+import { EmailService } from "@/common/services/email.service";
 import { verifyRefreshToken } from "@/common/utils/jwt";
 import { hashPassword, verifyPassword } from "@/common/utils/password";
 import { PrismaClient } from "@/generated/prisma";
@@ -21,9 +23,12 @@ const PASSWORD_RESET_EXPIRY_MS = 60 * 60 * 1000; // 1 hour
 
 @singleton()
 export class AuthService {
+  private readonly frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:4001";
+
   constructor(
     private readonly prisma: PrismaClient,
     private readonly tokenService: TokenService,
+    private readonly emailService: EmailService,
   ) {}
 
   async register(body: RegisterBody): Promise<AuthResponse> {
@@ -60,8 +65,13 @@ export class AuthService {
       },
     });
 
-    // TODO: Send verification email with emailVerificationToken
-    logger.info({ userId: user.id }, "Verification email pending");
+    const verificationUrl = `${this.frontendUrl}/verify-email?token=${emailVerificationToken}`;
+
+    void this.emailService.send({
+      to: user.email,
+      subject: "Verify your email — DepVault",
+      react: VerifyEmailTemplate({ firstName: body.firstName, verificationUrl }),
+    });
 
     return this.tokenService.issueTokens(user, "EMAIL", body.email);
   }
@@ -135,8 +145,13 @@ export class AuthService {
       },
     });
 
-    // TODO: Send password reset email with resetToken
-    logger.info({ userId: user.id }, "Password reset email pending");
+    const resetUrl = `${this.frontendUrl}/reset-password?token=${resetToken}`;
+
+    this.emailService.send({
+      to: body.email,
+      subject: "Reset your password — DepVault",
+      react: PasswordResetTemplate({ firstName: user.firstName, resetUrl }),
+    });
 
     return { message: "If an account with that email exists, a reset link has been sent" };
   }

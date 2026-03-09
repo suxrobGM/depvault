@@ -8,7 +8,8 @@ const now = new Date();
 const mockUser = {
   id: "invitee-uuid",
   email: "invitee@example.com",
-  username: "invitee",
+  firstName: "Invitee",
+  lastName: "User",
   avatarUrl: null,
   deletedAt: null,
 };
@@ -20,7 +21,13 @@ const mockMember = {
   role: "EDITOR",
   createdAt: now,
   updatedAt: now,
-  user: { id: "invitee-uuid", email: "invitee@example.com", username: "invitee", avatarUrl: null },
+  user: {
+    id: "invitee-uuid",
+    email: "invitee@example.com",
+    firstName: "Invitee",
+    lastName: "User",
+    avatarUrl: null,
+  },
 };
 
 const ownerMembership = {
@@ -36,8 +43,10 @@ function createMockPrisma() {
   return {
     user: {
       findFirst: mock(() => Promise.resolve(null)),
+      findUnique: mock(() => Promise.resolve(null)),
     },
     project: {
+      findUnique: mock(() => Promise.resolve({ name: "Test Project" })),
       update: mock(() => Promise.resolve({})),
     },
     projectMember: {
@@ -53,13 +62,19 @@ function createMockPrisma() {
   } as any;
 }
 
+function createMockEmailService() {
+  return { send: mock(() => Promise.resolve()) } as any;
+}
+
 describe("MemberService", () => {
   let service: MemberService;
   let mockPrisma: ReturnType<typeof createMockPrisma>;
+  let mockEmailService: ReturnType<typeof createMockEmailService>;
 
   beforeEach(() => {
     mockPrisma = createMockPrisma();
-    service = new MemberService(mockPrisma);
+    mockEmailService = createMockEmailService();
+    service = new MemberService(mockPrisma, mockEmailService);
   });
 
   describe("invite", () => {
@@ -68,6 +83,10 @@ describe("MemberService", () => {
         .mockResolvedValueOnce(ownerMembership)
         .mockResolvedValueOnce(null);
       mockPrisma.user.findFirst.mockResolvedValueOnce(mockUser);
+      mockPrisma.user.findUnique.mockResolvedValueOnce({
+        firstName: "Owner",
+        lastName: "User",
+      });
 
       const result = await service.invite(
         "project-uuid",
@@ -81,6 +100,30 @@ describe("MemberService", () => {
         data: { projectId: "project-uuid", userId: "invitee-uuid", role: "EDITOR" },
         include: expect.any(Object),
       });
+    });
+
+    it("should send an invite email", async () => {
+      mockPrisma.projectMember.findUnique
+        .mockResolvedValueOnce(ownerMembership)
+        .mockResolvedValueOnce(null);
+      mockPrisma.user.findFirst.mockResolvedValueOnce(mockUser);
+      mockPrisma.user.findUnique.mockResolvedValueOnce({
+        firstName: "Owner",
+        lastName: "User",
+      });
+
+      await service.invite(
+        "project-uuid",
+        { email: "invitee@example.com", role: "EDITOR" },
+        "owner-uuid",
+      );
+
+      expect(mockEmailService.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: "invitee@example.com",
+          subject: expect.stringContaining("invited"),
+        }),
+      );
     });
 
     it("should throw NotFoundError when invitee email not found", async () => {
