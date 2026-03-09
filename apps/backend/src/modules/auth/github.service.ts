@@ -163,6 +163,7 @@ export class GitHubService {
       lastName: string;
       role: string;
       emailVerified: boolean;
+      avatarUrl: string | null;
     },
     ghAccessToken: string,
   ): Promise<AuthResponse> {

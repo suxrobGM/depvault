@@ -19,6 +19,7 @@ export interface AuthUser {
   lastName: string;
   role: string;
   emailVerified: boolean;
+  avatarUrl: string | null;
 }
 
 export interface AuthContextValue {

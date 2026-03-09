@@ -39,6 +39,7 @@ export const AuthResponseSchema = t.Object({
     lastName: t.String(),
     role: t.String(),
     emailVerified: t.Boolean(),
+    avatarUrl: t.Nullable(t.String()),
   }),
 });
 

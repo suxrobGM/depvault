@@ -12,6 +12,7 @@ interface TokenUser {
   lastName: string;
   role: string;
   emailVerified: boolean;
+  avatarUrl: string | null;
 }
 
 @singleton()
@@ -45,6 +46,7 @@ export class TokenService {
         lastName: user.lastName,
         role: user.role,
         emailVerified: user.emailVerified,
+        avatarUrl: user.avatarUrl,
       },
     };
   }

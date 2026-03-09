@@ -65,6 +65,7 @@ function createMockTokenService() {
           lastName: "User",
           role: "USER",
           emailVerified: false,
+          avatarUrl: null,
         },
       }),
     ),

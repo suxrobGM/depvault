@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactElement } from "react";
+import { DEFAULT_ROLES } from "@depvault/shared/constants";
 import {
   ChevronLeft as ChevronLeftIcon,
   Dashboard as DashboardIcon,
@@ -43,9 +44,11 @@ const navItems = [
 
 export function Sidebar(props: SidebarProps): ReactElement {
   const { open, mobileOpen, onToggle, onMobileClose } = props;
+
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
+  const showRoleBadge = user?.role && !DEFAULT_ROLES.has(user.role);
 
   const drawerContent = (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -119,7 +122,7 @@ export function Sidebar(props: SidebarProps): ReactElement {
               <Typography variant="caption" color="text.secondary" noWrap>
                 {user.email}
               </Typography>
-              {user.role && (
+              {showRoleBadge && (
                 <Chip label={user.role} size="small" color="primary" variant="outlined" />
               )}
             </Stack>

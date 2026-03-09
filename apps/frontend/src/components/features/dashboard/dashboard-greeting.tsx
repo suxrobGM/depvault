@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactElement } from "react";
+import { DEFAULT_ROLES } from "@depvault/shared/constants";
 import { Add as AddIcon } from "@mui/icons-material";
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import Link from "next/link";
@@ -10,6 +11,8 @@ import { ROUTES } from "@/lib/constants";
 
 export function DashboardGreeting(): ReactElement {
   const { user } = useAuth();
+
+  const showRoleBadge = user?.role && !DEFAULT_ROLES.has(user.role);
   const displayName = user?.firstName ?? null;
   const greeting = displayName ? `Welcome back, ${displayName}` : "Welcome to DepVault";
 
@@ -36,7 +39,9 @@ export function DashboardGreeting(): ReactElement {
           <GradientText variant="h4" component="h1">
             {greeting}
           </GradientText>
-          {user?.role && <Chip label={user.role} size="small" color="primary" variant="outlined" />}
+          {showRoleBadge && (
+            <Chip label={user.role} size="small" color="primary" variant="outlined" />
+          )}
         </Stack>
         <Typography variant="body2" color="text.secondary">
           {today}

@@ -32,7 +32,9 @@ export function UserMenu(): ReactElement {
   return (
     <>
       <IconButton onClick={handleOpen} size="small">
-        <Avatar sx={{ width: 32, height: 32, fontSize: 14 }}>{initials}</Avatar>
+        <Avatar src={user?.avatarUrl ?? undefined} sx={{ width: 32, height: 32, fontSize: 14 }}>
+          {initials}
+        </Avatar>
       </IconButton>
       <Menu
         anchorEl={anchorEl}
