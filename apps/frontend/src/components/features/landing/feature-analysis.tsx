@@ -42,13 +42,14 @@ export function FeatureAnalysis(): ReactElement {
           </GradientText>
         </Box>
         <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8, mb: 2 }}>
-          Upload any dependency file — package.json, requirements.txt, Cargo.toml, and more.
-          Instantly detect outdated packages, known vulnerabilities, and license issues across your
-          entire stack.
+          Connect your GitHub repo or upload dependency files — package.json, requirements.txt,
+          Cargo.toml, go.mod, and more. Instantly detect outdated packages, known CVEs, and license
+          conflicts across your entire stack with an interactive dependency tree.
         </Typography>
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
           <Chip label="8+ Ecosystems" size="small" variant="outlined" color="primary" />
           <Chip label="CVE Detection" size="small" variant="outlined" color="primary" />
+          <Chip label="Repo Scanning" size="small" variant="outlined" color="primary" />
         </Stack>
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>

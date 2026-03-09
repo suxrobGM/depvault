@@ -1,9 +1,11 @@
 import type { ReactElement, ReactNode } from "react";
 import {
+  FolderZip as BundlerIcon,
   Rocket as CiCdIcon,
   SwapHoriz as ConverterIcon,
   GitHub as GitIcon,
   Description as LicenseIcon,
+  Checklist as OnboardingIcon,
   Autorenew as RotationIcon,
   ContentCopy as TemplateIcon,
 } from "@mui/icons-material";
@@ -64,6 +66,20 @@ const moreFeatures: MoreFeature[] = [
       "Clone an environment's variable structure to bootstrap new stages. Diff templates against live environments.",
     color: "#fb923c",
   },
+  {
+    icon: <OnboardingIcon />,
+    title: "Onboarding Checklist",
+    description:
+      "Mark variables as required for local setup. New team members see a guided checklist and download .env.example in one click.",
+    color: "#38bdf8",
+  },
+  {
+    icon: <BundlerIcon />,
+    title: "Secret File Bundler",
+    description:
+      "Download all required env variables and secret files for an environment as a single encrypted archive with a one-time password.",
+    color: "#e879f9",
+  },
 ];
 
 export function LandingFeatureCards(): ReactElement {
@@ -107,7 +123,7 @@ export function LandingFeatureCards(): ReactElement {
         </Typography>
         <Grid container spacing={3}>
           {moreFeatures.map((feature) => (
-            <Grid key={feature.title} size={{ xs: 12, sm: 6, md: 4 }}>
+            <Grid key={feature.title} size={{ xs: 12, sm: 6, md: 3 }}>
               <GlassCard glowColor={feature.color} sx={{ height: "100%" }}>
                 <CardContent sx={{ p: 3 }}>
                   <Box

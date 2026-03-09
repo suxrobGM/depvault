@@ -52,13 +52,14 @@ export function FeatureVault(): ReactElement {
           </GradientText>
         </Box>
         <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8, mb: 2 }}>
-          Store environment variables with AES-256-GCM encryption. Compare environments
-          side-by-side, detect missing variables, and keep your team in sync with onboarding
-          checklists.
+          Encrypt environment variables and secret files — SSL certificates, private keys,
+          keystores, cloud credentials — with AES-256-GCM in a zero-plaintext vault. Compare
+          environments side-by-side and detect missing variables before they break a deploy.
         </Typography>
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
           <Chip label="AES-256-GCM" size="small" variant="outlined" color="secondary" />
           <Chip label="Env Diff" size="small" variant="outlined" color="secondary" />
+          <Chip label="Secret Files" size="small" variant="outlined" color="secondary" />
         </Stack>
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>

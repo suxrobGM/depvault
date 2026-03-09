@@ -1,8 +1,9 @@
 import type { ReactElement } from "react";
 import {
-  QueryStats as AnalyzeIcon,
-  Shield as SecureIcon,
-  CloudUpload as UploadIcon,
+  GitHub as ConnectIcon,
+  BugReport as ScanIcon,
+  Share as ShareIcon,
+  Lock as StoreIcon,
 } from "@mui/icons-material";
 import { Box, Grid, Stack, Typography } from "@mui/material";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -12,24 +13,31 @@ import { SectionContainer } from "@/components/ui/section-container";
 const steps = [
   {
     number: "01",
-    icon: <UploadIcon sx={{ fontSize: 28 }} />,
-    title: "Upload",
+    icon: <ConnectIcon sx={{ fontSize: 28 }} />,
+    title: "Connect",
     description:
-      "Drop any dependency or config file — package.json, .env, Cargo.toml, requirements.txt, and more.",
+      "Link your GitHub repo or upload dependency files from any ecosystem — package.json, requirements.txt, Cargo.toml, go.mod, and more.",
   },
   {
     number: "02",
-    icon: <AnalyzeIcon sx={{ fontSize: 28 }} />,
-    title: "Analyze",
+    icon: <ScanIcon sx={{ fontSize: 28 }} />,
+    title: "Scan",
     description:
-      "Instantly scan for outdated packages, known CVEs, license conflicts, and missing environment variables.",
+      "Detect outdated packages, known CVEs, license conflicts, and secrets accidentally committed to your git history.",
   },
   {
     number: "03",
-    icon: <SecureIcon sx={{ fontSize: 28 }} />,
-    title: "Secure",
+    icon: <StoreIcon sx={{ fontSize: 28 }} />,
+    title: "Store",
     description:
-      "Encrypt secrets with AES-256-GCM, share via one-time links, and onboard teammates safely.",
+      "Encrypt env variables and secret files — SSL certs, private keys, keystores, credentials — with AES-256-GCM in a zero-plaintext vault.",
+  },
+  {
+    number: "04",
+    icon: <ShareIcon sx={{ fontSize: 28 }} />,
+    title: "Share",
+    description:
+      "Onboard teammates with setup checklists, share secrets via one-time encrypted links, and inject credentials into CI/CD pipelines.",
   },
 ];
 
@@ -46,11 +54,11 @@ export function HowItWorksSection(): ReactElement {
           textAlign="center"
           sx={{ mb: 6, maxWidth: 500, mx: "auto" }}
         >
-          From upload to secure in three simple steps
+          From repo to secure in four simple steps
         </Typography>
         <Grid container spacing={4}>
           {steps.map((step, i) => (
-            <Grid key={step.number} size={{ xs: 12, md: 4 }}>
+            <Grid key={step.number} size={{ xs: 12, sm: 6, md: 3 }}>
               <Stack alignItems="center" sx={{ position: "relative", height: "100%" }}>
                 {i < steps.length - 1 && (
                   <Box
