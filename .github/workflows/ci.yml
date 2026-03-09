@@ -43,6 +43,10 @@ jobs:
         run: bun run typecheck
         working-directory: apps/backend
 
+      - name: Build backend type declarations
+        run: bun run build:types
+        working-directory: apps/backend
+
       - name: Typecheck frontend
         run: bun run typecheck
         working-directory: apps/frontend
