@@ -10,7 +10,9 @@ import { ROUTES } from "@/lib/constants";
 
 export function DashboardGreeting(): ReactElement {
   const { user } = useAuth();
-  const greeting = user?.username ? `Welcome back, ${user.username}` : "Welcome to DepVault";
+  const displayName = user?.firstName ?? null;
+  const greeting = displayName ? `Welcome back, ${displayName}` : "Welcome to DepVault";
+
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",

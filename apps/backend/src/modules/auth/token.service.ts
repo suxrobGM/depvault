@@ -8,7 +8,8 @@ import type { AuthResponse } from "./auth.schema";
 interface TokenUser {
   id: string;
   email: string;
-  username: string;
+  firstName: string;
+  lastName: string;
   role: string;
   emailVerified: boolean;
 }
@@ -40,7 +41,8 @@ export class TokenService {
       user: {
         id: user.id,
         email: user.email,
-        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
         role: user.role,
         emailVerified: user.emailVerified,
       },

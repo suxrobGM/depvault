@@ -113,7 +113,7 @@ export function Sidebar(props: SidebarProps): ReactElement {
           <Divider />
           <Box sx={{ px: 2, py: 1.5 }}>
             <Typography variant="body2" noWrap fontWeight={600}>
-              {user.username}
+              {[user.firstName, user.lastName].filter(Boolean).join(" ") || user.email}
             </Typography>
             <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 0.5 }}>
               <Typography variant="caption" color="text.secondary" noWrap>

@@ -34,7 +34,8 @@ function createMockPrisma() {
         Promise.resolve({
           id: "user-uuid",
           email: "test@example.com",
-          username: "testuser",
+          firstName: "Test",
+          lastName: "User",
           role: "USER",
           emailVerified: false,
           passwordHash: "hashed-password",
@@ -60,7 +61,8 @@ function createMockTokenService() {
         user: {
           id: "user-uuid",
           email: "test@example.com",
-          username: "testuser",
+          firstName: "Test",
+          lastName: "User",
           role: "USER",
           emailVerified: false,
         },
@@ -83,7 +85,8 @@ describe("AuthService", () => {
   describe("register", () => {
     const validBody = {
       email: "test@example.com",
-      username: "testuser",
+      firstName: "Test",
+      lastName: "User",
       password: "Password1",
     };
 
@@ -93,7 +96,8 @@ describe("AuthService", () => {
       expect(result.accessToken).toBe("mock-access-token");
       expect(result.refreshToken).toBe("mock-refresh-token");
       expect(result.user.email).toBe("test@example.com");
-      expect(result.user.username).toBe("testuser");
+      expect(result.user.firstName).toBe("Test");
+      expect(result.user.lastName).toBe("User");
       expect(result.user.role).toBe("USER");
       expect(result.user.emailVerified).toBe(false);
     });
@@ -117,27 +121,16 @@ describe("AuthService", () => {
     });
 
     it("should throw ConflictError when email already exists", async () => {
-      mockPrisma.user.findFirst.mockResolvedValueOnce({
+      mockPrisma.user.findUnique.mockResolvedValueOnce({
         email: "test@example.com",
-        username: "other",
       });
 
       expect(service.register(validBody)).rejects.toThrow("User with this email already exists");
     });
 
-    it("should throw ConflictError when username already exists", async () => {
-      mockPrisma.user.findFirst.mockResolvedValueOnce({
-        email: "other@example.com",
-        username: "testuser",
-      });
-
-      expect(service.register(validBody)).rejects.toThrow("User with this username already exists");
-    });
-
-    it("should throw ConflictError instance for duplicate user", async () => {
-      mockPrisma.user.findFirst.mockResolvedValueOnce({
+    it("should throw ConflictError instance for duplicate email", async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce({
         email: "test@example.com",
-        username: "testuser",
       });
 
       expect(service.register(validBody)).rejects.toBeInstanceOf(ConflictError);
@@ -150,7 +143,8 @@ describe("AuthService", () => {
     const verifiedUser = {
       id: "user-uuid",
       email: "test@example.com",
-      username: "testuser",
+      firstName: "Test",
+      lastName: "User",
       role: "USER",
       emailVerified: true,
       passwordHash: "hashed-password",
@@ -206,7 +200,8 @@ describe("AuthService", () => {
     const validUser = {
       id: "user-uuid",
       email: "test@example.com",
-      username: "testuser",
+      firstName: "Test",
+      lastName: "User",
       role: "USER",
       emailVerified: true,
       deletedAt: null,

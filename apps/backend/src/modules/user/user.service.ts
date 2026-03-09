@@ -28,7 +28,8 @@ export class UserService {
     return {
       id: user.id,
       email: user.email,
-      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
       role: user.role,
       avatarUrl: user.avatarUrl,
       emailVerified: user.emailVerified,
@@ -38,24 +39,11 @@ export class UserService {
   }
 
   async updateProfile(userId: string, body: UpdateProfileBody): Promise<UserProfileResponse> {
-    if (body.username) {
-      const existing = await this.prisma.user.findFirst({
-        where: {
-          username: body.username,
-          id: { not: userId },
-          deletedAt: null,
-        },
-      });
-
-      if (existing) {
-        throw new ConflictError("Username is already taken");
-      }
-    }
-
     const user = await this.prisma.user.update({
       where: { id: userId, deletedAt: null },
       data: {
-        ...(body.username !== undefined && { username: body.username }),
+        ...(body.firstName !== undefined && { firstName: body.firstName }),
+        ...(body.lastName !== undefined && { lastName: body.lastName }),
         ...(body.avatarUrl !== undefined && { avatarUrl: body.avatarUrl }),
       },
     });
@@ -63,7 +51,8 @@ export class UserService {
     return {
       id: user.id,
       email: user.email,
-      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
       role: user.role,
       avatarUrl: user.avatarUrl,
       emailVerified: user.emailVerified,

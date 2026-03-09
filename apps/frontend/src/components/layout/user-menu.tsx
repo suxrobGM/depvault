@@ -24,7 +24,10 @@ export function UserMenu(): ReactElement {
   const handleOpen = (e: MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
-  const initials = user?.username?.slice(0, 2).toUpperCase() ?? "?";
+  const initials =
+    user?.firstName && user?.lastName
+      ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+      : (user?.email?.slice(0, 2).toUpperCase() ?? "?");
 
   return (
     <>

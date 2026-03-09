@@ -15,7 +15,8 @@ import { ROUTES } from "@/lib/constants";
 export interface AuthUser {
   id: string;
   email: string;
-  username: string;
+  firstName: string;
+  lastName: string;
   role: string;
   emailVerified: boolean;
 }

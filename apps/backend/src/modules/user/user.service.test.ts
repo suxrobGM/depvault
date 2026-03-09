@@ -16,7 +16,8 @@ mock.module("@/common/logger/logger", () => ({
 const baseUser = {
   id: "user-uuid",
   email: "test@example.com",
-  username: "testuser",
+  firstName: "Test",
+  lastName: "User",
   role: "USER",
   avatarUrl: null,
   emailVerified: true,
@@ -57,7 +58,8 @@ describe("UserService", () => {
 
       expect(result.id).toBe("user-uuid");
       expect(result.email).toBe("test@example.com");
-      expect(result.username).toBe("testuser");
+      expect(result.firstName).toBe("Test");
+      expect(result.lastName).toBe("User");
       expect(result.role).toBe("USER");
       expect(result.avatarUrl).toBeNull();
       expect(result.emailVerified).toBe(true);
@@ -73,16 +75,20 @@ describe("UserService", () => {
   });
 
   describe("updateProfile", () => {
-    it("should update username", async () => {
-      const updatedUser = { ...baseUser, username: "newname" };
+    it("should update firstName and lastName", async () => {
+      const updatedUser = { ...baseUser, firstName: "Jane", lastName: "Doe" };
       mockPrisma.user.update.mockResolvedValueOnce(updatedUser);
 
-      const result = await service.updateProfile("user-uuid", { username: "newname" });
+      const result = await service.updateProfile("user-uuid", {
+        firstName: "Jane",
+        lastName: "Doe",
+      });
 
-      expect(result.username).toBe("newname");
+      expect(result.firstName).toBe("Jane");
+      expect(result.lastName).toBe("Doe");
       expect(mockPrisma.user.update).toHaveBeenCalledWith({
         where: { id: "user-uuid", deletedAt: null },
-        data: { username: "newname" },
+        data: { firstName: "Jane", lastName: "Doe" },
       });
     });
 
@@ -95,22 +101,6 @@ describe("UserService", () => {
       });
 
       expect(result.avatarUrl).toBe("https://example.com/avatar.png");
-    });
-
-    it("should throw ConflictError when username is already taken", async () => {
-      mockPrisma.user.findFirst.mockResolvedValueOnce({ id: "other-uuid", username: "taken" });
-
-      expect(service.updateProfile("user-uuid", { username: "taken" })).rejects.toBeInstanceOf(
-        ConflictError,
-      );
-    });
-
-    it("should not check uniqueness when username is not provided", async () => {
-      mockPrisma.user.update.mockResolvedValueOnce(baseUser);
-
-      await service.updateProfile("user-uuid", { avatarUrl: null });
-
-      expect(mockPrisma.user.findFirst).not.toHaveBeenCalled();
     });
   });
 

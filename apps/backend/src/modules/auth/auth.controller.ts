@@ -139,18 +139,25 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
   )
   .get(
     "/github/callback",
-    async ({ query, cookie }) => {
-      const result = await githubService.callback(query);
-      setAuthCookies(cookie, result);
-      return result;
+    async ({ query, cookie, set }) => {
+      const frontendUrl = process.env.CORS_ORIGINS?.split(",")[0] ?? "http://localhost:4001";
+      try {
+        const result = await githubService.callback(query);
+        setAuthCookies(cookie, result);
+        set.status = 302;
+        set.headers.location = `${frontendUrl}/dashboard`;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "GitHub authentication failed";
+        set.status = 302;
+        set.headers.location = `${frontendUrl}/login?error=${encodeURIComponent(message)}`;
+      }
     },
     {
       query: GitHubCallbackQuerySchema,
-      response: AuthResponseSchema,
       detail: {
         summary: "GitHub OAuth callback",
         description:
-          "Handle the OAuth callback from GitHub. Creates a new account on first login or authenticates an existing user.",
+          "Handle the OAuth callback from GitHub. Sets auth cookies and redirects to the frontend.",
       },
     },
   )

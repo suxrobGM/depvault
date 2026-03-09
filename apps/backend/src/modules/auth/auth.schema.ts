@@ -2,7 +2,8 @@ import { t, type Static } from "elysia";
 
 export const RegisterBodySchema = t.Object({
   email: t.String({ format: "email" }),
-  username: t.String({ minLength: 3, maxLength: 30 }),
+  firstName: t.String({ minLength: 1, maxLength: 50 }),
+  lastName: t.String({ minLength: 1, maxLength: 50 }),
   password: t.String({ minLength: 8, maxLength: 128 }),
 });
 
@@ -34,7 +35,8 @@ export const AuthResponseSchema = t.Object({
   user: t.Object({
     id: t.String(),
     email: t.String(),
-    username: t.String(),
+    firstName: t.String(),
+    lastName: t.String(),
     role: t.String(),
     emailVerified: t.Boolean(),
   }),

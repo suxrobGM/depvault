@@ -3,7 +3,8 @@ import { t, type Static } from "elysia";
 export const UserProfileResponseSchema = t.Object({
   id: t.String(),
   email: t.String(),
-  username: t.String(),
+  firstName: t.String(),
+  lastName: t.String(),
   role: t.String(),
   avatarUrl: t.Nullable(t.String()),
   emailVerified: t.Boolean(),
@@ -12,7 +13,8 @@ export const UserProfileResponseSchema = t.Object({
 });
 
 export const UpdateProfileBodySchema = t.Object({
-  username: t.Optional(t.String({ minLength: 3, maxLength: 30 })),
+  firstName: t.Optional(t.String({ minLength: 1, maxLength: 50 })),
+  lastName: t.Optional(t.String({ minLength: 1, maxLength: 50 })),
   avatarUrl: t.Optional(t.Nullable(t.String())),
 });
 

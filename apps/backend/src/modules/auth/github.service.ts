@@ -57,12 +57,15 @@ export class GitHubService {
         throw new UnauthorizedError("This account has been deactivated");
       }
 
+      const { firstName, lastName } = this.parseName(profile.name, profile.login);
       const updated = await this.prisma.user.update({
         where: { id: existingByEmail.id },
         data: {
           githubId: profile.id.toString(),
           githubAccessToken: ghAccessToken,
           avatarUrl: existingByEmail.avatarUrl ?? profile.avatar_url,
+          firstName: existingByEmail.firstName ?? firstName,
+          lastName: existingByEmail.lastName ?? lastName,
           emailVerified: true,
         },
       });
@@ -153,7 +156,14 @@ export class GitHubService {
   }
 
   private async loginUser(
-    user: { id: string; email: string; username: string; role: string; emailVerified: boolean },
+    user: {
+      id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+      emailVerified: boolean;
+    },
     ghAccessToken: string,
   ): Promise<AuthResponse> {
     await this.prisma.user.update({
@@ -164,24 +174,28 @@ export class GitHubService {
     return this.tokenService.issueTokens(user, "GITHUB", user.id);
   }
 
+  private parseName(name: string | null, login: string): { firstName: string; lastName: string } {
+    if (!name) return { firstName: login, lastName: "" };
+    const parts = name.trim().split(/\s+/);
+    return {
+      firstName: parts[0] ?? login,
+      lastName: parts.length > 1 ? parts.slice(1).join(" ") : "",
+    };
+  }
+
   private async createUser(
     profile: GitHubProfile,
     email: string,
     ghAccessToken: string,
   ): Promise<AuthResponse> {
-    let username = profile.login;
-    const existingUsername = await this.prisma.user.findUnique({
-      where: { username },
-    });
-    if (existingUsername) {
-      username = `${profile.login}-${randomUUID().slice(0, 6)}`;
-    }
+    const { firstName, lastName } = this.parseName(profile.name, profile.login);
 
     const tokenFamily = randomUUID();
     const user = await this.prisma.user.create({
       data: {
         email,
-        username,
+        firstName,
+        lastName,
         avatarUrl: profile.avatar_url,
         githubId: profile.id.toString(),
         githubAccessToken: ghAccessToken,

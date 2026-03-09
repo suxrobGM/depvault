@@ -14,13 +14,14 @@ export function RegisterForm(): ReactElement {
   const [registered, setRegistered] = useState(false);
 
   const form = useForm({
-    defaultValues: { email: "", username: "", password: "", confirmPassword: "" },
+    defaultValues: { email: "", firstName: "", lastName: "", password: "", confirmPassword: "" },
     validators: { onSubmit: registerSchema },
     onSubmit: async ({ value }) => {
       setServerError(null);
       const { error } = await client.api.auth.register.post({
         email: value.email,
-        username: value.username,
+        firstName: value.firstName,
+        lastName: value.lastName,
         password: value.password,
       });
       if (error) {
@@ -96,20 +97,36 @@ export function RegisterForm(): ReactElement {
             )}
           </form.Field>
 
-          <form.Field name="username">
-            {(field) => (
-              <TextField
-                label="Username"
-                fullWidth
-                autoComplete="username"
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                onBlur={field.handleBlur}
-                error={field.state.meta.errors.length > 0}
-                helperText={field.state.meta.errors[0]?.toString()}
-              />
-            )}
-          </form.Field>
+          <Stack direction="row" spacing={2}>
+            <form.Field name="firstName">
+              {(field) => (
+                <TextField
+                  label="First Name"
+                  fullWidth
+                  autoComplete="given-name"
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  onBlur={field.handleBlur}
+                  error={field.state.meta.errors.length > 0}
+                  helperText={field.state.meta.errors[0]?.toString()}
+                />
+              )}
+            </form.Field>
+            <form.Field name="lastName">
+              {(field) => (
+                <TextField
+                  label="Last Name"
+                  fullWidth
+                  autoComplete="family-name"
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  onBlur={field.handleBlur}
+                  error={field.state.meta.errors.length > 0}
+                  helperText={field.state.meta.errors[0]?.toString()}
+                />
+              )}
+            </form.Field>
+          </Stack>
 
           <form.Field name="password">
             {(field) => (

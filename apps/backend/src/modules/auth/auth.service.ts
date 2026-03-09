@@ -31,15 +31,12 @@ export class AuthService {
       throw new BadRequestError(PASSWORD_REQUIREMENTS);
     }
 
-    const existingUser = await this.prisma.user.findFirst({
-      where: {
-        OR: [{ email: body.email }, { username: body.username }],
-      },
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: body.email },
     });
 
     if (existingUser) {
-      const field = existingUser.email === body.email ? "email" : "username";
-      throw new ConflictError(`User with this ${field} already exists`);
+      throw new ConflictError("User with this email already exists");
     }
 
     const passwordHash = await hashPassword(body.password);
@@ -49,7 +46,8 @@ export class AuthService {
     const user = await this.prisma.user.create({
       data: {
         email: body.email,
-        username: body.username,
+        firstName: body.firstName,
+        lastName: body.lastName,
         passwordHash,
         emailVerificationToken,
         accounts: {
