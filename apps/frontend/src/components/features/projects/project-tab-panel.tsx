@@ -33,5 +33,5 @@ export function ProjectTabPanel(props: ProjectTabPanelProps): ReactElement {
     );
   }
 
-  return <OverviewTab project={project} memberCount={memberCount} />;
+  return <OverviewTab project={project} projectId={projectId} memberCount={memberCount} />;
 }
