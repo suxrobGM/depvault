@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import { Alert, Box, Button, CardContent, Stack, Typography } from "@mui/material";
+import { GitHub as GitHubIcon } from "@mui/icons-material";
+import { Alert, Box, Button, CardContent, Chip, Stack, Typography } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormTextField } from "@/components/ui/form-text-field";
@@ -10,6 +11,7 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useAuth } from "@/hooks/use-auth";
 import { useNotification } from "@/hooks/use-notification";
 import { client } from "@/lib/api";
+import { API_BASE_URL } from "@/lib/constants";
 import type { AuthUser } from "@/providers/auth-provider";
 import { changeEmailSchema, changePasswordSchema } from "./schemas";
 
@@ -84,6 +86,51 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
 
   return (
     <Stack spacing={3}>
+      <GlassCard className="vault-fade-up vault-delay-1">
+        <CardContent sx={{ p: 3 }}>
+          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+            GitHub Account
+          </Typography>
+          {user.githubId ? (
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Stack direction="row" alignItems="center" spacing={1.5}>
+                <GitHubIcon />
+                <Box>
+                  <Typography variant="body2" fontWeight={600}>
+                    {user.githubUsername ?? "Connected"}
+                  </Typography>
+                  <Chip label="Linked" size="small" color="success" />
+                </Box>
+              </Stack>
+              <Button
+                variant="outlined"
+                size="small"
+                component="a"
+                href={`${API_BASE_URL}/api/auth/github`}
+              >
+                Relink
+              </Button>
+            </Stack>
+          ) : (
+            <Stack spacing={1.5}>
+              <Typography variant="body2" color="text.secondary">
+                Link your GitHub account to import dependencies from your repositories.
+              </Typography>
+              <Box>
+                <Button
+                  variant="contained"
+                  startIcon={<GitHubIcon />}
+                  component="a"
+                  href={`${API_BASE_URL}/api/auth/github`}
+                >
+                  Link GitHub
+                </Button>
+              </Box>
+            </Stack>
+          )}
+        </CardContent>
+      </GlassCard>
+
       <GlassCard className="vault-fade-up vault-delay-2">
         <CardContent sx={{ p: 3 }}>
           <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>

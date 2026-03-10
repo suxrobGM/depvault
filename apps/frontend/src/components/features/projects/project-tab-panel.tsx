@@ -2,12 +2,13 @@
 
 import type { ReactElement } from "react";
 import type { ProjectResponse } from "@/types/api/project";
-import { MembersTab } from "./members-tab";
+import { AnalysisTab } from "./analysis/analysis-tab";
+import { MembersTab } from "./members/members-tab";
 import { OverviewTab } from "./overview-tab";
-import { SettingsTab } from "./settings-tab";
+import { SettingsTab } from "./settings/settings-tab";
 
 interface ProjectTabPanelProps {
-  activeTab: "overview" | "members" | "settings";
+  activeTab: "overview" | "analysis" | "members" | "settings";
   project: ProjectResponse;
   projectId: string;
   isOwner: boolean;
@@ -17,6 +18,10 @@ interface ProjectTabPanelProps {
 
 export function ProjectTabPanel(props: ProjectTabPanelProps): ReactElement {
   const { activeTab, project, projectId, isOwner, canEdit, memberCount } = props;
+
+  if (activeTab === "analysis") {
+    return <AnalysisTab projectId={projectId} canEdit={canEdit} />;
+  }
 
   if (activeTab === "members") {
     return <MembersTab projectId={projectId} isOwner={isOwner} />;

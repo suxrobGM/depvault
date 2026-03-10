@@ -25,7 +25,7 @@ import { useNotification } from "@/hooks/use-notification";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 import type { ProjectResponse } from "@/types/api/project";
-import { updateProjectSchema } from "./schemas";
+import { updateProjectSchema } from "../schemas";
 
 interface SettingsTabProps {
   project: ProjectResponse;

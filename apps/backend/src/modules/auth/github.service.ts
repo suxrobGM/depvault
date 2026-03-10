@@ -23,7 +23,7 @@ export class GitHubService {
       client_id: clientId,
       redirect_uri:
         process.env.GITHUB_CALLBACK_URL ?? "http://localhost:4000/api/auth/github/callback",
-      scope: "read:user user:email",
+      scope: "read:user user:email repo",
       state: randomUUID(),
     });
 
@@ -38,7 +38,7 @@ export class GitHubService {
     });
 
     if (existingByGithubId) {
-      return this.loginUser(existingByGithubId, ghAccessToken);
+      return this.loginUser(existingByGithubId, ghAccessToken, profile.login);
     }
 
     const rawEmail = profile.email ?? (await this.fetchPrimaryEmail(ghAccessToken));
@@ -64,6 +64,7 @@ export class GitHubService {
         where: { id: existingByEmail.id },
         data: {
           githubId: profile.id.toString(),
+          githubUsername: profile.login,
           githubAccessToken: ghAccessToken,
           avatarUrl: existingByEmail.avatarUrl ?? profile.avatar_url,
           firstName: existingByEmail.firstName ?? firstName,
@@ -73,7 +74,7 @@ export class GitHubService {
       });
 
       await this.upsertAccount(updated.id, profile.id.toString());
-      return this.loginUser(updated, ghAccessToken);
+      return this.loginUser(updated, ghAccessToken, profile.login);
     }
 
     return this.createUser(profile, email, ghAccessToken);
@@ -94,6 +95,7 @@ export class GitHubService {
       where: { id: userId },
       data: {
         githubId: profile.id.toString(),
+        githubUsername: profile.login,
         githubAccessToken: ghAccessToken,
       },
     });
@@ -168,10 +170,14 @@ export class GitHubService {
       avatarUrl: string | null;
     },
     ghAccessToken: string,
+    ghUsername?: string,
   ): Promise<AuthResponse> {
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { githubAccessToken: ghAccessToken },
+      data: {
+        githubAccessToken: ghAccessToken,
+        ...(ghUsername && { githubUsername: ghUsername }),
+      },
     });
 
     return this.tokenService.issueTokens(user, "GITHUB", user.id);
@@ -201,6 +207,7 @@ export class GitHubService {
         lastName,
         avatarUrl: profile.avatar_url,
         githubId: profile.id.toString(),
+        githubUsername: profile.login,
         githubAccessToken: ghAccessToken,
         emailVerified: true,
         accounts: {

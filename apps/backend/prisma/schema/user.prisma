@@ -17,6 +17,7 @@ model User {
   passwordHash           String?   @map("password_hash")
   avatarUrl              String?   @map("avatar_url")
   githubId               String?   @unique @map("github_id")
+  githubUsername          String?   @map("github_username")
   githubAccessToken      String?   @map("github_access_token")
   emailVerified          Boolean   @default(false) @map("email_verified")
   emailVerificationToken String?   @map("email_verification_token")

@@ -42,6 +42,7 @@ export class UserService {
       avatarUrl: user.avatarUrl,
       emailVerified: user.emailVerified,
       githubId: user.githubId,
+      githubUsername: user.githubUsername,
       hasPassword: !!user.passwordHash,
       createdAt: user.createdAt.toISOString(),
     };
@@ -66,6 +67,7 @@ export class UserService {
       avatarUrl: user.avatarUrl,
       emailVerified: user.emailVerified,
       githubId: user.githubId,
+      githubUsername: user.githubUsername,
       hasPassword: !!user.passwordHash,
       createdAt: user.createdAt.toISOString(),
     };

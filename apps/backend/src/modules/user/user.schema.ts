@@ -9,6 +9,7 @@ export const UserProfileResponseSchema = t.Object({
   avatarUrl: t.Nullable(t.String()),
   emailVerified: t.Boolean(),
   githubId: t.Nullable(t.String()),
+  githubUsername: t.Nullable(t.String()),
   hasPassword: t.Boolean(),
   createdAt: t.String(),
 });

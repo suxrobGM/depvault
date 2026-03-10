@@ -15,7 +15,7 @@ import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useNotification } from "@/hooks/use-notification";
 import { client } from "@/lib/api";
-import { inviteMemberSchema } from "./schemas";
+import { inviteMemberSchema } from "../schemas";
 
 interface InviteMemberDialogProps {
   open: boolean;

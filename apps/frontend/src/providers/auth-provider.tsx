@@ -13,6 +13,8 @@ export interface AuthUser {
   role: string;
   emailVerified: boolean;
   avatarUrl: string | null;
+  githubId: string | null;
+  githubUsername: string | null;
   hasPassword: boolean;
 }
 
