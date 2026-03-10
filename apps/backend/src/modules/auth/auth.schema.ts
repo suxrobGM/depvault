@@ -12,10 +12,6 @@ export const LoginBodySchema = t.Object({
   password: t.String(),
 });
 
-export const RefreshBodySchema = t.Object({
-  refreshToken: t.String(),
-});
-
 export const ForgotPasswordBodySchema = t.Object({
   email: t.String({ format: "email" }),
 });
@@ -58,7 +54,6 @@ export const LinkGitHubBodySchema = t.Object({
 
 export type RegisterBody = Static<typeof RegisterBodySchema>;
 export type LoginBody = Static<typeof LoginBodySchema>;
-export type RefreshBody = Static<typeof RefreshBodySchema>;
 export type ForgotPasswordBody = Static<typeof ForgotPasswordBodySchema>;
 export type ResetPasswordBody = Static<typeof ResetPasswordBodySchema>;
 export type VerifyEmailBody = Static<typeof VerifyEmailBodySchema>;

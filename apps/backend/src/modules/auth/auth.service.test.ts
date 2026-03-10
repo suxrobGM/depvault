@@ -238,7 +238,7 @@ describe("AuthService", () => {
     it("should return new tokens for a valid refresh token", async () => {
       mockPrisma.user.findUnique.mockResolvedValueOnce(validUser);
 
-      const result = await service.refresh({ refreshToken: "valid-refresh-token" });
+      const result = await service.refresh("valid-refresh-token");
 
       expect(result.accessToken).toBe("mock-access-token");
       expect(result.refreshToken).toBe("mock-refresh-token");
@@ -246,17 +246,13 @@ describe("AuthService", () => {
     });
 
     it("should throw UnauthorizedError for an expired/invalid refresh token", async () => {
-      expect(service.refresh({ refreshToken: "expired-token" })).rejects.toBeInstanceOf(
-        UnauthorizedError,
-      );
+      expect(service.refresh("expired-token")).rejects.toBeInstanceOf(UnauthorizedError);
     });
 
     it("should throw UnauthorizedError when user is not found", async () => {
       mockPrisma.user.findUnique.mockResolvedValueOnce(null);
 
-      expect(service.refresh({ refreshToken: "valid-refresh-token" })).rejects.toBeInstanceOf(
-        UnauthorizedError,
-      );
+      expect(service.refresh("valid-refresh-token")).rejects.toBeInstanceOf(UnauthorizedError);
     });
 
     it("should throw UnauthorizedError when user is soft-deleted", async () => {
@@ -265,9 +261,7 @@ describe("AuthService", () => {
         deletedAt: new Date(),
       });
 
-      expect(service.refresh({ refreshToken: "valid-refresh-token" })).rejects.toBeInstanceOf(
-        UnauthorizedError,
-      );
+      expect(service.refresh("valid-refresh-token")).rejects.toBeInstanceOf(UnauthorizedError);
     });
 
     it("should throw UnauthorizedError when no stored refresh token exists", async () => {
@@ -285,9 +279,7 @@ describe("AuthService", () => {
         ],
       });
 
-      expect(service.refresh({ refreshToken: "valid-refresh-token" })).rejects.toBeInstanceOf(
-        UnauthorizedError,
-      );
+      expect(service.refresh("valid-refresh-token")).rejects.toBeInstanceOf(UnauthorizedError);
     });
 
     it("should revoke all tokens on replay attack and throw UnauthorizedError", async () => {
@@ -305,9 +297,7 @@ describe("AuthService", () => {
         ],
       });
 
-      await expect(service.refresh({ refreshToken: "valid-refresh-token" })).rejects.toBeInstanceOf(
-        UnauthorizedError,
-      );
+      expect(service.refresh("valid-refresh-token")).rejects.toBeInstanceOf(UnauthorizedError);
 
       expect(mockPrisma.account.updateMany).toHaveBeenCalledWith({
         where: { userId: "user-uuid" },

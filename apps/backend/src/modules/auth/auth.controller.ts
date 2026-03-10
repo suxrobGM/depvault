@@ -9,7 +9,6 @@ import {
   LinkGitHubBodySchema,
   LoginBodySchema,
   MessageResponseSchema,
-  RefreshBodySchema,
   RegisterBodySchema,
   ResetPasswordBodySchema,
   VerifyEmailBodySchema,
@@ -62,18 +61,18 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
   )
   .post(
     "/refresh",
-    async ({ body, cookie }) => {
-      const result = await authService.refresh(body);
+    async ({ cookie }) => {
+      const refreshToken = String(cookie.refresh_token?.value ?? "");
+      const result = await authService.refresh(refreshToken);
       setAuthCookies(cookie, result);
       return result;
     },
     {
-      body: RefreshBodySchema,
       response: AuthResponseSchema,
       detail: {
         summary: "Refresh access token",
         description:
-          "Exchange a valid refresh token for a new access/refresh token pair. The old refresh token is invalidated (rotation).",
+          "Exchange the refresh_token cookie for a new access/refresh token pair. The old refresh token is invalidated (rotation).",
       },
     },
   )

@@ -12,7 +12,6 @@ import type {
   AuthResponse,
   ForgotPasswordBody,
   LoginBody,
-  RefreshBody,
   RegisterBody,
   ResetPasswordBody,
   VerifyEmailBody,
@@ -99,10 +98,10 @@ export class AuthService {
     return this.tokenService.issueTokens(user, "EMAIL", user.email);
   }
 
-  async refresh(body: RefreshBody): Promise<AuthResponse> {
+  async refresh(refreshToken: string): Promise<AuthResponse> {
     let sub: string;
     try {
-      ({ sub } = await verifyRefreshToken(body.refreshToken));
+      ({ sub } = await verifyRefreshToken(refreshToken));
     } catch {
       throw new UnauthorizedError("Invalid or expired refresh token");
     }
@@ -116,7 +115,7 @@ export class AuthService {
       throw new UnauthorizedError("User not found");
     }
 
-    const matchedAccount = await this.findMatchingAccount(user.accounts, body.refreshToken);
+    const matchedAccount = await this.findMatchingAccount(user.accounts, refreshToken);
     if (!matchedAccount) {
       throw new UnauthorizedError("Invalid refresh token");
     }
