@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import { Alert, Button, Stack, TextField, Typography } from "@mui/material";
+import { Alert, Button, Stack, Typography } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import Link from "next/link";
 import { resetPasswordAction } from "@/actions/auth";
+import { FormTextField } from "@/components/ui/form-text-field";
 import { ROUTES } from "@/lib/constants";
 import { resetPasswordSchema } from "./schemas";
 
@@ -55,38 +56,22 @@ export function ResetPasswordForm(props: ResetPasswordFormProps): ReactElement {
       <Stack spacing={2.5}>
         {serverError && <Alert severity="error">{serverError}</Alert>}
 
-        <form.Field name="password">
-          {(field) => (
-            <TextField
-              label="New Password"
-              type="password"
-              fullWidth
-              autoComplete="new-password"
-              autoFocus
-              value={field.state.value}
-              onChange={(e) => field.handleChange(e.target.value)}
-              onBlur={field.handleBlur}
-              error={field.state.meta.errors.length > 0}
-              helperText={field.state.meta.errors[0]?.toString()}
-            />
-          )}
-        </form.Field>
+        <FormTextField
+          form={form}
+          name="password"
+          label="New Password"
+          type="password"
+          autoComplete="new-password"
+          autoFocus
+        />
 
-        <form.Field name="confirmPassword">
-          {(field) => (
-            <TextField
-              label="Confirm New Password"
-              type="password"
-              fullWidth
-              autoComplete="new-password"
-              value={field.state.value}
-              onChange={(e) => field.handleChange(e.target.value)}
-              onBlur={field.handleBlur}
-              error={field.state.meta.errors.length > 0}
-              helperText={field.state.meta.errors[0]?.toString()}
-            />
-          )}
-        </form.Field>
+        <FormTextField
+          form={form}
+          name="confirmPassword"
+          label="Confirm New Password"
+          type="password"
+          autoComplete="new-password"
+        />
 
         <Button
           type="submit"

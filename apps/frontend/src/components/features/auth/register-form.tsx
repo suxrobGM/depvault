@@ -2,9 +2,10 @@
 
 import { useState, type ReactElement } from "react";
 import { GitHub as GitHubIcon, MarkEmailRead as MarkEmailReadIcon } from "@mui/icons-material";
-import { Alert, Button, Divider, Stack, TextField, Typography } from "@mui/material";
+import { Alert, Button, Divider, Stack, Typography } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import Link from "next/link";
+import { FormTextField } from "@/components/ui/form-text-field";
 import { client } from "@/lib/api";
 import { API_BASE_URL, ROUTES } from "@/lib/constants";
 import { registerSchema } from "./schemas";
@@ -80,85 +81,45 @@ export function RegisterForm(): ReactElement {
         <Stack spacing={2.5}>
           {serverError && <Alert severity="error">{serverError}</Alert>}
 
-          <form.Field name="email">
-            {(field) => (
-              <TextField
-                label="Email"
-                type="email"
-                fullWidth
-                autoComplete="email"
-                autoFocus
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                onBlur={field.handleBlur}
-                error={field.state.meta.errors.length > 0}
-                helperText={field.state.meta.errors[0]?.toString()}
-              />
-            )}
-          </form.Field>
+          <FormTextField
+            form={form}
+            name="email"
+            label="Email"
+            type="email"
+            autoComplete="email"
+            autoFocus
+          />
 
           <Stack direction="row" spacing={2}>
-            <form.Field name="firstName">
-              {(field) => (
-                <TextField
-                  label="First Name"
-                  fullWidth
-                  autoComplete="given-name"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
-                  error={field.state.meta.errors.length > 0}
-                  helperText={field.state.meta.errors[0]?.toString()}
-                />
-              )}
-            </form.Field>
-            <form.Field name="lastName">
-              {(field) => (
-                <TextField
-                  label="Last Name"
-                  fullWidth
-                  autoComplete="family-name"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
-                  error={field.state.meta.errors.length > 0}
-                  helperText={field.state.meta.errors[0]?.toString()}
-                />
-              )}
-            </form.Field>
+            <FormTextField
+              form={form}
+              name="firstName"
+              label="First Name"
+              autoComplete="given-name"
+            />
+            <FormTextField
+              form={form}
+              name="lastName"
+              label="Last Name"
+              autoComplete="family-name"
+            />
           </Stack>
 
-          <form.Field name="password">
-            {(field) => (
-              <TextField
-                label="Password"
-                type="password"
-                fullWidth
-                autoComplete="new-password"
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                onBlur={field.handleBlur}
-                error={field.state.meta.errors.length > 0}
-                helperText={field.state.meta.errors[0]?.toString()}
-              />
-            )}
-          </form.Field>
+          <FormTextField
+            form={form}
+            name="password"
+            label="Password"
+            type="password"
+            autoComplete="new-password"
+          />
 
-          <form.Field name="confirmPassword">
-            {(field) => (
-              <TextField
-                label="Confirm Password"
-                type="password"
-                fullWidth
-                autoComplete="new-password"
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                onBlur={field.handleBlur}
-                error={field.state.meta.errors.length > 0}
-                helperText={field.state.meta.errors[0]?.toString()}
-              />
-            )}
-          </form.Field>
+          <FormTextField
+            form={form}
+            name="confirmPassword"
+            label="Confirm Password"
+            type="password"
+            autoComplete="new-password"
+          />
 
           <Button
             type="submit"

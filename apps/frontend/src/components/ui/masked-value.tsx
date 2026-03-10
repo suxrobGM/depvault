@@ -22,7 +22,7 @@ export function MaskedValue(props: MaskedValueProps): ReactElement {
       >
         {visible ? value : maskChar.repeat(12)}
       </Typography>
-      <IconButton size="small" onClick={() => setVisible((v) => !v)}>
+      <IconButton size="small" onClick={() => setVisible((v) => !v)} aria-label="Toggle visibility">
         {visible ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
       </IconButton>
     </Stack>

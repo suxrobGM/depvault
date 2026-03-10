@@ -5,28 +5,19 @@ import {
   Share as ShareIcon,
 } from "@mui/icons-material";
 import { Box, Chip, Grid, IconButton, Stack, Typography } from "@mui/material";
+import { BrowserWindow } from "@/components/ui/browser-window";
 import { GlassCard } from "@/components/ui/glass-card";
 import { GradientText } from "@/components/ui/gradient-text";
+import { IconBox } from "@/components/ui/icon-box";
 
 export function FeatureSharing(): ReactElement {
   return (
     <Grid container spacing={4} alignItems="center">
       <Grid size={{ xs: 12, md: 6 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
-          <Box
-            sx={{
-              width: 44,
-              height: 44,
-              borderRadius: 2,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              bgcolor: "rgba(6, 182, 212, 0.1)",
-              color: "#06b6d4",
-            }}
-          >
+          <IconBox color="#06b6d4">
             <ShareIcon />
-          </Box>
+          </IconBox>
           <GradientText
             variant="h4"
             component="h3"
@@ -48,24 +39,7 @@ export function FeatureSharing(): ReactElement {
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
         <GlassCard hoverGlow={false} sx={{ overflow: "hidden" }}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 0.75,
-              px: 2,
-              py: 1,
-              borderBottom: 1,
-              borderColor: "vault.glassBorder",
-            }}
-          >
-            <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "#f87171" }} />
-            <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "#fbbf24" }} />
-            <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "#34d399" }} />
-            <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-              share secret
-            </Typography>
-          </Box>
+          <BrowserWindow title="share secret" />
           <Box sx={{ p: 2.5 }}>
             <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: "block" }}>
               Secure link generated
@@ -98,7 +72,7 @@ export function FeatureSharing(): ReactElement {
               >
                 https://depvault.app/s/x7Kp2mNq9vBt...
               </Typography>
-              <IconButton size="small" sx={{ color: "text.secondary" }}>
+              <IconButton size="small" aria-label="Copy link" sx={{ color: "text.secondary" }}>
                 <CopyIcon sx={{ fontSize: 16 }} />
               </IconButton>
             </Box>
@@ -116,7 +90,7 @@ export function FeatureSharing(): ReactElement {
                   height: 20,
                   fontSize: "0.65rem",
                   bgcolor: "rgba(6, 182, 212, 0.12)",
-                  color: "#22d3ee",
+                  color: "var(--mui-palette-info-light)",
                   fontWeight: 600,
                 }}
               />
@@ -127,7 +101,7 @@ export function FeatureSharing(): ReactElement {
                   height: 20,
                   fontSize: "0.65rem",
                   bgcolor: "rgba(245, 158, 11, 0.12)",
-                  color: "#fbbf24",
+                  color: "var(--mui-palette-warning-main)",
                   fontWeight: 600,
                 }}
               />

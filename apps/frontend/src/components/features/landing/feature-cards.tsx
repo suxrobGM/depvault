@@ -11,6 +11,7 @@ import {
 } from "@mui/icons-material";
 import { Box, CardContent, Grid, Stack, Typography } from "@mui/material";
 import { GlassCard } from "@/components/ui/glass-card";
+import { IconBox } from "@/components/ui/icon-box";
 import { SectionContainer } from "@/components/ui/section-container";
 import { FeatureAnalysis } from "./feature-analysis";
 import { FeatureSharing } from "./feature-sharing";
@@ -29,28 +30,28 @@ const moreFeatures: MoreFeature[] = [
     title: "License Compliance",
     description:
       "Detect license types per dependency, configure allow/warn/block policies, and export audit reports.",
-    color: "#10b981",
+    color: "var(--mui-palette-primary-main)",
   },
   {
     icon: <GitIcon />,
     title: "Git Secret Detection",
     description:
       "Scan connected repos for accidentally committed secrets with built-in and custom regex patterns.",
-    color: "#f87171",
+    color: "var(--mui-palette-error-main)",
   },
   {
     icon: <CiCdIcon />,
     title: "CI/CD Secret Injection",
     description:
       "Generate scoped, short-lived tokens for pipelines to pull secrets at build time — no .env files in CI.",
-    color: "#22d3ee",
+    color: "var(--mui-palette-info-light)",
   },
   {
     icon: <RotationIcon />,
     title: "Secret Rotation & Alerts",
     description:
       "Set rotation policies per variable, track age with visual indicators, and receive email reminders.",
-    color: "#f59e0b",
+    color: "var(--mui-palette-secondary-main)",
   },
   {
     icon: <ConverterIcon />,
@@ -126,21 +127,9 @@ export function LandingFeatureCards(): ReactElement {
             <Grid key={feature.title} size={{ xs: 12, sm: 6, md: 3 }}>
               <GlassCard glowColor={feature.color} sx={{ height: "100%" }}>
                 <CardContent sx={{ p: 3 }}>
-                  <Box
-                    sx={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 2,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      bgcolor: `${feature.color}1a`,
-                      color: feature.color,
-                      mb: 2,
-                    }}
-                  >
+                  <IconBox color={feature.color} sx={{ mb: 2 }}>
                     {feature.icon}
-                  </Box>
+                  </IconBox>
                   <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 0.5 }}>
                     {feature.title}
                   </Typography>

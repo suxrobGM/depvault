@@ -26,7 +26,12 @@ export function TopBar(props: TopBarProps): ReactElement {
       }}
     >
       <Toolbar>
-        <IconButton edge="start" onClick={onMenuClick} sx={{ mr: 2, display: { md: "none" } }}>
+        <IconButton
+          edge="start"
+          onClick={onMenuClick}
+          aria-label="Open menu"
+          sx={{ mr: 2, display: { md: "none" } }}
+        >
           <MenuIcon />
         </IconButton>
         <Box sx={{ flexGrow: 1 }} />

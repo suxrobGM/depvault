@@ -47,7 +47,7 @@ export default function ErrorPage(props: ErrorPageProps): ReactElement {
         <GradientText
           variant="h3"
           component="h1"
-          gradient="linear-gradient(135deg, #f59e0b, #fbbf24, #d97706)"
+          gradient="linear-gradient(135deg, var(--mui-palette-secondary-main), var(--mui-palette-secondary-light), var(--mui-palette-secondary-dark))"
         >
           Something went wrong
         </GradientText>

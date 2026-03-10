@@ -31,7 +31,7 @@ export function UserMenu(): ReactElement {
 
   return (
     <>
-      <IconButton onClick={handleOpen} size="small">
+      <IconButton onClick={handleOpen} size="small" aria-label="User menu">
         <Avatar src={user?.avatarUrl ?? undefined} sx={{ width: 32, height: 32, fontSize: 14 }}>
           {initials}
         </Avatar>

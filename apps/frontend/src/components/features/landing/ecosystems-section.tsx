@@ -6,6 +6,7 @@ import {
 } from "@mui/icons-material";
 import { Box, Grid, Stack, Typography } from "@mui/material";
 import { GlassCard } from "@/components/ui/glass-card";
+import { IconBox } from "@/components/ui/icon-box";
 import { SectionContainer } from "@/components/ui/section-container";
 
 interface EcosystemCategory {
@@ -20,13 +21,13 @@ const categories: EcosystemCategory[] = [
   {
     title: "Dependency Ecosystems",
     icon: <CodeIcon sx={{ fontSize: 20 }} />,
-    color: "#10b981",
+    color: "var(--mui-palette-primary-main)",
     items: ["Node.js", "Python", "Rust", ".NET", "Go", "Java / Kotlin", "Ruby", "PHP"],
   },
   {
     title: "Config Formats",
     icon: <FileIcon sx={{ fontSize: 20 }} />,
-    color: "#f59e0b",
+    color: "var(--mui-palette-secondary-main)",
     mono: true,
     items: [
       ".env",
@@ -42,7 +43,7 @@ const categories: EcosystemCategory[] = [
   {
     title: "Secret Files",
     icon: <KeyIcon sx={{ fontSize: 20 }} />,
-    color: "#22d3ee",
+    color: "var(--mui-palette-info-light)",
     items: [
       "SSL / TLS Certificates",
       "Private Keys",
@@ -77,20 +78,9 @@ export function EcosystemsSection(): ReactElement {
             <Grid key={cat.title} size={{ xs: 12, md: 4 }}>
               <GlassCard hoverGlow={false} sx={{ height: "100%", p: 3 }}>
                 <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2.5 }}>
-                  <Box
-                    sx={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 1.5,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      bgcolor: `${cat.color}1a`,
-                      color: cat.color,
-                    }}
-                  >
+                  <IconBox color={cat.color} size={36}>
                     {cat.icon}
-                  </Box>
+                  </IconBox>
                   <Typography variant="subtitle2" sx={{ letterSpacing: "0.04em" }}>
                     {cat.title}
                   </Typography>

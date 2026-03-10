@@ -10,6 +10,7 @@ import { Box, CardContent, Grid, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 import { EmptyState } from "@/components/ui/empty-state";
 import { GlassCard } from "@/components/ui/glass-card";
+import { IconBox } from "@/components/ui/icon-box";
 import { ROUTES } from "@/lib/constants";
 import { DashboardGreeting } from "./dashboard-greeting";
 import { DashboardOnboarding } from "./dashboard-onboarding";
@@ -20,21 +21,21 @@ const quickActions = [
     icon: <AddIcon />,
     title: "Create Project",
     description: "Set up a project to organize dependencies, secrets, and secure files",
-    color: "#10b981",
+    color: "var(--mui-palette-primary-main)",
     href: ROUTES.dashboard,
   },
   {
     icon: <SearchIcon />,
     title: "Analyze Dependencies",
     description: "Upload a dependency file to scan for vulnerabilities and license issues",
-    color: "#f59e0b",
+    color: "var(--mui-palette-secondary-main)",
     href: ROUTES.converter,
   },
   {
     icon: <VpnKeyIcon />,
     title: "Manage Vault",
     description: "Store environment variables and secret files with AES-256-GCM encryption",
-    color: "#06b6d4",
+    color: "var(--mui-palette-info-dark)",
     href: ROUTES.secrets,
   },
 ];
@@ -66,20 +67,9 @@ export function DashboardView(): ReactElement {
               >
                 <CardContent className={`vault-fade-up vault-delay-${index + 5}`} sx={{ p: 3 }}>
                   <Stack direction="row" alignItems="center" justifyContent="space-between">
-                    <Box
-                      sx={{
-                        width: 56,
-                        height: 56,
-                        borderRadius: 2,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        bgcolor: `${action.color}1a`,
-                        color: action.color,
-                      }}
-                    >
+                    <IconBox color={action.color} size={56}>
                       {action.icon}
-                    </Box>
+                    </IconBox>
                     <ChevronIcon sx={{ color: "text.secondary", fontSize: 20 }} />
                   </Stack>
                   <Typography variant="subtitle1" fontWeight={600} sx={{ mt: 2 }} gutterBottom>

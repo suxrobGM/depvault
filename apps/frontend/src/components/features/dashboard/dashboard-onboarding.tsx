@@ -60,18 +60,31 @@ function getStorageKey(userId: string): string {
   return `depvault-onboarding-${userId}`;
 }
 
+/**
+ * Load completed steps from localStorage for the given user ID.
+ * @param userId
+ * @returns
+ */
+function loadCompleted(userId: string | undefined): Set<string> {
+  if (typeof window === "undefined" || !userId) {
+    return new Set();
+  }
+
+  try {
+    const stored = localStorage.getItem(getStorageKey(userId));
+    if (stored) {
+      return new Set(JSON.parse(stored));
+    }
+  } catch {
+    /* ignore parse errors */
+  }
+  return new Set();
+}
+
 export function DashboardOnboarding(): ReactElement {
   const { user } = useAuth();
-  const [completed, setCompleted] = useState<Set<string>>(() => {
-    if (!user?.id) return new Set();
-    try {
-      const stored = localStorage.getItem(getStorageKey(user.id));
-      if (stored) return new Set(JSON.parse(stored));
-    } catch {
-      /* ignore parse errors */
-    }
-    return new Set();
-  });
+
+  const [completed, setCompleted] = useState<Set<string>>(() => loadCompleted(user?.id));
 
   const toggle = (id: string) => {
     if (!user?.id) {
@@ -118,7 +131,8 @@ export function DashboardOnboarding(): ReactElement {
               width: `${progress}%`,
               height: "100%",
               borderRadius: 2,
-              background: "linear-gradient(90deg, #10b981, #34d399)",
+              background:
+                "linear-gradient(90deg, var(--mui-palette-primary-main), var(--mui-palette-primary-light))",
               transition: "width 0.3s ease",
             }}
           />

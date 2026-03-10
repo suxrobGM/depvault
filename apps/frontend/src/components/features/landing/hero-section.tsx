@@ -123,14 +123,10 @@ export function HeroSection(): ReactElement {
               borderColor: "vault.glassBorder",
             }}
           >
-            <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "#ef4444" }} />
-            <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "#f59e0b" }} />
-            <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "#10b981" }} />
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ ml: 1.5, fontFamily: "var(--font-jetbrains), monospace", fontSize: "0.7rem" }}
-            >
+            <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "error.main" }} />
+            <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "warning.main" }} />
+            <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "success.main" }} />
+            <Typography variant="mono" color="text.secondary" sx={{ ml: 1.5 }}>
               depvault — analysis
             </Typography>
           </Box>

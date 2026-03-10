@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useMemo,
-  useState,
-  type PropsWithChildren,
-  type ReactElement,
-} from "react";
+import { createContext, useState, type PropsWithChildren, type ReactElement } from "react";
 import { useRouter } from "next/navigation";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
@@ -43,7 +36,7 @@ export function AuthProvider(props: AuthProviderProps): ReactElement {
   const [user, setUser] = useState<AuthUser | null>(initialUser);
   const [isLoading, setIsLoading] = useState(false);
 
-  const logout = useCallback(async () => {
+  const logout = async () => {
     setIsLoading(true);
     try {
       await client.api.auth.logout.post();
@@ -52,18 +45,15 @@ export function AuthProvider(props: AuthProviderProps): ReactElement {
       setIsLoading(false);
       router.push(ROUTES.login);
     }
-  }, [router]);
+  };
 
-  const value = useMemo<AuthContextValue>(
-    () => ({
-      user,
-      isAuthenticated: !!user,
-      isLoading,
-      setUser,
-      logout,
-    }),
-    [user, isLoading, logout],
-  );
+  const value: AuthContextValue = {
+    user,
+    isAuthenticated: !!user,
+    isLoading,
+    setUser,
+    logout,
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

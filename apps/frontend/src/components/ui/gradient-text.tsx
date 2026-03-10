@@ -10,7 +10,8 @@ interface GradientTextProps extends PropsWithChildren {
   sx?: SxProps<Theme>;
 }
 
-const DEFAULT_GRADIENT = "linear-gradient(135deg, #10b981, #34d399, #06b6d4)";
+const DEFAULT_GRADIENT =
+  "linear-gradient(135deg, var(--mui-palette-primary-main), var(--mui-palette-primary-light), var(--mui-palette-info-dark))";
 
 export function GradientText(props: GradientTextProps): ReactElement {
   const {

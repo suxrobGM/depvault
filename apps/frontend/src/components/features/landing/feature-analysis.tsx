@@ -1,8 +1,10 @@
 import type { ReactElement } from "react";
 import { Security as SecurityIcon } from "@mui/icons-material";
 import { Box, Chip, Grid, Stack, Typography } from "@mui/material";
+import { BrowserWindow } from "@/components/ui/browser-window";
 import { GlassCard } from "@/components/ui/glass-card";
 import { GradientText } from "@/components/ui/gradient-text";
+import { IconBox } from "@/components/ui/icon-box";
 
 const mockRows = [
   { name: "lodash", current: "4.17.15", latest: "4.17.21", severity: "warning" },
@@ -13,9 +15,21 @@ const mockRows = [
 ];
 
 const severityColors: Record<string, { bg: string; color: string; label: string }> = {
-  error: { bg: "rgba(248, 113, 113, 0.12)", color: "#f87171", label: "Critical" },
-  warning: { bg: "rgba(251, 191, 36, 0.12)", color: "#fbbf24", label: "Outdated" },
-  success: { bg: "rgba(52, 211, 153, 0.12)", color: "#34d399", label: "Up to date" },
+  error: {
+    bg: "rgba(248, 113, 113, 0.12)",
+    color: "var(--mui-palette-error-main)",
+    label: "Critical",
+  },
+  warning: {
+    bg: "rgba(251, 191, 36, 0.12)",
+    color: "var(--mui-palette-warning-main)",
+    label: "Outdated",
+  },
+  success: {
+    bg: "rgba(52, 211, 153, 0.12)",
+    color: "var(--mui-palette-success-main)",
+    label: "Up to date",
+  },
 };
 
 export function FeatureAnalysis(): ReactElement {
@@ -23,20 +37,9 @@ export function FeatureAnalysis(): ReactElement {
     <Grid container spacing={4} alignItems="center">
       <Grid size={{ xs: 12, md: 6 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
-          <Box
-            sx={{
-              width: 44,
-              height: 44,
-              borderRadius: 2,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              bgcolor: "rgba(16, 185, 129, 0.1)",
-              color: "#10b981",
-            }}
-          >
+          <IconBox color="#10b981">
             <SecurityIcon />
-          </Box>
+          </IconBox>
           <GradientText variant="h4" component="h3">
             Dependency Analysis
           </GradientText>
@@ -54,24 +57,7 @@ export function FeatureAnalysis(): ReactElement {
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
         <GlassCard hoverGlow={false} sx={{ overflow: "hidden" }}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 0.75,
-              px: 2,
-              py: 1,
-              borderBottom: 1,
-              borderColor: "vault.glassBorder",
-            }}
-          >
-            <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "#f87171" }} />
-            <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "#fbbf24" }} />
-            <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "#34d399" }} />
-            <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-              analysis — package.json
-            </Typography>
-          </Box>
+          <BrowserWindow title="analysis — package.json" />
           <Box sx={{ p: 0 }}>
             <Box
               sx={{

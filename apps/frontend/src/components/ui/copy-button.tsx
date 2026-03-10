@@ -21,7 +21,7 @@ export function CopyButton(props: CopyButtonProps): ReactElement {
 
   return (
     <Tooltip title={copied ? "Copied!" : "Copy"}>
-      <IconButton size={size} onClick={handleCopy}>
+      <IconButton size={size} onClick={handleCopy} aria-label="Copy to clipboard">
         {copied ? <Check fontSize="small" /> : <ContentCopy fontSize="small" />}
       </IconButton>
     </Tooltip>

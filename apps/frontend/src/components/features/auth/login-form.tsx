@@ -2,10 +2,11 @@
 
 import { useState, type ReactElement } from "react";
 import { GitHub as GitHubIcon } from "@mui/icons-material";
-import { Alert, Button, Divider, Stack, TextField, Typography } from "@mui/material";
+import { Alert, Button, Divider, Stack, Typography } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { FormTextField } from "@/components/ui/form-text-field";
 import { client } from "@/lib/api";
 import { API_BASE_URL, ROUTES } from "@/lib/constants";
 import { loginSchema } from "./schemas";
@@ -56,38 +57,22 @@ export function LoginForm(): ReactElement {
         <Stack spacing={2.5}>
           {serverError && <Alert severity="error">{serverError}</Alert>}
 
-          <form.Field name="email">
-            {(field) => (
-              <TextField
-                label="Email"
-                type="email"
-                fullWidth
-                autoComplete="email"
-                autoFocus
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                onBlur={field.handleBlur}
-                error={field.state.meta.errors.length > 0}
-                helperText={field.state.meta.errors[0]?.toString()}
-              />
-            )}
-          </form.Field>
+          <FormTextField
+            form={form}
+            name="email"
+            label="Email"
+            type="email"
+            autoComplete="email"
+            autoFocus
+          />
 
-          <form.Field name="password">
-            {(field) => (
-              <TextField
-                label="Password"
-                type="password"
-                fullWidth
-                autoComplete="current-password"
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                onBlur={field.handleBlur}
-                error={field.state.meta.errors.length > 0}
-                helperText={field.state.meta.errors[0]?.toString()}
-              />
-            )}
-          </form.Field>
+          <FormTextField
+            form={form}
+            name="password"
+            label="Password"
+            type="password"
+            autoComplete="current-password"
+          />
 
           <Button
             type="submit"

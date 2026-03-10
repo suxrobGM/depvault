@@ -1,4 +1,4 @@
-import { alpha, createTheme } from "@mui/material/styles";
+import { alpha, createTheme, type CSSProperties } from "@mui/material/styles";
 
 declare module "@mui/material/styles" {
   interface Palette {
@@ -18,6 +18,18 @@ declare module "@mui/material/styles" {
       glowPrimary?: string;
       glowSecondary?: string;
     };
+  }
+  interface TypographyVariants {
+    mono: CSSProperties;
+  }
+  interface TypographyVariantsOptions {
+    mono?: CSSProperties;
+  }
+}
+
+declare module "@mui/material/Typography" {
+  interface TypographyPropsVariantOverrides {
+    mono: true;
   }
 }
 
@@ -60,6 +72,10 @@ export const theme = createTheme({
     h4: { fontSize: "1.25rem", fontWeight: 600 },
     h5: { fontSize: "1.125rem", fontWeight: 600 },
     h6: { fontSize: "1rem", fontWeight: 600 },
+    mono: {
+      fontFamily: "var(--font-jetbrains), monospace",
+      fontSize: "0.75rem",
+    },
   },
   shape: { borderRadius: 10 },
   components: {

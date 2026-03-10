@@ -1,6 +1,7 @@
 import type { ReactElement, ReactNode } from "react";
-import { Box, CardContent, Typography } from "@mui/material";
+import { CardContent, Typography } from "@mui/material";
 import { GlassCard } from "./glass-card";
+import { IconBox } from "./icon-box";
 
 interface FeatureCardProps {
   icon: ReactNode;
@@ -15,24 +16,13 @@ export function FeatureCard(props: FeatureCardProps): ReactElement {
   return (
     <GlassCard glowColor={accentColor}>
       <CardContent sx={{ p: 3.5 }}>
-        <Box
-          sx={{
-            width: 48,
-            height: 48,
-            borderRadius: 2,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: `${accentColor}1a`,
-            color: accentColor,
-            mb: 2.5,
-            "& .MuiSvgIcon-root": {
-              fontSize: 24,
-            },
-          }}
+        <IconBox
+          color={accentColor}
+          size={48}
+          sx={{ mb: 2.5, "& .MuiSvgIcon-root": { fontSize: 24 } }}
         >
           {icon}
-        </Box>
+        </IconBox>
         <Typography variant="h6" gutterBottom>
           {title}
         </Typography>

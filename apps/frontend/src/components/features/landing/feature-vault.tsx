@@ -1,8 +1,10 @@
 import type { ReactElement } from "react";
 import { Lock as LockIcon } from "@mui/icons-material";
 import { Box, Chip, Grid, Stack, Typography } from "@mui/material";
+import { BrowserWindow } from "@/components/ui/browser-window";
 import { GlassCard } from "@/components/ui/glass-card";
 import { GradientText } from "@/components/ui/gradient-text";
+import { IconBox } from "@/components/ui/icon-box";
 
 const diffLines = [
   { type: "header", text: "── .env (production vs staging) ──" },
@@ -17,11 +19,11 @@ const diffLines = [
 ];
 
 const lineColors: Record<string, { color: string; bg: string }> = {
-  header: { color: "#94a3b8", bg: "transparent" },
-  same: { color: "#94a3b8", bg: "transparent" },
-  remove: { color: "#f87171", bg: "rgba(248, 113, 113, 0.06)" },
-  add: { color: "#34d399", bg: "rgba(52, 211, 153, 0.06)" },
-  missing: { color: "#fbbf24", bg: "rgba(251, 191, 36, 0.06)" },
+  header: { color: "var(--mui-palette-text-secondary)", bg: "transparent" },
+  same: { color: "var(--mui-palette-text-secondary)", bg: "transparent" },
+  remove: { color: "var(--mui-palette-error-main)", bg: "rgba(248, 113, 113, 0.06)" },
+  add: { color: "var(--mui-palette-success-main)", bg: "rgba(52, 211, 153, 0.06)" },
+  missing: { color: "var(--mui-palette-warning-main)", bg: "rgba(251, 191, 36, 0.06)" },
 };
 
 export function FeatureVault(): ReactElement {
@@ -29,20 +31,9 @@ export function FeatureVault(): ReactElement {
     <Grid container spacing={4} alignItems="center" direction="row-reverse">
       <Grid size={{ xs: 12, md: 6 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
-          <Box
-            sx={{
-              width: 44,
-              height: 44,
-              borderRadius: 2,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              bgcolor: "rgba(245, 158, 11, 0.1)",
-              color: "#f59e0b",
-            }}
-          >
+          <IconBox color="#f59e0b">
             <LockIcon />
-          </Box>
+          </IconBox>
           <GradientText
             variant="h4"
             component="h3"
@@ -66,24 +57,7 @@ export function FeatureVault(): ReactElement {
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
         <GlassCard hoverGlow={false} sx={{ overflow: "hidden" }}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 0.75,
-              px: 2,
-              py: 1,
-              borderBottom: 1,
-              borderColor: "vault.glassBorder",
-            }}
-          >
-            <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "#f87171" }} />
-            <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "#fbbf24" }} />
-            <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "#34d399" }} />
-            <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-              env diff — production ↔ staging
-            </Typography>
-          </Box>
+          <BrowserWindow title="env diff — production ↔ staging" />
           <Box sx={{ p: 1.5 }}>
             {diffLines.map((line, i) => {
               const style = lineColors[line.type]!;
