@@ -34,9 +34,26 @@ function createMockPrisma() {
       findUnique: mock(() => Promise.resolve(null)),
       findFirst: mock(() => Promise.resolve(null)),
       update: mock(() => Promise.resolve({ ...baseUser })),
+      delete: mock(() => Promise.resolve({ ...baseUser })),
     },
     account: {
       updateMany: mock(() => Promise.resolve({ count: 1 })),
+    },
+    auditLog: {
+      deleteMany: mock(() => Promise.resolve({ count: 0 })),
+    },
+    sharedSecret: {
+      deleteMany: mock(() => Promise.resolve({ count: 0 })),
+    },
+    secretFile: {
+      deleteMany: mock(() => Promise.resolve({ count: 0 })),
+    },
+    analysis: {
+      deleteMany: mock(() => Promise.resolve({ count: 0 })),
+    },
+    project: {
+      findMany: mock(() => Promise.resolve([])),
+      deleteMany: mock(() => Promise.resolve({ count: 0 })),
     },
   } as any;
 }
@@ -219,20 +236,26 @@ describe("UserService", () => {
   });
 
   describe("deleteAccount", () => {
-    it("should soft-delete user and revoke tokens", async () => {
+    it("should hard-delete user and all associated data", async () => {
       mockPrisma.user.findUnique.mockResolvedValueOnce(baseUser);
+      mockPrisma.project.findMany.mockResolvedValueOnce([]);
 
       const result = await service.deleteAccount("user-uuid");
 
-      expect(result.message).toBe("Account deleted successfully");
-      expect(mockPrisma.user.update).toHaveBeenCalledWith({
-        where: { id: "user-uuid" },
-        data: { deletedAt: expect.any(Date) },
-      });
-      expect(mockPrisma.account.updateMany).toHaveBeenCalledWith({
+      expect(result.message).toBe("Account permanently deleted");
+      expect(mockPrisma.auditLog.deleteMany).toHaveBeenCalledWith({
         where: { userId: "user-uuid" },
-        data: { refreshToken: null, tokenFamily: null },
       });
+      expect(mockPrisma.sharedSecret.deleteMany).toHaveBeenCalledWith({
+        where: { creatorId: "user-uuid" },
+      });
+      expect(mockPrisma.secretFile.deleteMany).toHaveBeenCalledWith({
+        where: { uploadedBy: "user-uuid" },
+      });
+      expect(mockPrisma.analysis.deleteMany).toHaveBeenCalledWith({
+        where: { userId: "user-uuid" },
+      });
+      expect(mockPrisma.user.delete).toHaveBeenCalledWith({ where: { id: "user-uuid" } });
     });
 
     it("should throw NotFoundError when user does not exist", async () => {

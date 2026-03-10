@@ -25,21 +25,21 @@ import { DashboardStats } from "./dashboard-stats";
 
 const quickActions = [
   {
-    icon: <AddIcon />,
+    icon: <AddIcon sx={{ fontSize: 28 }} />,
     title: "Create Project",
     description: "Set up a project to organize dependencies, secrets, and secure files",
     color: "var(--mui-palette-primary-main)",
     href: ROUTES.projects,
   },
   {
-    icon: <SearchIcon />,
+    icon: <SearchIcon sx={{ fontSize: 28 }} />,
     title: "Analyze Dependencies",
     description: "Upload a dependency file to scan for vulnerabilities and license issues",
     color: "var(--mui-palette-secondary-main)",
     href: ROUTES.converter,
   },
   {
-    icon: <VpnKeyIcon />,
+    icon: <VpnKeyIcon sx={{ fontSize: 28 }} />,
     title: "Manage Vault",
     description: "Store environment variables and secret files with AES-256-GCM encryption",
     color: "var(--mui-palette-info-dark)",

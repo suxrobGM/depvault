@@ -7,7 +7,7 @@ import {
   Inventory as InventoryIcon,
   VpnKey as SecretIcon,
 } from "@mui/icons-material";
-import { CardContent, Grid, Skeleton, Typography } from "@mui/material";
+import { Box, CardContent, Grid, Skeleton, Stack, Typography } from "@mui/material";
 import { GlassCard } from "@/components/ui/glass-card";
 import { IconBox } from "@/components/ui/icon-box";
 import { useApiQuery } from "@/hooks/use-api-query";
@@ -28,25 +28,25 @@ export function DashboardStats(): ReactElement {
 
   const stats: StatCard[] = [
     {
-      icon: <FolderIcon />,
+      icon: <FolderIcon sx={{ fontSize: 22 }} />,
       label: "Projects",
       value: data?.projectCount ?? 0,
       color: "var(--mui-palette-primary-main)",
     },
     {
-      icon: <InventoryIcon />,
+      icon: <InventoryIcon sx={{ fontSize: 22 }} />,
       label: "Dependencies",
       value: data?.dependencyCount ?? 0,
       color: "var(--mui-palette-info-light)",
     },
     {
-      icon: <BugIcon />,
+      icon: <BugIcon sx={{ fontSize: 22 }} />,
       label: "Vulnerabilities",
       value: data?.vulnerabilityCount ?? 0,
       color: "var(--mui-palette-error-main)",
     },
     {
-      icon: <SecretIcon />,
+      icon: <SecretIcon sx={{ fontSize: 22 }} />,
       label: "Env Variables",
       value: data?.envVariableCount ?? 0,
       color: "var(--mui-palette-secondary-main)",
@@ -62,19 +62,23 @@ export function DashboardStats(): ReactElement {
               className={`vault-fade-up vault-delay-${i + 1}`}
               sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}
             >
-              <IconBox color={stat.color} size={40} sx={{ mb: 1.5 }}>
-                {stat.icon}
-              </IconBox>
-              {isLoading ? (
-                <Skeleton variant="text" width={60} height={40} />
-              ) : (
-                <Typography variant="h4" fontWeight={700} sx={{ mb: 0.25 }}>
-                  {stat.value}
-                </Typography>
-              )}
-              <Typography variant="body2" color="text.secondary">
-                {stat.label}
-              </Typography>
+              <Stack direction="row" alignItems="center" spacing={2}>
+                <IconBox color={stat.color} size={44}>
+                  {stat.icon}
+                </IconBox>
+                <Box>
+                  {isLoading ? (
+                    <Skeleton variant="text" width={60} height={36} />
+                  ) : (
+                    <Typography variant="h4" fontWeight={700} lineHeight={1.2}>
+                      {stat.value}
+                    </Typography>
+                  )}
+                  <Typography variant="body2" color="text.secondary">
+                    {stat.label}
+                  </Typography>
+                </Box>
+              </Stack>
             </CardContent>
           </GlassCard>
         </Grid>
