@@ -7,14 +7,16 @@ interface GlassCardProps extends PropsWithChildren {
   hoverGlow?: boolean;
   sx?: SxProps<Theme>;
   onClick?: CardProps["onClick"];
+  className?: string;
 }
 
 export function GlassCard(props: GlassCardProps): ReactElement {
-  const { glowColor, hoverGlow = true, sx, onClick, children } = props;
+  const { glowColor, hoverGlow = true, sx, onClick, className, children } = props;
 
   return (
     <Card
       onClick={onClick}
+      className={className}
       sx={[
         onClick ? { cursor: "pointer" } : {},
         glowColor && hoverGlow

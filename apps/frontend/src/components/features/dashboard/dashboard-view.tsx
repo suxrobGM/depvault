@@ -7,6 +7,7 @@ import {
   VpnKey as VpnKeyIcon,
 } from "@mui/icons-material";
 import { Box, CardContent, Grid, Stack, Typography } from "@mui/material";
+import type { Route } from "next";
 import Link from "next/link";
 import { EmptyState } from "@/components/ui/empty-state";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -53,7 +54,7 @@ export function DashboardView(): ReactElement {
         {quickActions.map((action, index) => (
           <Grid key={action.title} size={{ xs: 12, sm: 6, md: 4 }}>
             <Link
-              href={action.href}
+              href={action.href as Route}
               style={{ textDecoration: "none", display: "block", height: "100%" }}
             >
               <GlassCard

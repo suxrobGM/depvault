@@ -3,6 +3,7 @@
 import type { MouseEvent, ReactElement } from "react";
 import { GitHub as GitHubIcon, Shield as ShieldIcon } from "@mui/icons-material";
 import { Box, Divider, Grid, IconButton, Link as MuiLink, Stack, Typography } from "@mui/material";
+import type { Route } from "next";
 import NextLink from "next/link";
 import { GradientText } from "@/components/ui/gradient-text";
 import { SectionContainer } from "@/components/ui/section-container";
@@ -95,7 +96,7 @@ export function LandingFooter(): ReactElement {
                   <MuiLink
                     key={link.label}
                     component={NextLink}
-                    href={link.href}
+                    href={link.href as Route}
                     underline="none"
                     variant="body2"
                     onClick={(e: MouseEvent<HTMLAnchorElement>) => handleClick(e, link.href)}

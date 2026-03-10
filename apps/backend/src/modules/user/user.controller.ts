@@ -2,6 +2,8 @@ import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
 import { authGuard } from "@/common/middleware/auth.middleware";
 import {
+  AvatarUploadBodySchema,
+  AvatarUploadResponseSchema,
   ChangeEmailBodySchema,
   ChangePasswordBodySchema,
   MessageResponseSchema,
@@ -50,6 +52,16 @@ export const userController = new Elysia({ prefix: "/users", detail: { tags: ["U
       summary: "Change email address",
       description:
         "Change the authenticated user's email. Requires password verification. A new verification email is sent to the updated address.",
+      security: [{ bearerAuth: [] }],
+    },
+  })
+  .post("/me/avatar", ({ user, body }) => userService.uploadAvatar(user.id, body.file), {
+    body: AvatarUploadBodySchema,
+    response: AvatarUploadResponseSchema,
+    detail: {
+      summary: "Upload avatar",
+      description:
+        "Upload and set the authenticated user's avatar image. Accepts jpg, png, gif, or webp up to 5 MB.",
       security: [{ bearerAuth: [] }],
     },
   })

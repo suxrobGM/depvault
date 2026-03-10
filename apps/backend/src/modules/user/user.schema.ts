@@ -9,6 +9,7 @@ export const UserProfileResponseSchema = t.Object({
   avatarUrl: t.Nullable(t.String()),
   emailVerified: t.Boolean(),
   githubId: t.Nullable(t.String()),
+  hasPassword: t.Boolean(),
   createdAt: t.String(),
 });
 
@@ -30,6 +31,14 @@ export const ChangeEmailBodySchema = t.Object({
 
 export const MessageResponseSchema = t.Object({
   message: t.String(),
+});
+
+export const AvatarUploadBodySchema = t.Object({
+  file: t.File({ maxSize: "5m" }),
+});
+
+export const AvatarUploadResponseSchema = t.Object({
+  avatarUrl: t.String(),
 });
 
 export type UserProfileResponse = Static<typeof UserProfileResponseSchema>;

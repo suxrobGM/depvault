@@ -13,6 +13,7 @@ export interface AuthUser {
   role: string;
   emailVerified: boolean;
   avatarUrl: string | null;
+  hasPassword: boolean;
 }
 
 export interface AuthContextValue {

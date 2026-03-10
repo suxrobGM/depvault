@@ -6,6 +6,7 @@
     "dev": "bun --bun next dev -p 4001",
     "build": "bun --bun next build",
     "start": "bun --bun next start -p 4001",
+    "typegen": "bun --bun next typegen",
     "lint": "eslint",
     "typecheck": "tsc --noEmit"
   },
@@ -24,6 +25,7 @@
     "notistack": "^3.0.2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-easy-crop": "^5.5.6",
     "zod": "^4.3.6"
   },
   "devDependencies": {

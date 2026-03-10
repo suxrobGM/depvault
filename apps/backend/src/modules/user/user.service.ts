@@ -1,4 +1,6 @@
 import { randomUUID } from "crypto";
+import { existsSync, mkdirSync, unlinkSync, writeFileSync } from "node:fs";
+import { basename, extname, resolve } from "node:path";
 import { isValidPassword, PASSWORD_REQUIREMENTS } from "@shared/utils/validators";
 import { singleton } from "tsyringe";
 import { EmailChangeVerificationTemplate } from "@/common/emails";
@@ -40,6 +42,7 @@ export class UserService {
       avatarUrl: user.avatarUrl,
       emailVerified: user.emailVerified,
       githubId: user.githubId,
+      hasPassword: !!user.passwordHash,
       createdAt: user.createdAt.toISOString(),
     };
   }
@@ -63,8 +66,62 @@ export class UserService {
       avatarUrl: user.avatarUrl,
       emailVerified: user.emailVerified,
       githubId: user.githubId,
+      hasPassword: !!user.passwordHash,
       createdAt: user.createdAt.toISOString(),
     };
+  }
+
+  async uploadAvatar(userId: string, file: File): Promise<{ avatarUrl: string }> {
+    const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      throw new BadRequestError("Only jpg, png, gif, and webp images are allowed");
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId, deletedAt: null },
+    });
+
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+
+    const uploadsDir = resolve(process.env.UPLOAD_DIR ?? "./uploads", "avatars");
+    mkdirSync(uploadsDir, { recursive: true });
+
+    if (user.avatarUrl) {
+      const oldFilename = basename(user.avatarUrl);
+      const oldPath = resolve(uploadsDir, oldFilename);
+      if (existsSync(oldPath)) {
+        unlinkSync(oldPath);
+      }
+    }
+
+    const ext = extname(file.name) || this.mimeToExt(file.type);
+    const filename = `${userId}-${Date.now()}${ext}`;
+    const filePath = resolve(uploadsDir, filename);
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+    writeFileSync(filePath, buffer);
+
+    const avatarUrl = `/uploads/avatars/${filename}`;
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl },
+    });
+
+    return { avatarUrl };
+  }
+
+  private mimeToExt(mime: string): string {
+    const map: Record<string, string> = {
+      "image/jpeg": ".jpg",
+      "image/png": ".png",
+      "image/gif": ".gif",
+      "image/webp": ".webp",
+    };
+    return map[mime] ?? ".bin";
   }
 
   async changePassword(userId: string, body: ChangePasswordBody): Promise<{ message: string }> {

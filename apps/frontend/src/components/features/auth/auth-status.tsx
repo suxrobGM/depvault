@@ -1,12 +1,13 @@
 import type { ReactElement } from "react";
 import { Alert, Stack, Typography, type AlertColor } from "@mui/material";
+import type { Route } from "next";
 import Link from "next/link";
 import { AuthCard } from "./auth-card";
 
 interface AuthStatusProps {
   title: string;
   message: string;
-  linkHref: string;
+  linkHref: Route;
   linkText: string;
   severity?: AlertColor;
 }

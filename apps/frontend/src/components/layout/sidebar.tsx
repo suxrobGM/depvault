@@ -23,6 +23,7 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
+import type { Route } from "next";
 import { usePathname, useRouter } from "next/navigation";
 import { GradientText } from "@/components/ui/gradient-text";
 import { useAuth } from "@/hooks/use-auth";
@@ -88,7 +89,7 @@ export function Sidebar(props: SidebarProps): ReactElement {
               key={item.href}
               selected={isActive}
               onClick={() => {
-                router.push(item.href);
+                router.push(item.href as Route);
                 onMobileClose();
               }}
               sx={{

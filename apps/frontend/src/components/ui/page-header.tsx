@@ -1,11 +1,12 @@
 import type { ReactElement, ReactNode } from "react";
 import { NavigateNext as NavigateNextIcon } from "@mui/icons-material";
 import { Box, Breadcrumbs, Stack, Typography } from "@mui/material";
+import type { Route } from "next";
 import Link from "next/link";
 
 interface BreadcrumbItem {
   label: string;
-  href?: string;
+  href?: Route;
 }
 
 interface PageHeaderProps {

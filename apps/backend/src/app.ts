@@ -4,6 +4,7 @@ import { prisma } from "@/common/database";
 import { logger } from "@/common/logger";
 import { errorMiddleware } from "@/common/middleware";
 import { corsPlugin, swaggerPlugin } from "@/common/plugins";
+import { uploadsStaticPlugin } from "@/common/plugins/static.plugin";
 import { validateEnv } from "@/env";
 import { analysisController } from "@/modules/analysis";
 import { auditLogController } from "@/modules/audit-log/audit-log.controller";
@@ -16,21 +17,17 @@ import { userController } from "@/modules/user";
 import { HttpErrorResponses } from "./types/response";
 
 // Validate environment
-const env = validateEnv();
+validateEnv();
 
 const app = new Elysia()
-  // Infrastructure plugins
   .use(errorMiddleware)
   .use(corsPlugin)
   .use(swaggerPlugin)
+  .use(uploadsStaticPlugin)
   .onStop(async () => {
     await prisma.$disconnect();
   })
-
-  // Health check
   .get("/health", () => ({ status: "ok", timestamp: new Date().toISOString() }))
-
-  // Feature modules
   .group("/api", (api) =>
     api
       .guard({

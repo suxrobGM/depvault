@@ -1,5 +1,6 @@
 import type { ReactElement, ReactNode } from "react";
 import { Box, Button, Typography } from "@mui/material";
+import type { Route } from "next";
 import Link from "next/link";
 
 interface EmptyStateProps {
@@ -7,7 +8,7 @@ interface EmptyStateProps {
   title: string;
   description?: string;
   actionLabel?: string;
-  actionHref?: string;
+  actionHref?: Route;
   onAction?: () => void;
 }
 
