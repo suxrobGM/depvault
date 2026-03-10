@@ -18,7 +18,7 @@ DepVault is a web dashboard that analyzes dependencies, detects vulnerabilities,
 
 - **Component library**: MUI 7 — prefer MUI components over custom HTML elements
 - **Styling**: MUI `sx` prop for all styling. Custom CSS utility classes in `globals.css` for animations
-- **Data tables**: MUI DataGrid for analysis results, project lists, env variable tables
+- **Data tables**: Custom table components or MUI Table for data display. MUI DataGrid for complex grids with sorting/filtering
 - **Forms**: MUI TextField, Select, Checkbox with `react-hook-form` + `zod` for validation
 - **Layout**: MUI Box, Stack, Grid2. App shell uses persistent sidebar + top app bar
 - **Typography**: MUI Typography with semantic variants (h1–h6, body1, body2, caption)
