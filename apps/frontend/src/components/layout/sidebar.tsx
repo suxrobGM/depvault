@@ -26,6 +26,7 @@ import {
 } from "@mui/material";
 import type { Route } from "next";
 import { usePathname, useRouter } from "next/navigation";
+import { NotificationBell } from "@/components/features/notifications";
 import { GradientText } from "@/components/ui/gradient-text";
 import { useAuth } from "@/hooks/use-auth";
 import { ROUTES } from "@/lib/constants";
@@ -121,6 +122,9 @@ export function Sidebar(props: SidebarProps): ReactElement {
       </List>
       {user && (
         <>
+          <List sx={{ px: open ? 1 : 0.5 }}>
+            <NotificationBell open={open} />
+          </List>
           <Divider />
           <Box
             sx={{

@@ -14,6 +14,7 @@ export const ROUTES = {
   projectAnalysisDetail: (id: string, analysisId: string) =>
     `/projects/${id}/analysis/${analysisId}`,
   secrets: "/secrets",
+  notifications: "/notifications",
 } as const;
 
 export const COOKIE_NAMES = {

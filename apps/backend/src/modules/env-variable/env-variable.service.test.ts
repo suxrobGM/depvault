@@ -82,7 +82,8 @@ describe("EnvVariableService", () => {
     mockAuditLog = createMockAuditLogService();
     const { EnvironmentRepository } = require("./environment.repository");
     const envHelper = new EnvironmentRepository(mockPrisma);
-    service = new EnvVariableService(mockPrisma, mockAuditLog, envHelper);
+    const mockNotificationService = { notify: mock(() => Promise.resolve()) } as any;
+    service = new EnvVariableService(mockPrisma, mockAuditLog, envHelper, mockNotificationService);
 
     spyOn(encryption, "deriveProjectKey").mockReturnValue(fakeProjectKey);
     spyOn(encryption, "encrypt").mockReturnValue(mockEncrypted);

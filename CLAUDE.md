@@ -103,7 +103,8 @@ Examples:
 
 ## Comments
 
-Don't add comments that restate what the code already says. Only comment to explain **why**, not **what**. If the code needs a comment to explain what it does, rename the variable or extract a function instead.
+- Don't add inline comments that restate what the code already says. Only comment to explain **why**, not **what**. If the code needs a comment to explain what it does, rename the variable or extract a function instead.
+- Add brief JSDoc (`/** ... */`) for public functions — one-liner description is enough. Skip `@param` / `@returns` when types already convey the meaning.
 
 ## File Size Guideline
 

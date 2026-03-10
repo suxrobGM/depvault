@@ -4,6 +4,7 @@ enum NotificationType {
   ENV_DRIFT
   TEAM_INVITE
   ROLE_CHANGE
+  GIT_SECRET_DETECTION
 }
 
 model Notification {

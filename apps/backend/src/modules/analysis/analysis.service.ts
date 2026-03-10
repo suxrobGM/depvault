@@ -2,6 +2,7 @@ import { singleton } from "tsyringe";
 import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { DependencyStatus, PrismaClient, ProjectRole, type Ecosystem } from "@/generated/prisma";
+import { NotificationService } from "@/modules/notification";
 import type { PaginatedResponse } from "@/types/response";
 import type {
   AnalysisResponse,
@@ -24,7 +25,10 @@ const INCLUDE_DEPS_WITH_VULNS = {
 
 @singleton()
 export class AnalysisService {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   async create(body: CreateAnalysisBody, userId: string): Promise<AnalysisResponse> {
     await this.requireEditor(body.projectId, userId, "create");
@@ -69,6 +73,16 @@ export class AnalysisService {
       await this.prisma.analysis.update({
         where: { id: analysis.id },
         data: { healthScore },
+      });
+    }
+
+    const vulnCount = updatedDeps.reduce((n, d) => n + d.vulnerabilities.length, 0);
+    if (vulnCount > 0) {
+      void this.notificationService.notify({
+        type: "VULNERABILITY_FOUND",
+        userId,
+        projectId: body.projectId,
+        count: vulnCount,
       });
     }
 
@@ -156,6 +170,16 @@ export class AnalysisService {
       where: { id: analysisId },
       data: { healthScore },
     });
+
+    const vulnCount = updatedDeps.reduce((n, d) => n + d.vulnerabilities.length, 0);
+    if (vulnCount > 0) {
+      void this.notificationService.notify({
+        type: "VULNERABILITY_FOUND",
+        userId,
+        projectId: analysis.projectId,
+        count: vulnCount,
+      });
+    }
 
     return { ...analysis, healthScore, dependencies: updatedDeps };
   }

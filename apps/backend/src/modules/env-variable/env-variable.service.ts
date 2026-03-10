@@ -1,8 +1,10 @@
 import { singleton } from "tsyringe";
 import { NotFoundError } from "@/common/errors";
+import { logger } from "@/common/logger";
 import { deriveProjectKey, encrypt } from "@/common/utils/encryption";
 import { PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
+import { NotificationService } from "@/modules/notification";
 import type { PaginatedResponse } from "@/types/response";
 import { toDecryptedResponse, toMaskedResponse, toResponseWithValue } from "./env-variable.mapper";
 import type {
@@ -14,10 +16,14 @@ import { EnvironmentRepository } from "./environment.repository";
 
 @singleton()
 export class EnvVariableService {
+  private static readonly ROTATION_MAX_AGE_DAYS = 90;
+  private static readonly NOTIFICATION_COOLDOWN_HOURS = 24;
+
   constructor(
     private readonly prisma: PrismaClient,
     private readonly auditLogService: AuditLogService,
     private readonly envHelper: EnvironmentRepository,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async create(
@@ -103,6 +109,9 @@ export class EnvVariableService {
         ipAddress,
         metadata: { count: variables.length, environment: environmentName ?? null },
       });
+
+      void this.checkDrift(projectId, userId);
+      void this.checkRotation(projectId, userId, variables);
     }
 
     return {
@@ -204,5 +213,87 @@ export class EnvVariableService {
     });
 
     return { message: "Environment variable deleted successfully" };
+  }
+
+  private async checkDrift(projectId: string, userId: string): Promise<void> {
+    try {
+      const environments = await this.prisma.environment.findMany({
+        where: { projectId },
+        include: { variables: { select: { key: true } } },
+      });
+
+      if (environments.length < 2) return;
+
+      const allKeys = new Set(environments.flatMap((env) => env.variables.map((v) => v.key)));
+      const missingVars: { env: string; variable: string }[] = [];
+
+      for (const env of environments) {
+        const envKeys = new Set(env.variables.map((v) => v.key));
+        for (const key of allKeys) {
+          if (!envKeys.has(key)) {
+            missingVars.push({ env: env.name, variable: key });
+          }
+        }
+      }
+
+      if (missingVars.length === 0) return;
+
+      const recent = await this.prisma.notification.findFirst({
+        where: {
+          userId,
+          type: "ENV_DRIFT",
+          metadata: { path: ["projectId"], equals: projectId },
+          createdAt: {
+            gte: new Date(Date.now() - EnvVariableService.NOTIFICATION_COOLDOWN_HOURS * 3600_000),
+          },
+        },
+      });
+
+      if (recent) return;
+
+      void this.notificationService.notify({
+        type: "ENV_DRIFT",
+        userId,
+        projectId,
+        missingVars,
+      });
+    } catch (error) {
+      logger.error({ error }, "Failed to check environment drift");
+    }
+  }
+
+  private async checkRotation(
+    projectId: string,
+    userId: string,
+    variables: { key: string; updatedAt: Date }[],
+  ): Promise<void> {
+    try {
+      const maxAge = EnvVariableService.ROTATION_MAX_AGE_DAYS * 86400_000;
+      const staleVars = variables.filter((v) => Date.now() - v.updatedAt.getTime() > maxAge);
+
+      if (staleVars.length === 0) return;
+
+      const recent = await this.prisma.notification.findFirst({
+        where: {
+          userId,
+          type: "SECRET_ROTATION",
+          metadata: { path: ["projectId"], equals: projectId },
+          createdAt: {
+            gte: new Date(Date.now() - EnvVariableService.NOTIFICATION_COOLDOWN_HOURS * 3600_000),
+          },
+        },
+      });
+
+      if (recent) return;
+
+      void this.notificationService.notify({
+        type: "SECRET_ROTATION",
+        userId,
+        projectId,
+        variableNames: staleVars.map((v) => v.key),
+      });
+    } catch (error) {
+      logger.error({ error }, "Failed to check secret rotation");
+    }
   }
 }

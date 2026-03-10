@@ -4,6 +4,7 @@ import { logger } from "@/common/logger";
 import { decryptBinary, deriveProjectKey, encryptBinary } from "@/common/utils/encryption";
 import { PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
+import { NotificationService } from "@/modules/notification";
 import type { PaginatedResponse } from "@/types/response";
 import type { SecretFileResponse, UpdateSecretFileBody } from "./secret-file.schema";
 import { validateFile, validateFileName } from "./secret-file.validator";
@@ -13,7 +14,21 @@ export class SecretFileService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly auditLogService: AuditLogService,
+    private readonly notificationService: NotificationService,
   ) {}
+
+  async notifyGitSecretDetected(
+    projectId: string,
+    userId: string,
+    fileName: string,
+  ): Promise<void> {
+    void this.notificationService.notify({
+      type: "GIT_SECRET_DETECTION",
+      userId,
+      projectId,
+      fileName,
+    });
+  }
 
   async upload(
     projectId: string,

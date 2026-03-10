@@ -3,6 +3,7 @@ import { RoleChangeTemplate, TeamInviteTemplate } from "@/common/emails";
 import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from "@/common/errors";
 import { EmailService } from "@/common/services/email.service";
 import { PrismaClient } from "@/generated/prisma";
+import { NotificationService } from "@/modules/notification";
 import type { PaginatedResponse } from "@/types/response";
 import type {
   InviteMemberBody,
@@ -22,6 +23,7 @@ export class MemberService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly emailService: EmailService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async invite(projectId: string, body: InviteMemberBody, userId: string): Promise<MemberResponse> {
@@ -76,6 +78,12 @@ export class MemberService {
         role: body.role,
         dashboardUrl: `${this.frontendUrl}/dashboard`,
       }),
+    });
+
+    void this.notificationService.notify({
+      type: "TEAM_INVITE",
+      userId: invitee.id,
+      projectId,
     });
 
     return this.toResponse(member);
@@ -159,6 +167,14 @@ export class MemberService {
         }),
       });
     }
+
+    void this.notificationService.notify({
+      type: "ROLE_CHANGE",
+      userId: target.userId,
+      projectId,
+      oldRole: target.role,
+      newRole: body.role,
+    });
 
     return this.toResponse(updated);
   }

@@ -28,3 +28,4 @@ export type {
 } from "./secret-file";
 export type { AuditLogEntry, AuditLogListResponse } from "./audit-log";
 export type { ConvertResult } from "./convert";
+export type { Notification, NotificationListResponse, UnreadCountResponse } from "./notification";

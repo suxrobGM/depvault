@@ -66,6 +66,10 @@ function createMockEmailService() {
   return { send: mock(() => Promise.resolve()) } as any;
 }
 
+function createMockNotificationService() {
+  return { notify: mock(() => Promise.resolve()) } as any;
+}
+
 describe("MemberService", () => {
   let service: MemberService;
   let mockPrisma: ReturnType<typeof createMockPrisma>;
@@ -74,7 +78,7 @@ describe("MemberService", () => {
   beforeEach(() => {
     mockPrisma = createMockPrisma();
     mockEmailService = createMockEmailService();
-    service = new MemberService(mockPrisma, mockEmailService);
+    service = new MemberService(mockPrisma, mockEmailService, createMockNotificationService());
   });
 
   describe("invite", () => {
