@@ -5,6 +5,10 @@ import type { RegistryResult } from "./version-utils";
 const REQUEST_TIMEOUT_MS = 5000;
 
 export async function fetchNpmVersion(name: string): Promise<RegistryResult> {
+  if (!name) {
+    return { version: null, deprecated: false };
+  }
+
   const cached = versionCache.get(`npm:${name}`);
   if (cached) return cached;
 

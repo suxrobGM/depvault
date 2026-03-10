@@ -22,11 +22,7 @@ export async function checkVersions(
 ): Promise<VersionResult[]> {
   const fetcher = REGISTRY_FETCHERS[ecosystem];
   if (!fetcher) {
-    return dependencies.map((d) => ({
-      name: d.name,
-      latestVersion: null,
-      status: "UP_TO_DATE" as const,
-    }));
+    return [];
   }
 
   return runWithConcurrency(

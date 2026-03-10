@@ -11,6 +11,7 @@ enum Ecosystem {
 
 enum DependencyStatus {
   UP_TO_DATE
+  PATCH_UPDATE
   MINOR_UPDATE
   MAJOR_UPDATE
   DEPRECATED

@@ -43,7 +43,7 @@ export function compareVersions(
 
   if (latestParts[0] > currentParts[0]) return "MAJOR_UPDATE";
   if (latestParts[1] > currentParts[1]) return "MINOR_UPDATE";
-  if (latestParts[2] > currentParts[2]) return "MINOR_UPDATE";
+  if (latestParts[2] > currentParts[2]) return "PATCH_UPDATE";
   return "UP_TO_DATE";
 }
 
@@ -58,7 +58,11 @@ export async function runWithConcurrency<T, R>(
   async function worker() {
     while (index < items.length) {
       const i = index++;
-      results[i] = await fn(items[i]!);
+      try {
+        results[i] = await fn(items[i]!);
+      } catch {
+        results[i] = undefined as unknown as R;
+      }
     }
   }
 

@@ -44,8 +44,8 @@ describe("compareVersions", () => {
     expect(compareVersions("^4.17.0", "4.18.2", false)).toBe("MINOR_UPDATE");
   });
 
-  it("should return MINOR_UPDATE when only patch differs", () => {
-    expect(compareVersions("^4.18.0", "4.18.3", false)).toBe("MINOR_UPDATE");
+  it("should return PATCH_UPDATE when only patch differs", () => {
+    expect(compareVersions("^4.18.0", "4.18.3", false)).toBe("PATCH_UPDATE");
   });
 
   it("should return DEPRECATED when deprecated flag is set", () => {
