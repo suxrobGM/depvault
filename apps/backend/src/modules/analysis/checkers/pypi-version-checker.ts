@@ -1,11 +1,11 @@
 import { logger } from "@/common/logger";
-import { getCached, setCache } from "./version-cache";
+import { versionCache } from "./version-cache";
 import type { RegistryResult } from "./version-utils";
 
 const REQUEST_TIMEOUT_MS = 5000;
 
 export async function fetchPypiVersion(name: string): Promise<RegistryResult> {
-  const cached = getCached(`pypi:${name}`);
+  const cached = versionCache.get(`pypi:${name}`);
   if (cached) return cached;
 
   try {
@@ -27,7 +27,7 @@ export async function fetchPypiVersion(name: string): Promise<RegistryResult> {
     );
 
     const result: RegistryResult = { version, deprecated };
-    setCache(`pypi:${name}`, result.version, result.deprecated);
+    versionCache.set(`pypi:${name}`, result);
     return result;
   } catch {
     logger.warn(`Failed to fetch PyPI version for ${name}`);
