@@ -23,7 +23,7 @@ const quickActions = [
     title: "Create Project",
     description: "Set up a project to organize dependencies, secrets, and secure files",
     color: "var(--mui-palette-primary-main)",
-    href: ROUTES.dashboard,
+    href: ROUTES.projects,
   },
   {
     icon: <SearchIcon />,
@@ -102,7 +102,7 @@ export function DashboardView(): ReactElement {
             title="No projects yet"
             description="Create your first project to analyze dependencies, manage secrets, and store encrypted files."
             actionLabel="Create Project"
-            actionHref={ROUTES.dashboard}
+            actionHref={ROUTES.projects as Route}
           />
         </Grid>
         <Grid size={{ xs: 12, md: 5 }}>

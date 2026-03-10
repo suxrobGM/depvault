@@ -8,6 +8,7 @@ export const ROUTES = {
   dashboard: "/dashboard",
   profile: "/profile",
   converter: "/converter",
+  projects: "/projects",
   project: (id: string) => `/projects/${id}`,
   secrets: "/secrets",
 } as const;

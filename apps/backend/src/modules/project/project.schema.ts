@@ -3,17 +3,20 @@ import { t, type Static } from "elysia";
 export const CreateProjectBodySchema = t.Object({
   name: t.String({ minLength: 1, maxLength: 100 }),
   description: t.Optional(t.String({ maxLength: 500 })),
+  repositoryUrl: t.Optional(t.String({ maxLength: 500 })),
 });
 
 export const UpdateProjectBodySchema = t.Object({
   name: t.Optional(t.String({ minLength: 1, maxLength: 100 })),
   description: t.Optional(t.String({ maxLength: 500 })),
+  repositoryUrl: t.Optional(t.String({ maxLength: 500 })),
 });
 
 export const ProjectResponseSchema = t.Object({
   id: t.String(),
   name: t.String(),
   description: t.Nullable(t.String()),
+  repositoryUrl: t.Nullable(t.String()),
   ownerId: t.String(),
   createdAt: t.Date(),
   updatedAt: t.Date(),

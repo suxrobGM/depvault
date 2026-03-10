@@ -5,11 +5,12 @@ import { DEFAULT_ROLES } from "@depvault/shared/constants";
 import {
   ChevronLeft as ChevronLeftIcon,
   Dashboard as DashboardIcon,
-  Person as PersonIcon,
+  Folder as FolderIcon,
   Shield as ShieldIcon,
   SwapHoriz as SwapHorizIcon,
 } from "@mui/icons-material";
 import {
+  Avatar,
   Box,
   Chip,
   Divider,
@@ -29,6 +30,7 @@ import { GradientText } from "@/components/ui/gradient-text";
 import { useAuth } from "@/hooks/use-auth";
 import { ROUTES } from "@/lib/constants";
 import { SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH } from "./constants";
+import { UserMenu } from "./user-menu";
 
 interface SidebarProps {
   open: boolean;
@@ -39,8 +41,8 @@ interface SidebarProps {
 
 const navItems = [
   { label: "Dashboard", icon: <DashboardIcon />, href: ROUTES.dashboard },
+  { label: "Projects", icon: <FolderIcon />, href: ROUTES.projects },
   { label: "Converter", icon: <SwapHorizIcon />, href: ROUTES.converter },
-  { label: "Profile", icon: <PersonIcon />, href: ROUTES.profile },
 ];
 
 export function Sidebar(props: SidebarProps): ReactElement {
@@ -50,6 +52,11 @@ export function Sidebar(props: SidebarProps): ReactElement {
   const router = useRouter();
   const { user } = useAuth();
   const showRoleBadge = user?.role && !DEFAULT_ROLES.has(user.role);
+
+  const initials =
+    user?.firstName && user?.lastName
+      ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+      : (user?.email?.slice(0, 2).toUpperCase() ?? "?");
 
   const drawerContent = (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -112,21 +119,63 @@ export function Sidebar(props: SidebarProps): ReactElement {
           );
         })}
       </List>
-      {open && user && (
+      {user && (
         <>
           <Divider />
-          <Box sx={{ px: 2, py: 1.5 }}>
-            <Typography variant="body2" noWrap fontWeight={600}>
-              {[user.firstName, user.lastName].filter(Boolean).join(" ") || user.email}
-            </Typography>
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 0.5 }}>
-              <Typography variant="caption" color="text.secondary" noWrap>
-                {user.email}
-              </Typography>
-              {showRoleBadge && (
-                <Chip label={user.role} size="small" color="primary" variant="outlined" />
-              )}
-            </Stack>
+          <Box
+            sx={{
+              px: open ? 2 : 0,
+              py: 1.5,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: open ? "flex-start" : "center",
+              gap: 1.5,
+            }}
+          >
+            <UserMenu
+              trigger={
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: open ? "flex-start" : "center",
+                    gap: 1.5,
+                    width: "100%",
+                    cursor: "pointer",
+                    borderRadius: 1,
+                    "&:hover": { bgcolor: "action.hover" },
+                    p: 0.5,
+                  }}
+                >
+                  <Avatar
+                    src={user.avatarUrl ?? undefined}
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      fontSize: 14,
+                      bgcolor: "primary.main",
+                    }}
+                  >
+                    {initials}
+                  </Avatar>
+                  {open && (
+                    <Box sx={{ minWidth: 0, flex: 1 }}>
+                      <Typography variant="body2" noWrap fontWeight={600}>
+                        {[user.firstName, user.lastName].filter(Boolean).join(" ") || user.email}
+                      </Typography>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <Typography variant="caption" color="text.secondary" noWrap>
+                          {user.email}
+                        </Typography>
+                        {showRoleBadge && (
+                          <Chip label={user.role} size="small" color="primary" variant="outlined" />
+                        )}
+                      </Stack>
+                    </Box>
+                  )}
+                </Box>
+              }
+            />
           </Box>
         </>
       )}

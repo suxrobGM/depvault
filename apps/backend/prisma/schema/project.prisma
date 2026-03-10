@@ -5,14 +5,15 @@ enum ProjectRole {
 }
 
 model Project {
-  id          String   @id @default(uuid()) @db.Uuid
-  name        String
-  description String?
-  ownerId     String   @map("owner_id") @db.Uuid
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id            String   @id @default(uuid()) @db.Uuid
+  name          String
+  description   String?
+  repositoryUrl String?  @map("repository_url")
+  ownerId       String   @map("owner_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
-  owner        User              @relation(fields: [ownerId], references: [id])
+  owner        User            @relation(fields: [ownerId], references: [id])
   members      ProjectMember[]
   analyses     Analysis[]
   environments Environment[]

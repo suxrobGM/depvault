@@ -13,6 +13,7 @@ export class ProjectService {
       data: {
         name: body.name,
         description: body.description,
+        repositoryUrl: body.repositoryUrl,
         ownerId: userId,
         members: {
           create: {
@@ -93,6 +94,7 @@ export class ProjectService {
       data: {
         ...(body.name !== undefined && { name: body.name }),
         ...(body.description !== undefined && { description: body.description }),
+        ...(body.repositoryUrl !== undefined && { repositoryUrl: body.repositoryUrl }),
       },
     });
 

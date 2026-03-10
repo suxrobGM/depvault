@@ -1,22 +1,18 @@
 "use client";
 
-import { useState, type MouseEvent, type ReactElement } from "react";
+import { cloneElement, useState, type MouseEvent, type ReactElement } from "react";
 import { Logout as LogoutIcon, Person as PersonIcon } from "@mui/icons-material";
-import {
-  Avatar,
-  Divider,
-  IconButton,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-  Typography,
-} from "@mui/material";
+import { Divider, ListItemIcon, ListItemText, Menu, MenuItem, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { ROUTES } from "@/lib/constants";
 
-export function UserMenu(): ReactElement {
+interface UserMenuProps {
+  trigger: ReactElement<{ onClick?: (e: MouseEvent<HTMLElement>) => void }>;
+}
+
+export function UserMenu(props: UserMenuProps): ReactElement {
+  const { trigger } = props;
   const { user, logout } = useAuth();
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -24,24 +20,15 @@ export function UserMenu(): ReactElement {
   const handleOpen = (e: MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
-  const initials =
-    user?.firstName && user?.lastName
-      ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
-      : (user?.email?.slice(0, 2).toUpperCase() ?? "?");
-
   return (
     <>
-      <IconButton onClick={handleOpen} size="small" aria-label="User menu">
-        <Avatar src={user?.avatarUrl ?? undefined} sx={{ width: 32, height: 32, fontSize: 14 }}>
-          {initials}
-        </Avatar>
-      </IconButton>
+      {cloneElement(trigger, { onClick: handleOpen })}
       <Menu
         anchorEl={anchorEl}
         open={!!anchorEl}
         onClose={handleClose}
-        transformOrigin={{ horizontal: "right", vertical: "top" }}
-        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+        transformOrigin={{ horizontal: "left", vertical: "bottom" }}
+        anchorOrigin={{ horizontal: "left", vertical: "top" }}
         slotProps={{ paper: { sx: { minWidth: 200 } } }}
       >
         {user && (

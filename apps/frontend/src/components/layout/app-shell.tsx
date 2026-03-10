@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, type PropsWithChildren, type ReactElement } from "react";
-import { Box, Toolbar } from "@mui/material";
+import { Menu as MenuIcon } from "@mui/icons-material";
+import { Box, IconButton } from "@mui/material";
 import { SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH } from "./constants";
 import { Sidebar } from "./sidebar";
-import { TopBar } from "./topbar";
 
 export function AppShell(props: PropsWithChildren): ReactElement {
   const { children } = props;
@@ -15,7 +15,6 @@ export function AppShell(props: PropsWithChildren): ReactElement {
     <Box sx={{ display: "flex", minHeight: "100vh", position: "relative" }}>
       <Box className="vault-gradient-mesh-subtle" />
       <Box className="vault-dot-grid" />
-      <TopBar onMenuClick={() => setMobileOpen(true)} sidebarOpen={sidebarOpen} />
       <Sidebar
         open={sidebarOpen}
         mobileOpen={mobileOpen}
@@ -34,7 +33,13 @@ export function AppShell(props: PropsWithChildren): ReactElement {
           zIndex: 1,
         }}
       >
-        <Toolbar />
+        <IconButton
+          onClick={() => setMobileOpen(true)}
+          aria-label="Open menu"
+          sx={{ display: { xs: "flex", md: "none" }, mb: 1 }}
+        >
+          <MenuIcon />
+        </IconButton>
         {children}
       </Box>
     </Box>

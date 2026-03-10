@@ -2,7 +2,7 @@
 
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 
-type QueryFn<T> = () => Promise<{ data: T; error: unknown }>;
+type QueryFn<T> = () => Promise<{ data: T | null; error: unknown }>;
 
 export function useApiQuery<T>(
   queryKey: unknown[],
