@@ -42,19 +42,22 @@ export class AnalysisService {
       throw new BadRequestError(`Unsupported ecosystem: ${body.ecosystem}`);
     }
 
-    if (!parser.canParse(body.fileName)) {
+    const fileBaseName = body.fileName.split("/").pop() ?? body.fileName;
+
+    if (!parser.canParse(fileBaseName)) {
       throw new BadRequestError(
         `Unsupported file "${body.fileName}" for ${body.ecosystem} ecosystem`,
       );
     }
 
-    const parseResult = parser.parse(body.content, body.fileName);
+    const parseResult = parser.parse(body.content, fileBaseName);
 
     const analysis = await this.prisma.analysis.create({
       data: {
         projectId: body.projectId,
         userId,
-        fileName: body.fileName,
+        fileName: fileBaseName,
+        filePath: body.filePath ?? null,
         ecosystem: body.ecosystem,
         dependencies: {
           create: parseResult.dependencies.map((dep) => ({
@@ -150,15 +153,21 @@ export class AnalysisService {
 
     const where = { projectId };
 
-    const [items, total] = await Promise.all([
+    const [rows, total] = await Promise.all([
       this.prisma.analysis.findMany({
         where,
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: "desc" },
+        include: { _count: { select: { dependencies: true } } },
       }),
       this.prisma.analysis.count({ where }),
     ]);
+
+    const items = rows.map(({ _count, ...rest }) => ({
+      ...rest,
+      dependencyCount: _count.dependencies,
+    }));
 
     return {
       items,

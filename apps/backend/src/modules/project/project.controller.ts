@@ -19,6 +19,7 @@ import {
   ProjectListQuerySchema,
   ProjectListResponseSchema,
   ProjectResponseSchema,
+  ProjectStatsResponseSchema,
   UpdateProjectBodySchema,
 } from "./project.schema";
 import { ProjectService } from "./project.service";
@@ -48,6 +49,15 @@ export const projectController = new Elysia({
       summary: "List projects",
       description:
         "Return a paginated list of projects where the authenticated user is a member (owner, editor, or viewer).",
+      security: [{ bearerAuth: [] }],
+    },
+  })
+  .get("/stats", ({ user }) => projectService.getStats(user.id), {
+    response: ProjectStatsResponseSchema,
+    detail: {
+      summary: "Get dashboard stats",
+      description:
+        "Return aggregate statistics across all projects the authenticated user is a member of.",
       security: [{ bearerAuth: [] }],
     },
   })

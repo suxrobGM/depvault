@@ -10,3 +10,5 @@ export type ProjectResponse = Data<ProjectById["get"]>;
 
 export type MemberListResponse = Data<ProjectById["members"]["get"]>;
 export type Member = MemberListResponse["items"][number];
+
+export type ProjectStatsResponse = Data<(typeof client)["api"]["projects"]["stats"]["get"]>;

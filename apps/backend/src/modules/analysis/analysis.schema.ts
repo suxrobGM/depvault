@@ -6,6 +6,7 @@ const EcosystemEnum = t.Enum(Ecosystem);
 export const CreateAnalysisBodySchema = t.Object({
   projectId: t.String({ format: "uuid" }),
   fileName: t.String({ minLength: 1, maxLength: 255 }),
+  filePath: t.Optional(t.String({ maxLength: 1024 })),
   content: t.String({ minLength: 1 }),
   ecosystem: EcosystemEnum,
 });
@@ -42,6 +43,7 @@ export const AnalysisResponseSchema = t.Object({
   projectId: t.String(),
   userId: t.String(),
   fileName: t.String(),
+  filePath: t.Nullable(t.String()),
   ecosystem: EcosystemEnum,
   healthScore: t.Nullable(t.Number()),
   createdAt: t.Date(),
@@ -54,8 +56,10 @@ export const AnalysisSummaryResponseSchema = t.Object({
   projectId: t.String(),
   userId: t.String(),
   fileName: t.String(),
+  filePath: t.Nullable(t.String()),
   ecosystem: EcosystemEnum,
   healthScore: t.Nullable(t.Number()),
+  dependencyCount: t.Number(),
   createdAt: t.Date(),
   updatedAt: t.Date(),
 });

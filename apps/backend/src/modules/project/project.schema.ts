@@ -37,7 +37,15 @@ export const ProjectListResponseSchema = t.Object({
   }),
 });
 
+export const ProjectStatsResponseSchema = t.Object({
+  projectCount: t.Number(),
+  dependencyCount: t.Number(),
+  vulnerabilityCount: t.Number(),
+  envVariableCount: t.Number(),
+});
+
 export type CreateProjectBody = Static<typeof CreateProjectBodySchema>;
 export type UpdateProjectBody = Static<typeof UpdateProjectBodySchema>;
 export type ProjectResponse = Static<typeof ProjectResponseSchema>;
 export type ProjectListQuery = Static<typeof ProjectListQuerySchema>;
+export type ProjectStatsResponse = Static<typeof ProjectStatsResponseSchema>;

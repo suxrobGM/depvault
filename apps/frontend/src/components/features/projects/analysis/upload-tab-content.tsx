@@ -18,11 +18,17 @@ export function UploadTabContent(props: UploadTabContentProps): ReactElement {
   const notification = useNotification();
   const [ecosystem, setEcosystem] = useState<EcosystemValue>("NODEJS");
   const [fileName, setFileName] = useState("package.json");
+  const [filePath, setFilePath] = useState("");
   const [content, setContent] = useState("");
 
   const mutation = useApiMutation(
-    (values: { projectId: string; fileName: string; content: string; ecosystem: EcosystemValue }) =>
-      client.api.analyses.post(values),
+    (values: {
+      projectId: string;
+      fileName: string;
+      filePath?: string;
+      content: string;
+      ecosystem: EcosystemValue;
+    }) => client.api.analyses.post(values),
     {
       invalidateKeys: [["analyses", projectId]],
       onSuccess: () => {
@@ -57,7 +63,7 @@ export function UploadTabContent(props: UploadTabContentProps): ReactElement {
       notification.error("Please provide file content");
       return;
     }
-    mutation.mutate({ projectId, fileName, content, ecosystem });
+    mutation.mutate({ projectId, fileName, ...(filePath && { filePath }), content, ecosystem });
   };
 
   return (
@@ -81,6 +87,15 @@ export function UploadTabContent(props: UploadTabContentProps): ReactElement {
         value={fileName}
         onChange={(e) => setFileName(e.target.value)}
         fullWidth
+      />
+
+      <TextField
+        label="File Path (optional)"
+        value={filePath}
+        onChange={(e) => setFilePath(e.target.value)}
+        fullWidth
+        placeholder="e.g., packages/api/package.json"
+        helperText="Useful for monorepos to distinguish files with the same name"
       />
 
       <Box>

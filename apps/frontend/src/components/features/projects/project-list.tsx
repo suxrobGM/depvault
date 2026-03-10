@@ -79,11 +79,12 @@ export function ProjectList(): ReactElement {
                     <Tooltip title="Open repository">
                       <IconButton
                         size="small"
-                        component="a"
-                        href={project.repositoryUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                        aria-label="Open repository"
+                        onClick={(e: React.MouseEvent) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          window.open(project.repositoryUrl!, "_blank", "noopener,noreferrer");
+                        }}
                         sx={{ ml: 1 }}
                       >
                         {project.repositoryUrl.includes("github.com") ? (

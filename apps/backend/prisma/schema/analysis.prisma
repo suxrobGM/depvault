@@ -35,6 +35,7 @@ model Analysis {
   projectId   String    @map("project_id") @db.Uuid
   userId      String    @map("user_id") @db.Uuid
   fileName    String    @map("file_name")
+  filePath    String?   @map("file_path")
   ecosystem   Ecosystem
   healthScore Int?      @map("health_score")
   createdAt   DateTime  @default(now()) @map("created_at")

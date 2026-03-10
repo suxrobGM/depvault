@@ -2,7 +2,12 @@ import { singleton } from "tsyringe";
 import { ForbiddenError, NotFoundError } from "@/common/errors";
 import { PrismaClient } from "@/generated/prisma";
 import type { PaginatedResponse } from "@/types/response";
-import type { CreateProjectBody, ProjectResponse, UpdateProjectBody } from "./project.schema";
+import type {
+  CreateProjectBody,
+  ProjectResponse,
+  ProjectStatsResponse,
+  UpdateProjectBody,
+} from "./project.schema";
 
 @singleton()
 export class ProjectService {
@@ -119,5 +124,31 @@ export class ProjectService {
     });
 
     return { message: "Project deleted successfully" };
+  }
+
+  async getStats(userId: string): Promise<ProjectStatsResponse> {
+    const memberFilter = { members: { some: { userId } } };
+
+    const [projectCount, dependencyCount, vulnerabilityCount, envVariableCount] = await Promise.all(
+      [
+        this.prisma.project.count({ where: memberFilter }),
+        this.prisma.dependency.count({
+          where: { analysis: { project: memberFilter } },
+        }),
+        this.prisma.vulnerability.count({
+          where: { dependency: { analysis: { project: memberFilter } } },
+        }),
+        this.prisma.envVariable.count({
+          where: { environment: { project: memberFilter } },
+        }),
+      ],
+    );
+
+    return {
+      projectCount,
+      dependencyCount,
+      vulnerabilityCount,
+      envVariableCount,
+    };
   }
 }

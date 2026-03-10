@@ -3,14 +3,16 @@
 import type { ReactElement, ReactNode } from "react";
 import {
   BugReport as BugIcon,
-  InsertDriveFile as FileIcon,
   Folder as FolderIcon,
   Inventory as InventoryIcon,
   VpnKey as SecretIcon,
 } from "@mui/icons-material";
-import { CardContent, Grid, Typography } from "@mui/material";
+import { CardContent, Grid, Skeleton, Typography } from "@mui/material";
 import { GlassCard } from "@/components/ui/glass-card";
 import { IconBox } from "@/components/ui/icon-box";
+import { useApiQuery } from "@/hooks/use-api-query";
+import { client } from "@/lib/api";
+import type { ProjectStatsResponse } from "@/types/api/project";
 
 interface StatCard {
   icon: ReactNode;
@@ -19,25 +21,38 @@ interface StatCard {
   color: string;
 }
 
-const stats: StatCard[] = [
-  { icon: <FolderIcon />, label: "Projects", value: 0, color: "var(--mui-palette-primary-main)" },
-  {
-    icon: <InventoryIcon />,
-    label: "Dependencies",
-    value: 0,
-    color: "var(--mui-palette-info-light)",
-  },
-  { icon: <BugIcon />, label: "Vulnerabilities", value: 0, color: "var(--mui-palette-error-main)" },
-  {
-    icon: <SecretIcon />,
-    label: "Env Variables",
-    value: 0,
-    color: "var(--mui-palette-secondary-main)",
-  },
-  { icon: <FileIcon />, label: "Secret Files", value: 0, color: "#a78bfa" },
-];
-
 export function DashboardStats(): ReactElement {
+  const { data, isLoading } = useApiQuery<ProjectStatsResponse>(["project-stats"], () =>
+    client.api.projects.stats.get(),
+  );
+
+  const stats: StatCard[] = [
+    {
+      icon: <FolderIcon />,
+      label: "Projects",
+      value: data?.projectCount ?? 0,
+      color: "var(--mui-palette-primary-main)",
+    },
+    {
+      icon: <InventoryIcon />,
+      label: "Dependencies",
+      value: data?.dependencyCount ?? 0,
+      color: "var(--mui-palette-info-light)",
+    },
+    {
+      icon: <BugIcon />,
+      label: "Vulnerabilities",
+      value: data?.vulnerabilityCount ?? 0,
+      color: "var(--mui-palette-error-main)",
+    },
+    {
+      icon: <SecretIcon />,
+      label: "Env Variables",
+      value: data?.envVariableCount ?? 0,
+      color: "var(--mui-palette-secondary-main)",
+    },
+  ];
+
   return (
     <Grid container spacing={2} sx={{ mb: 3 }}>
       {stats.map((stat, i) => (
@@ -50,9 +65,13 @@ export function DashboardStats(): ReactElement {
               <IconBox color={stat.color} size={40} sx={{ mb: 1.5 }}>
                 {stat.icon}
               </IconBox>
-              <Typography variant="h4" fontWeight={700} sx={{ mb: 0.25 }}>
-                {stat.value}
-              </Typography>
+              {isLoading ? (
+                <Skeleton variant="text" width={60} height={40} />
+              ) : (
+                <Typography variant="h4" fontWeight={700} sx={{ mb: 0.25 }}>
+                  {stat.value}
+                </Typography>
+              )}
               <Typography variant="body2" color="text.secondary">
                 {stat.label}
               </Typography>

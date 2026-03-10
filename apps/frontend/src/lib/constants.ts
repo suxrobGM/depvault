@@ -10,6 +10,9 @@ export const ROUTES = {
   converter: "/converter",
   projects: "/projects",
   project: (id: string) => `/projects/${id}`,
+  projectAnalysis: (id: string) => `/projects/${id}/analysis`,
+  projectAnalysisDetail: (id: string, analysisId: string) =>
+    `/projects/${id}/analysis/${analysisId}`,
   secrets: "/secrets",
 } as const;
 

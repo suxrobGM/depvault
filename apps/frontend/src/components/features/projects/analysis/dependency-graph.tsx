@@ -1,24 +1,28 @@
 "use client";
 
+import "@xyflow/react/dist/style.css";
 import { type ReactElement } from "react";
 import { Box, Chip, Stack, Typography, useTheme } from "@mui/material";
 import {
   Background,
   Controls,
   Handle,
-  MiniMap,
   Position,
   ReactFlow,
   type Edge,
   type Node,
   type NodeProps,
 } from "@xyflow/react";
-import "@xyflow/react/dist/style.css";
 import type { Dependency } from "@/types/api/analysis";
 
 interface DependencyGraphProps {
   dependencies: Dependency[];
   fileName: string;
+}
+
+interface GraphData {
+  nodes: Node[];
+  edges: Edge[];
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -100,7 +104,13 @@ const nodeTypes = {
   project: ProjectNode,
 };
 
-function buildGraphData(dependencies: Dependency[], fileName: string) {
+/**
+ * Builds graph data from a list of dependencies. Each dependency becomes a node, and edges are created based on parent-child relationships.
+ * @param dependencies The list of dependencies to visualize in the graph.
+ * @param fileName The name of the project file, used as the label for the root node.
+ * @returns An object containing the nodes and edges for the graph visualization.
+ */
+function buildGraphData(dependencies: Dependency[], fileName: string): GraphData {
   const nodes: Node[] = [];
   const edges: Edge[] = [];
 
@@ -158,6 +168,12 @@ export function DependencyGraph(props: DependencyGraphProps): ReactElement {
         border: 1,
         borderColor: "divider",
         overflow: "hidden",
+        "& .react-flow__controls-button": {
+          backgroundColor: "rgba(30,30,40,0.9)",
+          borderColor: "divider",
+          color: "text.primary",
+          fill: "currentcolor",
+        },
       }}
     >
       <ReactFlow
@@ -169,13 +185,12 @@ export function DependencyGraph(props: DependencyGraphProps): ReactElement {
         maxZoom={2}
         proOptions={{ hideAttribution: true }}
       >
-        <Background color={theme.palette.mode === "dark" ? "#333" : "#ddd"} gap={20} />
-        <Controls />
-        <MiniMap
-          nodeColor={(n) => {
-            if (n.type === "project") return theme.palette.primary.main;
-            const dep = n.data?.dep as Dependency | undefined;
-            return dep ? (STATUS_COLORS[dep.status] ?? "#6b7280") : "#6b7280";
+        <Background color="#333" gap={20} />
+        <Controls
+          style={{
+            backgroundColor: "rgba(30,30,40,0.9)",
+            borderColor: theme.palette.divider,
+            borderRadius: 8,
           }}
         />
       </ReactFlow>

@@ -65,8 +65,13 @@ export function GitHubTabContent(props: GitHubTabContentProps): ReactElement {
   );
 
   const analysisMutation = useApiMutation(
-    (values: { projectId: string; fileName: string; content: string; ecosystem: EcosystemValue }) =>
-      client.api.analyses.post(values),
+    (values: {
+      projectId: string;
+      fileName: string;
+      filePath?: string;
+      content: string;
+      ecosystem: EcosystemValue;
+    }) => client.api.analyses.post(values),
   );
 
   const handleSelectRepo = (fullName: string) => {
@@ -100,6 +105,7 @@ export function GitHubTabContent(props: GitHubTabContentProps): ReactElement {
         await analysisMutation.mutateAsync({
           projectId,
           fileName: file.name,
+          filePath: file.path,
           content: fileData.content,
           ecosystem: file.ecosystem as EcosystemValue,
         });
