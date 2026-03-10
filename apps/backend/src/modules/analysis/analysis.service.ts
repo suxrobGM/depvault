@@ -1,13 +1,15 @@
 import { singleton } from "tsyringe";
 import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
-import { PrismaClient } from "@/generated/prisma";
+import { DependencyStatus, PrismaClient, ProjectRole, type Ecosystem } from "@/generated/prisma";
 import type { PaginatedResponse } from "@/types/response";
 import type {
   AnalysisResponse,
   AnalysisSummaryResponse,
   CreateAnalysisBody,
+  UpdateAnalysisBody,
 } from "./analysis.schema";
+import { calculateHealthScore } from "./analysis.utils";
 import { checkVersions, scanVulnerabilities } from "./checkers";
 import { nodejsParser, pythonParser, type DependencyParser } from "./parsers";
 
@@ -25,17 +27,7 @@ export class AnalysisService {
   constructor(private readonly prisma: PrismaClient) {}
 
   async create(body: CreateAnalysisBody, userId: string): Promise<AnalysisResponse> {
-    const member = await this.prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId: body.projectId, userId } },
-    });
-
-    if (!member) {
-      throw new NotFoundError("Project not found");
-    }
-
-    if (member.role === "VIEWER") {
-      throw new ForbiddenError("Viewers cannot create analyses");
-    }
+    await this.requireEditor(body.projectId, userId, "create");
 
     const parser = PARSERS[body.ecosystem];
     if (!parser) {
@@ -70,59 +62,9 @@ export class AnalysisService {
       include: INCLUDE_DEPS_WITH_VULNS,
     });
 
-    const depInputs = analysis.dependencies.map((d) => ({
-      name: d.name,
-      currentVersion: d.currentVersion,
-    }));
+    const updatedDeps = await this.scanAndUpdateDeps(analysis.dependencies, body.ecosystem);
+    const healthScore = calculateHealthScore(updatedDeps);
 
-    const [versionResults, vulnResults] = await Promise.all([
-      checkVersions(depInputs, body.ecosystem).catch((err) => {
-        logger.warn(`Version check failed: ${err}`);
-        return [];
-      }),
-      scanVulnerabilities(depInputs, body.ecosystem).catch((err) => {
-        logger.warn(`Vulnerability scan failed: ${err}`);
-        return [];
-      }),
-    ]);
-
-    const versionByName = new Map(versionResults.map((v) => [v.name, v]));
-    const vulnsByName = new Map<string, typeof vulnResults>();
-    for (const vuln of vulnResults) {
-      const existing = vulnsByName.get(vuln.packageName) ?? [];
-      existing.push(vuln);
-      vulnsByName.set(vuln.packageName, existing);
-    }
-
-    const updateOps = analysis.dependencies.map((dep) => {
-      const version = versionByName.get(dep.name);
-      const vulns = vulnsByName.get(dep.name) ?? [];
-
-      return this.prisma.dependency.update({
-        where: { id: dep.id },
-        data: {
-          latestVersion: version?.latestVersion ?? null,
-          status: version?.status ?? "UP_TO_DATE",
-          ...(vulns.length > 0 && {
-            vulnerabilities: {
-              create: vulns.map((v) => ({
-                cveId: v.cveId,
-                title: v.title,
-                description: v.description,
-                severity: v.severity,
-                fixedIn: v.fixedIn,
-                url: v.url,
-              })),
-            },
-          }),
-        },
-        include: { vulnerabilities: true },
-      });
-    });
-
-    const updatedDeps = await Promise.all(updateOps);
-
-    const healthScore = this.calculateHealthScore(updatedDeps);
     if (healthScore !== null) {
       await this.prisma.analysis.update({
         where: { id: analysis.id },
@@ -130,11 +72,7 @@ export class AnalysisService {
       });
     }
 
-    return {
-      ...analysis,
-      healthScore,
-      dependencies: updatedDeps,
-    };
+    return { ...analysis, healthScore, dependencies: updatedDeps };
   }
 
   async list(
@@ -143,13 +81,7 @@ export class AnalysisService {
     page: number,
     limit: number,
   ): Promise<PaginatedResponse<AnalysisSummaryResponse>> {
-    const member = await this.prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId } },
-    });
-
-    if (!member) {
-      throw new NotFoundError("Project not found");
-    }
+    await this.requireMember(projectId, userId);
 
     const where = { projectId };
 
@@ -171,16 +103,76 @@ export class AnalysisService {
 
     return {
       items,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     };
   }
 
   async getById(projectId: string, analysisId: string, userId: string): Promise<AnalysisResponse> {
+    await this.requireMember(projectId, userId);
+    return this.findAnalysisOrThrow(analysisId, projectId, true);
+  }
+
+  async delete(
+    projectId: string,
+    analysisId: string,
+    userId: string,
+  ): Promise<{ message: string }> {
+    await this.requireEditor(projectId, userId, "delete");
+    await this.findAnalysisOrThrow(analysisId, projectId, false);
+    await this.prisma.analysis.delete({ where: { id: analysisId } });
+    return { message: "Analysis deleted successfully" };
+  }
+
+  async updateFilePath(
+    projectId: string,
+    analysisId: string,
+    userId: string,
+    body: UpdateAnalysisBody,
+  ): Promise<AnalysisResponse> {
+    await this.requireEditor(projectId, userId, "update");
+    await this.findAnalysisOrThrow(analysisId, projectId, false);
+
+    return this.prisma.analysis.update({
+      where: { id: analysisId },
+      data: {
+        ...(body.filePath !== undefined && { filePath: body.filePath }),
+      },
+      include: INCLUDE_DEPS_WITH_VULNS,
+    });
+  }
+
+  async rescan(projectId: string, analysisId: string, userId: string): Promise<AnalysisResponse> {
+    await this.requireEditor(projectId, userId, "rescan");
+    const analysis = await this.findAnalysisOrThrow(analysisId, projectId, true);
+
+    await this.prisma.vulnerability.deleteMany({
+      where: { dependency: { analysisId } },
+    });
+
+    const updatedDeps = await this.scanAndUpdateDeps(analysis.dependencies, analysis.ecosystem);
+    const healthScore = calculateHealthScore(updatedDeps);
+
+    await this.prisma.analysis.update({
+      where: { id: analysisId },
+      data: { healthScore },
+    });
+
+    return { ...analysis, healthScore, dependencies: updatedDeps };
+  }
+
+  // --- Private helpers ---
+
+  private async requireMember(projectId: string, userId: string): Promise<void> {
+    const member = await this.prisma.projectMember.findUnique({
+      where: { projectId_userId: { projectId, userId } },
+    });
+
+    if (!member) {
+      throw new NotFoundError("Project not found");
+    }
+  }
+
+  private async requireEditor(projectId: string, userId: string, action: string): Promise<void> {
     const member = await this.prisma.projectMember.findUnique({
       where: { projectId_userId: { projectId, userId } },
     });
@@ -189,9 +181,27 @@ export class AnalysisService {
       throw new NotFoundError("Project not found");
     }
 
+    if (member.role === ProjectRole.VIEWER) {
+      throw new ForbiddenError(`Viewers cannot ${action} analyses`);
+    }
+  }
+
+  private async findAnalysisOrThrow(
+    analysisId: string,
+    projectId: string,
+    includeDeps: true,
+  ): Promise<AnalysisResponse>;
+
+  private async findAnalysisOrThrow(
+    analysisId: string,
+    projectId: string,
+    includeDeps: false,
+  ): Promise<{ id: string }>;
+
+  private async findAnalysisOrThrow(analysisId: string, projectId: string, includeDeps: boolean) {
     const analysis = await this.prisma.analysis.findFirst({
       where: { id: analysisId, projectId },
-      include: INCLUDE_DEPS_WITH_VULNS,
+      ...(includeDeps && { include: INCLUDE_DEPS_WITH_VULNS }),
     });
 
     if (!analysis) {
@@ -201,55 +211,61 @@ export class AnalysisService {
     return analysis;
   }
 
-  async delete(
-    projectId: string,
-    analysisId: string,
-    userId: string,
-  ): Promise<{ message: string }> {
-    const member = await this.prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId } },
+  private async scanAndUpdateDeps(
+    dependencies: Array<{ id: string; name: string; currentVersion: string }>,
+    ecosystem: Ecosystem,
+  ) {
+    const depInputs = dependencies.map((d) => ({
+      name: d.name,
+      currentVersion: d.currentVersion,
+    }));
+
+    const [versionResults, vulnResults] = await Promise.all([
+      checkVersions(depInputs, ecosystem).catch((err) => {
+        logger.warn(`Version check failed: ${err}`);
+        return [];
+      }),
+      scanVulnerabilities(depInputs, ecosystem).catch((err) => {
+        logger.warn(`Vulnerability scan failed: ${err}`);
+        return [];
+      }),
+    ]);
+
+    const versionByName = new Map(versionResults.map((v) => [v.name, v]));
+    const vulnsByName = new Map<string, typeof vulnResults>();
+
+    for (const vuln of vulnResults) {
+      const existing = vulnsByName.get(vuln.packageName) ?? [];
+      existing.push(vuln);
+      vulnsByName.set(vuln.packageName, existing);
+    }
+
+    const updateOps = dependencies.map((dep) => {
+      const version = versionByName.get(dep.name);
+      const vulns = vulnsByName.get(dep.name) ?? [];
+
+      return this.prisma.dependency.update({
+        where: { id: dep.id },
+        data: {
+          latestVersion: version?.latestVersion ?? null,
+          status: version?.status ?? DependencyStatus.UP_TO_DATE,
+          ...(vulns.length > 0 && {
+            vulnerabilities: {
+              create: vulns.map((v) => ({
+                cveId: v.cveId,
+                title: v.title,
+                description: v.description,
+                severity: v.severity,
+                fixedIn: v.fixedIn,
+                url: v.url,
+              })),
+            },
+          }),
+        },
+        include: { vulnerabilities: true },
+      });
     });
 
-    if (!member) {
-      throw new NotFoundError("Project not found");
-    }
-
-    if (member.role === "VIEWER") {
-      throw new ForbiddenError("Viewers cannot delete analyses");
-    }
-
-    const analysis = await this.prisma.analysis.findFirst({
-      where: { id: analysisId, projectId },
-    });
-
-    if (!analysis) {
-      throw new NotFoundError("Analysis not found");
-    }
-
-    await this.prisma.analysis.delete({ where: { id: analysisId } });
-
-    return { message: "Analysis deleted successfully" };
-  }
-
-  private calculateHealthScore(
-    dependencies: Array<{ status: string; vulnerabilities: unknown[] }>,
-  ): number | null {
-    if (dependencies.length === 0) return null;
-
-    let score = 100;
-    for (const dep of dependencies) {
-      if (dep.status === "MAJOR_UPDATE") score -= 5;
-      else if (dep.status === "MINOR_UPDATE") score -= 2;
-      else if (dep.status === "DEPRECATED") score -= 10;
-
-      for (const vuln of dep.vulnerabilities as Array<{ severity: string }>) {
-        if (vuln.severity === "CRITICAL") score -= 15;
-        else if (vuln.severity === "HIGH") score -= 10;
-        else if (vuln.severity === "MEDIUM") score -= 5;
-        else if (vuln.severity === "LOW") score -= 2;
-      }
-    }
-
-    return Math.max(0, Math.min(100, score));
+    return Promise.all(updateOps);
   }
 }

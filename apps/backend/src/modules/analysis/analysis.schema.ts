@@ -88,7 +88,12 @@ export const AnalysisParamsSchema = t.Object({
   analysisId: t.String({ format: "uuid" }),
 });
 
+export const UpdateAnalysisBodySchema = t.Object({
+  filePath: t.Optional(t.Nullable(t.String({ maxLength: 1024 }))),
+});
+
 export type CreateAnalysisBody = Static<typeof CreateAnalysisBodySchema>;
+export type UpdateAnalysisBody = Static<typeof UpdateAnalysisBodySchema>;
 export type AnalysisResponse = Static<typeof AnalysisResponseSchema>;
 export type AnalysisSummaryResponse = Static<typeof AnalysisSummaryResponseSchema>;
 export type AnalysisListQuery = Static<typeof AnalysisListQuerySchema>;

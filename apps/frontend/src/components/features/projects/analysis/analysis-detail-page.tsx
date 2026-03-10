@@ -2,17 +2,23 @@
 
 import { useState, type ReactElement } from "react";
 import {
+  Check as CheckIcon,
+  Close as CloseIcon,
   Delete as DeleteIcon,
+  Edit as EditIcon,
   AccountTree as GraphIcon,
+  Refresh as RescanIcon,
   TableChart as TableIcon,
 } from "@mui/icons-material";
 import {
   Box,
   Button,
   Chip,
+  CircularProgress,
   IconButton,
   Skeleton,
   Stack,
+  TextField,
   ToggleButton,
   ToggleButtonGroup,
   Tooltip,
@@ -50,6 +56,8 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
   const notification = useNotification();
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [editingPath, setEditingPath] = useState(false);
+  const [filePathDraft, setFilePathDraft] = useState("");
 
   const { data: project } = useApiQuery<ProjectResponse>(["projects", projectId], () =>
     client.api.projects({ id: projectId }).get(),
@@ -75,6 +83,37 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
       },
       onError: () => {
         notification.error("Failed to delete analysis");
+      },
+    },
+  );
+
+  const updateMutation = useApiMutation(
+    (body: { filePath: string | null }) =>
+      client.api.analyses.project({ projectId })({ analysisId }).patch(body),
+    {
+      invalidateKeys: [["analyses", projectId, analysisId]],
+      onSuccess: () => {
+        notification.success("File path updated");
+        setEditingPath(false);
+      },
+      onError: () => {
+        notification.error("Failed to update file path");
+      },
+    },
+  );
+
+  const rescanMutation = useApiMutation(
+    () => client.api.analyses.project({ projectId })({ analysisId }).rescan.post(),
+    {
+      invalidateKeys: [
+        ["analyses", projectId, analysisId],
+        ["analyses", projectId],
+      ],
+      onSuccess: () => {
+        notification.success("Rescan completed");
+      },
+      onError: () => {
+        notification.error("Failed to rescan dependencies");
       },
     },
   );
@@ -121,6 +160,21 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
         ]}
         actions={
           <Stack direction="row" spacing={1} alignItems="center">
+            {canEdit && (
+              <Tooltip title="Rescan dependencies">
+                <IconButton
+                  size="small"
+                  onClick={() => rescanMutation.mutate()}
+                  disabled={rescanMutation.isPending}
+                >
+                  {rescanMutation.isPending ? (
+                    <CircularProgress size={18} />
+                  ) : (
+                    <RescanIcon fontSize="small" />
+                  )}
+                </IconButton>
+              </Tooltip>
+            )}
             <ToggleButtonGroup
               value={viewMode}
               exclusive
@@ -139,9 +193,11 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
               </ToggleButton>
             </ToggleButtonGroup>
             {canEdit && (
-              <IconButton color="error" onClick={() => setDeleteDialogOpen(true)} size="small">
-                <DeleteIcon />
-              </IconButton>
+              <Tooltip title="Delete analysis">
+                <IconButton color="error" onClick={() => setDeleteDialogOpen(true)} size="small">
+                  <DeleteIcon />
+                </IconButton>
+              </Tooltip>
             )}
           </Stack>
         }
@@ -160,13 +216,60 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
         </Typography>
       </Stack>
 
+      {canEdit && (
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+          {editingPath ? (
+            <>
+              <TextField
+                size="small"
+                placeholder="e.g., packages/api/package.json"
+                value={filePathDraft}
+                onChange={(e) => setFilePathDraft(e.target.value)}
+                sx={{ width: 360 }}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    updateMutation.mutate({ filePath: filePathDraft || null });
+                  } else if (e.key === "Escape") {
+                    setEditingPath(false);
+                  }
+                }}
+              />
+              <IconButton
+                size="small"
+                color="primary"
+                onClick={() => updateMutation.mutate({ filePath: filePathDraft || null })}
+                disabled={updateMutation.isPending}
+              >
+                <CheckIcon fontSize="small" />
+              </IconButton>
+              <IconButton size="small" onClick={() => setEditingPath(false)}>
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </>
+          ) : (
+            <Tooltip title="Edit file path">
+              <IconButton
+                size="small"
+                onClick={() => {
+                  setFilePathDraft(analysis.filePath ?? "");
+                  setEditingPath(true);
+                }}
+              >
+                <EditIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Stack>
+      )}
+
       <AnalysisSummaryStats
         dependencies={analysis.dependencies}
         healthScore={analysis.healthScore}
       />
 
       {viewMode === "table" ? (
-        <DependencyDataGrid dependencies={analysis.dependencies} />
+        <DependencyDataGrid dependencies={analysis.dependencies} ecosystem={analysis.ecosystem} />
       ) : (
         <DependencyGraph dependencies={analysis.dependencies} fileName={displayName} />
       )}

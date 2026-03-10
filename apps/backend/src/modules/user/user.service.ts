@@ -217,23 +217,45 @@ export class UserService {
 
   async deleteAccount(userId: string): Promise<{ message: string }> {
     const user = await this.prisma.user.findUnique({
-      where: { id: userId, deletedAt: null },
+      where: { id: userId },
     });
 
     if (!user) {
       throw new NotFoundError("User not found");
     }
 
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { deletedAt: new Date() },
+    // Delete uploaded avatar file if exists
+    if (user.avatarUrl) {
+      const uploadsDir = resolve(process.env.UPLOAD_DIR ?? "./uploads", "avatars");
+      const oldFilename = basename(user.avatarUrl);
+      const oldPath = resolve(uploadsDir, oldFilename);
+      if (existsSync(oldPath)) {
+        unlinkSync(oldPath);
+      }
+    }
+
+    // Delete entities that don't cascade from User
+    // Order matters: delete children before parents
+    await this.prisma.auditLog.deleteMany({ where: { userId } });
+    await this.prisma.sharedSecret.deleteMany({ where: { creatorId: userId } });
+    await this.prisma.secretFile.deleteMany({ where: { uploadedBy: userId } });
+    await this.prisma.analysis.deleteMany({ where: { userId } });
+
+    // Delete owned projects (cascades: environments, env vars, analyses, members, audit logs)
+    const ownedProjects = await this.prisma.project.findMany({
+      where: { ownerId: userId },
+      select: { id: true },
     });
 
-    await this.prisma.account.updateMany({
-      where: { userId },
-      data: { refreshToken: null, tokenFamily: null },
-    });
+    if (ownedProjects.length > 0) {
+      await this.prisma.project.deleteMany({
+        where: { id: { in: ownedProjects.map((p) => p.id) } },
+      });
+    }
 
-    return { message: "Account deleted successfully" };
+    // Delete user (cascades: accounts, project memberships, notifications)
+    await this.prisma.user.delete({ where: { id: userId } });
+
+    return { message: "Account permanently deleted" };
   }
 }

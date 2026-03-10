@@ -70,7 +70,7 @@ export const userController = new Elysia({ prefix: "/users", detail: { tags: ["U
     detail: {
       summary: "Delete account",
       description:
-        "Soft-delete the authenticated user's account and revoke all refresh tokens. The account can no longer be used to log in.",
+        "Permanently delete the authenticated user's account and all associated data including projects, analyses, uploads, and secret files. This action is irreversible.",
       security: [{ bearerAuth: [] }],
     },
   });

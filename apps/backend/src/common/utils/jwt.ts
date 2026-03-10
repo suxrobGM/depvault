@@ -16,7 +16,7 @@ function getSecret(): Uint8Array {
  * @returns Signed JWT string with `type: "access"` claim
  */
 export async function signAccessToken(payload: JwtPayload): Promise<string> {
-  const expiry = process.env.JWT_EXPIRY ?? "15m";
+  const expiry = process.env.JWT_EXPIRY ?? "1d";
 
   return new SignJWT({ email: payload.email, role: payload.role, type: "access" })
     .setProtectedHeader({ alg: "HS256" })

@@ -9,6 +9,7 @@ import {
   AnalysisProjectParamsSchema,
   AnalysisResponseSchema,
   CreateAnalysisBodySchema,
+  UpdateAnalysisBodySchema,
 } from "./analysis.schema";
 import { AnalysisService } from "./analysis.service";
 
@@ -55,6 +56,36 @@ export const analysisController = new Elysia({
         summary: "Get analysis details",
         description:
           "Return analysis details with all parsed dependencies. The authenticated user must be a member of the project.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .patch(
+    "/project/:projectId/:analysisId",
+    ({ params, body, user }) =>
+      analysisService.updateFilePath(params.projectId, params.analysisId, user.id, body),
+    {
+      params: AnalysisParamsSchema,
+      body: UpdateAnalysisBodySchema,
+      response: AnalysisResponseSchema,
+      detail: {
+        summary: "Update analysis",
+        description:
+          "Update analysis metadata such as file path. Only owners and editors can update.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .post(
+    "/project/:projectId/:analysisId/rescan",
+    ({ params, user }) => analysisService.rescan(params.projectId, params.analysisId, user.id),
+    {
+      params: AnalysisParamsSchema,
+      response: AnalysisResponseSchema,
+      detail: {
+        summary: "Rescan analysis",
+        description:
+          "Re-check version updates and vulnerabilities for all dependencies in an existing analysis.",
         security: [{ bearerAuth: [] }],
       },
     },

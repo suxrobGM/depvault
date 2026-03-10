@@ -235,9 +235,15 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
       <ConfirmDialog
         open={deleteDialogOpen}
         title="Delete Account"
-        description="Are you sure you want to delete your account? This will permanently remove all your data and cannot be undone."
+        description="Are you sure you want to delete your account? This will permanently remove all your projects, analyses, uploads, secret files, and other data."
         confirmLabel="Delete my account"
         destructive
+        confirmationText="DELETE"
+        confirmationHint={
+          <>
+            Type <strong>DELETE</strong> to permanently delete your account.
+          </>
+        }
         loading={deleteMutation.isPending}
         onConfirm={() => deleteMutation.mutate()}
         onCancel={() => setDeleteDialogOpen(false)}
