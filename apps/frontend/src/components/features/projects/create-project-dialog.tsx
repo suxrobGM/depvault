@@ -62,7 +62,13 @@ export function CreateProjectDialog(props: CreateProjectDialogProps): ReactEleme
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="sm"
+      fullWidth
+      slotProps={{ paper: { sx: { overflowX: "hidden" } } }}
+    >
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -70,7 +76,7 @@ export function CreateProjectDialog(props: CreateProjectDialogProps): ReactEleme
         }}
       >
         <DialogTitle>Create Project</DialogTitle>
-        <DialogContent sx={{ overflowX: "hidden" }}>
+        <DialogContent>
           <Stack spacing={2.5} sx={{ mt: 1 }}>
             <FormTextField form={form} name="name" label="Project Name" autoFocus />
             <FormTextField

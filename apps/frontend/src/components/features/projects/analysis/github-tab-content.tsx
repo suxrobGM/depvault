@@ -1,26 +1,9 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import { GitHub as GitHubIcon, Search as SearchIcon } from "@mui/icons-material";
-import {
-  Alert,
-  Box,
-  Button,
-  Checkbox,
-  Chip,
-  CircularProgress,
-  DialogActions,
-  FormControlLabel,
-  InputAdornment,
-  Stack,
-  Step,
-  StepLabel,
-  Stepper,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { GitHub as GitHubIcon } from "@mui/icons-material";
+import { Button, Stack, Step, StepLabel, Stepper, Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
-import { GlassCard } from "@/components/ui/glass-card";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useAuth } from "@/hooks/use-auth";
@@ -29,6 +12,8 @@ import { client } from "@/lib/api";
 import { API_BASE_URL } from "@/lib/constants";
 import type { GitHubDependencyFile, GitHubRepoListResponse } from "@/types/api/github";
 import type { EcosystemValue } from "./analysis-utils";
+import { GitHubFileSelector } from "./github-file-selector";
+import { GitHubRepoSelector } from "./github-repo-selector";
 
 interface GitHubTabContentProps {
   projectId: string;
@@ -44,6 +29,7 @@ export function GitHubTabContent(props: GitHubTabContentProps): ReactElement {
   const [selectedRepo, setSelectedRepo] = useState<{ owner: string; repo: string } | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<GitHubDependencyFile[]>([]);
   const [repoSearch, setRepoSearch] = useState("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const hasGitHub = !!user?.githubId;
 
@@ -90,9 +76,19 @@ export function GitHubTabContent(props: GitHubTabContentProps): ReactElement {
     });
   };
 
+  const handleToggleAll = () => {
+    if (!depFiles) return;
+    if (selectedFiles.length === depFiles.length) {
+      setSelectedFiles([]);
+    } else {
+      setSelectedFiles([...depFiles]);
+    }
+  };
+
   const handleAnalyze = async () => {
     if (!selectedRepo || selectedFiles.length === 0) return;
 
+    setIsAnalyzing(true);
     let successCount = 0;
     for (const file of selectedFiles) {
       try {
@@ -115,6 +111,7 @@ export function GitHubTabContent(props: GitHubTabContentProps): ReactElement {
       }
     }
 
+    setIsAnalyzing(false);
     if (successCount > 0) {
       queryClient.invalidateQueries({ queryKey: ["analyses", projectId] });
       notification.success(
@@ -155,185 +152,29 @@ export function GitHubTabContent(props: GitHubTabContentProps): ReactElement {
       </Stepper>
 
       {step === 0 && (
-        <RepoSelector
-          repoSearch={repoSearch}
+        <GitHubRepoSelector
+          search={repoSearch}
           onSearchChange={setRepoSearch}
-          reposLoading={reposLoading}
+          isLoading={reposLoading}
           repos={reposData?.items}
           onSelectRepo={handleSelectRepo}
         />
       )}
 
       {step === 1 && (
-        <FileSelector
-          selectedRepo={selectedRepo}
-          filesLoading={filesLoading}
-          depFiles={depFiles}
+        <GitHubFileSelector
+          repoLabel={`${selectedRepo?.owner}/${selectedRepo?.repo}`}
+          isLoading={filesLoading}
+          files={depFiles}
           selectedFiles={selectedFiles}
+          isAnalyzing={isAnalyzing}
           onToggleFile={handleToggleFile}
+          onToggleAll={handleToggleAll}
           onBack={() => setStep(0)}
           onClose={onClose}
           onAnalyze={handleAnalyze}
-          isPending={analysisMutation.isPending}
         />
       )}
     </Stack>
-  );
-}
-
-interface RepoSelectorProps {
-  repoSearch: string;
-  onSearchChange: (value: string) => void;
-  reposLoading: boolean;
-  repos: GitHubRepoListResponse["items"] | undefined;
-  onSelectRepo: (fullName: string) => void;
-}
-
-function RepoSelector(props: RepoSelectorProps): ReactElement {
-  const { repoSearch, onSearchChange, reposLoading, repos, onSelectRepo } = props;
-
-  return (
-    <Box>
-      <TextField
-        placeholder="Search repositories..."
-        value={repoSearch}
-        onChange={(e) => onSearchChange(e.target.value)}
-        fullWidth
-        size="small"
-        sx={{ mb: 2 }}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon fontSize="small" />
-              </InputAdornment>
-            ),
-          },
-        }}
-      />
-      {reposLoading && (
-        <Stack alignItems="center" sx={{ py: 3 }}>
-          <CircularProgress size={32} />
-        </Stack>
-      )}
-      <Box
-        sx={{
-          maxHeight: 300,
-          overflow: "auto",
-          display: "flex",
-          flexDirection: "column",
-          gap: 1,
-          pr: 0.5,
-        }}
-      >
-        {repos
-          ?.filter((r) => r.name.toLowerCase().includes(repoSearch.toLowerCase()))
-          .map((repo) => (
-            <GlassCard
-              key={repo.id}
-              sx={{ flexShrink: 0, "&:hover": { borderColor: "primary.main" } }}
-              onClick={() => onSelectRepo(repo.fullName)}
-            >
-              <Stack direction="row" alignItems="center" spacing={1.5} sx={{ p: 1.5 }}>
-                <GitHubIcon fontSize="small" sx={{ flexShrink: 0 }} />
-                <Box sx={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
-                  <Typography variant="body2" fontWeight={600} noWrap>
-                    {repo.fullName}
-                  </Typography>
-                  {repo.description && (
-                    <Typography variant="caption" color="text.secondary" noWrap display="block">
-                      {repo.description}
-                    </Typography>
-                  )}
-                </Box>
-                <Stack direction="row" spacing={0.5} sx={{ flexShrink: 0 }}>
-                  {repo.language && <Chip label={repo.language} size="small" variant="outlined" />}
-                  {repo.isPrivate && <Chip label="Private" size="small" color="warning" />}
-                </Stack>
-              </Stack>
-            </GlassCard>
-          ))}
-      </Box>
-    </Box>
-  );
-}
-
-interface FileSelectorProps {
-  selectedRepo: { owner: string; repo: string } | null;
-  filesLoading: boolean;
-  depFiles: GitHubDependencyFile[] | undefined;
-  selectedFiles: GitHubDependencyFile[];
-  onToggleFile: (file: GitHubDependencyFile) => void;
-  onBack: () => void;
-  onClose: () => void;
-  onAnalyze: () => void;
-  isPending: boolean;
-}
-
-function FileSelector(props: FileSelectorProps): ReactElement {
-  const {
-    selectedRepo,
-    filesLoading,
-    depFiles,
-    selectedFiles,
-    onToggleFile,
-    onBack,
-    onClose,
-    onAnalyze,
-    isPending,
-  } = props;
-
-  return (
-    <Box>
-      <Button size="small" onClick={onBack} sx={{ mb: 1 }}>
-        &larr; Back to repositories
-      </Button>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-        {selectedRepo?.owner}/{selectedRepo?.repo}
-      </Typography>
-
-      {filesLoading && (
-        <Stack alignItems="center" sx={{ py: 3 }}>
-          <CircularProgress size={32} />
-        </Stack>
-      )}
-
-      {depFiles && depFiles.length === 0 && (
-        <Alert severity="info">No dependency files found in this repository.</Alert>
-      )}
-
-      <Stack spacing={1}>
-        {depFiles?.map((file) => (
-          <FormControlLabel
-            key={file.path}
-            control={
-              <Checkbox
-                checked={selectedFiles.some((f) => f.path === file.path)}
-                onChange={() => onToggleFile(file)}
-              />
-            }
-            label={
-              <Stack direction="row" spacing={1} alignItems="center">
-                <Typography variant="body2">{file.path}</Typography>
-                <Chip label={file.ecosystem} size="small" variant="outlined" />
-              </Stack>
-            }
-          />
-        ))}
-      </Stack>
-
-      <DialogActions sx={{ px: 0, pb: 0, mt: 2 }}>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button
-          variant="contained"
-          onClick={onAnalyze}
-          disabled={selectedFiles.length === 0 || isPending}
-        >
-          {isPending
-            ? "Analyzing..."
-            : `Analyze ${selectedFiles.length} ${selectedFiles.length === 1 ? "file" : "files"}`}
-        </Button>
-      </DialogActions>
-    </Box>
   );
 }
