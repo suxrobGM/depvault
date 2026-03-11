@@ -2,7 +2,7 @@ import { singleton } from "tsyringe";
 import { NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { deriveProjectKey, encrypt } from "@/common/utils/encryption";
-import { PrismaClient } from "@/generated/prisma";
+import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import { NotificationService } from "@/modules/notification";
 import type { PaginatedResponse } from "@/types/response";
@@ -43,7 +43,6 @@ export class EnvironmentService {
 
     return environments.map((env) => ({
       id: env.id,
-      name: env.name,
       type: env.type,
       vaultGroupId: env.vaultGroupId,
       vaultGroupName: env.vaultGroup.name,
@@ -63,8 +62,7 @@ export class EnvironmentService {
     const environment = await this.envHelper.findOrCreateEnvironment(
       projectId,
       body.vaultGroupId,
-      body.environment,
-      body.environmentType,
+      body.environmentType as EnvironmentType,
     );
 
     const projectKey = deriveProjectKey(projectId);
@@ -99,7 +97,7 @@ export class EnvironmentService {
     projectId: string,
     userId: string,
     vaultGroupId: string,
-    environmentName?: string,
+    environmentType?: string,
     page = 1,
     limit = 20,
     ipAddress = "unknown",
@@ -107,8 +105,8 @@ export class EnvironmentService {
     const member = await this.envHelper.requireMember(projectId, userId);
     const canReadValues = member.role === "OWNER" || member.role === "EDITOR";
 
-    const where = environmentName
-      ? { environment: { projectId, vaultGroupId, name: environmentName } }
+    const where = environmentType
+      ? { environment: { projectId, vaultGroupId, type: environmentType as EnvironmentType } }
       : { environment: { projectId, vaultGroupId } };
 
     const [variables, total] = await Promise.all([
@@ -134,7 +132,7 @@ export class EnvironmentService {
         resourceType: "ENV_VARIABLE",
         resourceId: projectId,
         ipAddress,
-        metadata: { count: variables.length, environment: environmentName ?? null },
+        metadata: { count: variables.length, environmentType: environmentType ?? null },
       });
 
       void this.checkDrift(projectId, userId);
@@ -256,7 +254,7 @@ export class EnvironmentService {
         const envKeys = new Set(env.variables.map((v) => v.key));
         for (const key of allKeys) {
           if (!envKeys.has(key)) {
-            missingVars.push({ env: env.name, variable: key });
+            missingVars.push({ env: env.type, variable: key });
           }
         }
       }

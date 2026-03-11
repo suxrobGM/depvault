@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import { CONFIG_FORMATS, type ConfigFormat } from "@depvault/shared/constants";
+import {
+  CONFIG_FORMATS,
+  getEnvironmentLabel,
+  type ConfigFormat,
+  type EnvironmentTypeValue,
+} from "@depvault/shared/constants";
 import { ContentCopy as CopyIcon } from "@mui/icons-material";
 import {
   Box,
@@ -27,21 +32,21 @@ interface ExportVariablesDialogProps {
   onClose: () => void;
   projectId: string;
   vaultGroupId: string;
-  environment: string;
+  environmentType: EnvironmentTypeValue;
 }
 
 export function ExportVariablesDialog(props: ExportVariablesDialogProps): ReactElement {
-  const { open, onClose, projectId, vaultGroupId, environment } = props;
+  const { open, onClose, projectId, vaultGroupId, environmentType } = props;
   const [format, setFormat] = useState<ConfigFormat>("env");
   const notification = useNotification();
 
   const { data } = useApiQuery<ExportResult>(
-    ["env-export", projectId, environment, format],
+    ["env-export", projectId, environmentType, format],
     () =>
       client.api
         .projects({ id: projectId })
-        .environments.export.get({ query: { environment, format, vaultGroupId } }),
-    { enabled: open && !!environment },
+        .environments.export.get({ query: { environmentType, format, vaultGroupId } }),
+    { enabled: open && !!environmentType },
   );
 
   const handleCopy = async () => {
@@ -53,7 +58,7 @@ export function ExportVariablesDialog(props: ExportVariablesDialogProps): ReactE
   const handleDownload = () => {
     if (!data?.content) return;
     const ext = format === "env" ? ".env" : `.${format}`;
-    downloadFile(data.content, `${environment}${ext}`);
+    downloadFile(data.content, `${getEnvironmentLabel(environmentType).toLowerCase()}${ext}`);
   };
 
   return (

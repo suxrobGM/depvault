@@ -8,4 +8,3 @@ export type EnvironmentItem = EnvironmentListResponse[number];
 
 export type EnvDiffResponse = Data<ProjectById["environments"]["diff"]["get"]>;
 export type EnvDiffRow = EnvDiffResponse["rows"][number];
-export type EnvironmentType = EnvironmentItem["type"];

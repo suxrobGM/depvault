@@ -1,4 +1,5 @@
 import { t, type Static } from "elysia";
+import { EnvironmentType } from "@/generated/prisma";
 
 const FORBIDDEN_EXTENSIONS = [".exe", ".sh", ".bat", ".cmd", ".ps1"];
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
@@ -17,8 +18,10 @@ export const SecretFileResponseSchema = t.Object({
   updatedAt: t.Date(),
 });
 
+const EnvironmentTypeSchema = t.Enum(EnvironmentType);
+
 export const SecretFileListQuerySchema = t.Object({
-  environment: t.Optional(t.String()),
+  environmentType: t.Optional(EnvironmentTypeSchema),
   page: t.Integer({ minimum: 1, default: 1 }),
   limit: t.Integer({ minimum: 1, maximum: 100, default: 20 }),
 });
@@ -53,7 +56,7 @@ export const SecretFileVersionListResponseSchema = t.Object({
 export const UploadSecretFileBodySchema = t.Object({
   file: t.File({ maxSize: "25m" }),
   vaultGroupId: t.String(),
-  environment: t.String({ minLength: 1 }),
+  environmentType: EnvironmentTypeSchema,
   description: t.Optional(t.String({ maxLength: 500 })),
 });
 
@@ -67,7 +70,7 @@ export const UpdateSecretFileBodySchema = t.Object({
   name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
   description: t.Optional(t.String({ maxLength: 500 })),
   vaultGroupId: t.Optional(t.String()),
-  environment: t.Optional(t.String({ minLength: 1 })),
+  environmentType: t.Optional(EnvironmentTypeSchema),
 });
 
 export type SecretFileResponse = Static<typeof SecretFileResponseSchema>;

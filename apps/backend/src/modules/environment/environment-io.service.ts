@@ -1,7 +1,7 @@
 import { singleton } from "tsyringe";
 import { PARSERS, SERIALIZERS, type ConfigFormat } from "@/common/parsers";
 import { decrypt, deriveProjectKey, encrypt } from "@/common/utils/encryption";
-import { PrismaClient } from "@/generated/prisma";
+import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import { toExampleLine, toResponseWithValue } from "./environment.mapper";
 import { EnvironmentRepository } from "./environment.repository";
@@ -29,8 +29,7 @@ export class EnvironmentIOService {
     const environment = await this.envRepository.findOrCreateEnvironment(
       projectId,
       body.vaultGroupId,
-      body.environment,
-      body.environmentType,
+      body.environmentType as EnvironmentType,
     );
 
     const projectKey = deriveProjectKey(projectId);
@@ -78,14 +77,14 @@ export class EnvironmentIOService {
   async export(
     projectId: string,
     vaultGroupId: string,
-    environment: string,
+    environmentType: EnvironmentType,
     format: ConfigFormat,
     userId: string,
     ipAddress: string,
   ) {
     await this.envRepository.requireEditorOrOwner(projectId, userId);
 
-    const env = await this.envRepository.requireEnvironment(vaultGroupId, environment);
+    const env = await this.envRepository.requireEnvironment(vaultGroupId, environmentType);
 
     const variables = await this.prisma.envVariable.findMany({
       where: { environmentId: env.id },
@@ -108,21 +107,21 @@ export class EnvironmentIOService {
       resourceType: "ENV_VARIABLE",
       resourceId: projectId,
       ipAddress,
-      metadata: { format, environment, count: variables.length },
+      metadata: { format, environmentType, count: variables.length },
     });
 
-    return { content, format, environment };
+    return { content, format, environmentType };
   }
 
   async generateExample(
     projectId: string,
     vaultGroupId: string,
-    environment: string,
+    environmentType: EnvironmentType,
     userId: string,
   ) {
     await this.envRepository.requireMember(projectId, userId);
 
-    const env = await this.envRepository.requireEnvironment(vaultGroupId, environment);
+    const env = await this.envRepository.requireEnvironment(vaultGroupId, environmentType);
 
     const variables = await this.prisma.envVariable.findMany({
       where: { environmentId: env.id },
@@ -130,6 +129,6 @@ export class EnvironmentIOService {
     });
 
     const content = variables.map(toExampleLine).join("\n");
-    return { content, environment };
+    return { content, environmentType };
   }
 }

@@ -23,12 +23,12 @@ interface EditVariableDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
-  environment: string;
+  environmentType: string;
   variable: EnvVariable | null;
 }
 
 export function EditVariableDialog(props: EditVariableDialogProps): ReactElement {
-  const { open, onClose, projectId, environment, variable } = props;
+  const { open, onClose, projectId, environmentType, variable } = props;
   const notification = useNotification();
 
   const mutation = useApiMutation(
@@ -38,7 +38,7 @@ export function EditVariableDialog(props: EditVariableDialogProps): ReactElement
         .environments.variables({ varId: variable?.id ?? "" })
         .put(values),
     {
-      invalidateKeys: [["env-variables", projectId, environment]],
+      invalidateKeys: [["env-variables", projectId, environmentType]],
       onSuccess: () => {
         notification.success("Variable updated");
         handleClose();

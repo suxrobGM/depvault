@@ -6,8 +6,7 @@ export const EnvironmentTypeSchema = t.Enum(EnvironmentType);
 
 export const CreateEnvVariableBodySchema = t.Object({
   vaultGroupId: t.String(),
-  environment: t.String({ minLength: 1, maxLength: 100 }),
-  environmentType: t.Optional(EnvironmentTypeSchema),
+  environmentType: EnvironmentTypeSchema,
   key: t.String({ minLength: 1, maxLength: 255 }),
   value: t.String(),
   description: t.Optional(t.String({ maxLength: 500 })),
@@ -44,7 +43,7 @@ export const EnvVariableWithValueResponseSchema = t.Object({
 
 export const EnvVariableListQuerySchema = t.Object({
   vaultGroupId: t.String(),
-  environment: t.Optional(t.String()),
+  environmentType: t.Optional(EnvironmentTypeSchema),
   page: t.Integer({ minimum: 1, default: 1 }),
   limit: t.Integer({ minimum: 1, maximum: 100, default: 20 }),
 });
@@ -68,8 +67,7 @@ const ConfigFormatSchema = t.Union(CONFIG_FORMAT_VALUES.map((v) => t.Literal(v))
 
 export const ImportEnvVariablesBodySchema = t.Object({
   vaultGroupId: t.String(),
-  environment: t.String({ minLength: 1, maxLength: 100 }),
-  environmentType: t.Optional(EnvironmentTypeSchema),
+  environmentType: EnvironmentTypeSchema,
   format: ConfigFormatSchema,
   content: t.String({ minLength: 1 }),
 });
@@ -82,29 +80,28 @@ export const ImportEnvVariablesResponseSchema = t.Object({
 
 export const ExportEnvVariablesQuerySchema = t.Object({
   vaultGroupId: t.String(),
-  environment: t.String({ minLength: 1 }),
+  environmentType: EnvironmentTypeSchema,
   format: ConfigFormatSchema,
 });
 
 export const ExportEnvVariablesResponseSchema = t.Object({
   content: t.String(),
   format: t.String(),
-  environment: t.String(),
+  environmentType: EnvironmentTypeSchema,
 });
 
 export const EnvExampleResponseSchema = t.Object({
   content: t.String(),
-  environment: t.String(),
+  environmentType: EnvironmentTypeSchema,
 });
 
 export const EnvExampleQuerySchema = t.Object({
   vaultGroupId: t.String(),
-  environment: t.String({ minLength: 1 }),
+  environmentType: EnvironmentTypeSchema,
 });
 
 export const EnvironmentResponseSchema = t.Object({
   id: t.String(),
-  name: t.String(),
   type: EnvironmentTypeSchema,
   vaultGroupId: t.String(),
   vaultGroupName: t.String(),
@@ -148,14 +145,12 @@ export type EnvDiffRow = Static<typeof EnvDiffRowSchema>;
 
 export const CloneEnvironmentBodySchema = t.Object({
   vaultGroupId: t.String(),
-  sourceEnvironment: t.String({ minLength: 1, maxLength: 100 }),
-  targetName: t.String({ minLength: 1, maxLength: 100 }),
-  targetType: t.Optional(EnvironmentTypeSchema),
+  sourceType: EnvironmentTypeSchema,
+  targetType: EnvironmentTypeSchema,
 });
 
 export const CloneEnvironmentResponseSchema = t.Object({
   id: t.String(),
-  name: t.String(),
   type: EnvironmentTypeSchema,
   variableCount: t.Number(),
 });

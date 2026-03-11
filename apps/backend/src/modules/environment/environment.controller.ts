@@ -120,7 +120,7 @@ export const environmentController = new Elysia({
         params.id,
         user.id,
         query.vaultGroupId,
-        query.environment,
+        query.environmentType,
         query.page,
         query.limit,
         getClientIp(request, server),
@@ -132,7 +132,7 @@ export const environmentController = new Elysia({
       detail: {
         summary: "List environment variables",
         description:
-          "List environment variables for a project, optionally filtered by environment name. Viewers see masked values; editors and owners see decrypted values.",
+          "List environment variables for a project, optionally filtered by environment type. Viewers see masked values; editors and owners see decrypted values.",
         security: [{ bearerAuth: [] }],
       },
     },
@@ -196,7 +196,7 @@ export const environmentController = new Elysia({
       environmentIOService.export(
         params.id,
         query.vaultGroupId,
-        query.environment,
+        query.environmentType,
         query.format,
         user.id,
         getClientIp(request, server),
@@ -219,7 +219,7 @@ export const environmentController = new Elysia({
       environmentIOService.generateExample(
         params.id,
         query.vaultGroupId,
-        query.environment,
+        query.environmentType,
         user.id,
       ),
     {

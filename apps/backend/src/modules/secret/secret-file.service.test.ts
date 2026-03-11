@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
 import * as encryption from "@/common/utils/encryption";
-import { ProjectRole } from "@/generated/prisma";
+import { EnvironmentType, ProjectRole } from "@/generated/prisma";
 import { SecretFileService } from "./secret-file.service";
 
 const now = new Date();
@@ -16,7 +16,6 @@ const fakeEncryptedContent = Buffer.from("encrypted-content");
 const mockEnvironment = {
   id: envId,
   projectId,
-  name: "development",
   type: "DEVELOPMENT",
   createdAt: now,
   updatedAt: now,
@@ -104,7 +103,7 @@ describe("SecretFileService", () => {
         userId,
         file,
         "vault-group-uuid",
-        "development",
+        EnvironmentType.DEVELOPMENT,
         "Config file",
       );
 
@@ -122,7 +121,7 @@ describe("SecretFileService", () => {
         mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
         const file = createMockFile(`script${ext}`);
         expect(
-          service.upload(projectId, userId, file, "vault-group-uuid", "dev"),
+          service.upload(projectId, userId, file, "vault-group-uuid", EnvironmentType.DEVELOPMENT),
         ).rejects.toBeInstanceOf(BadRequestError);
       }
     });
@@ -132,7 +131,7 @@ describe("SecretFileService", () => {
 
       const file = createMockFile("../etc/passwd");
       expect(
-        service.upload(projectId, userId, file, "vault-group-uuid", "dev"),
+        service.upload(projectId, userId, file, "vault-group-uuid", EnvironmentType.DEVELOPMENT),
       ).rejects.toBeInstanceOf(BadRequestError);
     });
 
@@ -141,7 +140,7 @@ describe("SecretFileService", () => {
 
       const file = createMockFile("big.json", 26 * 1024 * 1024);
       expect(
-        service.upload(projectId, userId, file, "vault-group-uuid", "dev"),
+        service.upload(projectId, userId, file, "vault-group-uuid", EnvironmentType.DEVELOPMENT),
       ).rejects.toBeInstanceOf(BadRequestError);
     });
 
@@ -150,7 +149,7 @@ describe("SecretFileService", () => {
 
       const file = createMockFile("config.json");
       expect(
-        service.upload(projectId, userId, file, "vault-group-uuid", "dev"),
+        service.upload(projectId, userId, file, "vault-group-uuid", EnvironmentType.DEVELOPMENT),
       ).rejects.toBeInstanceOf(ForbiddenError);
     });
   });
@@ -159,7 +158,7 @@ describe("SecretFileService", () => {
     it("should return file metadata without content", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.VIEWER });
 
-      const result = await service.list(projectId, userId, "development");
+      const result = await service.list(projectId, userId, EnvironmentType.DEVELOPMENT);
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0]!.name).toBe("config.json");
@@ -173,14 +172,14 @@ describe("SecretFileService", () => {
       );
     });
 
-    it("should filter by environment name", async () => {
+    it("should filter by environment type", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
 
-      await service.list(projectId, userId, "staging", 1, 10);
+      await service.list(projectId, userId, EnvironmentType.STAGING, 1, 10);
 
       expect(mockPrisma.secretFile.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { environment: { projectId, name: "staging" } },
+          where: { environment: { projectId, type: EnvironmentType.STAGING } },
         }),
       );
     });
@@ -280,7 +279,7 @@ describe("SecretFileService", () => {
       mockPrisma.environment.findUnique.mockResolvedValueOnce({
         ...mockEnvironment,
         id: "new-env-id",
-        name: "staging",
+        type: "STAGING",
       });
       mockPrisma.secretFile.update.mockResolvedValueOnce({
         ...mockSecretFile,
@@ -288,7 +287,10 @@ describe("SecretFileService", () => {
       });
 
       const vaultGroupId = "vault-group-uuid";
-      await service.update(projectId, fileId, userId, { environment: "staging", vaultGroupId });
+      await service.update(projectId, fileId, userId, {
+        environmentType: EnvironmentType.STAGING,
+        vaultGroupId,
+      });
 
       expect(mockPrisma.secretFile.update).toHaveBeenCalledWith({
         where: { id: fileId },

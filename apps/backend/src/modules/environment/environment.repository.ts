@@ -6,25 +6,15 @@ import { EnvironmentType, PrismaClient, ProjectRole } from "@/generated/prisma";
 export class EnvironmentRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async findOrCreateEnvironment(
-    projectId: string,
-    vaultGroupId: string,
-    name: string,
-    type?: string,
-  ) {
+  async findOrCreateEnvironment(projectId: string, vaultGroupId: string, type: EnvironmentType) {
     const existing = await this.prisma.environment.findUnique({
-      where: { vaultGroupId_name: { vaultGroupId, name } },
+      where: { vaultGroupId_type: { vaultGroupId, type } },
     });
 
     if (existing) return existing;
 
     return this.prisma.environment.create({
-      data: {
-        projectId,
-        vaultGroupId,
-        name,
-        type: (type as EnvironmentType) ?? EnvironmentType.DEVELOPMENT,
-      },
+      data: { projectId, vaultGroupId, type },
     });
   }
 
@@ -50,13 +40,13 @@ export class EnvironmentRepository {
     return member;
   }
 
-  async requireEnvironment(vaultGroupId: string, environmentName: string) {
+  async requireEnvironment(vaultGroupId: string, type: EnvironmentType) {
     const env = await this.prisma.environment.findUnique({
-      where: { vaultGroupId_name: { vaultGroupId, name: environmentName } },
+      where: { vaultGroupId_type: { vaultGroupId, type } },
     });
 
     if (!env) {
-      throw new NotFoundError(`Environment "${environmentName}" not found`);
+      throw new NotFoundError(`Environment "${type}" not found`);
     }
 
     return env;

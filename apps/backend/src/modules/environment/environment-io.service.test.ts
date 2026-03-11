@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 import { ForbiddenError, NotFoundError } from "@/common/errors";
 import * as encryption from "@/common/utils/encryption";
+import { EnvironmentType } from "@/generated/prisma";
 import { EnvironmentIOService } from "./environment-io.service";
 
 const now = new Date();
@@ -37,7 +38,6 @@ const mockVariable = {
 const mockEnvironment = {
   id: envId,
   projectId,
-  name: "development",
   type: "DEVELOPMENT",
   createdAt: now,
   updatedAt: now,
@@ -93,7 +93,7 @@ describe("EnvironmentIOService", () => {
         projectId,
         {
           vaultGroupId,
-          environment: "development",
+          environmentType: "DEVELOPMENT",
           format: "env",
           content: "DATABASE_URL=postgres://localhost/db",
         },
@@ -116,7 +116,7 @@ describe("EnvironmentIOService", () => {
         projectId,
         {
           vaultGroupId,
-          environment: "development",
+          environmentType: "DEVELOPMENT",
           format: "env",
           content: "DATABASE_URL=new-value",
         },
@@ -136,13 +136,13 @@ describe("EnvironmentIOService", () => {
 
       await service.bulkImport(
         projectId,
-        { vaultGroupId, environment: "staging", format: "env", content: "KEY=value" },
+        { vaultGroupId, environmentType: "STAGING", format: "env", content: "KEY=value" },
         userId,
         ipAddress,
       );
 
       expect(mockPrisma.environment.create).toHaveBeenCalledWith({
-        data: { projectId, vaultGroupId, name: "staging", type: "DEVELOPMENT" },
+        data: { projectId, vaultGroupId, type: "STAGING" },
       });
     });
 
@@ -153,7 +153,7 @@ describe("EnvironmentIOService", () => {
 
       await service.bulkImport(
         projectId,
-        { vaultGroupId, environment: "development", format: "env", content: "KEY=value" },
+        { vaultGroupId, environmentType: "DEVELOPMENT", format: "env", content: "KEY=value" },
         userId,
         ipAddress,
       );
@@ -175,7 +175,7 @@ describe("EnvironmentIOService", () => {
       expect(
         service.bulkImport(
           projectId,
-          { vaultGroupId, environment: "dev", format: "env", content: "K=V" },
+          { vaultGroupId, environmentType: "DEVELOPMENT", format: "env", content: "K=V" },
           userId,
           ipAddress,
         ),
@@ -188,7 +188,7 @@ describe("EnvironmentIOService", () => {
       expect(
         service.bulkImport(
           projectId,
-          { vaultGroupId, environment: "dev", format: "env", content: "K=V" },
+          { vaultGroupId, environmentType: "DEVELOPMENT", format: "env", content: "K=V" },
           userId,
           ipAddress,
         ),
@@ -204,7 +204,7 @@ describe("EnvironmentIOService", () => {
       const result = await service.export(
         projectId,
         vaultGroupId,
-        "development",
+        EnvironmentType.DEVELOPMENT,
         "env",
         userId,
         ipAddress,
@@ -212,7 +212,7 @@ describe("EnvironmentIOService", () => {
 
       expect(result.content).toContain("DATABASE_URL=");
       expect(result.format).toBe("env");
-      expect(result.environment).toBe("development");
+      expect(result.environmentType).toBe("DEVELOPMENT");
       expect(encryption.decrypt).toHaveBeenCalled();
     });
 
@@ -220,13 +220,20 @@ describe("EnvironmentIOService", () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "EDITOR" });
       mockPrisma.environment.findUnique.mockResolvedValueOnce(mockEnvironment);
 
-      await service.export(projectId, vaultGroupId, "development", "env", userId, ipAddress);
+      await service.export(
+        projectId,
+        vaultGroupId,
+        EnvironmentType.DEVELOPMENT,
+        "env",
+        userId,
+        ipAddress,
+      );
 
       expect(mockAuditLog.log).toHaveBeenCalledWith(
         expect.objectContaining({
           action: "DOWNLOAD",
           resourceType: "ENV_VARIABLE",
-          metadata: expect.objectContaining({ format: "env", environment: "development" }),
+          metadata: expect.objectContaining({ format: "env", environmentType: "DEVELOPMENT" }),
         }),
       );
     });
@@ -236,7 +243,14 @@ describe("EnvironmentIOService", () => {
       mockPrisma.environment.findUnique.mockResolvedValueOnce(null);
 
       expect(
-        service.export(projectId, vaultGroupId, "nonexistent", "env", userId, ipAddress),
+        service.export(
+          projectId,
+          vaultGroupId,
+          EnvironmentType.PRODUCTION,
+          "env",
+          userId,
+          ipAddress,
+        ),
       ).rejects.toBeInstanceOf(NotFoundError);
     });
 
@@ -244,7 +258,14 @@ describe("EnvironmentIOService", () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
 
       expect(
-        service.export(projectId, vaultGroupId, "development", "env", userId, ipAddress),
+        service.export(
+          projectId,
+          vaultGroupId,
+          EnvironmentType.DEVELOPMENT,
+          "env",
+          userId,
+          ipAddress,
+        ),
       ).rejects.toBeInstanceOf(ForbiddenError);
     });
   });
@@ -254,21 +275,31 @@ describe("EnvironmentIOService", () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
       mockPrisma.environment.findUnique.mockResolvedValueOnce(mockEnvironment);
 
-      const result = await service.generateExample(projectId, vaultGroupId, "development", userId);
+      const result = await service.generateExample(
+        projectId,
+        vaultGroupId,
+        EnvironmentType.DEVELOPMENT,
+        userId,
+      );
 
       expect(result.content).toContain("DATABASE_URL=");
       expect(result.content).toContain("(required)");
       expect(result.content).toContain("The database URL");
-      expect(result.environment).toBe("development");
+      expect(result.environmentType).toBe("DEVELOPMENT");
     });
 
     it("should allow VIEWER access", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
       mockPrisma.environment.findUnique.mockResolvedValueOnce(mockEnvironment);
 
-      const result = await service.generateExample(projectId, vaultGroupId, "development", userId);
+      const result = await service.generateExample(
+        projectId,
+        vaultGroupId,
+        EnvironmentType.DEVELOPMENT,
+        userId,
+      );
 
-      expect(result.environment).toBe("development");
+      expect(result.environmentType).toBe("DEVELOPMENT");
     });
 
     it("should not decrypt values", async () => {
@@ -277,7 +308,7 @@ describe("EnvironmentIOService", () => {
       const decryptSpy = spyOn(encryption, "decrypt");
       decryptSpy.mockClear();
 
-      await service.generateExample(projectId, vaultGroupId, "development", userId);
+      await service.generateExample(projectId, vaultGroupId, EnvironmentType.DEVELOPMENT, userId);
 
       expect(decryptSpy).not.toHaveBeenCalled();
     });
@@ -287,7 +318,7 @@ describe("EnvironmentIOService", () => {
       mockPrisma.environment.findUnique.mockResolvedValueOnce(null);
 
       expect(
-        service.generateExample(projectId, vaultGroupId, "nonexistent", userId),
+        service.generateExample(projectId, vaultGroupId, EnvironmentType.PRODUCTION, userId),
       ).rejects.toBeInstanceOf(NotFoundError);
     });
 
@@ -295,7 +326,7 @@ describe("EnvironmentIOService", () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce(null);
 
       expect(
-        service.generateExample(projectId, vaultGroupId, "development", userId),
+        service.generateExample(projectId, vaultGroupId, EnvironmentType.DEVELOPMENT, userId),
       ).rejects.toBeInstanceOf(NotFoundError);
     });
   });

@@ -1,13 +1,14 @@
 "use client";
 
 import type { ReactElement } from "react";
+import { getEnvironmentLabel } from "@depvault/shared/constants";
 import { Chip, Stack, Typography } from "@mui/material";
 import type { EnvironmentItem } from "@/types/api/environment";
 
 interface EnvironmentSelectorProps {
   environments: EnvironmentItem[];
   selected: string | null;
-  onSelect: (name: string) => void;
+  onSelect: (type: string) => void;
 }
 
 export function EnvironmentSelector(props: EnvironmentSelectorProps): ReactElement {
@@ -21,10 +22,10 @@ export function EnvironmentSelector(props: EnvironmentSelectorProps): ReactEleme
       {environments.map((env) => (
         <Chip
           key={env.id}
-          label={`${env.name} (${env.variableCount})`}
-          variant={selected === env.name ? "filled" : "outlined"}
-          color={selected === env.name ? "primary" : "default"}
-          onClick={() => onSelect(env.name)}
+          label={`${getEnvironmentLabel(env.type)} (${env.variableCount})`}
+          variant={selected === env.type ? "filled" : "outlined"}
+          color={selected === env.type ? "primary" : "default"}
+          onClick={() => onSelect(env.type)}
           size="small"
         />
       ))}

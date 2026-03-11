@@ -23,7 +23,6 @@ import { useNotification } from "@/hooks/use-notification";
 import { client } from "@/lib/api";
 
 const applyTemplateSchema = z.object({
-  environmentName: z.string().min(1, "Name is required").max(100),
   environmentType: z.enum(ENVIRONMENT_TYPE_VALUES),
 });
 
@@ -33,7 +32,7 @@ interface TemplateApplyDialogProps {
   projectId: string;
   vaultGroupId: string;
   templateId: string | null;
-  onSuccess: (envName: string) => void;
+  onSuccess: (envType: string) => void;
 }
 
 export function TemplateApplyDialog(props: TemplateApplyDialogProps): ReactElement {
@@ -41,7 +40,7 @@ export function TemplateApplyDialog(props: TemplateApplyDialogProps): ReactEleme
   const notification = useNotification();
 
   const mutation = useApiMutation(
-    (values: { environmentName: string; environmentType: EnvironmentTypeValue }) =>
+    (values: { environmentType: EnvironmentTypeValue }) =>
       client.api
         .projects({ id: projectId })
         ["env-templates"]({ templateId: templateId ?? "" })
@@ -51,11 +50,11 @@ export function TemplateApplyDialog(props: TemplateApplyDialogProps): ReactEleme
         ["environments", projectId],
         ["env-templates", projectId],
       ],
-      onSuccess: (data: { environmentName: string; variablesCreated: number }) => {
+      onSuccess: (data: { environmentType: string; variablesCreated: number }) => {
         notification.success(
-          `Created "${data.environmentName}" with ${data.variablesCreated} variables`,
+          `Created "${data.environmentType}" environment with ${data.variablesCreated} variables`,
         );
-        onSuccess(data.environmentName);
+        onSuccess(data.environmentType);
         handleClose();
       },
       onError: (error) => notification.error(error.message || "Failed to apply template"),
@@ -64,7 +63,6 @@ export function TemplateApplyDialog(props: TemplateApplyDialogProps): ReactEleme
 
   const form = useForm({
     defaultValues: {
-      environmentName: "",
       environmentType: "DEVELOPMENT" as EnvironmentTypeValue,
     },
     validators: { onSubmit: applyTemplateSchema },
@@ -91,12 +89,11 @@ export function TemplateApplyDialog(props: TemplateApplyDialogProps): ReactEleme
           <Stack spacing={2.5} sx={{ mt: 1 }}>
             <FormTextField
               form={form}
-              name="environmentName"
-              label="New Environment Name"
+              name="environmentType"
+              label="Environment Type"
+              select
               autoFocus
-              placeholder="e.g. qa"
-            />
-            <FormTextField form={form} name="environmentType" label="Environment Type" select>
+            >
               {ENVIRONMENT_TYPES.map((t) => (
                 <MenuItem key={t.value} value={t.value}>
                   {t.label}

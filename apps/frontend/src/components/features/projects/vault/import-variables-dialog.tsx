@@ -30,29 +30,24 @@ interface ImportVariablesDialogProps {
   onClose: () => void;
   projectId: string;
   vaultGroupId: string;
-  /** Pass the environment name when importing into an existing environment, or null for first-time import. */
-  environment: string | null;
+  /** Pass the environment type when importing into an existing environment, or omit for first-time import. */
+  environmentType?: string;
 }
 
 export function ImportVariablesDialog(props: ImportVariablesDialogProps): ReactElement {
-  const { open, onClose, projectId, vaultGroupId, environment } = props;
+  const { open, onClose, projectId, vaultGroupId, environmentType } = props;
   const notification = useNotification();
-  const isNewEnvironment = !environment;
+  const isNewEnvironment = !environmentType;
 
   const mutation = useApiMutation(
-    (values: {
-      environment: string;
-      environmentType: EnvironmentTypeValue;
-      format: ConfigFormat;
-      content: string;
-    }) =>
+    (values: { environmentType: EnvironmentTypeValue; format: ConfigFormat; content: string }) =>
       client.api
         .projects({ id: projectId })
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .environments.import.post({ ...values, vaultGroupId } as any),
     {
       invalidateKeys: [
-        ["env-variables", projectId, environment],
+        ["env-variables", projectId],
         ["environments", projectId],
         ["vault-groups", projectId],
       ],
@@ -66,8 +61,7 @@ export function ImportVariablesDialog(props: ImportVariablesDialogProps): ReactE
 
   const form = useForm({
     defaultValues: {
-      environment: environment ?? "",
-      environmentType: "DEVELOPMENT" as EnvironmentTypeValue,
+      environmentType: (environmentType ?? "DEVELOPMENT") as EnvironmentTypeValue,
       format: "env" as ConfigFormat,
       content: "",
     },
@@ -101,22 +95,19 @@ export function ImportVariablesDialog(props: ImportVariablesDialogProps): ReactE
         <DialogContent>
           <Stack spacing={2.5} sx={{ mt: 1 }}>
             {isNewEnvironment && (
-              <>
-                <FormTextField
-                  form={form}
-                  name="environment"
-                  label="Environment Name"
-                  autoFocus
-                  placeholder="e.g. development, staging, production"
-                />
-                <FormTextField form={form} name="environmentType" label="Environment Type" select>
-                  {ENVIRONMENT_TYPES.map((t) => (
-                    <MenuItem key={t.value} value={t.value}>
-                      {t.label}
-                    </MenuItem>
-                  ))}
-                </FormTextField>
-              </>
+              <FormTextField
+                form={form}
+                name="environmentType"
+                label="Environment Type"
+                select
+                autoFocus
+              >
+                {ENVIRONMENT_TYPES.map((t) => (
+                  <MenuItem key={t.value} value={t.value}>
+                    {t.label}
+                  </MenuItem>
+                ))}
+              </FormTextField>
             )}
             <FormTextField form={form} name="format" label="Format" select>
               {CONFIG_FORMATS.map((f) => (

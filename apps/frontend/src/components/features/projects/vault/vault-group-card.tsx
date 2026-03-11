@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
+import type { EnvironmentTypeValue } from "@depvault/shared/constants";
 import { Delete as DeleteIcon, Edit as EditIcon, VpnKey as VpnKeyIcon } from "@mui/icons-material";
 import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -52,7 +53,7 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
         .environments.get({ query: { vaultGroupId: group.id } }),
   );
 
-  const activeEnv = selectedEnv ?? environments?.[0]?.name ?? null;
+  const activeEnv = selectedEnv ?? environments?.[0]?.type ?? null;
 
   const { data: variablesData, isLoading: variablesLoading } = useApiQuery<EnvVariableListResponse>(
     ["env-variables", projectId, group.id, activeEnv],
@@ -60,7 +61,7 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
       client.api.projects({ id: projectId }).environments.variables.get({
         query: {
           vaultGroupId: group.id,
-          environment: activeEnv!,
+          environmentType: activeEnv as EnvironmentTypeValue,
           page: 1,
           limit: 100,
         },
@@ -103,8 +104,8 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
         environments={environments}
         currentEnvironment={activeEnv}
         onBack={() => setView("variables")}
-        onEnvironmentCreated={(envName) => {
-          setSelectedEnv(envName);
+        onEnvironmentCreated={(envType) => {
+          setSelectedEnv(envType);
           setView("variables");
         }}
       />
@@ -144,7 +145,6 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
               onClose={() => setImportOpen(false)}
               projectId={projectId}
               vaultGroupId={group.id}
-              environment={null}
             />
             <EditGroupDialog
               open={editGroupOpen}
@@ -212,7 +212,7 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
         {activeEnv && (
           <VaultVariableTable
             projectId={projectId}
-            environment={activeEnv}
+            environmentType={activeEnv}
             variables={variablesData?.items ?? []}
             isLoading={variablesLoading}
             canEdit={canEdit}
@@ -228,13 +228,13 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
             onClose={() => setCreateOpen(false)}
             projectId={projectId}
             vaultGroupId={group.id}
-            environment={activeEnv}
+            environmentType={activeEnv}
           />
           <EditVariableDialog
             open={!!editTarget}
             onClose={() => setEditTarget(null)}
             projectId={projectId}
-            environment={activeEnv}
+            environmentType={activeEnv}
             variable={editTarget}
           />
           <ImportVariablesDialog
@@ -242,14 +242,14 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
             onClose={() => setImportOpen(false)}
             projectId={projectId}
             vaultGroupId={group.id}
-            environment={activeEnv}
+            environmentType={activeEnv}
           />
           <CloneEnvironmentDialog
             open={cloneOpen}
             onClose={() => setCloneOpen(false)}
             projectId={projectId}
             vaultGroupId={group.id}
-            sourceEnvironment={activeEnv}
+            sourceType={activeEnv}
             onSuccess={setSelectedEnv}
           />
         </>
@@ -261,7 +261,7 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
           onClose={() => setExportOpen(false)}
           projectId={projectId}
           vaultGroupId={group.id}
-          environment={activeEnv}
+          environmentType={activeEnv as EnvironmentTypeValue}
         />
       )}
 

@@ -39,7 +39,6 @@ function getMasterKey(): Buffer {
 
 /**
  * Derives a per-project 256-bit key from the master key using HKDF-SHA256.
- *
  * @param projectId - The project ID for which to derive the key.
  * @returns The derived project key as a Buffer.
  */
@@ -50,9 +49,8 @@ export function deriveProjectKey(projectId: string): Buffer {
 
 /**
  * Encrypts a UTF-8 string with AES-256-GCM. Returns base64-encoded ciphertext, IV, and auth tag.
- *
  * @param plaintext - The string to encrypt.
- *  @param projectKey - The 32-byte project key to use for encryption.
+ * @param projectKey - The 32-byte project key to use for encryption.
  * @returns An object containing the base64-encoded ciphertext, IV, and auth tag.
  * @throws If encryption fails (e.g. invalid key length).
  */
@@ -98,7 +96,6 @@ export function decrypt(
 
 /**
  * Encrypts binary data (e.g. secret files) with AES-256-GCM. Returns ciphertext as Buffer.
- *
  * @param data - The binary data to encrypt as a Buffer.
  * @param projectKey - The 32-byte project key to use for encryption.
  * @return An object containing the ciphertext as a Buffer, and the IV and auth tag as base64 strings.
@@ -118,7 +115,6 @@ export function encryptBinary(data: Buffer, projectKey: Buffer): EncryptedBinary
 
 /**
  * Decrypts AES-256-GCM encrypted binary data back to a Buffer.
- *
  * @param ciphertext - The encrypted data as a Buffer.
  * @param iv - The base64-encoded initialization vector used during encryption.
  * @param authTag - The base64-encoded authentication tag from encryption.

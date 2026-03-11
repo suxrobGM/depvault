@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactElement } from "react";
+import { getEnvironmentLabel, type EnvironmentTypeValue } from "@depvault/shared/constants";
 import {
   Button,
   Dialog,
@@ -21,7 +22,7 @@ import type { EnvironmentItem } from "@/types/api/environment";
 const saveTemplateSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
   description: z.string().max(500),
-  sourceEnvironment: z.string().min(1, "Select a source environment"),
+  sourceEnvironmentType: z.string().min(1, "Select a source environment"),
 });
 
 interface TemplateSaveDialogProps {
@@ -37,7 +38,7 @@ export function TemplateSaveDialog(props: TemplateSaveDialogProps): ReactElement
   const notification = useNotification();
 
   const mutation = useApiMutation(
-    (values: { name: string; description?: string; sourceEnvironment: string }) =>
+    (values: { name: string; description?: string; sourceEnvironmentType: EnvironmentTypeValue }) =>
       client.api.projects({ id: projectId })["env-templates"].post(values),
     {
       invalidateKeys: [["env-templates", projectId]],
@@ -53,14 +54,14 @@ export function TemplateSaveDialog(props: TemplateSaveDialogProps): ReactElement
     defaultValues: {
       name: "",
       description: "",
-      sourceEnvironment: currentEnvironment ?? "",
+      sourceEnvironmentType: currentEnvironment ?? "",
     },
     validators: { onSubmit: saveTemplateSchema },
     onSubmit: async ({ value }) => {
       await mutation.mutateAsync({
         name: value.name,
         description: value.description || undefined,
-        sourceEnvironment: value.sourceEnvironment,
+        sourceEnvironmentType: value.sourceEnvironmentType as EnvironmentTypeValue,
       });
     },
   });
@@ -94,10 +95,15 @@ export function TemplateSaveDialog(props: TemplateSaveDialogProps): ReactElement
               label="Description"
               placeholder="Optional description"
             />
-            <FormTextField form={form} name="sourceEnvironment" label="Source Environment" select>
+            <FormTextField
+              form={form}
+              name="sourceEnvironmentType"
+              label="Source Environment"
+              select
+            >
               {environments.map((env) => (
-                <MenuItem key={env.id} value={env.name}>
-                  {env.name} ({env.variableCount} variables)
+                <MenuItem key={env.id} value={env.type}>
+                  {getEnvironmentLabel(env.type)} ({env.variableCount} variables)
                 </MenuItem>
               ))}
             </FormTextField>

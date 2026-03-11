@@ -20,7 +20,7 @@ interface EnvTemplatesViewProps {
   environments: EnvironmentItem[];
   currentEnvironment: string | null;
   onBack: () => void;
-  onEnvironmentCreated: (envName: string) => void;
+  onEnvironmentCreated: (envType: string) => void;
 }
 
 export function EnvTemplatesView(props: EnvTemplatesViewProps): ReactElement {

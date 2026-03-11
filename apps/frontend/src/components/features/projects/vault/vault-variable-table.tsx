@@ -31,7 +31,7 @@ import type { EnvVariable } from "@/types/api/env-variable";
 
 interface VaultVariableTableProps {
   projectId: string;
-  environment: string;
+  environmentType: string;
   variables: EnvVariable[];
   isLoading: boolean;
   canEdit: boolean;
@@ -39,7 +39,7 @@ interface VaultVariableTableProps {
 }
 
 export function VaultVariableTable(props: VaultVariableTableProps): ReactElement {
-  const { projectId, environment, variables, isLoading, canEdit, onEditVariable } = props;
+  const { projectId, environmentType, variables, isLoading, canEdit, onEditVariable } = props;
   const [deleteTarget, setDeleteTarget] = useState<EnvVariable | null>(null);
   const notification = useNotification();
 
@@ -47,7 +47,7 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
     (varId: string) =>
       client.api.projects({ id: projectId }).environments.variables({ varId }).delete(),
     {
-      invalidateKeys: [["env-variables", projectId, environment]],
+      invalidateKeys: [["env-variables", projectId, environmentType]],
       onSuccess: () => {
         notification.success("Variable deleted");
         setDeleteTarget(null);

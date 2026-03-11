@@ -23,8 +23,7 @@ import { useNotification } from "@/hooks/use-notification";
 import { client } from "@/lib/api";
 
 const cloneSchema = z.object({
-  sourceEnvironment: z.string().min(1, "Source is required"),
-  targetName: z.string().min(1, "Name is required").max(100),
+  sourceType: z.enum(ENVIRONMENT_TYPE_VALUES),
   targetType: z.enum(ENVIRONMENT_TYPE_VALUES),
 });
 
@@ -33,22 +32,22 @@ interface CloneEnvironmentDialogProps {
   onClose: () => void;
   projectId: string;
   vaultGroupId: string;
-  sourceEnvironment: string;
-  onSuccess: (envName: string) => void;
+  sourceType: string;
+  onSuccess: (envType: string) => void;
 }
 
 export function CloneEnvironmentDialog(props: CloneEnvironmentDialogProps): ReactElement {
-  const { open, onClose, projectId, vaultGroupId, sourceEnvironment, onSuccess } = props;
+  const { open, onClose, projectId, vaultGroupId, sourceType, onSuccess } = props;
   const notification = useNotification();
 
   const mutation = useApiMutation(
-    (values: { sourceEnvironment: string; targetName: string; targetType: EnvironmentTypeValue }) =>
+    (values: { sourceType: EnvironmentTypeValue; targetType: EnvironmentTypeValue }) =>
       client.api.projects({ id: projectId }).environments.clone.post({ ...values, vaultGroupId }),
     {
       invalidateKeys: [["environments", projectId]],
-      onSuccess: (data: { name: string; variableCount: number }) => {
-        notification.success(`Cloned ${data.variableCount} variables to "${data.name}"`);
-        onSuccess(data.name);
+      onSuccess: (data: { type: string; variableCount: number }) => {
+        notification.success(`Cloned ${data.variableCount} variables to "${data.type}"`);
+        onSuccess(data.type);
         handleClose();
       },
       onError: (error) => notification.error(error.message || "Failed to clone environment"),
@@ -57,8 +56,7 @@ export function CloneEnvironmentDialog(props: CloneEnvironmentDialogProps): Reac
 
   const form = useForm({
     defaultValues: {
-      sourceEnvironment,
-      targetName: "",
+      sourceType: sourceType as EnvironmentTypeValue,
       targetType: "DEVELOPMENT" as EnvironmentTypeValue,
     },
     validators: { onSubmit: cloneSchema },
@@ -83,20 +81,20 @@ export function CloneEnvironmentDialog(props: CloneEnvironmentDialogProps): Reac
         <DialogTitle>Clone Environment</DialogTitle>
         <DialogContent>
           <Stack spacing={2.5} sx={{ mt: 1 }}>
+            <FormTextField form={form} name="sourceType" label="Source Environment" disabled select>
+              {ENVIRONMENT_TYPES.map((t) => (
+                <MenuItem key={t.value} value={t.value}>
+                  {t.label}
+                </MenuItem>
+              ))}
+            </FormTextField>
             <FormTextField
               form={form}
-              name="sourceEnvironment"
-              label="Source Environment"
-              disabled
-            />
-            <FormTextField
-              form={form}
-              name="targetName"
-              label="New Environment Name"
+              name="targetType"
+              label="Target Environment"
+              select
               autoFocus
-              placeholder="e.g. production"
-            />
-            <FormTextField form={form} name="targetType" label="Environment Type" select>
+            >
               {ENVIRONMENT_TYPES.map((t) => (
                 <MenuItem key={t.value} value={t.value}>
                   {t.label}

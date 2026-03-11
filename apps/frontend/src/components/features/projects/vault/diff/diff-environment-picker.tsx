@@ -1,31 +1,39 @@
 "use client";
 
 import type { ReactElement } from "react";
+import { getEnvironmentLabel } from "@depvault/shared/constants";
 import { Autocomplete, Chip, TextField } from "@mui/material";
 import type { EnvironmentItem } from "@/types/api/environment";
 
 interface DiffEnvironmentPickerProps {
   environments: EnvironmentItem[];
   selected: string[];
-  onChange: (envNames: string[]) => void;
+  onChange: (envTypes: string[]) => void;
 }
 
 export function DiffEnvironmentPicker(props: DiffEnvironmentPickerProps): ReactElement {
   const { environments, selected, onChange } = props;
 
-  const options = environments.map((e) => e.name);
+  const options = environments.map((e) => e.type);
 
   return (
     <Autocomplete
       multiple
       options={options}
+      getOptionLabel={getEnvironmentLabel}
       value={selected}
       onChange={(_, value) => {
         if (value.length <= 3) onChange(value);
       }}
-      renderTags={(value, getTagProps) =>
-        value.map((name, index) => (
-          <Chip {...getTagProps({ index })} key={name} label={name} size="small" color="primary" />
+      renderValue={(value, getTagProps) =>
+        value.map((type, index) => (
+          <Chip
+            {...getTagProps({ index })}
+            key={type}
+            label={getEnvironmentLabel(type)}
+            size="small"
+            color="primary"
+          />
         ))
       }
       renderInput={(params) => (

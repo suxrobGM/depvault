@@ -1,7 +1,7 @@
 import { singleton } from "tsyringe";
 import { NotFoundError } from "@/common/errors";
 import { deriveProjectKey, encrypt } from "@/common/utils/encryption";
-import { PrismaClient } from "@/generated/prisma";
+import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import { EnvironmentRepository } from "./environment.repository";
 import type { CloneEnvironmentBody } from "./environment.schema";
@@ -25,20 +25,22 @@ export class EnvironmentCloneService {
 
     const sourceEnv = await this.prisma.environment.findUnique({
       where: {
-        vaultGroupId_name: { vaultGroupId: body.vaultGroupId, name: body.sourceEnvironment },
+        vaultGroupId_type: {
+          vaultGroupId: body.vaultGroupId,
+          type: body.sourceType as EnvironmentType,
+        },
       },
       include: { variables: true },
     });
 
     if (!sourceEnv) {
-      throw new NotFoundError(`Source environment "${body.sourceEnvironment}" not found`);
+      throw new NotFoundError(`Source environment "${body.sourceType}" not found`);
     }
 
     const targetEnv = await this.envHelper.findOrCreateEnvironment(
       projectId,
       body.vaultGroupId,
-      body.targetName,
-      body.targetType,
+      body.targetType as EnvironmentType,
     );
 
     const projectKey = deriveProjectKey(projectId);
@@ -68,15 +70,14 @@ export class EnvironmentCloneService {
       resourceId: targetEnv.id,
       ipAddress,
       metadata: {
-        source: body.sourceEnvironment,
-        target: body.targetName,
+        source: body.sourceType,
+        target: body.targetType,
         variableCount: created.length,
       },
     });
 
     return {
       id: targetEnv.id,
-      name: targetEnv.name,
       type: targetEnv.type,
       variableCount: created.length,
     };

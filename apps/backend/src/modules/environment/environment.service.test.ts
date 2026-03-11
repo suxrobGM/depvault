@@ -36,7 +36,6 @@ const mockVariable = {
 const mockEnvironment = {
   id: envId,
   projectId,
-  name: "development",
   type: "DEVELOPMENT",
   createdAt: now,
   updatedAt: now,
@@ -98,7 +97,7 @@ describe("EnvironmentService", () => {
         projectId,
         {
           vaultGroupId,
-          environment: "development",
+          environmentType: "DEVELOPMENT",
           key: "DATABASE_URL",
           value: "postgres://localhost/db",
           description: "The database URL",
@@ -129,7 +128,7 @@ describe("EnvironmentService", () => {
 
       await service.create(
         projectId,
-        { vaultGroupId, environment: "development", key: "API_KEY", value: "secret" },
+        { vaultGroupId, environmentType: "DEVELOPMENT", key: "API_KEY", value: "secret" },
         userId,
         ipAddress,
       );
@@ -151,13 +150,13 @@ describe("EnvironmentService", () => {
 
       await service.create(
         projectId,
-        { vaultGroupId, environment: "staging", key: "API_KEY", value: "secret" },
+        { vaultGroupId, environmentType: "STAGING", key: "API_KEY", value: "secret" },
         userId,
         ipAddress,
       );
 
       expect(mockPrisma.environment.create).toHaveBeenCalledWith({
-        data: { projectId, vaultGroupId, name: "staging", type: "DEVELOPMENT" },
+        data: { projectId, vaultGroupId, type: "STAGING" },
       });
     });
 
@@ -167,7 +166,7 @@ describe("EnvironmentService", () => {
       expect(
         service.create(
           projectId,
-          { vaultGroupId, environment: "dev", key: "K", value: "V" },
+          { vaultGroupId, environmentType: "DEVELOPMENT", key: "K", value: "V" },
           userId,
           ipAddress,
         ),
@@ -180,7 +179,7 @@ describe("EnvironmentService", () => {
       expect(
         service.create(
           projectId,
-          { vaultGroupId, environment: "dev", key: "K", value: "V" },
+          { vaultGroupId, environmentType: "DEVELOPMENT", key: "K", value: "V" },
           userId,
           ipAddress,
         ),
@@ -192,7 +191,7 @@ describe("EnvironmentService", () => {
     it("should return decrypted values for OWNER", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
 
-      const result = await service.list(projectId, userId, vaultGroupId, "development");
+      const result = await service.list(projectId, userId, vaultGroupId, "DEVELOPMENT");
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0]!.value).toBe("postgres://localhost/db");
@@ -202,7 +201,7 @@ describe("EnvironmentService", () => {
     it("should write audit log when reading decrypted values", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
 
-      await service.list(projectId, userId, vaultGroupId, "development", 1, 20, ipAddress);
+      await service.list(projectId, userId, vaultGroupId, "DEVELOPMENT", 1, 20, ipAddress);
 
       expect(mockAuditLog.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -219,20 +218,20 @@ describe("EnvironmentService", () => {
       const decryptSpy = spyOn(encryption, "decrypt");
       decryptSpy.mockClear();
 
-      const result = await service.list(projectId, userId, vaultGroupId, "development");
+      const result = await service.list(projectId, userId, vaultGroupId, "DEVELOPMENT");
 
       expect(result.items[0]!.value).toBe("********");
       expect(decryptSpy).not.toHaveBeenCalled();
     });
 
-    it("should filter by environment name when provided", async () => {
+    it("should filter by environment type when provided", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "EDITOR" });
 
-      await service.list(projectId, userId, vaultGroupId, "staging", 1, 10);
+      await service.list(projectId, userId, vaultGroupId, "STAGING", 1, 10);
 
       expect(mockPrisma.envVariable.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { environment: { projectId, vaultGroupId, name: "staging" } },
+          where: { environment: { projectId, vaultGroupId, type: "STAGING" } },
         }),
       );
     });

@@ -38,7 +38,7 @@ export const secretFileController = new Elysia({
             user.id,
             body.file,
             body.vaultGroupId,
-            body.environment,
+            body.environmentType,
             body.description,
             getClientIp(request, server),
           );
@@ -59,7 +59,7 @@ export const secretFileController = new Elysia({
   .get(
     "/",
     ({ params, query, user }) =>
-      secretFileService.list(params.id, user.id, query.environment, query.page, query.limit),
+      secretFileService.list(params.id, user.id, query.environmentType, query.page, query.limit),
     {
       params: StringIdParamSchema,
       query: SecretFileListQuerySchema,

@@ -1,7 +1,7 @@
 import { singleton } from "tsyringe";
 import { BadRequestError, NotFoundError } from "@/common/errors";
 import { decrypt, deriveProjectKey } from "@/common/utils/encryption";
-import { PrismaClient } from "@/generated/prisma";
+import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import { EnvironmentRepository } from "./environment.repository";
 import type { EnvDiffResponse, EnvDiffRow } from "./environment.schema";
@@ -18,34 +18,35 @@ export class EnvironmentDiffService {
   async diff(
     projectId: string,
     vaultGroupId: string,
-    environmentsCsv: string,
+    environmentTypesCsv: string,
     userId: string,
     ipAddress: string,
   ): Promise<EnvDiffResponse> {
-    const envNames = environmentsCsv
+    const envTypes = environmentTypesCsv
       .split(",")
       .map((s) => s.trim())
-      .filter(Boolean);
-    if (envNames.length < 2 || envNames.length > 3) {
-      throw new BadRequestError("Provide 2 or 3 comma-separated environment names");
+      .filter(Boolean) as EnvironmentType[];
+
+    if (envTypes.length < 2 || envTypes.length > 3) {
+      throw new BadRequestError("Provide 2 or 3 comma-separated environment types");
     }
 
     const member = await this.envHelper.requireMember(projectId, userId);
     const canReadValues = member.role === "OWNER" || member.role === "EDITOR";
 
     const environments = await this.prisma.environment.findMany({
-      where: { projectId, vaultGroupId, name: { in: envNames } },
+      where: { projectId, vaultGroupId, type: { in: envTypes } },
       include: { variables: true },
     });
 
-    if (environments.length !== envNames.length) {
-      const found = new Set(environments.map((e) => e.name));
-      const missing = envNames.filter((n) => !found.has(n));
+    if (environments.length !== envTypes.length) {
+      const found = new Set(environments.map((e) => e.type));
+      const missing = envTypes.filter((t) => !found.has(t));
       throw new NotFoundError(`Environment(s) not found: ${missing.join(", ")}`);
     }
 
     const projectKey = canReadValues ? deriveProjectKey(projectId) : null;
-    const rows = this.buildDiffRows(environments, envNames, projectKey, canReadValues);
+    const rows = this.buildDiffRows(environments, envTypes, projectKey, canReadValues);
 
     await this.auditLogService.log({
       userId,
@@ -54,15 +55,15 @@ export class EnvironmentDiffService {
       resourceType: "ENV_VARIABLE",
       resourceId: projectId,
       ipAddress,
-      metadata: { type: "diff", environments: envNames.join(",") },
+      metadata: { type: "diff", environments: envTypes.join(",") },
     });
 
-    return { environments: envNames, rows };
+    return { environments: envTypes, rows };
   }
 
   private buildDiffRows(
     environments: {
-      name: string;
+      type: EnvironmentType;
       variables: {
         key: string;
         description: string | null;
@@ -74,7 +75,7 @@ export class EnvironmentDiffService {
         updatedAt: Date;
       }[];
     }[],
-    envNames: string[],
+    envTypes: EnvironmentType[],
     projectKey: Buffer | null,
     canReadValues: boolean,
   ): EnvDiffRow[] {
@@ -89,7 +90,7 @@ export class EnvironmentDiffService {
           allKeys.set(v.key, { description: v.description, isRequired: v.isRequired });
         }
       }
-      envVarMaps.set(env.name, varMap);
+      envVarMaps.set(env.type, varMap);
     }
 
     const rows: EnvDiffRow[] = [];
@@ -101,15 +102,15 @@ export class EnvironmentDiffService {
       let allExist = true;
       const decryptedValues: string[] = [];
 
-      for (const envName of envNames) {
-        const varMap = envVarMaps.get(envName)!;
+      for (const envType of envTypes) {
+        const varMap = envVarMaps.get(envType)!;
         const variable = varMap.get(key);
         if (variable) {
           const value = projectKey
             ? decrypt(variable.encryptedValue, variable.iv, variable.authTag, projectKey)
             : "********";
           decryptedValues.push(value);
-          values[envName] = {
+          values[envType] = {
             value,
             exists: true,
             environmentId: variable.environmentId,
@@ -117,7 +118,7 @@ export class EnvironmentDiffService {
           };
         } else {
           allExist = false;
-          values[envName] = null;
+          values[envType] = null;
         }
       }
 

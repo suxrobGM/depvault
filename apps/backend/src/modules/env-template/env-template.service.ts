@@ -1,7 +1,7 @@
 import { singleton } from "tsyringe";
 import { ConflictError, NotFoundError } from "@/common/errors";
 import { deriveProjectKey, encrypt } from "@/common/utils/encryption";
-import { PrismaClient } from "@/generated/prisma";
+import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import { EnvironmentRepository } from "@/modules/environment/environment.repository";
 import type {
@@ -28,12 +28,12 @@ export class EnvTemplateService {
       isRequired?: boolean;
     }[] = [];
 
-    if (body.sourceEnvironment) {
+    if (body.sourceEnvironmentType) {
       const env = await this.prisma.environment.findFirst({
-        where: { projectId, name: body.sourceEnvironment },
+        where: { projectId, type: body.sourceEnvironmentType as EnvironmentType },
         include: { variables: { orderBy: { createdAt: "asc" } } },
       });
-      if (!env) throw new NotFoundError(`Environment "${body.sourceEnvironment}" not found`);
+      if (!env) throw new NotFoundError(`Environment "${body.sourceEnvironmentType}" not found`);
       variables = env.variables.map((v) => ({
         key: v.key,
         description: v.description ?? undefined,
@@ -220,8 +220,7 @@ export class EnvTemplateService {
     const env = await this.envHelper.findOrCreateEnvironment(
       projectId,
       body.vaultGroupId,
-      body.environmentName,
-      body.environmentType,
+      body.environmentType as EnvironmentType,
     );
 
     const projectKey = deriveProjectKey(projectId);
@@ -253,14 +252,14 @@ export class EnvTemplateService {
       metadata: {
         type: "template_apply",
         templateName: template.name,
-        environmentName: body.environmentName,
+        environmentType: body.environmentType,
         variableCount: created.length,
       },
     });
 
     return {
       environmentId: env.id,
-      environmentName: env.name,
+      environmentType: env.type,
       variablesCreated: created.length,
     };
   }

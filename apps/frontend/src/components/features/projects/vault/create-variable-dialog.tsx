@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactElement } from "react";
+import type { EnvironmentTypeValue } from "@depvault/shared/constants";
 import {
   Button,
   Checkbox,
@@ -23,16 +24,16 @@ interface CreateVariableDialogProps {
   onClose: () => void;
   projectId: string;
   vaultGroupId: string;
-  environment: string;
+  environmentType: string;
 }
 
 export function CreateVariableDialog(props: CreateVariableDialogProps): ReactElement {
-  const { open, onClose, projectId, vaultGroupId, environment } = props;
+  const { open, onClose, projectId, vaultGroupId, environmentType } = props;
   const notification = useNotification();
 
   const mutation = useApiMutation(
     (values: {
-      environment: string;
+      environmentType: EnvironmentTypeValue;
       key: string;
       value: string;
       description?: string;
@@ -43,7 +44,7 @@ export function CreateVariableDialog(props: CreateVariableDialogProps): ReactEle
         .environments.variables.post({ ...values, vaultGroupId }),
     {
       invalidateKeys: [
-        ["env-variables", projectId, environment],
+        ["env-variables", projectId],
         ["environments", projectId],
       ],
       onSuccess: () => {
@@ -56,7 +57,7 @@ export function CreateVariableDialog(props: CreateVariableDialogProps): ReactEle
 
   const form = useForm({
     defaultValues: {
-      environment,
+      environmentType: environmentType as EnvironmentTypeValue,
       key: "",
       value: "",
       description: "",
@@ -65,7 +66,7 @@ export function CreateVariableDialog(props: CreateVariableDialogProps): ReactEle
     validators: { onSubmit: createVariableSchema },
     onSubmit: async ({ value }) => {
       await mutation.mutateAsync({
-        environment: value.environment,
+        environmentType: value.environmentType,
         key: value.key,
         value: value.value,
         description: value.description,
