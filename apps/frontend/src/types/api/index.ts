@@ -22,6 +22,12 @@ export type {
 } from "./env-variable";
 export type { EnvironmentListResponse, EnvironmentItem } from "./environment";
 export type {
+  EnvTemplateListResponse,
+  EnvTemplateItem,
+  EnvTemplateDetailResponse,
+  EnvTemplateVariable,
+} from "./env-template";
+export type {
   SecretFile,
   SecretFileListResponse,
   SecretFileVersion,

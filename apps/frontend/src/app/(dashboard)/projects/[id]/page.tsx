@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { ProjectDetailView } from "@/components/features/projects/project-detail-view";
 
-const VALID_TABS = ["overview", "analysis", "members", "settings"] as const;
+const VALID_TABS = ["overview", "analysis", "vault", "members", "settings"] as const;
 type ProjectTab = (typeof VALID_TABS)[number];
 
 interface PageProps {

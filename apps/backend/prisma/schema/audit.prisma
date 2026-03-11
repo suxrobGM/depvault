@@ -5,10 +5,12 @@ enum AuditAction {
   DOWNLOAD
   SHARE
   UPLOAD
+  CLONE
 }
 
 enum AuditResourceType {
   ENV_VARIABLE
+  ENV_TEMPLATE
   SECRET_FILE
   SHARE_LINK
 }

@@ -11,7 +11,7 @@ import type { MemberListResponse, ProjectResponse } from "@/types/api/project";
 import { ProjectTabPanel } from "./project-tab-panel";
 import { ProjectTabs } from "./project-tabs";
 
-type ProjectTab = "overview" | "analysis" | "members" | "settings";
+type ProjectTab = "overview" | "analysis" | "vault" | "members" | "settings";
 
 interface ProjectDetailViewProps {
   projectId: string;

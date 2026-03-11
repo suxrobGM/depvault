@@ -6,9 +6,10 @@ import { AnalysisTab } from "./analysis/analysis-tab";
 import { MembersTab } from "./members/members-tab";
 import { OverviewTab } from "./overview-tab";
 import { SettingsTab } from "./settings/settings-tab";
+import { VaultTab } from "./vault/vault-tab";
 
 interface ProjectTabPanelProps {
-  activeTab: "overview" | "analysis" | "members" | "settings";
+  activeTab: "overview" | "analysis" | "vault" | "members" | "settings";
   project: ProjectResponse;
   projectId: string;
   isOwner: boolean;
@@ -21,6 +22,10 @@ export function ProjectTabPanel(props: ProjectTabPanelProps): ReactElement {
 
   if (activeTab === "analysis") {
     return <AnalysisTab projectId={projectId} canEdit={canEdit} />;
+  }
+
+  if (activeTab === "vault") {
+    return <VaultTab projectId={projectId} canEdit={canEdit} />;
   }
 
   if (activeTab === "members") {

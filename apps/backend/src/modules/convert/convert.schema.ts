@@ -1,11 +1,7 @@
+import { CONFIG_FORMAT_VALUES } from "@shared/constants/config-formats";
 import { t, type Static } from "elysia";
 
-const ConfigFormatSchema = t.Union([
-  t.Literal("env"),
-  t.Literal("appsettings.json"),
-  t.Literal("secrets.yaml"),
-  t.Literal("config.toml"),
-]);
+const ConfigFormatSchema = t.Union(CONFIG_FORMAT_VALUES.map((v) => t.Literal(v)));
 
 export const ConvertBodySchema = t.Object({
   content: t.String({ minLength: 1 }),

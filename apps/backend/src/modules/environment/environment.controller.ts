@@ -4,9 +4,15 @@ import { authGuard } from "@/common/middleware";
 import { getClientIp } from "@/common/utils/ip";
 import { StringIdParamSchema } from "@/types/request";
 import { MessageResponseSchema } from "@/types/response";
+import { EnvironmentCloneService } from "./environment-clone.service";
+import { EnvironmentDiffService } from "./environment-diff.service";
 import { EnvironmentIOService } from "./environment-io.service";
 import {
+  CloneEnvironmentBodySchema,
+  CloneEnvironmentResponseSchema,
   CreateEnvVariableBodySchema,
+  EnvDiffQuerySchema,
+  EnvDiffResponseSchema,
   EnvExampleQuerySchema,
   EnvExampleResponseSchema,
   EnvironmentListResponseSchema,
@@ -23,6 +29,8 @@ import {
 import { EnvironmentService } from "./environment.service";
 
 const environmentService = container.resolve(EnvironmentService);
+const environmentDiffService = container.resolve(EnvironmentDiffService);
+const environmentCloneService = container.resolve(EnvironmentCloneService);
 const environmentIOService = container.resolve(EnvironmentIOService);
 
 export const environmentController = new Elysia({
@@ -39,6 +47,48 @@ export const environmentController = new Elysia({
       security: [{ bearerAuth: [] }],
     },
   })
+  .get(
+    "/diff",
+    ({ params, query, user, request, server }) =>
+      environmentDiffService.diff(
+        params.id,
+        query.environments,
+        user.id,
+        getClientIp(request, server),
+      ),
+    {
+      params: StringIdParamSchema,
+      query: EnvDiffQuerySchema,
+      response: EnvDiffResponseSchema,
+      detail: {
+        summary: "Diff environments",
+        description:
+          "Compare variables across 2-3 environments. Returns rows with match/mismatch/missing status.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .post(
+    "/clone",
+    ({ params, body, user, request, server }) =>
+      environmentCloneService.cloneEnvironment(
+        params.id,
+        body,
+        user.id,
+        getClientIp(request, server),
+      ),
+    {
+      params: StringIdParamSchema,
+      body: CloneEnvironmentBodySchema,
+      response: CloneEnvironmentResponseSchema,
+      detail: {
+        summary: "Clone environment",
+        description:
+          "Clone an environment's variable structure into a new environment. Values are left empty.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
   .post(
     "/variables",
     ({ params, body, user, request, server }) =>

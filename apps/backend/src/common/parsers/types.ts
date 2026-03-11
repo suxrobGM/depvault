@@ -4,8 +4,7 @@ export interface ConfigEntry {
   value: string;
 }
 
-/** Supported config format identifiers. */
-export type ConfigFormat = "env" | "appsettings.json" | "secrets.yaml" | "config.toml";
+export type { ConfigFormat } from "@shared/constants/config-formats";
 
 /** Parses raw file content into flat key-value pairs. */
 export interface ConfigParser {

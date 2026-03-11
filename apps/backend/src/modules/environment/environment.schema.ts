@@ -1,11 +1,8 @@
+import { CONFIG_FORMAT_VALUES } from "@shared/constants/config-formats";
 import { t, type Static } from "elysia";
+import { EnvironmentType } from "@/generated/prisma";
 
-export const EnvironmentTypeSchema = t.Union([
-  t.Literal("DEVELOPMENT"),
-  t.Literal("STAGING"),
-  t.Literal("PRODUCTION"),
-  t.Literal("CUSTOM"),
-]);
+export const EnvironmentTypeSchema = t.Enum(EnvironmentType);
 
 export const CreateEnvVariableBodySchema = t.Object({
   environment: t.String({ minLength: 1, maxLength: 100 }),
@@ -69,12 +66,7 @@ export const EnvVariableParamsSchema = t.Object({
   varId: t.String(),
 });
 
-const ConfigFormatSchema = t.Union([
-  t.Literal("env"),
-  t.Literal("appsettings.json"),
-  t.Literal("secrets.yaml"),
-  t.Literal("config.toml"),
-]);
+const ConfigFormatSchema = t.Union(CONFIG_FORMAT_VALUES.map((v) => t.Literal(v)));
 
 export const ImportEnvVariablesBodySchema = t.Object({
   environment: t.String({ minLength: 1, maxLength: 100 }),
@@ -118,6 +110,48 @@ export const EnvironmentResponseSchema = t.Object({
 });
 
 export const EnvironmentListResponseSchema = t.Array(EnvironmentResponseSchema);
+
+export const EnvDiffQuerySchema = t.Object({
+  environments: t.String({ minLength: 1 }),
+});
+
+const EnvDiffValueSchema = t.Object({
+  value: t.String(),
+  exists: t.Boolean(),
+  environmentId: t.String(),
+  updatedAt: t.Date(),
+});
+
+const EnvDiffRowSchema = t.Object({
+  key: t.String(),
+  description: t.Nullable(t.String()),
+  isRequired: t.Boolean(),
+  status: t.Union([t.Literal("match"), t.Literal("mismatch"), t.Literal("missing")]),
+  values: t.Record(t.String(), t.Nullable(EnvDiffValueSchema)),
+});
+
+export const EnvDiffResponseSchema = t.Object({
+  environments: t.Array(t.String()),
+  rows: t.Array(EnvDiffRowSchema),
+});
+
+export type EnvDiffResponse = Static<typeof EnvDiffResponseSchema>;
+export type EnvDiffRow = Static<typeof EnvDiffRowSchema>;
+
+export const CloneEnvironmentBodySchema = t.Object({
+  sourceEnvironment: t.String({ minLength: 1, maxLength: 100 }),
+  targetName: t.String({ minLength: 1, maxLength: 100 }),
+  targetType: t.Optional(EnvironmentTypeSchema),
+});
+
+export const CloneEnvironmentResponseSchema = t.Object({
+  id: t.String(),
+  name: t.String(),
+  type: EnvironmentTypeSchema,
+  variableCount: t.Number(),
+});
+
+export type CloneEnvironmentBody = Static<typeof CloneEnvironmentBodySchema>;
 
 export type EnvironmentResponse = Static<typeof EnvironmentResponseSchema>;
 export type CreateEnvVariableBody = Static<typeof CreateEnvVariableBodySchema>;
