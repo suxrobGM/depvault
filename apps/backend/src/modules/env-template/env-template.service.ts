@@ -30,7 +30,10 @@ export class EnvTemplateService {
 
     if (body.sourceEnvironmentType) {
       const env = await this.prisma.environment.findFirst({
-        where: { projectId, type: body.sourceEnvironmentType as EnvironmentType },
+        where: {
+          type: body.sourceEnvironmentType as EnvironmentType,
+          ...(body.sourceVaultGroupId ? { vaultGroupId: body.sourceVaultGroupId } : { projectId }),
+        },
         include: { variables: { orderBy: { createdAt: "asc" } } },
       });
       if (!env) throw new NotFoundError(`Environment "${body.sourceEnvironmentType}" not found`);

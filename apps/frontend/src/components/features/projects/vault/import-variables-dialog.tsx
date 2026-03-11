@@ -13,12 +13,12 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  MenuItem,
   Stack,
   Typography,
 } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import { FileUploadButton, type FileUploadResult } from "@/components/ui/file-upload-button";
+import { FormSelectField } from "@/components/ui/form-select-field";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
@@ -90,27 +90,15 @@ export function ImportVariablesDialog(props: ImportVariablesDialogProps): ReactE
         <DialogContent>
           <Stack spacing={2.5} sx={{ mt: 1 }}>
             {isNewEnvironment && (
-              <FormTextField
+              <FormSelectField
                 form={form}
                 name="environmentType"
                 label="Environment Type"
-                select
+                items={ENVIRONMENT_TYPES}
                 autoFocus
-              >
-                {ENVIRONMENT_TYPES.map((t) => (
-                  <MenuItem key={t.value} value={t.value}>
-                    {t.label}
-                  </MenuItem>
-                ))}
-              </FormTextField>
+              />
             )}
-            <FormTextField form={form} name="format" label="Format" select>
-              {CONFIG_FORMATS.map((f) => (
-                <MenuItem key={f.value} value={f.value}>
-                  {f.label}
-                </MenuItem>
-              ))}
-            </FormTextField>
+            <FormSelectField form={form} name="format" label="Format" items={CONFIG_FORMATS} />
             <FileUploadButton onFileRead={handleFileRead} />
             <FormTextField
               form={form}

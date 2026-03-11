@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import { Add as AddIcon, VpnKey as VpnKeyIcon } from "@mui/icons-material";
+import {
+  Add as AddIcon,
+  BookmarkBorder as BookmarkBorderIcon,
+  VpnKey as VpnKeyIcon,
+} from "@mui/icons-material";
 import { Box, Button, Skeleton, Stack, Typography } from "@mui/material";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
@@ -12,6 +16,7 @@ import { ROUTES } from "@/lib/constants";
 import type { MemberListResponse, ProjectResponse } from "@/types/api/project";
 import type { VaultGroupListResponse } from "@/types/api/vault-group";
 import { CreateGroupDialog } from "./create-group-dialog";
+import { ProjectTemplatesSection } from "./templates/project-templates-section";
 import { VaultGroupList } from "./vault-group-list";
 
 interface VaultPageViewProps {
@@ -23,6 +28,7 @@ export function VaultPageView(props: VaultPageViewProps): ReactElement {
   const { user } = useAuth();
 
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
 
   const { data: project, isLoading: projectLoading } = useApiQuery<ProjectResponse>(
     ["projects", projectId],
@@ -77,17 +83,34 @@ export function VaultPageView(props: VaultPageViewProps): ReactElement {
           { label: "Vault" },
         ]}
         actions={
-          canEdit ? (
+          <Stack direction="row" spacing={1}>
             <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => setCreateGroupOpen(true)}
+              variant={showTemplates ? "contained" : "outlined"}
+              startIcon={<BookmarkBorderIcon />}
+              onClick={() => setShowTemplates((v) => !v)}
             >
-              Add Group
+              Templates
             </Button>
-          ) : undefined
+            {canEdit && (
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => setCreateGroupOpen(true)}
+              >
+                Add Group
+              </Button>
+            )}
+          </Stack>
         }
       />
+
+      {showTemplates && (
+        <ProjectTemplatesSection
+          projectId={projectId}
+          canEdit={canEdit}
+          vaultGroups={groups ?? []}
+        />
+      )}
 
       {!groups || groups.length === 0 ? (
         <EmptyState

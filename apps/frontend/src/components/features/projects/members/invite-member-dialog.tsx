@@ -1,16 +1,9 @@
 "use client";
 
 import type { ReactElement } from "react";
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  MenuItem,
-  Stack,
-} from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
+import { FormSelectField } from "@/components/ui/form-select-field";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
@@ -63,10 +56,15 @@ export function InviteMemberDialog(props: InviteMemberDialogProps): ReactElement
         <DialogContent>
           <Stack spacing={2.5} sx={{ mt: 1 }}>
             <FormTextField form={form} name="email" label="Email Address" type="email" autoFocus />
-            <FormTextField form={form} name="role" label="Role" select>
-              <MenuItem value="VIEWER">Viewer</MenuItem>
-              <MenuItem value="EDITOR">Editor</MenuItem>
-            </FormTextField>
+            <FormSelectField
+              form={form}
+              name="role"
+              label="Role"
+              items={[
+                { value: "VIEWER", label: "Viewer" },
+                { value: "EDITOR", label: "Editor" },
+              ]}
+            />
           </Stack>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>

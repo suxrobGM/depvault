@@ -6,18 +6,10 @@ import {
   ENVIRONMENT_TYPES,
   type EnvironmentTypeValue,
 } from "@depvault/shared/constants";
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  MenuItem,
-  Stack,
-} from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod/v4";
-import { FormTextField } from "@/components/ui/form-text-field";
+import { FormSelectField } from "@/components/ui/form-select-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
 
@@ -79,26 +71,20 @@ export function CloneEnvironmentDialog(props: CloneEnvironmentDialogProps): Reac
         <DialogTitle>Clone Environment</DialogTitle>
         <DialogContent>
           <Stack spacing={2.5} sx={{ mt: 1 }}>
-            <FormTextField form={form} name="sourceType" label="Source Environment" disabled select>
-              {ENVIRONMENT_TYPES.map((t) => (
-                <MenuItem key={t.value} value={t.value}>
-                  {t.label}
-                </MenuItem>
-              ))}
-            </FormTextField>
-            <FormTextField
+            <FormSelectField
+              form={form}
+              name="sourceType"
+              label="Source Environment"
+              items={ENVIRONMENT_TYPES}
+              disabled
+            />
+            <FormSelectField
               form={form}
               name="targetType"
               label="Target Environment"
-              select
+              items={ENVIRONMENT_TYPES}
               autoFocus
-            >
-              {ENVIRONMENT_TYPES.map((t) => (
-                <MenuItem key={t.value} value={t.value}>
-                  {t.label}
-                </MenuItem>
-              ))}
-            </FormTextField>
+            />
           </Stack>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>

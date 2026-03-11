@@ -1,43 +1,51 @@
 "use client";
 
 import type { ReactElement } from "react";
-import { getEnvironmentLabel, type EnvironmentTypeValue } from "@depvault/shared/constants";
+import {
+  ENVIRONMENT_TYPES,
+  getEnvironmentLabel,
+  type EnvironmentTypeValue,
+} from "@depvault/shared/constants";
 import {
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  MenuItem,
   Stack,
+  Typography,
 } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod/v4";
+import { FormSelectField } from "@/components/ui/form-select-field";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
-import type { EnvironmentItem } from "@/types/api/environment";
 
 const saveTemplateSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
   description: z.string().max(500),
-  sourceEnvironmentType: z.string().min(1, "Select a source environment"),
+  sourceVaultGroupId: z.string(),
+  sourceEnvironmentType: z.string(),
 });
 
 interface TemplateSaveDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
-  environments: EnvironmentItem[];
-  currentEnvironment: string | null;
+  vaultGroups: Array<{ id: string; name: string }>;
 }
 
 export function TemplateSaveDialog(props: TemplateSaveDialogProps): ReactElement {
-  const { open, onClose, projectId, environments, currentEnvironment } = props;
+  const { open, onClose, projectId, vaultGroups } = props;
 
   const mutation = useApiMutation(
-    (values: { name: string; description?: string; sourceEnvironmentType: EnvironmentTypeValue }) =>
-      client.api.projects({ id: projectId })["env-templates"].post(values),
+    (values: {
+      name: string;
+      description?: string;
+      sourceVaultGroupId?: string;
+      sourceEnvironmentType?: EnvironmentTypeValue;
+    }) => client.api.projects({ id: projectId })["env-templates"].post(values),
     {
       invalidateKeys: [["env-templates", projectId]],
       successMessage: (data: { name: string; variableCount: number }) =>
@@ -50,14 +58,20 @@ export function TemplateSaveDialog(props: TemplateSaveDialogProps): ReactElement
     defaultValues: {
       name: "",
       description: "",
-      sourceEnvironmentType: currentEnvironment ?? "",
+      sourceVaultGroupId: "",
+      sourceEnvironmentType: "",
     },
     validators: { onSubmit: saveTemplateSchema },
     onSubmit: async ({ value }) => {
       await mutation.mutateAsync({
         name: value.name,
-        description: value.description || undefined,
-        sourceEnvironmentType: value.sourceEnvironmentType as EnvironmentTypeValue,
+        description: value.description,
+        ...(value.sourceVaultGroupId && value.sourceEnvironmentType
+          ? {
+              sourceVaultGroupId: value.sourceVaultGroupId,
+              sourceEnvironmentType: value.sourceEnvironmentType as EnvironmentTypeValue,
+            }
+          : {}),
       });
     },
   });
@@ -91,18 +105,31 @@ export function TemplateSaveDialog(props: TemplateSaveDialogProps): ReactElement
               label="Description"
               placeholder="Optional description"
             />
-            <FormTextField
+            <Typography variant="subtitle2" color="text.secondary">
+              Copy from existing environment (optional)
+            </Typography>
+            <FormSelectField
               form={form}
-              name="sourceEnvironmentType"
-              label="Source Environment"
-              select
-            >
-              {environments.map((env) => (
-                <MenuItem key={env.id} value={env.type}>
-                  {getEnvironmentLabel(env.type)} ({env.variableCount} variables)
-                </MenuItem>
-              ))}
-            </FormTextField>
+              name="sourceVaultGroupId"
+              label="Vault Group"
+              items={vaultGroups.map((g) => ({ value: g.id, label: g.name }))}
+              optional
+            />
+            <form.Subscribe selector={(s) => s.values.sourceVaultGroupId}>
+              {(sourceVaultGroupId) =>
+                sourceVaultGroupId ? (
+                  <FormSelectField
+                    form={form}
+                    name="sourceEnvironmentType"
+                    label="Environment Type"
+                    items={ENVIRONMENT_TYPES.map((t) => ({
+                      value: t.value,
+                      label: getEnvironmentLabel(t.value),
+                    }))}
+                  />
+                ) : null
+              }
+            </form.Subscribe>
           </Stack>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>

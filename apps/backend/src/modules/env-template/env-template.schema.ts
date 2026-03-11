@@ -7,6 +7,7 @@ export const CreateEnvTemplateBodySchema = t.Object({
   name: t.String({ minLength: 1, maxLength: 100 }),
   description: t.Optional(t.String({ maxLength: 500 })),
   sourceEnvironmentType: t.Optional(EnvironmentTypeSchema),
+  sourceVaultGroupId: t.Optional(t.String({ format: "uuid" })),
   variables: t.Optional(
     t.Array(
       t.Object({

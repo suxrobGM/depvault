@@ -20,11 +20,10 @@ import { EditVariableDialog } from "./edit-variable-dialog";
 import { EnvironmentSelector } from "./environment-selector";
 import { ExportVariablesDialog } from "./export-variables-dialog";
 import { ImportVariablesDialog } from "./import-variables-dialog";
-import { EnvTemplatesView } from "./templates/env-templates-view";
 import { VaultToolbar } from "./vault-toolbar";
 import { VaultVariableTable } from "./vault-variable-table";
 
-type VaultView = "variables" | "diff" | "templates";
+type VaultView = "variables" | "diff";
 
 interface VaultGroupCardProps {
   projectId: string;
@@ -126,23 +125,6 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
     );
   }
 
-  if (view === "templates" && environments) {
-    return (
-      <EnvTemplatesView
-        projectId={projectId}
-        vaultGroupId={group.id}
-        canEdit={canEdit}
-        environments={environments}
-        currentEnvironment={activeEnv}
-        onBack={() => setView("variables")}
-        onEnvironmentCreated={(envType) => {
-          setSelectedEnv(envType);
-          setView("variables");
-        }}
-      />
-    );
-  }
-
   if (!environments || environments.length === 0) {
     return (
       <Box>
@@ -231,7 +213,6 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
             onExport={() => setExportOpen(true)}
             onCompare={() => setView("diff")}
             onClone={() => setCloneOpen(true)}
-            onTemplates={() => setView("templates")}
           />
         </Stack>
 
