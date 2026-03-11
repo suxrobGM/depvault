@@ -4,8 +4,15 @@
  * @param fileName The name of the file to be downloaded, including extension.
  * @param type The MIME type of the file. Defaults to "text/plain".
  */
-export function downloadFile(content: string, fileName: string, type = "text/plain"): void {
-  const blob = new Blob([content], { type });
+export function downloadFile(content: string | Blob, fileName: string, type = "text/plain"): void {
+  let blob: Blob;
+  if (content instanceof Blob) {
+    blob = content;
+    type = content.type || type;
+  } else {
+    blob = new Blob([content], { type });
+  }
+
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;

@@ -23,6 +23,7 @@ import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 import type { AnalysisListResponse } from "@/types/api/analysis";
 import type { ProjectResponse } from "@/types/api/project";
+import type { SecretFileListResponse } from "@/types/api/secret-file";
 import type { VaultGroupListResponse } from "@/types/api/vault-group";
 
 interface OverviewTabProps {
@@ -44,8 +45,14 @@ export function OverviewTab(props: OverviewTabProps): ReactElement {
     () => client.api.projects({ id: projectId })["vault-groups"].get(),
   );
 
+  const { data: secretFilesData } = useApiQuery<SecretFileListResponse>(
+    ["secret-files", projectId, "overview"],
+    () => client.api.projects({ id: projectId }).secrets.get({ query: { page: 1, limit: 1 } }),
+  );
+
   const vaultGroupCount = vaultGroups?.length ?? 0;
   const totalVariableCount = vaultGroups?.reduce((sum, g) => sum + (g.variableCount ?? 0), 0) ?? 0;
+  const secretFileCount = secretFilesData?.pagination.total ?? 0;
 
   const analysisCount = analysisData?.pagination.total ?? 0;
   const totalDeps = analysisData?.items.reduce((sum, a) => sum + a.dependencyCount, 0) ?? 0;
@@ -175,20 +182,28 @@ export function OverviewTab(props: OverviewTabProps): ReactElement {
               </Typography>
             </Stack>
             <Grid container spacing={2} sx={{ mb: 2.5 }}>
-              <Grid size={6}>
+              <Grid size={4}>
                 <Typography variant="caption" color="text.secondary">
-                  Vault Groups
+                  Groups
                 </Typography>
                 <Typography variant="h6" fontWeight={700} lineHeight={1.2}>
                   {vaultGroupCount}
                 </Typography>
               </Grid>
-              <Grid size={6}>
+              <Grid size={4}>
                 <Typography variant="caption" color="text.secondary">
-                  Total Variables
+                  Variables
                 </Typography>
                 <Typography variant="h6" fontWeight={700} lineHeight={1.2}>
                   {totalVariableCount}
+                </Typography>
+              </Grid>
+              <Grid size={4}>
+                <Typography variant="caption" color="text.secondary">
+                  Secret Files
+                </Typography>
+                <Typography variant="h6" fontWeight={700} lineHeight={1.2}>
+                  {secretFileCount}
                 </Typography>
               </Grid>
             </Grid>

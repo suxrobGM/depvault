@@ -32,3 +32,8 @@ Located at `src/lib/api-server.ts`. Reads cookies from `next/headers` and forwar
 - Frontend tsconfig maps `@depvault/backend` to `../../apps/backend/dist/apps/backend/src/app.d.ts`
 - `@elysiajs/eden` must be a devDependency in the frontend for Treaty types to work
 - `@depvault/shared` is a `workspace:*` dependency (not from npm)
+
+## API Fetching
+
+- Never use `fetch` API directly in components. Use `useApiQuery` and `useApiMutation` hooks that wrap API calls with React Query.
+- Use Eden Treaty API client for all API calls, never direct `fetch`.

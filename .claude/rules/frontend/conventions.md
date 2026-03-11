@@ -19,7 +19,6 @@ paths: [apps/frontend/src/**]
 
 - **Never** add `"use client"` to `page.tsx` or `layout.tsx` files. Pages and layouts must be React Server Components
 - Extract interactive logic (hooks, state, event handlers) into `"use client"` feature components under `src/components/features/`
-- Page files are thin wrappers that compose server-fetched data with client components
 
 ## Component Props
 
