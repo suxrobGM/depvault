@@ -24,7 +24,10 @@ export function FormTextField(props: FormTextFieldProps): ReactElement {
           onChange={(e) => field.handleChange(e.target.value)}
           onBlur={field.handleBlur}
           error={field.state.meta.errors.length > 0}
-          helperText={field.state.meta.errors[0]?.toString()}
+          helperText={
+            (field.state.meta.errors[0] as { message?: string })?.message ??
+            field.state.meta.errors[0]?.toString()
+          }
           {...textFieldProps}
         />
       )}

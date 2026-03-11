@@ -142,6 +142,8 @@ export function UploadSecretFileDialog(props: UploadSecretFileDialogProps): Reac
               name="vaultGroupId"
               label="Vault Group"
               items={groupItems}
+              optional
+              emptyLabel="Select a vault group"
               emptyMessage="No vault groups found. Create a group in the Variables tab first."
             />
 
