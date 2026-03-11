@@ -171,6 +171,11 @@ function SecretFileRow(props: SecretFileRowProps): ReactElement {
             </Typography>
           )}
         </TableCell>
+        <TableCell>
+          <Typography variant="body2" color="text.secondary">
+            {file.vaultGroupName}
+          </Typography>
+        </TableCell>
         {activeEnv && (
           <TableCell>
             <Chip
@@ -251,7 +256,7 @@ function SecretFileRow(props: SecretFileRowProps): ReactElement {
       </TableRow>
 
       <TableRow>
-        <TableCell colSpan={activeEnv ? 6 : 5} sx={{ py: 0 }}>
+        <TableCell colSpan={activeEnv ? 7 : 6} sx={{ py: 0 }}>
           <Collapse in={historyOpen} timeout="auto" unmountOnExit>
             <Box sx={{ py: 2, pl: 6, pr: 2 }}>
               <Typography
@@ -345,6 +350,7 @@ export function SecretFileTable(props: SecretFileTableProps): ReactElement {
           <TableRow>
             <TableCell width={48} />
             <TableCell>File</TableCell>
+            <TableCell>Vault Group</TableCell>
             {activeEnv && <TableCell>Environment</TableCell>}
             <TableCell>Size</TableCell>
             <TableCell>Uploaded</TableCell>

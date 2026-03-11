@@ -6,6 +6,7 @@ import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import { NotificationService } from "@/modules/notification";
 import type { PaginatedResponse } from "@/types/response";
+import { toSecretFileResponse } from "./secret-file.mapper";
 import type { SecretFileResponse, UpdateSecretFileBody } from "./secret-file.schema";
 import { validateFile, validateFileName } from "./secret-file.validator";
 
@@ -79,7 +80,7 @@ export class SecretFileService {
       metadata: { fileName: file.name },
     });
 
-    return this.toResponse(secretFile);
+    return toSecretFileResponse(secretFile, environment.vaultGroup);
   }
 
   async list(
@@ -103,23 +104,13 @@ export class SecretFileService {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: "desc" },
-        select: {
-          id: true,
-          environmentId: true,
-          name: true,
-          description: true,
-          mimeType: true,
-          fileSize: true,
-          uploadedBy: true,
-          createdAt: true,
-          updatedAt: true,
-        },
+        include: { environment: { include: { vaultGroup: true } } },
       }),
       this.prisma.secretFile.count({ where }),
     ]);
 
     return {
-      items: files,
+      items: files.map((f) => toSecretFileResponse(f, f.environment.vaultGroup)),
       pagination: {
         page,
         limit,
@@ -193,9 +184,10 @@ export class SecretFileService {
         ...(data.description !== undefined && { description: data.description }),
         ...(data.environmentType && { environmentId }),
       },
+      include: { environment: { include: { vaultGroup: true } } },
     });
 
-    return this.toResponse(updated);
+    return toSecretFileResponse(updated, updated.environment.vaultGroup);
   }
 
   async delete(
@@ -242,12 +234,14 @@ export class SecretFileService {
   ) {
     const existing = await this.prisma.environment.findUnique({
       where: { vaultGroupId_type: { vaultGroupId, type } },
+      include: { vaultGroup: true },
     });
 
     if (existing) return existing;
 
     return this.prisma.environment.create({
       data: { projectId, vaultGroupId, type },
+      include: { vaultGroup: true },
     });
   }
 
@@ -290,29 +284,5 @@ export class SecretFileService {
     } catch {
       logger.warn({ projectId, userId, action, fileId }, "Failed to create audit log entry");
     }
-  }
-
-  private toResponse(file: {
-    id: string;
-    environmentId: string;
-    name: string;
-    description: string | null;
-    mimeType: string;
-    fileSize: number;
-    uploadedBy: string;
-    createdAt: Date;
-    updatedAt: Date;
-  }): SecretFileResponse {
-    return {
-      id: file.id,
-      environmentId: file.environmentId,
-      name: file.name,
-      description: file.description,
-      mimeType: file.mimeType,
-      fileSize: file.fileSize,
-      uploadedBy: file.uploadedBy,
-      createdAt: file.createdAt,
-      updatedAt: file.updatedAt,
-    };
   }
 }

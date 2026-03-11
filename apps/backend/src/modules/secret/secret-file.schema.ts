@@ -9,6 +9,8 @@ export { FORBIDDEN_EXTENSIONS, MAX_FILE_SIZE };
 export const SecretFileResponseSchema = t.Object({
   id: t.String(),
   environmentId: t.String(),
+  vaultGroupId: t.String(),
+  vaultGroupName: t.String(),
   name: t.String(),
   description: t.Nullable(t.String()),
   mimeType: t.String(),

@@ -1,6 +1,7 @@
 import { singleton } from "tsyringe";
 import { ForbiddenError, NotFoundError } from "@/common/errors";
 import { PrismaClient } from "@/generated/prisma";
+import { toSecretFileResponse } from "./secret-file.mapper";
 import type { SecretFileResponse } from "./secret-file.schema";
 
 @singleton()
@@ -64,9 +65,10 @@ export class SecretFileVersionService {
         authTag: version.authTag,
         fileSize: version.fileSize,
       },
+      include: { environment: { include: { vaultGroup: true } } },
     });
 
-    return this.toResponse(updated);
+    return toSecretFileResponse(updated, updated.environment.vaultGroup);
   }
 
   private async findFileOrThrow(projectId: string, fileId: string) {
@@ -101,29 +103,5 @@ export class SecretFileVersionService {
     }
 
     return member;
-  }
-
-  private toResponse(file: {
-    id: string;
-    environmentId: string;
-    name: string;
-    description: string | null;
-    mimeType: string;
-    fileSize: number;
-    uploadedBy: string;
-    createdAt: Date;
-    updatedAt: Date;
-  }): SecretFileResponse {
-    return {
-      id: file.id,
-      environmentId: file.environmentId,
-      name: file.name,
-      description: file.description,
-      mimeType: file.mimeType,
-      fileSize: file.fileSize,
-      uploadedBy: file.uploadedBy,
-      createdAt: file.createdAt,
-      updatedAt: file.updatedAt,
-    };
   }
 }
