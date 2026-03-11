@@ -67,7 +67,6 @@ export function TemplateDetailDialog(props: TemplateDetailDialogProps): ReactEle
                     <TableCell align="center" sx={{ fontWeight: 700 }}>
                       Required
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Validation</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -87,11 +86,6 @@ export function TemplateDetailDialog(props: TemplateDetailDialogProps): ReactEle
                         {v.isRequired && (
                           <Chip label="Required" size="small" color="warning" variant="outlined" />
                         )}
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" color="text.secondary" fontFamily="monospace">
-                          {v.validationRule || "—"}
-                        </Typography>
                       </TableCell>
                     </TableRow>
                   ))}

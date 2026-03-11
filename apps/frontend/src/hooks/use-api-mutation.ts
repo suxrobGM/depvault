@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 type MutationFn<TData, TVariables> = (variables: TVariables) => Promise<{
-  data: TData;
+  data: TData | null;
   error: unknown;
 }>;
 

@@ -99,7 +99,14 @@ describe("SecretFileService", () => {
       mockPrisma.environment.findUnique.mockResolvedValueOnce(mockEnvironment);
 
       const file = createMockFile("config.json");
-      const result = await service.upload(projectId, userId, file, "development", "Config file");
+      const result = await service.upload(
+        projectId,
+        userId,
+        file,
+        "vault-group-uuid",
+        "development",
+        "Config file",
+      );
 
       expect(result.id).toBe(fileId);
       expect(result.name).toBe("config.json");
@@ -114,9 +121,9 @@ describe("SecretFileService", () => {
       for (const ext of [".exe", ".sh", ".bat", ".cmd", ".ps1"]) {
         mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
         const file = createMockFile(`script${ext}`);
-        expect(service.upload(projectId, userId, file, "dev")).rejects.toBeInstanceOf(
-          BadRequestError,
-        );
+        expect(
+          service.upload(projectId, userId, file, "vault-group-uuid", "dev"),
+        ).rejects.toBeInstanceOf(BadRequestError);
       }
     });
 
@@ -124,25 +131,27 @@ describe("SecretFileService", () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
 
       const file = createMockFile("../etc/passwd");
-      expect(service.upload(projectId, userId, file, "dev")).rejects.toBeInstanceOf(
-        BadRequestError,
-      );
+      expect(
+        service.upload(projectId, userId, file, "vault-group-uuid", "dev"),
+      ).rejects.toBeInstanceOf(BadRequestError);
     });
 
     it("should reject files exceeding 25 MB", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
 
       const file = createMockFile("big.json", 26 * 1024 * 1024);
-      expect(service.upload(projectId, userId, file, "dev")).rejects.toBeInstanceOf(
-        BadRequestError,
-      );
+      expect(
+        service.upload(projectId, userId, file, "vault-group-uuid", "dev"),
+      ).rejects.toBeInstanceOf(BadRequestError);
     });
 
     it("should throw ForbiddenError for VIEWER", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.VIEWER });
 
       const file = createMockFile("config.json");
-      expect(service.upload(projectId, userId, file, "dev")).rejects.toBeInstanceOf(ForbiddenError);
+      expect(
+        service.upload(projectId, userId, file, "vault-group-uuid", "dev"),
+      ).rejects.toBeInstanceOf(ForbiddenError);
     });
   });
 
@@ -278,7 +287,8 @@ describe("SecretFileService", () => {
         environmentId: "new-env-id",
       });
 
-      await service.update(projectId, fileId, userId, { environment: "staging" });
+      const vaultGroupId = "vault-group-uuid";
+      await service.update(projectId, fileId, userId, { environment: "staging", vaultGroupId });
 
       expect(mockPrisma.secretFile.update).toHaveBeenCalledWith({
         where: { id: fileId },

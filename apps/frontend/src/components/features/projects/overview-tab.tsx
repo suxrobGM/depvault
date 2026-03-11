@@ -3,6 +3,7 @@
 import type { ReactElement } from "react";
 import {
   Security as AnalysisIcon,
+  ArrowForward as ArrowForwardIcon,
   CalendarToday as CalendarIcon,
   Inventory2 as DepsIcon,
   GitHub as GitHubIcon,
@@ -10,14 +11,19 @@ import {
   TrendingUp as HealthIcon,
   OpenInNew as OpenInNewIcon,
   Update as UpdateIcon,
+  VpnKey as VpnKeyIcon,
 } from "@mui/icons-material";
 import { Box, Button, CardContent, Grid, Stack, Typography } from "@mui/material";
+import type { Route } from "next";
+import Link from "next/link";
 import { GlassCard } from "@/components/ui/glass-card";
 import { IconBox } from "@/components/ui/icon-box";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
+import { ROUTES } from "@/lib/constants";
 import type { AnalysisListResponse } from "@/types/api/analysis";
 import type { ProjectResponse } from "@/types/api/project";
+import type { VaultGroupListResponse } from "@/types/api/vault-group";
 
 interface OverviewTabProps {
   project: ProjectResponse;
@@ -32,6 +38,14 @@ export function OverviewTab(props: OverviewTabProps): ReactElement {
     ["analyses", projectId, "overview"],
     () => client.api.analyses.project({ projectId }).get({ query: { page: 1, limit: 100 } }),
   );
+
+  const { data: vaultGroups } = useApiQuery<VaultGroupListResponse>(
+    ["vault-groups", projectId, "overview"],
+    () => client.api.projects({ id: projectId })["vault-groups"].get(),
+  );
+
+  const vaultGroupCount = vaultGroups?.length ?? 0;
+  const totalVariableCount = vaultGroups?.reduce((sum, g) => sum + (g.variableCount ?? 0), 0) ?? 0;
 
   const analysisCount = analysisData?.pagination.total ?? 0;
   const totalDeps = analysisData?.items.reduce((sum, a) => sum + a.dependencyCount, 0) ?? 0;
@@ -119,6 +133,7 @@ export function OverviewTab(props: OverviewTabProps): ReactElement {
           </CardContent>
         </GlassCard>
       </Grid>
+
       <Grid size={{ xs: 12, md: 4 }}>
         <GlassCard sx={{ height: "100%" }}>
           <CardContent sx={{ p: 3 }}>
@@ -144,6 +159,103 @@ export function OverviewTab(props: OverviewTabProps): ReactElement {
                 </Grid>
               ))}
             </Grid>
+          </CardContent>
+        </GlassCard>
+      </Grid>
+
+      <Grid size={{ xs: 12, md: 6 }}>
+        <GlassCard sx={{ height: "100%" }}>
+          <CardContent sx={{ p: 3 }}>
+            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2.5 }}>
+              <IconBox color="var(--mui-palette-success-main)" size={40}>
+                <VpnKeyIcon sx={{ fontSize: 22 }} />
+              </IconBox>
+              <Typography variant="subtitle1" fontWeight={600}>
+                Vault Summary
+              </Typography>
+            </Stack>
+            <Grid container spacing={2} sx={{ mb: 2.5 }}>
+              <Grid size={6}>
+                <Typography variant="caption" color="text.secondary">
+                  Vault Groups
+                </Typography>
+                <Typography variant="h6" fontWeight={700} lineHeight={1.2}>
+                  {vaultGroupCount}
+                </Typography>
+              </Grid>
+              <Grid size={6}>
+                <Typography variant="caption" color="text.secondary">
+                  Total Variables
+                </Typography>
+                <Typography variant="h6" fontWeight={700} lineHeight={1.2}>
+                  {totalVariableCount}
+                </Typography>
+              </Grid>
+            </Grid>
+            <Button
+              component={Link}
+              href={ROUTES.projectVault(projectId) as Route}
+              variant="outlined"
+              size="small"
+              endIcon={<ArrowForwardIcon />}
+            >
+              Go to Vault
+            </Button>
+          </CardContent>
+        </GlassCard>
+      </Grid>
+
+      <Grid size={{ xs: 12, md: 6 }}>
+        <GlassCard sx={{ height: "100%" }}>
+          <CardContent sx={{ p: 3 }}>
+            <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2.5 }}>
+              <IconBox color="var(--mui-palette-info-main)" size={40}>
+                <AnalysisIcon sx={{ fontSize: 22 }} />
+              </IconBox>
+              <Typography variant="subtitle1" fontWeight={600}>
+                Analysis Summary
+              </Typography>
+            </Stack>
+            <Grid container spacing={2} sx={{ mb: 2.5 }}>
+              <Grid size={4}>
+                <Typography variant="caption" color="text.secondary">
+                  Analyses
+                </Typography>
+                <Typography variant="h6" fontWeight={700} lineHeight={1.2}>
+                  {analysisCount}
+                </Typography>
+              </Grid>
+              <Grid size={4}>
+                <Typography variant="caption" color="text.secondary">
+                  Dependencies
+                </Typography>
+                <Typography variant="h6" fontWeight={700} lineHeight={1.2}>
+                  {totalDeps}
+                </Typography>
+              </Grid>
+              <Grid size={4}>
+                <Typography variant="caption" color="text.secondary">
+                  Avg Health
+                </Typography>
+                <Typography
+                  variant="h6"
+                  fontWeight={700}
+                  lineHeight={1.2}
+                  sx={{ color: avgHealth !== null ? getHealthColor() : "text.secondary" }}
+                >
+                  {avgHealth !== null ? `${avgHealth}%` : "\u2014"}
+                </Typography>
+              </Grid>
+            </Grid>
+            <Button
+              component={Link}
+              href={ROUTES.projectAnalysis(projectId) as Route}
+              variant="outlined"
+              size="small"
+              endIcon={<ArrowForwardIcon />}
+            >
+              Go to Analysis
+            </Button>
           </CardContent>
         </GlassCard>
       </Grid>

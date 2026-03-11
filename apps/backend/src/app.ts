@@ -17,6 +17,7 @@ import { notificationController } from "@/modules/notification";
 import { projectController } from "@/modules/project";
 import { secretController, secretFileController } from "@/modules/secret";
 import { userController } from "@/modules/user";
+import { vaultGroupController } from "@/modules/vault-group";
 import { HttpErrorResponses } from "./types/response";
 
 // Validate environment
@@ -38,6 +39,7 @@ const app = new Elysia()
       })
       .use(authController)
       .use(projectController)
+      .use(vaultGroupController)
       .use(environmentController)
       .use(envTemplateController)
       .use(secretFileController)

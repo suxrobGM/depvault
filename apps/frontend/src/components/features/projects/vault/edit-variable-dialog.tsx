@@ -32,13 +32,7 @@ export function EditVariableDialog(props: EditVariableDialogProps): ReactElement
   const notification = useNotification();
 
   const mutation = useApiMutation(
-    (values: {
-      key?: string;
-      value?: string;
-      description?: string;
-      isRequired?: boolean;
-      validationRule?: string;
-    }) =>
+    (values: { key?: string; value?: string; description?: string; isRequired?: boolean }) =>
       client.api
         .projects({ id: projectId })
         .environments.variables({ varId: variable?.id ?? "" })
@@ -59,7 +53,6 @@ export function EditVariableDialog(props: EditVariableDialogProps): ReactElement
       value: variable?.value ?? "",
       description: variable?.description ?? "",
       isRequired: variable?.isRequired ?? false,
-      validationRule: variable?.validationRule ?? "",
     },
     validators: { onSubmit: updateVariableSchema },
     onSubmit: async ({ value }) => {
@@ -68,7 +61,6 @@ export function EditVariableDialog(props: EditVariableDialogProps): ReactElement
         value: value.value,
         description: value.description,
         isRequired: value.isRequired,
-        validationRule: value.validationRule,
       });
     },
   });
@@ -92,7 +84,6 @@ export function EditVariableDialog(props: EditVariableDialogProps): ReactElement
             <FormTextField form={form} name="key" label="Key" autoFocus />
             <FormTextField form={form} name="value" label="Value" />
             <FormTextField form={form} name="description" label="Description" />
-            <FormTextField form={form} name="validationRule" label="Validation Rule" />
             <form.Field name="isRequired">
               {(field) => (
                 <FormControlLabel

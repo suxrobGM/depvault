@@ -15,6 +15,7 @@ import {
   EnvDiffResponseSchema,
   EnvExampleQuerySchema,
   EnvExampleResponseSchema,
+  EnvironmentListQuerySchema,
   EnvironmentListResponseSchema,
   EnvVariableListQuerySchema,
   EnvVariableListResponseSchema,
@@ -38,20 +39,27 @@ export const environmentController = new Elysia({
   detail: { tags: ["Environments"] },
 })
   .use(authGuard)
-  .get("/", ({ params, user }) => environmentService.listEnvironments(params.id, user.id), {
-    params: StringIdParamSchema,
-    response: EnvironmentListResponseSchema,
-    detail: {
-      summary: "List environments",
-      description: "List all environments for a project with variable counts.",
-      security: [{ bearerAuth: [] }],
+  .get(
+    "/",
+    ({ params, query, user }) =>
+      environmentService.listEnvironments(params.id, user.id, query.vaultGroupId),
+    {
+      params: StringIdParamSchema,
+      query: EnvironmentListQuerySchema,
+      response: EnvironmentListResponseSchema,
+      detail: {
+        summary: "List environments",
+        description: "List all environments for a project with variable counts.",
+        security: [{ bearerAuth: [] }],
+      },
     },
-  })
+  )
   .get(
     "/diff",
     ({ params, query, user, request, server }) =>
       environmentDiffService.diff(
         params.id,
+        query.vaultGroupId,
         query.environments,
         user.id,
         getClientIp(request, server),
@@ -111,6 +119,7 @@ export const environmentController = new Elysia({
       environmentService.list(
         params.id,
         user.id,
+        query.vaultGroupId,
         query.environment,
         query.page,
         query.limit,
@@ -186,6 +195,7 @@ export const environmentController = new Elysia({
     ({ params, query, user, request, server }) =>
       environmentIOService.export(
         params.id,
+        query.vaultGroupId,
         query.environment,
         query.format,
         user.id,
@@ -206,7 +216,12 @@ export const environmentController = new Elysia({
   .get(
     "/example",
     ({ params, query, user }) =>
-      environmentIOService.generateExample(params.id, query.environment, user.id),
+      environmentIOService.generateExample(
+        params.id,
+        query.vaultGroupId,
+        query.environment,
+        user.id,
+      ),
     {
       params: StringIdParamSchema,
       query: EnvExampleQuerySchema,

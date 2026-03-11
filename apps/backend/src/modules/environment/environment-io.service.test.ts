@@ -19,6 +19,8 @@ const mockEncrypted = {
   authTag: "tag-base64",
 };
 
+const vaultGroupId = "vault-group-uuid";
+
 const mockVariable = {
   id: varId,
   environmentId: envId,
@@ -28,9 +30,6 @@ const mockVariable = {
   authTag: "tag-base64",
   description: "The database URL",
   isRequired: true,
-  validationRule: null,
-  rotationDays: null,
-  lastRotatedAt: null,
   createdAt: now,
   updatedAt: now,
 };
@@ -93,6 +92,7 @@ describe("EnvironmentIOService", () => {
       const result = await service.bulkImport(
         projectId,
         {
+          vaultGroupId,
           environment: "development",
           format: "env",
           content: "DATABASE_URL=postgres://localhost/db",
@@ -114,7 +114,12 @@ describe("EnvironmentIOService", () => {
 
       const result = await service.bulkImport(
         projectId,
-        { environment: "development", format: "env", content: "DATABASE_URL=new-value" },
+        {
+          vaultGroupId,
+          environment: "development",
+          format: "env",
+          content: "DATABASE_URL=new-value",
+        },
         userId,
         ipAddress,
       );
@@ -131,13 +136,13 @@ describe("EnvironmentIOService", () => {
 
       await service.bulkImport(
         projectId,
-        { environment: "staging", format: "env", content: "KEY=value" },
+        { vaultGroupId, environment: "staging", format: "env", content: "KEY=value" },
         userId,
         ipAddress,
       );
 
       expect(mockPrisma.environment.create).toHaveBeenCalledWith({
-        data: { projectId, name: "staging", type: "DEVELOPMENT" },
+        data: { projectId, vaultGroupId, name: "staging", type: "DEVELOPMENT" },
       });
     });
 
@@ -148,7 +153,7 @@ describe("EnvironmentIOService", () => {
 
       await service.bulkImport(
         projectId,
-        { environment: "development", format: "env", content: "KEY=value" },
+        { vaultGroupId, environment: "development", format: "env", content: "KEY=value" },
         userId,
         ipAddress,
       );
@@ -170,7 +175,7 @@ describe("EnvironmentIOService", () => {
       expect(
         service.bulkImport(
           projectId,
-          { environment: "dev", format: "env", content: "K=V" },
+          { vaultGroupId, environment: "dev", format: "env", content: "K=V" },
           userId,
           ipAddress,
         ),
@@ -183,7 +188,7 @@ describe("EnvironmentIOService", () => {
       expect(
         service.bulkImport(
           projectId,
-          { environment: "dev", format: "env", content: "K=V" },
+          { vaultGroupId, environment: "dev", format: "env", content: "K=V" },
           userId,
           ipAddress,
         ),
@@ -196,7 +201,14 @@ describe("EnvironmentIOService", () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
       mockPrisma.environment.findUnique.mockResolvedValueOnce(mockEnvironment);
 
-      const result = await service.export(projectId, "development", "env", userId, ipAddress);
+      const result = await service.export(
+        projectId,
+        vaultGroupId,
+        "development",
+        "env",
+        userId,
+        ipAddress,
+      );
 
       expect(result.content).toContain("DATABASE_URL=");
       expect(result.format).toBe("env");
@@ -208,7 +220,7 @@ describe("EnvironmentIOService", () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "EDITOR" });
       mockPrisma.environment.findUnique.mockResolvedValueOnce(mockEnvironment);
 
-      await service.export(projectId, "development", "env", userId, ipAddress);
+      await service.export(projectId, vaultGroupId, "development", "env", userId, ipAddress);
 
       expect(mockAuditLog.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -224,7 +236,7 @@ describe("EnvironmentIOService", () => {
       mockPrisma.environment.findUnique.mockResolvedValueOnce(null);
 
       expect(
-        service.export(projectId, "nonexistent", "env", userId, ipAddress),
+        service.export(projectId, vaultGroupId, "nonexistent", "env", userId, ipAddress),
       ).rejects.toBeInstanceOf(NotFoundError);
     });
 
@@ -232,7 +244,7 @@ describe("EnvironmentIOService", () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
 
       expect(
-        service.export(projectId, "development", "env", userId, ipAddress),
+        service.export(projectId, vaultGroupId, "development", "env", userId, ipAddress),
       ).rejects.toBeInstanceOf(ForbiddenError);
     });
   });
@@ -242,7 +254,7 @@ describe("EnvironmentIOService", () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
       mockPrisma.environment.findUnique.mockResolvedValueOnce(mockEnvironment);
 
-      const result = await service.generateExample(projectId, "development", userId);
+      const result = await service.generateExample(projectId, vaultGroupId, "development", userId);
 
       expect(result.content).toContain("DATABASE_URL=");
       expect(result.content).toContain("(required)");
@@ -254,7 +266,7 @@ describe("EnvironmentIOService", () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
       mockPrisma.environment.findUnique.mockResolvedValueOnce(mockEnvironment);
 
-      const result = await service.generateExample(projectId, "development", userId);
+      const result = await service.generateExample(projectId, vaultGroupId, "development", userId);
 
       expect(result.environment).toBe("development");
     });
@@ -265,7 +277,7 @@ describe("EnvironmentIOService", () => {
       const decryptSpy = spyOn(encryption, "decrypt");
       decryptSpy.mockClear();
 
-      await service.generateExample(projectId, "development", userId);
+      await service.generateExample(projectId, vaultGroupId, "development", userId);
 
       expect(decryptSpy).not.toHaveBeenCalled();
     });
@@ -274,17 +286,17 @@ describe("EnvironmentIOService", () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
       mockPrisma.environment.findUnique.mockResolvedValueOnce(null);
 
-      expect(service.generateExample(projectId, "nonexistent", userId)).rejects.toBeInstanceOf(
-        NotFoundError,
-      );
+      expect(
+        service.generateExample(projectId, vaultGroupId, "nonexistent", userId),
+      ).rejects.toBeInstanceOf(NotFoundError);
     });
 
     it("should throw NotFoundError when user is not a member", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce(null);
 
-      expect(service.generateExample(projectId, "development", userId)).rejects.toBeInstanceOf(
-        NotFoundError,
-      );
+      expect(
+        service.generateExample(projectId, vaultGroupId, "development", userId),
+      ).rejects.toBeInstanceOf(NotFoundError);
     });
   });
 });

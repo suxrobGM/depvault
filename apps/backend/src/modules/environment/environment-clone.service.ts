@@ -24,7 +24,9 @@ export class EnvironmentCloneService {
     await this.envHelper.requireEditorOrOwner(projectId, userId);
 
     const sourceEnv = await this.prisma.environment.findUnique({
-      where: { projectId_name: { projectId, name: body.sourceEnvironment } },
+      where: {
+        vaultGroupId_name: { vaultGroupId: body.vaultGroupId, name: body.sourceEnvironment },
+      },
       include: { variables: true },
     });
 
@@ -34,6 +36,7 @@ export class EnvironmentCloneService {
 
     const targetEnv = await this.envHelper.findOrCreateEnvironment(
       projectId,
+      body.vaultGroupId,
       body.targetName,
       body.targetType,
     );
@@ -52,7 +55,6 @@ export class EnvironmentCloneService {
             authTag,
             description: v.description,
             isRequired: v.isRequired,
-            validationRule: v.validationRule,
           },
         });
       }),

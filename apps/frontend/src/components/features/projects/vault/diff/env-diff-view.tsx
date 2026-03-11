@@ -11,12 +11,13 @@ import { DiffTable } from "./diff-table";
 
 interface EnvDiffViewProps {
   projectId: string;
+  vaultGroupId: string;
   environments: EnvironmentItem[];
   onBack: () => void;
 }
 
 export function EnvDiffView(props: EnvDiffViewProps): ReactElement {
-  const { projectId, environments, onBack } = props;
+  const { projectId, vaultGroupId, environments, onBack } = props;
   const [selected, setSelected] = useState<string[]>([]);
 
   const canDiff = selected.length >= 2 && selected.length <= 3;
@@ -24,9 +25,9 @@ export function EnvDiffView(props: EnvDiffViewProps): ReactElement {
   const { data, isLoading } = useApiQuery<EnvDiffResponse>(
     ["env-diff", projectId, ...selected],
     () =>
-      client.api
-        .projects({ id: projectId })
-        .environments.diff.get({ query: { environments: selected.join(",") } }),
+      client.api.projects({ id: projectId }).environments.diff.get({
+        query: { environments: selected.join(","), vaultGroupId },
+      }),
     { enabled: canDiff },
   );
 

@@ -17,7 +17,6 @@ import type {
 
 @singleton()
 export class EnvironmentService {
-  private static readonly ROTATION_MAX_AGE_DAYS = 90;
   private static readonly NOTIFICATION_COOLDOWN_HOURS = 24;
 
   constructor(
@@ -27,12 +26,18 @@ export class EnvironmentService {
     private readonly notificationService: NotificationService,
   ) {}
 
-  async listEnvironments(projectId: string, userId: string): Promise<EnvironmentResponse[]> {
+  async listEnvironments(
+    projectId: string,
+    userId: string,
+    vaultGroupId?: string,
+  ): Promise<EnvironmentResponse[]> {
     await this.envHelper.requireMember(projectId, userId);
 
+    const where = vaultGroupId ? { projectId, vaultGroupId } : { projectId };
+
     const environments = await this.prisma.environment.findMany({
-      where: { projectId },
-      include: { _count: { select: { variables: true } } },
+      where,
+      include: { vaultGroup: true, _count: { select: { variables: true } } },
       orderBy: { createdAt: "asc" },
     });
 
@@ -40,6 +45,8 @@ export class EnvironmentService {
       id: env.id,
       name: env.name,
       type: env.type,
+      vaultGroupId: env.vaultGroupId,
+      vaultGroupName: env.vaultGroup.name,
       variableCount: env._count.variables,
       createdAt: env.createdAt,
     }));
@@ -55,6 +62,7 @@ export class EnvironmentService {
 
     const environment = await this.envHelper.findOrCreateEnvironment(
       projectId,
+      body.vaultGroupId,
       body.environment,
       body.environmentType,
     );
@@ -71,7 +79,6 @@ export class EnvironmentService {
         authTag,
         description: body.description,
         isRequired: body.isRequired ?? false,
-        validationRule: body.validationRule,
       },
     });
 
@@ -91,6 +98,7 @@ export class EnvironmentService {
   async list(
     projectId: string,
     userId: string,
+    vaultGroupId: string,
     environmentName?: string,
     page = 1,
     limit = 20,
@@ -100,8 +108,8 @@ export class EnvironmentService {
     const canReadValues = member.role === "OWNER" || member.role === "EDITOR";
 
     const where = environmentName
-      ? { environment: { projectId, name: environmentName } }
-      : { environment: { projectId } };
+      ? { environment: { projectId, vaultGroupId, name: environmentName } }
+      : { environment: { projectId, vaultGroupId } };
 
     const [variables, total] = await Promise.all([
       this.prisma.envVariable.findMany({
@@ -130,7 +138,6 @@ export class EnvironmentService {
       });
 
       void this.checkDrift(projectId, userId);
-      void this.checkRotation(projectId, userId, variables);
     }
 
     return {
@@ -186,7 +193,6 @@ export class EnvironmentService {
         ...encryptionFields,
         ...(body.description !== undefined && { description: body.description }),
         ...(body.isRequired !== undefined && { isRequired: body.isRequired }),
-        ...(body.validationRule !== undefined && { validationRule: body.validationRule }),
       },
     });
 
@@ -278,41 +284,6 @@ export class EnvironmentService {
       });
     } catch (error) {
       logger.error({ error }, "Failed to check environment drift");
-    }
-  }
-
-  private async checkRotation(
-    projectId: string,
-    userId: string,
-    variables: { key: string; updatedAt: Date }[],
-  ): Promise<void> {
-    try {
-      const maxAge = EnvironmentService.ROTATION_MAX_AGE_DAYS * 86400_000;
-      const staleVars = variables.filter((v) => Date.now() - v.updatedAt.getTime() > maxAge);
-
-      if (staleVars.length === 0) return;
-
-      const recent = await this.prisma.notification.findFirst({
-        where: {
-          userId,
-          type: "SECRET_ROTATION",
-          metadata: { path: ["projectId"], equals: projectId },
-          createdAt: {
-            gte: new Date(Date.now() - EnvironmentService.NOTIFICATION_COOLDOWN_HOURS * 3600_000),
-          },
-        },
-      });
-
-      if (recent) return;
-
-      void this.notificationService.notify({
-        type: "SECRET_ROTATION",
-        userId,
-        projectId,
-        variableNames: staleVars.map((v) => v.key),
-      });
-    } catch (error) {
-      logger.error({ error }, "Failed to check secret rotation");
     }
   }
 }

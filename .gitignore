@@ -140,3 +140,5 @@ vite.config.ts.timestamp-*
 
 .claude/settings.local.json
 **.github-project-config.json
+
+.VSCodeCounter/

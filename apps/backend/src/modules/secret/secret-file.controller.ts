@@ -37,6 +37,7 @@ export const secretFileController = new Elysia({
             params.id,
             user.id,
             body.file,
+            body.vaultGroupId,
             body.environment,
             body.description,
             getClientIp(request, server),

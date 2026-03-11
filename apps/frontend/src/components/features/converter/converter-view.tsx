@@ -1,11 +1,7 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import {
-  Download as DownloadIcon,
-  SwapHoriz as SwapIcon,
-  CloudUpload as UploadIcon,
-} from "@mui/icons-material";
+import { Download as DownloadIcon, SwapHoriz as SwapIcon } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -20,6 +16,7 @@ import {
   Typography,
 } from "@mui/material";
 import { CopyButton } from "@/components/ui/copy-button";
+import { FileUploadButton, type FileUploadResult } from "@/components/ui/file-upload-button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useNotification } from "@/hooks/use-notification";
@@ -28,19 +25,8 @@ import type { ConvertResult } from "@/types/api/convert";
 import { downloadFile } from "@/utils/download-file";
 import { CONFIG_FORMATS, type ConfigFormat } from "./schemas";
 
-const ALL_FILE_ACCEPT = ".env,.txt,.json,.yaml,.yml,.toml";
-
 function firstAvailableFormat(exclude: ConfigFormat): ConfigFormat {
   return CONFIG_FORMATS.find((f) => f.value !== exclude)!.value;
-}
-
-function detectFormatFromExtension(fileName: string): ConfigFormat | null {
-  const lower = fileName.toLowerCase();
-  if (lower.endsWith(".json")) return "appsettings.json";
-  if (lower.endsWith(".yaml") || lower.endsWith(".yml")) return "secrets.yaml";
-  if (lower.endsWith(".toml")) return "config.toml";
-  if (lower.endsWith(".env") || lower.startsWith(".env")) return "env";
-  return null;
 }
 
 function getDownloadFileName(format: ConfigFormat): string {
@@ -57,7 +43,8 @@ export function ConverterView(): ReactElement {
 
   const mutation = useApiMutation(
     (values: { content: string; fromFormat: ConfigFormat; toFormat: ConfigFormat }) =>
-      client.api.convert.post(values),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      client.api.convert.post(values as any),
     {
       onSuccess: (data) => {
         setResult(data);
@@ -98,25 +85,15 @@ export function ConverterView(): ReactElement {
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const detected = detectFormatFromExtension(file.name);
-    if (detected) {
-      setFromFormat(detected);
-      if (toFormat === detected) {
-        setToFormat(firstAvailableFormat(detected));
+  const handleFileRead = (result: FileUploadResult) => {
+    if (result.detectedFormat) {
+      setFromFormat(result.detectedFormat);
+      if (toFormat === result.detectedFormat) {
+        setToFormat(firstAvailableFormat(result.detectedFormat));
       }
     }
-
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      setContent(ev.target?.result as string);
-      setResult(null);
-    };
-    reader.readAsText(file);
-    e.target.value = "";
+    setContent(result.content);
+    setResult(null);
   };
 
   const handleDownload = () => {
@@ -161,16 +138,7 @@ export function ConverterView(): ReactElement {
               </TextField>
             </Stack>
 
-            <Button
-              variant="outlined"
-              component="label"
-              startIcon={<UploadIcon />}
-              size="small"
-              sx={{ alignSelf: "flex-start", mb: 1.5 }}
-            >
-              Upload File
-              <input type="file" hidden onChange={handleFileUpload} accept={ALL_FILE_ACCEPT} />
-            </Button>
+            <FileUploadButton onFileRead={handleFileRead} sx={{ mb: 1.5 }} />
 
             <TextField
               multiline

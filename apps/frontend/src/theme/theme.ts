@@ -198,6 +198,7 @@ export const theme = createTheme({
           backgroundColor: t.palette.vault.glassBg,
           backdropFilter: "blur(12px)",
           border: `1px solid ${t.palette.vault.glassBorder}`,
+          overflowX: "hidden",
         }),
       },
     },

@@ -34,6 +34,7 @@ export class SecretFileService {
     projectId: string,
     userId: string,
     file: File,
+    vaultGroupId: string,
     environmentName: string,
     description?: string,
     ipAddress = "unknown",
@@ -42,7 +43,11 @@ export class SecretFileService {
 
     validateFile(file);
 
-    const environment = await this.findOrCreateEnvironment(projectId, environmentName);
+    const environment = await this.findOrCreateEnvironment(
+      projectId,
+      vaultGroupId,
+      environmentName,
+    );
     const projectKey = deriveProjectKey(projectId);
 
     const fileBuffer = Buffer.from(await file.arrayBuffer());
@@ -172,8 +177,12 @@ export class SecretFileService {
     }
 
     let environmentId = file.environmentId;
-    if (data.environment) {
-      const environment = await this.findOrCreateEnvironment(projectId, data.environment);
+    if (data.environment && data.vaultGroupId) {
+      const environment = await this.findOrCreateEnvironment(
+        projectId,
+        data.vaultGroupId,
+        data.environment,
+      );
       environmentId = environment.id;
     }
 
@@ -198,9 +207,7 @@ export class SecretFileService {
     await this.requireEditorOrOwner(projectId, userId);
 
     const file = await this.findFileOrThrow(projectId, fileId);
-
     await this.prisma.secretFile.delete({ where: { id: fileId } });
-
     await this.logAudit(projectId, userId, "DELETED", fileId);
 
     await this.auditLogService.log({
@@ -228,15 +235,15 @@ export class SecretFileService {
     return file;
   }
 
-  private async findOrCreateEnvironment(projectId: string, name: string) {
+  private async findOrCreateEnvironment(projectId: string, vaultGroupId: string, name: string) {
     const existing = await this.prisma.environment.findUnique({
-      where: { projectId_name: { projectId, name } },
+      where: { vaultGroupId_name: { vaultGroupId, name } },
     });
 
     if (existing) return existing;
 
     return this.prisma.environment.create({
-      data: { projectId, name, type: "DEVELOPMENT" },
+      data: { projectId, vaultGroupId, name, type: "DEVELOPMENT" },
     });
   }
 

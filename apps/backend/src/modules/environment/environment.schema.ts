@@ -5,13 +5,13 @@ import { EnvironmentType } from "@/generated/prisma";
 export const EnvironmentTypeSchema = t.Enum(EnvironmentType);
 
 export const CreateEnvVariableBodySchema = t.Object({
+  vaultGroupId: t.String(),
   environment: t.String({ minLength: 1, maxLength: 100 }),
   environmentType: t.Optional(EnvironmentTypeSchema),
   key: t.String({ minLength: 1, maxLength: 255 }),
   value: t.String(),
   description: t.Optional(t.String({ maxLength: 500 })),
   isRequired: t.Optional(t.Boolean()),
-  validationRule: t.Optional(t.String({ maxLength: 255 })),
 });
 
 export const UpdateEnvVariableBodySchema = t.Object({
@@ -19,7 +19,6 @@ export const UpdateEnvVariableBodySchema = t.Object({
   value: t.Optional(t.String()),
   description: t.Optional(t.String({ maxLength: 500 })),
   isRequired: t.Optional(t.Boolean()),
-  validationRule: t.Optional(t.String({ maxLength: 255 })),
 });
 
 export const EnvVariableResponseSchema = t.Object({
@@ -28,7 +27,6 @@ export const EnvVariableResponseSchema = t.Object({
   key: t.String(),
   description: t.Nullable(t.String()),
   isRequired: t.Boolean(),
-  validationRule: t.Nullable(t.String()),
   createdAt: t.Date(),
   updatedAt: t.Date(),
 });
@@ -40,12 +38,12 @@ export const EnvVariableWithValueResponseSchema = t.Object({
   value: t.String(),
   description: t.Nullable(t.String()),
   isRequired: t.Boolean(),
-  validationRule: t.Nullable(t.String()),
   createdAt: t.Date(),
   updatedAt: t.Date(),
 });
 
 export const EnvVariableListQuerySchema = t.Object({
+  vaultGroupId: t.String(),
   environment: t.Optional(t.String()),
   page: t.Integer({ minimum: 1, default: 1 }),
   limit: t.Integer({ minimum: 1, maximum: 100, default: 20 }),
@@ -69,6 +67,7 @@ export const EnvVariableParamsSchema = t.Object({
 const ConfigFormatSchema = t.Union(CONFIG_FORMAT_VALUES.map((v) => t.Literal(v)));
 
 export const ImportEnvVariablesBodySchema = t.Object({
+  vaultGroupId: t.String(),
   environment: t.String({ minLength: 1, maxLength: 100 }),
   environmentType: t.Optional(EnvironmentTypeSchema),
   format: ConfigFormatSchema,
@@ -82,6 +81,7 @@ export const ImportEnvVariablesResponseSchema = t.Object({
 });
 
 export const ExportEnvVariablesQuerySchema = t.Object({
+  vaultGroupId: t.String(),
   environment: t.String({ minLength: 1 }),
   format: ConfigFormatSchema,
 });
@@ -98,6 +98,7 @@ export const EnvExampleResponseSchema = t.Object({
 });
 
 export const EnvExampleQuerySchema = t.Object({
+  vaultGroupId: t.String(),
   environment: t.String({ minLength: 1 }),
 });
 
@@ -105,13 +106,20 @@ export const EnvironmentResponseSchema = t.Object({
   id: t.String(),
   name: t.String(),
   type: EnvironmentTypeSchema,
+  vaultGroupId: t.String(),
+  vaultGroupName: t.String(),
   variableCount: t.Number(),
   createdAt: t.Date(),
+});
+
+export const EnvironmentListQuerySchema = t.Object({
+  vaultGroupId: t.Optional(t.String()),
 });
 
 export const EnvironmentListResponseSchema = t.Array(EnvironmentResponseSchema);
 
 export const EnvDiffQuerySchema = t.Object({
+  vaultGroupId: t.String(),
   environments: t.String({ minLength: 1 }),
 });
 
@@ -139,6 +147,7 @@ export type EnvDiffResponse = Static<typeof EnvDiffResponseSchema>;
 export type EnvDiffRow = Static<typeof EnvDiffRowSchema>;
 
 export const CloneEnvironmentBodySchema = t.Object({
+  vaultGroupId: t.String(),
   sourceEnvironment: t.String({ minLength: 1, maxLength: 100 }),
   targetName: t.String({ minLength: 1, maxLength: 100 }),
   targetType: t.Optional(EnvironmentTypeSchema),

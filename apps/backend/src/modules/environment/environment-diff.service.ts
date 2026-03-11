@@ -17,6 +17,7 @@ export class EnvironmentDiffService {
   /** Compare variables across 2-3 environments, highlighting missing and differing values. */
   async diff(
     projectId: string,
+    vaultGroupId: string,
     environmentsCsv: string,
     userId: string,
     ipAddress: string,
@@ -33,7 +34,7 @@ export class EnvironmentDiffService {
     const canReadValues = member.role === "OWNER" || member.role === "EDITOR";
 
     const environments = await this.prisma.environment.findMany({
-      where: { projectId, name: { in: envNames } },
+      where: { projectId, vaultGroupId, name: { in: envNames } },
       include: { variables: true },
     });
 

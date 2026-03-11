@@ -15,6 +15,7 @@ import { TemplateSaveDialog } from "./template-save-dialog";
 
 interface EnvTemplatesViewProps {
   projectId: string;
+  vaultGroupId: string;
   canEdit: boolean;
   environments: EnvironmentItem[];
   currentEnvironment: string | null;
@@ -23,8 +24,15 @@ interface EnvTemplatesViewProps {
 }
 
 export function EnvTemplatesView(props: EnvTemplatesViewProps): ReactElement {
-  const { projectId, canEdit, environments, currentEnvironment, onBack, onEnvironmentCreated } =
-    props;
+  const {
+    projectId,
+    vaultGroupId,
+    canEdit,
+    environments,
+    currentEnvironment,
+    onBack,
+    onEnvironmentCreated,
+  } = props;
 
   const [saveOpen, setSaveOpen] = useState(false);
   const [viewTemplateId, setViewTemplateId] = useState<string | null>(null);
@@ -109,6 +117,7 @@ export function EnvTemplatesView(props: EnvTemplatesViewProps): ReactElement {
           open={!!applyTemplateId}
           onClose={() => setApplyTemplateId(null)}
           projectId={projectId}
+          vaultGroupId={vaultGroupId}
           templateId={applyTemplateId}
           onSuccess={onEnvironmentCreated}
         />

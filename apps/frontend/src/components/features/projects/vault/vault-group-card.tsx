@@ -1,16 +1,20 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import { VpnKey as VpnKeyIcon } from "@mui/icons-material";
-import { Box, Stack, Typography } from "@mui/material";
+import { Delete as DeleteIcon, Edit as EditIcon, VpnKey as VpnKeyIcon } from "@mui/icons-material";
+import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
+import { useNotification } from "@/hooks/use-notification";
 import { client } from "@/lib/api";
 import type { EnvVariable, EnvVariableListResponse } from "@/types/api/env-variable";
 import type { EnvironmentListResponse } from "@/types/api/environment";
+import type { VaultGroup } from "@/types/api/vault-group";
 import { CloneEnvironmentDialog } from "./clone-environment-dialog";
 import { CreateVariableDialog } from "./create-variable-dialog";
 import { EnvDiffView } from "./diff/env-diff-view";
+import { EditGroupDialog } from "./edit-group-dialog";
 import { EditVariableDialog } from "./edit-variable-dialog";
 import { EnvironmentSelector } from "./environment-selector";
 import { ExportVariablesDialog } from "./export-variables-dialog";
@@ -21,13 +25,15 @@ import { VaultVariableTable } from "./vault-variable-table";
 
 type VaultView = "variables" | "diff" | "templates";
 
-interface VaultTabProps {
+interface VaultGroupCardProps {
   projectId: string;
+  group: VaultGroup;
   canEdit: boolean;
 }
 
-export function VaultTab(props: VaultTabProps): ReactElement {
-  const { projectId, canEdit } = props;
+export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
+  const { projectId, group, canEdit } = props;
+  const notification = useNotification();
 
   const [view, setView] = useState<VaultView>("variables");
   const [selectedEnv, setSelectedEnv] = useState<string | null>(null);
@@ -36,26 +42,94 @@ export function VaultTab(props: VaultTabProps): ReactElement {
   const [importOpen, setImportOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [cloneOpen, setCloneOpen] = useState(false);
+  const [editGroupOpen, setEditGroupOpen] = useState(false);
 
   const { data: environments } = useApiQuery<EnvironmentListResponse>(
-    ["environments", projectId],
-    () => client.api.projects({ id: projectId }).environments.get(),
+    ["environments", projectId, group.id],
+    () =>
+      client.api
+        .projects({ id: projectId })
+        .environments.get({ query: { vaultGroupId: group.id } }),
   );
 
   const activeEnv = selectedEnv ?? environments?.[0]?.name ?? null;
 
   const { data: variablesData, isLoading: variablesLoading } = useApiQuery<EnvVariableListResponse>(
-    ["env-variables", projectId, activeEnv],
+    ["env-variables", projectId, group.id, activeEnv],
     () =>
-      client.api
-        .projects({ id: projectId })
-        .environments.variables.get({ query: { environment: activeEnv!, page: 1, limit: 100 } }),
+      client.api.projects({ id: projectId }).environments.variables.get({
+        query: {
+          vaultGroupId: group.id,
+          environment: activeEnv!,
+          page: 1,
+          limit: 100,
+        },
+      }),
     { enabled: !!activeEnv && view === "variables" },
   );
 
+  const deleteMutation = useApiMutation(
+    () => client.api.projects({ id: projectId })["vault-groups"]({ groupId: group.id }).delete(),
+    {
+      invalidateKeys: [["vault-groups", projectId]],
+      onSuccess: () => notification.success("Group deleted"),
+      onError: (error) => notification.error(error.message || "Failed to delete group"),
+    },
+  );
+
+  const handleDelete = () => {
+    if (window.confirm(`Delete group "${group.name}" and all its environments and variables?`)) {
+      deleteMutation.mutate();
+    }
+  };
+
+  if (view === "diff" && environments) {
+    return (
+      <EnvDiffView
+        projectId={projectId}
+        vaultGroupId={group.id}
+        environments={environments}
+        onBack={() => setView("variables")}
+      />
+    );
+  }
+
+  if (view === "templates" && environments) {
+    return (
+      <EnvTemplatesView
+        projectId={projectId}
+        vaultGroupId={group.id}
+        canEdit={canEdit}
+        environments={environments}
+        currentEnvironment={activeEnv}
+        onBack={() => setView("variables")}
+        onEnvironmentCreated={(envName) => {
+          setSelectedEnv(envName);
+          setView("variables");
+        }}
+      />
+    );
+  }
+
   if (!environments || environments.length === 0) {
     return (
-      <Box className="vault-fade-up vault-delay-2">
+      <Box>
+        <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ mb: 2 }}>
+          {canEdit && (
+            <>
+              <Tooltip title="Edit group">
+                <IconButton size="small" onClick={() => setEditGroupOpen(true)}>
+                  <EditIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Delete group">
+                <IconButton size="small" color="error" onClick={handleDelete}>
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </>
+          )}
+        </Stack>
         <EmptyState
           icon={<VpnKeyIcon />}
           title="No environments yet"
@@ -64,49 +138,45 @@ export function VaultTab(props: VaultTabProps): ReactElement {
           onAction={canEdit ? () => setImportOpen(true) : undefined}
         />
         {canEdit && (
-          <ImportVariablesDialog
-            open={importOpen}
-            onClose={() => setImportOpen(false)}
-            projectId={projectId}
-            environment="development"
-          />
+          <>
+            <ImportVariablesDialog
+              open={importOpen}
+              onClose={() => setImportOpen(false)}
+              projectId={projectId}
+              vaultGroupId={group.id}
+              environment={null}
+            />
+            <EditGroupDialog
+              open={editGroupOpen}
+              onClose={() => setEditGroupOpen(false)}
+              projectId={projectId}
+              group={group}
+            />
+          </>
         )}
       </Box>
     );
   }
 
-  if (view === "diff") {
-    return (
-      <Box className="vault-fade-up vault-delay-2">
-        <EnvDiffView
-          projectId={projectId}
-          environments={environments}
-          onBack={() => setView("variables")}
-        />
-      </Box>
-    );
-  }
-
-  if (view === "templates") {
-    return (
-      <Box className="vault-fade-up vault-delay-2">
-        <EnvTemplatesView
-          projectId={projectId}
-          canEdit={canEdit}
-          environments={environments}
-          currentEnvironment={activeEnv}
-          onBack={() => setView("variables")}
-          onEnvironmentCreated={(envName) => {
-            setSelectedEnv(envName);
-            setView("variables");
-          }}
-        />
-      </Box>
-    );
-  }
-
   return (
-    <Box className="vault-fade-up vault-delay-2">
+    <Box>
+      <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ mb: 2 }}>
+        {canEdit && (
+          <>
+            <Tooltip title="Edit group">
+              <IconButton size="small" onClick={() => setEditGroupOpen(true)}>
+                <EditIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Delete group">
+              <IconButton size="small" color="error" onClick={handleDelete}>
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </>
+        )}
+      </Stack>
+
       <Stack spacing={3}>
         <Stack
           direction="row"
@@ -157,6 +227,7 @@ export function VaultTab(props: VaultTabProps): ReactElement {
             open={createOpen}
             onClose={() => setCreateOpen(false)}
             projectId={projectId}
+            vaultGroupId={group.id}
             environment={activeEnv}
           />
           <EditVariableDialog
@@ -170,12 +241,14 @@ export function VaultTab(props: VaultTabProps): ReactElement {
             open={importOpen}
             onClose={() => setImportOpen(false)}
             projectId={projectId}
+            vaultGroupId={group.id}
             environment={activeEnv}
           />
           <CloneEnvironmentDialog
             open={cloneOpen}
             onClose={() => setCloneOpen(false)}
             projectId={projectId}
+            vaultGroupId={group.id}
             sourceEnvironment={activeEnv}
             onSuccess={setSelectedEnv}
           />
@@ -187,7 +260,17 @@ export function VaultTab(props: VaultTabProps): ReactElement {
           open={exportOpen}
           onClose={() => setExportOpen(false)}
           projectId={projectId}
+          vaultGroupId={group.id}
           environment={activeEnv}
+        />
+      )}
+
+      {canEdit && (
+        <EditGroupDialog
+          open={editGroupOpen}
+          onClose={() => setEditGroupOpen(false)}
+          projectId={projectId}
+          group={group}
         />
       )}
     </Box>

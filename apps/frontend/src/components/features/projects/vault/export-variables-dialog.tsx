@@ -26,11 +26,12 @@ interface ExportVariablesDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
+  vaultGroupId: string;
   environment: string;
 }
 
 export function ExportVariablesDialog(props: ExportVariablesDialogProps): ReactElement {
-  const { open, onClose, projectId, environment } = props;
+  const { open, onClose, projectId, vaultGroupId, environment } = props;
   const [format, setFormat] = useState<ConfigFormat>("env");
   const notification = useNotification();
 
@@ -39,7 +40,7 @@ export function ExportVariablesDialog(props: ExportVariablesDialogProps): ReactE
     () =>
       client.api
         .projects({ id: projectId })
-        .environments.export.get({ query: { environment, format } }),
+        .environments.export.get({ query: { environment, format, vaultGroupId } }),
     { enabled: open && !!environment },
   );
 

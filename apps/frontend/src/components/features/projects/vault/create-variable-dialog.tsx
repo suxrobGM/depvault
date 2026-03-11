@@ -22,11 +22,12 @@ interface CreateVariableDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
+  vaultGroupId: string;
   environment: string;
 }
 
 export function CreateVariableDialog(props: CreateVariableDialogProps): ReactElement {
-  const { open, onClose, projectId, environment } = props;
+  const { open, onClose, projectId, vaultGroupId, environment } = props;
   const notification = useNotification();
 
   const mutation = useApiMutation(
@@ -36,8 +37,10 @@ export function CreateVariableDialog(props: CreateVariableDialogProps): ReactEle
       value: string;
       description?: string;
       isRequired?: boolean;
-      validationRule?: string;
-    }) => client.api.projects({ id: projectId }).environments.variables.post(values),
+    }) =>
+      client.api
+        .projects({ id: projectId })
+        .environments.variables.post({ ...values, vaultGroupId }),
     {
       invalidateKeys: [
         ["env-variables", projectId, environment],
@@ -58,7 +61,6 @@ export function CreateVariableDialog(props: CreateVariableDialogProps): ReactEle
       value: "",
       description: "",
       isRequired: false,
-      validationRule: "",
     },
     validators: { onSubmit: createVariableSchema },
     onSubmit: async ({ value }) => {
@@ -68,7 +70,6 @@ export function CreateVariableDialog(props: CreateVariableDialogProps): ReactEle
         value: value.value,
         description: value.description,
         isRequired: value.isRequired,
-        validationRule: value.validationRule,
       });
     },
   });
@@ -102,12 +103,6 @@ export function CreateVariableDialog(props: CreateVariableDialogProps): ReactEle
               name="description"
               label="Description"
               placeholder="Optional description"
-            />
-            <FormTextField
-              form={form}
-              name="validationRule"
-              label="Validation Rule"
-              placeholder="Optional regex or format hint"
             />
             <form.Field name="isRequired">
               {(field) => (

@@ -1,3 +1,5 @@
+import type { Route } from "next";
+
 export const ROUTES = {
   home: "/",
   login: "/login",
@@ -9,10 +11,11 @@ export const ROUTES = {
   profile: "/profile",
   converter: "/converter",
   projects: "/projects",
-  project: (id: string) => `/projects/${id}`,
-  projectAnalysis: (id: string) => `/projects/${id}/analysis`,
+  project: (id: string) => `/projects/${id}` as Route,
+  projectAnalysis: (id: string) => `/projects/${id}/analysis` as Route,
   projectAnalysisDetail: (id: string, analysisId: string) =>
-    `/projects/${id}/analysis/${analysisId}`,
+    `/projects/${id}/analysis/${analysisId}` as Route,
+  projectVault: (id: string) => `/projects/${id}/vault` as Route,
   secrets: "/secrets",
   notifications: "/notifications",
 } as const;

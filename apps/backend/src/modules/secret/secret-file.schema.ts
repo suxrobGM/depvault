@@ -52,6 +52,7 @@ export const SecretFileVersionListResponseSchema = t.Object({
 
 export const UploadSecretFileBodySchema = t.Object({
   file: t.File({ maxSize: "25m" }),
+  vaultGroupId: t.String(),
   environment: t.String({ minLength: 1 }),
   description: t.Optional(t.String({ maxLength: 500 })),
 });
@@ -65,6 +66,7 @@ export const SecretFileRollbackParamsSchema = t.Object({
 export const UpdateSecretFileBodySchema = t.Object({
   name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
   description: t.Optional(t.String({ maxLength: 500 })),
+  vaultGroupId: t.Optional(t.String()),
   environment: t.Optional(t.String({ minLength: 1 })),
 });
 

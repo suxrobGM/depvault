@@ -1,3 +1,5 @@
+import type { SelectOption } from "../types";
+
 /** Supported config file format identifiers. */
 export const CONFIG_FORMAT_VALUES = [
   "env",
@@ -14,4 +16,4 @@ export const CONFIG_FORMATS = [
   { value: "appsettings.json", label: "appsettings.json" },
   { value: "secrets.yaml", label: "secrets.yaml" },
   { value: "config.toml", label: "config.toml" },
-] as const satisfies readonly { value: ConfigFormat; label: string }[];
+] as const satisfies readonly SelectOption<ConfigFormat>[];

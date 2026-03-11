@@ -1,4 +1,5 @@
 import { t, type Static } from "elysia";
+import { EnvironmentType } from "@/generated/prisma";
 
 export const CreateEnvTemplateBodySchema = t.Object({
   name: t.String({ minLength: 1, maxLength: 100 }),
@@ -10,7 +11,6 @@ export const CreateEnvTemplateBodySchema = t.Object({
         key: t.String({ minLength: 1, maxLength: 255 }),
         description: t.Optional(t.String({ maxLength: 500 })),
         isRequired: t.Optional(t.Boolean()),
-        validationRule: t.Optional(t.String({ maxLength: 255 })),
       }),
     ),
   ),
@@ -26,7 +26,6 @@ const EnvTemplateVariableSchema = t.Object({
   key: t.String(),
   description: t.Nullable(t.String()),
   isRequired: t.Boolean(),
-  validationRule: t.Nullable(t.String()),
   sortOrder: t.Number(),
 });
 
@@ -53,15 +52,9 @@ export const EnvTemplateDetailResponseSchema = t.Object({
 export const EnvTemplateListResponseSchema = t.Array(EnvTemplateResponseSchema);
 
 export const ApplyTemplateBodySchema = t.Object({
+  vaultGroupId: t.String(),
   environmentName: t.String({ minLength: 1, maxLength: 100 }),
-  environmentType: t.Optional(
-    t.Union([
-      t.Literal("DEVELOPMENT"),
-      t.Literal("STAGING"),
-      t.Literal("PRODUCTION"),
-      t.Literal("CUSTOM"),
-    ]),
-  ),
+  environmentType: t.Optional(t.Enum(EnvironmentType)),
 });
 
 export const ApplyTemplateResponseSchema = t.Object({

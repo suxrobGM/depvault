@@ -26,12 +26,11 @@ export class EnvTemplateService {
       key: string;
       description?: string;
       isRequired?: boolean;
-      validationRule?: string;
     }[] = [];
 
     if (body.sourceEnvironment) {
-      const env = await this.prisma.environment.findUnique({
-        where: { projectId_name: { projectId, name: body.sourceEnvironment } },
+      const env = await this.prisma.environment.findFirst({
+        where: { projectId, name: body.sourceEnvironment },
         include: { variables: { orderBy: { createdAt: "asc" } } },
       });
       if (!env) throw new NotFoundError(`Environment "${body.sourceEnvironment}" not found`);
@@ -39,7 +38,6 @@ export class EnvTemplateService {
         key: v.key,
         description: v.description ?? undefined,
         isRequired: v.isRequired,
-        validationRule: v.validationRule ?? undefined,
       }));
     } else if (body.variables) {
       variables = body.variables;
@@ -61,7 +59,6 @@ export class EnvTemplateService {
             key: v.key,
             description: v.description,
             isRequired: v.isRequired ?? false,
-            validationRule: v.validationRule,
             sortOrder: i,
           })),
         },
@@ -132,7 +129,6 @@ export class EnvTemplateService {
         key: v.key,
         description: v.description,
         isRequired: v.isRequired,
-        validationRule: v.validationRule,
         sortOrder: v.sortOrder,
       })),
     };
@@ -223,6 +219,7 @@ export class EnvTemplateService {
 
     const env = await this.envHelper.findOrCreateEnvironment(
       projectId,
+      body.vaultGroupId,
       body.environmentName,
       body.environmentType,
     );
@@ -241,7 +238,6 @@ export class EnvTemplateService {
             authTag,
             description: v.description,
             isRequired: v.isRequired,
-            validationRule: v.validationRule,
           },
         });
       }),

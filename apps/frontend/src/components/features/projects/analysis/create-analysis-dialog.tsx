@@ -24,7 +24,7 @@ export function CreateAnalysisDialog(props: CreateAnalysisDialogProps): ReactEle
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>New Analysis</DialogTitle>
-      <DialogContent sx={{ overflowX: "hidden" }}>
+      <DialogContent>
         <Tabs value={tabIndex} onChange={(_, v) => setTabIndex(v)} sx={{ mb: 2 }}>
           <Tab icon={<UploadIcon />} iconPosition="start" label="Upload" />
           <Tab icon={<GitHubIcon />} iconPosition="start" label="GitHub" />

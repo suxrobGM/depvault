@@ -7,7 +7,6 @@ interface EnvVariableRecord {
   key: string;
   description: string | null;
   isRequired: boolean;
-  validationRule: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,7 +28,6 @@ export function toResponseWithValue(
     value,
     description: variable.description,
     isRequired: variable.isRequired,
-    validationRule: variable.validationRule,
     createdAt: variable.createdAt,
     updatedAt: variable.updatedAt,
   };

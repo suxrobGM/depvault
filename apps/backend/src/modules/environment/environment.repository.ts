@@ -6,9 +6,14 @@ import { EnvironmentType, PrismaClient, ProjectRole } from "@/generated/prisma";
 export class EnvironmentRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async findOrCreateEnvironment(projectId: string, name: string, type?: string) {
+  async findOrCreateEnvironment(
+    projectId: string,
+    vaultGroupId: string,
+    name: string,
+    type?: string,
+  ) {
     const existing = await this.prisma.environment.findUnique({
-      where: { projectId_name: { projectId, name } },
+      where: { vaultGroupId_name: { vaultGroupId, name } },
     });
 
     if (existing) return existing;
@@ -16,6 +21,7 @@ export class EnvironmentRepository {
     return this.prisma.environment.create({
       data: {
         projectId,
+        vaultGroupId,
         name,
         type: (type as EnvironmentType) ?? EnvironmentType.DEVELOPMENT,
       },
@@ -44,9 +50,9 @@ export class EnvironmentRepository {
     return member;
   }
 
-  async requireEnvironment(projectId: string, environmentName: string) {
+  async requireEnvironment(vaultGroupId: string, environmentName: string) {
     const env = await this.prisma.environment.findUnique({
-      where: { projectId_name: { projectId, name: environmentName } },
+      where: { vaultGroupId_name: { vaultGroupId, name: environmentName } },
     });
 
     if (!env) {
