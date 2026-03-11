@@ -7,7 +7,6 @@ import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 import { createProjectSchema } from "./schemas";
@@ -20,22 +19,19 @@ interface CreateProjectDialogProps {
 export function CreateProjectDialog(props: CreateProjectDialogProps): ReactElement {
   const { open, onClose } = props;
   const router = useRouter();
-  const notification = useToast();
 
   const mutation = useApiMutation(
     (values: { name: string; description?: string; repositoryUrl?: string }) =>
       client.api.projects.post(values),
     {
       invalidateKeys: [["projects"]],
+      successMessage: "Project created",
+      errorMessage: "Failed to create project",
       onSuccess: (data) => {
-        notification.success("Project created");
         onClose();
         if (data) {
           router.push(ROUTES.project(data.id) as Route);
         }
-      },
-      onError: () => {
-        notification.error("Failed to create project");
       },
     },
   );

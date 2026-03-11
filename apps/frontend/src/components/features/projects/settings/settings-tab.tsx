@@ -21,7 +21,6 @@ import { useRouter } from "next/navigation";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { GlassCard } from "@/components/ui/glass-card";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 import type { ProjectResponse } from "@/types/api/project";
@@ -37,7 +36,6 @@ interface SettingsTabProps {
 export function SettingsTab(props: SettingsTabProps): ReactElement {
   const { project, projectId, isOwner, canEdit } = props;
   const router = useRouter();
-  const notification = useToast();
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   const updateMutation = useApiMutation(
@@ -45,18 +43,14 @@ export function SettingsTab(props: SettingsTabProps): ReactElement {
       client.api.projects({ id: projectId }).put(values),
     {
       invalidateKeys: [["projects", projectId], ["projects"]],
-      onSuccess: () => notification.success("Project updated"),
-      onError: () => notification.error("Failed to update project"),
+      successMessage: "Project updated",
     },
   );
 
   const deleteMutation = useApiMutation(() => client.api.projects({ id: projectId }).delete(), {
     invalidateKeys: [["projects"]],
-    onSuccess: () => {
-      notification.success("Project deleted");
-      router.push(ROUTES.projects as Route);
-    },
-    onError: () => notification.error("Failed to delete project"),
+    successMessage: "Project deleted",
+    onSuccess: () => router.push(ROUTES.projects as Route),
   });
 
   const form = useForm({

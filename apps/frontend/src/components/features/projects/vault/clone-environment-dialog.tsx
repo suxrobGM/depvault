@@ -19,7 +19,6 @@ import { useForm } from "@tanstack/react-form";
 import { z } from "zod/v4";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 
 const cloneSchema = z.object({
@@ -38,19 +37,18 @@ interface CloneEnvironmentDialogProps {
 
 export function CloneEnvironmentDialog(props: CloneEnvironmentDialogProps): ReactElement {
   const { open, onClose, projectId, vaultGroupId, sourceType, onSuccess } = props;
-  const notification = useToast();
 
   const mutation = useApiMutation(
     (values: { sourceType: EnvironmentTypeValue; targetType: EnvironmentTypeValue }) =>
       client.api.projects({ id: projectId }).environments.clone.post({ ...values, vaultGroupId }),
     {
       invalidateKeys: [["environments", projectId]],
+      successMessage: (data: { type: string; variableCount: number }) =>
+        `Cloned ${data.variableCount} variables to "${data.type}"`,
       onSuccess: (data: { type: string; variableCount: number }) => {
-        notification.success(`Cloned ${data.variableCount} variables to "${data.type}"`);
         onSuccess(data.type);
         handleClose();
       },
-      onError: (error) => notification.error(error.message || "Failed to clone environment"),
     },
   );
 

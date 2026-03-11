@@ -15,7 +15,6 @@ import {
 import { useForm } from "@tanstack/react-form";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import { createVariableSchema } from "./vault-schemas";
 
@@ -29,7 +28,6 @@ interface CreateVariableDialogProps {
 
 export function CreateVariableDialog(props: CreateVariableDialogProps): ReactElement {
   const { open, onClose, projectId, vaultGroupId, environmentType } = props;
-  const notification = useToast();
 
   const mutation = useApiMutation(
     (values: {
@@ -47,11 +45,8 @@ export function CreateVariableDialog(props: CreateVariableDialogProps): ReactEle
         ["env-variables", projectId],
         ["environments", projectId],
       ],
-      onSuccess: () => {
-        notification.success("Variable created");
-        handleClose();
-      },
-      onError: (error) => notification.error(error.message || "Failed to create variable"),
+      successMessage: "Variable created",
+      onSuccess: () => handleClose(),
     },
   );
 

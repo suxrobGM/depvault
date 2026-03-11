@@ -8,7 +8,6 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useConfirm } from "@/hooks/use-confirm";
-import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import type { EnvVariable, EnvVariableListResponse } from "@/types/api/env-variable";
 import type { EnvironmentListResponse } from "@/types/api/environment";
@@ -35,7 +34,6 @@ interface VaultGroupCardProps {
 
 export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
   const { projectId, group, canEdit } = props;
-  const notification = useToast();
   const confirm = useConfirm();
 
   const [view, setView] = useState<VaultView>("variables");
@@ -75,8 +73,7 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
     () => client.api.projects({ id: projectId })["vault-groups"]({ groupId: group.id }).delete(),
     {
       invalidateKeys: [["vault-groups", projectId]],
-      onSuccess: () => notification.success("Group deleted"),
-      onError: (error) => notification.error(error.message || "Failed to delete group"),
+      successMessage: "Group deleted",
     },
   );
 
@@ -88,11 +85,8 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
         ["env-variables", projectId],
         ["vault-groups", projectId],
       ],
-      onSuccess: () => {
-        notification.success("Environment deleted");
-        setSelectedEnv(null);
-      },
-      onError: (error) => notification.error(error.message || "Failed to delete environment"),
+      successMessage: "Environment deleted",
+      onSuccess: () => setSelectedEnv(null),
     },
   );
 

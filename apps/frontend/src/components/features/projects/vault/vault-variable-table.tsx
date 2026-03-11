@@ -25,7 +25,6 @@ import {
 import { GlassCard } from "@/components/ui/glass-card";
 import { MaskedValue } from "@/components/ui/masked-value";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import type { EnvVariable } from "@/types/api/env-variable";
 
@@ -41,18 +40,14 @@ interface VaultVariableTableProps {
 export function VaultVariableTable(props: VaultVariableTableProps): ReactElement {
   const { projectId, environmentType, variables, isLoading, canEdit, onEditVariable } = props;
   const [deleteTarget, setDeleteTarget] = useState<EnvVariable | null>(null);
-  const notification = useToast();
 
   const deleteMutation = useApiMutation(
     (varId: string) =>
       client.api.projects({ id: projectId }).environments.variables({ varId }).delete(),
     {
       invalidateKeys: [["env-variables", projectId, environmentType]],
-      onSuccess: () => {
-        notification.success("Variable deleted");
-        setDeleteTarget(null);
-      },
-      onError: (error) => notification.error(error.message || "Failed to delete variable"),
+      successMessage: "Variable deleted",
+      onSuccess: () => setDeleteTarget(null),
     },
   );
 

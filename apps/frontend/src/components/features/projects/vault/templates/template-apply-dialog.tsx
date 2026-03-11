@@ -19,7 +19,6 @@ import { useForm } from "@tanstack/react-form";
 import { z } from "zod/v4";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 
 const applyTemplateSchema = z.object({
@@ -37,7 +36,6 @@ interface TemplateApplyDialogProps {
 
 export function TemplateApplyDialog(props: TemplateApplyDialogProps): ReactElement {
   const { open, onClose, projectId, vaultGroupId, templateId, onSuccess } = props;
-  const notification = useToast();
 
   const mutation = useApiMutation(
     (values: { environmentType: EnvironmentTypeValue }) =>
@@ -50,14 +48,13 @@ export function TemplateApplyDialog(props: TemplateApplyDialogProps): ReactEleme
         ["environments", projectId],
         ["env-templates", projectId],
       ],
+      successMessage: (data: { environmentType: string; variablesCreated: number }) =>
+        `Created "${data.environmentType}" environment with ${data.variablesCreated} variables`,
+      errorMessage: "Failed to apply template",
       onSuccess: (data: { environmentType: string; variablesCreated: number }) => {
-        notification.success(
-          `Created "${data.environmentType}" environment with ${data.variablesCreated} variables`,
-        );
         onSuccess(data.environmentType);
         handleClose();
       },
-      onError: (error) => notification.error(error.message || "Failed to apply template"),
     },
   );
 

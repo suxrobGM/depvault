@@ -12,6 +12,9 @@ interface NotificationFilters {
   limit?: number;
 }
 
+/**
+ * Fetches notifications with optional filtering by type and read status, and supports pagination.
+ */
 export function useNotifications(filters?: NotificationFilters) {
   return useApiQuery(["notifications", "list", filters], () =>
     client.api.notifications.get({
@@ -25,6 +28,10 @@ export function useNotifications(filters?: NotificationFilters) {
   );
 }
 
+/**
+ * Fetches the count of unread notifications,
+ * with automatic refetching every 45 seconds and a stale time of 30 seconds.
+ */
 export function useUnreadCount() {
   return useApiQuery(
     ["notifications", "unread-count"],
@@ -33,6 +40,9 @@ export function useUnreadCount() {
   );
 }
 
+/**
+ * Marks a single notification as read by its ID, with automatic invalidation of the notifications list query.
+ */
 export function useMarkRead() {
   return useApiMutation(
     (notificationId: string) => client.api.notifications({ notificationId }).read.patch(),
@@ -40,12 +50,18 @@ export function useMarkRead() {
   );
 }
 
+/**
+ * Marks all notifications as read, with automatic invalidation of the notifications list query.
+ */
 export function useMarkAllRead() {
   return useApiMutation(() => client.api.notifications["read-all"].patch(), {
     invalidateKeys: [["notifications"]],
   });
 }
 
+/**
+ * Deletes a notification by its ID, with automatic invalidation of the notifications list query.
+ */
 export function useDeleteNotification() {
   return useApiMutation(
     (notificationId: string) => client.api.notifications({ notificationId }).delete(),

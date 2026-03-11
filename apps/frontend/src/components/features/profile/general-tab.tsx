@@ -6,7 +6,6 @@ import { useForm } from "@tanstack/react-form";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { GlassCard } from "@/components/ui/glass-card";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import type { AuthUser } from "@/providers/auth-provider";
 import { AvatarUploader } from "./avatar-uploader";
@@ -19,19 +18,15 @@ interface GeneralTabProps {
 
 export function GeneralTab(props: GeneralTabProps): ReactElement {
   const { user, setUser } = props;
-  const notification = useToast();
 
   const updateMutation = useApiMutation(
     (values: { firstName: string; lastName: string }) => client.api.users.me.patch(values),
     {
+      successMessage: "Profile updated",
       onSuccess: (data) => {
         if (data) {
           setUser({ ...user, firstName: data.firstName, lastName: data.lastName });
         }
-        notification.success("Profile updated");
-      },
-      onError: () => {
-        notification.error("Failed to update profile");
       },
     },
   );

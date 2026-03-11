@@ -15,7 +15,6 @@ import { useForm } from "@tanstack/react-form";
 import { z } from "zod/v4";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import type { EnvironmentItem } from "@/types/api/environment";
 
@@ -35,18 +34,15 @@ interface TemplateSaveDialogProps {
 
 export function TemplateSaveDialog(props: TemplateSaveDialogProps): ReactElement {
   const { open, onClose, projectId, environments, currentEnvironment } = props;
-  const notification = useToast();
 
   const mutation = useApiMutation(
     (values: { name: string; description?: string; sourceEnvironmentType: EnvironmentTypeValue }) =>
       client.api.projects({ id: projectId })["env-templates"].post(values),
     {
       invalidateKeys: [["env-templates", projectId]],
-      onSuccess: (data: { name: string; variableCount: number }) => {
-        notification.success(`Template "${data.name}" saved with ${data.variableCount} variables`);
-        handleClose();
-      },
-      onError: (error) => notification.error(error.message || "Failed to save template"),
+      successMessage: (data: { name: string; variableCount: number }) =>
+        `Template "${data.name}" saved with ${data.variableCount} variables`,
+      onSuccess: () => handleClose(),
     },
   );
 

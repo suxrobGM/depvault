@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import { CloudUpload as UploadIcon } from "@mui/icons-material";
-import { Box, Button, DialogActions, MenuItem, Stack, TextField } from "@mui/material";
+import { Button, DialogActions, MenuItem, Stack, TextField } from "@mui/material";
+import { FileUploadButton } from "@/components/ui/file-upload-button";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
@@ -31,13 +31,8 @@ export function UploadTabContent(props: UploadTabContentProps): ReactElement {
     }) => client.api.analyses.post(values),
     {
       invalidateKeys: [["analyses", projectId]],
-      onSuccess: () => {
-        notification.success("Analysis created successfully");
-        onClose();
-      },
-      onError: () => {
-        notification.error("Failed to create analysis");
-      },
+      successMessage: "Analysis created successfully",
+      onSuccess: () => onClose(),
     },
   );
 
@@ -45,17 +40,6 @@ export function UploadTabContent(props: UploadTabContentProps): ReactElement {
     setEcosystem(value);
     const eco = ECOSYSTEMS.find((e) => e.value === value);
     if (eco) setFileName(eco.defaultFile);
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setFileName(file.name);
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      setContent(ev.target?.result as string);
-    };
-    reader.readAsText(file);
   };
 
   const handleSubmit = () => {
@@ -98,11 +82,14 @@ export function UploadTabContent(props: UploadTabContentProps): ReactElement {
         helperText="Useful for monorepos to distinguish files with the same name"
       />
 
-      <Box>
-        <Button variant="outlined" component="label" startIcon={<UploadIcon />} sx={{ mb: 1.5 }}>
-          Upload File
-          <input type="file" hidden onChange={handleFileUpload} accept=".json,.txt,.toml" />
-        </Button>
+      <Stack spacing={1.5}>
+        <FileUploadButton
+          accept=".json,.txt,.toml"
+          onFileRead={({ fileName: name, content: text }) => {
+            setFileName(name);
+            setContent(text);
+          }}
+        />
         <TextField
           label="File Content"
           value={content}
@@ -112,7 +99,7 @@ export function UploadTabContent(props: UploadTabContentProps): ReactElement {
           fullWidth
           placeholder="Paste your dependency file content here or upload a file above"
         />
-      </Box>
+      </Stack>
 
       <DialogActions sx={{ px: 0, pb: 0 }}>
         <Button onClick={onClose}>Cancel</Button>

@@ -21,7 +21,6 @@ import { useForm } from "@tanstack/react-form";
 import { FileUploadButton, type FileUploadResult } from "@/components/ui/file-upload-button";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import { importVariablesSchema } from "./vault-schemas";
 
@@ -36,7 +35,6 @@ interface ImportVariablesDialogProps {
 
 export function ImportVariablesDialog(props: ImportVariablesDialogProps): ReactElement {
   const { open, onClose, projectId, vaultGroupId, environmentType } = props;
-  const notification = useToast();
   const isNewEnvironment = !environmentType;
 
   const mutation = useApiMutation(
@@ -51,11 +49,8 @@ export function ImportVariablesDialog(props: ImportVariablesDialogProps): ReactE
         ["environments", projectId],
         ["vault-groups", projectId],
       ],
-      onSuccess: (data) => {
-        notification.success(`Imported ${data?.imported} variables (${data?.skipped} skipped)`);
-        handleClose();
-      },
-      onError: (error) => notification.error(error.message || "Failed to import variables"),
+      successMessage: (data) => `Imported ${data?.imported} variables (${data?.skipped} skipped)`,
+      onSuccess: () => handleClose(),
     },
   );
 

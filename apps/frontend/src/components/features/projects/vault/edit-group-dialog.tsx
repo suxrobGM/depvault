@@ -6,7 +6,6 @@ import { useForm } from "@tanstack/react-form";
 import { z } from "zod/v4";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import type { VaultGroup } from "@/types/api/vault-group";
 
@@ -24,18 +23,14 @@ interface EditGroupDialogProps {
 
 export function EditGroupDialog(props: EditGroupDialogProps): ReactElement {
   const { open, onClose, projectId, group } = props;
-  const notification = useToast();
 
   const mutation = useApiMutation(
     (values: { name?: string; description?: string | null }) =>
       client.api.projects({ id: projectId })["vault-groups"]({ groupId: group.id }).put(values),
     {
       invalidateKeys: [["vault-groups", projectId]],
-      onSuccess: () => {
-        notification.success("Vault group updated");
-        onClose();
-      },
-      onError: (error) => notification.error(error.message || "Failed to update group"),
+      successMessage: "Vault group updated",
+      onSuccess: () => onClose(),
     },
   );
 

@@ -23,7 +23,6 @@ import {
 } from "@mui/material";
 import { GlassCard } from "@/components/ui/glass-card";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import type { EnvTemplateItem } from "@/types/api/env-template";
 
@@ -38,18 +37,15 @@ interface TemplateListProps {
 export function TemplateList(props: TemplateListProps): ReactElement {
   const { projectId, templates, canEdit, onView, onApply } = props;
   const [deleteTarget, setDeleteTarget] = useState<EnvTemplateItem | null>(null);
-  const notification = useToast();
 
   const deleteMutation = useApiMutation(
     (templateId: string) =>
       client.api.projects({ id: projectId })["env-templates"]({ templateId }).delete(),
     {
       invalidateKeys: [["env-templates", projectId]],
-      onSuccess: () => {
-        notification.success("Template deleted");
-        setDeleteTarget(null);
-      },
-      onError: (error) => notification.error(error.message || "Failed to delete template"),
+      successMessage: "Template deleted",
+      errorMessage: "Failed to delete template",
+      onSuccess: () => setDeleteTarget(null),
     },
   );
 

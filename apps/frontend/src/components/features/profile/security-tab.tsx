@@ -9,7 +9,6 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useAuth } from "@/hooks/use-auth";
 import { useConfirm } from "@/hooks/use-confirm";
-import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import { API_BASE_URL } from "@/lib/constants";
 import type { AuthUser } from "@/providers/auth-provider";
@@ -23,19 +22,13 @@ interface SecurityTabProps {
 export function SecurityTab(props: SecurityTabProps): ReactElement {
   const { user } = props;
   const { logout } = useAuth();
-  const notification = useToast();
   const confirm = useConfirm();
 
   const emailMutation = useApiMutation(
     (values: { newEmail: string; password: string }) => client.api.users.me.email.patch(values),
     {
-      onSuccess: () => {
-        notification.success("Email updated. Please verify your new email address.");
-        emailForm.reset();
-      },
-      onError: () => {
-        notification.error("Failed to update email");
-      },
+      successMessage: "Email updated. Please verify your new email address.",
+      onSuccess: () => emailForm.reset(),
     },
   );
 
@@ -43,24 +36,14 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
     (values: { currentPassword: string; newPassword: string }) =>
       client.api.users.me.password.patch(values),
     {
-      onSuccess: () => {
-        notification.success("Password changed successfully");
-        passwordForm.reset();
-      },
-      onError: () => {
-        notification.error("Failed to change password");
-      },
+      successMessage: "Password changed successfully",
+      onSuccess: () => passwordForm.reset(),
     },
   );
 
   const deleteMutation = useApiMutation(() => client.api.users.me.delete(), {
-    onSuccess: () => {
-      notification.success("Account deleted");
-      logout();
-    },
-    onError: () => {
-      notification.error("Failed to delete account");
-    },
+    successMessage: "Account deleted",
+    onSuccess: () => logout(),
   });
 
   const emailForm = useForm({

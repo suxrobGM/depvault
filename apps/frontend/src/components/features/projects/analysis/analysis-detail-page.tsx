@@ -32,7 +32,6 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useConfirm } from "@/hooks/use-confirm";
-import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 import type { AnalysisDetailResponse } from "@/types/api/analysis";
@@ -53,7 +52,6 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
   const { projectId, analysisId } = props;
   const router = useRouter();
   const { user } = useAuth();
-  const notification = useToast();
   const confirm = useConfirm();
 
   const [viewMode, setViewMode] = useState<ViewMode>("table");
@@ -78,13 +76,8 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
     () => client.api.analyses.project({ projectId })({ analysisId }).delete(),
     {
       invalidateKeys: [["analyses", projectId]],
-      onSuccess: () => {
-        notification.success("Analysis deleted");
-        router.push(ROUTES.projectAnalysis(projectId) as Route);
-      },
-      onError: () => {
-        notification.error("Failed to delete analysis");
-      },
+      successMessage: "Analysis deleted",
+      onSuccess: () => router.push(ROUTES.projectAnalysis(projectId) as Route),
     },
   );
 
@@ -93,13 +86,8 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
       client.api.analyses.project({ projectId })({ analysisId }).patch(body),
     {
       invalidateKeys: [["analyses", projectId, analysisId]],
-      onSuccess: () => {
-        notification.success("File path updated");
-        setEditingPath(false);
-      },
-      onError: () => {
-        notification.error("Failed to update file path");
-      },
+      successMessage: "File path updated",
+      onSuccess: () => setEditingPath(false),
     },
   );
 
@@ -110,12 +98,7 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
         ["analyses", projectId, analysisId],
         ["analyses", projectId],
       ],
-      onSuccess: () => {
-        notification.success("Rescan completed");
-      },
-      onError: () => {
-        notification.error("Failed to rescan dependencies");
-      },
+      successMessage: "Rescan completed",
     },
   );
 

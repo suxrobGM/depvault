@@ -13,7 +13,6 @@ import {
 import { useForm } from "@tanstack/react-form";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import { inviteMemberSchema } from "../schemas";
 
@@ -25,20 +24,14 @@ interface InviteMemberDialogProps {
 
 export function InviteMemberDialog(props: InviteMemberDialogProps): ReactElement {
   const { open, onClose, projectId } = props;
-  const notification = useToast();
 
   const mutation = useApiMutation(
     (values: { email: string; role: "EDITOR" | "VIEWER" }) =>
       client.api.projects({ id: projectId }).members.post(values),
     {
       invalidateKeys: [["projects", projectId, "members"]],
-      onSuccess: () => {
-        notification.success("Member invited");
-        handleClose();
-      },
-      onError: (error) => {
-        notification.error(error.message || "Failed to invite member");
-      },
+      successMessage: "Member invited",
+      onSuccess: () => handleClose(),
     },
   );
 

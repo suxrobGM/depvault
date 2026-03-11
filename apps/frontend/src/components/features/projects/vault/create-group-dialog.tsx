@@ -6,7 +6,6 @@ import { useForm } from "@tanstack/react-form";
 import { z } from "zod/v4";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 
 const createGroupSchema = z.object({
@@ -22,18 +21,14 @@ interface CreateGroupDialogProps {
 
 export function CreateGroupDialog(props: CreateGroupDialogProps): ReactElement {
   const { open, onClose, projectId } = props;
-  const notification = useToast();
 
   const mutation = useApiMutation(
     (values: { name: string; description?: string }) =>
       client.api.projects({ id: projectId })["vault-groups"].post(values),
     {
       invalidateKeys: [["vault-groups", projectId]],
-      onSuccess: () => {
-        notification.success("Vault group created");
-        handleClose();
-      },
-      onError: (error) => notification.error(error.message ?? "Failed to create group"),
+      successMessage: "Vault group created",
+      onSuccess: () => handleClose(),
     },
   );
 
