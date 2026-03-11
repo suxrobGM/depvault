@@ -3,24 +3,21 @@
 import { useState, type ReactElement } from "react";
 import type { SecretFileEnvironmentTypeValue } from "@depvault/shared/constants";
 import type { SelectOption } from "@depvault/shared/types";
-import { FilePresent as FileIcon } from "@mui/icons-material";
-import { Chip, Skeleton, Stack } from "@mui/material";
+import { FilePresent as FileIcon, Upload as UploadIcon } from "@mui/icons-material";
+import { Button, Chip, Skeleton, Stack } from "@mui/material";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useApiQuery } from "@/hooks/use-api-query";
+import { useAuth } from "@/hooks/use-auth";
 import { client } from "@/lib/api";
+import type { MemberListResponse } from "@/types/api/project";
 import type { SecretFile, SecretFileListResponse } from "@/types/api/secret-file";
-import type { VaultGroup } from "@/types/api/vault-group";
+import type { VaultGroup, VaultGroupListResponse } from "@/types/api/vault-group";
 import { EditSecretFileDialog } from "./edit-secret-file-dialog";
 import { SecretFileTable } from "./secret-file-table";
 import { UploadSecretFileDialog } from "./upload-secret-file-dialog";
 
 interface SecretFilesTabProps {
   projectId: string;
-  canEdit: boolean;
-  vaultGroups: VaultGroup[];
-  uploadOpen: boolean;
-  onUploadOpen: () => void;
-  onUploadClose: () => void;
 }
 
 const ENV_FILTERS: SelectOption<SecretFileEnvironmentTypeValue>[] = [
@@ -31,10 +28,21 @@ const ENV_FILTERS: SelectOption<SecretFileEnvironmentTypeValue>[] = [
 ];
 
 export function SecretFilesTab(props: SecretFilesTabProps): ReactElement {
-  const { projectId, canEdit, vaultGroups, uploadOpen, onUploadOpen, onUploadClose } = props;
+  const { projectId } = props;
+  const { user } = useAuth();
 
   const [activeEnv, setActiveEnv] = useState<SecretFileEnvironmentTypeValue>("GLOBAL");
   const [editFile, setEditFile] = useState<SecretFile | null>(null);
+  const [uploadOpen, setUploadOpen] = useState(false);
+
+  const { data: membersData } = useApiQuery<MemberListResponse>(
+    ["projects", projectId, "members"],
+    () => client.api.projects({ id: projectId }).members.get({ query: { page: 1, limit: 50 } }),
+  );
+
+  const { data: groups } = useApiQuery<VaultGroupListResponse>(["vault-groups", projectId], () =>
+    client.api.projects({ id: projectId })["vault-groups"].get(),
+  );
 
   const { data: filesData, isLoading } = useApiQuery<SecretFileListResponse>(
     ["secret-files", projectId, activeEnv],
@@ -44,21 +52,35 @@ export function SecretFilesTab(props: SecretFilesTabProps): ReactElement {
       }),
   );
 
+  const currentMember = membersData?.items.find((m) => m.user.id === user?.id);
+  const canEdit = currentMember?.role === "OWNER" || currentMember?.role === "EDITOR";
+  const vaultGroups: VaultGroup[] = groups ?? [];
   const files = filesData?.items ?? [];
 
   return (
     <>
-      <Stack direction="row" spacing={1} sx={{ mb: 3 }}>
-        {ENV_FILTERS.map((f) => (
-          <Chip
-            key={f.label}
-            label={f.label}
-            variant={activeEnv === f.value ? "filled" : "outlined"}
-            color={activeEnv === f.value ? "primary" : "default"}
-            onClick={() => setActiveEnv(f.value)}
-            size="small"
-          />
-        ))}
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
+        <Stack direction="row" spacing={1}>
+          {ENV_FILTERS.map((f) => (
+            <Chip
+              key={f.label}
+              label={f.label}
+              variant={activeEnv === f.value ? "filled" : "outlined"}
+              color={activeEnv === f.value ? "primary" : "default"}
+              onClick={() => setActiveEnv(f.value)}
+              size="small"
+            />
+          ))}
+        </Stack>
+        {canEdit && (
+          <Button
+            variant="contained"
+            startIcon={<UploadIcon />}
+            onClick={() => setUploadOpen(true)}
+          >
+            Upload File
+          </Button>
+        )}
       </Stack>
 
       {isLoading ? (
@@ -73,7 +95,7 @@ export function SecretFilesTab(props: SecretFilesTabProps): ReactElement {
               : "No secret files have been uploaded to this project yet."
           }
           actionLabel={canEdit ? "Upload File" : undefined}
-          onAction={canEdit ? onUploadOpen : undefined}
+          onAction={canEdit ? () => setUploadOpen(true) : undefined}
         />
       ) : (
         <SecretFileTable
@@ -87,7 +109,7 @@ export function SecretFilesTab(props: SecretFilesTabProps): ReactElement {
 
       <UploadSecretFileDialog
         open={uploadOpen}
-        onClose={onUploadClose}
+        onClose={() => setUploadOpen(false)}
         projectId={projectId}
         vaultGroups={vaultGroups}
       />

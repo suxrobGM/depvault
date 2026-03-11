@@ -21,22 +21,35 @@ import { useRouter } from "next/navigation";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { GlassCard } from "@/components/ui/glass-card";
 import { useApiMutation } from "@/hooks/use-api-mutation";
+import { useApiQuery } from "@/hooks/use-api-query";
+import { useAuth } from "@/hooks/use-auth";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import type { ProjectResponse } from "@/types/api/project";
+import type { MemberListResponse, ProjectResponse } from "@/types/api/project";
 import { updateProjectSchema } from "../schemas";
 
 interface SettingsTabProps {
-  project: ProjectResponse;
   projectId: string;
-  isOwner: boolean;
-  canEdit: boolean;
 }
 
 export function SettingsTab(props: SettingsTabProps): ReactElement {
-  const { project, projectId, isOwner, canEdit } = props;
+  const { projectId } = props;
   const router = useRouter();
+  const { user } = useAuth();
   const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const { data: project } = useApiQuery<ProjectResponse>(["projects", projectId], () =>
+    client.api.projects({ id: projectId }).get(),
+  );
+
+  const { data: membersData } = useApiQuery<MemberListResponse>(
+    ["projects", projectId, "members"],
+    () => client.api.projects({ id: projectId }).members.get({ query: { page: 1, limit: 50 } }),
+  );
+
+  const currentMember = membersData?.items.find((m) => m.user.id === user?.id);
+  const isOwner = currentMember?.role === "OWNER";
+  const canEdit = isOwner || currentMember?.role === "EDITOR";
 
   const updateMutation = useApiMutation(
     (values: { name: string; description?: string; repositoryUrl?: string }) =>
@@ -55,9 +68,9 @@ export function SettingsTab(props: SettingsTabProps): ReactElement {
 
   const form = useForm({
     defaultValues: {
-      name: project.name,
-      description: project.description ?? "",
-      repositoryUrl: project.repositoryUrl ?? "",
+      name: project?.name ?? "",
+      description: project?.description ?? "",
+      repositoryUrl: project?.repositoryUrl ?? "",
     },
     validators: { onSubmit: updateProjectSchema },
     onSubmit: async ({ value }) => {
@@ -70,6 +83,10 @@ export function SettingsTab(props: SettingsTabProps): ReactElement {
       });
     },
   });
+
+  if (!project) {
+    return <></>;
+  }
 
   return (
     <Grid container spacing={3} className="vault-fade-up vault-delay-2">

@@ -1,42 +1,32 @@
 "use client";
 
 import type { ReactElement } from "react";
-import {
-  Group as GroupIcon,
-  Info as InfoIcon,
-  Settings as SettingsIcon,
-} from "@mui/icons-material";
+import { FolderOpen as FilesIcon, VpnKey as VpnKeyIcon } from "@mui/icons-material";
 import { Tab, Tabs } from "@mui/material";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ROUTES } from "@/lib/constants";
 
-interface ProjectTabsProps {
+interface VaultTabsProps {
   projectId: string;
 }
 
 const TABS = [
   {
-    label: "Overview",
-    icon: <InfoIcon />,
-    route: (id: string) => ROUTES.projectOverview(id),
-    segment: "overview",
+    label: "Variables",
+    icon: <VpnKeyIcon />,
+    route: (id: string) => ROUTES.projectVaultVariables(id),
+    segment: "variables",
   },
   {
-    label: "Members",
-    icon: <GroupIcon />,
-    route: (id: string) => ROUTES.projectMembers(id),
-    segment: "members",
-  },
-  {
-    label: "Settings",
-    icon: <SettingsIcon />,
-    route: (id: string) => ROUTES.projectSettings(id),
-    segment: "settings",
+    label: "Secret Files",
+    icon: <FilesIcon />,
+    route: (id: string) => ROUTES.projectVaultSecretFiles(id),
+    segment: "secret-files",
   },
 ] as const;
 
-export function ProjectTabs(props: ProjectTabsProps): ReactElement {
+export function VaultTabs(props: VaultTabsProps): ReactElement {
   const { projectId } = props;
   const pathname = usePathname();
 
@@ -45,7 +35,6 @@ export function ProjectTabs(props: ProjectTabsProps): ReactElement {
   return (
     <Tabs
       value={activeIndex === -1 ? 0 : activeIndex}
-      className="vault-fade-up vault-delay-1"
       sx={{ mb: 3, borderBottom: 1, borderColor: "divider" }}
     >
       {TABS.map((tab) => (

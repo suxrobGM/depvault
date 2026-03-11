@@ -22,18 +22,27 @@ import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 import type { AnalysisListResponse } from "@/types/api/analysis";
-import type { ProjectResponse } from "@/types/api/project";
+import type { MemberListResponse, ProjectResponse } from "@/types/api/project";
 import type { SecretFileListResponse } from "@/types/api/secret-file";
 import type { VaultGroupListResponse } from "@/types/api/vault-group";
 
 interface OverviewTabProps {
-  project: ProjectResponse;
   projectId: string;
-  memberCount: number;
 }
 
 export function OverviewTab(props: OverviewTabProps): ReactElement {
-  const { project, projectId, memberCount } = props;
+  const { projectId } = props;
+
+  const { data: project } = useApiQuery<ProjectResponse>(["projects", projectId], () =>
+    client.api.projects({ id: projectId }).get(),
+  );
+
+  const { data: membersData } = useApiQuery<MemberListResponse>(
+    ["projects", projectId, "members"],
+    () => client.api.projects({ id: projectId }).members.get({ query: { page: 1, limit: 50 } }),
+  );
+
+  const memberCount = membersData?.pagination.total ?? 0;
 
   const { data: analysisData } = useApiQuery<AnalysisListResponse>(
     ["analyses", projectId, "overview"],
@@ -96,6 +105,10 @@ export function OverviewTab(props: OverviewTabProps): ReactElement {
       label: "Avg Health",
     },
   ];
+
+  if (!project) {
+    return <></>;
+  }
 
   return (
     <Grid container spacing={3} className="vault-fade-up vault-delay-2">

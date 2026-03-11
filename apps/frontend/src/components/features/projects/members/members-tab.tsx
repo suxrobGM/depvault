@@ -29,6 +29,7 @@ import {
 import { GlassCard } from "@/components/ui/glass-card";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
+import { useAuth } from "@/hooks/use-auth";
 import { client } from "@/lib/api";
 import type { Member, MemberListResponse } from "@/types/api/project";
 import { InviteMemberDialog } from "./invite-member-dialog";
@@ -36,7 +37,6 @@ import { TransferOwnershipDialog } from "./transfer-ownership-dialog";
 
 interface MembersTabProps {
   projectId: string;
-  isOwner: boolean;
 }
 
 const ROLE_COLORS: Record<string, "primary" | "secondary" | "default"> = {
@@ -46,7 +46,8 @@ const ROLE_COLORS: Record<string, "primary" | "secondary" | "default"> = {
 };
 
 export function MembersTab(props: MembersTabProps): ReactElement {
-  const { projectId, isOwner } = props;
+  const { projectId } = props;
+  const { user } = useAuth();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
@@ -57,6 +58,8 @@ export function MembersTab(props: MembersTabProps): ReactElement {
     ["projects", projectId, "members"],
     () => client.api.projects({ id: projectId }).members.get({ query: { page: 1, limit: 50 } }),
   );
+
+  const isOwner = data?.items.find((m) => m.user.id === user?.id)?.role === "OWNER";
 
   const updateRoleMutation = useApiMutation(
     (vars: { memberId: string; role: "EDITOR" | "VIEWER" }) =>

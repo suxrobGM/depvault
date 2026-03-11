@@ -1,40 +1,25 @@
 "use client";
 
-import type { ReactElement } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { Box, Skeleton, Stack, Typography } from "@mui/material";
 import { PageHeader } from "@/components/ui/page-header";
 import { useApiQuery } from "@/hooks/use-api-query";
-import { useAuth } from "@/hooks/use-auth";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import type { MemberListResponse, ProjectResponse } from "@/types/api/project";
-import { ProjectTabPanel } from "./project-tab-panel";
+import type { ProjectResponse } from "@/types/api/project";
 import { ProjectTabs } from "./project-tabs";
 
-type ProjectTab = "overview" | "members" | "settings";
-
-interface ProjectDetailViewProps {
+interface ProjectLayoutShellProps {
   projectId: string;
-  activeTab: ProjectTab;
+  children: ReactNode;
 }
 
-export function ProjectDetailView(props: ProjectDetailViewProps): ReactElement {
-  const { projectId, activeTab } = props;
-  const { user } = useAuth();
+export function ProjectLayoutShell(props: ProjectLayoutShellProps): ReactElement {
+  const { projectId, children } = props;
 
   const { data: project, isLoading } = useApiQuery<ProjectResponse>(["projects", projectId], () =>
     client.api.projects({ id: projectId }).get(),
   );
-
-  const { data: membersData } = useApiQuery<MemberListResponse>(
-    ["projects", projectId, "members"],
-    () => client.api.projects({ id: projectId }).members.get({ query: { page: 1, limit: 50 } }),
-  );
-
-  const currentMember = membersData?.items.find((m) => m.user.id === user?.id);
-  const isOwner = currentMember?.role === "OWNER";
-  const isEditor = currentMember?.role === "EDITOR";
-  const canEdit = isOwner || isEditor;
 
   if (isLoading) {
     return (
@@ -68,15 +53,8 @@ export function ProjectDetailView(props: ProjectDetailViewProps): ReactElement {
           { label: project.name },
         ]}
       />
-      <ProjectTabs activeTab={activeTab} projectId={projectId} />
-      <ProjectTabPanel
-        activeTab={activeTab}
-        project={project}
-        projectId={projectId}
-        isOwner={isOwner}
-        canEdit={canEdit}
-        memberCount={membersData?.pagination.total ?? 0}
-      />
+      <ProjectTabs projectId={projectId} />
+      {children}
     </Box>
   );
 }
