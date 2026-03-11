@@ -8,12 +8,16 @@ type MutationFn<TData, TVariables> = (variables: TVariables) => Promise<{
   error: unknown;
 }>;
 
+interface EdenError extends Error {
+  value: { message: string };
+}
+
 interface UseApiMutationOptions<TData, TVariables> {
   invalidateKeys?: unknown[][];
   successMessage?: string | ((data: TData) => string);
-  errorMessage?: string | ((error: Error) => string);
+  errorMessage?: string | ((error: EdenError) => string);
   onSuccess?: (data: TData, variables: TVariables) => void;
-  onError?: (error: Error) => void;
+  onError?: (error: EdenError) => void;
 }
 
 /**
@@ -27,11 +31,11 @@ export function useApiMutation<TData, TVariables = void>(
   const queryClient = useQueryClient();
   const notification = useToast();
 
-  return useMutation<TData, Error, TVariables>({
+  return useMutation<TData, EdenError, TVariables>({
     mutationFn: async (variables) => {
       const { data, error } = await mutationFn(variables);
       if (error) {
-        throw error;
+        throw new Error((error as EdenError)?.value?.message);
       }
       return data as TData;
     },

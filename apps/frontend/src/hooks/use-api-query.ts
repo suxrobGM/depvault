@@ -10,6 +10,10 @@ interface UseApiQueryOptions<T> extends Omit<UseQueryOptions<T>, "queryKey" | "q
   errorMessage?: string | ((error: Error) => string);
 }
 
+interface EdenError extends Error {
+  value: { message: string };
+}
+
 /**
  * Wraps `useQuery` with Eden Treaty response unwrapping and optional error toast via `errorMessage`.
  */
@@ -26,7 +30,7 @@ export function useApiQuery<T>(
     queryFn: async () => {
       const { data, error } = await queryFn();
       if (error) {
-        throw error;
+        throw new Error((error as EdenError)?.value?.message);
       }
       return data as T;
     },
@@ -36,7 +40,7 @@ export function useApiQuery<T>(
   useEffect(() => {
     if (result.error && errorMessage) {
       const msg =
-        typeof errorMessage === "function" ? errorMessage(result.error as Error) : errorMessage;
+        typeof errorMessage === "function" ? errorMessage(result.error as EdenError) : errorMessage;
       notification.error(msg);
     }
   }, [result.error, errorMessage, notification]);
