@@ -59,8 +59,7 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
               <TableCell>Value</TableCell>
               <TableCell>Description</TableCell>
               <TableCell align="center">Required</TableCell>
-              <TableCell align="center">History</TableCell>
-              {canEdit && <TableCell align="right">Actions</TableCell>}
+              <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

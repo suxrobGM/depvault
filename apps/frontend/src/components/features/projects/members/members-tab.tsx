@@ -3,33 +3,16 @@
 import { useState, type ReactElement } from "react";
 import {
   Delete as DeleteIcon,
-  MoreVert as MoreVertIcon,
   PersonAdd as PersonAddIcon,
   SwapHoriz as SwapHorizIcon,
 } from "@mui/icons-material";
-import {
-  Avatar,
-  Box,
-  Button,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  IconButton,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-  Skeleton,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Avatar, Box, Button, Chip, Skeleton, Stack, Typography } from "@mui/material";
+import { ActionMenu } from "@/components/ui/action-menu";
 import { GlassCard } from "@/components/ui/glass-card";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useAuth } from "@/hooks/use-auth";
+import { useConfirm } from "@/hooks/use-confirm";
 import { client } from "@/lib/api";
 import type { Member, MemberListResponse } from "@/types/api/project";
 import { InviteMemberDialog } from "./invite-member-dialog";
@@ -48,11 +31,10 @@ const ROLE_COLORS: Record<string, "primary" | "secondary" | "default"> = {
 export function MembersTab(props: MembersTabProps): ReactElement {
   const { projectId } = props;
   const { user } = useAuth();
+  const confirm = useConfirm();
+
   const [inviteOpen, setInviteOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
-  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
-  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
-  const [removeConfirmOpen, setRemoveConfirmOpen] = useState(false);
 
   const { data, isLoading } = useApiQuery<MemberListResponse>(
     ["projects", projectId, "members"],
@@ -79,36 +61,17 @@ export function MembersTab(props: MembersTabProps): ReactElement {
     {
       invalidateKeys: [["projects", projectId, "members"]],
       successMessage: "Member removed",
-      onSuccess: () => setRemoveConfirmOpen(false),
     },
   );
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, member: Member) => {
-    setMenuAnchor(event.currentTarget);
-    setSelectedMember(member);
-  };
-
-  const handleMenuClose = () => {
-    setMenuAnchor(null);
-    setSelectedMember(null);
-  };
-
-  const handleRoleChange = (role: "EDITOR" | "VIEWER") => {
-    if (selectedMember) {
-      updateRoleMutation.mutate({ memberId: selectedMember.id, role });
-    }
-    handleMenuClose();
-  };
-
-  const handleRemoveClick = () => {
-    setMenuAnchor(null);
-    setRemoveConfirmOpen(true);
-  };
-
-  const handleRemoveConfirm = () => {
-    if (selectedMember) {
-      removeMutation.mutate({ memberId: selectedMember.id });
-    }
+  const handleRemove = async (member: Member) => {
+    const ok = await confirm({
+      title: "Remove Member",
+      description: `Are you sure you want to remove ${member.user.email} from this project?`,
+      confirmLabel: "Remove",
+      destructive: true,
+    });
+    if (ok) removeMutation.mutate({ memberId: member.id });
   };
 
   if (isLoading) {
@@ -173,55 +136,34 @@ export function MembersTab(props: MembersTabProps): ReactElement {
                   variant="outlined"
                 />
                 {isOwner && member.role !== "OWNER" && (
-                  <IconButton size="small" onClick={(e) => handleMenuOpen(e, member)}>
-                    <MoreVertIcon fontSize="small" />
-                  </IconButton>
+                  <ActionMenu
+                    items={[
+                      {
+                        label: "Change to Editor",
+                        onClick: () =>
+                          updateRoleMutation.mutate({ memberId: member.id, role: "EDITOR" }),
+                        hidden: member.role === "EDITOR",
+                      },
+                      {
+                        label: "Change to Viewer",
+                        onClick: () =>
+                          updateRoleMutation.mutate({ memberId: member.id, role: "VIEWER" }),
+                        hidden: member.role === "VIEWER",
+                      },
+                      {
+                        label: "Remove",
+                        icon: <DeleteIcon fontSize="small" />,
+                        onClick: () => handleRemove(member),
+                        destructive: true,
+                      },
+                    ]}
+                  />
                 )}
               </Stack>
             </GlassCard>
           );
         })}
       </Stack>
-
-      <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={handleMenuClose}>
-        {selectedMember?.role !== "EDITOR" && (
-          <MenuItem onClick={() => handleRoleChange("EDITOR")}>
-            <ListItemText>Change to Editor</ListItemText>
-          </MenuItem>
-        )}
-        {selectedMember?.role !== "VIEWER" && (
-          <MenuItem onClick={() => handleRoleChange("VIEWER")}>
-            <ListItemText>Change to Viewer</ListItemText>
-          </MenuItem>
-        )}
-        <MenuItem onClick={handleRemoveClick} sx={{ color: "error.main" }}>
-          <ListItemIcon sx={{ color: "error.main" }}>
-            <DeleteIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Remove</ListItemText>
-        </MenuItem>
-      </Menu>
-
-      <Dialog open={removeConfirmOpen} onClose={() => setRemoveConfirmOpen(false)}>
-        <DialogTitle>Remove Member</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to remove <strong>{selectedMember?.user.email}</strong> from this
-            project?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setRemoveConfirmOpen(false)}>Cancel</Button>
-          <Button
-            color="error"
-            variant="contained"
-            onClick={handleRemoveConfirm}
-            disabled={removeMutation.isPending}
-          >
-            {removeMutation.isPending ? "Removing..." : "Remove"}
-          </Button>
-        </DialogActions>
-      </Dialog>
 
       <InviteMemberDialog
         open={inviteOpen}

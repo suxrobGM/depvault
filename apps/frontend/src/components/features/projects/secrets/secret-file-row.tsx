@@ -9,7 +9,6 @@ import {
   Download as DownloadIcon,
   Edit as EditIcon,
   History as HistoryIcon,
-  MoreVert as MoreVertIcon,
   Replay as ReplayIcon,
 } from "@mui/icons-material";
 import {
@@ -17,10 +16,6 @@ import {
   Chip,
   Collapse,
   IconButton,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
   Skeleton,
   Table,
   TableBody,
@@ -29,6 +24,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { ActionMenu } from "@/components/ui/action-menu";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useConfirm } from "@/hooks/use-confirm";
@@ -64,7 +60,6 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
   const toast = useToast();
 
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [downloading, setDownloading] = useState(false);
   const [downloadingVersionId, setDownloadingVersionId] = useState<string | null>(null);
 
@@ -101,7 +96,6 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
 
   const handleDownload = async () => {
     setDownloading(true);
-    setMenuAnchor(null);
 
     const { data, error } = await client.api
       .projects({ id: projectId })
@@ -138,16 +132,13 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
   };
 
   const handleDelete = async () => {
-    setMenuAnchor(null);
     const ok = await confirm({
       title: "Delete Secret File",
       description: `Are you sure you want to permanently delete "${file.name}"? All version history will also be deleted.`,
       confirmLabel: "Delete",
       destructive: true,
     });
-    if (ok) {
-      deleteMutation.mutate();
-    }
+    if (ok) deleteMutation.mutate();
   };
 
   const versions: SecretFileVersion[] = versionsData?.items ?? [];
@@ -200,55 +191,36 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
           </Typography>
         </TableCell>
         <TableCell align="right">
-          <IconButton
-            size="small"
-            onClick={(e) => setMenuAnchor(e.currentTarget)}
+          <ActionMenu
             disabled={downloading}
-          >
-            <MoreVertIcon fontSize="small" />
-          </IconButton>
-          <Menu anchorEl={menuAnchor} open={!!menuAnchor} onClose={() => setMenuAnchor(null)}>
-            {canEdit && (
-              <MenuItem onClick={handleDownload} disabled={downloading}>
-                <ListItemIcon>
-                  <DownloadIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText>{downloading ? "Downloading..." : "Download"}</ListItemText>
-              </MenuItem>
-            )}
-            {canEdit && (
-              <MenuItem
-                onClick={() => {
-                  setMenuAnchor(null);
-                  onEdit(file);
-                }}
-              >
-                <ListItemIcon>
-                  <EditIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText>Edit</ListItemText>
-              </MenuItem>
-            )}
-            <MenuItem
-              onClick={() => {
-                setMenuAnchor(null);
-                setHistoryOpen(true);
-              }}
-            >
-              <ListItemIcon>
-                <HistoryIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Version History</ListItemText>
-            </MenuItem>
-            {canEdit && (
-              <MenuItem onClick={handleDelete} sx={{ color: "error.main" }}>
-                <ListItemIcon sx={{ color: "error.main" }}>
-                  <DeleteIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText>Delete</ListItemText>
-              </MenuItem>
-            )}
-          </Menu>
+            items={[
+              {
+                label: downloading ? "Downloading..." : "Download",
+                icon: <DownloadIcon fontSize="small" />,
+                onClick: handleDownload,
+                disabled: downloading,
+                hidden: !canEdit,
+              },
+              {
+                label: "Edit",
+                icon: <EditIcon fontSize="small" />,
+                onClick: () => onEdit(file),
+                hidden: !canEdit,
+              },
+              {
+                label: "Version History",
+                icon: <HistoryIcon fontSize="small" />,
+                onClick: () => setHistoryOpen(true),
+              },
+              {
+                label: "Delete",
+                icon: <DeleteIcon fontSize="small" />,
+                onClick: handleDelete,
+                hidden: !canEdit,
+                destructive: true,
+              },
+            ]}
+          />
         </TableCell>
       </TableRow>
 

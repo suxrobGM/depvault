@@ -2,6 +2,7 @@
 
 import { useState, type ReactElement } from "react";
 import {
+  Close as CloseIcon,
   Delete as DeleteIcon,
   Edit as EditIcon,
   History as HistoryIcon,
@@ -13,7 +14,6 @@ import {
   Collapse,
   IconButton,
   Skeleton,
-  Stack,
   Table,
   TableBody,
   TableCell,
@@ -21,6 +21,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { ActionMenu } from "@/components/ui/action-menu";
 import { MaskedValue } from "@/components/ui/masked-value";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
@@ -93,7 +94,6 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
   };
 
   const versions = versionsData?.items ?? [];
-  const colSpan = canEdit ? 6 : 5;
 
   return (
     <>
@@ -116,33 +116,34 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
             <Chip label="Required" size="small" color="warning" variant="outlined" />
           )}
         </TableCell>
-        <TableCell align="center">
-          <IconButton
-            size="small"
-            title="Version history"
-            onClick={() => setHistoryOpen((v) => !v)}
-            aria-label="toggle version history"
-            color={historyOpen ? "primary" : "default"}
-          >
-            <HistoryIcon fontSize="small" />
-          </IconButton>
+        <TableCell align="right">
+          <ActionMenu
+            items={[
+              {
+                label: "Edit",
+                icon: <EditIcon fontSize="small" />,
+                onClick: () => onEdit(variable),
+                hidden: !canEdit,
+              },
+              {
+                label: "Version History",
+                icon: <HistoryIcon fontSize="small" />,
+                onClick: () => setHistoryOpen(true),
+              },
+              {
+                label: "Delete",
+                icon: <DeleteIcon fontSize="small" />,
+                onClick: handleDelete,
+                hidden: !canEdit,
+                destructive: true,
+              },
+            ]}
+          />
         </TableCell>
-        {canEdit && (
-          <TableCell align="right">
-            <Stack direction="row" spacing={0.5} justifyContent="flex-end">
-              <IconButton size="small" onClick={() => onEdit(variable)}>
-                <EditIcon fontSize="small" />
-              </IconButton>
-              <IconButton size="small" onClick={handleDelete} disabled={deleteMutation.isPending}>
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            </Stack>
-          </TableCell>
-        )}
       </TableRow>
 
       <TableRow>
-        <TableCell colSpan={colSpan} sx={{ py: 0 }}>
+        <TableCell colSpan={5} sx={{ py: 0 }}>
           <Collapse in={historyOpen} timeout="auto" unmountOnExit>
             <Box sx={{ py: 2, pl: 6, pr: 2 }}>
               <Typography
@@ -152,6 +153,9 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
               >
                 <HistoryIcon fontSize="small" />
                 Version History
+                <IconButton size="small" onClick={() => setHistoryOpen(false)} sx={{ ml: "auto" }}>
+                  <CloseIcon fontSize="small" />
+                </IconButton>
               </Typography>
 
               {versionsLoading ? (
