@@ -1,0 +1,330 @@
+"use client";
+
+import { useState, type ReactElement } from "react";
+import type { SecretFileEnvironmentTypeValue } from "@depvault/shared/constants";
+import {
+  KeyboardArrowDown as ArrowDownIcon,
+  KeyboardArrowUp as ArrowUpIcon,
+  Delete as DeleteIcon,
+  Download as DownloadIcon,
+  Edit as EditIcon,
+  History as HistoryIcon,
+  MoreVert as MoreVertIcon,
+  Replay as ReplayIcon,
+} from "@mui/icons-material";
+import {
+  Box,
+  Chip,
+  Collapse,
+  IconButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Skeleton,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+} from "@mui/material";
+import { useApiMutation } from "@/hooks/use-api-mutation";
+import { useApiQuery } from "@/hooks/use-api-query";
+import { useConfirm } from "@/hooks/use-confirm";
+import { useToast } from "@/hooks/use-toast";
+import { client } from "@/lib/api";
+import type {
+  SecretFile,
+  SecretFileVersion,
+  SecretFileVersionListResponse,
+} from "@/types/api/secret-file";
+import { downloadFile } from "@/utils/download-file";
+import { formatBytes, formatDate } from "@/utils/formatters";
+
+const ENV_COLORS: Record<string, "default" | "success" | "warning" | "error"> = {
+  GLOBAL: "default",
+  DEVELOPMENT: "success",
+  STAGING: "warning",
+  PRODUCTION: "error",
+};
+
+export interface SecretFileRowProps {
+  projectId: string;
+  file: SecretFile;
+  activeEnv: SecretFileEnvironmentTypeValue;
+  canEdit: boolean;
+  onEdit: (file: SecretFile) => void;
+}
+
+export function SecretFileRow(props: SecretFileRowProps): ReactElement {
+  const { projectId, file, activeEnv, canEdit, onEdit } = props;
+
+  const confirm = useConfirm();
+  const toast = useToast();
+
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadingVersionId, setDownloadingVersionId] = useState<string | null>(null);
+
+  const { data: versionsData, isLoading: versionsLoading } =
+    useApiQuery<SecretFileVersionListResponse>(
+      ["secret-file-versions", projectId, file.id],
+      () => client.api.projects({ id: projectId }).secrets({ fileId: file.id }).versions.get(),
+      { enabled: historyOpen },
+    );
+
+  const deleteMutation = useApiMutation(
+    () => client.api.projects({ id: projectId }).secrets({ fileId: file.id }).delete(),
+    {
+      invalidateKeys: [["secret-files", projectId]],
+      successMessage: "File deleted",
+    },
+  );
+
+  const rollbackMutation = useApiMutation(
+    (versionId: string) =>
+      client.api
+        .projects({ id: projectId })
+        .secrets({ fileId: file.id })
+        .rollback({ versionId })
+        .post(),
+    {
+      invalidateKeys: [
+        ["secret-files", projectId],
+        ["secret-file-versions", projectId, file.id],
+      ],
+      successMessage: "File rolled back successfully",
+    },
+  );
+
+  const handleDownload = async () => {
+    setDownloading(true);
+    setMenuAnchor(null);
+
+    const { data, error } = await client.api
+      .projects({ id: projectId })
+      .secrets({ fileId: file.id })
+      .download.get();
+
+    if (error) {
+      toast.error("Failed to download file");
+      setDownloading(false);
+      return;
+    }
+
+    downloadFile(data as unknown as ArrayBuffer, file.name);
+    setDownloading(false);
+  };
+
+  const handleVersionDownload = async (versionId: string) => {
+    setDownloadingVersionId(versionId);
+
+    const { data, error } = await client.api
+      .projects({ id: projectId })
+      .secrets({ fileId: file.id })
+      .versions({ versionId })
+      .download.get();
+
+    if (error) {
+      toast.error("Failed to download version");
+      setDownloadingVersionId(null);
+      return;
+    }
+
+    downloadFile(data as unknown as ArrayBuffer, file.name);
+    setDownloadingVersionId(null);
+  };
+
+  const handleDelete = async () => {
+    setMenuAnchor(null);
+    const ok = await confirm({
+      title: "Delete Secret File",
+      description: `Are you sure you want to permanently delete "${file.name}"? All version history will also be deleted.`,
+      confirmLabel: "Delete",
+      destructive: true,
+    });
+    if (ok) {
+      deleteMutation.mutate();
+    }
+  };
+
+  const versions: SecretFileVersion[] = versionsData?.items ?? [];
+
+  return (
+    <>
+      <TableRow sx={{ "& > *": { borderBottom: historyOpen ? "unset" : undefined } }}>
+        <TableCell>
+          <IconButton
+            size="small"
+            onClick={() => setHistoryOpen((v) => !v)}
+            aria-label="toggle version history"
+          >
+            {historyOpen ? <ArrowUpIcon fontSize="small" /> : <ArrowDownIcon fontSize="small" />}
+          </IconButton>
+        </TableCell>
+        <TableCell>
+          <Typography variant="body2" fontWeight={500}>
+            {file.name}
+          </Typography>
+          {file.description && (
+            <Typography variant="caption" color="text.secondary">
+              {file.description}
+            </Typography>
+          )}
+        </TableCell>
+        <TableCell>
+          <Typography variant="body2" color="text.secondary">
+            {file.vaultGroupName}
+          </Typography>
+        </TableCell>
+        {activeEnv && (
+          <TableCell>
+            <Chip
+              label={activeEnv}
+              size="small"
+              color={ENV_COLORS[activeEnv] ?? "default"}
+              variant="outlined"
+            />
+          </TableCell>
+        )}
+        <TableCell>
+          <Typography variant="body2" color="text.secondary">
+            {formatBytes(file.fileSize)}
+          </Typography>
+        </TableCell>
+        <TableCell>
+          <Typography variant="body2" color="text.secondary">
+            {formatDate(file.createdAt)}
+          </Typography>
+        </TableCell>
+        <TableCell align="right">
+          <IconButton
+            size="small"
+            onClick={(e) => setMenuAnchor(e.currentTarget)}
+            disabled={downloading}
+          >
+            <MoreVertIcon fontSize="small" />
+          </IconButton>
+          <Menu anchorEl={menuAnchor} open={!!menuAnchor} onClose={() => setMenuAnchor(null)}>
+            {canEdit && (
+              <MenuItem onClick={handleDownload} disabled={downloading}>
+                <ListItemIcon>
+                  <DownloadIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>{downloading ? "Downloading..." : "Download"}</ListItemText>
+              </MenuItem>
+            )}
+            {canEdit && (
+              <MenuItem
+                onClick={() => {
+                  setMenuAnchor(null);
+                  onEdit(file);
+                }}
+              >
+                <ListItemIcon>
+                  <EditIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Edit</ListItemText>
+              </MenuItem>
+            )}
+            <MenuItem
+              onClick={() => {
+                setMenuAnchor(null);
+                setHistoryOpen(true);
+              }}
+            >
+              <ListItemIcon>
+                <HistoryIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Version History</ListItemText>
+            </MenuItem>
+            {canEdit && (
+              <MenuItem onClick={handleDelete} sx={{ color: "error.main" }}>
+                <ListItemIcon sx={{ color: "error.main" }}>
+                  <DeleteIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Delete</ListItemText>
+              </MenuItem>
+            )}
+          </Menu>
+        </TableCell>
+      </TableRow>
+
+      <TableRow>
+        <TableCell colSpan={activeEnv ? 7 : 6} sx={{ py: 0 }}>
+          <Collapse in={historyOpen} timeout="auto" unmountOnExit>
+            <Box sx={{ py: 2, pl: 6, pr: 2 }}>
+              <Typography
+                variant="subtitle2"
+                gutterBottom
+                sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+              >
+                <HistoryIcon fontSize="small" />
+                Version History
+              </Typography>
+              {versionsLoading ? (
+                <Skeleton variant="rounded" height={60} />
+              ) : versions.length === 0 ? (
+                <Typography variant="body2" color="text.secondary">
+                  No previous versions.
+                </Typography>
+              ) : (
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Version</TableCell>
+                      <TableCell>Date</TableCell>
+                      <TableCell>Size</TableCell>
+                      <TableCell align="right">Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {versions.map((v, idx) => (
+                      <TableRow key={v.id}>
+                        <TableCell>
+                          <Typography variant="body2">v{versions.length - idx}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" color="text.secondary">
+                            {formatDate(v.createdAt)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" color="text.secondary">
+                            {formatBytes(v.fileSize)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                          <IconButton
+                            size="small"
+                            title="Download this version"
+                            disabled={downloadingVersionId === v.id}
+                            onClick={() => handleVersionDownload(v.id)}
+                          >
+                            <DownloadIcon fontSize="small" />
+                          </IconButton>
+                          {canEdit && (
+                            <IconButton
+                              size="small"
+                              title="Rollback to this version"
+                              disabled={rollbackMutation.isPending}
+                              onClick={() => rollbackMutation.mutate(v.id)}
+                            >
+                              <ReplayIcon fontSize="small" />
+                            </IconButton>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </Box>
+          </Collapse>
+        </TableCell>
+      </TableRow>
+    </>
+  );
+}

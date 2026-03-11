@@ -4,20 +4,15 @@ import { authGuard } from "@/common/middleware";
 import { getClientIp } from "@/common/utils/ip";
 import { StringIdParamSchema } from "@/types/request";
 import { MessageResponseSchema } from "@/types/response";
-import { EnvironmentCloneService } from "./environment-clone.service";
-import { EnvironmentDiffService } from "./environment-diff.service";
-import { EnvironmentIOService } from "./environment-io.service";
 import {
-  CloneEnvironmentBodySchema,
-  CloneEnvironmentResponseSchema,
+  EnvVariableVersionListResponseSchema,
+  EnvVariableVersionParamsSchema,
+} from "./env-variable-version.schema";
+import { EnvVariableVersionService } from "./env-variable-version.service";
+import {
   CreateEnvVariableBodySchema,
-  DeleteEnvironmentParamsSchema,
-  EnvDiffQuerySchema,
-  EnvDiffResponseSchema,
   EnvExampleQuerySchema,
   EnvExampleResponseSchema,
-  EnvironmentListQuerySchema,
-  EnvironmentListResponseSchema,
   EnvVariableListQuerySchema,
   EnvVariableListResponseSchema,
   EnvVariableParamsSchema,
@@ -27,6 +22,18 @@ import {
   ImportEnvVariablesBodySchema,
   ImportEnvVariablesResponseSchema,
   UpdateEnvVariableBodySchema,
+} from "./env-variable.schema";
+import { EnvironmentCloneService } from "./environment-clone.service";
+import { EnvironmentDiffService } from "./environment-diff.service";
+import { EnvironmentIOService } from "./environment-io.service";
+import {
+  CloneEnvironmentBodySchema,
+  CloneEnvironmentResponseSchema,
+  DeleteEnvironmentParamsSchema,
+  EnvDiffQuerySchema,
+  EnvDiffResponseSchema,
+  EnvironmentListQuerySchema,
+  EnvironmentListResponseSchema,
 } from "./environment.schema";
 import { EnvironmentService } from "./environment.service";
 
@@ -34,6 +41,7 @@ const environmentService = container.resolve(EnvironmentService);
 const environmentDiffService = container.resolve(EnvironmentDiffService);
 const environmentCloneService = container.resolve(EnvironmentCloneService);
 const environmentIOService = container.resolve(EnvironmentIOService);
+const envVariableVersionService = container.resolve(EnvVariableVersionService);
 
 export const environmentController = new Elysia({
   prefix: "/projects/:id/environments",
@@ -171,6 +179,35 @@ export const environmentController = new Elysia({
         summary: "Delete an environment variable",
         description:
           "Permanently delete an environment variable and all its version history. Only owners and editors can delete.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .get(
+    "/variables/:varId/versions",
+    ({ params, user }) => envVariableVersionService.listVersions(params.id, params.varId, user.id),
+    {
+      params: EnvVariableParamsSchema,
+      response: EnvVariableVersionListResponseSchema,
+      detail: {
+        summary: "List variable version history",
+        description:
+          "List the version history for an environment variable. Editors and owners see decrypted values; viewers see masked values.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .post(
+    "/variables/:varId/versions/:versionId/rollback",
+    ({ params, user }) =>
+      envVariableVersionService.rollback(params.id, params.varId, params.versionId, user.id),
+    {
+      params: EnvVariableVersionParamsSchema,
+      response: EnvVariableWithValueResponseSchema,
+      detail: {
+        summary: "Rollback variable to a previous version",
+        description:
+          "Restore an environment variable to a previous version. The current value is saved as a new version snapshot before rolling back. Only owners and editors can rollback.",
         security: [{ bearerAuth: [] }],
       },
     },

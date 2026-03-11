@@ -3,9 +3,9 @@ import { PARSERS, SERIALIZERS, type ConfigFormat } from "@/common/parsers";
 import { decrypt, deriveProjectKey, encrypt } from "@/common/utils/encryption";
 import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
+import type { EnvVariableWithValueResponse, ImportEnvVariablesBody } from "./env-variable.schema";
 import { toExampleLine, toResponseWithValue } from "./environment.mapper";
 import { EnvironmentRepository } from "./environment.repository";
-import type { EnvVariableWithValueResponse, ImportEnvVariablesBody } from "./environment.schema";
 
 @singleton()
 export class EnvironmentIOService {

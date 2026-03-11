@@ -6,14 +6,14 @@ import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import { NotificationService } from "@/modules/notification";
 import type { PaginatedResponse } from "@/types/response";
-import { toDecryptedResponse, toMaskedResponse, toResponseWithValue } from "./environment.mapper";
-import { EnvironmentRepository } from "./environment.repository";
 import type {
   CreateEnvVariableBody,
-  EnvironmentResponse,
   EnvVariableWithValueResponse,
   UpdateEnvVariableBody,
-} from "./environment.schema";
+} from "./env-variable.schema";
+import { toDecryptedResponse, toMaskedResponse, toResponseWithValue } from "./environment.mapper";
+import { EnvironmentRepository } from "./environment.repository";
+import type { EnvironmentResponse } from "./environment.schema";
 
 @singleton()
 export class EnvironmentService {
