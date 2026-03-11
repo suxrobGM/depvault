@@ -153,6 +153,59 @@ export class SecretFileService {
     return { buffer: decrypted, name: file.name, mimeType: file.mimeType };
   }
 
+  async uploadNewVersion(
+    projectId: string,
+    fileId: string,
+    userId: string,
+    file: File,
+    ipAddress = "unknown",
+  ): Promise<SecretFileResponse> {
+    await this.requireEditorOrOwner(projectId, userId);
+
+    validateFile(file);
+
+    const existing = await this.findFileOrThrow(projectId, fileId);
+
+    await this.prisma.secretFileVersion.create({
+      data: {
+        secretFileId: fileId,
+        encryptedContent: existing.encryptedContent,
+        iv: existing.iv,
+        authTag: existing.authTag,
+        fileSize: existing.fileSize,
+        changedBy: userId,
+      },
+    });
+
+    const projectKey = deriveProjectKey(projectId);
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+    const { ciphertext, iv, authTag } = encryptBinary(fileBuffer, projectKey);
+
+    const updated = await this.prisma.secretFile.update({
+      where: { id: fileId },
+      data: {
+        encryptedContent: new Uint8Array(ciphertext),
+        iv,
+        authTag,
+        mimeType: file.type ?? "application/octet-stream",
+        fileSize: file.size,
+      },
+      include: { environment: { include: { vaultGroup: true } } },
+    });
+
+    await this.auditLogService.log({
+      userId,
+      projectId,
+      action: "UPLOAD",
+      resourceType: "SECRET_FILE",
+      resourceId: fileId,
+      ipAddress,
+      metadata: { fileName: file.name, action: "new_version" },
+    });
+
+    return toSecretFileResponse(updated, updated.environment.vaultGroup);
+  }
+
   async update(
     projectId: string,
     fileId: string,

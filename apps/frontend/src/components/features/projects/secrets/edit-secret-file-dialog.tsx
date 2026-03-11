@@ -1,12 +1,22 @@
 "use client";
 
-import type { ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import {
   SECRET_FILE_ENV_TYPES,
   type SecretFileEnvironmentTypeValue,
 } from "@depvault/shared/constants";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { useForm } from "@tanstack/react-form";
+import { FileDropZone } from "@/components/ui/file-drop-zone";
 import { FormSelectField } from "@/components/ui/form-select-field";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
@@ -26,19 +36,29 @@ interface EditSecretFileDialogProps {
 export function EditSecretFileDialog(props: EditSecretFileDialogProps): ReactElement {
   const { open, onClose, projectId, file, vaultGroups } = props;
 
+  const [newFile, setNewFile] = useState<File | null>(null);
+
   const groupItems = vaultGroups.map((g) => ({ value: g.id, label: g.name }));
 
-  const mutation = useApiMutation(
+  const metadataMutation = useApiMutation(
     (values: {
       name?: string;
       description?: string;
       vaultGroupId?: string;
       environmentType?: SecretFileEnvironmentTypeValue;
     }) => client.api.projects({ id: projectId }).secrets({ fileId: file.id }).put(values),
+    { invalidateKeys: [["secret-files", projectId]], successMessage: "File updated" },
+  );
+
+  const contentMutation = useApiMutation(
+    (values: { file: File }) =>
+      client.api.projects({ id: projectId }).secrets({ fileId: file.id }).content.post(values),
     {
-      invalidateKeys: [["secret-files", projectId]],
-      successMessage: "File updated",
-      onSuccess: () => handleClose(),
+      invalidateKeys: [
+        ["secret-files", projectId],
+        ["secret-file-versions", projectId, file.id],
+      ],
+      successMessage: "New version uploaded",
     },
   );
 
@@ -51,19 +71,26 @@ export function EditSecretFileDialog(props: EditSecretFileDialogProps): ReactEle
     },
     validators: { onSubmit: editSecretFileSchema },
     onSubmit: async ({ value }) => {
-      await mutation.mutateAsync({
+      await metadataMutation.mutateAsync({
         name: value.name,
         description: value.description,
-        vaultGroupId: value.vaultGroupId,
-        environmentType: value.environmentType,
+        vaultGroupId: value.vaultGroupId || undefined,
+        environmentType: value.environmentType || undefined,
       });
+      if (newFile) {
+        await contentMutation.mutateAsync({ file: newFile });
+      }
+      handleClose();
     },
   });
 
   const handleClose = () => {
     form.reset();
+    setNewFile(null);
     onClose();
   };
+
+  const isPending = metadataMutation.isPending || contentMutation.isPending;
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
@@ -99,12 +126,23 @@ export function EditSecretFileDialog(props: EditSecretFileDialogProps): ReactEle
               optional
               emptyLabel="Keep current"
             />
+
+            <Divider />
+
+            <Typography variant="subtitle2">Replace File Content</Typography>
+            <FileDropZone
+              file={newFile}
+              onChange={setNewFile}
+              hint="Current content will be saved to version history"
+            />
           </Stack>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button type="submit" variant="contained" disabled={mutation.isPending}>
-            {mutation.isPending ? "Saving..." : "Save"}
+          <Button onClick={handleClose} disabled={isPending}>
+            Cancel
+          </Button>
+          <Button type="submit" variant="contained" disabled={isPending}>
+            {isPending ? "Saving..." : "Save"}
           </Button>
         </DialogActions>
       </form>

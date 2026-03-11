@@ -68,6 +68,10 @@ export const SecretFileRollbackParamsSchema = t.Object({
   versionId: t.String(),
 });
 
+export const UploadNewVersionBodySchema = t.Object({
+  file: t.File({ maxSize: "25m" }),
+});
+
 export const UpdateSecretFileBodySchema = t.Object({
   name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
   description: t.Optional(t.String({ maxLength: 500 })),

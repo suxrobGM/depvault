@@ -1,22 +1,13 @@
 "use client";
 
-import { useRef, useState, type ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import {
   SECRET_FILE_ENV_TYPES,
   type SecretFileEnvironmentTypeValue,
 } from "@depvault/shared/constants";
-import { UploadFile as UploadFileIcon } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
+import { FileDropZone } from "@/components/ui/file-drop-zone";
 import { FormSelectField } from "@/components/ui/form-select-field";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
@@ -36,7 +27,6 @@ export function UploadSecretFileDialog(props: UploadSecretFileDialogProps): Reac
   const { open, onClose, projectId, vaultGroups } = props;
 
   const [file, setFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
 
   const mutation = useApiMutation(
@@ -93,49 +83,11 @@ export function UploadSecretFileDialog(props: UploadSecretFileDialogProps): Reac
         <DialogTitle>Upload Secret File</DialogTitle>
         <DialogContent>
           <Stack spacing={2.5} sx={{ mt: 1 }}>
-            <Box
-              onClick={() => fileInputRef.current?.click()}
-              sx={{
-                border: 2,
-                borderColor: file ? "primary.main" : "divider",
-                borderStyle: "dashed",
-                borderRadius: 2,
-                p: 3,
-                textAlign: "center",
-                cursor: "pointer",
-                transition: "border-color 0.2s",
-                "&:hover": { borderColor: "primary.main" },
-              }}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                hidden
-                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              />
-              <UploadFileIcon
-                sx={{ fontSize: 40, color: file ? "primary.main" : "text.secondary", mb: 1 }}
-              />
-              {file ? (
-                <>
-                  <Typography variant="body2" fontWeight={600}>
-                    {file.name}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {(file.size / 1024).toFixed(1)} KB — click to change
-                  </Typography>
-                </>
-              ) : (
-                <>
-                  <Typography variant="body2" color="text.secondary">
-                    Click to select a file
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Max 25 MB. Executable files (.exe, .sh, .bat, .cmd, .ps1) are not allowed.
-                  </Typography>
-                </>
-              )}
-            </Box>
+            <FileDropZone
+              file={file}
+              onChange={setFile}
+              hint="Max 25 MB. Executable files (.exe, .sh, .bat, .cmd, .ps1) are not allowed."
+            />
 
             <FormSelectField
               form={form}

@@ -14,6 +14,7 @@ import {
   SecretFileRollbackParamsSchema,
   SecretFileVersionListResponseSchema,
   UpdateSecretFileBodySchema,
+  UploadNewVersionBodySchema,
   UploadSecretFileBodySchema,
 } from "./secret-file.schema";
 import { SecretFileService } from "./secret-file.service";
@@ -135,6 +136,51 @@ export const secretFileController = new Elysia({
         summary: "List secret file versions",
         description:
           "List all version history entries for a secret file. Any project member can view version metadata.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .post(
+    "/:fileId/content",
+    async ({ params, body, user, request, server }) =>
+      secretFileService.uploadNewVersion(
+        params.id,
+        params.fileId,
+        user.id,
+        body.file,
+        getClientIp(request, server),
+      ),
+    {
+      params: SecretFileParamsSchema,
+      body: UploadNewVersionBodySchema,
+      response: SecretFileResponseSchema,
+      detail: {
+        summary: "Upload a new version of a secret file",
+        description:
+          "Replace a secret file's content with a new upload. The current content is saved as a version before being replaced. Only owners and editors can upload new versions.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .get(
+    "/:fileId/versions/:versionId/download",
+    async ({ params, user, set }) => {
+      const { buffer, name, mimeType } = await secretFileVersionService.downloadVersion(
+        params.id,
+        params.fileId,
+        params.versionId,
+        user.id,
+      );
+      set.headers["content-type"] = mimeType;
+      set.headers["content-disposition"] = `attachment; filename="${name}"`;
+      return buffer;
+    },
+    {
+      params: SecretFileRollbackParamsSchema,
+      detail: {
+        summary: "Download a specific version of a secret file",
+        description:
+          "Download and decrypt a previous version of a secret file. Only owners and editors can download.",
         security: [{ bearerAuth: [] }],
       },
     },

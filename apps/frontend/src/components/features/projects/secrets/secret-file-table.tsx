@@ -89,6 +89,7 @@ function SecretFileRow(props: SecretFileRowProps): ReactElement {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [downloadingVersionId, setDownloadingVersionId] = useState<string | null>(null);
 
   const toast = useToast();
 
@@ -138,12 +139,33 @@ function SecretFileRow(props: SecretFileRowProps): ReactElement {
         return;
       }
 
-      const blob = new Blob([data as unknown as ArrayBuffer], { type: "application/octet-stream" });
-      downloadFile(blob, file.name);
+      downloadFile(data as unknown as ArrayBuffer, file.name);
     } catch {
       toast.error("Failed to download file");
     } finally {
       setDownloading(false);
+    }
+  };
+
+  const handleVersionDownload = async (versionId: string) => {
+    setDownloadingVersionId(versionId);
+    try {
+      const { data, error } = await client.api
+        .projects({ id: projectId })
+        .secrets({ fileId: file.id })
+        .versions({ versionId })
+        .download.get();
+
+      if (error) {
+        toast.error("Failed to download version");
+        return;
+      }
+
+      downloadFile(data as unknown as ArrayBuffer, file.name);
+    } catch {
+      toast.error("Failed to download version");
+    } finally {
+      setDownloadingVersionId(null);
     }
   };
 
@@ -280,7 +302,7 @@ function SecretFileRow(props: SecretFileRowProps): ReactElement {
                       <TableCell>Version</TableCell>
                       <TableCell>Date</TableCell>
                       <TableCell>Size</TableCell>
-                      {canEdit && <TableCell align="right">Action</TableCell>}
+                      <TableCell align="right">Actions</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -299,8 +321,16 @@ function SecretFileRow(props: SecretFileRowProps): ReactElement {
                             {formatBytes(v.fileSize)}
                           </Typography>
                         </TableCell>
-                        {canEdit && (
-                          <TableCell align="right">
+                        <TableCell align="right">
+                          <IconButton
+                            size="small"
+                            title="Download this version"
+                            disabled={downloadingVersionId === v.id}
+                            onClick={() => handleVersionDownload(v.id)}
+                          >
+                            <DownloadIcon fontSize="small" />
+                          </IconButton>
+                          {canEdit && (
                             <IconButton
                               size="small"
                               title="Rollback to this version"
@@ -309,8 +339,8 @@ function SecretFileRow(props: SecretFileRowProps): ReactElement {
                             >
                               <ReplayIcon fontSize="small" />
                             </IconButton>
-                          </TableCell>
-                        )}
+                          )}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
