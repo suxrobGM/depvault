@@ -1,5 +1,5 @@
 import { decrypt } from "@/common/utils/encryption";
-import type { EnvVariableWithValueResponse } from "./env-variable.schema";
+import type { EnvVariableWithValueResponse } from "./environment.schema";
 
 interface EnvVariableRecord {
   id: string;

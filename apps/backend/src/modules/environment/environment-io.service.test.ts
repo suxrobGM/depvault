@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 import { ForbiddenError, NotFoundError } from "@/common/errors";
 import * as encryption from "@/common/utils/encryption";
-import { EnvVariableIOService } from "./env-variable-io.service";
+import { EnvironmentIOService } from "./environment-io.service";
 
 const now = new Date();
 const projectId = "project-uuid";
@@ -67,8 +67,8 @@ function createMockAuditLogService() {
   } as any;
 }
 
-describe("EnvVariableIOService", () => {
-  let service: EnvVariableIOService;
+describe("EnvironmentIOService", () => {
+  let service: EnvironmentIOService;
   let mockPrisma: ReturnType<typeof createMockPrisma>;
   let mockAuditLog: ReturnType<typeof createMockAuditLogService>;
 
@@ -77,7 +77,7 @@ describe("EnvVariableIOService", () => {
     mockAuditLog = createMockAuditLogService();
     const { EnvironmentRepository } = require("./environment.repository");
     const envRepo = new EnvironmentRepository(mockPrisma);
-    service = new EnvVariableIOService(mockPrisma, mockAuditLog, envRepo);
+    service = new EnvironmentIOService(mockPrisma, mockAuditLog, envRepo);
 
     spyOn(encryption, "deriveProjectKey").mockReturnValue(fakeProjectKey);
     spyOn(encryption, "encrypt").mockReturnValue(mockEncrypted);

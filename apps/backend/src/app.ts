@@ -10,7 +10,7 @@ import { analysisController } from "@/modules/analysis";
 import { auditLogController } from "@/modules/audit-log/audit-log.controller";
 import { authController } from "@/modules/auth";
 import { convertController } from "@/modules/convert";
-import { envVariableController } from "@/modules/env-variable";
+import { environmentController } from "@/modules/environment";
 import { githubApiController } from "@/modules/github";
 import { notificationController } from "@/modules/notification";
 import { projectController } from "@/modules/project";
@@ -37,7 +37,7 @@ const app = new Elysia()
       })
       .use(authController)
       .use(projectController)
-      .use(envVariableController)
+      .use(environmentController)
       .use(secretFileController)
       .use(secretController)
       .use(userController)

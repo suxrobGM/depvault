@@ -4,11 +4,12 @@ import { authGuard } from "@/common/middleware";
 import { getClientIp } from "@/common/utils/ip";
 import { StringIdParamSchema } from "@/types/request";
 import { MessageResponseSchema } from "@/types/response";
-import { EnvVariableIOService } from "./env-variable-io.service";
+import { EnvironmentIOService } from "./environment-io.service";
 import {
   CreateEnvVariableBodySchema,
   EnvExampleQuerySchema,
   EnvExampleResponseSchema,
+  EnvironmentListResponseSchema,
   EnvVariableListQuerySchema,
   EnvVariableListResponseSchema,
   EnvVariableParamsSchema,
@@ -18,21 +19,30 @@ import {
   ImportEnvVariablesBodySchema,
   ImportEnvVariablesResponseSchema,
   UpdateEnvVariableBodySchema,
-} from "./env-variable.schema";
-import { EnvVariableService } from "./env-variable.service";
+} from "./environment.schema";
+import { EnvironmentService } from "./environment.service";
 
-const envVariableService = container.resolve(EnvVariableService);
-const envVariableIOService = container.resolve(EnvVariableIOService);
+const environmentService = container.resolve(EnvironmentService);
+const environmentIOService = container.resolve(EnvironmentIOService);
 
-export const envVariableController = new Elysia({
-  prefix: "/projects/:id/env-variables",
-  detail: { tags: ["Environment Variables"] },
+export const environmentController = new Elysia({
+  prefix: "/projects/:id/environments",
+  detail: { tags: ["Environments"] },
 })
   .use(authGuard)
+  .get("/", ({ params, user }) => environmentService.listEnvironments(params.id, user.id), {
+    params: StringIdParamSchema,
+    response: EnvironmentListResponseSchema,
+    detail: {
+      summary: "List environments",
+      description: "List all environments for a project with variable counts.",
+      security: [{ bearerAuth: [] }],
+    },
+  })
   .post(
-    "/",
+    "/variables",
     ({ params, body, user, request, server }) =>
-      envVariableService.create(params.id, body, user.id, getClientIp(request, server)),
+      environmentService.create(params.id, body, user.id, getClientIp(request, server)),
     {
       params: StringIdParamSchema,
       body: CreateEnvVariableBodySchema,
@@ -46,9 +56,9 @@ export const envVariableController = new Elysia({
     },
   )
   .get(
-    "/",
+    "/variables",
     ({ params, query, user, request, server }) =>
-      envVariableService.list(
+      environmentService.list(
         params.id,
         user.id,
         query.environment,
@@ -69,9 +79,9 @@ export const envVariableController = new Elysia({
     },
   )
   .put(
-    "/:varId",
+    "/variables/:varId",
     ({ params, body, user, request, server }) =>
-      envVariableService.update(
+      environmentService.update(
         params.id,
         params.varId,
         body,
@@ -91,9 +101,9 @@ export const envVariableController = new Elysia({
     },
   )
   .delete(
-    "/:varId",
+    "/variables/:varId",
     ({ params, user, request, server }) =>
-      envVariableService.delete(params.id, params.varId, user.id, getClientIp(request, server)),
+      environmentService.delete(params.id, params.varId, user.id, getClientIp(request, server)),
     {
       params: EnvVariableParamsSchema,
       response: MessageResponseSchema,
@@ -108,7 +118,7 @@ export const envVariableController = new Elysia({
   .post(
     "/import",
     ({ params, body, user, request, server }) =>
-      envVariableIOService.bulkImport(params.id, body, user.id, getClientIp(request, server)),
+      environmentIOService.bulkImport(params.id, body, user.id, getClientIp(request, server)),
     {
       params: StringIdParamSchema,
       body: ImportEnvVariablesBodySchema,
@@ -124,7 +134,7 @@ export const envVariableController = new Elysia({
   .get(
     "/export",
     ({ params, query, user, request, server }) =>
-      envVariableIOService.export(
+      environmentIOService.export(
         params.id,
         query.environment,
         query.format,
@@ -146,7 +156,7 @@ export const envVariableController = new Elysia({
   .get(
     "/example",
     ({ params, query, user }) =>
-      envVariableIOService.generateExample(params.id, query.environment, user.id),
+      environmentIOService.generateExample(params.id, query.environment, user.id),
     {
       params: StringIdParamSchema,
       query: EnvExampleQuerySchema,

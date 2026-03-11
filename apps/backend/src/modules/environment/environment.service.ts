@@ -6,16 +6,17 @@ import { PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import { NotificationService } from "@/modules/notification";
 import type { PaginatedResponse } from "@/types/response";
-import { toDecryptedResponse, toMaskedResponse, toResponseWithValue } from "./env-variable.mapper";
+import { toDecryptedResponse, toMaskedResponse, toResponseWithValue } from "./environment.mapper";
+import { EnvironmentRepository } from "./environment.repository";
 import type {
   CreateEnvVariableBody,
+  EnvironmentResponse,
   EnvVariableWithValueResponse,
   UpdateEnvVariableBody,
-} from "./env-variable.schema";
-import { EnvironmentRepository } from "./environment.repository";
+} from "./environment.schema";
 
 @singleton()
-export class EnvVariableService {
+export class EnvironmentService {
   private static readonly ROTATION_MAX_AGE_DAYS = 90;
   private static readonly NOTIFICATION_COOLDOWN_HOURS = 24;
 
@@ -25,6 +26,24 @@ export class EnvVariableService {
     private readonly envHelper: EnvironmentRepository,
     private readonly notificationService: NotificationService,
   ) {}
+
+  async listEnvironments(projectId: string, userId: string): Promise<EnvironmentResponse[]> {
+    await this.envHelper.requireMember(projectId, userId);
+
+    const environments = await this.prisma.environment.findMany({
+      where: { projectId },
+      include: { _count: { select: { variables: true } } },
+      orderBy: { createdAt: "asc" },
+    });
+
+    return environments.map((env) => ({
+      id: env.id,
+      name: env.name,
+      type: env.type,
+      variableCount: env._count.variables,
+      createdAt: env.createdAt,
+    }));
+  }
 
   async create(
     projectId: string,
@@ -244,7 +263,7 @@ export class EnvVariableService {
           type: "ENV_DRIFT",
           metadata: { path: ["projectId"], equals: projectId },
           createdAt: {
-            gte: new Date(Date.now() - EnvVariableService.NOTIFICATION_COOLDOWN_HOURS * 3600_000),
+            gte: new Date(Date.now() - EnvironmentService.NOTIFICATION_COOLDOWN_HOURS * 3600_000),
           },
         },
       });
@@ -268,7 +287,7 @@ export class EnvVariableService {
     variables: { key: string; updatedAt: Date }[],
   ): Promise<void> {
     try {
-      const maxAge = EnvVariableService.ROTATION_MAX_AGE_DAYS * 86400_000;
+      const maxAge = EnvironmentService.ROTATION_MAX_AGE_DAYS * 86400_000;
       const staleVars = variables.filter((v) => Date.now() - v.updatedAt.getTime() > maxAge);
 
       if (staleVars.length === 0) return;
@@ -279,7 +298,7 @@ export class EnvVariableService {
           type: "SECRET_ROTATION",
           metadata: { path: ["projectId"], equals: projectId },
           createdAt: {
-            gte: new Date(Date.now() - EnvVariableService.NOTIFICATION_COOLDOWN_HOURS * 3600_000),
+            gte: new Date(Date.now() - EnvironmentService.NOTIFICATION_COOLDOWN_HOURS * 3600_000),
           },
         },
       });

@@ -20,6 +20,7 @@ export type {
   ImportResult,
   ExportResult,
 } from "./env-variable";
+export type { EnvironmentListResponse, EnvironmentItem } from "./environment";
 export type {
   SecretFile,
   SecretFileListResponse,

@@ -109,6 +109,17 @@ export const EnvExampleQuerySchema = t.Object({
   environment: t.String({ minLength: 1 }),
 });
 
+export const EnvironmentResponseSchema = t.Object({
+  id: t.String(),
+  name: t.String(),
+  type: EnvironmentTypeSchema,
+  variableCount: t.Number(),
+  createdAt: t.Date(),
+});
+
+export const EnvironmentListResponseSchema = t.Array(EnvironmentResponseSchema);
+
+export type EnvironmentResponse = Static<typeof EnvironmentResponseSchema>;
 export type CreateEnvVariableBody = Static<typeof CreateEnvVariableBodySchema>;
 export type UpdateEnvVariableBody = Static<typeof UpdateEnvVariableBodySchema>;
 export type EnvVariableResponse = Static<typeof EnvVariableResponseSchema>;

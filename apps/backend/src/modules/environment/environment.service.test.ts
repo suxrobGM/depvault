@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 import { ForbiddenError, NotFoundError } from "@/common/errors";
 import * as encryption from "@/common/utils/encryption";
-import { EnvVariableService } from "./env-variable.service";
+import { EnvironmentService } from "./environment.service";
 
 const now = new Date();
 const projectId = "project-uuid";
@@ -72,8 +72,8 @@ function createMockAuditLogService() {
   } as any;
 }
 
-describe("EnvVariableService", () => {
-  let service: EnvVariableService;
+describe("EnvironmentService", () => {
+  let service: EnvironmentService;
   let mockPrisma: ReturnType<typeof createMockPrisma>;
   let mockAuditLog: ReturnType<typeof createMockAuditLogService>;
 
@@ -83,7 +83,7 @@ describe("EnvVariableService", () => {
     const { EnvironmentRepository } = require("./environment.repository");
     const envHelper = new EnvironmentRepository(mockPrisma);
     const mockNotificationService = { notify: mock(() => Promise.resolve()) } as any;
-    service = new EnvVariableService(mockPrisma, mockAuditLog, envHelper, mockNotificationService);
+    service = new EnvironmentService(mockPrisma, mockAuditLog, envHelper, mockNotificationService);
 
     spyOn(encryption, "deriveProjectKey").mockReturnValue(fakeProjectKey);
     spyOn(encryption, "encrypt").mockReturnValue(mockEncrypted);
