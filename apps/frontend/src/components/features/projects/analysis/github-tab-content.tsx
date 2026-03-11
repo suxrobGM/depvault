@@ -7,7 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useAuth } from "@/hooks/use-auth";
-import { useNotification } from "@/hooks/use-notification";
+import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import { API_BASE_URL } from "@/lib/constants";
 import type { GitHubDependencyFile, GitHubRepoListResponse } from "@/types/api/github";
@@ -23,7 +23,7 @@ interface GitHubTabContentProps {
 export function GitHubTabContent(props: GitHubTabContentProps): ReactElement {
   const { projectId, onClose } = props;
   const { user } = useAuth();
-  const notification = useNotification();
+  const notification = useToast();
   const queryClient = useQueryClient();
   const [step, setStep] = useState(0);
   const [selectedRepo, setSelectedRepo] = useState<{ owner: string; repo: string } | null>(null);

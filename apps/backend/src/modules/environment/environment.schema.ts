@@ -155,6 +155,11 @@ export const CloneEnvironmentResponseSchema = t.Object({
   variableCount: t.Number(),
 });
 
+export const DeleteEnvironmentParamsSchema = t.Object({
+  id: t.String(),
+  envId: t.String(),
+});
+
 export type CloneEnvironmentBody = Static<typeof CloneEnvironmentBodySchema>;
 
 export type EnvironmentResponse = Static<typeof EnvironmentResponseSchema>;

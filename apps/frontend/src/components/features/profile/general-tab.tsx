@@ -6,7 +6,7 @@ import { useForm } from "@tanstack/react-form";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { GlassCard } from "@/components/ui/glass-card";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useNotification } from "@/hooks/use-notification";
+import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import type { AuthUser } from "@/providers/auth-provider";
 import { AvatarUploader } from "./avatar-uploader";
@@ -19,7 +19,7 @@ interface GeneralTabProps {
 
 export function GeneralTab(props: GeneralTabProps): ReactElement {
   const { user, setUser } = props;
-  const notification = useNotification();
+  const notification = useToast();
 
   const updateMutation = useApiMutation(
     (values: { firstName: string; lastName: string }) => client.api.users.me.patch(values),

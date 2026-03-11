@@ -1,6 +1,6 @@
 import { singleton } from "tsyringe";
 import { NotFoundError } from "@/common/errors";
-import { deriveProjectKey, encrypt } from "@/common/utils/encryption";
+import { decrypt, deriveProjectKey, encrypt } from "@/common/utils/encryption";
 import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import { EnvironmentRepository } from "./environment.repository";
@@ -14,7 +14,7 @@ export class EnvironmentCloneService {
     private readonly envHelper: EnvironmentRepository,
   ) {}
 
-  /** Clone an environment's variable structure (keys + metadata) into a new environment with empty values. */
+  /** Clone an environment's variables (keys, values, and metadata) into a new environment. */
   async cloneEnvironment(
     projectId: string,
     body: CloneEnvironmentBody,
@@ -47,7 +47,9 @@ export class EnvironmentCloneService {
 
     const created = await Promise.all(
       sourceEnv.variables.map((v) => {
-        const { ciphertext, iv, authTag } = encrypt("", projectKey);
+        const plaintext = decrypt(v.encryptedValue, v.iv, v.authTag, projectKey);
+        const { ciphertext, iv, authTag } = encrypt(plaintext, projectKey);
+
         return this.prisma.envVariable.create({
           data: {
             environmentId: targetEnv.id,

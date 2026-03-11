@@ -26,13 +26,13 @@ import {
 } from "@mui/material";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { PageHeader } from "@/components/ui/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useAuth } from "@/hooks/use-auth";
-import { useNotification } from "@/hooks/use-notification";
+import { useConfirm } from "@/hooks/use-confirm";
+import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 import type { AnalysisDetailResponse } from "@/types/api/analysis";
@@ -53,9 +53,10 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
   const { projectId, analysisId } = props;
   const router = useRouter();
   const { user } = useAuth();
-  const notification = useNotification();
+  const notification = useToast();
+  const confirm = useConfirm();
+
   const [viewMode, setViewMode] = useState<ViewMode>("table");
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editingPath, setEditingPath] = useState(false);
   const [filePathDraft, setFilePathDraft] = useState("");
 
@@ -117,6 +118,19 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
       },
     },
   );
+
+  const handleDeleteAnalysis = async () => {
+    const confirmed = await confirm({
+      title: "Delete Analysis",
+      description:
+        "Are you sure you want to delete this analysis? This will remove all dependency data and cannot be undone.",
+      confirmLabel: "Delete",
+      destructive: true,
+    });
+    if (confirmed) {
+      deleteMutation.mutate();
+    }
+  };
 
   const currentMember = membersData?.items.find((m) => m.user.id === user?.id);
   const canEdit = currentMember?.role === "OWNER" || currentMember?.role === "EDITOR";
@@ -194,7 +208,7 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
             </ToggleButtonGroup>
             {canEdit && (
               <Tooltip title="Delete analysis">
-                <IconButton color="error" onClick={() => setDeleteDialogOpen(true)} size="small">
+                <IconButton color="error" onClick={handleDeleteAnalysis} size="small">
                   <DeleteIcon />
                 </IconButton>
               </Tooltip>
@@ -273,17 +287,6 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
       ) : (
         <DependencyGraph dependencies={analysis.dependencies} fileName={displayName} />
       )}
-
-      <ConfirmDialog
-        open={deleteDialogOpen}
-        title="Delete Analysis"
-        description="Are you sure you want to delete this analysis? This will remove all dependency data and cannot be undone."
-        confirmLabel="Delete"
-        destructive
-        loading={deleteMutation.isPending}
-        onConfirm={() => deleteMutation.mutate()}
-        onCancel={() => setDeleteDialogOpen(false)}
-      />
     </Box>
   );
 }

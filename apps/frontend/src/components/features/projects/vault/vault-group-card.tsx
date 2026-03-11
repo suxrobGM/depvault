@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import type { EnvironmentTypeValue } from "@depvault/shared/constants";
+import { getEnvironmentLabel, type EnvironmentTypeValue } from "@depvault/shared/constants";
 import { Delete as DeleteIcon, Edit as EditIcon, VpnKey as VpnKeyIcon } from "@mui/icons-material";
 import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
-import { useNotification } from "@/hooks/use-notification";
+import { useConfirm } from "@/hooks/use-confirm";
+import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import type { EnvVariable, EnvVariableListResponse } from "@/types/api/env-variable";
 import type { EnvironmentListResponse } from "@/types/api/environment";
@@ -34,7 +35,8 @@ interface VaultGroupCardProps {
 
 export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
   const { projectId, group, canEdit } = props;
-  const notification = useNotification();
+  const notification = useToast();
+  const confirm = useConfirm();
 
   const [view, setView] = useState<VaultView>("variables");
   const [selectedEnv, setSelectedEnv] = useState<string | null>(null);
@@ -78,9 +80,44 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
     },
   );
 
-  const handleDelete = () => {
-    if (window.confirm(`Delete group "${group.name}" and all its environments and variables?`)) {
+  const deleteEnvMutation = useApiMutation(
+    (envId: string) => client.api.projects({ id: projectId }).environments({ envId }).delete(),
+    {
+      invalidateKeys: [
+        ["environments", projectId, group.id],
+        ["env-variables", projectId],
+        ["vault-groups", projectId],
+      ],
+      onSuccess: () => {
+        notification.success("Environment deleted");
+        setSelectedEnv(null);
+      },
+      onError: (error) => notification.error(error.message || "Failed to delete environment"),
+    },
+  );
+
+  const handleDelete = async () => {
+    const confirmed = await confirm({
+      title: "Delete vault group",
+      description: `This will permanently delete the group "${group.name}" and all its environments and variables.`,
+      confirmLabel: "Delete",
+      destructive: true,
+      confirmationText: group.name,
+    });
+    if (confirmed) {
       deleteMutation.mutate();
+    }
+  };
+
+  const handleDeleteEnvironment = async (envId: string, envType: string) => {
+    const confirmed = await confirm({
+      title: "Delete environment",
+      description: `This will permanently delete the "${getEnvironmentLabel(envType)}" environment and all its variables.`,
+      confirmLabel: "Delete",
+      destructive: true,
+    });
+    if (confirmed) {
+      deleteEnvMutation.mutate(envId);
     }
   };
 
@@ -190,6 +227,7 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
             environments={environments}
             selected={activeEnv}
             onSelect={setSelectedEnv}
+            onDelete={canEdit ? handleDeleteEnvironment : undefined}
           />
           <VaultToolbar
             canEdit={canEdit}

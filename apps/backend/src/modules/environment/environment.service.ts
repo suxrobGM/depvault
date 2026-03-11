@@ -238,6 +238,39 @@ export class EnvironmentService {
     return { message: "Environment variable deleted successfully" };
   }
 
+  /** Delete an entire environment and all its variables. */
+  async deleteEnvironment(
+    projectId: string,
+    envId: string,
+    userId: string,
+    ipAddress: string,
+  ): Promise<{ message: string }> {
+    await this.envHelper.requireEditorOrOwner(projectId, userId);
+
+    const environment = await this.prisma.environment.findFirst({
+      where: { id: envId, projectId },
+      include: { _count: { select: { variables: true } } },
+    });
+
+    if (!environment) {
+      throw new NotFoundError("Environment not found");
+    }
+
+    await this.prisma.environment.delete({ where: { id: envId } });
+
+    await this.auditLogService.log({
+      userId,
+      projectId,
+      action: "DELETE",
+      resourceType: "ENV_VARIABLE",
+      resourceId: envId,
+      ipAddress,
+      metadata: { type: environment.type, variableCount: environment._count.variables },
+    });
+
+    return { message: "Environment deleted successfully" };
+  }
+
   private async checkDrift(projectId: string, userId: string): Promise<void> {
     try {
       const environments = await this.prisma.environment.findMany({

@@ -15,7 +15,7 @@ import {
 import { useForm } from "@tanstack/react-form";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useNotification } from "@/hooks/use-notification";
+import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import { createVariableSchema } from "./vault-schemas";
 
@@ -29,7 +29,7 @@ interface CreateVariableDialogProps {
 
 export function CreateVariableDialog(props: CreateVariableDialogProps): ReactElement {
   const { open, onClose, projectId, vaultGroupId, environmentType } = props;
-  const notification = useNotification();
+  const notification = useToast();
 
   const mutation = useApiMutation(
     (values: {

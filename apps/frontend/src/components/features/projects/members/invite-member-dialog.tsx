@@ -13,7 +13,7 @@ import {
 import { useForm } from "@tanstack/react-form";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useNotification } from "@/hooks/use-notification";
+import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import { inviteMemberSchema } from "../schemas";
 
@@ -25,7 +25,7 @@ interface InviteMemberDialogProps {
 
 export function InviteMemberDialog(props: InviteMemberDialogProps): ReactElement {
   const { open, onClose, projectId } = props;
-  const notification = useNotification();
+  const notification = useToast();
 
   const mutation = useApiMutation(
     (values: { email: string; role: "EDITOR" | "VIEWER" }) =>

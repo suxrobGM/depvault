@@ -23,7 +23,7 @@ import {
 } from "@mui/material";
 import { GlassCard } from "@/components/ui/glass-card";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useNotification } from "@/hooks/use-notification";
+import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import type { EnvTemplateItem } from "@/types/api/env-template";
 
@@ -38,7 +38,7 @@ interface TemplateListProps {
 export function TemplateList(props: TemplateListProps): ReactElement {
   const { projectId, templates, canEdit, onView, onApply } = props;
   const [deleteTarget, setDeleteTarget] = useState<EnvTemplateItem | null>(null);
-  const notification = useNotification();
+  const notification = useToast();
 
   const deleteMutation = useApiMutation(
     (templateId: string) =>

@@ -22,8 +22,8 @@ import {
   Typography,
 } from "@mui/material";
 import Cropper, { type Area, type Point } from "react-easy-crop";
-import { useNotification } from "@/hooks/use-notification";
-import { API_BASE_URL } from "@/lib/constants";
+import { useToast } from "@/hooks/use-toast";
+import { client } from "@/lib/api";
 import { getCroppedImg } from "./crop-utils";
 
 interface AvatarUploaderProps {
@@ -33,7 +33,7 @@ interface AvatarUploaderProps {
 
 export function AvatarUploader(props: AvatarUploaderProps): ReactElement {
   const { currentAvatarUrl, onAvatarChange } = props;
-  const notification = useNotification();
+  const notification = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -91,21 +91,12 @@ export function AvatarUploader(props: AvatarUploaderProps): ReactElement {
       const blob = await getCroppedImg(previewUrl, croppedAreaPixels);
       const file = new File([blob], "avatar.webp", { type: "image/webp" });
 
-      const formData = new FormData();
-      formData.append("file", file);
+      const { data, error } = await client.api.users.me.avatar.post({ file });
 
-      const res = await fetch(`${API_BASE_URL}/api/users/me/avatar`, {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const error = await res.json().catch(() => ({ message: "Upload failed" }));
-        throw new Error(error.message ?? "Upload failed");
+      if (error) {
+        throw new Error(error.value?.message ?? "Upload failed");
       }
 
-      const data = await res.json();
       onAvatarChange(data.avatarUrl);
       notification.success("Avatar updated");
       handleCloseDialog();

@@ -7,7 +7,7 @@ import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useNotification } from "@/hooks/use-notification";
+import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 import { createProjectSchema } from "./schemas";
@@ -20,7 +20,7 @@ interface CreateProjectDialogProps {
 export function CreateProjectDialog(props: CreateProjectDialogProps): ReactElement {
   const { open, onClose } = props;
   const router = useRouter();
-  const notification = useNotification();
+  const notification = useToast();
 
   const mutation = useApiMutation(
     (values: { name: string; description?: string; repositoryUrl?: string }) =>

@@ -4,7 +4,7 @@ import { useState, type ReactElement } from "react";
 import { CloudUpload as UploadIcon } from "@mui/icons-material";
 import { Box, Button, DialogActions, MenuItem, Stack, TextField } from "@mui/material";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useNotification } from "@/hooks/use-notification";
+import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import { ECOSYSTEMS, type EcosystemValue } from "./analysis-utils";
 
@@ -15,7 +15,7 @@ interface UploadTabContentProps {
 
 export function UploadTabContent(props: UploadTabContentProps): ReactElement {
   const { projectId, onClose } = props;
-  const notification = useNotification();
+  const notification = useToast();
   const [ecosystem, setEcosystem] = useState<EcosystemValue>("NODEJS");
   const [fileName, setFileName] = useState("package.json");
   const [filePath, setFilePath] = useState("");

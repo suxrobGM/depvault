@@ -9,10 +9,11 @@ interface EnvironmentSelectorProps {
   environments: EnvironmentItem[];
   selected: string | null;
   onSelect: (type: string) => void;
+  onDelete?: (envId: string, envType: string) => void;
 }
 
 export function EnvironmentSelector(props: EnvironmentSelectorProps): ReactElement {
-  const { environments, selected, onSelect } = props;
+  const { environments, selected, onSelect, onDelete } = props;
 
   return (
     <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
@@ -26,6 +27,7 @@ export function EnvironmentSelector(props: EnvironmentSelectorProps): ReactEleme
           variant={selected === env.type ? "filled" : "outlined"}
           color={selected === env.type ? "primary" : "default"}
           onClick={() => onSelect(env.type)}
+          onDelete={onDelete ? () => onDelete(env.id, env.type) : undefined}
           size="small"
         />
       ))}

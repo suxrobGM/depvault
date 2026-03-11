@@ -11,6 +11,7 @@ import {
   CloneEnvironmentBodySchema,
   CloneEnvironmentResponseSchema,
   CreateEnvVariableBodySchema,
+  DeleteEnvironmentParamsSchema,
   EnvDiffQuerySchema,
   EnvDiffResponseSchema,
   EnvExampleQuerySchema,
@@ -92,7 +93,7 @@ export const environmentController = new Elysia({
       detail: {
         summary: "Clone environment",
         description:
-          "Clone an environment's variable structure into a new environment. Values are left empty.",
+          "Clone an environment's variables (keys, values, and metadata) into a new environment.",
         security: [{ bearerAuth: [] }],
       },
     },
@@ -230,6 +231,26 @@ export const environmentController = new Elysia({
         summary: "Generate .env.example template",
         description:
           "Generate a .env.example template with keys and placeholder annotations but no real values. Any project member can access this.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .delete(
+    "/:envId",
+    ({ params, user, request, server }) =>
+      environmentService.deleteEnvironment(
+        params.id,
+        params.envId,
+        user.id,
+        getClientIp(request, server),
+      ),
+    {
+      params: DeleteEnvironmentParamsSchema,
+      response: MessageResponseSchema,
+      detail: {
+        summary: "Delete an environment",
+        description:
+          "Permanently delete an environment and all its variables. Only owners and editors can delete.",
         security: [{ bearerAuth: [] }],
       },
     },

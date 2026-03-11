@@ -6,7 +6,7 @@ import { useForm } from "@tanstack/react-form";
 import { z } from "zod/v4";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useNotification } from "@/hooks/use-notification";
+import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import type { VaultGroup } from "@/types/api/vault-group";
 
@@ -24,7 +24,7 @@ interface EditGroupDialogProps {
 
 export function EditGroupDialog(props: EditGroupDialogProps): ReactElement {
   const { open, onClose, projectId, group } = props;
-  const notification = useNotification();
+  const notification = useToast();
 
   const mutation = useApiMutation(
     (values: { name?: string; description?: string | null }) =>

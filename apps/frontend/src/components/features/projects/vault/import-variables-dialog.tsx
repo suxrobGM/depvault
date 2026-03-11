@@ -21,7 +21,7 @@ import { useForm } from "@tanstack/react-form";
 import { FileUploadButton, type FileUploadResult } from "@/components/ui/file-upload-button";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useNotification } from "@/hooks/use-notification";
+import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import { importVariablesSchema } from "./vault-schemas";
 
@@ -36,7 +36,7 @@ interface ImportVariablesDialogProps {
 
 export function ImportVariablesDialog(props: ImportVariablesDialogProps): ReactElement {
   const { open, onClose, projectId, vaultGroupId, environmentType } = props;
-  const notification = useNotification();
+  const notification = useToast();
   const isNewEnvironment = !environmentType;
 
   const mutation = useApiMutation(

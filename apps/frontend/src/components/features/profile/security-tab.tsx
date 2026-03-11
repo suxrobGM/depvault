@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, type ReactElement } from "react";
+import type { ReactElement } from "react";
 import { GitHub as GitHubIcon } from "@mui/icons-material";
 import { Alert, Box, Button, CardContent, Chip, Stack, Typography } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { GlassCard } from "@/components/ui/glass-card";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useAuth } from "@/hooks/use-auth";
-import { useNotification } from "@/hooks/use-notification";
+import { useConfirm } from "@/hooks/use-confirm";
+import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import { API_BASE_URL } from "@/lib/constants";
 import type { AuthUser } from "@/providers/auth-provider";
@@ -23,8 +23,8 @@ interface SecurityTabProps {
 export function SecurityTab(props: SecurityTabProps): ReactElement {
   const { user } = props;
   const { logout } = useAuth();
-  const notification = useNotification();
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const notification = useToast();
+  const confirm = useConfirm();
 
   const emailMutation = useApiMutation(
     (values: { newEmail: string; password: string }) => client.api.users.me.email.patch(values),
@@ -81,6 +81,25 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
       });
     },
   });
+
+  const handleDeleteAccount = async () => {
+    const confirmed = await confirm({
+      title: "Delete Account",
+      description:
+        "Are you sure you want to delete your account? This will permanently remove all your projects, analyses, uploads, secret files, and other data.",
+      confirmLabel: "Delete my account",
+      destructive: true,
+      confirmationText: "DELETE",
+      confirmationHint: (
+        <>
+          Type <strong>DELETE</strong> to permanently delete your account.
+        </>
+      ),
+    });
+    if (confirmed) {
+      deleteMutation.mutate();
+    }
+  };
 
   const oauthOnly = !user.hasPassword;
 
@@ -226,28 +245,11 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             Permanently delete your account and all associated data. This action cannot be undone.
           </Typography>
-          <Button variant="outlined" color="error" onClick={() => setDeleteDialogOpen(true)}>
+          <Button variant="outlined" color="error" onClick={handleDeleteAccount}>
             Delete Account
           </Button>
         </CardContent>
       </GlassCard>
-
-      <ConfirmDialog
-        open={deleteDialogOpen}
-        title="Delete Account"
-        description="Are you sure you want to delete your account? This will permanently remove all your projects, analyses, uploads, secret files, and other data."
-        confirmLabel="Delete my account"
-        destructive
-        confirmationText="DELETE"
-        confirmationHint={
-          <>
-            Type <strong>DELETE</strong> to permanently delete your account.
-          </>
-        }
-        loading={deleteMutation.isPending}
-        onConfirm={() => deleteMutation.mutate()}
-        onCancel={() => setDeleteDialogOpen(false)}
-      />
     </Stack>
   );
 }

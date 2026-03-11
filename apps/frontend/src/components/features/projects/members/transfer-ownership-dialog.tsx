@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useNotification } from "@/hooks/use-notification";
+import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import type { Member } from "@/types/api/project";
 
@@ -31,7 +31,7 @@ interface TransferOwnershipDialogProps {
 
 export function TransferOwnershipDialog(props: TransferOwnershipDialogProps): ReactElement {
   const { open, onClose, projectId, members } = props;
-  const notification = useNotification();
+  const notification = useToast();
   const router = useRouter();
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 

@@ -22,7 +22,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useApiQuery } from "@/hooks/use-api-query";
-import { useNotification } from "@/hooks/use-notification";
+import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import type { ExportResult } from "@/types/api/env-variable";
 import { downloadFile } from "@/utils/download-file";
@@ -38,7 +38,7 @@ interface ExportVariablesDialogProps {
 export function ExportVariablesDialog(props: ExportVariablesDialogProps): ReactElement {
   const { open, onClose, projectId, vaultGroupId, environmentType } = props;
   const [format, setFormat] = useState<ConfigFormat>("env");
-  const notification = useNotification();
+  const notification = useToast();
 
   const { data } = useApiQuery<ExportResult>(
     ["env-export", projectId, environmentType, format],

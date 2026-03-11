@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { GlassCard } from "@/components/ui/glass-card";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useNotification } from "@/hooks/use-notification";
+import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 import type { ProjectResponse } from "@/types/api/project";
@@ -37,7 +37,7 @@ interface SettingsTabProps {
 export function SettingsTab(props: SettingsTabProps): ReactElement {
   const { project, projectId, isOwner, canEdit } = props;
   const router = useRouter();
-  const notification = useNotification();
+  const notification = useToast();
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   const updateMutation = useApiMutation(

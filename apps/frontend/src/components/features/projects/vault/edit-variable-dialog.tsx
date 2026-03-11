@@ -14,7 +14,7 @@ import {
 import { useForm } from "@tanstack/react-form";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useNotification } from "@/hooks/use-notification";
+import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import type { EnvVariable } from "@/types/api/env-variable";
 import { updateVariableSchema } from "./vault-schemas";
@@ -29,7 +29,7 @@ interface EditVariableDialogProps {
 
 export function EditVariableDialog(props: EditVariableDialogProps): ReactElement {
   const { open, onClose, projectId, environmentType, variable } = props;
-  const notification = useNotification();
+  const notification = useToast();
 
   const mutation = useApiMutation(
     (values: { key?: string; value?: string; description?: string; isRequired?: boolean }) =>

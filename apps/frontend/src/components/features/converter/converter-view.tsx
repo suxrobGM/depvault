@@ -19,7 +19,7 @@ import { CopyButton } from "@/components/ui/copy-button";
 import { FileUploadButton, type FileUploadResult } from "@/components/ui/file-upload-button";
 import { GlassCard } from "@/components/ui/glass-card";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useNotification } from "@/hooks/use-notification";
+import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import type { ConvertResult } from "@/types/api/convert";
 import { downloadFile } from "@/utils/download-file";
@@ -35,7 +35,7 @@ function getDownloadFileName(format: ConfigFormat): string {
 }
 
 export function ConverterView(): ReactElement {
-  const notification = useNotification();
+  const notification = useToast();
   const [content, setContent] = useState("");
   const [fromFormat, setFromFormat] = useState<ConfigFormat>("env");
   const [toFormat, setToFormat] = useState<ConfigFormat>("appsettings.json");

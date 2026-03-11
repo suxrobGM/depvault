@@ -25,7 +25,7 @@ import {
 import { GlassCard } from "@/components/ui/glass-card";
 import { MaskedValue } from "@/components/ui/masked-value";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useNotification } from "@/hooks/use-notification";
+import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import type { EnvVariable } from "@/types/api/env-variable";
 
@@ -41,7 +41,7 @@ interface VaultVariableTableProps {
 export function VaultVariableTable(props: VaultVariableTableProps): ReactElement {
   const { projectId, environmentType, variables, isLoading, canEdit, onEditVariable } = props;
   const [deleteTarget, setDeleteTarget] = useState<EnvVariable | null>(null);
-  const notification = useNotification();
+  const notification = useToast();
 
   const deleteMutation = useApiMutation(
     (varId: string) =>

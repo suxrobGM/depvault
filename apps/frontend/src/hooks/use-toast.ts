@@ -2,14 +2,14 @@
 
 import { useSnackbar } from "notistack";
 
-interface UseNotificationReturn {
+interface UseToastReturn {
   success: (message: string) => void;
   error: (message: string) => void;
   warning: (message: string) => void;
   info: (message: string) => void;
 }
 
-export function useNotification(): UseNotificationReturn {
+export function useToast(): UseToastReturn {
   const { enqueueSnackbar } = useSnackbar();
 
   const success = (message: string) => enqueueSnackbar(message, { variant: "success" });

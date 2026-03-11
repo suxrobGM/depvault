@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactElement } from "react";
+import { useEffect, useRef, type ReactElement } from "react";
 import { Box, Button, Divider, List, Popover, Skeleton, Stack, Typography } from "@mui/material";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
@@ -21,12 +21,21 @@ interface NotificationDropdownProps {
 export function NotificationDropdown(props: NotificationDropdownProps): ReactElement {
   const { anchorEl, onClose } = props;
   const open = Boolean(anchorEl);
-  const router = useRouter();
 
-  const { data, isLoading } = useNotifications({
+  const router = useRouter();
+  const prevOpen = useRef(false);
+
+  const { data, isLoading, refetch } = useNotifications({
     page: 1,
     limit: 5,
   });
+
+  useEffect(() => {
+    if (open && !prevOpen.current) {
+      refetch();
+    }
+    prevOpen.current = open;
+  }, [open, refetch]);
 
   const { data: countData } = useUnreadCount();
   const markRead = useMarkRead();

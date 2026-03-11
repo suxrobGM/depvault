@@ -29,7 +29,7 @@ import {
 import { GlassCard } from "@/components/ui/glass-card";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
-import { useNotification } from "@/hooks/use-notification";
+import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import type { Member, MemberListResponse } from "@/types/api/project";
 import { InviteMemberDialog } from "./invite-member-dialog";
@@ -48,7 +48,7 @@ const ROLE_COLORS: Record<string, "primary" | "secondary" | "default"> = {
 
 export function MembersTab(props: MembersTabProps): ReactElement {
   const { projectId, isOwner } = props;
-  const notification = useNotification();
+  const notification = useToast();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);

@@ -19,7 +19,7 @@ import { useForm } from "@tanstack/react-form";
 import { z } from "zod/v4";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useNotification } from "@/hooks/use-notification";
+import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 
 const cloneSchema = z.object({
@@ -38,7 +38,7 @@ interface CloneEnvironmentDialogProps {
 
 export function CloneEnvironmentDialog(props: CloneEnvironmentDialogProps): ReactElement {
   const { open, onClose, projectId, vaultGroupId, sourceType, onSuccess } = props;
-  const notification = useNotification();
+  const notification = useToast();
 
   const mutation = useApiMutation(
     (values: { sourceType: EnvironmentTypeValue; targetType: EnvironmentTypeValue }) =>

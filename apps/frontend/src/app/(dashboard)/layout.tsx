@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/app-shell";
 import { getServerClient } from "@/lib/api-server";
 import { ROUTES } from "@/lib/constants";
-import { AuthProvider, NotificationProvider, QueryProvider } from "@/providers";
+import { AuthProvider, ConfirmProvider, NotificationProvider, QueryProvider } from "@/providers";
 
 async function getUser() {
   const client = await getServerClient();
@@ -32,9 +32,11 @@ export default function DashboardLayout(props: PropsWithChildren): ReactElement 
   return (
     <QueryProvider>
       <NotificationProvider>
-        <Suspense>
-          <AuthenticatedShell>{children}</AuthenticatedShell>
-        </Suspense>
+        <ConfirmProvider>
+          <Suspense>
+            <AuthenticatedShell>{children}</AuthenticatedShell>
+          </Suspense>
+        </ConfirmProvider>
       </NotificationProvider>
     </QueryProvider>
   );
