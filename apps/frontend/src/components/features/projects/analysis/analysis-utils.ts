@@ -1,6 +1,8 @@
 export const ECOSYSTEMS = [
   { value: "NODEJS", label: "Node.js", defaultFile: "package.json" },
   { value: "PYTHON", label: "Python", defaultFile: "requirements.txt" },
+  { value: "DOTNET", label: ".NET", defaultFile: "Project.csproj" },
+  { value: "KOTLIN", label: "Kotlin", defaultFile: "libs.versions.toml" },
 ] as const;
 
 export type EcosystemValue = (typeof ECOSYSTEMS)[number]["value"];
@@ -20,6 +22,7 @@ export function getEcosystemLabel(ecosystem: string): string {
     DOTNET: ".NET",
     GO: "Go",
     JAVA: "Java",
+    KOTLIN: "Kotlin",
     RUBY: "Ruby",
     PHP: "PHP",
   };
@@ -39,6 +42,12 @@ const REGISTRY_URLS: Record<string, (name: string) => string> = {
   },
   RUBY: (name) => `https://rubygems.org/gems/${name}`,
   PHP: (name) => `https://packagist.org/packages/${name}`,
+  KOTLIN: (name) => {
+    const [group, artifact] = name.includes(":") ? name.split(":") : ["", name];
+    return group
+      ? `https://central.sonatype.com/artifact/${group}/${artifact}`
+      : `https://central.sonatype.com/search?q=${artifact}`;
+  },
   DOTNET: (name) => `https://www.nuget.org/packages/${name}`,
 };
 

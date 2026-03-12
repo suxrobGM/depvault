@@ -5,6 +5,7 @@ enum Ecosystem {
   DOTNET
   GO
   JAVA
+  KOTLIN
   RUBY
   PHP
 }

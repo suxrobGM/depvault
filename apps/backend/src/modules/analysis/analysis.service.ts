@@ -12,11 +12,19 @@ import type {
 } from "./analysis.schema";
 import { calculateHealthScore } from "./analysis.utils";
 import { checkVersions, resolveLicensePolicy, scanVulnerabilities } from "./checkers";
-import { nodejsParser, pythonParser, type DependencyParser } from "./parsers";
+import {
+  dotnetParser,
+  kotlinParser,
+  nodejsParser,
+  pythonParser,
+  type DependencyParser,
+} from "./parsers";
 
 const PARSERS: Record<string, DependencyParser> = {
   NODEJS: nodejsParser,
   PYTHON: pythonParser,
+  DOTNET: dotnetParser,
+  KOTLIN: kotlinParser,
 };
 
 const INCLUDE_DEPS_WITH_VULNS = {

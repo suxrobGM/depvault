@@ -1,5 +1,7 @@
 import type { Ecosystem } from "@/generated/prisma";
+import { fetchMavenVersion } from "./maven-version-checker";
 import { fetchNpmVersion } from "./npm-version-checker";
+import { fetchNugetVersion } from "./nuget-version-checker";
 import { fetchPypiVersion } from "./pypi-version-checker";
 import {
   compareVersions,
@@ -14,6 +16,8 @@ const CONCURRENCY_LIMIT = 10;
 const REGISTRY_FETCHERS: Partial<Record<Ecosystem, (name: string) => Promise<RegistryResult>>> = {
   NODEJS: fetchNpmVersion,
   PYTHON: fetchPypiVersion,
+  DOTNET: fetchNugetVersion,
+  KOTLIN: fetchMavenVersion,
 };
 
 export async function checkVersions(

@@ -13,9 +13,16 @@ const DEPENDENCY_FILES: Record<string, Ecosystem> = {
   "package.json": "NODEJS",
   "requirements.txt": "PYTHON",
   "pyproject.toml": "PYTHON",
+  "libs.versions.toml": "KOTLIN",
 };
 
 const DEPENDENCY_FILE_NAMES = new Set(Object.keys(DEPENDENCY_FILES));
+
+const DEPENDENCY_FILE_EXTENSIONS: Array<{ ext: string; ecosystem: Ecosystem }> = [
+  { ext: ".csproj", ecosystem: "DOTNET" },
+  { ext: ".fsproj", ecosystem: "DOTNET" },
+  { ext: ".vbproj", ecosystem: "DOTNET" },
+];
 
 @singleton()
 export class GitHubApiService {
@@ -64,19 +71,21 @@ export class GitHubApiService {
     const treeData = (await treeResponse.json()) as GitHubTreeResponse;
 
     return treeData.tree
-      .filter((item) => {
-        if (item.type !== "blob") return false;
-        const fileName = item.path.split("/").pop() ?? "";
-        return DEPENDENCY_FILE_NAMES.has(fileName);
-      })
+      .filter((item) => item.type === "blob")
       .map((item) => {
-        const fileName = item.path.split("/").pop()!;
-        return {
-          path: item.path,
-          name: fileName,
-          ecosystem: DEPENDENCY_FILES[fileName]!,
-        };
-      });
+        const fileName = item.path.split("/").pop() ?? "";
+        if (DEPENDENCY_FILE_NAMES.has(fileName)) {
+          return { path: item.path, name: fileName, ecosystem: DEPENDENCY_FILES[fileName]! };
+        }
+        const extMatch = DEPENDENCY_FILE_EXTENSIONS.find((e) =>
+          fileName.toLowerCase().endsWith(e.ext),
+        );
+        if (extMatch) {
+          return { path: item.path, name: fileName, ecosystem: extMatch.ecosystem };
+        }
+        return null;
+      })
+      .filter((item) => item !== null);
   }
 
   async getFileContent(userId: string, owner: string, repo: string, path: string) {
