@@ -74,7 +74,7 @@ export class SecretFileService {
       resourceType: "SECRET_FILE",
       resourceId: secretFile.id,
       ipAddress,
-      metadata: { fileName: file.name },
+      metadata: { fileName: file.name, vaultGroupName: environment.vaultGroup.name },
     });
 
     return toSecretFileResponse(secretFile, environment.vaultGroup);
@@ -142,7 +142,7 @@ export class SecretFileService {
       resourceType: "SECRET_FILE",
       resourceId: fileId,
       ipAddress,
-      metadata: { fileName: file.name },
+      metadata: { fileName: file.name, vaultGroupName: file.environment.vaultGroup.name },
     });
 
     return { buffer: decrypted, name: file.name, mimeType: file.mimeType };
@@ -195,7 +195,11 @@ export class SecretFileService {
       resourceType: "SECRET_FILE",
       resourceId: fileId,
       ipAddress,
-      metadata: { fileName: file.name, action: "new_version" },
+      metadata: {
+        fileName: file.name,
+        action: "new_version",
+        vaultGroupName: existing.environment.vaultGroup.name,
+      },
     });
 
     return toSecretFileResponse(updated, updated.environment.vaultGroup);
@@ -256,7 +260,7 @@ export class SecretFileService {
       resourceType: "SECRET_FILE",
       resourceId: fileId,
       ipAddress,
-      metadata: { fileName: file.name },
+      metadata: { fileName: file.name, vaultGroupName: file.environment.vaultGroup.name },
     });
 
     return { message: "Secret file deleted successfully" };
@@ -265,6 +269,7 @@ export class SecretFileService {
   private async findFileOrThrow(projectId: string, fileId: string) {
     const file = await this.prisma.secretFile.findFirst({
       where: { id: fileId, environment: { projectId } },
+      include: { environment: { include: { vaultGroup: { select: { name: true } } } } },
     });
 
     if (!file) {

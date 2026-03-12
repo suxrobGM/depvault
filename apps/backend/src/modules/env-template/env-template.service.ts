@@ -238,6 +238,8 @@ export class EnvTemplateService {
       throw new NotFoundError("Template not found");
     }
 
+    const groupName = await this.envRepository.getVaultGroupName(body.vaultGroupId);
+
     const env = await this.envRepository.findOrCreateEnvironment(
       projectId,
       body.vaultGroupId,
@@ -275,6 +277,7 @@ export class EnvTemplateService {
         templateName: template.name,
         environmentType: body.environmentType,
         variableCount: created.length,
+        vaultGroupName: groupName,
       },
     });
 

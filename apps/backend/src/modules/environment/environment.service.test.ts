@@ -33,6 +33,11 @@ const mockVariable = {
   updatedAt: now,
 };
 
+const mockVariableWithEnv = {
+  ...mockVariable,
+  environment: { vaultGroup: { name: "Default" } },
+};
+
 const mockEnvironment = {
   id: envId,
   projectId,
@@ -60,6 +65,9 @@ function createMockPrisma() {
     },
     envVariableVersion: {
       create: mock(() => Promise.resolve({})),
+    },
+    vaultGroup: {
+      findUnique: mock(() => Promise.resolve({ name: "Default" })),
     },
   } as any;
 }
@@ -266,7 +274,7 @@ describe("EnvironmentService", () => {
   describe("update", () => {
     it("should update key and value with version snapshot", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
-      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
+      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariableWithEnv);
 
       await service.update(
         projectId,
@@ -290,7 +298,7 @@ describe("EnvironmentService", () => {
 
     it("should write audit log on update", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
-      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
+      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariableWithEnv);
 
       await service.update(projectId, varId, { key: "NEW_KEY" }, userId, ipAddress);
 
@@ -305,7 +313,7 @@ describe("EnvironmentService", () => {
 
     it("should update metadata without creating version snapshot", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "EDITOR" });
-      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
+      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariableWithEnv);
 
       await service.update(projectId, varId, { description: "Updated desc" }, userId, ipAddress);
 
@@ -337,7 +345,7 @@ describe("EnvironmentService", () => {
   describe("delete", () => {
     it("should delete variable when user is OWNER", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
-      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
+      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariableWithEnv);
 
       const result = await service.delete(projectId, varId, userId, ipAddress);
 
@@ -347,7 +355,7 @@ describe("EnvironmentService", () => {
 
     it("should write audit log on delete", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
-      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
+      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariableWithEnv);
 
       await service.delete(projectId, varId, userId, ipAddress);
 
@@ -362,7 +370,7 @@ describe("EnvironmentService", () => {
 
     it("should delete variable when user is EDITOR", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "EDITOR" });
-      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
+      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariableWithEnv);
 
       await service.delete(projectId, varId, userId, ipAddress);
 

@@ -40,6 +40,15 @@ export class EnvironmentRepository {
     return member;
   }
 
+  /** Look up a vault group's display name by ID. */
+  async getVaultGroupName(vaultGroupId: string): Promise<string> {
+    const group = await this.prisma.vaultGroup.findUnique({
+      where: { id: vaultGroupId },
+      select: { name: true },
+    });
+    return group?.name ?? "Unknown";
+  }
+
   async requireEnvironment(vaultGroupId: string, type: EnvironmentType) {
     const env = await this.prisma.environment.findUnique({
       where: { vaultGroupId_type: { vaultGroupId, type } },

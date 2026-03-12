@@ -69,7 +69,7 @@ describe("AuditLogService", () => {
     it("should not throw when creation fails", async () => {
       mockPrisma.auditLog.create.mockRejectedValueOnce(new Error("DB error"));
 
-      await expect(
+      expect(
         service.log({
           userId,
           projectId,

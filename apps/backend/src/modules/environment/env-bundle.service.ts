@@ -22,6 +22,8 @@ export class EnvBundleService {
   async createBundle(projectId: string, body: EnvBundleBody, userId: string, ipAddress: string) {
     await this.envRepository.requireEditorOrOwner(projectId, userId);
 
+    const groupName = await this.envRepository.getVaultGroupName(body.vaultGroupId);
+
     const env = await this.envRepository.requireEnvironment(
       body.vaultGroupId,
       body.environmentType,
@@ -96,6 +98,7 @@ export class EnvBundleService {
         format: body.format,
         variableCount: body.variableIds.length,
         fileCount: body.secretFileIds.length,
+        vaultGroupName: groupName,
       },
     });
 

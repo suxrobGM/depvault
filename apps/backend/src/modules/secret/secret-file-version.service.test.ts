@@ -13,6 +13,8 @@ const versionId = "version-uuid";
 
 const fakeEncryptedContent = Buffer.from("encrypted-content");
 
+const vaultGroupId = "vault-group-uuid";
+
 const mockSecretFile = {
   id: fileId,
   environmentId: envId,
@@ -26,6 +28,7 @@ const mockSecretFile = {
   uploadedBy: userId,
   createdAt: now,
   updatedAt: now,
+  environment: { vaultGroup: { id: vaultGroupId, name: "Default" } },
 };
 
 const mockVersion = {
@@ -110,6 +113,7 @@ describe("SecretFileVersionService", () => {
           authTag: mockVersion.authTag,
           fileSize: mockVersion.fileSize,
         },
+        include: { environment: { include: { vaultGroup: true } } },
       });
     });
 

@@ -33,6 +33,7 @@ export class EnvironmentDiffService {
 
     const member = await this.envHelper.requireMember(projectId, userId);
     const canReadValues = member.role === "OWNER" || member.role === "EDITOR";
+    const groupName = await this.envHelper.getVaultGroupName(vaultGroupId);
 
     const environments = await this.prisma.environment.findMany({
       where: { projectId, vaultGroupId, type: { in: envTypes } },
@@ -55,7 +56,7 @@ export class EnvironmentDiffService {
       resourceType: "ENV_VARIABLE",
       resourceId: projectId,
       ipAddress,
-      metadata: { type: "diff", environments: envTypes.join(",") },
+      metadata: { type: "diff", environments: envTypes.join(","), vaultGroupName: groupName },
     });
 
     return { environments: envTypes, rows };

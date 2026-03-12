@@ -23,6 +23,7 @@ export class EnvironmentIOService {
   ) {
     await this.envRepository.requireEditorOrOwner(projectId, userId);
 
+    const groupName = await this.envRepository.getVaultGroupName(body.vaultGroupId);
     const parser = PARSERS[body.format as ConfigFormat];
     const entries = parser.parse(body.content);
 
@@ -68,7 +69,12 @@ export class EnvironmentIOService {
       resourceType: "ENV_VARIABLE",
       resourceId: projectId,
       ipAddress,
-      metadata: { imported: variables.length, skipped, format: body.format },
+      metadata: {
+        imported: variables.length,
+        skipped,
+        format: body.format,
+        vaultGroupName: groupName,
+      },
     });
 
     return { imported: variables.length, skipped, variables };
@@ -84,6 +90,7 @@ export class EnvironmentIOService {
   ) {
     await this.envRepository.requireEditorOrOwner(projectId, userId);
 
+    const groupName = await this.envRepository.getVaultGroupName(vaultGroupId);
     const env = await this.envRepository.requireEnvironment(vaultGroupId, environmentType);
 
     const variables = await this.prisma.envVariable.findMany({
@@ -107,7 +114,7 @@ export class EnvironmentIOService {
       resourceType: "ENV_VARIABLE",
       resourceId: projectId,
       ipAddress,
-      metadata: { format, environmentType, count: variables.length },
+      metadata: { format, environmentType, count: variables.length, vaultGroupName: groupName },
     });
 
     return { content, format, environmentType };

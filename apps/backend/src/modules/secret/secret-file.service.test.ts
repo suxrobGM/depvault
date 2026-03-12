@@ -13,12 +13,15 @@ const fileId = "file-uuid";
 const fakeProjectKey = Buffer.alloc(32, 1);
 const fakeEncryptedContent = Buffer.from("encrypted-content");
 
+const vaultGroupId = "vault-group-uuid";
+
 const mockEnvironment = {
   id: envId,
   projectId,
   type: "DEVELOPMENT",
   createdAt: now,
   updatedAt: now,
+  vaultGroup: { id: vaultGroupId, name: "Default" },
 };
 
 const mockSecretFile = {
@@ -34,6 +37,7 @@ const mockSecretFile = {
   uploadedBy: userId,
   createdAt: now,
   updatedAt: now,
+  environment: { vaultGroup: { id: vaultGroupId, name: "Default" } },
 };
 
 function createMockPrisma() {
@@ -55,6 +59,9 @@ function createMockPrisma() {
     },
     secretFileAuditLog: {
       create: mock(() => Promise.resolve({})),
+    },
+    vaultGroup: {
+      findUnique: mock(() => Promise.resolve({ name: "Default" })),
     },
   } as any;
 }
@@ -111,9 +118,6 @@ describe("SecretFileService", () => {
       expect(result.name).toBe("config.json");
       expect(encryption.encryptBinary).toHaveBeenCalled();
       expect(mockPrisma.secretFile.create).toHaveBeenCalled();
-      expect(mockPrisma.secretFileAuditLog.create).toHaveBeenCalledWith({
-        data: { secretFileId: fileId, userId, action: "UPLOADED" },
-      });
     });
 
     it("should reject executable file types", async () => {
@@ -164,10 +168,7 @@ describe("SecretFileService", () => {
       expect(result.items[0]!.name).toBe("config.json");
       expect(mockPrisma.secretFile.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          select: expect.objectContaining({
-            id: true,
-            name: true,
-          }),
+          include: { environment: { include: { vaultGroup: true } } },
         }),
       );
     });
@@ -203,9 +204,6 @@ describe("SecretFileService", () => {
       expect(result.name).toBe("config.json");
       expect(result.mimeType).toBe("application/json");
       expect(encryption.decryptBinary).toHaveBeenCalled();
-      expect(mockPrisma.secretFileAuditLog.create).toHaveBeenCalledWith({
-        data: { secretFileId: fileId, userId, action: "DOWNLOADED" },
-      });
     });
 
     it("should throw ForbiddenError for VIEWER download", async () => {
@@ -231,9 +229,6 @@ describe("SecretFileService", () => {
 
       expect(result.message).toBe("Secret file deleted successfully");
       expect(mockPrisma.secretFile.delete).toHaveBeenCalledWith({ where: { id: fileId } });
-      expect(mockPrisma.secretFileAuditLog.create).toHaveBeenCalledWith({
-        data: { secretFileId: fileId, userId, action: "DELETED" },
-      });
     });
 
     it("should throw ForbiddenError for VIEWER", async () => {
@@ -270,6 +265,7 @@ describe("SecretFileService", () => {
       expect(mockPrisma.secretFile.update).toHaveBeenCalledWith({
         where: { id: fileId },
         data: { name: "updated.json", description: "Updated desc" },
+        include: { environment: { include: { vaultGroup: true } } },
       });
     });
 
@@ -286,7 +282,6 @@ describe("SecretFileService", () => {
         environmentId: "new-env-id",
       });
 
-      const vaultGroupId = "vault-group-uuid";
       await service.update(projectId, fileId, userId, {
         environmentType: EnvironmentType.STAGING,
         vaultGroupId,
@@ -295,6 +290,7 @@ describe("SecretFileService", () => {
       expect(mockPrisma.secretFile.update).toHaveBeenCalledWith({
         where: { id: fileId },
         data: { environmentId: "new-env-id" },
+        include: { environment: { include: { vaultGroup: true } } },
       });
     });
 

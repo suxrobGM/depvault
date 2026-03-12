@@ -17,8 +17,7 @@ export const secretController = new Elysia({
   prefix: "/secrets/shared",
   detail: { tags: ["Shared Secrets"] },
 })
-  // Info endpoint — light rate limit, does not consume the secret
-  .use(rateLimiter({ max: 60, windowMs: 60 * 1000 }))
+  .use(rateLimiter({ max: 10, windowMs: 60 * 1000 }))
   .get("/:token/info", ({ params }) => sharedSecretService.getInfo(params.token), {
     params: TokenParamSchema,
     response: SharedSecretInfoResponseSchema,
@@ -28,8 +27,6 @@ export const secretController = new Elysia({
         "Returns metadata (type, password-protected, expiry) without consuming the secret.",
     },
   })
-  // Access endpoint — strict rate limit (10/min) to block token brute-forcing
-  .use(rateLimiter({ max: 10, windowMs: 60 * 1000 }))
   .post(
     "/:token",
     ({ params, body, request, server }) =>

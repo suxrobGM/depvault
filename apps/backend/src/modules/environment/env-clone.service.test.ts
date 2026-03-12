@@ -77,6 +77,9 @@ function createMockPrisma() {
     envVariable: {
       create: mock(() => Promise.resolve(mockSourceVariable)),
     },
+    vaultGroup: {
+      findUnique: mock(() => Promise.resolve({ name: "Default" })),
+    },
   } as any;
 }
 
@@ -196,6 +199,7 @@ describe("EnvironmentCloneService", () => {
           source: "DEVELOPMENT",
           target: "STAGING",
           variableCount: 2,
+          vaultGroupName: "Default",
         },
       });
     });

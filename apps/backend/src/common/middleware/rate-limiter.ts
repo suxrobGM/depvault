@@ -122,7 +122,7 @@ export function rateLimiter(options: RateLimitOptions) {
   const keyFn = options.keyFn ?? ((req: Request, server: any) => getClientIp(req, server));
 
   return new Elysia({ name: `rate-limiter-${max}-${windowMs}` }).onBeforeHandle(
-    { as: "local" },
+    { as: "scoped" },
     ({ request, set, server }) => {
       const key = keyFn(request, server);
       const { count, resetAt } = store.hit(key, windowMs);

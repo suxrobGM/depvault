@@ -63,6 +63,8 @@ export class EnvironmentService {
   ): Promise<EnvVariableWithValueResponse> {
     await this.envHelper.requireEditorOrOwner(projectId, userId);
 
+    const groupName = await this.envHelper.getVaultGroupName(body.vaultGroupId);
+
     const environment = await this.envHelper.findOrCreateEnvironment(
       projectId,
       body.vaultGroupId,
@@ -91,7 +93,7 @@ export class EnvironmentService {
       resourceType: "ENV_VARIABLE",
       resourceId: variable.id,
       ipAddress,
-      metadata: { key: body.key },
+      metadata: { key: body.key, vaultGroupName: groupName },
     });
 
     return toResponseWithValue(variable, body.value);
@@ -108,6 +110,7 @@ export class EnvironmentService {
   ): Promise<PaginatedResponse<EnvVariableWithValueResponse>> {
     const member = await this.envHelper.requireMember(projectId, userId);
     const canReadValues = member.role === "OWNER" || member.role === "EDITOR";
+    const groupName = await this.envHelper.getVaultGroupName(vaultGroupId);
 
     const where = environmentType
       ? { environment: { projectId, vaultGroupId, type: environmentType as EnvironmentType } }
@@ -136,7 +139,11 @@ export class EnvironmentService {
         resourceType: "ENV_VARIABLE",
         resourceId: projectId,
         ipAddress,
-        metadata: { count: variables.length, environmentType: environmentType ?? null },
+        metadata: {
+          count: variables.length,
+          environmentType: environmentType ?? null,
+          vaultGroupName: groupName,
+        },
       });
 
       void this.checkDrift(projectId, userId);
@@ -164,6 +171,7 @@ export class EnvironmentService {
 
     const variable = await this.prisma.envVariable.findFirst({
       where: { id: varId, environment: { projectId } },
+      include: { environment: { include: { vaultGroup: { select: { name: true } } } } },
     });
 
     if (!variable) {
@@ -205,7 +213,7 @@ export class EnvironmentService {
       resourceType: "ENV_VARIABLE",
       resourceId: varId,
       ipAddress,
-      metadata: { key: updated.key },
+      metadata: { key: updated.key, vaultGroupName: variable.environment.vaultGroup.name },
     });
 
     return toDecryptedResponse(updated, projectKey);
@@ -221,6 +229,7 @@ export class EnvironmentService {
 
     const variable = await this.prisma.envVariable.findFirst({
       where: { id: varId, environment: { projectId } },
+      include: { environment: { include: { vaultGroup: { select: { name: true } } } } },
     });
 
     if (!variable) {
@@ -236,7 +245,7 @@ export class EnvironmentService {
       resourceType: "ENV_VARIABLE",
       resourceId: varId,
       ipAddress,
-      metadata: { key: variable.key },
+      metadata: { key: variable.key, vaultGroupName: variable.environment.vaultGroup.name },
     });
 
     return { message: "Environment variable deleted successfully" };
@@ -253,7 +262,7 @@ export class EnvironmentService {
 
     const environment = await this.prisma.environment.findFirst({
       where: { id: envId, projectId },
-      include: { _count: { select: { variables: true } } },
+      include: { vaultGroup: { select: { name: true } }, _count: { select: { variables: true } } },
     });
 
     if (!environment) {
@@ -269,7 +278,11 @@ export class EnvironmentService {
       resourceType: "ENV_VARIABLE",
       resourceId: envId,
       ipAddress,
-      metadata: { type: environment.type, variableCount: environment._count.variables },
+      metadata: {
+        type: environment.type,
+        variableCount: environment._count.variables,
+        vaultGroupName: environment.vaultGroup.name,
+      },
     });
 
     return { message: "Environment deleted successfully" };

@@ -69,6 +69,8 @@ export function ActivityFilterBar(props: ActivityFilterBarProps): ReactElement {
     onFiltersChange(EMPTY_FILTERS);
   };
 
+  const fieldSx = { minWidth: 150, flex: { xs: "1 1 calc(50% - 8px)", sm: "0 0 auto" } } as const;
+
   return (
     <Stack
       direction="row"
@@ -82,7 +84,7 @@ export function ActivityFilterBar(props: ActivityFilterBarProps): ReactElement {
         size="small"
         value={filters.action}
         onChange={(e) => handleChange("action", e.target.value)}
-        sx={{ minWidth: 150 }}
+        sx={fieldSx}
       >
         {ACTION_OPTIONS.map((opt) => (
           <MenuItem key={opt.value} value={opt.value}>
@@ -97,7 +99,7 @@ export function ActivityFilterBar(props: ActivityFilterBarProps): ReactElement {
         size="small"
         value={filters.resourceType}
         onChange={(e) => handleChange("resourceType", e.target.value)}
-        sx={{ minWidth: 160 }}
+        sx={fieldSx}
       >
         {RESOURCE_TYPE_OPTIONS.map((opt) => (
           <MenuItem key={opt.value} value={opt.value}>
@@ -113,7 +115,7 @@ export function ActivityFilterBar(props: ActivityFilterBarProps): ReactElement {
         value={filters.from}
         onChange={(e) => handleChange("from", e.target.value)}
         slotProps={{ inputLabel: { shrink: true } }}
-        sx={{ minWidth: 160 }}
+        sx={fieldSx}
       />
 
       <TextField
@@ -123,7 +125,7 @@ export function ActivityFilterBar(props: ActivityFilterBarProps): ReactElement {
         value={filters.to}
         onChange={(e) => handleChange("to", e.target.value)}
         slotProps={{ inputLabel: { shrink: true } }}
-        sx={{ minWidth: 160 }}
+        sx={fieldSx}
       />
 
       <TextField
@@ -141,7 +143,7 @@ export function ActivityFilterBar(props: ActivityFilterBarProps): ReactElement {
             ),
           },
         }}
-        sx={{ minWidth: 200 }}
+        sx={{ minWidth: 150, flex: { xs: "1 1 100%", sm: "0 0 auto" } }}
       />
 
       {hasActiveFilters && (

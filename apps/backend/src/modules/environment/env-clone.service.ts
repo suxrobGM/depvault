@@ -23,6 +23,8 @@ export class EnvironmentCloneService {
   ) {
     await this.envHelper.requireEditorOrOwner(projectId, userId);
 
+    const groupName = await this.envHelper.getVaultGroupName(body.vaultGroupId);
+
     const sourceEnv = await this.prisma.environment.findUnique({
       where: {
         vaultGroupId_type: {
@@ -75,6 +77,7 @@ export class EnvironmentCloneService {
         source: body.sourceType,
         target: body.targetType,
         variableCount: created.length,
+        vaultGroupName: groupName,
       },
     });
 

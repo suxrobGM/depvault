@@ -57,6 +57,9 @@ function createMockPrisma() {
       findMany: mock(() => Promise.resolve([mockVariable])),
       findUnique: mock(() => Promise.resolve(null)),
     },
+    vaultGroup: {
+      findUnique: mock(() => Promise.resolve({ name: "Default" })),
+    },
   } as any;
 }
 

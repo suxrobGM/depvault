@@ -1,12 +1,7 @@
 import { singleton } from "tsyringe";
 import { ForbiddenError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger/logger";
-import {
-  PrismaClient,
-  type AuditAction,
-  type AuditResourceType,
-  type Prisma,
-} from "@/generated/prisma";
+import { PrismaClient, type AuditAction, type AuditResourceType } from "@/generated/prisma";
 import type { PaginatedResponse } from "@/types/response";
 import type { AuditLogResponse } from "./audit-log.schema";
 
@@ -34,7 +29,7 @@ export class AuditLogService {
           resourceType: params.resourceType,
           resourceId: params.resourceId,
           ipAddress: params.ipAddress,
-          metadata: params.metadata as Prisma.InputJsonValue | undefined,
+          metadata: params.metadata,
         },
       });
     } catch (error) {
