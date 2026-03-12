@@ -77,46 +77,80 @@ export class LicenseRuleService {
     return { message: "License rule deleted successfully" };
   }
 
-  async getComplianceSummary(projectId: string, userId: string): Promise<LicenseComplianceSummary> {
+  async getComplianceSummary(
+    projectId: string,
+    userId: string,
+    page = 1,
+    limit = 25,
+    search?: string,
+  ): Promise<LicenseComplianceSummary> {
     await this.requireMember(projectId, userId);
 
-    const dependencies = await this.prisma.dependency.findMany({
-      where: { analysis: { projectId } },
-      select: {
-        name: true,
-        license: true,
-        licensePolicy: true,
-        analysis: { select: { fileName: true } },
-      },
-      orderBy: { name: "asc" },
-    });
+    const baseWhere = { analysis: { projectId } };
+    const searchWhere = search
+      ? {
+          ...baseWhere,
+          OR: [
+            { name: { contains: search, mode: "insensitive" as const } },
+            { license: { contains: search, mode: "insensitive" as const } },
+          ],
+        }
+      : baseWhere;
+
+    const [allDeps, filteredTotal, paginatedDeps] = await Promise.all([
+      this.prisma.dependency.findMany({
+        where: baseWhere,
+        select: { license: true, licensePolicy: true },
+      }),
+
+      this.prisma.dependency.count({ where: searchWhere }),
+
+      this.prisma.dependency.findMany({
+        where: searchWhere,
+        select: {
+          name: true,
+          license: true,
+          licensePolicy: true,
+          analysis: { select: { fileName: true } },
+        },
+        orderBy: { name: "asc" },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+    ]);
 
     let allowed = 0;
     let warned = 0;
     let blocked = 0;
     let unknown = 0;
 
-    const items = dependencies.map((dep) => {
+    for (const dep of allDeps) {
       if (!dep.license) unknown++;
       else if (dep.licensePolicy === "ALLOW") allowed++;
       else if (dep.licensePolicy === "WARN") warned++;
       else if (dep.licensePolicy === "BLOCK") blocked++;
+    }
 
-      return {
-        name: dep.name,
-        license: dep.license,
-        licensePolicy: dep.licensePolicy,
-        analysisFileName: dep.analysis.fileName,
-      };
-    });
+    const items = paginatedDeps.map((dep) => ({
+      name: dep.name,
+      license: dep.license,
+      licensePolicy: dep.licensePolicy,
+      analysisFileName: dep.analysis.fileName,
+    }));
 
     return {
-      total: dependencies.length,
+      total: allDeps.length,
       allowed,
       warned,
       blocked,
       unknown,
       dependencies: items,
+      pagination: {
+        page,
+        limit,
+        total: filteredTotal,
+        totalPages: Math.ceil(filteredTotal / limit),
+      },
     };
   }
 

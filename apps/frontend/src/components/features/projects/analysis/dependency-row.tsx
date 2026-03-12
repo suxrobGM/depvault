@@ -5,7 +5,7 @@ import {
   KeyboardArrowUp as CollapseIcon,
   KeyboardArrowDown as ExpandIcon,
 } from "@mui/icons-material";
-import { Box, Chip, Collapse, IconButton, Typography } from "@mui/material";
+import { Box, Chip, Collapse, IconButton, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { StatusBadge } from "@/components/ui/status-badge";
 import type { Dependency } from "@/types/api/analysis";
@@ -107,6 +107,24 @@ export function DependencyRow(props: DependencyRowProps): ReactElement {
             label={STATUS_LABEL[dep.status] ?? dep.status}
             variant={STATUS_VARIANT[dep.status] ?? "default"}
           />
+        </Box>
+
+        <Box>
+          <Tooltip title={dep.licensePolicy} placement="top">
+            <Chip
+              label={dep.license ?? "Unknown"}
+              size="small"
+              color={
+                dep.licensePolicy === "BLOCK"
+                  ? "error"
+                  : dep.licensePolicy === "WARN"
+                    ? "warning"
+                    : "default"
+              }
+              variant="outlined"
+              sx={{ maxWidth: 100, fontSize: "0.7rem" }}
+            />
+          </Tooltip>
         </Box>
 
         <Box>

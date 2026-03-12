@@ -37,6 +37,14 @@ export type {
 export type { AuditLogEntry, AuditLogListResponse } from "./audit-log";
 export type { VaultGroup, VaultGroupListResponse, VaultGroupResponse } from "./vault-group";
 export type { ConvertResult } from "./convert";
+export type {
+  LicenseRuleListResponse,
+  LicenseRule,
+  LicenseComplianceSummary,
+  LicenseComplianceDep,
+  CreateLicenseRuleBody,
+  UpdateLicenseRuleBody,
+} from "./license-rule";
 export type { Notification, NotificationListResponse, UnreadCountResponse } from "./notification";
 export type {
   SharedSecretAuditItem,

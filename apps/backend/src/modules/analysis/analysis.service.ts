@@ -51,6 +51,26 @@ export class AnalysisService {
 
     const parseResult = parser.parse(body.content, fileBaseName);
 
+    const duplicateWhere = body.filePath
+      ? { projectId: body.projectId, filePath: body.filePath, ecosystem: body.ecosystem }
+      : {
+          projectId: body.projectId,
+          fileName: fileBaseName,
+          filePath: null,
+          ecosystem: body.ecosystem,
+        };
+
+    const existing = await this.prisma.analysis.findMany({
+      where: duplicateWhere,
+      select: { id: true },
+    });
+
+    if (existing.length > 0) {
+      await this.prisma.analysis.deleteMany({
+        where: { id: { in: existing.map((a) => a.id) } },
+      });
+    }
+
     const analysis = await this.prisma.analysis.create({
       data: {
         projectId: body.projectId,

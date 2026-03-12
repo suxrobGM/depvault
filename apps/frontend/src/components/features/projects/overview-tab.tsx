@@ -4,6 +4,7 @@ import type { ReactElement } from "react";
 import { Grid } from "@mui/material";
 import { AboutCard } from "./overview/about-card";
 import { AnalysisSummaryCard } from "./overview/analysis-summary-card";
+import { LicenseComplianceCard } from "./overview/license-compliance-card";
 import { QuickStatsCard } from "./overview/quick-stats-card";
 import { SecretScanningCard } from "./overview/secret-scanning-card";
 import { VaultSummaryCard } from "./overview/vault-summary-card";
@@ -35,6 +36,10 @@ export function OverviewTab(props: OverviewTabProps): ReactElement {
 
       <Grid size={{ xs: 12, md: 6 }}>
         <SecretScanningCard projectId={projectId} />
+      </Grid>
+
+      <Grid size={{ xs: 12, md: 6 }}>
+        <LicenseComplianceCard projectId={projectId} />
       </Grid>
     </Grid>
   );

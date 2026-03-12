@@ -49,6 +49,7 @@ export function getPackageUrl(ecosystem: string, packageName: string): string | 
 
 export const STATUS_VARIANT: Record<string, "success" | "warning" | "error" | "default"> = {
   UP_TO_DATE: "success",
+  PATCH_UPDATE: "success",
   MINOR_UPDATE: "warning",
   MAJOR_UPDATE: "error",
   DEPRECATED: "error",
@@ -56,6 +57,7 @@ export const STATUS_VARIANT: Record<string, "success" | "warning" | "error" | "d
 
 export const STATUS_LABEL: Record<string, string> = {
   UP_TO_DATE: "Up to date",
+  PATCH_UPDATE: "Patch update",
   MINOR_UPDATE: "Minor update",
   MAJOR_UPDATE: "Major update",
   DEPRECATED: "Deprecated",
@@ -65,5 +67,6 @@ export const STATUS_ORDER: Record<string, number> = {
   DEPRECATED: 0,
   MAJOR_UPDATE: 1,
   MINOR_UPDATE: 2,
-  UP_TO_DATE: 3,
+  PATCH_UPDATE: 3,
+  UP_TO_DATE: 4,
 };

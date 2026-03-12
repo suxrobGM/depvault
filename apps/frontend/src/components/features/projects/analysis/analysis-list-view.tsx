@@ -3,10 +3,11 @@
 import { useState, type ReactElement } from "react";
 import {
   Add as AddIcon,
+  Delete as DeleteIcon,
   FolderOpen as FolderIcon,
   Security as SecurityIcon,
 } from "@mui/icons-material";
-import { Box, Button, Chip, Skeleton, Stack, Typography } from "@mui/material";
+import { Box, Button, Chip, IconButton, Skeleton, Stack, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { Route } from "next";
 import Link from "next/link";
@@ -16,8 +17,10 @@ import { HealthArc } from "@/components/ui/health-arc";
 import { ListSkeleton } from "@/components/ui/list-skeleton";
 import { PageHeader } from "@/components/ui/page-header";
 import { PaginationBar } from "@/components/ui/pagination-bar";
+import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useAuth } from "@/hooks/use-auth";
+import { useConfirm } from "@/hooks/use-confirm";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 import type { Analysis, AnalysisListResponse } from "@/types/api/analysis";
@@ -33,12 +36,33 @@ interface AnalysisRowProps {
   item: Analysis;
   projectId: string;
   index: number;
+  canEdit: boolean;
 }
 
 const PAGE_SIZE = 10;
 
 function AnalysisRow(props: AnalysisRowProps): ReactElement {
-  const { item, projectId, index } = props;
+  const { item, projectId, index, canEdit } = props;
+  const confirm = useConfirm();
+
+  const deleteMutation = useApiMutation(
+    (analysisId: string) =>
+      client.api.projects({ id: projectId }).analyses({ analysisId }).delete(),
+    {
+      invalidateKeys: [["analyses", projectId]],
+      successMessage: "Analysis deleted",
+    },
+  );
+
+  const handleDelete = async () => {
+    const confirmed = await confirm({
+      title: "Delete Analysis",
+      description: `Delete "${item.filePath ?? item.fileName}" and all its dependency data? This cannot be undone.`,
+      confirmLabel: "Delete",
+      destructive: true,
+    });
+    if (confirmed) deleteMutation.mutate(item.id);
+  };
 
   const displayName = item.filePath ?? item.fileName;
 
@@ -119,6 +143,21 @@ function AnalysisRow(props: AnalysisRowProps): ReactElement {
               sx={{ height: 24, fontSize: "0.7rem", borderColor: "divider" }}
             />
           )}
+          {canEdit && (
+            <Tooltip title="Delete analysis">
+              <IconButton
+                size="small"
+                color="error"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleDelete();
+                }}
+              >
+                <DeleteIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
+          )}
         </Stack>
       </GlassCard>
     </Link>
@@ -197,7 +236,13 @@ export function AnalysisListView(props: AnalysisListViewProps): ReactElement {
       ) : (
         <Stack spacing={1.5}>
           {data.items.map((item, index) => (
-            <AnalysisRow key={item.id} item={item} projectId={projectId} index={index} />
+            <AnalysisRow
+              key={item.id}
+              item={item}
+              projectId={projectId}
+              index={index}
+              canEdit={canEdit}
+            />
           ))}
 
           {totalPages > 1 && <PaginationBar count={totalPages} page={page} onChange={setPage} />}

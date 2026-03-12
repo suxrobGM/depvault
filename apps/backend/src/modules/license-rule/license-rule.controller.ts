@@ -3,6 +3,7 @@ import { container } from "@/common/di/container";
 import { authGuard } from "@/common/middleware";
 import { MessageResponseSchema } from "@/types/response";
 import {
+  ComplianceQuerySchema,
   CreateLicenseRuleBodySchema,
   ExportQuerySchema,
   LicenseComplianceSummarySchema,
@@ -70,14 +71,22 @@ export const licenseRuleController = new Elysia({
   )
   .get(
     "/compliance",
-    ({ params, user }) => licenseRuleService.getComplianceSummary(params.id, user.id),
+    ({ params, query, user }) =>
+      licenseRuleService.getComplianceSummary(
+        params.id,
+        user.id,
+        query.page,
+        query.limit,
+        query.search,
+      ),
     {
       params: LicenseRuleProjectParamsSchema,
+      query: ComplianceQuerySchema,
       response: LicenseComplianceSummarySchema,
       detail: {
         summary: "License compliance summary",
         description:
-          "Return a compliance summary with pass/warn/fail counts for all dependencies in the project.",
+          "Return a paginated compliance summary with pass/warn/fail counts for all dependencies in the project.",
         security: [{ bearerAuth: [] }],
       },
     },

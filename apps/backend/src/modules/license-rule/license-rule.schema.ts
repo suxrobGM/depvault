@@ -1,5 +1,7 @@
 import { t, type Static } from "elysia";
 import { LicensePolicy } from "@/generated/prisma";
+import { PaginationQuerySchema } from "@/types/pagination";
+import { PaginationSchema } from "@/types/response";
 
 const LicensePolicyEnum = t.Enum(LicensePolicy);
 
@@ -34,6 +36,12 @@ export const LicenseRuleListResponseSchema = t.Object({
   items: t.Array(LicenseRuleResponseSchema),
 });
 
+export const ComplianceQuerySchema = PaginationQuerySchema(
+  t.Object({
+    search: t.Optional(t.String()),
+  }),
+);
+
 export const LicenseComplianceSummarySchema = t.Object({
   total: t.Number(),
   allowed: t.Number(),
@@ -48,6 +56,7 @@ export const LicenseComplianceSummarySchema = t.Object({
       analysisFileName: t.String(),
     }),
   ),
+  pagination: PaginationSchema,
 });
 
 export const ExportQuerySchema = t.Object({

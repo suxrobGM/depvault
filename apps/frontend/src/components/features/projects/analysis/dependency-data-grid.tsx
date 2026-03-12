@@ -15,11 +15,17 @@ interface DependencyDataGridProps {
   ecosystem?: string;
 }
 
-type SortField = "name" | "status" | "vulns";
+type SortField = "name" | "status" | "license" | "vulns";
 type SortDir = "asc" | "desc";
 
 const PAGE_SIZE = 25;
-const GRID_COLUMNS = "1.5fr 110px 110px 140px 70px 40px";
+const GRID_COLUMNS = "1.5fr 100px 100px 130px 110px 60px 40px";
+
+const LICENSE_POLICY_ORDER: Record<string, number> = {
+  BLOCK: 0,
+  WARN: 1,
+  ALLOW: 2,
+};
 
 const columnLabelSx = {
   textTransform: "uppercase",
@@ -47,6 +53,12 @@ export function DependencyDataGrid(props: DependencyDataGridProps): ReactElement
         return dir * a.name.localeCompare(b.name);
       case "status":
         return dir * ((STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99));
+      case "license":
+        return (
+          dir *
+          ((LICENSE_POLICY_ORDER[a.licensePolicy] ?? 99) -
+            (LICENSE_POLICY_ORDER[b.licensePolicy] ?? 99))
+        );
       case "vulns":
         return dir * (a.vulnerabilities.length - b.vulnerabilities.length);
       default:
@@ -129,6 +141,13 @@ export function DependencyDataGrid(props: DependencyDataGridProps): ReactElement
         <SortableHeader
           field="status"
           label="Status"
+          activeField={sortField}
+          direction={sortDir}
+          onSort={handleSort}
+        />
+        <SortableHeader
+          field="license"
+          label="License"
           activeField={sortField}
           direction={sortDir}
           onSort={handleSort}
