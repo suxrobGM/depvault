@@ -1,5 +1,7 @@
 import { CONFIG_FORMAT_VALUES } from "@shared/constants/config-formats";
 import { t, type Static } from "elysia";
+import { PaginationQuerySchema } from "@/types/pagination";
+import { PaginatedResponseSchema } from "@/types/response";
 import { EnvironmentTypeSchema } from "./environment.schema";
 
 export const CreateEnvVariableBodySchema = t.Object({
@@ -39,22 +41,16 @@ export const EnvVariableWithValueResponseSchema = t.Object({
   updatedAt: t.Date(),
 });
 
-export const EnvVariableListQuerySchema = t.Object({
-  vaultGroupId: t.String(),
-  environmentType: t.Optional(EnvironmentTypeSchema),
-  page: t.Integer({ minimum: 1, default: 1 }),
-  limit: t.Integer({ minimum: 1, maximum: 100, default: 20 }),
-});
-
-export const EnvVariableListResponseSchema = t.Object({
-  items: t.Array(EnvVariableWithValueResponseSchema),
-  pagination: t.Object({
-    page: t.Number(),
-    limit: t.Number(),
-    total: t.Number(),
-    totalPages: t.Number(),
+export const EnvVariableListQuerySchema = PaginationQuerySchema(
+  t.Object({
+    vaultGroupId: t.String(),
+    environmentType: t.Optional(EnvironmentTypeSchema),
   }),
-});
+);
+
+export const EnvVariableListResponseSchema = PaginatedResponseSchema(
+  EnvVariableWithValueResponseSchema,
+);
 
 export const EnvVariableParamsSchema = t.Object({
   id: t.String(),

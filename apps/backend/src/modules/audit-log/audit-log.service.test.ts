@@ -18,7 +18,7 @@ const mockAuditLog = {
   ipAddress: "127.0.0.1",
   metadata: null,
   createdAt: now,
-  user: { email: "test@test.com" },
+  user: { email: "test@test.com", firstName: "Test", lastName: "User", avatarUrl: null },
 };
 
 function createMockPrisma() {
@@ -210,10 +210,15 @@ describe("AuditLogService", () => {
 
       expect(mockPrisma.auditLog.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          include: { user: { select: { email: true } } },
+          include: {
+            user: { select: { email: true, firstName: true, lastName: true, avatarUrl: true } },
+          },
         }),
       );
       expect(result.items[0]!.userEmail).toBe("test@test.com");
+      expect(result.items[0]!.userFirstName).toBe("Test");
+      expect(result.items[0]!.userLastName).toBe("User");
+      expect(result.items[0]!.userAvatarUrl).toBeNull();
     });
   });
 });

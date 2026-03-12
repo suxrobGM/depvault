@@ -1,5 +1,7 @@
 import { t, type Static } from "elysia";
 import { ProjectRole } from "@/generated/prisma";
+import { PaginationQueryBaseSchema } from "@/types/pagination";
+import { PaginatedResponseSchema } from "@/types/response";
 
 export const ProjectRoleSchema = t.Enum(ProjectRole);
 export const InviteRoleSchema = t.Union([
@@ -45,20 +47,9 @@ export const MemberResponseSchema = t.Object({
   }),
 });
 
-export const MemberListQuerySchema = t.Object({
-  page: t.Integer({ minimum: 1, default: 1 }),
-  limit: t.Integer({ minimum: 1, maximum: 100, default: 20 }),
-});
+export const MemberListQuerySchema = PaginationQueryBaseSchema;
 
-export const MemberListResponseSchema = t.Object({
-  items: t.Array(MemberResponseSchema),
-  pagination: t.Object({
-    page: t.Number(),
-    limit: t.Number(),
-    total: t.Number(),
-    totalPages: t.Number(),
-  }),
-});
+export const MemberListResponseSchema = PaginatedResponseSchema(MemberResponseSchema);
 
 export type InviteMemberBody = Static<typeof InviteMemberBodySchema>;
 export type UpdateMemberRoleBody = Static<typeof UpdateMemberRoleBodySchema>;

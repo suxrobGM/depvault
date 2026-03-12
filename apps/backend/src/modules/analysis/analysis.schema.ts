@@ -1,5 +1,7 @@
 import { t, type Static } from "elysia";
 import { Ecosystem } from "@/generated/prisma";
+import { PaginationQueryBaseSchema } from "@/types/pagination";
+import { PaginatedResponseSchema } from "@/types/response";
 
 const EcosystemEnum = t.Enum(Ecosystem);
 
@@ -64,20 +66,9 @@ export const AnalysisSummaryResponseSchema = t.Object({
   updatedAt: t.Date(),
 });
 
-export const AnalysisListQuerySchema = t.Object({
-  page: t.Integer({ minimum: 1, default: 1 }),
-  limit: t.Integer({ minimum: 1, maximum: 100, default: 20 }),
-});
+export const AnalysisListQuerySchema = PaginationQueryBaseSchema;
 
-export const AnalysisListResponseSchema = t.Object({
-  items: t.Array(AnalysisSummaryResponseSchema),
-  pagination: t.Object({
-    page: t.Number(),
-    limit: t.Number(),
-    total: t.Number(),
-    totalPages: t.Number(),
-  }),
-});
+export const AnalysisListResponseSchema = PaginatedResponseSchema(AnalysisSummaryResponseSchema);
 
 export const AnalysisProjectParamsSchema = t.Object({
   projectId: t.String({ format: "uuid" }),

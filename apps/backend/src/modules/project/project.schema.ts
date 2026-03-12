@@ -1,4 +1,6 @@
 import { t, type Static } from "elysia";
+import { PaginationQueryBaseSchema } from "@/types/pagination";
+import { PaginatedResponseSchema } from "@/types/response";
 
 export const CreateProjectBodySchema = t.Object({
   name: t.String({ minLength: 1, maxLength: 100 }),
@@ -22,20 +24,9 @@ export const ProjectResponseSchema = t.Object({
   updatedAt: t.Date(),
 });
 
-export const ProjectListQuerySchema = t.Object({
-  page: t.Integer({ minimum: 1, default: 1 }),
-  limit: t.Integer({ minimum: 1, maximum: 100, default: 20 }),
-});
+export const ProjectListQuerySchema = PaginationQueryBaseSchema;
 
-export const ProjectListResponseSchema = t.Object({
-  items: t.Array(ProjectResponseSchema),
-  pagination: t.Object({
-    page: t.Number(),
-    limit: t.Number(),
-    total: t.Number(),
-    totalPages: t.Number(),
-  }),
-});
+export const ProjectListResponseSchema = PaginatedResponseSchema(ProjectResponseSchema);
 
 export const ProjectStatsResponseSchema = t.Object({
   projectCount: t.Number(),

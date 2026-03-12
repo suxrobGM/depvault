@@ -6,9 +6,10 @@ import {
   PersonAdd as PersonAddIcon,
   SwapHoriz as SwapHorizIcon,
 } from "@mui/icons-material";
-import { Avatar, Box, Button, Chip, Skeleton, Stack, Typography } from "@mui/material";
+import { Box, Button, Chip, Skeleton, Stack, Typography } from "@mui/material";
 import { ActionMenu } from "@/components/ui/action-menu";
 import { GlassCard } from "@/components/ui/glass-card";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useAuth } from "@/hooks/use-auth";
@@ -116,9 +117,13 @@ export function MembersTab(props: MembersTabProps): ReactElement {
           return (
             <GlassCard key={member.id} hoverGlow={false}>
               <Stack direction="row" alignItems="center" sx={{ px: 3, py: 2 }} spacing={2}>
-                <Avatar src={member.user.avatarUrl ?? undefined} sx={{ width: 40, height: 40 }}>
-                  {(name || member.user.email).charAt(0).toUpperCase()}
-                </Avatar>
+                <UserAvatar
+                  firstName={member.user.firstName}
+                  lastName={member.user.lastName}
+                  email={member.user.email}
+                  avatarUrl={member.user.avatarUrl}
+                  size={40}
+                />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="body1" fontWeight={500} noWrap>
                     {name || member.user.email}

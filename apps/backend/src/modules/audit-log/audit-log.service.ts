@@ -80,7 +80,11 @@ export class AuditLogService {
     const [logs, total] = await Promise.all([
       this.prisma.auditLog.findMany({
         where,
-        include: { user: { select: { email: true } } },
+        include: {
+          user: {
+            select: { email: true, firstName: true, lastName: true, avatarUrl: true },
+          },
+        },
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: "desc" },
@@ -99,6 +103,9 @@ export class AuditLogService {
       metadata: log.metadata as Record<string, unknown> | null,
       createdAt: log.createdAt,
       userEmail: log.user?.email ?? null,
+      userFirstName: log.user?.firstName ?? null,
+      userLastName: log.user?.lastName ?? null,
+      userAvatarUrl: log.user?.avatarUrl ?? null,
     }));
 
     return {

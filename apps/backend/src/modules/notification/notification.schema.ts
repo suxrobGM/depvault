@@ -1,5 +1,6 @@
 import { t, type Static } from "elysia";
 import { NotificationType } from "@/generated/prisma";
+import { PaginationQuerySchema } from "@/types/pagination";
 import { PaginatedResponseSchema } from "@/types/response";
 
 export const NotificationTypeSchema = t.Enum(NotificationType);
@@ -16,12 +17,12 @@ export const NotificationResponseSchema = t.Object({
   updatedAt: t.Date(),
 });
 
-export const NotificationListQuerySchema = t.Object({
-  type: t.Optional(NotificationTypeSchema),
-  read: t.Optional(t.BooleanString()),
-  page: t.Integer({ minimum: 1, default: 1 }),
-  limit: t.Integer({ minimum: 1, maximum: 100, default: 20 }),
-});
+export const NotificationListQuerySchema = PaginationQuerySchema(
+  t.Object({
+    type: t.Optional(NotificationTypeSchema),
+    read: t.Optional(t.BooleanString()),
+  }),
+);
 
 export const NotificationListResponseSchema = PaginatedResponseSchema(NotificationResponseSchema);
 

@@ -2,7 +2,7 @@
 
 import { useState, type ReactElement } from "react";
 import { History as HistoryIcon } from "@mui/icons-material";
-import { Box, Stack } from "@mui/material";
+import { Box } from "@mui/material";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ListSkeleton } from "@/components/ui/list-skeleton";
 import { PaginationBar } from "@/components/ui/pagination-bar";
@@ -75,13 +75,18 @@ export function ActivityLogView(props: ActivityLogViewProps): ReactElement {
           }
         />
       ) : (
-        <Stack spacing={1.5}>
+        <Box sx={{ pl: { xs: 0, sm: 1 } }}>
           {data.items.map((entry, index) => (
-            <ActivityLogEntry key={entry.id} entry={entry} index={index} />
+            <ActivityLogEntry
+              key={entry.id}
+              entry={entry}
+              index={index}
+              isLast={index === data.items.length - 1}
+            />
           ))}
 
           {totalPages > 1 && <PaginationBar count={totalPages} page={page} onChange={setPage} />}
-        </Stack>
+        </Box>
       )}
     </Box>
   );

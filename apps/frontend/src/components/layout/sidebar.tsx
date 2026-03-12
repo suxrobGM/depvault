@@ -10,7 +10,6 @@ import {
   SwapHoriz as SwapHorizIcon,
 } from "@mui/icons-material";
 import {
-  Avatar,
   Box,
   Chip,
   Divider,
@@ -28,6 +27,7 @@ import type { Route } from "next";
 import { usePathname, useRouter } from "next/navigation";
 import { NotificationBell } from "@/components/features/notifications";
 import { GradientText } from "@/components/ui/gradient-text";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { useAuth } from "@/hooks/use-auth";
 import { ROUTES } from "@/lib/constants";
 import { SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH } from "./constants";
@@ -53,11 +53,6 @@ export function Sidebar(props: SidebarProps): ReactElement {
   const router = useRouter();
   const { user } = useAuth();
   const showRoleBadge = user?.role && !DEFAULT_ROLES.has(user.role);
-
-  const initials =
-    user?.firstName && user?.lastName
-      ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
-      : (user?.email?.slice(0, 2).toUpperCase() ?? "?");
 
   const drawerContent = (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -151,17 +146,13 @@ export function Sidebar(props: SidebarProps): ReactElement {
                     p: 0.5,
                   }}
                 >
-                  <Avatar
-                    src={user.avatarUrl ?? undefined}
-                    sx={{
-                      width: 32,
-                      height: 32,
-                      fontSize: 14,
-                      bgcolor: "primary.main",
-                    }}
-                  >
-                    {initials}
-                  </Avatar>
+                  <UserAvatar
+                    firstName={user.firstName}
+                    lastName={user.lastName}
+                    email={user.email}
+                    avatarUrl={user.avatarUrl}
+                    size={32}
+                  />
                   {open && (
                     <Box sx={{ minWidth: 0, flex: 1 }}>
                       <Typography variant="body2" noWrap fontWeight={600}>
