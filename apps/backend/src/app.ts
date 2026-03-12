@@ -39,7 +39,6 @@ validateEnv();
 const app = new Elysia()
   .use(errorMiddleware)
   .use(corsPlugin)
-  .use(swaggerPlugin)
   .use(uploadsStaticPlugin)
   .use(secretScanCron)
   .onStop(async () => {
@@ -48,6 +47,7 @@ const app = new Elysia()
   .get("/health", () => ({ status: "ok", timestamp: new Date().toISOString() }))
   .group("/api", (api) =>
     api
+      .use(swaggerPlugin)
       .guard({
         response: HttpErrorResponses,
       })
@@ -83,4 +83,6 @@ const app = new Elysia()
 export type App = typeof app;
 
 logger.info(`Connect API running at http://${app.server?.hostname}:${app.server?.port}`);
-logger.info(`Swagger docs available at http://${app.server?.hostname}:${app.server?.port}/swagger`);
+logger.info(
+  `Swagger docs available at http://${app.server?.hostname}:${app.server?.port}/api/swagger`,
+);

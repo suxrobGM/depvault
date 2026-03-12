@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "test": "bun run test",
+    "test:coverage": "bun test --coverage",
     "dev": "bun run --watch src/app.ts",
     "start": "bun run src/app.ts",
     "db:generate": "prisma generate",

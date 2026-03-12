@@ -50,7 +50,7 @@ const moreFeatures: MoreFeature[] = [
     icon: <RotationIcon />,
     title: "Secret Rotation & Alerts",
     description:
-      "Set rotation policies per variable, track age with visual indicators, and receive email reminders.",
+      "Set rotation policies per variable, track age with visual indicators, and receive alerts when rotation is due.",
     color: "var(--mui-palette-secondary-main)",
   },
   {

@@ -34,16 +34,18 @@ const quickActions = [
   {
     icon: <SearchIcon sx={{ fontSize: 28 }} />,
     title: "Analyze Dependencies",
-    description: "Upload a dependency file to scan for vulnerabilities and license issues",
+    description:
+      "Open a project to scan dependencies for vulnerabilities, outdated packages, and license issues",
     color: "var(--mui-palette-secondary-main)",
-    href: ROUTES.converter,
+    href: ROUTES.projects,
   },
   {
     icon: <VpnKeyIcon sx={{ fontSize: 28 }} />,
     title: "Manage Vault",
-    description: "Store environment variables and secret files with AES-256-GCM encryption",
+    description:
+      "Select a project to manage its encrypted vault, secret files, and environment variables",
     color: "var(--mui-palette-info-dark)",
-    href: ROUTES.secrets,
+    href: ROUTES.projects,
   },
 ];
 
