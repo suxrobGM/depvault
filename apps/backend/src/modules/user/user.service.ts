@@ -17,7 +17,7 @@ import type {
 
 @singleton()
 export class UserService {
-  private readonly frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:4001";
+  private readonly frontendUrl = process.env.FRONTEND_URL!;
 
   constructor(
     private readonly prisma: PrismaClient,

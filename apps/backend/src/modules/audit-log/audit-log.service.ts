@@ -11,7 +11,7 @@ import type { PaginatedResponse } from "@/types/response";
 import type { AuditLogResponse } from "./audit-log.schema";
 
 export interface CreateAuditLogParams {
-  userId: string;
+  userId?: string;
   projectId: string;
   action: AuditAction;
   resourceType: AuditResourceType;
@@ -88,7 +88,7 @@ export class AuditLogService {
       ipAddress: log.ipAddress,
       metadata: log.metadata as Record<string, unknown> | null,
       createdAt: log.createdAt,
-      userEmail: log.user.email,
+      userEmail: log.user?.email ?? null,
     }));
 
     return {

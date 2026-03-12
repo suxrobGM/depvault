@@ -17,7 +17,7 @@ enum AuditResourceType {
 
 model AuditLog {
   id           String            @id @default(uuid()) @db.Uuid
-  userId       String            @map("user_id") @db.Uuid
+  userId       String?           @map("user_id") @db.Uuid
   projectId    String            @map("project_id") @db.Uuid
   action       AuditAction
   resourceType AuditResourceType @map("resource_type")
@@ -26,7 +26,7 @@ model AuditLog {
   metadata     Json?
   createdAt    DateTime          @default(now()) @map("created_at")
 
-  user    User    @relation(fields: [userId], references: [id])
+  user    User?   @relation(fields: [userId], references: [id])
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@index([projectId, createdAt])

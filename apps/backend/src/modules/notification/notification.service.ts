@@ -185,7 +185,7 @@ export class NotificationService {
     email: string,
     projectName: string,
   ): void {
-    const dashboardUrl = `${process.env.FRONTEND_URL ?? "http://localhost:4001"}/notifications`;
+    const dashboardUrl = `${process.env.FRONTEND_URL!}/notifications`;
 
     switch (payload.type) {
       case "VULNERABILITY_FOUND":

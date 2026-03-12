@@ -10,6 +10,7 @@ import {
   Edit as EditIcon,
   History as HistoryIcon,
   Replay as ReplayIcon,
+  Share as ShareIcon,
 } from "@mui/icons-material";
 import {
   Box,
@@ -24,6 +25,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { CreateFileShareDialog } from "@/components/features/shared-secret/create-file-share-dialog";
 import { ActionMenu } from "@/components/ui/action-menu";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
@@ -60,6 +62,7 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
   const toast = useToast();
 
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [downloadingVersionId, setDownloadingVersionId] = useState<string | null>(null);
 
@@ -202,6 +205,12 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
                 hidden: !canEdit,
               },
               {
+                label: "Share",
+                icon: <ShareIcon fontSize="small" />,
+                onClick: () => setShareOpen(true),
+                hidden: !canEdit,
+              },
+              {
                 label: "Edit",
                 icon: <EditIcon fontSize="small" />,
                 onClick: () => onEdit(file),
@@ -223,6 +232,13 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
           />
         </TableCell>
       </TableRow>
+
+      <CreateFileShareDialog
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        projectId={projectId}
+        file={file}
+      />
 
       <TableRow>
         <TableCell colSpan={activeEnv ? 7 : 6} sx={{ py: 0 }}>

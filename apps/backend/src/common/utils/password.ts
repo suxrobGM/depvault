@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import * as Bun from "bun";
 
 /**
@@ -17,4 +18,13 @@ export async function hashPassword(password: string): Promise<string> {
  */
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
   return Bun.password.verify(password, hash);
+}
+
+/**
+ * Generates a secure random token of the specified byte length (default 32 bytes = 64 hex characters).
+ * @param length The number of random bytes to generate (default 32)
+ * @returns A hexadecimal string representation of the random token
+ */
+export function createRandomToken(length: number = 32): string {
+  return randomBytes(length).toString("hex");
 }

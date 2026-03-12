@@ -19,7 +19,8 @@ model Project {
   vaultGroups  VaultGroup[]
   environments Environment[]
   envTemplates EnvTemplate[]
-  auditLogs    AuditLog[]
+  auditLogs     AuditLog[]
+  sharedSecrets SharedSecret[]
 
   @@map("projects")
 }

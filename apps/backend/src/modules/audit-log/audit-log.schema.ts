@@ -6,7 +6,7 @@ export const AuditResourceTypeSchema = t.Enum(AuditResourceType);
 
 export const AuditLogResponseSchema = t.Object({
   id: t.String(),
-  userId: t.String(),
+  userId: t.Nullable(t.String()),
   projectId: t.String(),
   action: AuditActionSchema,
   resourceType: AuditResourceTypeSchema,
@@ -14,7 +14,7 @@ export const AuditLogResponseSchema = t.Object({
   ipAddress: t.String(),
   metadata: t.Nullable(t.Unknown()),
   createdAt: t.Date(),
-  userEmail: t.Optional(t.String()),
+  userEmail: t.Nullable(t.String()),
 });
 
 export const AuditLogListQuerySchema = t.Object({

@@ -21,44 +21,43 @@ const authService = container.resolve(AuthService);
 const githubService = container.resolve(GitHubService);
 
 export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Auth"] } })
-  .use(
-    new Elysia().use(rateLimiter({ max: 5, windowMs: 60 * 60 * 1000 })).post(
-      "/register",
-      async ({ body, cookie }) => {
-        const result = await authService.register(body);
-        setAuthCookies(cookie, result);
-        return result;
+  .use(rateLimiter({ max: 5, windowMs: 60 * 60 * 1000 }))
+  .post(
+    "/register",
+    async ({ body, cookie }) => {
+      const result = await authService.register(body);
+      setAuthCookies(cookie, result);
+      return result;
+    },
+    {
+      body: RegisterBodySchema,
+      response: AuthResponseSchema,
+      detail: {
+        summary: "Register with email and password",
+        description:
+          "Create a new account with email, username, and password. Returns JWT tokens. A verification email is sent to confirm the address.",
       },
-      {
-        body: RegisterBodySchema,
-        response: AuthResponseSchema,
-        detail: {
-          summary: "Register with email and password",
-          description:
-            "Create a new account with email, username, and password. Returns JWT tokens. A verification email is sent to confirm the address.",
-        },
-      },
-    ),
+    },
   )
-  .use(
-    new Elysia().use(rateLimiter({ max: 5, windowMs: 60 * 1000 })).post(
-      "/login",
-      async ({ body, cookie }) => {
-        const result = await authService.login(body);
-        setAuthCookies(cookie, result);
-        return result;
+  .use(rateLimiter({ max: 5, windowMs: 60 * 1000 }))
+  .post(
+    "/login",
+    async ({ body, cookie }) => {
+      const result = await authService.login(body);
+      setAuthCookies(cookie, result);
+      return result;
+    },
+    {
+      body: LoginBodySchema,
+      response: AuthResponseSchema,
+      detail: {
+        summary: "Login with email and password",
+        description:
+          "Authenticate with email and password. Returns JWT access and refresh tokens. Email must be verified before login is allowed.",
       },
-      {
-        body: LoginBodySchema,
-        response: AuthResponseSchema,
-        detail: {
-          summary: "Login with email and password",
-          description:
-            "Authenticate with email and password. Returns JWT access and refresh tokens. Email must be verified before login is allowed.",
-        },
-      },
-    ),
+    },
   )
+
   .post(
     "/refresh",
     async ({ cookie }) => {
@@ -90,19 +89,17 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
       },
     },
   )
-  .use(
-    new Elysia()
-      .use(rateLimiter({ max: 3, windowMs: 60 * 60 * 1000 }))
-      .post("/forgot-password", ({ body }) => authService.forgotPassword(body), {
-        body: ForgotPasswordBodySchema,
-        response: MessageResponseSchema,
-        detail: {
-          summary: "Request password reset email",
-          description:
-            "Send a password reset link to the provided email. Always returns success to prevent email enumeration.",
-        },
-      }),
-  )
+
+  .use(rateLimiter({ max: 3, windowMs: 60 * 60 * 1000 }))
+  .post("/forgot-password", ({ body }) => authService.forgotPassword(body), {
+    body: ForgotPasswordBodySchema,
+    response: MessageResponseSchema,
+    detail: {
+      summary: "Request password reset email",
+      description:
+        "Send a password reset link to the provided email. Always returns success to prevent email enumeration.",
+    },
+  })
   .post("/reset-password", ({ body }) => authService.resetPassword(body), {
     body: ResetPasswordBodySchema,
     response: MessageResponseSchema,

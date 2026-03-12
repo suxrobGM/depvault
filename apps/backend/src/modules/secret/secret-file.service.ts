@@ -1,6 +1,5 @@
 import { singleton } from "tsyringe";
 import { ForbiddenError, NotFoundError } from "@/common/errors";
-import { logger } from "@/common/logger";
 import { decryptBinary, deriveProjectKey, encryptBinary } from "@/common/utils/encryption";
 import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
@@ -67,8 +66,6 @@ export class SecretFileService {
         uploadedBy: userId,
       },
     });
-
-    await this.logAudit(projectId, userId, "UPLOADED", secretFile.id);
 
     await this.auditLogService.log({
       userId,
@@ -137,8 +134,6 @@ export class SecretFileService {
       file.authTag,
       projectKey,
     );
-
-    await this.logAudit(projectId, userId, "DOWNLOADED", fileId);
 
     await this.auditLogService.log({
       userId,
@@ -253,7 +248,6 @@ export class SecretFileService {
 
     const file = await this.findFileOrThrow(projectId, fileId);
     await this.prisma.secretFile.delete({ where: { id: fileId } });
-    await this.logAudit(projectId, userId, "DELETED", fileId);
 
     await this.auditLogService.log({
       userId,
@@ -318,24 +312,5 @@ export class SecretFileService {
     }
 
     return member;
-  }
-
-  private async logAudit(
-    projectId: string,
-    userId: string,
-    action: "UPLOADED" | "DOWNLOADED" | "DELETED",
-    fileId: string,
-  ) {
-    try {
-      await this.prisma.secretFileAuditLog.create({
-        data: {
-          secretFileId: fileId,
-          userId,
-          action,
-        },
-      });
-    } catch {
-      logger.warn({ projectId, userId, action, fileId }, "Failed to create audit log entry");
-    }
   }
 }

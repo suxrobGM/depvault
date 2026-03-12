@@ -18,7 +18,7 @@ const MEMBER_INCLUDE = {
 
 @singleton()
 export class MemberService {
-  private readonly frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:4001";
+  private readonly frontendUrl = process.env.FRONTEND_URL!;
 
   constructor(
     private readonly prisma: PrismaClient,

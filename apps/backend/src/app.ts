@@ -15,7 +15,7 @@ import { environmentController } from "@/modules/environment";
 import { githubApiController } from "@/modules/github";
 import { notificationController } from "@/modules/notification";
 import { projectController } from "@/modules/project";
-import { secretController, secretFileController } from "@/modules/secret";
+import { secretController, secretFileController, sharedSecretController } from "@/modules/secret";
 import { userController } from "@/modules/user";
 import { vaultGroupController } from "@/modules/vault-group";
 import { HttpErrorResponses } from "./types/response";
@@ -44,6 +44,7 @@ const app = new Elysia()
       .use(envTemplateController)
       .use(secretFileController)
       .use(secretController)
+      .use(sharedSecretController)
       .use(userController)
       .use(auditLogController)
       .use(analysisController)

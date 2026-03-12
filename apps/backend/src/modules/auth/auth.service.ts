@@ -22,7 +22,7 @@ const PASSWORD_RESET_EXPIRY_MS = 60 * 60 * 1000; // 1 hour
 
 @singleton()
 export class AuthService {
-  private readonly frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:4001";
+  private readonly frontendUrl = process.env.FRONTEND_URL!;
 
   constructor(
     private readonly prisma: PrismaClient,

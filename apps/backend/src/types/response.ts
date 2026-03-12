@@ -48,6 +48,7 @@ export const HttpErrorResponses = {
   403: ErrorResponseSchema,
   404: ErrorResponseSchema,
   409: ErrorResponseSchema,
+  410: ErrorResponseSchema,
   429: ErrorResponseSchema,
   500: ErrorResponseSchema,
 };

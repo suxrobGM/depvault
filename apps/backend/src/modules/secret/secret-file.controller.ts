@@ -27,35 +27,31 @@ export const secretFileController = new Elysia({
   detail: { tags: ["Secret Files"] },
 })
   .use(authGuard)
-  .use(
-    new Elysia()
-      .use(authGuard)
-      .use(rateLimiter({ max: 20, windowMs: 60 * 1000 }))
-      .post(
-        "/",
-        async ({ params, body, user, request, server }) => {
-          return secretFileService.upload(
-            params.id,
-            user.id,
-            body.file,
-            body.vaultGroupId,
-            body.environmentType,
-            body.description,
-            getClientIp(request, server),
-          );
-        },
-        {
-          params: StringIdParamSchema,
-          body: UploadSecretFileBodySchema,
-          response: SecretFileResponseSchema,
-          detail: {
-            summary: "Upload a secret file",
-            description:
-              "Upload and encrypt a secret file for the project. Executable file types (.exe, .sh, .bat, .cmd, .ps1) are rejected. Max file size is 25 MB. Only owners and editors can upload.",
-            security: [{ bearerAuth: [] }],
-          },
-        },
-      ),
+  .use(rateLimiter({ max: 20, windowMs: 60 * 1000 }))
+  .post(
+    "/",
+    async ({ params, body, user, request, server }) => {
+      return secretFileService.upload(
+        params.id,
+        user.id,
+        body.file,
+        body.vaultGroupId,
+        body.environmentType,
+        body.description,
+        getClientIp(request, server),
+      );
+    },
+    {
+      params: StringIdParamSchema,
+      body: UploadSecretFileBodySchema,
+      response: SecretFileResponseSchema,
+      detail: {
+        summary: "Upload a secret file",
+        description:
+          "Upload and encrypt a secret file for the project. Executable file types (.exe, .sh, .bat, .cmd, .ps1) are rejected. Max file size is 25 MB. Only owners and editors can upload.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
   )
   .get(
     "/",

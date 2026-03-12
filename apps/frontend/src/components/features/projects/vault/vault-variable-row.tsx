@@ -7,6 +7,7 @@ import {
   Edit as EditIcon,
   History as HistoryIcon,
   Replay as ReplayIcon,
+  Share as ShareIcon,
 } from "@mui/icons-material";
 import {
   Box,
@@ -21,6 +22,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { CreateShareLinkDialog } from "@/components/features/shared-secret/create-share-link-dialog";
 import { ActionMenu } from "@/components/ui/action-menu";
 import { MaskedValue } from "@/components/ui/masked-value";
 import { useApiMutation } from "@/hooks/use-api-mutation";
@@ -43,6 +45,7 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
 
   const confirm = useConfirm();
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   const { data: versionsData, isLoading: versionsLoading } =
     useApiQuery<EnvVariableVersionListResponse>(
@@ -126,6 +129,12 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
                 hidden: !canEdit,
               },
               {
+                label: "Share",
+                icon: <ShareIcon fontSize="small" />,
+                onClick: () => setShareOpen(true),
+                hidden: !canEdit,
+              },
+              {
                 label: "Version History",
                 icon: <HistoryIcon fontSize="small" />,
                 onClick: () => setHistoryOpen(true),
@@ -141,6 +150,13 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
           />
         </TableCell>
       </TableRow>
+
+      <CreateShareLinkDialog
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        projectId={projectId}
+        variable={variable}
+      />
 
       <TableRow>
         <TableCell colSpan={5} sx={{ py: 0 }}>
