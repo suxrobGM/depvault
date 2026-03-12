@@ -156,6 +156,53 @@ describe("AuditLogService", () => {
       );
     });
 
+    it("should filter by date range", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
+
+      const from = "2026-01-01T00:00:00.000Z";
+      const to = "2026-01-31T23:59:59.999Z";
+
+      await service.list(projectId, userId, { from, to }, 1, 20);
+
+      expect(mockPrisma.auditLog.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            createdAt: { gte: new Date(from), lte: new Date(to) },
+          }),
+        }),
+      );
+    });
+
+    it("should filter by start date only", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
+
+      const from = "2026-01-01T00:00:00.000Z";
+
+      await service.list(projectId, userId, { from }, 1, 20);
+
+      expect(mockPrisma.auditLog.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            createdAt: { gte: new Date(from) },
+          }),
+        }),
+      );
+    });
+
+    it("should filter by userEmail with case-insensitive partial match", async () => {
+      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
+
+      await service.list(projectId, userId, { userEmail: "test@" }, 1, 20);
+
+      expect(mockPrisma.auditLog.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            user: { email: { contains: "test@", mode: "insensitive" } },
+          }),
+        }),
+      );
+    });
+
     it("should include user email in response", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
 

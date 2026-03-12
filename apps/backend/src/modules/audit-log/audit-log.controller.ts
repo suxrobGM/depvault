@@ -21,6 +21,9 @@ export const auditLogController = new Elysia({
         {
           action: query.action,
           resourceType: query.resourceType,
+          from: query.from,
+          to: query.to,
+          userEmail: query.userEmail,
         },
         query.page,
         query.limit,

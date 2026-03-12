@@ -45,7 +45,13 @@ export class AuditLogService {
   async list(
     projectId: string,
     userId: string,
-    filters: { action?: AuditAction; resourceType?: AuditResourceType },
+    filters: {
+      action?: AuditAction;
+      resourceType?: AuditResourceType;
+      from?: string;
+      to?: string;
+      userEmail?: string;
+    },
     page = 1,
     limit = 20,
   ): Promise<PaginatedResponse<AuditLogResponse>> {
@@ -61,10 +67,19 @@ export class AuditLogService {
       throw new ForbiddenError("Only owners and editors can view audit logs");
     }
 
+    const createdAtFilter = {
+      ...(filters.from && { gte: new Date(filters.from) }),
+      ...(filters.to && { lte: new Date(filters.to) }),
+    };
+
     const where = {
       projectId,
       ...(filters.action && { action: filters.action }),
       ...(filters.resourceType && { resourceType: filters.resourceType }),
+      ...(Object.keys(createdAtFilter).length > 0 && { createdAt: createdAtFilter }),
+      ...(filters.userEmail && {
+        user: { email: { contains: filters.userEmail, mode: "insensitive" as const } },
+      }),
     };
 
     const [logs, total] = await Promise.all([

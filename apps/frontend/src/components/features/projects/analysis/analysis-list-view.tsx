@@ -13,6 +13,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/ui/empty-state";
 import { GlassCard } from "@/components/ui/glass-card";
 import { HealthArc } from "@/components/ui/health-arc";
+import { ListSkeleton } from "@/components/ui/list-skeleton";
 import { PageHeader } from "@/components/ui/page-header";
 import { PaginationBar } from "@/components/ui/pagination-bar";
 import { useApiQuery } from "@/hooks/use-api-query";
@@ -28,15 +29,23 @@ interface AnalysisListViewProps {
   projectId: string;
 }
 
+interface AnalysisRowProps {
+  item: Analysis;
+  projectId: string;
+  index: number;
+}
+
 const PAGE_SIZE = 10;
 
-function AnalysisRow(props: { item: Analysis; projectId: string; index: number }): ReactElement {
+function AnalysisRow(props: AnalysisRowProps): ReactElement {
   const { item, projectId, index } = props;
 
   const displayName = item.filePath ?? item.fileName;
+
   const dirPath = displayName.includes("/")
     ? displayName.substring(0, displayName.lastIndexOf("/") + 1)
     : null;
+
   const fileName = displayName.includes("/")
     ? displayName.substring(displayName.lastIndexOf("/") + 1)
     : displayName;
@@ -116,21 +125,6 @@ function AnalysisRow(props: { item: Analysis; projectId: string; index: number }
   );
 }
 
-function ListSkeleton(): ReactElement {
-  return (
-    <Stack spacing={1.5}>
-      {Array.from({ length: 5 }, (_, i) => (
-        <Skeleton
-          key={i}
-          variant="rounded"
-          height={68}
-          sx={{ borderRadius: 2, opacity: 1 - i * 0.15 }}
-        />
-      ))}
-    </Stack>
-  );
-}
-
 export function AnalysisListView(props: AnalysisListViewProps): ReactElement {
   const { projectId } = props;
   const { user } = useAuth();
@@ -161,7 +155,7 @@ export function AnalysisListView(props: AnalysisListViewProps): ReactElement {
     return (
       <Box>
         <Skeleton variant="text" width={300} height={40} sx={{ mb: 1 }} />
-        <ListSkeleton />
+        <ListSkeleton height={68} />
       </Box>
     );
   }

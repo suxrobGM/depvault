@@ -1,5 +1,6 @@
 import { t, type Static } from "elysia";
 import { AuditAction, AuditResourceType } from "@/generated/prisma";
+import { DateRangeQuerySchema, PaginationQueryBaseSchema } from "@/types/pagination";
 
 export const AuditActionSchema = t.Enum(AuditAction);
 export const AuditResourceTypeSchema = t.Enum(AuditResourceType);
@@ -17,12 +18,15 @@ export const AuditLogResponseSchema = t.Object({
   userEmail: t.Nullable(t.String()),
 });
 
-export const AuditLogListQuerySchema = t.Object({
-  action: t.Optional(AuditActionSchema),
-  resourceType: t.Optional(AuditResourceTypeSchema),
-  page: t.Integer({ minimum: 1, default: 1 }),
-  limit: t.Integer({ minimum: 1, maximum: 100, default: 20 }),
-});
+export const AuditLogListQuerySchema = t.Composite([
+  PaginationQueryBaseSchema,
+  DateRangeQuerySchema,
+  t.Object({
+    action: t.Optional(AuditActionSchema),
+    resourceType: t.Optional(AuditResourceTypeSchema),
+    userEmail: t.Optional(t.String()),
+  }),
+]);
 
 export const AuditLogListResponseSchema = t.Object({
   items: t.Array(AuditLogResponseSchema),

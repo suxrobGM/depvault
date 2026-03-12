@@ -10,8 +10,8 @@ import {
   RotateRight as RotateRightIcon,
 } from "@mui/icons-material";
 import { Box, ListItemButton, ListItemIcon, Typography } from "@mui/material";
-import { formatRelativeTime } from "@/lib/format-date";
 import type { Notification } from "@/types/api";
+import { formatRelativeTime } from "@/utils/formatters";
 
 interface NotificationItemProps {
   notification: Notification;

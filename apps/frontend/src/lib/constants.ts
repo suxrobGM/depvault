@@ -21,6 +21,7 @@ export const ROUTES = {
   projectVault: (id: string) => `/projects/${id}/vault` as Route,
   projectVaultVariables: (id: string) => `/projects/${id}/vault/variables` as Route,
   projectVaultSecretFiles: (id: string) => `/projects/${id}/vault/secret-files` as Route,
+  projectActivity: (id: string) => `/projects/${id}/activity` as Route,
   secrets: "/secrets",
   notifications: "/notifications",
 } as const;

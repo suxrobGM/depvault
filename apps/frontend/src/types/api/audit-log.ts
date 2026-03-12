@@ -5,3 +5,5 @@ type ProjectById = ReturnType<(typeof client)["api"]["projects"]>;
 
 export type AuditLogListResponse = Data<ProjectById["audit-log"]["get"]>;
 export type AuditLogEntry = AuditLogListResponse["items"][number];
+export type AuditAction = AuditLogEntry["action"];
+export type AuditResourceType = AuditLogEntry["resourceType"];

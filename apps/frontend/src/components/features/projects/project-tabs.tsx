@@ -3,6 +3,7 @@
 import type { ReactElement } from "react";
 import {
   Group as GroupIcon,
+  History as HistoryIcon,
   Info as InfoIcon,
   Settings as SettingsIcon,
 } from "@mui/icons-material";
@@ -27,6 +28,12 @@ const TABS = [
     icon: <GroupIcon />,
     route: (id: string) => ROUTES.projectMembers(id),
     segment: "members",
+  },
+  {
+    label: "Activity",
+    icon: <HistoryIcon />,
+    route: (id: string) => ROUTES.projectActivity(id),
+    segment: "activity",
   },
   {
     label: "Settings",
