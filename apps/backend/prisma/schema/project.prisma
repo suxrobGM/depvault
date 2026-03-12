@@ -24,6 +24,7 @@ model Project {
   scanPatterns     ScanPattern[]
   secretScans      SecretScan[]
   secretDetections SecretDetection[]
+  ciTokens         CiToken[]
 
   @@map("projects")
 }

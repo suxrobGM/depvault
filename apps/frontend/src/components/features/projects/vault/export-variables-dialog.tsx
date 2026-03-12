@@ -7,7 +7,6 @@ import {
   type ConfigFormat,
   type EnvironmentTypeValue,
 } from "@depvault/shared/constants";
-import { ContentCopy as CopyIcon } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -15,14 +14,13 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  IconButton,
   MenuItem,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
+import { CopyButton } from "@/components/ui/copy-button";
 import { useApiQuery } from "@/hooks/use-api-query";
-import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import type { ExportResult } from "@/types/api/env-variable";
 import { downloadFile } from "@/utils/download-file";
@@ -38,8 +36,6 @@ interface ExportVariablesDialogProps {
 export function ExportVariablesDialog(props: ExportVariablesDialogProps): ReactElement {
   const { open, onClose, projectId, vaultGroupId, environmentType } = props;
   const [format, setFormat] = useState<ConfigFormat>("env");
-  const notification = useToast();
-
   const { data } = useApiQuery<ExportResult>(
     ["env-export", projectId, environmentType, format],
     () =>
@@ -48,12 +44,6 @@ export function ExportVariablesDialog(props: ExportVariablesDialogProps): ReactE
         .environments.export.get({ query: { environmentType, format, vaultGroupId } }),
     { enabled: open && !!environmentType },
   );
-
-  const handleCopy = async () => {
-    if (!data?.content) return;
-    await navigator.clipboard.writeText(data.content);
-    notification.success("Copied to clipboard");
-  };
 
   const handleDownload = () => {
     if (!data?.content) return;
@@ -98,13 +88,9 @@ export function ExportVariablesDialog(props: ExportVariablesDialogProps): ReactE
               >
                 {data.content}
               </Typography>
-              <IconButton
-                size="small"
-                onClick={handleCopy}
-                sx={{ position: "absolute", top: 8, right: 8 }}
-              >
-                <CopyIcon fontSize="small" />
-              </IconButton>
+              <Box sx={{ position: "absolute", top: 4, right: 4 }}>
+                <CopyButton value={data.content} notification="Copied to clipboard" />
+              </Box>
             </Box>
           )}
         </Stack>

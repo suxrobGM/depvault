@@ -39,6 +39,7 @@ model User {
   auditLogs          AuditLog[]
   triggeredScans     SecretScan[]      @relation("scanTriggeredBy")
   resolvedDetections SecretDetection[] @relation("detectionResolvedBy")
+  ciTokens           CiToken[]
 
   @@map("users")
 }

@@ -22,6 +22,20 @@ export function formatDate(date: Date | string): string {
   });
 }
 
+/** Formats a date with time (e.g., "Jan 1, 2024, 02:30 PM"), or "Never" if null. */
+export function formatDateTime(date: Date | string | null): string {
+  if (!date) {
+    return "Never";
+  }
+  return new Date(date).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 /**
  * Formats a date as a short relative label (e.g. "5m ago", "3d ago"),
  * falling back to locale date after 7 days.

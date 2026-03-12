@@ -10,6 +10,7 @@ import { secretScanCron } from "@/jobs/secret-scan.job";
 import { analysisController } from "@/modules/analysis";
 import { auditLogController } from "@/modules/audit-log/audit-log.controller";
 import { authController } from "@/modules/auth";
+import { ciAccessController, ciTokenController } from "@/modules/ci-token";
 import { convertController } from "@/modules/convert";
 import { envTemplateController } from "@/modules/env-template";
 import {
@@ -66,7 +67,9 @@ const app = new Elysia()
       .use(githubApiController)
       .use(notificationController)
       .use(secretScanController)
-      .use(scanPatternController),
+      .use(scanPatternController)
+      .use(ciTokenController)
+      .use(ciAccessController),
   )
   .listen(process.env.PORT!);
 
@@ -74,5 +77,4 @@ const app = new Elysia()
 export type App = typeof app;
 
 logger.info(`Connect API running at http://${app.server?.hostname}:${app.server?.port}`);
-
 logger.info(`Swagger docs available at http://${app.server?.hostname}:${app.server?.port}/swagger`);

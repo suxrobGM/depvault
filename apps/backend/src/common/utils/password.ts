@@ -1,4 +1,4 @@
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import * as Bun from "bun";
 
 /**
@@ -27,4 +27,14 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
  */
 export function createRandomToken(length: number = 32): string {
   return randomBytes(length).toString("hex");
+}
+
+/**
+ * Hashes a token using SHA-256.
+ * This is used to store a hash of CI tokens for verification without storing the raw token.
+ * @param token The raw token to hash
+ * @returns The hexadecimal string representation of the token hash
+ */
+export function hashToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
 }

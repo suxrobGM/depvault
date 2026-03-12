@@ -1,4 +1,5 @@
 enum AuditAction {
+  CREATE
   READ
   UPDATE
   DELETE
@@ -13,6 +14,7 @@ enum AuditResourceType {
   ENV_TEMPLATE
   SECRET_FILE
   SHARE_LINK
+  CI_TOKEN
 }
 
 model AuditLog {

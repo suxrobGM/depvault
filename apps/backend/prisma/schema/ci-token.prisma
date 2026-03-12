@@ -1,0 +1,22 @@
+model CiToken {
+  id            String    @id @default(uuid()) @db.Uuid
+  projectId     String    @map("project_id") @db.Uuid
+  environmentId String    @map("environment_id") @db.Uuid
+  createdBy     String    @map("created_by") @db.Uuid
+  name          String
+  tokenHash     String    @unique @map("token_hash")
+  tokenPrefix   String    @map("token_prefix")
+  ipAllowlist   String[]  @default([]) @map("ip_allowlist")
+  revokedAt     DateTime? @map("revoked_at")
+  lastUsedAt    DateTime? @map("last_used_at")
+  expiresAt     DateTime  @map("expires_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  environment Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+  creator     User        @relation(fields: [createdBy], references: [id])
+
+  @@index([projectId])
+  @@map("ci_tokens")
+}

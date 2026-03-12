@@ -27,6 +27,7 @@ import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 import type { MemberListResponse, ProjectResponse } from "@/types/api/project";
 import { updateProjectSchema } from "../schemas";
+import { CiTokensSection } from "./ci-tokens-section";
 
 interface SettingsTabProps {
   projectId: string;
@@ -130,6 +131,9 @@ export function SettingsTab(props: SettingsTabProps): ReactElement {
             </form>
           </CardContent>
         </GlassCard>
+      </Grid>
+      <Grid size={{ xs: 12 }}>
+        <CiTokensSection projectId={projectId} canEdit={canEdit} />
       </Grid>
 
       {isOwner && (

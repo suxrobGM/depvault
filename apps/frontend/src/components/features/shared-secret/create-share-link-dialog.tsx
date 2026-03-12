@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import { ContentCopy as CopyIcon, Link as LinkIcon } from "@mui/icons-material";
+import { Link as LinkIcon } from "@mui/icons-material";
 import {
   Alert,
   Box,
@@ -15,11 +15,11 @@ import {
   Typography,
 } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
+import { CopyButton } from "@/components/ui/copy-button";
 import { FormCheckboxField } from "@/components/ui/form-checkbox-field";
 import { FormSelectField } from "@/components/ui/form-select-field";
 import { FormTextField } from "@/components/ui/form-text-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import type { EnvVariable } from "@/types/api/env-variable";
 
@@ -38,7 +38,6 @@ interface CreateShareLinkDialogProps {
 
 export function CreateShareLinkDialog(props: CreateShareLinkDialogProps): ReactElement {
   const { open, onClose, projectId, variables } = props;
-  const toast = useToast();
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -75,13 +74,6 @@ export function CreateShareLinkDialog(props: CreateShareLinkDialogProps): ReactE
     onClose();
   };
 
-  const handleCopy = () => {
-    if (shareUrl) {
-      navigator.clipboard.writeText(shareUrl);
-      toast.success("Link copied to clipboard");
-    }
-  };
-
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -111,9 +103,12 @@ export function CreateShareLinkDialog(props: CreateShareLinkDialogProps): ReactE
             >
               {shareUrl}
             </Box>
-            <Button variant="contained" startIcon={<CopyIcon />} onClick={handleCopy} fullWidth>
-              Copy Link
-            </Button>
+            <CopyButton
+              value={shareUrl}
+              label="Copy Link"
+              notification="Link copied to clipboard"
+              fullWidth
+            />
           </Stack>
         ) : (
           <form
