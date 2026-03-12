@@ -2,8 +2,8 @@
 
 import { useState, type ReactElement } from "react";
 import { getEnvironmentLabel, type EnvironmentTypeValue } from "@depvault/shared/constants";
-import { Delete as DeleteIcon, Edit as EditIcon, VpnKey as VpnKeyIcon } from "@mui/icons-material";
-import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { VpnKey as VpnKeyIcon } from "@mui/icons-material";
+import { Box, Stack, Typography } from "@mui/material";
 import { CreateShareLinkDialog } from "@/components/features/shared-secret/create-share-link-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useApiMutation } from "@/hooks/use-api-mutation";
@@ -149,21 +149,13 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
   if (!environments || environments.length === 0) {
     return (
       <Box>
-        <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ mb: 2 }}>
-          {canEdit && (
-            <>
-              <Tooltip title="Edit group">
-                <IconButton size="small" onClick={() => setEditGroupOpen(true)}>
-                  <EditIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Delete group">
-                <IconButton size="small" color="error" onClick={handleDelete}>
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </>
-          )}
+        <Stack direction="row" justifyContent="flex-end" sx={{ mb: 2 }}>
+          <VaultToolbar
+            canEdit={canEdit}
+            onImport={() => setImportOpen(true)}
+            onEditGroup={() => setEditGroupOpen(true)}
+            onDeleteGroup={handleDelete}
+          />
         </Stack>
         <EmptyState
           icon={<VpnKeyIcon />}
@@ -194,23 +186,6 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
 
   return (
     <Box>
-      <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ mb: 2 }}>
-        {canEdit && (
-          <>
-            <Tooltip title="Edit group">
-              <IconButton size="small" onClick={() => setEditGroupOpen(true)}>
-                <EditIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Delete group">
-              <IconButton size="small" color="error" onClick={handleDelete}>
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </>
-        )}
-      </Stack>
-
       <Stack spacing={3}>
         <Stack
           direction="row"
@@ -236,6 +211,8 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
             onCompare={() => setView("diff")}
             onClone={() => setCloneOpen(true)}
             onShare={() => setShareOpen(true)}
+            onEditGroup={() => setEditGroupOpen(true)}
+            onDeleteGroup={handleDelete}
           />
         </Stack>
 

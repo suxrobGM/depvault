@@ -5,11 +5,14 @@ import {
   Add as AddIcon,
   ContentCopy as CloneIcon,
   CompareArrows as CompareIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
   FileDownload as ExportIcon,
   FileUpload as ImportIcon,
   Share as ShareIcon,
 } from "@mui/icons-material";
 import { Button, Stack } from "@mui/material";
+import { ActionMenu, type ActionMenuItem } from "@/components/ui/action-menu";
 
 interface VaultToolbarProps {
   canEdit?: boolean;
@@ -21,6 +24,8 @@ interface VaultToolbarProps {
   onCompare?: () => void;
   onClone?: () => void;
   onShare?: () => void;
+  onEditGroup?: () => void;
+  onDeleteGroup?: () => void;
 }
 
 export function VaultToolbar(props: VaultToolbarProps): ReactElement {
@@ -34,10 +39,52 @@ export function VaultToolbar(props: VaultToolbarProps): ReactElement {
     onCompare,
     onClone,
     onShare,
+    onEditGroup,
+    onDeleteGroup,
   } = props;
 
+  const menuItems: ActionMenuItem[] = [
+    {
+      label: "Export",
+      icon: <ExportIcon fontSize="small" />,
+      onClick: () => onExport?.(),
+      hidden: !hasEnvironment,
+    },
+    {
+      label: "Clone",
+      icon: <CloneIcon fontSize="small" />,
+      onClick: () => onClone?.(),
+      hidden: !canEdit || !hasEnvironment,
+    },
+    {
+      label: "Share",
+      icon: <ShareIcon fontSize="small" />,
+      onClick: () => onShare?.(),
+      hidden: !canEdit || !hasVariables,
+    },
+    {
+      label: "Compare",
+      icon: <CompareIcon fontSize="small" />,
+      onClick: () => onCompare?.(),
+    },
+    {
+      label: "Edit Group",
+      icon: <EditIcon fontSize="small" />,
+      onClick: () => onEditGroup?.(),
+      hidden: !canEdit,
+      dividerBefore: true,
+    },
+    {
+      label: "Delete Group",
+      icon: <DeleteIcon fontSize="small" />,
+      onClick: () => onDeleteGroup?.(),
+      hidden: !canEdit,
+      destructive: true,
+    },
+  ];
+
   return (
-    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+    <Stack direction="row" spacing={1} alignItems="center">
       {canEdit && (
         <Button variant="contained" size="small" startIcon={<AddIcon />} onClick={onCreateVariable}>
           New Variable
@@ -48,24 +95,7 @@ export function VaultToolbar(props: VaultToolbarProps): ReactElement {
           Import
         </Button>
       )}
-      {hasEnvironment && (
-        <Button variant="outlined" size="small" startIcon={<ExportIcon />} onClick={onExport}>
-          Export
-        </Button>
-      )}
-      {canEdit && hasEnvironment && (
-        <Button variant="outlined" size="small" startIcon={<CloneIcon />} onClick={onClone}>
-          Clone
-        </Button>
-      )}
-      {canEdit && hasVariables && (
-        <Button variant="outlined" size="small" startIcon={<ShareIcon />} onClick={onShare}>
-          Share
-        </Button>
-      )}
-      <Button variant="outlined" size="small" startIcon={<CompareIcon />} onClick={onCompare}>
-        Compare
-      </Button>
+      <ActionMenu items={menuItems} />
     </Stack>
   );
 }

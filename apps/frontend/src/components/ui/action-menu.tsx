@@ -2,7 +2,7 @@
 
 import { useState, type ReactElement } from "react";
 import { MoreVert as MoreVertIcon } from "@mui/icons-material";
-import { IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
+import { Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 
 /** A single entry in an ActionMenu. Set `hidden: true` to conditionally exclude an item. */
 export interface ActionMenuItem {
@@ -13,6 +13,8 @@ export interface ActionMenuItem {
   hidden?: boolean;
   /** Renders the item in `error.main` color. */
   destructive?: boolean;
+  /** Renders a divider above this item. */
+  dividerBefore?: boolean;
 }
 
 interface ActionMenuProps {
@@ -36,7 +38,8 @@ export function ActionMenu(props: ActionMenuProps): ReactElement {
         <MoreVertIcon fontSize="small" />
       </IconButton>
       <Menu anchorEl={anchor} open={!!anchor} onClose={close}>
-        {visible.map((item) => (
+        {visible.map((item) => [
+          item.dividerBefore && <Divider key={`${item.label}-divider`} />,
           <MenuItem
             key={item.label}
             disabled={item.disabled}
@@ -52,8 +55,8 @@ export function ActionMenu(props: ActionMenuProps): ReactElement {
               </ListItemIcon>
             )}
             <ListItemText>{item.label}</ListItemText>
-          </MenuItem>
-        ))}
+          </MenuItem>,
+        ])}
       </Menu>
     </>
   );
