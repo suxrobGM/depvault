@@ -7,22 +7,34 @@ import {
   CompareArrows as CompareIcon,
   FileDownload as ExportIcon,
   FileUpload as ImportIcon,
+  Share as ShareIcon,
 } from "@mui/icons-material";
 import { Button, Stack } from "@mui/material";
 
 interface VaultToolbarProps {
-  canEdit: boolean;
-  hasEnvironment: boolean;
-  onCreateVariable: () => void;
-  onImport: () => void;
-  onExport: () => void;
-  onCompare: () => void;
-  onClone: () => void;
+  canEdit?: boolean;
+  hasEnvironment?: boolean;
+  hasVariables?: boolean;
+  onCreateVariable?: () => void;
+  onImport?: () => void;
+  onExport?: () => void;
+  onCompare?: () => void;
+  onClone?: () => void;
+  onShare?: () => void;
 }
 
 export function VaultToolbar(props: VaultToolbarProps): ReactElement {
-  const { canEdit, hasEnvironment, onCreateVariable, onImport, onExport, onCompare, onClone } =
-    props;
+  const {
+    canEdit,
+    hasEnvironment,
+    hasVariables,
+    onCreateVariable,
+    onImport,
+    onExport,
+    onCompare,
+    onClone,
+    onShare,
+  } = props;
 
   return (
     <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
@@ -44,6 +56,11 @@ export function VaultToolbar(props: VaultToolbarProps): ReactElement {
       {canEdit && hasEnvironment && (
         <Button variant="outlined" size="small" startIcon={<CloneIcon />} onClick={onClone}>
           Clone
+        </Button>
+      )}
+      {canEdit && hasVariables && (
+        <Button variant="outlined" size="small" startIcon={<ShareIcon />} onClick={onShare}>
+          Share
         </Button>
       )}
       <Button variant="outlined" size="small" startIcon={<CompareIcon />} onClick={onCompare}>

@@ -33,11 +33,11 @@ interface CreateShareLinkDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
-  variable: EnvVariable;
+  variables: EnvVariable[];
 }
 
 export function CreateShareLinkDialog(props: CreateShareLinkDialogProps): ReactElement {
-  const { open, onClose, projectId, variable } = props;
+  const { open, onClose, projectId, variables } = props;
   const toast = useToast();
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -61,7 +61,7 @@ export function CreateShareLinkDialog(props: CreateShareLinkDialogProps): ReactE
     },
     onSubmit: async ({ value }) => {
       await mutation.mutateAsync({
-        variableIds: [variable.id],
+        variableIds: variables.map((v) => v.id),
         expiresIn: value.expiresIn,
         password: value.usePassword && value.password ? value.password : undefined,
       });
@@ -133,11 +133,24 @@ export function CreateShareLinkDialog(props: CreateShareLinkDialogProps): ReactE
                 }}
               >
                 <Typography variant="caption" color="text.secondary">
-                  Sharing variable
+                  {variables.length === 1
+                    ? "Sharing variable"
+                    : `Sharing ${variables.length} variables`}
                 </Typography>
-                <Typography variant="body2" fontFamily="monospace" fontWeight={600}>
-                  {variable.key}
-                </Typography>
+                {variables.length === 1 ? (
+                  <Typography variant="body2" fontFamily="monospace" fontWeight={600}>
+                    {variables[0]?.key}
+                  </Typography>
+                ) : (
+                  <Typography
+                    variant="body2"
+                    fontFamily="monospace"
+                    fontWeight={600}
+                    sx={{ maxHeight: 80, overflow: "auto" }}
+                  >
+                    {variables.map((v) => v.key).join(", ")}
+                  </Typography>
+                )}
               </Box>
 
               <FormSelectField

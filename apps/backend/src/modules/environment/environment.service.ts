@@ -37,7 +37,10 @@ export class EnvironmentService {
 
     const environments = await this.prisma.environment.findMany({
       where,
-      include: { vaultGroup: true, _count: { select: { variables: true } } },
+      include: {
+        vaultGroup: true,
+        _count: { select: { variables: true, secretFiles: true } },
+      },
       orderBy: { createdAt: "asc" },
     });
 
@@ -47,6 +50,7 @@ export class EnvironmentService {
       vaultGroupId: env.vaultGroupId,
       vaultGroupName: env.vaultGroup.name,
       variableCount: env._count.variables,
+      secretFileCount: env._count.secretFiles,
       createdAt: env.createdAt,
     }));
   }

@@ -155,7 +155,7 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
         open={shareOpen}
         onClose={() => setShareOpen(false)}
         projectId={projectId}
-        variable={variable}
+        variables={[variable]}
       />
 
       <TableRow>

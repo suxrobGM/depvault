@@ -4,6 +4,7 @@ import { useState, type ReactElement } from "react";
 import { getEnvironmentLabel, type EnvironmentTypeValue } from "@depvault/shared/constants";
 import { Delete as DeleteIcon, Edit as EditIcon, VpnKey as VpnKeyIcon } from "@mui/icons-material";
 import { Box, IconButton, Stack, Tooltip, Typography } from "@mui/material";
+import { CreateShareLinkDialog } from "@/components/features/shared-secret/create-share-link-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
@@ -43,6 +44,7 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
   const [exportOpen, setExportOpen] = useState(false);
   const [cloneOpen, setCloneOpen] = useState(false);
   const [editGroupOpen, setEditGroupOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   const { data: environments } = useApiQuery<EnvironmentListResponse>(
     ["environments", projectId, group.id],
@@ -103,12 +105,31 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
   };
 
   const handleDeleteEnvironment = async (envId: string, envType: string) => {
+    const env = environments?.find((e) => e.id === envId);
+    const varCount = env?.variableCount ?? 0;
+    const fileCount = env?.secretFileCount ?? 0;
+    const parts: string[] = [];
+
+    if (varCount > 0) {
+      parts.push(`${varCount} variable${varCount !== 1 ? "s" : ""}`);
+    }
+    if (fileCount > 0) {
+      parts.push(`${fileCount} secret file${fileCount !== 1 ? "s" : ""}`);
+    }
+
+    const description =
+      parts.length > 0
+        ? `This will permanently delete the "${getEnvironmentLabel(envType)}" environment and its ${parts.join(" and ")}.`
+        : `This will permanently delete the "${getEnvironmentLabel(envType)}" environment.`;
+
     const confirmed = await confirm({
       title: "Delete environment",
-      description: `This will permanently delete the "${getEnvironmentLabel(envType)}" environment and all its variables.`,
+      description,
       confirmLabel: "Delete",
       destructive: true,
+      confirmationText: getEnvironmentLabel(envType),
     });
+
     if (confirmed) {
       deleteEnvMutation.mutate(envId);
     }
@@ -208,11 +229,13 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
           <VaultToolbar
             canEdit={canEdit}
             hasEnvironment={!!activeEnv}
+            hasVariables={(variablesData?.items.length ?? 0) > 0}
             onCreateVariable={() => setCreateOpen(true)}
             onImport={() => setImportOpen(true)}
             onExport={() => setExportOpen(true)}
             onCompare={() => setView("diff")}
             onClone={() => setCloneOpen(true)}
+            onShare={() => setShareOpen(true)}
           />
         </Stack>
 
@@ -266,6 +289,15 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
             onSuccess={setSelectedEnv}
           />
         </>
+      )}
+
+      {canEdit && activeEnv && variablesData && variablesData.items.length > 0 && (
+        <CreateShareLinkDialog
+          open={shareOpen}
+          onClose={() => setShareOpen(false)}
+          projectId={projectId}
+          variables={variablesData.items}
+        />
       )}
 
       {activeEnv && (

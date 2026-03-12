@@ -95,24 +95,28 @@ export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
         <Alert severity="warning">
           Save these values now — this link has been destroyed and cannot be accessed again.
         </Alert>
-        <Paper variant="outlined">
-          <Table size="small">
+        <Paper variant="outlined" sx={{ overflow: "hidden" }}>
+          <Table size="small" sx={{ tableLayout: "fixed" }}>
             <TableHead>
               <TableRow>
-                <TableCell>Key</TableCell>
-                <TableCell>Value</TableCell>
+                <TableCell sx={{ width: "35%" }}>Key</TableCell>
+                <TableCell sx={{ width: "65%" }}>Value</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {result.variables.map((v) => (
                 <TableRow key={v.key}>
                   <TableCell>
-                    <Typography variant="body2" fontFamily="monospace" fontWeight={600}>
+                    <Typography variant="body2" fontFamily="monospace" fontWeight={600} noWrap>
                       {v.key}
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" fontFamily="monospace">
+                    <Typography
+                      variant="body2"
+                      fontFamily="monospace"
+                      sx={{ wordBreak: "break-all" }}
+                    >
                       {v.value}
                     </Typography>
                   </TableCell>
@@ -125,7 +129,7 @@ export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
           variant="outlined"
           startIcon={<DownloadIcon />}
           onClick={() => {
-            const text = result.variables.map((v) => `${v.key}=${v.value}`).join("");
+            const text = result.variables.map((v) => `${v.key}=${v.value}`).join("\n");
             downloadFile(text, ".env", "text/plain");
           }}
         >

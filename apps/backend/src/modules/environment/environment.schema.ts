@@ -9,6 +9,7 @@ export const EnvironmentResponseSchema = t.Object({
   vaultGroupId: t.String(),
   vaultGroupName: t.String(),
   variableCount: t.Number(),
+  secretFileCount: t.Number(),
   createdAt: t.Date(),
 });
 
