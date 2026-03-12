@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import { API_BASE_URL } from "@/lib/constants";
+import type { CreateAnalysisBody } from "@/types/api/analysis";
 import type { GitHubDependencyFile, GitHubRepoListResponse } from "@/types/api/github";
 import type { EcosystemValue } from "./analysis-utils";
 import { GitHubFileSelector } from "./github-file-selector";
@@ -50,14 +51,8 @@ export function GitHubTabContent(props: GitHubTabContentProps): ReactElement {
     { enabled: !!selectedRepo && step === 1 },
   );
 
-  const analysisMutation = useApiMutation(
-    (values: {
-      projectId: string;
-      fileName: string;
-      filePath?: string;
-      content: string;
-      ecosystem: EcosystemValue;
-    }) => client.api.analyses.post(values),
+  const analysisMutation = useApiMutation((values: CreateAnalysisBody) =>
+    client.api.projects({ id: projectId }).analyses.post(values),
   );
 
   const handleSelectRepo = (fullName: string) => {
@@ -99,7 +94,6 @@ export function GitHubTabContent(props: GitHubTabContentProps): ReactElement {
         if (!fileData) continue;
 
         await analysisMutation.mutateAsync({
-          projectId,
           fileName: file.name,
           filePath: file.path,
           content: fileData.content,

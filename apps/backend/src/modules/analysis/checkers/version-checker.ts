@@ -28,13 +28,14 @@ export async function checkVersions(
   return runWithConcurrency(
     dependencies,
     async (dep) => {
-      const { version: latestVersion, deprecated } = await fetcher(dep.name);
+      const { version: latestVersion, deprecated, license } = await fetcher(dep.name);
       return {
         name: dep.name,
         latestVersion,
         status: latestVersion
           ? compareVersions(dep.currentVersion, latestVersion, deprecated)
           : ("UP_TO_DATE" as const),
+        license,
       };
     },
     CONCURRENCY_LIMIT,

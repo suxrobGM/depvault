@@ -6,7 +6,6 @@ import { PaginatedResponseSchema } from "@/types/response";
 const EcosystemEnum = t.Enum(Ecosystem);
 
 export const CreateAnalysisBodySchema = t.Object({
-  projectId: t.String({ format: "uuid" }),
   fileName: t.String({ minLength: 1, maxLength: 255 }),
   filePath: t.Optional(t.String({ maxLength: 1024 })),
   content: t.String({ minLength: 1 }),
@@ -71,11 +70,11 @@ export const AnalysisListQuerySchema = PaginationQueryBaseSchema;
 export const AnalysisListResponseSchema = PaginatedResponseSchema(AnalysisSummaryResponseSchema);
 
 export const AnalysisProjectParamsSchema = t.Object({
-  projectId: t.String({ format: "uuid" }),
+  id: t.String({ format: "uuid" }),
 });
 
-export const AnalysisParamsSchema = t.Object({
-  projectId: t.String({ format: "uuid" }),
+export const AnalysisItemParamsSchema = t.Object({
+  id: t.String({ format: "uuid" }),
   analysisId: t.String({ format: "uuid" }),
 });
 

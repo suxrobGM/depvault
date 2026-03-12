@@ -6,6 +6,7 @@ import { FileUploadButton } from "@/components/ui/file-upload-button";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
+import type { CreateAnalysisBody } from "@/types/api/analysis";
 import { ECOSYSTEMS, type EcosystemValue } from "./analysis-utils";
 
 interface UploadTabContentProps {
@@ -22,13 +23,7 @@ export function UploadTabContent(props: UploadTabContentProps): ReactElement {
   const [content, setContent] = useState("");
 
   const mutation = useApiMutation(
-    (values: {
-      projectId: string;
-      fileName: string;
-      filePath?: string;
-      content: string;
-      ecosystem: EcosystemValue;
-    }) => client.api.analyses.post(values),
+    (values: CreateAnalysisBody) => client.api.projects({ id: projectId }).analyses.post(values),
     {
       invalidateKeys: [["analyses", projectId]],
       successMessage: "Analysis created successfully",
@@ -47,7 +42,7 @@ export function UploadTabContent(props: UploadTabContentProps): ReactElement {
       notification.error("Please provide file content");
       return;
     }
-    mutation.mutate({ projectId, fileName, ...(filePath && { filePath }), content, ecosystem });
+    mutation.mutate({ fileName, ...(filePath && { filePath }), content, ecosystem });
   };
 
   return (

@@ -27,7 +27,7 @@ export function AnalysisSummaryCard(props: AnalysisSummaryCardProps): ReactEleme
 
   const { data: analysisData } = useApiQuery<AnalysisListResponse>(
     ["analyses", projectId, "overview"],
-    () => client.api.analyses.project({ projectId }).get({ query: { page: 1, limit: 100 } }),
+    () => client.api.projects({ id: projectId }).analyses.get({ query: { page: 1, limit: 100 } }),
   );
 
   const analysisCount = analysisData?.pagination.total ?? 0;

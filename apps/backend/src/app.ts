@@ -21,6 +21,7 @@ import {
   envVariableController,
 } from "@/modules/environment";
 import { githubApiController } from "@/modules/github";
+import { licenseRuleController } from "@/modules/license-rule";
 import { notificationController } from "@/modules/notification";
 import { projectController } from "@/modules/project";
 import { scanPatternController } from "@/modules/scan-pattern";
@@ -28,7 +29,7 @@ import { secretController, secretFileController, sharedSecretController } from "
 import { secretScanController } from "@/modules/secret-scan";
 import { userController } from "@/modules/user";
 import { vaultGroupController } from "@/modules/vault-group";
-import { HttpErrorResponses } from "./types/response";
+import { HttpErrorResponses } from "@/types/response";
 
 // Validate environment
 validateEnv();
@@ -69,7 +70,8 @@ const app = new Elysia()
       .use(secretScanController)
       .use(scanPatternController)
       .use(ciTokenController)
-      .use(ciAccessController),
+      .use(ciAccessController)
+      .use(licenseRuleController),
   )
   .listen(process.env.PORT!);
 

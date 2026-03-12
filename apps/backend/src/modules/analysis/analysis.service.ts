@@ -11,7 +11,7 @@ import type {
   UpdateAnalysisBody,
 } from "./analysis.schema";
 import { calculateHealthScore } from "./analysis.utils";
-import { checkVersions, scanVulnerabilities } from "./checkers";
+import { checkVersions, resolveLicensePolicy, scanVulnerabilities } from "./checkers";
 import { nodejsParser, pythonParser, type DependencyParser } from "./parsers";
 
 const PARSERS: Record<string, DependencyParser> = {
@@ -30,7 +30,10 @@ export class AnalysisService {
     private readonly notificationService: NotificationService,
   ) {}
 
-  async create(body: CreateAnalysisBody, userId: string): Promise<AnalysisResponse> {
+  async create(
+    body: CreateAnalysisBody & { projectId: string },
+    userId: string,
+  ): Promise<AnalysisResponse> {
     await this.requireEditor(body.projectId, userId, "create");
 
     const parser = PARSERS[body.ecosystem];
@@ -66,7 +69,11 @@ export class AnalysisService {
       include: INCLUDE_DEPS_WITH_VULNS,
     });
 
-    const updatedDeps = await this.scanAndUpdateDeps(analysis.dependencies, body.ecosystem);
+    const updatedDeps = await this.scanAndUpdateDeps(
+      analysis.dependencies,
+      body.ecosystem,
+      body.projectId,
+    );
     const healthScore = calculateHealthScore(updatedDeps);
 
     if (healthScore !== null) {
@@ -163,7 +170,11 @@ export class AnalysisService {
       where: { dependency: { analysisId } },
     });
 
-    const updatedDeps = await this.scanAndUpdateDeps(analysis.dependencies, analysis.ecosystem);
+    const updatedDeps = await this.scanAndUpdateDeps(
+      analysis.dependencies,
+      analysis.ecosystem,
+      projectId,
+    );
     const healthScore = calculateHealthScore(updatedDeps);
 
     await this.prisma.analysis.update({
@@ -238,13 +249,14 @@ export class AnalysisService {
   private async scanAndUpdateDeps(
     dependencies: Array<{ id: string; name: string; currentVersion: string }>,
     ecosystem: Ecosystem,
+    projectId: string,
   ) {
     const depInputs = dependencies.map((d) => ({
       name: d.name,
       currentVersion: d.currentVersion,
     }));
 
-    const [versionResults, vulnResults] = await Promise.all([
+    const [versionResults, vulnResults, licenseRules] = await Promise.all([
       checkVersions(depInputs, ecosystem).catch((err) => {
         logger.warn(`Version check failed: ${err}`);
         return [];
@@ -253,6 +265,7 @@ export class AnalysisService {
         logger.warn(`Vulnerability scan failed: ${err}`);
         return [];
       }),
+      this.prisma.licenseRule.findMany({ where: { projectId } }),
     ]);
 
     const versionByName = new Map(versionResults.map((v) => [v.name, v]));
@@ -267,12 +280,16 @@ export class AnalysisService {
     const updateOps = dependencies.map((dep) => {
       const version = versionByName.get(dep.name);
       const vulns = vulnsByName.get(dep.name) ?? [];
+      const license = version?.license ?? null;
+      const licensePolicy = resolveLicensePolicy(license, licenseRules);
 
       return this.prisma.dependency.update({
         where: { id: dep.id },
         data: {
           latestVersion: version?.latestVersion ?? null,
           status: version?.status ?? DependencyStatus.UP_TO_DATE,
+          license,
+          licensePolicy,
           ...(vulns.length > 0 && {
             vulnerabilities: {
               create: vulns.map((v) => ({

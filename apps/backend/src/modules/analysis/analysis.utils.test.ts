@@ -1,9 +1,13 @@
 import { describe, expect, it } from "bun:test";
-import type { DependencyStatus, Vulnerability } from "@/generated/prisma";
+import type { DependencyStatus, LicensePolicy, Vulnerability } from "@/generated/prisma";
 import { calculateHealthScore } from "./analysis.utils";
 
-function dep(status: DependencyStatus, vulns: Pick<Vulnerability, "severity">[] = []) {
-  return { status, vulnerabilities: vulns };
+function dep(
+  status: DependencyStatus,
+  vulns: Pick<Vulnerability, "severity">[] = [],
+  licensePolicy: LicensePolicy = "ALLOW",
+) {
+  return { status, vulnerabilities: vulns, licensePolicy };
 }
 
 describe("calculateHealthScore", () => {

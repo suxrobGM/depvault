@@ -3,9 +3,9 @@ import { container } from "@/common/di/container";
 import { authGuard } from "@/common/middleware";
 import { MessageResponseSchema } from "@/types/response";
 import {
+  AnalysisItemParamsSchema,
   AnalysisListQuerySchema,
   AnalysisListResponseSchema,
-  AnalysisParamsSchema,
   AnalysisProjectParamsSchema,
   AnalysisResponseSchema,
   CreateAnalysisBodySchema,
@@ -16,24 +16,28 @@ import { AnalysisService } from "./analysis.service";
 const analysisService = container.resolve(AnalysisService);
 
 export const analysisController = new Elysia({
-  prefix: "/analyses",
+  prefix: "/projects/:id/analyses",
   detail: { tags: ["Analyses"] },
 })
   .use(authGuard)
-  .post("/", ({ body, user }) => analysisService.create(body, user.id), {
-    body: CreateAnalysisBodySchema,
-    response: AnalysisResponseSchema,
-    detail: {
-      summary: "Create analysis",
-      description:
-        "Parse a dependency file and store the analysis results. Accepts file content, ecosystem type, and project ID. Supports Node.js (package.json, package-lock.json) and Python (requirements.txt, pyproject.toml).",
-      security: [{ bearerAuth: [] }],
+  .post(
+    "/",
+    ({ params, body, user }) => analysisService.create({ ...body, projectId: params.id }, user.id),
+    {
+      params: AnalysisProjectParamsSchema,
+      body: CreateAnalysisBodySchema,
+      response: AnalysisResponseSchema,
+      detail: {
+        summary: "Create analysis",
+        description:
+          "Parse a dependency file and store the analysis results. Accepts file content, ecosystem type, and project ID. Supports Node.js (package.json, package-lock.json) and Python (requirements.txt, pyproject.toml).",
+        security: [{ bearerAuth: [] }],
+      },
     },
-  })
+  )
   .get(
-    "/project/:projectId",
-    ({ params, query, user }) =>
-      analysisService.list(params.projectId, user.id, query.page, query.limit),
+    "/",
+    ({ params, query, user }) => analysisService.list(params.id, user.id, query.page, query.limit),
     {
       params: AnalysisProjectParamsSchema,
       query: AnalysisListQuerySchema,
@@ -47,10 +51,10 @@ export const analysisController = new Elysia({
     },
   )
   .get(
-    "/project/:projectId/:analysisId",
-    ({ params, user }) => analysisService.getById(params.projectId, params.analysisId, user.id),
+    "/:analysisId",
+    ({ params, user }) => analysisService.getById(params.id, params.analysisId, user.id),
     {
-      params: AnalysisParamsSchema,
+      params: AnalysisItemParamsSchema,
       response: AnalysisResponseSchema,
       detail: {
         summary: "Get analysis details",
@@ -61,11 +65,11 @@ export const analysisController = new Elysia({
     },
   )
   .patch(
-    "/project/:projectId/:analysisId",
+    "/:analysisId",
     ({ params, body, user }) =>
-      analysisService.updateFilePath(params.projectId, params.analysisId, user.id, body),
+      analysisService.updateFilePath(params.id, params.analysisId, user.id, body),
     {
-      params: AnalysisParamsSchema,
+      params: AnalysisItemParamsSchema,
       body: UpdateAnalysisBodySchema,
       response: AnalysisResponseSchema,
       detail: {
@@ -77,10 +81,10 @@ export const analysisController = new Elysia({
     },
   )
   .post(
-    "/project/:projectId/:analysisId/rescan",
-    ({ params, user }) => analysisService.rescan(params.projectId, params.analysisId, user.id),
+    "/:analysisId/rescan",
+    ({ params, user }) => analysisService.rescan(params.id, params.analysisId, user.id),
     {
-      params: AnalysisParamsSchema,
+      params: AnalysisItemParamsSchema,
       response: AnalysisResponseSchema,
       detail: {
         summary: "Rescan analysis",
@@ -91,10 +95,10 @@ export const analysisController = new Elysia({
     },
   )
   .delete(
-    "/project/:projectId/:analysisId",
-    ({ params, user }) => analysisService.delete(params.projectId, params.analysisId, user.id),
+    "/:analysisId",
+    ({ params, user }) => analysisService.delete(params.id, params.analysisId, user.id),
     {
-      params: AnalysisParamsSchema,
+      params: AnalysisItemParamsSchema,
       response: MessageResponseSchema,
       detail: {
         summary: "Delete analysis",

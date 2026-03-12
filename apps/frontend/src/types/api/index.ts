@@ -12,6 +12,7 @@ export type {
   AnalysisListResponse,
   AnalysisDetailResponse,
   Dependency,
+  CreateAnalysisBody,
   Vulnerability,
 } from "./analysis";
 export type {

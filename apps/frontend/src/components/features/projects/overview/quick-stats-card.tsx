@@ -29,7 +29,7 @@ export function QuickStatsCard(props: QuickStatsCardProps): ReactElement {
 
   const { data: analysisData } = useApiQuery<AnalysisListResponse>(
     ["analyses", projectId, "overview"],
-    () => client.api.analyses.project({ projectId }).get({ query: { page: 1, limit: 100 } }),
+    () => client.api.projects({ id: projectId }).analyses.get({ query: { page: 1, limit: 100 } }),
   );
 
   const memberCount = membersData?.pagination.total ?? 0;

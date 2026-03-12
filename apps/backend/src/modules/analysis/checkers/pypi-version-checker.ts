@@ -14,10 +14,10 @@ export async function fetchPypiVersion(name: string): Promise<RegistryResult> {
       headers: { Accept: "application/json" },
     });
 
-    if (!response.ok) return { version: null, deprecated: false };
+    if (!response.ok) return { version: null, deprecated: false, license: null };
 
     const data = (await response.json()) as {
-      info?: { version?: string; classifiers?: string[] };
+      info?: { version?: string; license?: string; classifiers?: string[] };
     };
 
     const version = data.info?.version ?? null;
@@ -26,11 +26,13 @@ export async function fetchPypiVersion(name: string): Promise<RegistryResult> {
       (c: string) => c.toLowerCase().includes("inactive") || c.toLowerCase().includes("deprecated"),
     );
 
-    const result: RegistryResult = { version, deprecated };
+    const license = data.info?.license?.trim() || null;
+
+    const result: RegistryResult = { version, deprecated, license };
     versionCache.set(`pypi:${name}`, result);
     return result;
   } catch {
     logger.warn(`Failed to fetch PyPI version for ${name}`);
-    return { version: null, deprecated: false };
+    return { version: null, deprecated: false, license: null };
   }
 }

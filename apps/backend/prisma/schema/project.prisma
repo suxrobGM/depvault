@@ -25,8 +25,23 @@ model Project {
   secretScans      SecretScan[]
   secretDetections SecretDetection[]
   ciTokens         CiToken[]
+  licenseRules     LicenseRule[]
 
   @@map("projects")
+}
+
+model LicenseRule {
+  id        String        @id @default(uuid()) @db.Uuid
+  projectId String        @map("project_id") @db.Uuid
+  licenseId String        @map("license_id")
+  policy    LicensePolicy @default(WARN)
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, licenseId])
+  @@map("license_rules")
 }
 
 model ProjectMember {

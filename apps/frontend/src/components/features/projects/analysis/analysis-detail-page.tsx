@@ -69,11 +69,11 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
 
   const { data: analysis, isLoading } = useApiQuery<AnalysisDetailResponse>(
     ["analyses", projectId, analysisId],
-    () => client.api.analyses.project({ projectId })({ analysisId }).get(),
+    () => client.api.projects({ id: projectId }).analyses({ analysisId }).get(),
   );
 
   const deleteMutation = useApiMutation(
-    () => client.api.analyses.project({ projectId })({ analysisId }).delete(),
+    () => client.api.projects({ id: projectId }).analyses({ analysisId }).delete(),
     {
       invalidateKeys: [["analyses", projectId]],
       successMessage: "Analysis deleted",
@@ -83,7 +83,7 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
 
   const updateMutation = useApiMutation(
     (body: { filePath: string | null }) =>
-      client.api.analyses.project({ projectId })({ analysisId }).patch(body),
+      client.api.projects({ id: projectId }).analyses({ analysisId }).patch(body),
     {
       invalidateKeys: [["analyses", projectId, analysisId]],
       successMessage: "File path updated",
@@ -92,7 +92,7 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
   );
 
   const rescanMutation = useApiMutation(
-    () => client.api.analyses.project({ projectId })({ analysisId }).rescan.post(),
+    () => client.api.projects({ id: projectId }).analyses({ analysisId }).rescan.post(),
     {
       invalidateKeys: [
         ["analyses", projectId, analysisId],

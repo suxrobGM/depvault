@@ -1,7 +1,8 @@
-import type { DependencyStatus, Vulnerability } from "@/generated/prisma";
+import type { DependencyStatus, LicensePolicy, Vulnerability } from "@/generated/prisma";
 
 interface Dependency {
   status: DependencyStatus;
+  licensePolicy: LicensePolicy;
   vulnerabilities: Pick<Vulnerability, "severity">[];
 }
 
@@ -20,6 +21,9 @@ export function calculateHealthScore(dependencies: Dependency[]): number | null 
     if (dep.status === "MAJOR_UPDATE") score -= 5;
     else if (dep.status === "MINOR_UPDATE") score -= 2;
     else if (dep.status === "DEPRECATED") score -= 10;
+
+    if (dep.licensePolicy === "BLOCK") score -= 10;
+    else if (dep.licensePolicy === "WARN") score -= 3;
 
     for (const vuln of dep.vulnerabilities) {
       if (vuln.severity === "CRITICAL") score -= 15;

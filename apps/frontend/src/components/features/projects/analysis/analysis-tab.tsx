@@ -29,7 +29,7 @@ export function AnalysisTab(props: AnalysisTabProps): ReactElement {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const { data } = useApiQuery<AnalysisListResponse>(["analyses", projectId, 1], () =>
-    client.api.analyses.project({ projectId }).get({
+    client.api.projects({ id: projectId }).analyses.get({
       query: { page: 1, limit: 3 },
     }),
   );

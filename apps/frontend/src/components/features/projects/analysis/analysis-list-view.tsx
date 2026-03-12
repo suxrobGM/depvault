@@ -143,7 +143,7 @@ export function AnalysisListView(props: AnalysisListViewProps): ReactElement {
   const { data, isLoading } = useApiQuery<AnalysisListResponse>(
     ["analyses", projectId, page, PAGE_SIZE],
     () =>
-      client.api.analyses.project({ projectId }).get({
+      client.api.projects({ id: projectId }).analyses.get({
         query: { page, limit: PAGE_SIZE },
       }),
   );

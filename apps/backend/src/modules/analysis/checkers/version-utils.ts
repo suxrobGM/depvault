@@ -4,6 +4,7 @@ export interface VersionResult {
   name: string;
   latestVersion: string | null;
   status: DependencyStatus;
+  license: string | null;
 }
 
 export interface DependencyInput {
@@ -14,6 +15,7 @@ export interface DependencyInput {
 export interface RegistryResult {
   version: string | null;
   deprecated: boolean;
+  license: string | null;
 }
 
 export function cleanVersion(version: string): string {
