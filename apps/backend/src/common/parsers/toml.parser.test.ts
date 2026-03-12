@@ -1,5 +1,6 @@
+import { tomlSerializer } from "@shared/serializers";
 import { describe, expect, it } from "bun:test";
-import { tomlParser, tomlSerializer } from "./toml.parser";
+import { tomlParser } from "./toml.parser";
 
 describe("tomlParser", () => {
   it("should parse top-level key-value pairs", () => {

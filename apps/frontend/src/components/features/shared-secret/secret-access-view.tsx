@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
+import { CONFIG_FORMATS, type ConfigFormat } from "@depvault/shared/constants";
+import { getConfigFileName, serializeConfig } from "@depvault/shared/serializers";
 import {
   CheckCircle as CheckCircleIcon,
   Download as DownloadIcon,
@@ -24,6 +26,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useForm } from "@tanstack/react-form";
+import { FormSelectField } from "@/components/ui/form-select-field";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
 import type { SharedSecretInfoResponse } from "@/types/api/shared-secret";
@@ -50,6 +54,10 @@ export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
   const [result, setResult] = useState<AccessResult | null>(null);
   const [consumed, setConsumed] = useState(false);
 
+  const downloadForm = useForm({
+    defaultValues: { format: "env" as ConfigFormat },
+  });
+
   const mutation = useApiMutation(
     (body: { password?: string }) => client.api.secrets.shared({ token }).post(body),
     {
@@ -69,6 +77,17 @@ export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
 
   const handleAccess = () => {
     mutation.mutate(info.hasPassword ? { password } : {});
+  };
+
+  const handleDownload = () => {
+    if (result?.payloadType !== "ENV_VARIABLES") {
+      return;
+    }
+
+    const format = downloadForm.getFieldValue("format") as ConfigFormat;
+    const text = serializeConfig(format, result.variables);
+    const fileName = getConfigFileName(format);
+    downloadFile(text, fileName, "text/plain");
   };
 
   if (consumed && result?.payloadType === "SECRET_FILE") {
@@ -125,16 +144,19 @@ export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
             </TableBody>
           </Table>
         </Paper>
-        <Button
-          variant="outlined"
-          startIcon={<DownloadIcon />}
-          onClick={() => {
-            const text = result.variables.map((v) => `${v.key}=${v.value}`).join("\n");
-            downloadFile(text, ".env", "text/plain");
-          }}
-        >
-          Download as .env
-        </Button>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Box sx={{ minWidth: 180 }}>
+            <FormSelectField
+              form={downloadForm}
+              name="format"
+              label="Format"
+              items={CONFIG_FORMATS}
+            />
+          </Box>
+          <Button variant="outlined" startIcon={<DownloadIcon />} onClick={handleDownload}>
+            Download
+          </Button>
+        </Stack>
       </Stack>
     );
   }

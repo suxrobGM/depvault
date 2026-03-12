@@ -8,6 +8,7 @@ import {
   Delete as DeleteIcon,
   Edit as EditIcon,
   FileDownload as ExportIcon,
+  FolderZip as FolderZipIcon,
   FileUpload as ImportIcon,
   Share as ShareIcon,
 } from "@mui/icons-material";
@@ -24,6 +25,7 @@ interface VaultToolbarProps {
   onCompare?: () => void;
   onClone?: () => void;
   onShare?: () => void;
+  onBundle?: () => void;
   onEditGroup?: () => void;
   onDeleteGroup?: () => void;
 }
@@ -39,6 +41,7 @@ export function VaultToolbar(props: VaultToolbarProps): ReactElement {
     onCompare,
     onClone,
     onShare,
+    onBundle,
     onEditGroup,
     onDeleteGroup,
   } = props;
@@ -61,6 +64,12 @@ export function VaultToolbar(props: VaultToolbarProps): ReactElement {
       icon: <ShareIcon fontSize="small" />,
       onClick: () => onShare?.(),
       hidden: !canEdit || !hasVariables,
+    },
+    {
+      label: "Download Bundle",
+      icon: <FolderZipIcon fontSize="small" />,
+      onClick: () => onBundle?.(),
+      hidden: !canEdit || !hasEnvironment,
     },
     {
       label: "Compare",

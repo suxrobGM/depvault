@@ -16,6 +16,7 @@ import type { VaultGroup } from "@/types/api/vault-group";
 import { CloneEnvironmentDialog } from "./clone-environment-dialog";
 import { CreateVariableDialog } from "./create-variable-dialog";
 import { EnvDiffView } from "./diff/env-diff-view";
+import { DownloadBundleDialog } from "./download-bundle-dialog";
 import { EditGroupDialog } from "./edit-group-dialog";
 import { EditVariableDialog } from "./edit-variable-dialog";
 import { EnvironmentSelector } from "./environment-selector";
@@ -45,6 +46,7 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
   const [cloneOpen, setCloneOpen] = useState(false);
   const [editGroupOpen, setEditGroupOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [bundleOpen, setBundleOpen] = useState(false);
 
   const { data: environments } = useApiQuery<EnvironmentListResponse>(
     ["environments", projectId, group.id],
@@ -211,6 +213,7 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
             onCompare={() => setView("diff")}
             onClone={() => setCloneOpen(true)}
             onShare={() => setShareOpen(true)}
+            onBundle={() => setBundleOpen(true)}
             onEditGroup={() => setEditGroupOpen(true)}
             onDeleteGroup={handleDelete}
           />
@@ -274,6 +277,17 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
           onClose={() => setShareOpen(false)}
           projectId={projectId}
           variables={variablesData.items}
+        />
+      )}
+
+      {canEdit && activeEnv && (
+        <DownloadBundleDialog
+          open={bundleOpen}
+          onClose={() => setBundleOpen(false)}
+          projectId={projectId}
+          vaultGroupId={group.id}
+          environmentType={activeEnv as EnvironmentTypeValue}
+          variables={variablesData?.items ?? []}
         />
       )}
 

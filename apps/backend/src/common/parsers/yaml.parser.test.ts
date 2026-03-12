@@ -1,5 +1,6 @@
+import { yamlSerializer } from "@shared/serializers";
 import { describe, expect, it } from "bun:test";
-import { yamlParser, yamlSerializer } from "./yaml.parser";
+import { yamlParser } from "./yaml.parser";
 
 describe("yamlParser", () => {
   it("should parse flat key-value pairs", () => {

@@ -1,4 +1,4 @@
-import type { ConfigEntry, ConfigParser, ConfigSerializer } from "./types";
+import type { ConfigEntry, ConfigParser } from "./types";
 
 export const envParser: ConfigParser = {
   parse(content: string): ConfigEntry[] {
@@ -32,20 +32,6 @@ function stripQuotes(value: string): string {
     (value.startsWith("'") && value.endsWith("'"))
   ) {
     return value.slice(1, -1);
-  }
-  return value;
-}
-
-export const envSerializer: ConfigSerializer = {
-  serialize(entries: ConfigEntry[]): string {
-    return entries.map(({ key, value }) => `${key}=${quoteIfNeeded(value)}`).join("\n");
-  },
-};
-
-function quoteIfNeeded(value: string): string {
-  if (value.includes(" ") || value.includes("#") || value.includes('"') || value.includes("'")) {
-    const escaped = value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-    return `"${escaped}"`;
   }
   return value;
 }

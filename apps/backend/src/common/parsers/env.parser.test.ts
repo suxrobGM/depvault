@@ -1,5 +1,6 @@
+import { envSerializer } from "@shared/serializers";
 import { describe, expect, it } from "bun:test";
-import { envParser, envSerializer } from "./env.parser";
+import { envParser } from "./env.parser";
 
 describe("envParser", () => {
   it("should parse basic key=value pairs", () => {

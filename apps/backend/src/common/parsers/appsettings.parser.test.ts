@@ -1,5 +1,6 @@
+import { jsonSerializer as appsettingsSerializer } from "@shared/serializers";
 import { describe, expect, it } from "bun:test";
-import { appsettingsParser, appsettingsSerializer } from "./appsettings.parser";
+import { appsettingsParser } from "./appsettings.parser";
 
 describe("appsettingsParser", () => {
   it("should parse flat properties", () => {
