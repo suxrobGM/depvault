@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
+import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 import { ForbiddenError, NotFoundError } from "@/common/errors";
 import * as encryption from "@/common/utils/encryption";
 import { EnvVariableVersionService } from "./env-variable-version.service";
@@ -72,11 +72,8 @@ describe("EnvVariableVersionService", () => {
   let service: EnvVariableVersionService;
   let mockPrisma: ReturnType<typeof createMockPrisma>;
 
-  afterEach(() => {
-    mock.restore();
-  });
-
   beforeEach(() => {
+    mock.restore();
     mockPrisma = createMockPrisma();
     const { EnvironmentRepository } = require("./environment.repository");
     const envHelper = new EnvironmentRepository(mockPrisma);

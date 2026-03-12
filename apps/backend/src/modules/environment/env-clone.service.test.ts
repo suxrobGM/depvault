@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
+import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 import { ForbiddenError, NotFoundError } from "@/common/errors";
 import * as encryption from "@/common/utils/encryption";
 import { EnvironmentCloneService } from "./env-clone.service";
@@ -94,11 +94,8 @@ describe("EnvironmentCloneService", () => {
   let mockPrisma: ReturnType<typeof createMockPrisma>;
   let mockAuditLog: ReturnType<typeof createMockAuditLogService>;
 
-  afterEach(() => {
-    mock.restore();
-  });
-
   beforeEach(() => {
+    mock.restore();
     mockPrisma = createMockPrisma();
     mockAuditLog = createMockAuditLogService();
     const { EnvironmentRepository } = require("./environment.repository");
