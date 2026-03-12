@@ -1,7 +1,8 @@
+import { DEPENDENCY_EXTENSION_PATTERNS, DEPENDENCY_FILE_MAP } from "@shared/constants/ecosystems";
 import { singleton } from "tsyringe";
 import { BadRequestError, UnauthorizedError } from "@/common/errors";
 import { logger } from "@/common/logger";
-import { PrismaClient, type Ecosystem } from "@/generated/prisma";
+import { PrismaClient } from "@/generated/prisma";
 import type {
   GitHubCommit,
   GitHubContentResponse,
@@ -9,20 +10,7 @@ import type {
   GitHubTreeResponse,
 } from "./github-api.types";
 
-const DEPENDENCY_FILES: Record<string, Ecosystem> = {
-  "package.json": "NODEJS",
-  "requirements.txt": "PYTHON",
-  "pyproject.toml": "PYTHON",
-  "libs.versions.toml": "KOTLIN",
-};
-
-const DEPENDENCY_FILE_NAMES = new Set(Object.keys(DEPENDENCY_FILES));
-
-const DEPENDENCY_FILE_EXTENSIONS: Array<{ ext: string; ecosystem: Ecosystem }> = [
-  { ext: ".csproj", ecosystem: "DOTNET" },
-  { ext: ".fsproj", ecosystem: "DOTNET" },
-  { ext: ".vbproj", ecosystem: "DOTNET" },
-];
+const DEPENDENCY_FILE_NAMES = new Set(Object.keys(DEPENDENCY_FILE_MAP));
 
 @singleton()
 export class GitHubApiService {
@@ -75,9 +63,9 @@ export class GitHubApiService {
       .map((item) => {
         const fileName = item.path.split("/").pop() ?? "";
         if (DEPENDENCY_FILE_NAMES.has(fileName)) {
-          return { path: item.path, name: fileName, ecosystem: DEPENDENCY_FILES[fileName]! };
+          return { path: item.path, name: fileName, ecosystem: DEPENDENCY_FILE_MAP[fileName]! };
         }
-        const extMatch = DEPENDENCY_FILE_EXTENSIONS.find((e) =>
+        const extMatch = DEPENDENCY_EXTENSION_PATTERNS.find((e) =>
           fileName.toLowerCase().endsWith(e.ext),
         );
         if (extMatch) {

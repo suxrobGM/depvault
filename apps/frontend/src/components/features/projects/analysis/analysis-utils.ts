@@ -1,59 +1,25 @@
-export const ECOSYSTEMS = [
-  { value: "NODEJS", label: "Node.js", defaultFile: "package.json" },
-  { value: "PYTHON", label: "Python", defaultFile: "requirements.txt" },
-  { value: "DOTNET", label: ".NET", defaultFile: "Project.csproj" },
-  { value: "KOTLIN", label: "Kotlin", defaultFile: "libs.versions.toml" },
-] as const;
+import {
+  ECOSYSTEM_CONFIGS,
+  getEcosystemLabel,
+  getPackageUrl,
+  type EcosystemValue,
+} from "@depvault/shared/constants";
 
-export type EcosystemValue = (typeof ECOSYSTEMS)[number]["value"];
+export type { EcosystemValue };
+export { getEcosystemLabel, getPackageUrl };
+
+/** Ecosystems with active parser support, for the upload form dropdown. */
+const SUPPORTED_ECOSYSTEMS: ReadonlySet<string> = new Set(["NODEJS", "PYTHON", "DOTNET", "KOTLIN"]);
+
+export const ECOSYSTEMS = ECOSYSTEM_CONFIGS.filter((c) => SUPPORTED_ECOSYSTEMS.has(c.value)).map(
+  (c) => ({ value: c.value, label: c.label, defaultFile: c.defaultFile }),
+);
 
 export function getHealthColor(score: number | null): "success" | "warning" | "error" | "default" {
   if (score === null) return "default";
   if (score >= 80) return "success";
   if (score >= 50) return "warning";
   return "error";
-}
-
-export function getEcosystemLabel(ecosystem: string): string {
-  const labels: Record<string, string> = {
-    NODEJS: "Node.js",
-    PYTHON: "Python",
-    RUST: "Rust",
-    DOTNET: ".NET",
-    GO: "Go",
-    JAVA: "Java",
-    KOTLIN: "Kotlin",
-    RUBY: "Ruby",
-    PHP: "PHP",
-  };
-  return labels[ecosystem] ?? ecosystem;
-}
-
-const REGISTRY_URLS: Record<string, (name: string) => string> = {
-  NODEJS: (name) => `https://www.npmjs.com/package/${name}`,
-  PYTHON: (name) => `https://pypi.org/project/${name}`,
-  RUST: (name) => `https://crates.io/crates/${name}`,
-  GO: (name) => `https://pkg.go.dev/${name}`,
-  JAVA: (name) => {
-    const [group, artifact] = name.includes(":") ? name.split(":") : ["", name];
-    return group
-      ? `https://central.sonatype.com/artifact/${group}/${artifact}`
-      : `https://central.sonatype.com/search?q=${artifact}`;
-  },
-  RUBY: (name) => `https://rubygems.org/gems/${name}`,
-  PHP: (name) => `https://packagist.org/packages/${name}`,
-  KOTLIN: (name) => {
-    const [group, artifact] = name.includes(":") ? name.split(":") : ["", name];
-    return group
-      ? `https://central.sonatype.com/artifact/${group}/${artifact}`
-      : `https://central.sonatype.com/search?q=${artifact}`;
-  },
-  DOTNET: (name) => `https://www.nuget.org/packages/${name}`,
-};
-
-export function getPackageUrl(ecosystem: string, packageName: string): string | null {
-  const builder = REGISTRY_URLS[ecosystem];
-  return builder ? builder(packageName) : null;
 }
 
 export const STATUS_VARIANT: Record<string, "success" | "warning" | "error" | "default"> = {

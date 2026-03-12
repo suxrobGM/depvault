@@ -9,3 +9,16 @@ export {
   type SecretFileEnvironmentTypeValue,
 } from "./environment-types";
 export { DEFAULT_ROLES, UserRole, type UserRoleValue } from "./user-roles";
+export {
+  ECOSYSTEM_VALUES,
+  ECOSYSTEM_CONFIGS,
+  ECOSYSTEMS,
+  ECOSYSTEM_BY_VALUE,
+  DEPENDENCY_FILE_MAP,
+  DEPENDENCY_EXTENSION_PATTERNS,
+  getEcosystemLabel,
+  getPackageUrl,
+  getOsvEcosystem,
+  type EcosystemValue,
+  type EcosystemConfig,
+} from "./ecosystems";
