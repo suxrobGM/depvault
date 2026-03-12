@@ -15,12 +15,12 @@ export class EnvTemplateService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly auditLogService: AuditLogService,
-    private readonly envHelper: EnvironmentRepository,
+    private readonly envRepository: EnvironmentRepository,
   ) {}
 
   /** Create a template — either from an existing environment or from a manual variable list. */
   async create(projectId: string, body: CreateEnvTemplateBody, userId: string, ipAddress: string) {
-    await this.envHelper.requireEditorOrOwner(projectId, userId);
+    await this.envRepository.requireEditorOrOwner(projectId, userId);
 
     let variables: {
       key: string;
@@ -36,7 +36,11 @@ export class EnvTemplateService {
         },
         include: { variables: { orderBy: { createdAt: "asc" } } },
       });
-      if (!env) throw new NotFoundError(`Environment "${body.sourceEnvironmentType}" not found`);
+
+      if (!env) {
+        throw new NotFoundError(`Environment "${body.sourceEnvironmentType}" not found`);
+      }
+
       variables = env.variables.map((v) => ({
         key: v.key,
         description: v.description ?? undefined,
@@ -49,7 +53,10 @@ export class EnvTemplateService {
     const existing = await this.prisma.envTemplate.findUnique({
       where: { projectId_name: { projectId, name: body.name } },
     });
-    if (existing) throw new ConflictError(`Template "${body.name}" already exists`);
+
+    if (existing) {
+      throw new ConflictError(`Template "${body.name}" already exists`);
+    }
 
     const template = await this.prisma.envTemplate.create({
       data: {
@@ -91,7 +98,7 @@ export class EnvTemplateService {
   }
 
   async list(projectId: string, userId: string) {
-    await this.envHelper.requireMember(projectId, userId);
+    await this.envRepository.requireMember(projectId, userId);
 
     const templates = await this.prisma.envTemplate.findMany({
       where: { projectId },
@@ -111,14 +118,16 @@ export class EnvTemplateService {
   }
 
   async getDetail(projectId: string, templateId: string, userId: string) {
-    await this.envHelper.requireMember(projectId, userId);
+    await this.envRepository.requireMember(projectId, userId);
 
     const template = await this.prisma.envTemplate.findFirst({
       where: { id: templateId, projectId },
       include: { variables: { orderBy: { sortOrder: "asc" } } },
     });
 
-    if (!template) throw new NotFoundError("Template not found");
+    if (!template) {
+      throw new NotFoundError("Template not found");
+    }
 
     return {
       id: template.id,
@@ -144,12 +153,15 @@ export class EnvTemplateService {
     userId: string,
     ipAddress: string,
   ) {
-    await this.envHelper.requireEditorOrOwner(projectId, userId);
+    await this.envRepository.requireEditorOrOwner(projectId, userId);
 
     const template = await this.prisma.envTemplate.findFirst({
       where: { id: templateId, projectId },
     });
-    if (!template) throw new NotFoundError("Template not found");
+
+    if (!template) {
+      throw new NotFoundError("Template not found");
+    }
 
     const updated = await this.prisma.envTemplate.update({
       where: { id: templateId },
@@ -182,12 +194,15 @@ export class EnvTemplateService {
   }
 
   async delete(projectId: string, templateId: string, userId: string, ipAddress: string) {
-    await this.envHelper.requireEditorOrOwner(projectId, userId);
+    await this.envRepository.requireEditorOrOwner(projectId, userId);
 
     const template = await this.prisma.envTemplate.findFirst({
       where: { id: templateId, projectId },
     });
-    if (!template) throw new NotFoundError("Template not found");
+
+    if (!template) {
+      throw new NotFoundError("Template not found");
+    }
 
     await this.prisma.envTemplate.delete({ where: { id: templateId } });
 
@@ -212,15 +227,18 @@ export class EnvTemplateService {
     userId: string,
     ipAddress: string,
   ) {
-    await this.envHelper.requireEditorOrOwner(projectId, userId);
+    await this.envRepository.requireEditorOrOwner(projectId, userId);
 
     const template = await this.prisma.envTemplate.findFirst({
       where: { id: templateId, projectId },
       include: { variables: { orderBy: { sortOrder: "asc" } } },
     });
-    if (!template) throw new NotFoundError("Template not found");
 
-    const env = await this.envHelper.findOrCreateEnvironment(
+    if (!template) {
+      throw new NotFoundError("Template not found");
+    }
+
+    const env = await this.envRepository.findOrCreateEnvironment(
       projectId,
       body.vaultGroupId,
       body.environmentType as EnvironmentType,

@@ -3,6 +3,7 @@ import { container } from "@/common/di/container";
 import { authGuard } from "@/common/middleware";
 import { getClientIp } from "@/common/utils/ip";
 import { StringIdParamSchema } from "@/types/request";
+import { EnvironmentIOService } from "./env-io.service";
 import {
   EnvExampleQuerySchema,
   EnvExampleResponseSchema,
@@ -11,7 +12,6 @@ import {
   ImportEnvVariablesBodySchema,
   ImportEnvVariablesResponseSchema,
 } from "./env-variable.schema";
-import { EnvironmentIOService } from "./environment-io.service";
 
 const environmentIOService = container.resolve(EnvironmentIOService);
 

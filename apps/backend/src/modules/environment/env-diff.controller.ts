@@ -3,8 +3,8 @@ import { container } from "@/common/di/container";
 import { authGuard } from "@/common/middleware";
 import { getClientIp } from "@/common/utils/ip";
 import { StringIdParamSchema } from "@/types/request";
-import { EnvironmentCloneService } from "./environment-clone.service";
-import { EnvironmentDiffService } from "./environment-diff.service";
+import { EnvironmentCloneService } from "./env-clone.service";
+import { EnvironmentDiffService } from "./env-diff.service";
 import {
   CloneEnvironmentBodySchema,
   CloneEnvironmentResponseSchema,

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 import { ForbiddenError, NotFoundError } from "@/common/errors";
 import * as encryption from "@/common/utils/encryption";
 import { EnvironmentType } from "@/generated/prisma";
-import { EnvironmentIOService } from "./environment-io.service";
+import { EnvironmentIOService } from "./env-io.service";
 
 const now = new Date();
 const projectId = "project-uuid";
