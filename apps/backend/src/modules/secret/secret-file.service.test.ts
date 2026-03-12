@@ -82,6 +82,7 @@ describe("SecretFileService", () => {
   let mockPrisma: ReturnType<typeof createMockPrisma>;
 
   beforeEach(() => {
+    mock.restore();
     mockPrisma = createMockPrisma();
     const mockNotificationService = { notify: mock(() => Promise.resolve()) } as any;
     service = new SecretFileService(

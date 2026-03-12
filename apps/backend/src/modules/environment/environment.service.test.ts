@@ -84,6 +84,7 @@ describe("EnvironmentService", () => {
   let mockAuditLog: ReturnType<typeof createMockAuditLogService>;
 
   beforeEach(() => {
+    mock.restore();
     mockPrisma = createMockPrisma();
     mockAuditLog = createMockAuditLogService();
     const { EnvironmentRepository } = require("./environment.repository");

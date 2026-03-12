@@ -92,6 +92,7 @@ describe("SharedSecretService", () => {
   let mockAuditLog: ReturnType<typeof createMockAuditLogService>;
 
   beforeEach(() => {
+    mock.restore();
     mockPrisma = createMockPrisma();
     mockAuditLog = createMockAuditLogService();
     service = new SharedSecretService(mockPrisma, mockAuditLog);
