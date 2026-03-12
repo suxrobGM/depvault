@@ -45,7 +45,7 @@ packages/shared/ → Shared types & utils
 # Backend (cd apps/backend)
 bun run dev / start / typecheck
 bun test
-bun run db:generate / db:push / db:migrate / db:migrate:apply
+bun run db:generate / db:migrate / db:migrate:apply
 bun run build:types
 
 # Web (cd apps/frontend)
@@ -201,8 +201,7 @@ Applies when modifying Prisma schema files or writing database queries.
 
 ```bash
 bun run db:generate       # After schema edits — regenerate client
-bun run db:push           # Dev only — push without migration
-bun run db:migrate        # Create migration file for staging/prod
+bun run db:migrate        # Create migration file
 bun run db:migrate:apply  # Apply pending migrations
 ```
 
