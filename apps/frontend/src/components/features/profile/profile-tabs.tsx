@@ -3,27 +3,25 @@
 import type { ReactElement, SyntheticEvent } from "react";
 import { Person as PersonIcon, Security as SecurityIcon } from "@mui/icons-material";
 import { Tab, Tabs } from "@mui/material";
-import { useRouter } from "next/navigation";
+import type { Route } from "next";
+import { usePathname, useRouter } from "next/navigation";
 import { ROUTES } from "@/lib/constants";
 
-interface ProfileTabsProps {
-  activeTab: "general" | "security";
-}
+const TAB_ROUTES = [ROUTES.profileGeneral, ROUTES.profileSecurity] as const;
 
-const TAB_MAP = ["general", "security"] as const;
-
-export function ProfileTabs(props: ProfileTabsProps): ReactElement {
-  const { activeTab } = props;
+export function ProfileTabs(): ReactElement {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const activeIndex = TAB_ROUTES.findIndex((route) => pathname === route);
 
   const handleTabChange = (_: SyntheticEvent, newValue: number) => {
-    const tab = TAB_MAP[newValue];
-    router.push(`${ROUTES.profile}?tab=${tab}`);
+    router.push(TAB_ROUTES[newValue]! as Route);
   };
 
   return (
     <Tabs
-      value={TAB_MAP.indexOf(activeTab)}
+      value={activeIndex >= 0 ? activeIndex : 0}
       onChange={handleTabChange}
       className="vault-fade-up vault-delay-1"
       sx={{ mb: 3, borderBottom: 1, borderColor: "divider" }}

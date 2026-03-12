@@ -42,7 +42,7 @@ export function UserMenu(props: UserMenuProps): ReactElement {
         <MenuItem
           onClick={() => {
             handleClose();
-            router.push(ROUTES.profile);
+            router.push(ROUTES.profileGeneral);
           }}
         >
           <ListItemIcon>

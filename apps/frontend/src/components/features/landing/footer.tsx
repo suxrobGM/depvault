@@ -31,7 +31,7 @@ const footerLinks: Record<string, FooterLink[]> = {
   Account: [
     { label: "Sign In", href: ROUTES.login },
     { label: "Register", href: ROUTES.register },
-    { label: "Profile", href: ROUTES.profile },
+    { label: "Profile", href: ROUTES.profileGeneral },
   ],
   Resources: [
     { label: "Documentation", href: "#" },
