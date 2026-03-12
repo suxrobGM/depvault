@@ -61,7 +61,7 @@ export function UploadSecretFileDialog(props: UploadSecretFileDialogProps): Reac
         file,
         vaultGroupId: value.vaultGroupId,
         environmentType: value.environmentType,
-        description: value.description.trim() || undefined,
+        description: value.description?.trim() ?? "",
       });
     },
   });

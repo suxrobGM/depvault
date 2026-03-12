@@ -11,9 +11,9 @@ interface PageProps {
 export default async function SharedSecretPage(props: PageProps): Promise<ReactElement> {
   const { token } = await props.params;
 
-  const apiClient = await getServerClient();
+  const apiClient = await getServerClient({ auth: false });
   const { data: info, error } = await apiClient.api.secrets.shared({ token }).info.get();
-  const errorMessage = error?.value.message ?? "Secret not found or already consumed";
+  const errorMessage = error?.value.message;
 
   return (
     <Container maxWidth="sm" sx={{ py: 8 }}>
