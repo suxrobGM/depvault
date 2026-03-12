@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState, type ReactElement } from "react";
-import { Clear as ClearIcon, Search as SearchIcon } from "@mui/icons-material";
-import { Button, InputAdornment, MenuItem, Stack, TextField } from "@mui/material";
-import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import type { ReactElement } from "react";
+import { Clear as ClearIcon } from "@mui/icons-material";
+import { Button, MenuItem, Stack, TextField } from "@mui/material";
 import type { AuditAction, AuditResourceType } from "@/types/api/audit-log";
 
 const ACTION_OPTIONS = [
@@ -27,48 +26,32 @@ const RESOURCE_TYPE_OPTIONS = [
   { value: "CI_TOKEN", label: "CI Token" },
 ] as const;
 
-export interface AuditLogFilters {
+export interface GlobalActivityFilters {
   action: AuditAction | "";
   resourceType: AuditResourceType | "";
   from: string;
   to: string;
-  userEmail: string;
 }
 
-export const EMPTY_FILTERS: AuditLogFilters = {
+export const EMPTY_FILTERS: GlobalActivityFilters = {
   action: "",
   resourceType: "",
   from: "",
   to: "",
-  userEmail: "",
 };
 
-interface ActivityFilterBarProps {
-  filters: AuditLogFilters;
-  onFiltersChange: (filters: AuditLogFilters) => void;
+interface GlobalActivityFilterBarProps {
+  filters: GlobalActivityFilters;
+  onFiltersChange: (filters: GlobalActivityFilters) => void;
 }
 
-export function ActivityFilterBar(props: ActivityFilterBarProps): ReactElement {
+export function GlobalActivityFilterBar(props: GlobalActivityFilterBarProps): ReactElement {
   const { filters, onFiltersChange } = props;
-  const [emailInput, setEmailInput] = useState(filters.userEmail);
-  const debouncedEmail = useDebouncedValue(emailInput, 400);
-
-  useEffect(() => {
-    if (debouncedEmail === filters.userEmail) {
-      return;
-    }
-    onFiltersChange({ ...filters, userEmail: debouncedEmail });
-  }, [debouncedEmail, filters, onFiltersChange]);
 
   const hasActiveFilters = Object.values(filters).some((v) => v !== "");
 
-  const handleChange = (field: keyof AuditLogFilters, value: string) => {
+  const handleChange = (field: keyof GlobalActivityFilters, value: string) => {
     onFiltersChange({ ...filters, [field]: value });
-  };
-
-  const handleClear = () => {
-    setEmailInput("");
-    onFiltersChange(EMPTY_FILTERS);
   };
 
   const fieldSx = { minWidth: 150, flex: { xs: "1 1 calc(50% - 8px)", sm: "0 0 auto" } } as const;
@@ -130,30 +113,12 @@ export function ActivityFilterBar(props: ActivityFilterBarProps): ReactElement {
         sx={fieldSx}
       />
 
-      <TextField
-        label="User Email"
-        size="small"
-        value={emailInput}
-        onChange={(e) => setEmailInput(e.target.value)}
-        placeholder="Search by email..."
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon fontSize="small" />
-              </InputAdornment>
-            ),
-          },
-        }}
-        sx={{ minWidth: 150, flex: { xs: "1 1 100%", sm: "0 0 auto" } }}
-      />
-
       {hasActiveFilters && (
         <Button
           variant="text"
           size="small"
           startIcon={<ClearIcon />}
-          onClick={handleClear}
+          onClick={() => onFiltersChange(EMPTY_FILTERS)}
           sx={{ alignSelf: "center" }}
         >
           Clear

@@ -6,6 +6,9 @@ import {
   ChevronLeft as ChevronLeftIcon,
   Dashboard as DashboardIcon,
   Folder as FolderIcon,
+  History as HistoryIcon,
+  Security as SecurityNavIcon,
+  Settings as SettingsIcon,
   Shield as ShieldIcon,
   SwapHoriz as SwapHorizIcon,
 } from "@mui/icons-material";
@@ -43,7 +46,10 @@ interface SidebarProps {
 const navItems = [
   { label: "Dashboard", icon: <DashboardIcon />, href: ROUTES.dashboard },
   { label: "Projects", icon: <FolderIcon />, href: ROUTES.projects },
+  { label: "Activity", icon: <HistoryIcon />, href: ROUTES.activity },
+  { label: "Security", icon: <SecurityNavIcon />, href: ROUTES.security },
   { label: "Converter", icon: <SwapHorizIcon />, href: ROUTES.converter },
+  { label: "Settings", icon: <SettingsIcon />, href: ROUTES.settings },
 ];
 
 export function Sidebar(props: SidebarProps): ReactElement {

@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 import {
   ContentCopy as CloneIcon,
+  Add as CreateIcon,
   Delete as DeleteIcon,
   Download as DownloadIcon,
   Edit as EditIcon,
@@ -22,6 +23,7 @@ interface Description {
 }
 
 export const ACTIVITY_ACTION_CONFIG: Record<string, ActionConfig> = {
+  CREATE: { icon: <CreateIcon fontSize="small" />, color: "success.main", verb: "created" },
   READ: { icon: <ViewIcon fontSize="small" />, color: "info.main", verb: "viewed" },
   UPDATE: { icon: <EditIcon fontSize="small" />, color: "warning.main", verb: "updated" },
   DELETE: { icon: <DeleteIcon fontSize="small" />, color: "error.main", verb: "deleted" },
@@ -36,6 +38,7 @@ export const RESOURCE_LABELS: Record<string, string> = {
   ENV_TEMPLATE: "Env Template",
   SECRET_FILE: "Secret File",
   SHARE_LINK: "Share Link",
+  CI_TOKEN: "CI Token",
 };
 
 const VALID_COLOR_KEYS = ["info", "warning", "error", "success", "secondary", "primary"] as const;
@@ -162,6 +165,11 @@ export function generateActivityDescription(
       return { summary: "uploaded new version", highlight: fileName, detail: group };
     }
     return { summary: `${verb} file`, highlight: fileName, detail: group };
+  }
+
+  if (resourceType === "CI_TOKEN") {
+    const name = typeof meta.name === "string" ? meta.name : null;
+    return { summary: `${verb} ci token`, highlight: name, detail: null };
   }
 
   if (resourceType === "SHARE_LINK") {

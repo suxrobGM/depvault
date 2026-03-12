@@ -3,7 +3,7 @@ import { ForbiddenError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger/logger";
 import { PrismaClient, type AuditAction, type AuditResourceType } from "@/generated/prisma";
 import type { PaginatedResponse } from "@/types/response";
-import type { AuditLogResponse } from "./audit-log.schema";
+import type { AuditLogResponse, GlobalAuditLogResponse } from "./audit-log.schema";
 
 export interface CreateAuditLogParams {
   userId?: string;
@@ -106,6 +106,74 @@ export class AuditLogService {
       userFirstName: log.user?.firstName ?? null,
       userLastName: log.user?.lastName ?? null,
       userAvatarUrl: log.user?.avatarUrl ?? null,
+    }));
+
+    return {
+      items,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  /** List audit logs across all projects the user is a member of */
+  async listGlobal(
+    userId: string,
+    filters: {
+      action?: AuditAction;
+      resourceType?: AuditResourceType;
+      from?: string;
+      to?: string;
+    },
+    page = 1,
+    limit = 20,
+  ): Promise<PaginatedResponse<GlobalAuditLogResponse>> {
+    const createdAtFilter = {
+      ...(filters.from && { gte: new Date(filters.from) }),
+      ...(filters.to && { lte: new Date(filters.to) }),
+    };
+
+    const where = {
+      project: { members: { some: { userId } } },
+      ...(filters.action && { action: filters.action }),
+      ...(filters.resourceType && { resourceType: filters.resourceType }),
+      ...(Object.keys(createdAtFilter).length > 0 && { createdAt: createdAtFilter }),
+    };
+
+    const [logs, total] = await Promise.all([
+      this.prisma.auditLog.findMany({
+        where,
+        include: {
+          user: {
+            select: { email: true, firstName: true, lastName: true, avatarUrl: true },
+          },
+          project: { select: { name: true } },
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+      }),
+      this.prisma.auditLog.count({ where }),
+    ]);
+
+    const items: GlobalAuditLogResponse[] = logs.map((log) => ({
+      id: log.id,
+      userId: log.userId,
+      projectId: log.projectId,
+      action: log.action,
+      resourceType: log.resourceType,
+      resourceId: log.resourceId,
+      ipAddress: log.ipAddress,
+      metadata: log.metadata as Record<string, unknown> | null,
+      createdAt: log.createdAt,
+      userEmail: log.user?.email ?? null,
+      userFirstName: log.user?.firstName ?? null,
+      userLastName: log.user?.lastName ?? null,
+      userAvatarUrl: log.user?.avatarUrl ?? null,
+      projectName: log.project.name,
     }));
 
     return {

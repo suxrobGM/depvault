@@ -7,6 +7,7 @@ import { corsPlugin, swaggerPlugin } from "@/common/plugins";
 import { uploadsStaticPlugin } from "@/common/plugins/static.plugin";
 import { validateEnv } from "@/env";
 import { secretScanCron } from "@/jobs/secret-scan.job";
+import { activityController } from "@/modules/activity/activity.controller";
 import { analysisController } from "@/modules/analysis";
 import { auditLogController } from "@/modules/audit-log/audit-log.controller";
 import { authController } from "@/modules/auth";
@@ -27,6 +28,7 @@ import { projectController } from "@/modules/project";
 import { scanPatternController } from "@/modules/scan-pattern";
 import { secretController, secretFileController, sharedSecretController } from "@/modules/secret";
 import { secretScanController } from "@/modules/secret-scan";
+import { securityController } from "@/modules/security/security.controller";
 import { userController } from "@/modules/user";
 import { vaultGroupController } from "@/modules/vault-group";
 import { HttpErrorResponses } from "@/types/response";
@@ -71,7 +73,9 @@ const app = new Elysia()
       .use(scanPatternController)
       .use(ciTokenController)
       .use(ciAccessController)
-      .use(licenseRuleController),
+      .use(licenseRuleController)
+      .use(activityController)
+      .use(securityController),
   )
   .listen(process.env.PORT!);
 
