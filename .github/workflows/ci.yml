@@ -54,6 +54,8 @@ jobs:
       - name: Test backend
         run: bun test
         working-directory: apps/backend
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
 
       - name: Build frontend
         run: bun run build
