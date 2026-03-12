@@ -2,36 +2,12 @@ import { singleton } from "tsyringe";
 import { BadRequestError, UnauthorizedError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { PrismaClient, type Ecosystem } from "@/generated/prisma";
-
-interface GitHubRepo {
-  id: number;
-  name: string;
-  full_name: string;
-  private: boolean;
-  default_branch: string;
-  description: string | null;
-  language: string | null;
-  updated_at: string;
-}
-
-interface GitHubTreeResponse {
-  sha: string;
-  tree: Array<{
-    path: string;
-    mode: string;
-    type: string;
-    size?: number;
-  }>;
-  truncated: boolean;
-}
-
-interface GitHubContentResponse {
-  content: string;
-  encoding: string;
-  name: string;
-  path: string;
-  size: number;
-}
+import type {
+  GitHubCommit,
+  GitHubContentResponse,
+  GitHubRepo,
+  GitHubTreeResponse,
+} from "./github-api.types";
 
 const DEPENDENCY_FILES: Record<string, Ecosystem> = {
   "package.json": "NODEJS",
@@ -43,6 +19,8 @@ const DEPENDENCY_FILE_NAMES = new Set(Object.keys(DEPENDENCY_FILES));
 
 @singleton()
 export class GitHubApiService {
+  private readonly baseUrl = "https://api.github.com";
+
   constructor(private readonly prisma: PrismaClient) {}
 
   async listRepos(userId: string, page: number, limit: number) {
@@ -55,7 +33,7 @@ export class GitHubApiService {
       direction: "desc",
     });
 
-    const response = await this.githubFetch(`https://api.github.com/user/repos?${params}`, token);
+    const response = await this.githubFetch(`${this.baseUrl}/user/repos?${params}`, token);
 
     const repos = (await response.json()) as GitHubRepo[];
 
@@ -76,14 +54,11 @@ export class GitHubApiService {
   async listDependencyFiles(userId: string, owner: string, repo: string) {
     const token = await this.getToken(userId);
 
-    const repoResponse = await this.githubFetch(
-      `https://api.github.com/repos/${owner}/${repo}`,
-      token,
-    );
+    const repoResponse = await this.githubFetch(`${this.baseUrl}/repos/${owner}/${repo}`, token);
     const repoData = (await repoResponse.json()) as GitHubRepo;
 
     const treeResponse = await this.githubFetch(
-      `https://api.github.com/repos/${owner}/${repo}/git/trees/${repoData.default_branch}?recursive=1`,
+      `${this.baseUrl}/repos/${owner}/${repo}/git/trees/${repoData.default_branch}?recursive=1`,
       token,
     );
     const treeData = (await treeResponse.json()) as GitHubTreeResponse;
@@ -112,7 +87,7 @@ export class GitHubApiService {
     const token = await this.getToken(userId);
 
     const response = await this.githubFetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+      `${this.baseUrl}/repos/${owner}/${repo}/contents/${path}`,
       token,
     );
 
@@ -132,6 +107,41 @@ export class GitHubApiService {
     return { content, fileName };
   }
 
+  async listCommits(userId: string, owner: string, repo: string, perPage = 100, page = 1) {
+    const token = await this.getToken(userId);
+
+    const params = new URLSearchParams({
+      per_page: perPage.toString(),
+      page: page.toString(),
+    });
+
+    const response = await this.githubFetch(
+      `${this.baseUrl}/repos/${owner}/${repo}/commits?${params}`,
+      token,
+    );
+
+    const commits = (await response.json()) as GitHubCommit[];
+
+    return commits.map((c) => ({
+      sha: c.sha,
+      message: c.commit.message,
+      author: c.commit.author.name,
+      date: c.commit.author.date,
+    }));
+  }
+
+  async getCommitDiff(userId: string, owner: string, repo: string, sha: string): Promise<string> {
+    const token = await this.getToken(userId);
+
+    const response = await this.githubFetch(
+      `${this.baseUrl}/repos/${owner}/${repo}/commits/${sha}`,
+      token,
+      "application/vnd.github.diff",
+    );
+
+    return response.text();
+  }
+
   private async getToken(userId: string): Promise<string> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -147,11 +157,15 @@ export class GitHubApiService {
     return user.githubAccessToken;
   }
 
-  private async githubFetch(url: string, token: string): Promise<Response> {
+  private async githubFetch(
+    url: string,
+    token: string,
+    accept = "application/vnd.github+json",
+  ): Promise<Response> {
     const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${token}`,
-        Accept: "application/vnd.github+json",
+        Accept: accept,
         "X-GitHub-Api-Version": "2022-11-28",
       },
     });

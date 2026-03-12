@@ -13,14 +13,17 @@ model Project {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
-  owner        User            @relation(fields: [ownerId], references: [id])
-  members      ProjectMember[]
-  analyses     Analysis[]
-  vaultGroups  VaultGroup[]
-  environments Environment[]
-  envTemplates EnvTemplate[]
-  auditLogs     AuditLog[]
-  sharedSecrets SharedSecret[]
+  owner            User              @relation(fields: [ownerId], references: [id])
+  members          ProjectMember[]
+  analyses         Analysis[]
+  vaultGroups      VaultGroup[]
+  environments     Environment[]
+  envTemplates     EnvTemplate[]
+  auditLogs        AuditLog[]
+  sharedSecrets    SharedSecret[]
+  scanPatterns     ScanPattern[]
+  secretScans      SecretScan[]
+  secretDetections SecretDetection[]
 
   @@map("projects")
 }

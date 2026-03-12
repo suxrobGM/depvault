@@ -7,7 +7,14 @@ export type NotifyPayload =
       projectId: string;
       missingVars: { env: string; variable: string }[];
     }
-  | { type: "GIT_SECRET_DETECTION"; userId: string; projectId: string; fileName: string }
+  | {
+      type: "GIT_SECRET_DETECTION";
+      userId: string;
+      projectId: string;
+      fileName: string;
+      count?: number;
+      severityBreakdown?: { critical: number; high: number; medium: number; low: number };
+    }
   | { type: "TEAM_INVITE"; userId: string; projectId: string }
   | { type: "ROLE_CHANGE"; userId: string; projectId: string; oldRole: string; newRole: string };
 
@@ -45,12 +52,23 @@ export function createNotificationContent(
         message: `${payload.missingVars.length} variable${payload.missingVars.length === 1 ? "" : "s"} missing across environments in ${projectName}`,
         metadata: { ...base, missingVars: payload.missingVars },
       };
-    case "GIT_SECRET_DETECTION":
+    case "GIT_SECRET_DETECTION": {
+      const count = payload.count ?? 1;
+      const message =
+        count > 1
+          ? `${count} secrets detected across commits in ${projectName}`
+          : `A secret was found in ${payload.fileName} in ${projectName}`;
       return {
         title: "Secret Detected in Repository",
-        message: `A secret was found in ${payload.fileName} in ${projectName}`,
-        metadata: { ...base, fileName: payload.fileName },
+        message,
+        metadata: {
+          ...base,
+          fileName: payload.fileName,
+          count,
+          ...(payload.severityBreakdown && { severityBreakdown: payload.severityBreakdown }),
+        },
       };
+    }
     case "TEAM_INVITE":
       return {
         title: "Project Invitation",

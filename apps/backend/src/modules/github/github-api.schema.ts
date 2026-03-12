@@ -1,5 +1,6 @@
 import { t, type Static } from "elysia";
 import { Ecosystem } from "@/generated/prisma";
+import { PaginationQueryBaseSchema } from "@/types/pagination";
 
 const EcosystemEnum = t.Enum(Ecosystem);
 
@@ -31,10 +32,7 @@ export const GitHubFileContentResponseSchema = t.Object({
   fileName: t.String(),
 });
 
-export const GitHubRepoListQuerySchema = t.Object({
-  page: t.Integer({ minimum: 1, default: 1 }),
-  limit: t.Integer({ minimum: 1, maximum: 100, default: 30 }),
-});
+export const GitHubRepoListQuerySchema = PaginationQueryBaseSchema;
 
 export const GitHubRepoParamsSchema = t.Object({
   owner: t.String(),

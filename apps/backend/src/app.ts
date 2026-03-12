@@ -6,6 +6,7 @@ import { errorMiddleware } from "@/common/middleware";
 import { corsPlugin, swaggerPlugin } from "@/common/plugins";
 import { uploadsStaticPlugin } from "@/common/plugins/static.plugin";
 import { validateEnv } from "@/env";
+import { secretScanCron } from "@/jobs/secret-scan.job";
 import { analysisController } from "@/modules/analysis";
 import { auditLogController } from "@/modules/audit-log/audit-log.controller";
 import { authController } from "@/modules/auth";
@@ -21,7 +22,9 @@ import {
 import { githubApiController } from "@/modules/github";
 import { notificationController } from "@/modules/notification";
 import { projectController } from "@/modules/project";
+import { scanPatternController } from "@/modules/scan-pattern";
 import { secretController, secretFileController, sharedSecretController } from "@/modules/secret";
+import { secretScanController } from "@/modules/secret-scan";
 import { userController } from "@/modules/user";
 import { vaultGroupController } from "@/modules/vault-group";
 import { HttpErrorResponses } from "./types/response";
@@ -34,6 +37,7 @@ const app = new Elysia()
   .use(corsPlugin)
   .use(swaggerPlugin)
   .use(uploadsStaticPlugin)
+  .use(secretScanCron)
   .onStop(async () => {
     await prisma.$disconnect();
   })
@@ -60,7 +64,9 @@ const app = new Elysia()
       .use(analysisController)
       .use(convertController)
       .use(githubApiController)
-      .use(notificationController),
+      .use(notificationController)
+      .use(secretScanController)
+      .use(scanPatternController),
   )
   .listen(process.env.PORT!);
 
@@ -69,8 +75,4 @@ export type App = typeof app;
 
 logger.info(`Connect API running at http://${app.server?.hostname}:${app.server?.port}`);
 
-if (process.env.NODE_ENV === "development") {
-  logger.info(
-    `Swagger docs available at http://${app.server?.hostname}:${app.server?.port}/swagger`,
-  );
-}
+logger.info(`Swagger docs available at http://${app.server?.hostname}:${app.server?.port}/swagger`);
