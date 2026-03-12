@@ -2,7 +2,7 @@
 
 ## System Architecture
 
-```
+```text
                          ┌─────────────────────┐
                          │      Browser         │
                          └──────────┬───────────┘
@@ -33,7 +33,7 @@ Nginx sits in front of both services on a single domain. Requests matching `/api
 
 ## Monorepo Structure
 
-```
+```text
 depvault/
 ├── apps/
 │   ├── backend/         Elysia REST API (Bun runtime, port 4000)
@@ -50,7 +50,7 @@ depvault/
 
 **apps/backend** -- Elysia.js API server. Handles authentication, project management, dependency analysis, environment variable vault, secret file storage, secret sharing, CI token management, secret scanning, and notifications. Uses Prisma 7 with PostgreSQL and tsyringe for dependency injection.
 
-**apps/frontend** -- Next.js 16 App Router application. Uses React Server Components by default, MUI 7 for UI, react-hook-form + zod for form validation. Auth state managed via React context with JWT stored in httpOnly cookies.
+**apps/frontend** -- Next.js 16 App Router application. Uses React Server Components by default, MUI 7 for UI, TanStack Form + zod for form validation. TanStack Query for data fetching and caching. Auth state managed via React context with JWT stored in httpOnly cookies.
 
 **packages/shared** -- TypeScript types and utility functions shared between backend and frontend. Published as `@depvault/shared` within the monorepo.
 
@@ -60,7 +60,7 @@ depvault/
 
 Each feature module follows a consistent 3-file pattern with optional extras:
 
-```
+```text
 modules/{feature}/
 ├── {feature}.controller.ts    Elysia route group (thin HTTP layer)
 ├── {feature}.service.ts       @singleton() class with business logic
@@ -111,7 +111,7 @@ All modules are mounted under the `/api` group in `src/app.ts`:
 
 DepVault uses **tsyringe** for constructor-based DI:
 
-```
+```text
 ┌─────────────┐     container.resolve()     ┌──────────────┐
 │  Controller  │ ──────────────────────────► │   Service    │
 └─────────────┘                              │ @singleton() │
@@ -135,7 +135,7 @@ The database uses PostgreSQL with Prisma 7 (multi-file schema in `apps/backend/p
 
 ### Entity Relationship Overview
 
-```
+```text
 User ──────────┬──── Account (auth providers: EMAIL, GITHUB)
                │
                ├──── Project (owner)
@@ -195,7 +195,7 @@ User ──────────┬──── Account (auth providers: EMAI
 
 ## Authentication Flow
 
-```
+```text
                      Register                        Login
                         │                              │
                         ▼                              ▼
@@ -227,7 +227,7 @@ User ──────────┬──── Account (auth providers: EMAI
 
 All environment variable values and secret file contents are encrypted at rest using AES-256-GCM.
 
-```
+```text
                     Plaintext value
                           │
                           ▼
