@@ -1,4 +1,4 @@
-import { envSerializer } from "@shared/serializers";
+import { envSerializer } from "@depvault/shared/serializers";
 import { describe, expect, it } from "bun:test";
 import { envParser } from "./env.parser";
 

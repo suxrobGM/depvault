@@ -1,4 +1,4 @@
-import { CONFIG_FORMAT_VALUES } from "@shared/constants/config-formats";
+import { CONFIG_FORMAT_VALUES } from "@depvault/shared/constants";
 import { t, type Static } from "elysia";
 import { PaginationQuerySchema } from "@/types/pagination";
 import { PaginatedResponseSchema } from "@/types/response";

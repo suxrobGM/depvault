@@ -11,10 +11,9 @@
     "declarationMap": true,
     "noEmit": false,
     "paths": {
-      "@/*": ["./src/*"],
-      "@shared/*": ["../../packages/shared/src/*"]
+      "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "prisma/**/*", "prisma.config.ts", "../../packages/shared/src/**/*"],
-  "exclude": ["node_modules", "dist", "src/generated", "../../packages/shared/src/api"]
+  "include": ["src/**/*", "prisma/**/*", "prisma.config.ts"],
+  "exclude": ["node_modules", "dist", "src/generated"]
 }

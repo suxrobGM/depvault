@@ -29,7 +29,6 @@ Located at `src/lib/api-server.ts`. Reads cookies from `next/headers` and forwar
 ## Backend Type Inference
 
 - Run `bun run build:types` in `apps/backend/` to generate declaration files in `dist/`
-- Frontend tsconfig maps `@depvault/backend` to `../../apps/backend/dist/apps/backend/src/app.d.ts`
 - `@elysiajs/eden` must be a devDependency in the frontend for Treaty types to work
 - `@depvault/shared` is a `workspace:*` dependency (not from npm)
 

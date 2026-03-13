@@ -15,6 +15,7 @@
       "name": "@depvault/backend",
       "version": "1.0.0",
       "dependencies": {
+        "@depvault/shared": "workspace:*",
         "@elysiajs/cors": "^1.4.1",
         "@elysiajs/cron": "^1.4.1",
         "@elysiajs/jwt": "^1.4.0",
@@ -88,6 +89,7 @@
       "name": "@depvault/shared",
       "version": "1.0.0",
       "dependencies": {
+        "@depvault/backend": "workspace:*",
         "@elysiajs/eden": "^1.4.8",
         "elysia": "^1.4.25",
       },

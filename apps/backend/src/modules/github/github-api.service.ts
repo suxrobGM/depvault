@@ -1,4 +1,4 @@
-import { DEPENDENCY_EXTENSION_PATTERNS, DEPENDENCY_FILE_MAP } from "@shared/constants/ecosystems";
+import { DEPENDENCY_EXTENSION_PATTERNS, DEPENDENCY_FILE_MAP } from "@depvault/shared/constants";
 import { singleton } from "tsyringe";
 import { BadRequestError, UnauthorizedError } from "@/common/errors";
 import { logger } from "@/common/logger";

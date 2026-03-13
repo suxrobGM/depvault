@@ -1,4 +1,4 @@
-import { tomlSerializer } from "@shared/serializers";
+import { tomlSerializer } from "@depvault/shared/serializers";
 import { describe, expect, it } from "bun:test";
 import { tomlParser } from "./toml.parser";
 

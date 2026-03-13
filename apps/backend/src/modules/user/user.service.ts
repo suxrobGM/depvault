@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import { existsSync, mkdirSync, unlinkSync, writeFileSync } from "node:fs";
 import { basename, extname, resolve } from "node:path";
-import { isValidPassword, PASSWORD_REQUIREMENTS } from "@shared/utils/validators";
+import { isValidPassword, PASSWORD_REQUIREMENTS } from "@depvault/shared/utils";
 import { singleton } from "tsyringe";
 import { EmailChangeVerificationTemplate } from "@/common/emails";
 import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from "@/common/errors";

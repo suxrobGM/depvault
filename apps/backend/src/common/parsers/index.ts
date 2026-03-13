@@ -9,7 +9,7 @@ export { envParser } from "./env.parser";
 export { appsettingsParser } from "./appsettings.parser";
 export { yamlParser } from "./yaml.parser";
 export { tomlParser } from "./toml.parser";
-export { SERIALIZERS, serializeConfig, getConfigFileName } from "@shared/serializers";
+export { SERIALIZERS, serializeConfig, getConfigFileName } from "@depvault/shared/serializers";
 
 export const PARSERS: Record<ConfigFormat, ConfigParser> = {
   env: envParser,

@@ -1,4 +1,4 @@
-import { yamlSerializer } from "@shared/serializers";
+import { yamlSerializer } from "@depvault/shared/serializers";
 import { describe, expect, it } from "bun:test";
 import { yamlParser } from "./yaml.parser";
 

@@ -1,4 +1,4 @@
-import { jsonSerializer as appsettingsSerializer } from "@shared/serializers";
+import { jsonSerializer as appsettingsSerializer } from "@depvault/shared/serializers";
 import { describe, expect, it } from "bun:test";
 import { appsettingsParser } from "./appsettings.parser";
 

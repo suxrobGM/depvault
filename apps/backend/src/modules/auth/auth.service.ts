@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { isValidPassword, PASSWORD_REQUIREMENTS } from "@shared/utils/validators";
+import { isValidPassword, PASSWORD_REQUIREMENTS } from "@depvault/shared/utils";
 import { singleton } from "tsyringe";
 import { PasswordResetTemplate, VerifyEmailTemplate } from "@/common/emails";
 import { BadRequestError, ConflictError, UnauthorizedError } from "@/common/errors";

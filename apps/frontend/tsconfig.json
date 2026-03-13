@@ -15,8 +15,7 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@depvault/backend": ["../../apps/backend/dist/apps/backend/src/app.d.ts"]
+      "@/*": ["./src/*"]
     }
   },
   "include": [
