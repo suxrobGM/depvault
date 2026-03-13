@@ -4,7 +4,7 @@ If you've worked on a team where `.env` files get passed around in Slack DMs, yo
 
 I wanted one place for all of it. That became DepVault: a web dashboard for analyzing dependencies across 8+ ecosystems and storing secrets in an encrypted vault. It started as a class project, but I built it around a problem I actually had.
 
-Live app: [depvault.suxrobgm.net](https://depvault.suxrobgm.net) | Source: [github.com/suxrobgm/depvault](https://github.com/suxrobGM/depvault)
+Live app: [depvault.com](https://depvault.com) | Source: [github.com/suxrobgm/depvault](https://github.com/suxrobGM/depvault)
 
 ![Dashboard](./images/dashboard.jpg)
 
@@ -80,4 +80,4 @@ The whole thing is open source. The tech stack is Bun, Elysia.js, Next.js 16, Po
 
 ## Try it out
 
-DepVault is live at [depvault.suxrobgm.net](https://depvault.suxrobgm.net). Source code is at [github.com/suxrobgm/depvault](https://github.com/suxrobGM/depvault). Create an account, throw a `package.json` at it, see what turns up.
+DepVault is live at [depvault.com](https://depvault.com). Source code is at [github.com/suxrobgm/depvault](https://github.com/suxrobGM/depvault). Create an account, throw a `package.json` at it, see what turns up.

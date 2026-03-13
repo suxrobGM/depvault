@@ -69,7 +69,7 @@ Create a `.env` file based on the root `.env.example`. All variables are listed 
 | -------------------- | -------- | ---------------------- | -------------------------------- |
 | `RESEND_API_KEY`     | Yes      | --                     | API key from your Resend account |
 | `EMAIL_FROM_NAME`    | No       | `DepVault`             | Sender name for outgoing emails  |
-| `EMAIL_FROM_ADDRESS` | No       | `noreply@depvault.dev` | Sender email address             |
+| `EMAIL_FROM_ADDRESS` | No       | `noreply@depvault.com` | Sender email address             |
 
 ### File Uploads
 
@@ -117,7 +117,7 @@ The production setup uses Docker Compose with pre-built images from GitHub Conta
 mkdir -p ~/deploy/depvault
 cd ~/deploy/depvault
 
-# Copy docker-compose.yml and .env to the server
+# Copy deploy/docker-compose.yml and .env to the server
 # (the CI/CD pipeline does this automatically)
 ```
 
@@ -156,7 +156,7 @@ docker compose ps
 curl http://localhost:4000/health
 ```
 
-The `docker-compose.yml` defines two services:
+The `deploy/docker-compose.yml` defines two services:
 
 - **backend** -- Elysia API on port 4000, with a persistent volume for uploads
 - **frontend** -- Next.js on port 4001, depends on backend health check

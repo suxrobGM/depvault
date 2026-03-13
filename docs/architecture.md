@@ -41,8 +41,8 @@ depvault/
 ├── packages/
 │   └── shared/          Shared TypeScript types and utilities
 ├── deploy/
-│   └── depvault.conf    Nginx site configuration
-├── docker-compose.yml   Production container orchestration
+│   ├── depvault.conf       Nginx site configuration
+│   └── docker-compose.yml  Production container orchestration
 └── .github/workflows/
     ├── ci.yml           Lint, typecheck, test, build, secret scan
     └── deploy.yml       Build Docker images and deploy to VPS

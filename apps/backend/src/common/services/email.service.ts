@@ -20,7 +20,7 @@ export class EmailService {
     this.client = apiKey ? new Resend(apiKey) : null;
 
     const name = process.env.EMAIL_FROM_NAME ?? "DepVault";
-    const address = process.env.EMAIL_FROM_ADDRESS ?? "noreply@depvault.dev";
+    const address = process.env.EMAIL_FROM_ADDRESS ?? "noreply@depvault.com";
     this.from = `${name} <${address}>`;
 
     if (!this.client) {

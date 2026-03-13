@@ -385,7 +385,7 @@ After generation:
 | Link generated                        [x]     |
 |-----------------------------------------------|
 |                                               |
-| https://depvault.app/s/a8f3k2...     [Copy]  |
+| https://depvault.com/s/a8f3k2...     [Copy]  |
 |                                               |
 | This link can only be viewed once.            |
 | It expires in 24 hours.                       |

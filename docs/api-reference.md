@@ -2,7 +2,7 @@
 
 ## Live Documentation
 
-Interactive Swagger UI is available at: **[https://depvault.suxrobgm.net/api/swagger](https://depvault.suxrobgm.net/api/swagger)**
+Interactive Swagger UI is available at: **[https://depvault.com/api/swagger](https://depvault.com/api/swagger)**
 
 The Swagger docs are auto-generated from TypeBox schemas and reflect every endpoint, request body, query parameter, and response shape. Use Swagger for the full endpoint catalog.
 

@@ -11,7 +11,7 @@
 <p align="center">
   <a href="https://github.com/suxrobGM/depvault/actions/workflows/ci.yml"><img src="https://github.com/suxrobGM/depvault/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <a href="https://github.com/suxrobGM/depvault/actions/workflows/deploy.yml"><img src="https://github.com/suxrobGM/depvault/actions/workflows/deploy.yml/badge.svg" alt="Deploy" /></a>
-  <a href="https://depvault.suxrobgm.net"><img src="https://img.shields.io/badge/Live_App-depvault.suxrobgm.net-blue?style=flat&logo=vercel" alt="Website" /></a>
+  <a href="https://depvault.com"><img src="https://img.shields.io/badge/Live_App-depvault.com-blue?style=flat&logo=vercel" alt="Website" /></a>
   <a href="https://github.com/suxrobGM/depvault/blob/main/LICENSE"><img src="https://img.shields.io/github/license/suxrobGM/depvault" alt="License" /></a>
 </p>
 
@@ -28,7 +28,7 @@
 
 DepVault is a full-stack web platform that scans dependencies across 8+ language ecosystems, detects vulnerabilities via OSV.dev, and provides an AES-256-GCM encrypted vault for environment variables and secret files - all from a single dashboard.
 
-> **Live at [depvault.suxrobgm.net](https://depvault.suxrobgm.net)** | **[API Docs (Swagger)](https://depvault.suxrobgm.net/api/swagger)** | **[Full Documentation](docs/README.md)**
+> **Live at [depvault.com](https://depvault.com)** | **[API Docs (Swagger)](https://depvault.com/api/swagger)** | **[Full Documentation](docs/README.md)**
 
 ---
 

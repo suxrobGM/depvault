@@ -23,7 +23,7 @@ const envSchema = t.Object({
   MASTER_ENCRYPTION_KEY: t.String({ minLength: 64, maxLength: 64 }),
   RESEND_API_KEY: t.Optional(t.String()),
   EMAIL_FROM_NAME: t.Optional(t.String({ default: "DepVault" })),
-  EMAIL_FROM_ADDRESS: t.Optional(t.String({ default: "noreply@depvault.dev" })),
+  EMAIL_FROM_ADDRESS: t.Optional(t.String({ default: "noreply@depvault.com" })),
   FRONTEND_URL: t.Optional(t.String({ default: "http://localhost:4001" })),
 });
 

@@ -19,7 +19,7 @@ services:
       - GITHUB_CALLBACK_URL=${GITHUB_CALLBACK_URL}
       - RESEND_API_KEY=${RESEND_API_KEY}
       - EMAIL_FROM_NAME=${EMAIL_FROM_NAME:-DepVault}
-      - EMAIL_FROM_ADDRESS=${EMAIL_FROM_ADDRESS:-noreply@depvault.dev}
+      - EMAIL_FROM_ADDRESS=${EMAIL_FROM_ADDRESS:-noreply@depvault.com}
       - FRONTEND_URL=${FRONTEND_URL}
     volumes:
       - backend-uploads:/app/apps/backend/uploads

@@ -70,7 +70,7 @@ export function FeatureSharing(): ReactElement {
                   fontSize: "0.7rem",
                 }}
               >
-                https://depvault.app/s/x7Kp2mNq9vBt...
+                https://depvault.com/s/x7Kp2mNq9vBt...
               </Typography>
               <IconButton size="small" aria-label="Copy link" sx={{ color: "text.secondary" }}>
                 <CopyIcon sx={{ fontSize: 16 }} />
