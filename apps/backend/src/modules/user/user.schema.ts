@@ -21,7 +21,7 @@ export const UpdateProfileBodySchema = t.Object({
 });
 
 export const ChangePasswordBodySchema = t.Object({
-  currentPassword: t.String(),
+  currentPassword: t.Optional(t.String()),
   newPassword: t.String({ minLength: 8, maxLength: 128 }),
 });
 

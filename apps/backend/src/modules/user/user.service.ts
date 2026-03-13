@@ -139,13 +139,14 @@ export class UserService {
       throw new NotFoundError("User not found");
     }
 
-    if (!user.passwordHash) {
-      throw new BadRequestError("Cannot change password for OAuth-only accounts");
-    }
-
-    const isValid = await verifyPassword(body.currentPassword, user.passwordHash);
-    if (!isValid) {
-      throw new UnauthorizedError("Current password is incorrect");
+    if (user.passwordHash) {
+      if (!body.currentPassword) {
+        throw new BadRequestError("Current password is required");
+      }
+      const isValid = await verifyPassword(body.currentPassword, user.passwordHash);
+      if (!isValid) {
+        throw new UnauthorizedError("Current password is incorrect");
+      }
     }
 
     const newHash = await hashPassword(body.newPassword);

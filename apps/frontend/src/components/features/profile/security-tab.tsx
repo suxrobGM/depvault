@@ -12,7 +12,7 @@ import { useConfirm } from "@/hooks/use-confirm";
 import { client } from "@/lib/api";
 import { API_BASE_URL } from "@/lib/constants";
 import type { AuthUser } from "@/providers/auth-provider";
-import { changeEmailSchema, changePasswordSchema } from "./schemas";
+import { changeEmailSchema, changePasswordSchema, setPasswordSchema } from "./schemas";
 
 interface SecurityTabProps {
   user: AuthUser;
@@ -41,6 +41,17 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
     },
   );
 
+  const setPasswordMutation = useApiMutation(
+    (values: { newPassword: string }) => client.api.users.me.password.patch(values),
+    {
+      successMessage: "Password set successfully. You can now log in with email and password.",
+      onSuccess: () => {
+        setPasswordForm.reset();
+        props.setUser({ ...user, hasPassword: true });
+      },
+    },
+  );
+
   const deleteMutation = useApiMutation(() => client.api.users.me.delete(), {
     successMessage: "Account deleted",
     onSuccess: () => logout(),
@@ -62,6 +73,14 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
         currentPassword: value.currentPassword,
         newPassword: value.newPassword,
       });
+    },
+  });
+
+  const setPasswordForm = useForm({
+    defaultValues: { password: "", confirmPassword: "" },
+    validators: { onSubmit: setPasswordSchema },
+    onSubmit: async ({ value }) => {
+      await setPasswordMutation.mutateAsync({ newPassword: value.password });
     },
   });
 
@@ -139,9 +158,7 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
             Change Email
           </Typography>
           {oauthOnly ? (
-            <Alert severity="info">
-              Email changes are not available for GitHub-linked accounts without a password.
-            </Alert>
+            <Alert severity="info">Set a password first to enable email changes.</Alert>
           ) : (
             <form
               onSubmit={(e) => {
@@ -177,12 +194,43 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
       <GlassCard className="vault-fade-up vault-delay-3">
         <CardContent sx={{ p: 3 }}>
           <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-            Change Password
+            {oauthOnly ? "Set Password" : "Change Password"}
           </Typography>
           {oauthOnly ? (
-            <Alert severity="info">
-              Password changes are not available for GitHub-linked accounts without a password.
-            </Alert>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setPasswordForm.handleSubmit();
+              }}
+            >
+              <Stack spacing={2.5}>
+                <Alert severity="info" sx={{ mb: 1 }}>
+                  Your account was created via GitHub. Set a password to also log in with email and
+                  password.
+                </Alert>
+                <FormTextField
+                  form={setPasswordForm}
+                  name="password"
+                  label="Password"
+                  type="password"
+                />
+                <FormTextField
+                  form={setPasswordForm}
+                  name="confirmPassword"
+                  label="Confirm Password"
+                  type="password"
+                />
+                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={setPasswordMutation.isPending}
+                  >
+                    {setPasswordMutation.isPending ? "Setting..." : "Set Password"}
+                  </Button>
+                </Box>
+              </Stack>
+            </form>
           ) : (
             <form
               onSubmit={(e) => {

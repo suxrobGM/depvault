@@ -157,12 +157,24 @@ describe("UserService", () => {
       expect(service.changePassword("user-uuid", validBody)).rejects.toBeInstanceOf(NotFoundError);
     });
 
-    it("should throw BadRequestError for OAuth-only accounts", async () => {
+    it("should set password for OAuth-only accounts without currentPassword", async () => {
       mockPrisma.user.findUnique.mockResolvedValueOnce({ ...baseUser, passwordHash: null });
 
-      expect(service.changePassword("user-uuid", validBody)).rejects.toBeInstanceOf(
-        BadRequestError,
-      );
+      const result = await service.changePassword("user-uuid", { newPassword: "NewPassword1" });
+
+      expect(result.message).toBe("Password changed successfully");
+      expect(mockPrisma.user.update).toHaveBeenCalledWith({
+        where: { id: "user-uuid" },
+        data: { passwordHash: "new-hashed-password" },
+      });
+    });
+
+    it("should throw BadRequestError when currentPassword is missing for account with password", async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(baseUser);
+
+      expect(
+        service.changePassword("user-uuid", { newPassword: "NewPassword1" }),
+      ).rejects.toBeInstanceOf(BadRequestError);
     });
 
     it("should throw UnauthorizedError for wrong current password", async () => {
