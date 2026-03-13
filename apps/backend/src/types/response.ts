@@ -50,7 +50,6 @@ export const HttpErrorResponses = {
   409: ErrorResponseSchema,
   410: ErrorResponseSchema,
   429: ErrorResponseSchema,
-  500: ErrorResponseSchema,
 };
 
 export type ErrorResponse = Static<typeof ErrorResponseSchema>;

@@ -26,7 +26,7 @@
 
 ---
 
-DepVault is a full-stack web platform that scans dependencies across 8+ language ecosystems, detects vulnerabilities via OSV.dev, and provides an AES-256-GCM encrypted vault for environment variables and secret files — all from a single dashboard.
+DepVault is a full-stack web platform that scans dependencies across 8+ language ecosystems, detects vulnerabilities via OSV.dev, and provides an AES-256-GCM encrypted vault for environment variables and secret files - all from a single dashboard.
 
 > **Live at [depvault.suxrobgm.net](https://depvault.suxrobgm.net)** | **[API Docs (Swagger)](https://depvault.suxrobgm.net/api/swagger)** | **[Full Documentation](docs/README.md)**
 
@@ -52,7 +52,7 @@ DepVault is a full-stack web platform that scans dependencies across 8+ language
 
 - One-time encrypted links with auto-expiration and optional password protection
 - CI/CD token generation for pipeline secret injection at build time
-- Scoped, short-lived tokens — no `.env` files in CI
+- Scoped, short-lived tokens - no `.env` files in CI
 
 ### Security & Compliance
 
@@ -66,7 +66,7 @@ DepVault is a full-stack web platform that scans dependencies across 8+ language
 - Config format converter (`.env` ↔ JSON ↔ YAML ↔ TOML)
 - Environment templates for bootstrapping new stages
 - Onboarding checklist for new team members
-- Secret file bundler — download encrypted archives with one-time passwords
+- Secret file bundler - download encrypted archives with one-time passwords
 
 ---
 
@@ -136,7 +136,7 @@ depvault/
 
 - **Encryption at rest**: All secret values and files encrypted with AES-256-GCM before database storage
 - **Auth**: JWT tokens stored in httpOnly cookies (not localStorage), with refresh token rotation
-- **RBAC**: Project-level roles — owner, editor, viewer — enforced on every API endpoint
+- **RBAC**: Project-level roles - owner, editor, viewer - enforced on every API endpoint
 - **Secret scanning**: Gitleaks integrated in CI pipeline; in-app scanning with custom regex patterns
 - **One-time links**: Cryptographically random tokens; content auto-deleted after first access
 - **Password hashing**: bcrypt with configurable salt rounds
@@ -148,11 +148,11 @@ depvault/
 
 Two GitHub Actions workflows power the delivery pipeline:
 
-**CI** (`ci.yml`) — runs on every push and PR:
+**CI** (`ci.yml`) - runs on every push and PR:
 
 - Format check (Prettier) → Typecheck (backend + frontend) → Unit tests → Build → Secret scanning (Gitleaks) → Dependency audit
 
-**Deploy** (`deploy.yml`) — runs on push to `prod`:
+**Deploy** (`deploy.yml`) - runs on push to `prod`:
 
 - Build Docker images (backend + frontend) in parallel → Push to GitHub Container Registry → Deploy to VPS via SSH → Health check verification
 
@@ -165,13 +165,13 @@ Both workflows use Bun with dependency caching for fast execution.
 ### Prerequisites
 
 - [Bun](https://bun.sh) v1.3+
-- PostgreSQL 18+
+- [PostgreSQL 18+](https://www.postgresql.org/download)
 
 ### Setup
 
 ```bash
 # Clone the repository
-git clone https://github.com/suxrobGM/depvault.git
+git clone https://github.com/suxrobgm/depvault.git
 cd depvault
 
 # Install dependencies
@@ -182,10 +182,10 @@ cp apps/backend/.env.example apps/backend/.env
 cp apps/frontend/.env.example apps/frontend/.env
 # Edit both .env files with your values
 
-# Generate Prisma client and push schema
+# Generate Prisma client and apply migrations
 cd apps/backend
 bun run db:generate
-bun run db:push        # development only
+bun run db:migrate:apply
 bun run db:seed
 ```
 
@@ -209,7 +209,6 @@ bun run lint             # Run ESLint
 ```bash
 # From apps/backend/
 bun run db:generate        # Regenerate Prisma client after schema changes
-bun run db:push            # Push schema to DB (dev only)
 bun run db:migrate         # Create a new migration file
 bun run db:migrate:apply   # Apply pending migrations
 bun run db:seed            # Seed the database
@@ -225,20 +224,6 @@ cd apps/frontend && bun run build
 cd apps/backend
 bun run build:linux    # Linux binary
 bun run build:win      # Windows binary
-```
-
----
-
-## Testing
-
-- **Backend**: Bun's built-in test runner with 41 test files across all modules
-- **Strategy**: Unit tests for services with mocked Prisma, integration tests for API endpoints
-- **Coverage target**: 80%+ line coverage for services, 90%+ for parsers
-
-```bash
-cd apps/backend
-bun test                 # Run all tests
-bun test --coverage      # Run with coverage report
 ```
 
 ---
@@ -259,4 +244,4 @@ The full documentation package is available in the [`docs/`](docs/README.md) fol
 
 ## License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
