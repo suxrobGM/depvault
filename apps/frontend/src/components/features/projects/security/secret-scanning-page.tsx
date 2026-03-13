@@ -9,9 +9,8 @@ import {
 import { Box, Button, CardContent, Chip, Grid, Skeleton, Stack, Typography } from "@mui/material";
 import type { Route } from "next";
 import Link from "next/link";
-import { GlassCard } from "@/components/ui/glass-card";
-import { IconBox } from "@/components/ui/icon-box";
-import { PageHeader } from "@/components/ui/page-header";
+import { GlassCard, IconBox } from "@/components/ui/cards";
+import { PageHeader } from "@/components/ui/containers";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";

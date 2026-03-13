@@ -5,7 +5,7 @@ import type { SecretFileEnvironmentTypeValue } from "@depvault/shared/constants"
 import type { SelectOption } from "@depvault/shared/types";
 import { FilePresent as FileIcon, Upload as UploadIcon } from "@mui/icons-material";
 import { Button, Chip, Skeleton, Stack } from "@mui/material";
-import { EmptyState } from "@/components/ui/empty-state";
+import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useAuth } from "@/hooks/use-auth";
 import { client } from "@/lib/api";

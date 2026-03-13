@@ -3,7 +3,7 @@
 import { useState, type ReactElement } from "react";
 import { Add as AddIcon } from "@mui/icons-material";
 import { Box, Button, Skeleton, Stack, Typography } from "@mui/material";
-import { EmptyState } from "@/components/ui/empty-state";
+import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import type { EnvTemplateListResponse } from "@/types/api/env-template";

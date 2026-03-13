@@ -23,8 +23,8 @@ import {
   Typography,
 } from "@mui/material";
 import { CreateShareLinkDialog } from "@/components/features/shared-secret/create-share-link-dialog";
-import { ActionMenu } from "@/components/ui/action-menu";
-import { MaskedValue } from "@/components/ui/masked-value";
+import { MaskedValue } from "@/components/ui/data-display";
+import { ActionMenu } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useConfirm } from "@/hooks/use-confirm";

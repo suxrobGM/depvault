@@ -13,7 +13,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { GlassCard } from "@/components/ui/glass-card";
+import { GlassCard } from "@/components/ui/cards";
 import type { EnvVariable } from "@/types/api/env-variable";
 import { VaultVariableRow } from "./vault-variable-row";
 

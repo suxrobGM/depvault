@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { Box } from "@mui/material";
 import { ConverterView } from "@/components/features/converter/converter-view";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/ui/containers";
 import { ROUTES } from "@/lib/constants";
 
 export default function ConverterPage(): ReactElement {

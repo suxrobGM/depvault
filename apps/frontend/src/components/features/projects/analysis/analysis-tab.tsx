@@ -9,9 +9,9 @@ import {
 import { Box, Button, CardContent, Chip, Grid, Stack, Typography } from "@mui/material";
 import type { Route } from "next";
 import Link from "next/link";
-import { EmptyState } from "@/components/ui/empty-state";
-import { GlassCard } from "@/components/ui/glass-card";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { GlassCard } from "@/components/ui/cards";
+import { StatusBadge } from "@/components/ui/data-display";
+import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";

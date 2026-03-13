@@ -26,7 +26,7 @@ import {
   Typography,
 } from "@mui/material";
 import { CreateFileShareDialog } from "@/components/features/shared-secret/create-file-share-dialog";
-import { ActionMenu } from "@/components/ui/action-menu";
+import { ActionMenu } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useConfirm } from "@/hooks/use-confirm";

@@ -9,7 +9,7 @@ import {
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod/v4";
-import { FormSelectField } from "@/components/ui/form-select-field";
+import { FormSelectField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
 

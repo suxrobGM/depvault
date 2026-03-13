@@ -10,10 +10,8 @@ import {
   getActivityColor,
   RESOURCE_LABELS,
 } from "@/components/features/projects/activity/utils";
-import { EmptyState } from "@/components/ui/empty-state";
-import { ListSkeleton } from "@/components/ui/list-skeleton";
-import { PaginationBar } from "@/components/ui/pagination-bar";
-import { UserAvatar } from "@/components/ui/user-avatar";
+import { ListSkeleton, PaginationBar, UserAvatar } from "@/components/ui/data-display";
+import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import type { GlobalActivityEntry, GlobalActivityListResponse } from "@/types/api/activity";

@@ -21,7 +21,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
-import { FormSelectField } from "@/components/ui/form-select-field";
+import { FormSelectField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";

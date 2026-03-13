@@ -5,9 +5,8 @@ import {
   VpnKey as KeyIcon,
 } from "@mui/icons-material";
 import { Box, Grid, Stack, Typography } from "@mui/material";
-import { GlassCard } from "@/components/ui/glass-card";
-import { IconBox } from "@/components/ui/icon-box";
-import { SectionContainer } from "@/components/ui/section-container";
+import { GlassCard, IconBox } from "@/components/ui/cards";
+import { SectionContainer } from "@/components/ui/containers";
 
 interface EcosystemCategory {
   title: string;

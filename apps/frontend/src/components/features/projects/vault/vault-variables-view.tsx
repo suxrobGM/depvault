@@ -7,7 +7,7 @@ import {
   VpnKey as VpnKeyIcon,
 } from "@mui/icons-material";
 import { Button, Stack } from "@mui/material";
-import { EmptyState } from "@/components/ui/empty-state";
+import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useAuth } from "@/hooks/use-auth";
 import { client } from "@/lib/api";

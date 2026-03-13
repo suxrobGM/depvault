@@ -27,7 +27,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
-import { FormSelectField } from "@/components/ui/form-select-field";
+import { FormSelectField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
 import type { SharedSecretInfoResponse } from "@/types/api/shared-secret";

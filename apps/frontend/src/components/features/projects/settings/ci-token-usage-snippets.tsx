@@ -2,7 +2,7 @@
 
 import { useState, type ReactElement } from "react";
 import { Box, Tab, Tabs, Typography } from "@mui/material";
-import { CopyButton } from "@/components/ui/copy-button";
+import { CopyButton } from "@/components/ui/inputs";
 
 const GITHUB_ACTIONS_SNIPPET = `# Add DEPVAULT_CI_TOKEN to your repository secrets
 - name: Fetch secrets from DepVault

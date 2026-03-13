@@ -8,9 +8,8 @@ import {
   Update as UpdateIcon,
 } from "@mui/icons-material";
 import { CardContent, Grid, Typography } from "@mui/material";
-import { GlassCard } from "@/components/ui/glass-card";
-import { IconBox } from "@/components/ui/icon-box";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { GlassCard, IconBox } from "@/components/ui/cards";
+import { StatusBadge } from "@/components/ui/data-display";
 import type { Dependency } from "@/types/api/analysis";
 import { getHealthColor } from "./analysis-utils";
 

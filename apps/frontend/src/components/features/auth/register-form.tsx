@@ -5,7 +5,7 @@ import { GitHub as GitHubIcon, MarkEmailRead as MarkEmailReadIcon } from "@mui/i
 import { Alert, Button, Divider, Stack, Typography } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import Link from "next/link";
-import { FormTextField } from "@/components/ui/form-text-field";
+import { FormTextField } from "@/components/ui/form";
 import { client } from "@/lib/api";
 import { API_BASE_URL, ROUTES } from "@/lib/constants";
 import { registerSchema } from "./schemas";

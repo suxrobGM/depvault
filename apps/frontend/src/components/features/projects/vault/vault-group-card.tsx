@@ -5,7 +5,7 @@ import { getEnvironmentLabel, type EnvironmentTypeValue } from "@depvault/shared
 import { VpnKey as VpnKeyIcon } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import { CreateShareLinkDialog } from "@/components/features/shared-secret/create-share-link-dialog";
-import { EmptyState } from "@/components/ui/empty-state";
+import { EmptyState } from "@/components/ui/feedback";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useConfirm } from "@/hooks/use-confirm";

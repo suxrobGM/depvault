@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import { Shield as ShieldIcon } from "@mui/icons-material";
 import { Box, Button, Typography } from "@mui/material";
 import Link from "next/link";
-import { GradientText } from "@/components/ui/gradient-text";
+import { GradientText } from "@/components/ui/cards";
 import { ROUTES } from "@/lib/constants";
 
 export default function NotFound(): ReactElement {

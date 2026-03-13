@@ -10,9 +10,8 @@ import {
   ContentCopy as TemplateIcon,
 } from "@mui/icons-material";
 import { Box, CardContent, Grid, Stack, Typography } from "@mui/material";
-import { GlassCard } from "@/components/ui/glass-card";
-import { IconBox } from "@/components/ui/icon-box";
-import { SectionContainer } from "@/components/ui/section-container";
+import { GlassCard, IconBox } from "@/components/ui/cards";
+import { SectionContainer } from "@/components/ui/containers";
 import { FeatureAnalysis } from "./feature-analysis";
 import { FeatureSharing } from "./feature-sharing";
 import { FeatureVault } from "./feature-vault";

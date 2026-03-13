@@ -11,7 +11,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { GlassCard } from "@/components/ui/glass-card";
+import { GlassCard } from "@/components/ui/cards";
 import type { GitHubRepoListResponse } from "@/types/api/github";
 
 interface GitHubRepoSelectorProps {

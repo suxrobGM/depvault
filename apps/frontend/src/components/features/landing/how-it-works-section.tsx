@@ -6,9 +6,8 @@ import {
   Lock as StoreIcon,
 } from "@mui/icons-material";
 import { Box, Grid, Stack, Typography } from "@mui/material";
-import { GlassCard } from "@/components/ui/glass-card";
-import { GradientText } from "@/components/ui/gradient-text";
-import { SectionContainer } from "@/components/ui/section-container";
+import { GlassCard, GradientText } from "@/components/ui/cards";
+import { SectionContainer } from "@/components/ui/containers";
 
 const steps = [
   {

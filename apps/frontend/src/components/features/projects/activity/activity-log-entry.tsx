@@ -3,7 +3,7 @@
 import type { ReactElement } from "react";
 import { Box, Chip, Stack, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import { UserAvatar } from "@/components/ui/user-avatar";
+import { UserAvatar } from "@/components/ui/data-display";
 import type { AuditLogEntry } from "@/types/api/audit-log";
 import { formatRelativeTime } from "@/utils/formatters";
 import {

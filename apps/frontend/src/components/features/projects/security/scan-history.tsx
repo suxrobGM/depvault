@@ -11,9 +11,9 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { EmptyState } from "@/components/ui/empty-state";
-import { GlassCard } from "@/components/ui/glass-card";
-import { PaginationBar } from "@/components/ui/pagination-bar";
+import { GlassCard } from "@/components/ui/cards";
+import { PaginationBar } from "@/components/ui/data-display";
+import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import type { ScanListResponse } from "@/types/api/secret-scan";

@@ -5,8 +5,7 @@ import { ArrowForward as ArrowForwardIcon, VpnKey as VpnKeyIcon } from "@mui/ico
 import { Button, CardContent, Grid, Stack, Typography } from "@mui/material";
 import type { Route } from "next";
 import Link from "next/link";
-import { GlassCard } from "@/components/ui/glass-card";
-import { IconBox } from "@/components/ui/icon-box";
+import { GlassCard, IconBox } from "@/components/ui/cards";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";

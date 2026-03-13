@@ -3,9 +3,9 @@
 import type { ReactElement } from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import Link from "next/link";
-import { GradientText } from "@/components/ui/gradient-text";
-import { SectionContainer } from "@/components/ui/section-container";
-import { TypingEffect } from "@/components/ui/typing-effect";
+import { GradientText } from "@/components/ui/cards";
+import { SectionContainer } from "@/components/ui/containers";
+import { TypingEffect } from "@/components/ui/feedback";
 import { useScrollTo } from "@/hooks/use-scroll-to";
 import { ROUTES } from "@/lib/constants";
 

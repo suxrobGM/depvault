@@ -11,8 +11,7 @@ import {
   VpnKey as VaultIcon,
 } from "@mui/icons-material";
 import { Box, CardContent, Stack, Typography } from "@mui/material";
-import { GlassCard } from "@/components/ui/glass-card";
-import { GradientText } from "@/components/ui/gradient-text";
+import { GlassCard, GradientText } from "@/components/ui/cards";
 import { useAuth } from "@/hooks/use-auth";
 
 interface OnboardingStep {

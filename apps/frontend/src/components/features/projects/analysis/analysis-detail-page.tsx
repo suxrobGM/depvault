@@ -26,8 +26,8 @@ import {
 } from "@mui/material";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
-import { PageHeader } from "@/components/ui/page-header";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { PageHeader } from "@/components/ui/containers";
+import { StatusBadge } from "@/components/ui/data-display";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useAuth } from "@/hooks/use-auth";

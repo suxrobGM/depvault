@@ -1,10 +1,8 @@
 import type { ReactElement } from "react";
 import { Security as SecurityIcon } from "@mui/icons-material";
 import { Box, Chip, Grid, Stack, Typography } from "@mui/material";
-import { BrowserWindow } from "@/components/ui/browser-window";
-import { GlassCard } from "@/components/ui/glass-card";
-import { GradientText } from "@/components/ui/gradient-text";
-import { IconBox } from "@/components/ui/icon-box";
+import { GlassCard, GradientText, IconBox } from "@/components/ui/cards";
+import { BrowserWindow } from "@/components/ui/containers";
 
 const mockRows = [
   { name: "lodash", current: "4.17.15", latest: "4.17.21", severity: "warning" },

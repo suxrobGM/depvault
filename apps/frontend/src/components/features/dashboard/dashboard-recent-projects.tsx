@@ -7,8 +7,8 @@ import {
 import { Box, Button, CardContent, Grid, Stack, Typography } from "@mui/material";
 import type { Route } from "next";
 import Link from "next/link";
-import { EmptyState } from "@/components/ui/empty-state";
-import { GlassCard } from "@/components/ui/glass-card";
+import { GlassCard } from "@/components/ui/cards";
+import { EmptyState } from "@/components/ui/feedback";
 import { ROUTES } from "@/lib/constants";
 import type { Project } from "@/types/api/project";
 import { DashboardOnboarding } from "./dashboard-onboarding";

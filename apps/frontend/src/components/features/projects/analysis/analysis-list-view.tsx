@@ -11,12 +11,10 @@ import { Box, Button, Chip, IconButton, Skeleton, Stack, Tooltip, Typography } f
 import { alpha } from "@mui/material/styles";
 import type { Route } from "next";
 import Link from "next/link";
-import { EmptyState } from "@/components/ui/empty-state";
-import { GlassCard } from "@/components/ui/glass-card";
-import { HealthArc } from "@/components/ui/health-arc";
-import { ListSkeleton } from "@/components/ui/list-skeleton";
-import { PageHeader } from "@/components/ui/page-header";
-import { PaginationBar } from "@/components/ui/pagination-bar";
+import { GlassCard } from "@/components/ui/cards";
+import { PageHeader } from "@/components/ui/containers";
+import { HealthArc, ListSkeleton, PaginationBar } from "@/components/ui/data-display";
+import { EmptyState } from "@/components/ui/feedback";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useAuth } from "@/hooks/use-auth";

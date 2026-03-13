@@ -2,7 +2,7 @@
 
 import type { ReactElement, ReactNode } from "react";
 import { Box } from "@mui/material";
-import { PageHeader } from "@/components/ui/page-header";
+import { PageHeader } from "@/components/ui/containers";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";

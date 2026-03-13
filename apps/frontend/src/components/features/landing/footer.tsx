@@ -6,7 +6,7 @@ import { Box, Divider, Grid, IconButton, Link as MuiLink, Stack, Typography } fr
 import type { Route } from "next";
 import Image from "next/image";
 import NextLink from "next/link";
-import { SectionContainer } from "@/components/ui/section-container";
+import { SectionContainer } from "@/components/ui/containers";
 import { useScrollTo } from "@/hooks/use-scroll-to";
 import { ROUTES } from "@/lib/constants";
 

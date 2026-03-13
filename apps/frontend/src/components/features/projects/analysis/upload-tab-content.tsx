@@ -2,7 +2,7 @@
 
 import { useState, type ReactElement } from "react";
 import { Button, DialogActions, MenuItem, Stack, TextField } from "@mui/material";
-import { FileUploadButton } from "@/components/ui/file-upload-button";
+import { FileUploadButton } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";

@@ -7,9 +7,9 @@ import {
   SwapHoriz as SwapHorizIcon,
 } from "@mui/icons-material";
 import { Box, Button, Chip, Skeleton, Stack, Typography } from "@mui/material";
-import { ActionMenu } from "@/components/ui/action-menu";
-import { GlassCard } from "@/components/ui/glass-card";
-import { UserAvatar } from "@/components/ui/user-avatar";
+import { GlassCard } from "@/components/ui/cards";
+import { UserAvatar } from "@/components/ui/data-display";
+import { ActionMenu } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useAuth } from "@/hooks/use-auth";

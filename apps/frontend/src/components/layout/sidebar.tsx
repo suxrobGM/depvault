@@ -29,7 +29,7 @@ import type { Route } from "next";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { NotificationBell } from "@/components/features/notifications";
-import { UserAvatar } from "@/components/ui/user-avatar";
+import { UserAvatar } from "@/components/ui/data-display";
 import { useAuth } from "@/hooks/use-auth";
 import { ROUTES } from "@/lib/constants";
 import { SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH } from "./constants";

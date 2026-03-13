@@ -15,10 +15,8 @@ import {
   Typography,
 } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
-import { CopyButton } from "@/components/ui/copy-button";
-import { FormCheckboxField } from "@/components/ui/form-checkbox-field";
-import { FormSelectField } from "@/components/ui/form-select-field";
-import { FormTextField } from "@/components/ui/form-text-field";
+import { FormCheckboxField, FormSelectField, FormTextField } from "@/components/ui/form";
+import { CopyButton } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
 import type { SecretFile } from "@/types/api/secret-file";

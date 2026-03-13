@@ -13,7 +13,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { GlassCard } from "@/components/ui/glass-card";
+import { GlassCard } from "@/components/ui/cards";
 import {
   useDeleteNotification,
   useMarkAllRead,

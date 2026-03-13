@@ -19,7 +19,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { CopyButton } from "@/components/ui/copy-button";
+import { CopyButton } from "@/components/ui/inputs";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import type { ExportResult } from "@/types/api/env-variable";

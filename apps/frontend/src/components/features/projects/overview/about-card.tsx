@@ -8,7 +8,7 @@ import {
   Update as UpdateIcon,
 } from "@mui/icons-material";
 import { Button, CardContent, Stack, Typography } from "@mui/material";
-import { GlassCard } from "@/components/ui/glass-card";
+import { GlassCard } from "@/components/ui/cards";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import type { ProjectResponse } from "@/types/api/project";

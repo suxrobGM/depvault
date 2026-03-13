@@ -16,9 +16,8 @@ import {
   Typography,
 } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
-import { FileDropZone } from "@/components/ui/file-drop-zone";
-import { FormSelectField } from "@/components/ui/form-select-field";
-import { FormTextField } from "@/components/ui/form-text-field";
+import { FormSelectField, FormTextField } from "@/components/ui/form";
+import { FileDropZone } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
 import type { SecretFile } from "@/types/api/secret-file";

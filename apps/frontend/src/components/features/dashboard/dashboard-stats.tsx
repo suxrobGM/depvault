@@ -8,8 +8,7 @@ import {
   VpnKey as SecretIcon,
 } from "@mui/icons-material";
 import { Box, CardContent, Grid, Skeleton, Stack, Typography } from "@mui/material";
-import { GlassCard } from "@/components/ui/glass-card";
-import { IconBox } from "@/components/ui/icon-box";
+import { GlassCard, IconBox } from "@/components/ui/cards";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import type { ProjectStatsResponse } from "@/types/api/project";

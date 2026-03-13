@@ -3,8 +3,7 @@
 import type { ReactElement } from "react";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
-import { FormSelectField } from "@/components/ui/form-select-field";
-import { FormTextField } from "@/components/ui/form-text-field";
+import { FormSelectField, FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
 import { inviteMemberSchema } from "../schemas";

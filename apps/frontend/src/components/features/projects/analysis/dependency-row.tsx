@@ -7,7 +7,7 @@ import {
 } from "@mui/icons-material";
 import { Box, Chip, Collapse, IconButton, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import { StatusBadge } from "@/components/ui/status-badge";
+import { StatusBadge } from "@/components/ui/data-display";
 import type { Dependency } from "@/types/api/analysis";
 import { getPackageUrl, STATUS_LABEL, STATUS_VARIANT } from "./analysis-utils";
 import { VulnerabilityPanel } from "./vulnerability-panel";

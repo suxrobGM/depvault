@@ -20,9 +20,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { EmptyState } from "@/components/ui/empty-state";
-import { GlassCard } from "@/components/ui/glass-card";
-import { PaginationBar } from "@/components/ui/pagination-bar";
+import { GlassCard } from "@/components/ui/cards";
+import { PaginationBar } from "@/components/ui/data-display";
+import { EmptyState } from "@/components/ui/feedback";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";

@@ -25,9 +25,9 @@ import {
 import { alpha } from "@mui/material/styles";
 import type { Route } from "next";
 import { CreateAnalysisDialog } from "@/components/features/projects/analysis";
-import { EmptyState } from "@/components/ui/empty-state";
-import { PageHeader } from "@/components/ui/page-header";
-import { PaginationBar } from "@/components/ui/pagination-bar";
+import { PageHeader } from "@/components/ui/containers";
+import { PaginationBar } from "@/components/ui/data-display";
+import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useAuth } from "@/hooks/use-auth";
 import { client } from "@/lib/api";

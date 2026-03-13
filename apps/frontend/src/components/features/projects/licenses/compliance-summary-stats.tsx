@@ -8,8 +8,7 @@ import {
   Warning as WarnIcon,
 } from "@mui/icons-material";
 import { CardContent, Grid, Typography } from "@mui/material";
-import { GlassCard } from "@/components/ui/glass-card";
-import { IconBox } from "@/components/ui/icon-box";
+import { GlassCard, IconBox } from "@/components/ui/cards";
 
 interface ComplianceSummaryStatsProps {
   total: number;

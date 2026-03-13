@@ -15,10 +15,8 @@ import {
   Typography,
 } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
-import { CopyButton } from "@/components/ui/copy-button";
-import { FormDateField } from "@/components/ui/form-date-field";
-import { FormSelectField } from "@/components/ui/form-select-field";
-import { FormTextField } from "@/components/ui/form-text-field";
+import { FormDateField, FormSelectField, FormTextField } from "@/components/ui/form";
+import { CopyButton } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";

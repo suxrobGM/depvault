@@ -5,7 +5,7 @@ import { Alert, Button, Stack, Typography } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import Link from "next/link";
 import { forgotPasswordAction } from "@/actions/auth";
-import { FormTextField } from "@/components/ui/form-text-field";
+import { FormTextField } from "@/components/ui/form";
 import { ROUTES } from "@/lib/constants";
 import { forgotPasswordSchema } from "./schemas";
 

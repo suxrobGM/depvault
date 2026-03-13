@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { Box, Grid, Typography } from "@mui/material";
-import { GradientText } from "@/components/ui/gradient-text";
-import { SectionContainer } from "@/components/ui/section-container";
+import { GradientText } from "@/components/ui/cards";
+import { SectionContainer } from "@/components/ui/containers";
 
 const stats = [
   { value: "8+", label: "Ecosystems supported" },

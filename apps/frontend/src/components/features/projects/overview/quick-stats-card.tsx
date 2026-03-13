@@ -8,8 +8,7 @@ import {
   TrendingUp as HealthIcon,
 } from "@mui/icons-material";
 import { Box, CardContent, Grid, Stack, Typography } from "@mui/material";
-import { GlassCard } from "@/components/ui/glass-card";
-import { IconBox } from "@/components/ui/icon-box";
+import { GlassCard, IconBox } from "@/components/ui/cards";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import type { AnalysisListResponse } from "@/types/api/analysis";

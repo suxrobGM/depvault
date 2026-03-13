@@ -5,7 +5,7 @@ import { DEFAULT_ROLES } from "@depvault/shared/constants";
 import { Add as AddIcon } from "@mui/icons-material";
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import Link from "next/link";
-import { GradientText } from "@/components/ui/gradient-text";
+import { GradientText } from "@/components/ui/cards";
 import { useAuth } from "@/hooks/use-auth";
 import { ROUTES } from "@/lib/constants";
 

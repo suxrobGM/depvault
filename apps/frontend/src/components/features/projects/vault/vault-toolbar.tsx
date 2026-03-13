@@ -13,7 +13,7 @@ import {
   Share as ShareIcon,
 } from "@mui/icons-material";
 import { Button, Stack } from "@mui/material";
-import { ActionMenu, type ActionMenuItem } from "@/components/ui/action-menu";
+import { ActionMenu, type ActionMenuItem } from "@/components/ui/inputs";
 
 interface VaultToolbarProps {
   canEdit?: boolean;

@@ -20,8 +20,8 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { ActionMenu } from "@/components/ui/action-menu";
-import { GlassCard } from "@/components/ui/glass-card";
+import { GlassCard } from "@/components/ui/cards";
+import { ActionMenu } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useConfirm } from "@/hooks/use-confirm";

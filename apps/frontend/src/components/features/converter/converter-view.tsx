@@ -15,9 +15,8 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { CopyButton } from "@/components/ui/copy-button";
-import { FileUploadButton, type FileUploadResult } from "@/components/ui/file-upload-button";
-import { GlassCard } from "@/components/ui/glass-card";
+import { GlassCard } from "@/components/ui/cards";
+import { CopyButton, FileUploadButton, type FileUploadResult } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";

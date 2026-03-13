@@ -3,9 +3,8 @@
 import { useState, type ReactElement } from "react";
 import { History as HistoryIcon } from "@mui/icons-material";
 import { Box } from "@mui/material";
-import { EmptyState } from "@/components/ui/empty-state";
-import { ListSkeleton } from "@/components/ui/list-skeleton";
-import { PaginationBar } from "@/components/ui/pagination-bar";
+import { ListSkeleton, PaginationBar } from "@/components/ui/data-display";
+import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import type { AuditLogListResponse } from "@/types/api/audit-log";

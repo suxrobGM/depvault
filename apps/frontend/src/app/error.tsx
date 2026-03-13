@@ -4,7 +4,7 @@ import type { ReactElement } from "react";
 import { Warning as WarningIcon } from "@mui/icons-material";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import Link from "next/link";
-import { GradientText } from "@/components/ui/gradient-text";
+import { GradientText } from "@/components/ui/cards";
 import { ROUTES } from "@/lib/constants";
 
 interface ErrorPageProps {

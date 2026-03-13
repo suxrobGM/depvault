@@ -8,8 +8,7 @@ import {
 import { CardContent, Grid, Stack, Typography } from "@mui/material";
 import type { Route } from "next";
 import Link from "next/link";
-import { GlassCard } from "@/components/ui/glass-card";
-import { IconBox } from "@/components/ui/icon-box";
+import { GlassCard, IconBox } from "@/components/ui/cards";
 import { ROUTES } from "@/lib/constants";
 
 const quickActions = [

@@ -1,9 +1,8 @@
 import type { ReactElement } from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import Link from "next/link";
-import { GlassCard } from "@/components/ui/glass-card";
-import { GradientText } from "@/components/ui/gradient-text";
-import { SectionContainer } from "@/components/ui/section-container";
+import { GlassCard, GradientText } from "@/components/ui/cards";
+import { SectionContainer } from "@/components/ui/containers";
 import { ROUTES } from "@/lib/constants";
 
 export function CtaSection(): ReactElement {
