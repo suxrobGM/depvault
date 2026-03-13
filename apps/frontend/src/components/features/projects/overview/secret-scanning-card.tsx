@@ -2,10 +2,9 @@
 
 import type { ReactElement } from "react";
 import { ArrowForward as ArrowForwardIcon, Shield as ShieldIcon } from "@mui/icons-material";
-import { Button, CardContent, Chip, Grid, Stack, Typography } from "@mui/material";
-import type { Route } from "next";
-import Link from "next/link";
+import { CardContent, Chip, Grid, Stack, Typography } from "@mui/material";
 import { GlassCard, IconBox } from "@/components/ui/cards";
+import { LinkButton } from "@/components/ui/inputs";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
@@ -86,15 +85,14 @@ export function SecretScanningCard(props: SecretScanningCardProps): ReactElement
             No scans yet. Run your first scan to detect leaked secrets.
           </Typography>
         )}
-        <Button
-          component={Link}
-          href={ROUTES.projectSecretScanning(projectId) as Route}
+        <LinkButton
+          href={ROUTES.projectSecretScanning(projectId)}
           variant="outlined"
           size="small"
           endIcon={<ArrowForwardIcon />}
         >
           {scanSummary?.lastScan ? "View Details" : "Set Up Scanning"}
-        </Button>
+        </LinkButton>
       </CardContent>
     </GlassCard>
   );

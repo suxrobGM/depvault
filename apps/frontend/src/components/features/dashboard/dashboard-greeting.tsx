@@ -3,9 +3,9 @@
 import type { ReactElement } from "react";
 import { DEFAULT_ROLES } from "@depvault/shared/constants";
 import { Add as AddIcon } from "@mui/icons-material";
-import { Box, Button, Chip, Stack, Typography } from "@mui/material";
-import Link from "next/link";
+import { Box, Chip, Stack, Typography } from "@mui/material";
 import { GradientText } from "@/components/ui/cards";
+import { LinkButton } from "@/components/ui/inputs";
 import { useAuth } from "@/hooks/use-auth";
 import { ROUTES } from "@/lib/constants";
 
@@ -47,15 +47,9 @@ export function DashboardGreeting(): ReactElement {
           {today}
         </Typography>
       </Box>
-      <Button
-        component={Link}
-        href={ROUTES.dashboard}
-        variant="contained"
-        startIcon={<AddIcon />}
-        size="small"
-      >
+      <LinkButton href={ROUTES.dashboard} variant="contained" startIcon={<AddIcon />} size="small">
         New Project
-      </Button>
+      </LinkButton>
     </Box>
   );
 }

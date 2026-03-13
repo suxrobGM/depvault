@@ -2,10 +2,9 @@
 
 import type { ReactElement } from "react";
 import { ArrowForward as ArrowForwardIcon, Gavel as LicenseIcon } from "@mui/icons-material";
-import { Button, CardContent, Grid, Stack, Typography } from "@mui/material";
-import type { Route } from "next";
-import Link from "next/link";
+import { CardContent, Grid, Stack, Typography } from "@mui/material";
 import { GlassCard, IconBox } from "@/components/ui/cards";
+import { LinkButton } from "@/components/ui/inputs";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
@@ -91,15 +90,14 @@ export function LicenseComplianceCard(props: LicenseComplianceCardProps): ReactE
             </Typography>
           </Grid>
         </Grid>
-        <Button
-          component={Link}
-          href={ROUTES.projectLicenses(projectId) as Route}
+        <LinkButton
+          href={ROUTES.projectLicenses(projectId)}
           variant="outlined"
           size="small"
           endIcon={<ArrowForwardIcon />}
         >
           Go to Licenses
-        </Button>
+        </LinkButton>
       </CardContent>
     </GlassCard>
   );

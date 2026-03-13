@@ -7,10 +7,9 @@ import {
   Shield as ShieldIcon,
 } from "@mui/icons-material";
 import { Box, Button, CardContent, Chip, Grid, Skeleton, Stack, Typography } from "@mui/material";
-import type { Route } from "next";
-import Link from "next/link";
 import { GlassCard, IconBox } from "@/components/ui/cards";
 import { PageHeader } from "@/components/ui/containers";
+import { LinkButton } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
@@ -77,21 +76,20 @@ export function SecretScanningPage(props: SecretScanningPageProps): ReactElement
         title="Secret Scanning"
         subtitle="Detect accidentally committed secrets in your repository"
         breadcrumbs={[
-          { label: "Projects", href: ROUTES.projects as Route },
-          { label: project?.name ?? "...", href: ROUTES.projectOverview(projectId) as Route },
+          { label: "Projects", href: ROUTES.projects },
+          { label: project?.name ?? "...", href: ROUTES.projectOverview(projectId) },
           { label: "Secret Scanning" },
         ]}
         actions={
           <Stack direction="row" spacing={1}>
-            <Button
-              component={Link}
-              href={ROUTES.projectOverview(projectId) as Route}
+            <LinkButton
+              href={ROUTES.projectOverview(projectId)}
               variant="outlined"
               size="small"
               startIcon={<ArrowBackIcon />}
             >
               Back to Project
-            </Button>
+            </LinkButton>
             <Button
               variant="contained"
               size="small"

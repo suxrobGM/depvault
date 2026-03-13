@@ -12,6 +12,7 @@ import Link from "next/link";
 import { GlassCard } from "@/components/ui/cards";
 import { StatusBadge } from "@/components/ui/data-display";
 import { EmptyState } from "@/components/ui/feedback";
+import { LinkButton } from "@/components/ui/inputs";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
@@ -110,13 +111,9 @@ export function AnalysisTab(props: AnalysisTabProps): ReactElement {
       </Grid>
 
       <Stack alignItems="center" sx={{ mt: 3 }}>
-        <Button
-          component={Link}
-          href={ROUTES.projectAnalysis(projectId) as Route}
-          endIcon={<ChevronRightIcon />}
-        >
+        <LinkButton href={ROUTES.projectAnalysis(projectId)} endIcon={<ChevronRightIcon />}>
           View all analyses ({data.pagination.total})
-        </Button>
+        </LinkButton>
       </Stack>
 
       <CreateAnalysisDialog

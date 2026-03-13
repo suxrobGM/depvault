@@ -2,10 +2,9 @@
 
 import type { ReactElement } from "react";
 import { Security as AnalysisIcon, ArrowForward as ArrowForwardIcon } from "@mui/icons-material";
-import { Button, CardContent, Grid, Stack, Typography } from "@mui/material";
-import type { Route } from "next";
-import Link from "next/link";
+import { CardContent, Grid, Stack, Typography } from "@mui/material";
 import { GlassCard, IconBox } from "@/components/ui/cards";
+import { LinkButton } from "@/components/ui/inputs";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
@@ -82,15 +81,14 @@ export function AnalysisSummaryCard(props: AnalysisSummaryCardProps): ReactEleme
             </Typography>
           </Grid>
         </Grid>
-        <Button
-          component={Link}
-          href={ROUTES.projectAnalysis(projectId) as Route}
+        <LinkButton
+          href={ROUTES.projectAnalysis(projectId)}
           variant="outlined"
           size="small"
           endIcon={<ArrowForwardIcon />}
         >
           Go to Analysis
-        </Button>
+        </LinkButton>
       </CardContent>
     </GlassCard>
   );

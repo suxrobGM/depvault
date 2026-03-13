@@ -4,11 +4,12 @@ import {
   ChevronRight as ChevronIcon,
   FolderOpen as FolderOpenIcon,
 } from "@mui/icons-material";
-import { Box, Button, CardContent, Grid, Stack, Typography } from "@mui/material";
+import { Box, CardContent, Grid, Stack, Typography } from "@mui/material";
 import type { Route } from "next";
 import Link from "next/link";
 import { GlassCard } from "@/components/ui/cards";
 import { EmptyState } from "@/components/ui/feedback";
+import { LinkButton } from "@/components/ui/inputs";
 import { ROUTES } from "@/lib/constants";
 import type { Project } from "@/types/api/project";
 import { DashboardOnboarding } from "./dashboard-onboarding";
@@ -33,14 +34,9 @@ export function DashboardRecentProjects(props: DashboardRecentProjectsProps): Re
         >
           <Typography variant="h6">Recent Projects</Typography>
           {hasProjects && (
-            <Button
-              component={Link}
-              href={ROUTES.projects as Route}
-              endIcon={<ChevronIcon />}
-              size="small"
-            >
+            <LinkButton href={ROUTES.projects} endIcon={<ChevronIcon />} size="small">
               View all
-            </Button>
+            </LinkButton>
           )}
         </Stack>
 
@@ -49,7 +45,7 @@ export function DashboardRecentProjects(props: DashboardRecentProjectsProps): Re
             {projects.map((project) => (
               <Link
                 key={project.id}
-                href={ROUTES.project(project.id) as Route}
+                href={ROUTES.project(project.id)}
                 style={{ textDecoration: "none", display: "block" }}
               >
                 <GlassCard

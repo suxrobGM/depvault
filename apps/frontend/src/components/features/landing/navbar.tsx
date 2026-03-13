@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import Image from "next/image";
 import Link from "next/link";
+import { LinkButton } from "@/components/ui/inputs";
 import { useScrollTo } from "@/hooks/use-scroll-to";
 import { ROUTES } from "@/lib/constants";
 
@@ -81,24 +82,22 @@ export function LandingNavbar(): ReactElement {
           </Stack>
           <Box sx={{ flexGrow: { xs: 1, md: 0 } }} />
           <Stack direction="row" spacing={1.5} alignItems="center">
-            <Button
-              component={Link}
+            <LinkButton
               href={ROUTES.login}
               color="inherit"
               size="small"
               sx={{ display: { xs: "none", sm: "inline-flex" } }}
             >
               Sign in
-            </Button>
-            <Button
-              component={Link}
+            </LinkButton>
+            <LinkButton
               href={ROUTES.register}
               variant="contained"
               size="small"
               sx={{ display: { xs: "none", sm: "inline-flex" } }}
             >
               Get Started
-            </Button>
+            </LinkButton>
             <IconButton
               aria-label="Open menu"
               onClick={() => setDrawerOpen(true)}
@@ -138,24 +137,22 @@ export function LandingNavbar(): ReactElement {
         </List>
         <Divider sx={{ my: 1 }} />
         <Stack spacing={1.5} sx={{ px: 2, py: 2 }}>
-          <Button
-            component={Link}
+          <LinkButton
             href={ROUTES.login}
             color="inherit"
             fullWidth
             onClick={() => setDrawerOpen(false)}
           >
             Sign in
-          </Button>
-          <Button
-            component={Link}
+          </LinkButton>
+          <LinkButton
             href={ROUTES.register}
             variant="contained"
             fullWidth
             onClick={() => setDrawerOpen(false)}
           >
             Get Started
-          </Button>
+          </LinkButton>
         </Stack>
       </Drawer>
     </>

@@ -3,8 +3,8 @@
 import type { ReactElement } from "react";
 import { Warning as WarningIcon } from "@mui/icons-material";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import Link from "next/link";
 import { GradientText } from "@/components/ui/cards";
+import { LinkButton } from "@/components/ui/inputs";
 import { ROUTES } from "@/lib/constants";
 
 interface ErrorPageProps {
@@ -68,9 +68,9 @@ export default function ErrorPage(props: ErrorPageProps): ReactElement {
           <Button variant="contained" size="large" onClick={reset}>
             Try Again
           </Button>
-          <Button component={Link} href={ROUTES.home} variant="outlined" size="large">
+          <LinkButton href={ROUTES.home} variant="outlined" size="large">
             Go Home
-          </Button>
+          </LinkButton>
         </Stack>
       </Box>
     </Box>
