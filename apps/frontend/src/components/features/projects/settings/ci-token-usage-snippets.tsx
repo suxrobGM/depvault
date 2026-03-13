@@ -4,13 +4,15 @@ import { useState, type ReactElement } from "react";
 import { Box, Tab, Tabs, Typography } from "@mui/material";
 import { CopyButton } from "@/components/ui/inputs";
 
+const DEEPVAULT_URL = "https://depvault.com";
+
 const GITHUB_ACTIONS_SNIPPET = `# Add DEPVAULT_CI_TOKEN to your repository secrets
 - name: Fetch secrets from DepVault
   run: |
     SECRETS=$(curl -sf \\
       -H "Authorization: Bearer \${{ secrets.DEPVAULT_CI_TOKEN }}" \\
       -H "X-Pipeline-Run-Id: \${{ github.run_id }}" \\
-      \${{ vars.DEPVAULT_URL }}/api/ci/secrets)
+      ${DEEPVAULT_URL}/api/ci/secrets)
     echo "$SECRETS" | jq -r '.variables[] | "\\(.key)=\\(.value)"' >> $GITHUB_ENV`;
 
 const GITLAB_CI_SNIPPET = `# Add DEPVAULT_CI_TOKEN and DEPVAULT_URL as CI/CD variables
@@ -20,7 +22,7 @@ fetch_secrets:
       SECRETS=$(curl -sf \\
         -H "Authorization: Bearer $DEPVAULT_CI_TOKEN" \\
         -H "X-Pipeline-Run-Id: $CI_PIPELINE_ID" \\
-        $DEPVAULT_URL/api/ci/secrets)
+        ${DEEPVAULT_URL}/api/ci/secrets)
       echo "$SECRETS" | jq -r '.variables[] | "\\(.key)=\\(.value)"' >> .env
       export $(cat .env | xargs)`;
 
