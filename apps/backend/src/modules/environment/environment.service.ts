@@ -291,7 +291,7 @@ export class EnvironmentService {
   private async checkDrift(projectId: string, userId: string): Promise<void> {
     try {
       const environments = await this.prisma.environment.findMany({
-        where: { projectId },
+        where: { projectId, type: { not: "GLOBAL" } },
         include: { variables: { select: { key: true } } },
       });
 
