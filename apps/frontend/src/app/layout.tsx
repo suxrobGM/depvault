@@ -25,10 +25,71 @@ const syne = Syne({
   subsets: ["latin"],
 });
 
+const SITE_URL = "https://depvault.com";
+const SITE_NAME = "DepVault";
+const SITE_DESCRIPTION =
+  "Analyze dependencies, detect vulnerabilities, and securely store environment variables across any tech stack — from package.json to .env to appsettings.json — all in one place.";
+
 export const metadata: Metadata = {
-  title: "DepVault",
-  description:
-    "Analyze dependencies, detect vulnerabilities, and securely store environment variables across any tech stack.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  keywords: [
+    "dependency analysis",
+    "vulnerability detection",
+    "environment variables",
+    "secret management",
+    "env vault",
+    "dependency scanner",
+    "package.json",
+    "appsettings.json",
+    ".env management",
+    "developer tools",
+    "security",
+  ],
+  authors: [{ name: SITE_NAME, url: SITE_URL }],
+  creator: SITE_NAME,
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} — Dependency Analysis & Environment Vault`,
+    description: SITE_DESCRIPTION,
+    images: [
+      {
+        url: "/depvault-og.png",
+        width: 1200,
+        height: 630,
+        alt: `${SITE_NAME} — Dependency Analysis & Environment Vault`,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} — Dependency Analysis & Environment Vault`,
+    description: SITE_DESCRIPTION,
+    images: ["/depvault-og.png"],
+  },
+  icons: {
+    icon: { url: "/depvault-icon.svg", type: "image/svg+xml" },
+    apple: "/depvault-icon.svg",
+  },
+  manifest: "/manifest.webmanifest",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout(props: PropsWithChildren): ReactElement {

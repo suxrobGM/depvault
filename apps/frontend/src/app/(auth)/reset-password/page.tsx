@@ -1,6 +1,12 @@
 import type { ReactElement } from "react";
+import type { Metadata } from "next";
 import { AuthCard, AuthStatus, ResetPasswordForm } from "@/components/features/auth";
 import { ROUTES } from "@/lib/constants";
+
+export const metadata: Metadata = {
+  title: "Reset Password",
+  description: "Set a new password for your DepVault account.",
+};
 
 interface Props {
   searchParams: Promise<{ token: string | null }>;

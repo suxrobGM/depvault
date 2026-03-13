@@ -1,11 +1,11 @@
 "use client";
 
 import type { MouseEvent, ReactElement } from "react";
-import { GitHub as GitHubIcon, Shield as ShieldIcon } from "@mui/icons-material";
+import { GitHub as GitHubIcon } from "@mui/icons-material";
 import { Box, Divider, Grid, IconButton, Link as MuiLink, Stack, Typography } from "@mui/material";
 import type { Route } from "next";
+import Image from "next/image";
 import NextLink from "next/link";
-import { GradientText } from "@/components/ui/gradient-text";
 import { SectionContainer } from "@/components/ui/section-container";
 import { useScrollTo } from "@/hooks/use-scroll-to";
 import { ROUTES } from "@/lib/constants";
@@ -56,12 +56,9 @@ export function LandingFooter(): ReactElement {
       <SectionContainer sx={{ py: { xs: 5, md: 8 } }}>
         <Grid container spacing={4}>
           <Grid size={{ xs: 12, md: 4 }}>
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-              <ShieldIcon sx={{ color: "primary.main", fontSize: 24 }} />
-              <GradientText variant="h6" component="span">
-                DepVault
-              </GradientText>
-            </Stack>
+            <Box sx={{ mb: 2 }}>
+              <Image src="/depvault-logo-dark.svg" alt="DepVault" width={140} height={40} />
+            </Box>
             <Typography
               variant="body2"
               color="text.secondary"

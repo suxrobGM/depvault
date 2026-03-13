@@ -1,0 +1,11 @@
+<svg width="280" height="80" viewBox="0 0 280 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Shield -->
+  <path d="M30 8 L56 16 C56 16 58 40 50 56 C44 66 30 74 30 74 C30 74 16 66 10 56 C2 40 4 16 4 16 Z" fill="#10B981" opacity="0.9"/>
+  <!-- Keyhole -->
+  <circle cx="30" cy="34" r="8" fill="#FFFFFF" opacity="0.85"/>
+  <rect x="27.5" y="38" width="5" height="12" rx="2" fill="#FFFFFF" opacity="0.85"/>
+  <path d="M22 30 C22 22, 38 22, 38 30" stroke="#FFFFFF" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+  <!-- Wordmark -->
+  <text x="74" y="37" font-family="'JetBrains Mono', monospace" font-weight="700" font-size="32" letter-spacing="-0.5"><tspan fill="#0A0C10">Dep</tspan><tspan fill="#10B981">Vault</tspan></text>
+  <text x="74" y="56" font-family="'Instrument Sans', sans-serif" font-weight="500" font-size="11.5" fill="#8B8FA5" letter-spacing="3.5">SECURE YOUR STACK</text>
+</svg>

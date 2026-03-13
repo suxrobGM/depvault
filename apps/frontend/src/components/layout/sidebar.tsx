@@ -9,7 +9,6 @@ import {
   History as HistoryIcon,
   Security as SecurityNavIcon,
   Settings as SettingsIcon,
-  Shield as ShieldIcon,
   SwapHoriz as SwapHorizIcon,
 } from "@mui/icons-material";
 import {
@@ -27,9 +26,9 @@ import {
   Typography,
 } from "@mui/material";
 import type { Route } from "next";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { NotificationBell } from "@/components/features/notifications";
-import { GradientText } from "@/components/ui/gradient-text";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { useAuth } from "@/hooks/use-auth";
 import { ROUTES } from "@/lib/constants";
@@ -73,19 +72,14 @@ export function Sidebar(props: SidebarProps): ReactElement {
       >
         {open ? (
           <>
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <ShieldIcon sx={{ color: "primary.main", fontSize: 24 }} />
-              <GradientText variant="h6" component="span">
-                DepVault
-              </GradientText>
-            </Stack>
+            <Image src="/depvault-logo-dark.svg" alt="DepVault" width={130} height={37} />
             <IconButton onClick={onToggle} sx={{ display: { xs: "none", md: "flex" } }}>
               <ChevronLeftIcon />
             </IconButton>
           </>
         ) : (
           <IconButton onClick={onToggle} sx={{ display: { xs: "none", md: "flex" } }}>
-            <ShieldIcon sx={{ color: "primary.main", fontSize: 24 }} />
+            <Image src="/depvault-icon.svg" alt="DepVault" width={24} height={30} />
           </IconButton>
         )}
       </Toolbar>

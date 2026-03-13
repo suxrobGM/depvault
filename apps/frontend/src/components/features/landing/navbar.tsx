@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactElement } from "react";
-import { Close as CloseIcon, Menu as MenuIcon, Shield as ShieldIcon } from "@mui/icons-material";
+import { Close as CloseIcon, Menu as MenuIcon } from "@mui/icons-material";
 import {
   AppBar,
   Box,
@@ -15,8 +15,8 @@ import {
   Stack,
   Toolbar,
 } from "@mui/material";
+import Image from "next/image";
 import Link from "next/link";
-import { GradientText } from "@/components/ui/gradient-text";
 import { useScrollTo } from "@/hooks/use-scroll-to";
 import { ROUTES } from "@/lib/constants";
 
@@ -58,13 +58,8 @@ export function LandingNavbar(): ReactElement {
         }}
       >
         <Toolbar sx={{ maxWidth: "lg", width: "100%", mx: "auto" }}>
-          <Link href={ROUTES.home} style={{ textDecoration: "none" }}>
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <ShieldIcon sx={{ color: "primary.main", fontSize: 28 }} />
-              <GradientText variant="h6" component="span">
-                DepVault
-              </GradientText>
-            </Stack>
+          <Link href={ROUTES.home} style={{ textDecoration: "none", display: "flex" }}>
+            <Image src="/depvault-logo-dark.svg" alt="DepVault" width={140} height={40} priority />
           </Link>
           <Stack
             direction="row"

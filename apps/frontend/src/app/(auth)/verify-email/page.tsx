@@ -1,7 +1,13 @@
 import type { ReactElement } from "react";
+import type { Metadata } from "next";
 import { verifyEmailAction } from "@/actions/auth";
 import { AuthStatus } from "@/components/features/auth";
 import { ROUTES } from "@/lib/constants";
+
+export const metadata: Metadata = {
+  title: "Verify Email",
+  description: "Verify your email address to complete your DepVault registration.",
+};
 
 interface Props {
   searchParams: Promise<{ token: string | null }>;

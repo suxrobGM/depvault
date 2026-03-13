@@ -1,5 +1,15 @@
 import type { ReactElement, ReactNode } from "react";
-import { Body, Container, Head, Hr, Html, Preview, Section, Text } from "@react-email/components";
+import {
+  Body,
+  Container,
+  Head,
+  Hr,
+  Html,
+  Img,
+  Preview,
+  Section,
+  Text,
+} from "@react-email/components";
 
 interface BaseLayoutProps {
   preview: string;
@@ -26,11 +36,9 @@ const header = {
   padding: "32px 48px 0",
 } as const;
 
-const logo = {
-  fontSize: "24px",
-  fontWeight: 700,
-  color: "#1a1a2e",
-  letterSpacing: "-0.5px",
+const logoImg = {
+  width: "140px",
+  height: "40px",
 } as const;
 
 const content = {
@@ -57,7 +65,11 @@ export function BaseLayout(props: BaseLayoutProps): ReactElement {
       <Body style={main}>
         <Container style={container}>
           <Section style={header}>
-            <Text style={logo}>DepVault</Text>
+            <Img
+              src={`${process.env.FRONTEND_URL ?? "https://depvault.com"}/depvault-logo-light.svg`}
+              alt="DepVault"
+              style={logoImg}
+            />
           </Section>
           <Section style={content}>{children}</Section>
           <Hr style={{ borderColor: "#e6ebf1", margin: "20px 48px" }} />
