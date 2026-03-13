@@ -36,7 +36,9 @@ export function SecurityOverviewView(): ReactElement {
     );
   }
 
-  if (!data) return <Box />;
+  if (!data) {
+    return <></>;
+  }
 
   const vulns = data.vulnerabilities;
   const scans = data.secretScans;
