@@ -28,6 +28,7 @@ export function UserAvatar(props: UserAvatarProps): ReactElement {
           height: size,
           fontSize: size * 0.4,
           bgcolor: "primary.main",
+          color: "primary.contrastText",
         },
         ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
       ]}
