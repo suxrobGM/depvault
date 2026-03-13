@@ -2,7 +2,7 @@ import { singleton } from "tsyringe";
 import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { DependencyStatus, PrismaClient, ProjectRole, type Ecosystem } from "@/generated/prisma";
-import { NotificationService } from "@/modules/notification";
+import { NotificationService } from "@/modules/notification/notification.service";
 import type { PaginatedResponse } from "@/types/response";
 import type {
   AnalysisResponse,

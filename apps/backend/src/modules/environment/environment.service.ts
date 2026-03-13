@@ -4,7 +4,7 @@ import { logger } from "@/common/logger";
 import { deriveProjectKey, encrypt } from "@/common/utils/encryption";
 import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
-import { NotificationService } from "@/modules/notification";
+import { NotificationService } from "@/modules/notification/notification.service";
 import type { PaginatedResponse } from "@/types/response";
 import type {
   CreateEnvVariableBody,

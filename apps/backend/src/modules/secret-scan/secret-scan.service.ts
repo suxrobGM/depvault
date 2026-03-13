@@ -9,7 +9,7 @@ import {
   type Prisma,
 } from "@/generated/prisma";
 import { GitHubApiService } from "@/modules/github/github-api.service";
-import { NotificationService } from "@/modules/notification";
+import { NotificationService } from "@/modules/notification/notification.service";
 import type { PaginatedResponse } from "@/types/response";
 import { parseGitHubUrl } from "./parse-github-url";
 import { executeScan } from "./secret-scan.executor";

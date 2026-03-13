@@ -3,7 +3,7 @@ import { RoleChangeTemplate, TeamInviteTemplate } from "@/common/emails";
 import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from "@/common/errors";
 import { EmailService } from "@/common/services/email.service";
 import { PrismaClient } from "@/generated/prisma";
-import { NotificationService } from "@/modules/notification";
+import { NotificationService } from "@/modules/notification/notification.service";
 import type { PaginatedResponse } from "@/types/response";
 import type {
   InviteMemberBody,

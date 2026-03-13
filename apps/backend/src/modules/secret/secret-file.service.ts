@@ -3,7 +3,7 @@ import { ForbiddenError, NotFoundError } from "@/common/errors";
 import { decryptBinary, deriveProjectKey, encryptBinary } from "@/common/utils/encryption";
 import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
-import { NotificationService } from "@/modules/notification";
+import { NotificationService } from "@/modules/notification/notification.service";
 import type { PaginatedResponse } from "@/types/response";
 import { toSecretFileResponse } from "./secret-file.mapper";
 import type { SecretFileResponse, UpdateSecretFileBody } from "./secret-file.schema";

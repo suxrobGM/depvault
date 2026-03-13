@@ -1,7 +1,7 @@
 import { logger } from "@/common/logger";
 import { DetectionSeverity, PrismaClient, ProjectRole, ScanStatus } from "@/generated/prisma";
 import type { GitHubApiService } from "@/modules/github/github-api.service";
-import type { NotificationService } from "@/modules/notification";
+import type { NotificationService } from "@/modules/notification/notification.service";
 import { scanCommitHistory } from "./secret-scan.engine";
 import { BUILT_IN_PATTERNS } from "./secret-scan.patterns";
 
