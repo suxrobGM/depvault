@@ -36,6 +36,7 @@ DepVault is a web dashboard that analyzes dependencies, detects vulnerabilities,
 ```text
 apps/backend/    → Elysia REST API (port 4000)
 apps/frontend/   → Next.js web app (port 4001)
+apps/cli/        → .NET 10 CLI (Native AOT)
 packages/shared/ → Shared types & utils
 ```
 
@@ -50,6 +51,12 @@ bun run build:types
 
 # Web (cd apps/frontend)
 bun run dev / build / start
+
+# CLI (cd apps/cli)
+dotnet tool restore                          # restore Kiota tool
+dotnet build                                 # build CLI
+dotnet publish -c Release -r win-x64         # AOT publish
+bun run export:openapi                       # regenerate OpenAPI spec (from apps/backend)
 
 # Root
 bun run typecheck   # all workspaces

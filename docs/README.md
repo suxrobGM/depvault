@@ -20,6 +20,7 @@ Welcome to the DepVault documentation. This index links to every document in the
 | [Architecture Overview](architecture.md) | System diagram, monorepo structure, backend module pattern, DI, database schema, auth flow, and encryption design |
 | [API Reference](api-reference.md)        | All REST endpoint groups, authentication details, and link to live Swagger docs                                   |
 | [Deployment Guide](deployment-guide.md)  | Docker Compose setup, Nginx configuration, CI/CD pipeline, environment variables, and SSL                         |
+| [CLI Reference](cli.md)                  | Setup, build, command reference, and CI/CD usage for the .NET CLI tool                                            |
 
 ## Guides
 

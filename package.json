@@ -8,7 +8,8 @@
     "packages/*"
   ],
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky",
+    "cli:generate": "cd apps/backend && bun run export:openapi && cd ../.. && dotnet kiota generate -l CSharp -d apps/cli/openapi.json -o apps/cli/ApiClient -n DepVault.Cli.ApiClient --exclude-backward-compatible"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,css,less,scss,json,md}": [

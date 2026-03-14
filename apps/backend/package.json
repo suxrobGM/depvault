@@ -18,7 +18,8 @@
     "build:linux": "bun build --compile --minify-whitespace --minify-syntax --target bun-linux-x64 --outfile dist/server src/app.ts",
     "build:win": "bun build --compile --minify-whitespace --minify-syntax --target bun-windows-x64 --outfile dist/server.exe src/app.ts",
     "build:types": "tsc --emitDeclarationOnly",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "export:openapi": "bun run scripts/export-openapi.ts"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.1",
