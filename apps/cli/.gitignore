@@ -2,5 +2,4 @@ bin/
 obj/
 .idea/
 .vs/
-openapi.json
 ApiClient/

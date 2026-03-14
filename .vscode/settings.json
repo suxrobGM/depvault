@@ -14,5 +14,5 @@
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
   },
-  "VSCodeCounter.exclude": ["bun.lock"]
+  "VSCodeCounter.exclude": ["bun.lock", "apps/cli/openapi.json"]
 }

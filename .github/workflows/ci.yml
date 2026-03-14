@@ -71,12 +71,15 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
-      # - name: Restore .NET tools
-      #   run: dotnet tool restore
+      - name: Restore .NET tools
+        run: dotnet tool restore
 
-      # - name: Build CLI
-      #   run: dotnet build
-      #   working-directory: apps/cli
+      - name: Generate API client
+        run: dotnet kiota generate -l CSharp -d apps/cli/openapi.json -o apps/cli/ApiClient -n DepVault.Cli.ApiClient --exclude-backward-compatible
+
+      - name: Build CLI
+        run: dotnet build
+        working-directory: apps/cli
 
       - name: Secret scanning
         uses: gitleaks/gitleaks-action@v2
