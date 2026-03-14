@@ -130,7 +130,8 @@ public sealed class UpdateService(IVersionChecker versionChecker, IGitHubRelease
         }
         finally
         {
-            try { Directory.Delete(tempDir, recursive: true); }
+            try
+            { Directory.Delete(tempDir, recursive: true); }
             catch { /* cleanup is best-effort */ }
         }
     }

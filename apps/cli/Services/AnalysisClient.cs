@@ -27,7 +27,10 @@ public sealed class AnalysisClient(IApiClientFactory clientFactory)
             Ecosystem = ecosystem
         }, cancellationToken: ct);
 
-        if (response is null) return null;
+        if (response is null)
+        {
+            return null;
+        }
 
         return new AnalysisResult
         {

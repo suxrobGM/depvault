@@ -19,7 +19,7 @@ internal sealed class ScanCommands(
     public Command CreateScanCommand()
     {
         var pathOpt = new Option<string?>("--path")
-            { Description = "Repository root path (defaults to current directory)" };
+        { Description = "Repository root path (defaults to current directory)" };
         var projectOpt = new Option<string?>("--project") { Description = "Project ID" };
 
         var cmd = new Command("scan", "Scan repository for dependencies, env files, and secrets")

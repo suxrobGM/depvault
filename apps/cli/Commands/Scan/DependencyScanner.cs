@@ -61,7 +61,10 @@ internal sealed class DependencyScanner(
 
             task.Value = 100;
 
-            if (result is null) return;
+            if (result is null)
+            {
+                return;
+            }
 
             results.FilesAnalyzed++;
             results.TotalDependencies += result.Dependencies.Count;
@@ -79,7 +82,9 @@ internal sealed class DependencyScanner(
     {
         var tree = new Tree($"[cyan1]Found {files.Count} dependency file(s)[/]");
         foreach (var f in files)
+        {
             tree.AddNode($"[white]{Markup.Escape(f.RelativePath)}[/]");
+        }
 
         AnsiConsole.Write(tree);
         AnsiConsole.WriteLine();
@@ -87,7 +92,10 @@ internal sealed class DependencyScanner(
 
     private static void PrintHealthTable(ScanResults results)
     {
-        if (results.HealthScores.Count == 0) return;
+        if (results.HealthScores.Count == 0)
+        {
+            return;
+        }
 
         AnsiConsole.WriteLine();
         var table = new Table().Border(ConsoleTheme.Border).BorderStyle(new Style(ConsoleTheme.Muted));

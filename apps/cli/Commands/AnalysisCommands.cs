@@ -19,12 +19,12 @@ public sealed class AnalysisCommands(
     public Command CreateAnalyzeCommand()
     {
         var fileOpt = new Option<string?>("--file")
-            { Description = "Path to dependency file (auto-detected if omitted)" };
+        { Description = "Path to dependency file (auto-detected if omitted)" };
         var projectOpt = new Option<string?>("--project") { Description = "Project ID" };
         var ecosystemOpt = new Option<string?>("--ecosystem")
-            { Description = "Ecosystem (auto-detected from filename)" };
+        { Description = "Ecosystem (auto-detected from filename)" };
         var outputOpt = new Option<string>("--output")
-            { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
+        { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
 
         var cmd = new Command("analyze", "Upload and analyze a dependency file")
             { fileOpt, projectOpt, ecosystemOpt, outputOpt };
@@ -124,8 +124,12 @@ public sealed class AnalysisCommands(
         {
             output.PrintJson(deps.Select(d => new
             {
-                name = d.Name, version = d.CurrentVersion, latestVersion = d.LatestVersion,
-                status = d.Status, license = d.License, vulnerabilities = d.Vulnerabilities?.Count ?? 0
+                name = d.Name,
+                version = d.CurrentVersion,
+                latestVersion = d.LatestVersion,
+                status = d.Status,
+                license = d.License,
+                vulnerabilities = d.Vulnerabilities?.Count ?? 0
             }));
             return;
         }

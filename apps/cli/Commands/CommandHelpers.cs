@@ -25,7 +25,11 @@ internal static class CommandHelpers
     /// <summary>Checks file exists and prints error if not.</summary>
     public static bool RequireFile(string path, IOutputFormatter output)
     {
-        if (File.Exists(path)) return true;
+        if (File.Exists(path))
+        {
+            return true;
+        }
+
         output.PrintError($"File not found: {path}");
         return false;
     }

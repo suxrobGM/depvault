@@ -21,7 +21,7 @@ public sealed class CiCommands(
     private Command CreatePullCommand()
     {
         var formatOpt = new Option<string>("--format")
-            { Description = "Output format (env, json)", DefaultValueFactory = _ => "env" };
+        { Description = "Output format (env, json)", DefaultValueFactory = _ => "env" };
         var outputOpt = new Option<string?>("--output") { Description = "Output file path (defaults to stdout)" };
 
         var cmd = new Command("pull", "Fetch secrets using CI token (DEPVAULT_TOKEN)")

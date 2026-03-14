@@ -25,7 +25,7 @@ public sealed class ProjectCommands(
     private Command CreateListCommand()
     {
         var outputOpt = new Option<string>("--output")
-            { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
+        { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
         var cmd = new Command("list", "List your projects")
         {
             outputOpt

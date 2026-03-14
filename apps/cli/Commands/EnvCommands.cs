@@ -36,7 +36,7 @@ public sealed class EnvCommands(
         var projectOpt = new Option<string?>("--project") { Description = "Project ID (defaults to active)" };
         var vaultGroupOpt = new Option<string?>("--vault-group") { Description = "Vault group ID" };
         var envOpt = new Option<string>("--environment")
-            { Description = "Environment type", DefaultValueFactory = _ => "DEVELOPMENT" };
+        { Description = "Environment type", DefaultValueFactory = _ => "DEVELOPMENT" };
         var formatOpt = new Option<string>("--format")
         {
             Description = "Export format (env, appsettings.json, secrets.yaml, config.toml)",
@@ -94,11 +94,11 @@ public sealed class EnvCommands(
     {
         var projectOpt = new Option<string?>("--project") { Description = "Project ID (defaults to active)" };
         var vaultGroupOpt = new Option<string?>("--vault-group")
-            { Description = "Vault group ID (prompts interactively if omitted)" };
+        { Description = "Vault group ID (prompts interactively if omitted)" };
         var envOpt = new Option<string>("--environment")
-            { Description = "Environment type", DefaultValueFactory = _ => "DEVELOPMENT" };
+        { Description = "Environment type", DefaultValueFactory = _ => "DEVELOPMENT" };
         var formatOpt = new Option<string>("--format")
-            { Description = "Import format", DefaultValueFactory = _ => "env" };
+        { Description = "Import format", DefaultValueFactory = _ => "env" };
         var fileOpt = new Option<string?>("--file") { Description = "File to import (auto-detects if omitted)" };
 
         var cmd = new Command("push", "Import environment variables from local file")
@@ -170,7 +170,7 @@ public sealed class EnvCommands(
         var vaultGroupOpt = new Option<string?>("--vault-group") { Description = "Vault group ID" };
         var envOpt = new Option<string?>("--environment") { Description = "Environment type" };
         var outputOpt = new Option<string>("--output")
-            { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
+        { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
 
         var cmd = new Command("list", "List environment variables")
             { projectOpt, vaultGroupOpt, envOpt, outputOpt };
@@ -217,7 +217,7 @@ public sealed class EnvCommands(
                 if (parseResult.GetValue(outputOpt) == "json")
                 {
                     output.PrintJson(items.Select(v => new
-                        { key = v.Key, value = v.Value, environmentId = v.EnvironmentId }));
+                    { key = v.Key, value = v.Value, environmentId = v.EnvironmentId }));
                     return;
                 }
 
@@ -239,9 +239,9 @@ public sealed class EnvCommands(
         var projectOpt = new Option<string?>("--project") { Description = "Project ID" };
         var vaultGroupOpt = new Option<string>("--vault-group") { Description = "Vault group ID", Required = true };
         var envsOpt = new Option<string>("--environments")
-            { Description = "Comma-separated environment types", Required = true };
+        { Description = "Comma-separated environment types", Required = true };
         var outputOpt = new Option<string>("--output")
-            { Description = "Output format", DefaultValueFactory = _ => "table" };
+        { Description = "Output format", DefaultValueFactory = _ => "table" };
 
         var cmd = new Command("diff", "Compare environment variables across environments")
             { projectOpt, vaultGroupOpt, envsOpt, outputOpt };
