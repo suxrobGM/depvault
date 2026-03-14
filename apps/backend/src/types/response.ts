@@ -43,13 +43,40 @@ export const MessageResponseSchema = t.Object({
  * Common response types and error presets for API routes
  */
 export const HttpErrorResponses = {
-  400: ErrorResponseSchema,
-  401: ErrorResponseSchema,
-  403: ErrorResponseSchema,
-  404: ErrorResponseSchema,
-  409: ErrorResponseSchema,
-  410: ErrorResponseSchema,
-  429: ErrorResponseSchema,
+  400: t.Object(
+    { code: t.Number(), message: t.String(), details: t.Optional(t.Unknown()) },
+    { description: "Bad Request" },
+  ),
+  401: t.Object(
+    { code: t.Number(), message: t.String(), details: t.Optional(t.Unknown()) },
+    { description: "Unauthorized" },
+  ),
+  403: t.Object(
+    { code: t.Number(), message: t.String(), details: t.Optional(t.Unknown()) },
+    { description: "Forbidden" },
+  ),
+  404: t.Object(
+    { code: t.Number(), message: t.String(), details: t.Optional(t.Unknown()) },
+    { description: "Not Found" },
+  ),
+  409: t.Object(
+    { code: t.Number(), message: t.String(), details: t.Optional(t.Unknown()) },
+    { description: "Conflict" },
+  ),
+};
+
+export const GoneErrorSchema = {
+  410: t.Object(
+    { code: t.Number(), message: t.String(), details: t.Optional(t.Unknown()) },
+    { description: "Gone" },
+  ),
+};
+
+export const TooManyRequestsErrorSchema = {
+  429: t.Object(
+    { code: t.Number(), message: t.String(), details: t.Optional(t.Unknown()) },
+    { description: "Too Many Requests" },
+  ),
 };
 
 export type ErrorResponse = Static<typeof ErrorResponseSchema>;

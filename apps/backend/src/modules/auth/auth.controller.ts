@@ -2,6 +2,7 @@ import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
 import { authGuard } from "@/common/middleware/auth.middleware";
 import { rateLimiter } from "@/common/middleware/rate-limiter";
+import { TooManyRequestsErrorSchema } from "@/types/response";
 import {
   AuthResponseSchema,
   ForgotPasswordBodySchema,
@@ -32,7 +33,7 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
       },
       {
         body: RegisterBodySchema,
-        response: AuthResponseSchema,
+        response: { 200: AuthResponseSchema, ...TooManyRequestsErrorSchema },
         detail: {
           summary: "Register with email and password",
           description:
@@ -53,7 +54,7 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
       },
       {
         body: LoginBodySchema,
-        response: AuthResponseSchema,
+        response: { 200: AuthResponseSchema, ...TooManyRequestsErrorSchema },
         detail: {
           summary: "Login with email and password",
           description:
@@ -102,7 +103,7 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
       .use(rateLimiter({ max: 3, windowMs: 60 * 60 * 1000 }))
       .post("/forgot-password", ({ body }) => authService.forgotPassword(body), {
         body: ForgotPasswordBodySchema,
-        response: MessageResponseSchema,
+        response: { 200: MessageResponseSchema, ...TooManyRequestsErrorSchema },
         detail: {
           summary: "Request password reset email",
           description:
@@ -111,7 +112,7 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
       })
       .post("/reset-password", ({ body }) => authService.resetPassword(body), {
         body: ResetPasswordBodySchema,
-        response: MessageResponseSchema,
+        response: { 200: MessageResponseSchema, ...TooManyRequestsErrorSchema },
         detail: {
           summary: "Reset password with token",
           description:
@@ -120,7 +121,7 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
       })
       .post("/verify-email", ({ body }) => authService.verifyEmail(body), {
         body: VerifyEmailBodySchema,
-        response: MessageResponseSchema,
+        response: { 200: MessageResponseSchema, ...TooManyRequestsErrorSchema },
         detail: {
           summary: "Verify email address",
           description:

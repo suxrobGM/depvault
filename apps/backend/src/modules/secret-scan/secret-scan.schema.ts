@@ -2,10 +2,11 @@ import { t, type Static } from "elysia";
 import { DetectionSeverity, DetectionStatus, ScanStatus } from "@/generated/prisma";
 import { PaginationQueryBaseSchema, PaginationQuerySchema } from "@/types/pagination";
 import { PaginatedResponseSchema } from "@/types/response";
+import { tDateTime, tStringEnum, tStringUnion } from "@/types/schema";
 
-const SeverityEnum = t.Enum(DetectionSeverity);
-const StatusEnum = t.Enum(DetectionStatus);
-const ScanStatusEnum = t.Enum(ScanStatus);
+const SeverityEnum = tStringEnum(DetectionSeverity);
+const StatusEnum = tStringEnum(DetectionStatus);
+const ScanStatusEnum = tStringEnum(ScanStatus);
 
 // --- Params ---
 
@@ -32,10 +33,10 @@ export const ScanResponseSchema = t.Object({
   status: ScanStatusEnum,
   commitsScanned: t.Number(),
   detectionsFound: t.Number(),
-  startedAt: t.Nullable(t.Date()),
-  completedAt: t.Nullable(t.Date()),
+  startedAt: t.Nullable(tDateTime()),
+  completedAt: t.Nullable(tDateTime()),
   errorMessage: t.Nullable(t.String()),
-  createdAt: t.Date(),
+  createdAt: tDateTime(),
 });
 
 export const ScanListQuerySchema = PaginationQueryBaseSchema;
@@ -54,9 +55,9 @@ export const DetectionResponseSchema = t.Object({
   matchSnippet: t.String(),
   status: StatusEnum,
   resolvedById: t.Nullable(t.String()),
-  resolvedAt: t.Nullable(t.Date()),
+  resolvedAt: t.Nullable(tDateTime()),
   remediationSteps: t.Nullable(t.String()),
-  createdAt: t.Date(),
+  createdAt: tDateTime(),
   patternName: t.String(),
   patternSeverity: SeverityEnum,
 });
@@ -71,12 +72,12 @@ export const DetectionListQuerySchema = PaginationQuerySchema(
 export const DetectionListResponseSchema = PaginatedResponseSchema(DetectionResponseSchema);
 
 export const UpdateDetectionBodySchema = t.Object({
-  status: t.Union([t.Literal("RESOLVED"), t.Literal("FALSE_POSITIVE")]),
+  status: tStringUnion(["RESOLVED", "FALSE_POSITIVE"] as const),
 });
 
 export const BatchUpdateDetectionsBodySchema = t.Object({
   detectionIds: t.Array(t.String({ format: "uuid" }), { minItems: 1, maxItems: 500 }),
-  status: t.Union([t.Literal("RESOLVED"), t.Literal("FALSE_POSITIVE")]),
+  status: tStringUnion(["RESOLVED", "FALSE_POSITIVE"] as const),
 });
 
 export const BatchUpdateDetectionsResponseSchema = t.Object({

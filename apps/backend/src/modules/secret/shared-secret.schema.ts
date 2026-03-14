@@ -1,4 +1,5 @@
 import { t, type Static } from "elysia";
+import { tDateTime, tStringUnion } from "@/types/schema";
 
 export const CreateEnvShareBodySchema = t.Object({
   variableIds: t.Array(t.String(), { minItems: 1, maxItems: 100 }),
@@ -16,11 +17,11 @@ export const AccessSecretBodySchema = t.Object({
 });
 
 export const SharedSecretInfoResponseSchema = t.Object({
-  payloadType: t.Union([t.Literal("ENV_VARIABLES"), t.Literal("SECRET_FILE")]),
+  payloadType: tStringUnion(["ENV_VARIABLES", "SECRET_FILE"] as const),
   hasPassword: t.Boolean(),
   fileName: t.Nullable(t.String()),
   mimeType: t.Nullable(t.String()),
-  expiresAt: t.Date(),
+  expiresAt: tDateTime(),
 });
 
 export const SharedSecretVariableSchema = t.Object({
@@ -29,12 +30,12 @@ export const SharedSecretVariableSchema = t.Object({
 });
 
 export const AccessEnvSecretResponseSchema = t.Object({
-  payloadType: t.Literal("ENV_VARIABLES"),
+  payloadType: tStringUnion(["ENV_VARIABLES"] as const),
   variables: t.Array(SharedSecretVariableSchema),
 });
 
 export const AccessFileSecretResponseSchema = t.Object({
-  payloadType: t.Literal("SECRET_FILE"),
+  payloadType: tStringUnion(["SECRET_FILE"] as const),
   fileName: t.String(),
   mimeType: t.String(),
   content: t.String(), // base64-encoded file content
@@ -48,13 +49,13 @@ export const CreateShareResponseSchema = t.Object({
 export const SharedSecretAuditItemSchema = t.Object({
   id: t.String(),
   token: t.String(),
-  payloadType: t.Union([t.Literal("ENV_VARIABLES"), t.Literal("SECRET_FILE")]),
-  status: t.Union([t.Literal("PENDING"), t.Literal("VIEWED"), t.Literal("EXPIRED")]),
+  payloadType: tStringUnion(["ENV_VARIABLES", "SECRET_FILE"] as const),
+  status: tStringUnion(["PENDING", "VIEWED", "EXPIRED"] as const),
   hasPassword: t.Boolean(),
   fileName: t.Nullable(t.String()),
-  expiresAt: t.Date(),
-  viewedAt: t.Nullable(t.Date()),
-  createdAt: t.Date(),
+  expiresAt: tDateTime(),
+  viewedAt: t.Nullable(tDateTime()),
+  createdAt: tDateTime(),
 });
 
 export const SharedSecretAuditListResponseSchema = t.Object({

@@ -2,6 +2,7 @@ import { t, type Static } from "elysia";
 import { EnvironmentType } from "@/generated/prisma";
 import { PaginationQuerySchema } from "@/types/pagination";
 import { PaginatedResponseSchema } from "@/types/response";
+import { tDateTime, tStringEnum } from "@/types/schema";
 
 const FORBIDDEN_EXTENSIONS = [".exe", ".sh", ".bat", ".cmd", ".ps1"];
 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
@@ -18,11 +19,11 @@ export const SecretFileResponseSchema = t.Object({
   mimeType: t.String(),
   fileSize: t.Number(),
   uploadedBy: t.String(),
-  createdAt: t.Date(),
-  updatedAt: t.Date(),
+  createdAt: tDateTime(),
+  updatedAt: tDateTime(),
 });
 
-const EnvironmentTypeSchema = t.Enum(EnvironmentType);
+const EnvironmentTypeSchema = tStringEnum(EnvironmentType);
 
 export const SecretFileListQuerySchema = PaginationQuerySchema(
   t.Object({ environmentType: t.Optional(EnvironmentTypeSchema) }),
@@ -40,7 +41,7 @@ export const SecretFileVersionResponseSchema = t.Object({
   secretFileId: t.String(),
   fileSize: t.Number(),
   changedBy: t.String(),
-  createdAt: t.Date(),
+  createdAt: tDateTime(),
 });
 
 export const SecretFileVersionListResponseSchema = t.Object({

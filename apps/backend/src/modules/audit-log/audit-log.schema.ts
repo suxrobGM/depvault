@@ -2,9 +2,10 @@ import { t, type Static } from "elysia";
 import { AuditAction, AuditResourceType } from "@/generated/prisma";
 import { DateRangeQuerySchema, PaginationQueryBaseSchema } from "@/types/pagination";
 import { PaginatedResponseSchema } from "@/types/response";
+import { tDateTime, tStringEnum } from "@/types/schema";
 
-export const AuditActionSchema = t.Enum(AuditAction);
-export const AuditResourceTypeSchema = t.Enum(AuditResourceType);
+export const AuditActionSchema = tStringEnum(AuditAction);
+export const AuditResourceTypeSchema = tStringEnum(AuditResourceType);
 
 export const AuditLogResponseSchema = t.Object({
   id: t.String(),
@@ -15,7 +16,7 @@ export const AuditLogResponseSchema = t.Object({
   resourceId: t.String(),
   ipAddress: t.String(),
   metadata: t.Nullable(t.Unknown()),
-  createdAt: t.Date(),
+  createdAt: tDateTime(),
   userEmail: t.Nullable(t.String()),
   userFirstName: t.Nullable(t.String()),
   userLastName: t.Nullable(t.String()),
@@ -43,7 +44,7 @@ export const GlobalAuditLogResponseSchema = t.Object({
   resourceId: t.String(),
   ipAddress: t.String(),
   metadata: t.Nullable(t.Unknown()),
-  createdAt: t.Date(),
+  createdAt: tDateTime(),
   userEmail: t.Nullable(t.String()),
   userFirstName: t.Nullable(t.String()),
   userLastName: t.Nullable(t.String()),

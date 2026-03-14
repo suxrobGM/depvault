@@ -1,8 +1,9 @@
 import { t, type Static } from "elysia";
 import { Ecosystem } from "@/generated/prisma";
 import { PaginationQueryBaseSchema } from "@/types/pagination";
+import { tStringEnum } from "@/types/schema";
 
-const EcosystemEnum = t.Enum(Ecosystem);
+const EcosystemEnum = tStringEnum(Ecosystem);
 
 export const GitHubRepoSchema = t.Object({
   id: t.Number(),

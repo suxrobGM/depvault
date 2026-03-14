@@ -1,4 +1,5 @@
 import { t, type Static } from "elysia";
+import { tDateTime } from "@/types/schema";
 
 export const CreateVaultGroupBodySchema = t.Object({
   name: t.String({ minLength: 1, maxLength: 100 }),
@@ -23,8 +24,8 @@ export const VaultGroupResponseSchema = t.Object({
   sortOrder: t.Number(),
   environmentCount: t.Number(),
   variableCount: t.Number(),
-  createdAt: t.Date(),
-  updatedAt: t.Date(),
+  createdAt: tDateTime(),
+  updatedAt: tDateTime(),
 });
 
 export const VaultGroupListResponseSchema = t.Array(VaultGroupResponseSchema);

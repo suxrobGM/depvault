@@ -1,7 +1,8 @@
 import { t, type Static } from "elysia";
 import { EnvironmentType } from "@/generated/prisma";
+import { tDateTime, tStringEnum, tStringUnion } from "@/types/schema";
 
-export const EnvironmentTypeSchema = t.Enum(EnvironmentType);
+export const EnvironmentTypeSchema = tStringEnum(EnvironmentType);
 
 export const EnvironmentResponseSchema = t.Object({
   id: t.String(),
@@ -10,7 +11,7 @@ export const EnvironmentResponseSchema = t.Object({
   vaultGroupName: t.String(),
   variableCount: t.Number(),
   secretFileCount: t.Number(),
-  createdAt: t.Date(),
+  createdAt: tDateTime(),
 });
 
 export const EnvironmentListQuerySchema = t.Object({
@@ -28,15 +29,18 @@ const EnvDiffValueSchema = t.Object({
   value: t.String(),
   exists: t.Boolean(),
   environmentId: t.String(),
-  updatedAt: t.Date(),
+  updatedAt: tDateTime(),
 });
 
 const EnvDiffRowSchema = t.Object({
   key: t.String(),
   description: t.Nullable(t.String()),
   isRequired: t.Boolean(),
-  status: t.Union([t.Literal("match"), t.Literal("mismatch"), t.Literal("missing")]),
-  values: t.Record(t.String(), t.Nullable(EnvDiffValueSchema)),
+  status: tStringUnion(["match", "mismatch", "missing"] as const),
+  values: t.Unsafe<Record<string, Static<typeof EnvDiffValueSchema> | null>>({
+    type: "object",
+    additionalProperties: { ...EnvDiffValueSchema, nullable: true },
+  }),
 });
 
 export const EnvDiffResponseSchema = t.Object({

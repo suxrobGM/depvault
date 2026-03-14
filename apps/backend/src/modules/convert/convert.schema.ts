@@ -1,7 +1,8 @@
 import { CONFIG_FORMAT_VALUES } from "@depvault/shared/constants";
 import { t, type Static } from "elysia";
+import { tStringUnion } from "@/types/schema";
 
-const ConfigFormatSchema = t.Union(CONFIG_FORMAT_VALUES.map((v) => t.Literal(v)));
+const ConfigFormatSchema = tStringUnion(CONFIG_FORMAT_VALUES);
 
 export const ConvertBodySchema = t.Object({
   content: t.String({ minLength: 1 }),

@@ -126,7 +126,7 @@ public sealed class ProjectCommands(
 
                 output.PrintKeyValue("ID", project?.Id);
                 output.PrintKeyValue("Name", project?.Name);
-                output.PrintKeyValue("Created", project?.CreatedAt?.DateTimeOffset?.ToString("o") ?? project?.CreatedAt?.DateOnly?.ToString());
+                output.PrintKeyValue("Created", project?.CreatedAt?.ToString("o"));
             }
             catch (Exception ex)
             {

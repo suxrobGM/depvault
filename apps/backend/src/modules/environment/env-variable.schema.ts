@@ -2,6 +2,7 @@ import { CONFIG_FORMAT_VALUES } from "@depvault/shared/constants";
 import { t, type Static } from "elysia";
 import { PaginationQuerySchema } from "@/types/pagination";
 import { PaginatedResponseSchema } from "@/types/response";
+import { tDateTime, tStringUnion } from "@/types/schema";
 import { EnvironmentTypeSchema } from "./environment.schema";
 
 export const CreateEnvVariableBodySchema = t.Object({
@@ -26,8 +27,8 @@ export const EnvVariableResponseSchema = t.Object({
   key: t.String(),
   description: t.Nullable(t.String()),
   isRequired: t.Boolean(),
-  createdAt: t.Date(),
-  updatedAt: t.Date(),
+  createdAt: tDateTime(),
+  updatedAt: tDateTime(),
 });
 
 export const EnvVariableWithValueResponseSchema = t.Object({
@@ -37,8 +38,8 @@ export const EnvVariableWithValueResponseSchema = t.Object({
   value: t.String(),
   description: t.Nullable(t.String()),
   isRequired: t.Boolean(),
-  createdAt: t.Date(),
-  updatedAt: t.Date(),
+  createdAt: tDateTime(),
+  updatedAt: tDateTime(),
 });
 
 export const EnvVariableListQuerySchema = PaginationQuerySchema(
@@ -57,7 +58,7 @@ export const EnvVariableParamsSchema = t.Object({
   varId: t.String(),
 });
 
-const ConfigFormatSchema = t.Union(CONFIG_FORMAT_VALUES.map((v) => t.Literal(v)));
+const ConfigFormatSchema = tStringUnion(CONFIG_FORMAT_VALUES);
 
 export const ImportEnvVariablesBodySchema = t.Object({
   vaultGroupId: t.String(),

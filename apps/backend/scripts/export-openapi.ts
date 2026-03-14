@@ -1,10 +1,10 @@
 /**
  * Exports the OpenAPI spec from the running Elysia app to a JSON file.
  *
- * Elysia's swagger plugin produces TypeBox-flavoured JSON Schema that is not
- * fully OpenAPI 3.0 compliant (e.g. `type: "Date"`, `const` enums). This
- * script fetches the raw spec, sanitizes it for standard tooling (Kiota,
- * swagger-codegen, etc.), and writes the result to disk.
+ * The backend schemas use OpenAPI-compliant helpers (`tDateTime`, `tStringEnum`,
+ * `tStringUnion` from `@/types/schema`), so the spec is mostly valid out of the
+ * box. This script applies minimal safety-net cleanup for any remaining Elysia
+ * runtime quirks (e.g. duplicate content types on file upload endpoints).
  *
  * Usage:
  *   bun run scripts/export-openapi.ts [--output <path>]
@@ -21,25 +21,32 @@ function parseArgs(): { output: string } {
   return { output: resolve(output) };
 }
 
-/**
- * Recursively walks the spec and fixes non-standard constructs:
- * - `type: "Date"` → `type: "string", format: "date-time"`
- * - `anyOf` with `const` values → single `enum` array
- * - Removes `multipart/form-data` and `text/plain` content types from
- *   request/response bodies (Elysia duplicates schemas across all three)
- */
-function sanitizeSpec(spec: Record<string, unknown>): Record<string, unknown> {
-  if (!spec.servers) {
-    spec.servers = [{ url: "http://localhost:4000", description: "Local development" }];
-  }
+/** Properties that Elysia/TypeBox leaks into the spec but are not valid OpenAPI 3.0. */
+const INVALID_OPENAPI_PROPS = ["maxSize", "patternProperties"];
 
+/** Applies safety-net fixes for any remaining Elysia runtime quirks. */
+function sanitizeSpec(spec: Record<string, unknown>): Record<string, unknown> {
   stripTrailingSlashes(spec);
-  fixMalformedResponses(spec);
-  sanitizeNode(spec);
+  stripInvalidProperties(spec);
   stripDuplicateContentTypes(spec);
-  addResponseDescriptions(spec);
-  fixParameterSchemas(spec);
+  cleanupResponses(spec);
   return spec;
+}
+
+/** Remove Elysia/TypeBox-specific properties that are not valid in OpenAPI 3.0. */
+function stripInvalidProperties(node: unknown): void {
+  if (node === null || typeof node !== "object") return;
+  if (Array.isArray(node)) {
+    for (const item of node) stripInvalidProperties(item);
+    return;
+  }
+  const obj = node as Record<string, unknown>;
+  for (const prop of INVALID_OPENAPI_PROPS) {
+    if (prop in obj) delete obj[prop];
+  }
+  for (const value of Object.values(obj)) {
+    stripInvalidProperties(value);
+  }
 }
 
 /** Remove trailing slashes from path keys (Kiota cannot handle them). */
@@ -58,106 +65,7 @@ function stripTrailingSlashes(spec: Record<string, unknown>): void {
   }
 }
 
-/**
- * Fix responses that have schema properties (items, anyOf, properties) directly
- * on the response object instead of wrapped in content/application/json/schema.
- */
-function fixMalformedResponses(spec: Record<string, unknown>): void {
-  const paths = spec.paths as Record<string, Record<string, unknown>> | undefined;
-  if (!paths) return;
-
-  for (const pathObj of Object.values(paths)) {
-    for (const method of ["get", "post", "put", "patch", "delete"]) {
-      const operation = pathObj[method] as Record<string, unknown> | undefined;
-      if (!operation?.responses) continue;
-
-      const responses = operation.responses as Record<string, Record<string, unknown>>;
-      for (const [, response] of Object.entries(responses)) {
-        if (typeof response !== "object" || response === null) continue;
-
-        // Remove schema-level properties that leaked onto the response object.
-        // Valid response keys: description, headers, content, links
-        const validResponseKeys = new Set(["description", "headers", "content", "links"]);
-
-        if (response.content) {
-          // Content already exists — just strip invalid props
-          for (const key of Object.keys(response)) {
-            if (!validResponseKeys.has(key)) delete response[key];
-          }
-        } else {
-          // No content — try to build it from leaked schema props
-          const schema: Record<string, unknown> = {};
-          for (const key of Object.keys(response)) {
-            if (!validResponseKeys.has(key)) {
-              schema[key] = response[key];
-              delete response[key];
-            }
-          }
-          if (Object.keys(schema).length > 0) {
-            // If it has `items`, wrap as array
-            if ("items" in schema && !("type" in schema)) {
-              schema.type = "array";
-            }
-            response.content = { "application/json": { schema } };
-          }
-        }
-      }
-    }
-  }
-}
-
-/** Properties that are valid in JSON Schema but not OpenAPI 3.0. */
-const INVALID_OPENAPI_PROPS = ["patternProperties", "maxSize", "const"];
-
-function sanitizeNode(node: unknown): void {
-  if (node === null || typeof node !== "object") return;
-
-  if (Array.isArray(node)) {
-    for (const item of node) sanitizeNode(item);
-    return;
-  }
-
-  const obj = node as Record<string, unknown>;
-
-  // Remove JSON Schema properties not valid in OpenAPI 3.0
-  for (const prop of INVALID_OPENAPI_PROPS) {
-    if (prop in obj) delete obj[prop];
-  }
-
-  // Fix `type: "Date"` → `type: "string", format: "date-time"`
-  if (obj.type === "Date") {
-    obj.type = "string";
-    obj.format = "date-time";
-  }
-
-  // Fix anyOf containing `const` values → collapse to `enum`
-  if (Array.isArray(obj.anyOf)) {
-    const allConst = obj.anyOf.every(
-      (item: unknown) =>
-        typeof item === "object" && item !== null && "const" in (item as Record<string, unknown>),
-    );
-
-    if (allConst && obj.anyOf.length > 0) {
-      const enumValues = obj.anyOf.map(
-        (item: Record<string, unknown>) => item.const as string | number,
-      );
-      const firstItem = obj.anyOf[0] as Record<string, unknown>;
-
-      delete obj.anyOf;
-      obj.type = firstItem.type ?? "string";
-      obj.enum = enumValues;
-    } else {
-      for (const item of obj.anyOf) sanitizeNode(item);
-    }
-  }
-
-  // Recurse into all nested objects
-  for (const value of Object.values(obj)) {
-    sanitizeNode(value);
-  }
-}
-
-/** Remove duplicate multipart/form-data and text/plain content types that Elysia generates. */
+/** Remove duplicate multipart/form-data and text/plain content types when application/json exists. */
 function stripDuplicateContentTypes(node: unknown): void {
   if (node === null || typeof node !== "object") return;
 
@@ -183,76 +91,43 @@ function stripDuplicateContentTypes(node: unknown): void {
   }
 }
 
-const HTTP_STATUS_DESCRIPTIONS: Record<string, string> = {
-  "200": "Success",
-  "201": "Created",
-  "204": "No Content",
-  "400": "Bad Request",
-  "401": "Unauthorized",
-  "403": "Forbidden",
-  "404": "Not Found",
-  "409": "Conflict",
-  "410": "Gone",
-  "422": "Unprocessable Entity",
-  "429": "Too Many Requests",
-  "500": "Internal Server Error",
-};
+/** Remove leaked schema properties from response objects (Elysia runtime quirk). */
+function cleanupResponses(spec: Record<string, unknown>): void {
+  const paths = spec.paths as Record<string, Record<string, unknown>> | undefined;
+  if (!paths) return;
 
-/** Add missing `description` to response objects (required by OpenAPI 3.0). */
-function addResponseDescriptions(node: unknown): void {
-  if (node === null || typeof node !== "object") return;
+  const validResponseKeys = new Set(["description", "headers", "content", "links"]);
 
-  if (Array.isArray(node)) {
-    for (const item of node) addResponseDescriptions(item);
-    return;
-  }
+  for (const pathObj of Object.values(paths)) {
+    for (const method of ["get", "post", "put", "patch", "delete"]) {
+      const operation = pathObj[method] as Record<string, unknown> | undefined;
+      if (!operation?.responses) continue;
 
-  const obj = node as Record<string, unknown>;
+      const responses = operation.responses as Record<string, Record<string, unknown>>;
+      for (const [, response] of Object.entries(responses)) {
+        if (typeof response !== "object" || response === null) continue;
 
-  if (obj.responses && typeof obj.responses === "object") {
-    const responses = obj.responses as Record<string, Record<string, unknown>>;
-    for (const [code, response] of Object.entries(responses)) {
-      if (typeof response === "object" && response !== null && !response.description) {
-        response.description = HTTP_STATUS_DESCRIPTIONS[code] ?? `HTTP ${code}`;
+        if (response.content) {
+          for (const key of Object.keys(response)) {
+            if (!validResponseKeys.has(key)) delete response[key];
+          }
+        } else {
+          const schema: Record<string, unknown> = {};
+          for (const key of Object.keys(response)) {
+            if (!validResponseKeys.has(key)) {
+              schema[key] = response[key];
+              delete response[key];
+            }
+          }
+          if (Object.keys(schema).length > 0) {
+            if ("items" in schema && !("type" in schema)) schema.type = "array";
+            response.content = { "application/json": { schema } };
+          }
+        }
+
+        if (!response.description) response.description = "Success";
       }
     }
-  }
-
-  for (const value of Object.values(obj)) {
-    addResponseDescriptions(value);
-  }
-}
-
-/** Fix parameter schemas: unwrap anyOf with format:integer on String type. */
-function fixParameterSchemas(node: unknown): void {
-  if (node === null || typeof node !== "object") return;
-
-  if (Array.isArray(node)) {
-    for (const item of node) fixParameterSchemas(item);
-    return;
-  }
-
-  const obj = node as Record<string, unknown>;
-
-  // Fix parameters with anyOf containing {type: "string", format: "integer"}
-  if (Array.isArray(obj.anyOf) && obj.anyOf.length > 0) {
-    const hasIntegerString = obj.anyOf.some(
-      (item: unknown) =>
-        typeof item === "object" &&
-        item !== null &&
-        (item as Record<string, unknown>).type === "string" &&
-        (item as Record<string, unknown>).format === "integer",
-    );
-
-    if (hasIntegerString) {
-      // Simplify to just integer type
-      delete obj.anyOf;
-      obj.type = "integer";
-    }
-  }
-
-  for (const value of Object.values(obj)) {
-    fixParameterSchemas(value);
   }
 }
 

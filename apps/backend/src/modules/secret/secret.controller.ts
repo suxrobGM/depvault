@@ -2,6 +2,7 @@ import { Elysia, t } from "elysia";
 import { container } from "@/common/di/container";
 import { rateLimiter } from "@/common/middleware/rate-limiter";
 import { getClientIp } from "@/common/utils/ip";
+import { GoneErrorSchema, TooManyRequestsErrorSchema } from "@/types/response";
 import {
   AccessEnvSecretResponseSchema,
   AccessFileSecretResponseSchema,
@@ -20,7 +21,11 @@ export const secretController = new Elysia({
   .use(rateLimiter({ max: 10, windowMs: 60 * 1000 }))
   .get("/:token/info", ({ params }) => sharedSecretService.getInfo(params.token), {
     params: TokenParamSchema,
-    response: SharedSecretInfoResponseSchema,
+    response: {
+      200: SharedSecretInfoResponseSchema,
+      ...GoneErrorSchema,
+      ...TooManyRequestsErrorSchema,
+    },
     detail: {
       summary: "Check shared secret info",
       description:
@@ -34,7 +39,11 @@ export const secretController = new Elysia({
     {
       params: TokenParamSchema,
       body: AccessSecretBodySchema,
-      response: t.Union([AccessEnvSecretResponseSchema, AccessFileSecretResponseSchema]),
+      response: {
+        200: t.Union([AccessEnvSecretResponseSchema, AccessFileSecretResponseSchema]),
+        ...GoneErrorSchema,
+        ...TooManyRequestsErrorSchema,
+      },
       detail: {
         summary: "Access a one-time shared secret",
         description:

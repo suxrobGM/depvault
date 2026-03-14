@@ -1,6 +1,7 @@
 import { t, type Static } from "elysia";
 import { PaginationQueryBaseSchema } from "@/types/pagination";
 import { PaginatedResponseSchema } from "@/types/response";
+import { tDateTime } from "@/types/schema";
 
 export const CreateProjectBodySchema = t.Object({
   name: t.String({ minLength: 1, maxLength: 100 }),
@@ -20,8 +21,8 @@ export const ProjectResponseSchema = t.Object({
   description: t.Nullable(t.String()),
   repositoryUrl: t.Nullable(t.String()),
   ownerId: t.String(),
-  createdAt: t.Date(),
-  updatedAt: t.Date(),
+  createdAt: tDateTime(),
+  updatedAt: tDateTime(),
 });
 
 export const ProjectListQuerySchema = PaginationQueryBaseSchema;
