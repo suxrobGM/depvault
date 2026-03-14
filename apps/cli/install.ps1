@@ -1,5 +1,5 @@
 # DepVault CLI installer for Windows
-# Usage: irm https://raw.githubusercontent.com/suxrobGM/depvault/main/apps/cli/install.ps1 | iex
+# Usage: irm https://get.depvault.com | iex
 
 $ErrorActionPreference = "Stop"
 

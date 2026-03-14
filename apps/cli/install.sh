@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # DepVault CLI installer for Linux and macOS
-# Usage: curl -fsSL https://raw.githubusercontent.com/suxrobGM/depvault/main/apps/cli/install.sh | bash
+# Usage: curl -fsSL https://get.depvault.com | bash
 
 set -euo pipefail
 

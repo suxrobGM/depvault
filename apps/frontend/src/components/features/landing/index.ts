@@ -7,4 +7,5 @@ export * from "./footer";
 export * from "./hero-section";
 export * from "./how-it-works-section";
 export * from "./navbar";
+export * from "./pricing-section";
 export * from "./stats-section";

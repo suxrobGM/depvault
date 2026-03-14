@@ -35,15 +35,16 @@ const footerLinks: Record<string, FooterLink[]> = {
   ],
   Resources: [
     { label: "Documentation", href: ROUTES.docs },
-    { label: "Changelog", href: "#" },
-    { label: "Status", href: "#" },
+    { label: "Pricing", href: ROUTES.pricing },
+    { label: "Terms of Service", href: ROUTES.terms },
+    { label: "Privacy Policy", href: ROUTES.privacy },
   ],
 };
 
 export function LandingFooter(): ReactElement {
   const scrollTo = useScrollTo();
 
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const handleClick = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
     if (href.startsWith("#") && href.length > 1) {
       e.preventDefault();
       scrollTo(href.slice(1));

@@ -11,6 +11,9 @@ export const ROUTES = {
   profileGeneral: "/profile/general",
   profileSecurity: "/profile/security",
   converter: "/converter",
+  pricing: "/pricing",
+  terms: "/terms",
+  privacy: "/privacy",
   projects: "/projects",
   project: (id: string) => `/projects/${id}` as Route,
   projectOverview: (id: string) => `/projects/${id}/overview` as Route,
@@ -30,7 +33,7 @@ export const ROUTES = {
   settings: "/settings",
   secrets: "/secrets",
   notifications: "/notifications",
-  docs: "/docs",
+  docs: "/docs" as Route,
 } as const;
 
 export const COOKIE_NAMES = {

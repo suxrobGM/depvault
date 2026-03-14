@@ -6,10 +6,10 @@ The DepVault CLI is a .NET 10 command-line tool that provides the same core func
 
 ```bash
 # Linux / macOS
-curl -fsSL https://raw.githubusercontent.com/suxrobGM/depvault/main/apps/cli/install.sh | bash
+curl -fsSL https://get.depvault.com | bash
 
 # Windows (PowerShell)
-irm https://raw.githubusercontent.com/suxrobGM/depvault/main/apps/cli/install.ps1 | iex
+irm https://get.depvault.com | iex
 ```
 
 The installer downloads the latest release binary and adds it to `~/.depvault/bin/`.

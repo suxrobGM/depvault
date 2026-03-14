@@ -11,13 +11,13 @@ The DepVault CLI (`depvault`) is a .NET 10 Native AOT binary — a single self-c
 **Linux / macOS:**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/suxrobGM/depvault/main/apps/cli/install.sh | bash
+curl -fsSL https://get.depvault.com | bash
 ```
 
 **Windows (PowerShell):**
 
 ```powershell
-irm https://raw.githubusercontent.com/suxrobGM/depvault/main/apps/cli/install.ps1 | iex
+irm https://get.depvault.com | iex
 ```
 
 The installer detects your platform, downloads the latest release, and adds it to PATH. Installed to `~/.depvault/bin/` by default. Set `DEPVAULT_INSTALL_DIR` to customize.
@@ -85,10 +85,10 @@ When `DEPVAULT_TOKEN` is set, the CLI uses it for all requests and blocks intera
 | `depvault project list` | List all projects | [Projects](/cli/projects) |
 | `depvault project select` | Set active project | [Projects](/cli/projects) |
 | `depvault project info` | Show project details | [Projects](/cli/projects) |
-| `depvault env pull` | Export variables to file | [Vault](/guides/environment-vault) |
-| `depvault env push` | Import variables from file | [Vault](/guides/environment-vault) |
-| `depvault env list` | List environment variables | [Vault](/guides/environment-vault) |
-| `depvault env diff` | Compare environments | [Diff](/guides/environment-diff) |
+| `depvault env pull` | Export variables to file | [Env](/cli/env#env-pull) |
+| `depvault env push` | Import variables from file | [Env](/cli/env#env-push) |
+| `depvault env list` | List environment variables | [Env](/cli/env#env-list) |
+| `depvault env diff` | Compare environments | [Env](/cli/env#env-diff) |
 | `depvault analyze` | Analyze a dependency file | [Analysis](/guides/dependency-analysis) |
 | `depvault convert` | Convert config file formats | [Converter](/guides/config-converter) |
 | `depvault ci pull` | Fetch secrets with CI token | [CI/CD](/guides/ci-cd-integration) |

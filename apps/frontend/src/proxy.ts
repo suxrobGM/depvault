@@ -7,6 +7,10 @@ const AUTH_ROUTES = [
   ROUTES.forgotPassword,
   ROUTES.resetPassword,
   ROUTES.verifyEmail,
+  ROUTES.pricing,
+  ROUTES.terms,
+  ROUTES.privacy,
+  ROUTES.docs,
 ];
 
 const PUBLIC_ROUTES = [ROUTES.home, ROUTES.secrets];
