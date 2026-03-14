@@ -1,18 +1,12 @@
-# CLI Reference
+# CLI
 
-Complete reference for the DepVault CLI, a Native AOT .NET tool for managing projects, environments, and dependency analysis from the command line.
-
----
-
-## Overview
-
-The DepVault CLI (`depvault`) is a .NET 10 Native AOT binary. It compiles to a single self-contained executable with no runtime dependencies -- you do not need to install .NET to use it. The CLI provides full access to DepVault features including project management, environment variable operations, dependency analysis, and CI/CD secret injection.
+The DepVault CLI (`depvault`) is a .NET 10 Native AOT binary — a single self-contained executable with no runtime dependencies.
 
 ---
 
 ## Installation
 
-### Quick Install (Recommended)
+### Quick Install
 
 **Linux / macOS:**
 
@@ -26,13 +20,11 @@ curl -fsSL https://raw.githubusercontent.com/suxrobGM/depvault/main/apps/cli/ins
 irm https://raw.githubusercontent.com/suxrobGM/depvault/main/apps/cli/install.ps1 | iex
 ```
 
-The installer automatically detects your platform, downloads the latest release, and adds it to your PATH. The binary is installed to `~/.depvault/bin/` by default.
-
-To customize the install location, set the `DEPVAULT_INSTALL_DIR` environment variable before running the script.
+The installer detects your platform, downloads the latest release, and adds it to PATH. Installed to `~/.depvault/bin/` by default. Set `DEPVAULT_INSTALL_DIR` to customize.
 
 ### Manual Download
 
-Pre-built binaries are available on the [GitHub Releases](https://github.com/suxrobGM/depvault/releases) page:
+Pre-built binaries on the [GitHub Releases](https://github.com/suxrobGM/depvault/releases) page:
 
 | Platform | Archive |
 | --- | --- |
@@ -40,18 +32,6 @@ Pre-built binaries are available on the [GitHub Releases](https://github.com/sux
 | macOS x64 | `depvault-osx-x64.tar.gz` |
 | macOS ARM64 | `depvault-osx-arm64.tar.gz` |
 | Windows x64 | `depvault-win-x64.zip` |
-
-```bash
-# Linux / macOS — download, extract, and move to PATH
-tar -xzf depvault-linux-x64.tar.gz
-sudo mv depvault /usr/local/bin/
-```
-
-```powershell
-# Windows — extract and add to PATH
-Expand-Archive depvault-win-x64.zip -DestinationPath C:\Tools
-# Add C:\Tools to your PATH if not already present
-```
 
 ### Build from Source
 
@@ -63,48 +43,19 @@ cd depvault/apps/cli
 dotnet publish -c Release -r <rid>
 ```
 
-Replace `<rid>` with your runtime identifier: `linux-x64`, `osx-x64`, `osx-arm64`, or `win-x64`. The compiled binary is output to `bin/Release/net10.0/<rid>/publish/depvault`.
+Replace `<rid>` with `linux-x64`, `osx-x64`, `osx-arm64`, or `win-x64`.
 
 ---
 
 ## Configuration
 
-The CLI stores all configuration and credentials in the `~/.depvault/` directory.
+The CLI stores configuration in `~/.depvault/`:
 
-### config.json
-
-Stores non-sensitive settings such as the API server URL, active project, and default output format.
-
-```json
-{
-  "server": "https://depvault.example.com",
-  "activeProject": "b3f1a2c4-5678-9def-0123-456789abcdef",
-  "output": "table"
-}
-```
-
-### credentials.json
-
-Stores JWT tokens obtained from interactive login. This file is created by `depvault login` and removed by `depvault logout`.
-
-```json
-{
-  "accessToken": "eyJhbGciOiJIUzI1NiIs...",
-  "refreshToken": "eyJhbGciOiJIUzI1NiIs..."
-}
-```
-
-> Never commit `~/.depvault/credentials.json` to version control. The CLI creates this file with restricted permissions.
-
-### Setting Configuration Values
-
-Use the `config set` subcommand to update configuration:
+- **`config.json`** — Server URL, active project, default output format.
+- **`credentials.json`** — JWT tokens from interactive login. Created by `depvault login`, removed by `depvault logout`. Never commit this file.
 
 ```bash
-# Set the API server URL
 depvault config set server https://depvault.example.com
-
-# Set the default output format
 depvault config set output json
 ```
 
@@ -112,60 +63,31 @@ depvault config set output json
 
 ## Authentication Modes
 
-The CLI supports two authentication modes:
+| Mode | How it works | Use case |
+| --- | --- | --- |
+| Interactive | `depvault login` with email and password | Local development |
+| CI Token | `DEPVAULT_TOKEN` environment variable | CI/CD pipelines |
 
-| Mode        | How it works                                                     | Use case              |
-|-------------|------------------------------------------------------------------|-----------------------|
-| Interactive | Run `depvault login` to authenticate with email and password.    | Local development     |
-| CI Token    | Set the `DEPVAULT_TOKEN` environment variable.                   | CI/CD pipelines       |
-
-When `DEPVAULT_TOKEN` is set, the CLI uses it for all API requests and blocks interactive login commands. See [Authentication](/cli/authentication) and [CI/CD](/cli/ci) for details.
-
----
-
-## Version Check
-
-Print the installed CLI version:
-
-```bash
-depvault version
-```
-
-```
-depvault-cli 0.1.0
-```
+When `DEPVAULT_TOKEN` is set, the CLI uses it for all requests and blocks interactive login. See [Authentication](/cli/authentication) for details.
 
 ---
 
 ## Command Tree
 
-The table below lists every available command and subcommand.
-
-| Command                     | Description                                          |
-|-----------------------------|------------------------------------------------------|
-| `depvault version`          | Print CLI version                                    |
-| `depvault config set <k> <v>` | Set a configuration value (server, output)         |
-| `depvault login`            | Authenticate with email and password                 |
-| `depvault logout`           | Clear stored credentials                             |
-| `depvault whoami`           | Show current authenticated user                      |
-| `depvault project list`     | List all projects                                    |
-| `depvault project select`   | Set the active project                               |
-| `depvault project info`     | Show project details                                 |
-| `depvault env pull`         | Export environment variables to a file                |
-| `depvault env push`         | Import environment variables from a file             |
-| `depvault env list`         | List environment variables                           |
-| `depvault env diff`         | Compare variables across environments                |
-| `depvault analyze`          | Analyze a dependency file                            |
-| `depvault convert`          | Convert between configuration file formats           |
-| `depvault ci pull`          | Fetch secrets using a CI token                       |
-
----
-
-## Next Steps
-
-- **[Authentication](/cli/authentication)** -- Log in, manage credentials, and configure CI tokens.
-- **[Projects](/cli/projects)** -- List, select, and inspect projects.
-- **[Environment](/cli/environment)** -- Pull, push, list, and diff environment variables.
-- **[Analyze](/cli/analyze)** -- Run dependency analysis from the command line.
-- **[Convert](/cli/convert)** -- Convert configuration files between formats.
-- **[CI/CD](/cli/ci)** -- Automate secret injection in CI/CD pipelines.
+| Command | Description | Details |
+| --- | --- | --- |
+| `depvault version` | Print CLI version | |
+| `depvault config set <k> <v>` | Set a configuration value | |
+| `depvault login` | Authenticate with email/password | [Auth](/cli/authentication) |
+| `depvault logout` | Clear stored credentials | [Auth](/cli/authentication) |
+| `depvault whoami` | Show current user | [Auth](/cli/authentication) |
+| `depvault project list` | List all projects | [Projects](/cli/projects) |
+| `depvault project select` | Set active project | [Projects](/cli/projects) |
+| `depvault project info` | Show project details | [Projects](/cli/projects) |
+| `depvault env pull` | Export variables to file | [Vault](/guides/environment-vault) |
+| `depvault env push` | Import variables from file | [Vault](/guides/environment-vault) |
+| `depvault env list` | List environment variables | [Vault](/guides/environment-vault) |
+| `depvault env diff` | Compare environments | [Diff](/guides/environment-diff) |
+| `depvault analyze` | Analyze a dependency file | [Analysis](/guides/dependency-analysis) |
+| `depvault convert` | Convert config file formats | [Converter](/guides/config-converter) |
+| `depvault ci pull` | Fetch secrets with CI token | [CI/CD](/guides/ci-cd-integration) |

@@ -8,14 +8,15 @@ paths: [apps/docs/**]
 ## Framework
 
 - Nextra 4 with nextra-theme-docs
-- MDX for content pages, TSX for interactive pages (e.g., API reference)
+- MDX for content pages
 - Turbopack requires `resolveAlias` for `next-mdx-import-source-file` in next.config.ts
 
 ## Structure
 
 - Pages under `src/app/` following Next.js App Router conventions
 - `_meta.ts` files control sidebar ordering and titles (keys = folder names)
-- Guides in `guides/`, API docs in `api/`, CLI docs in `cli/`
+- Guides in `guides/`, CLI reference in `cli/`
+- CLI feature commands (env, analyze, convert, ci) are documented inline in their corresponding guide pages, not in the CLI section
 
 ## Theme
 
@@ -25,7 +26,12 @@ paths: [apps/docs/**]
 
 ## Content Guidelines
 
-- Write for both developers and end users
-- Include code examples for CLI and API usage
+- Write concise, professional prose — lead with substance, not restatements
+- No "Overview" sections that repeat the page heading
+- No "What's Next" / "Next Steps" sections — the sidebar handles navigation
+- No "Best Practices" sections unless advice is specific and non-obvious
+- Encryption details (AES-256-GCM) belong on the Environment Vault page only — other pages say "encrypted at rest"
+- Step-by-step UI instructions: 3–4 steps max
+- Include CLI examples with flags tables for relevant features
 - Keep pages focused — one feature per page
 - Use standard Markdown/MDX — no custom React components in content pages

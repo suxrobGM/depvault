@@ -1,129 +1,54 @@
 # Environment Templates
 
-Create and manage `.env.example` templates to streamline onboarding and ensure every team member has the required variables.
+Create `.env.example`-style templates to streamline onboarding and ensure every team member has the required variables.
 
 ---
 
-## Overview
+## Creating a Template
 
-Environment templates capture the structure of an environment — variable names, descriptions, validation rules, and required flags — without including actual values. Templates serve as blueprints for creating new environments, onboarding new team members, and maintaining consistency across projects. They are scoped to a project and can be reused whenever a new environment is needed.
+Derive a template from an existing environment:
 
----
-
-## Creating a Template from an Existing Environment
-
-The fastest way to create a template is to derive it from an environment that is already configured.
-
-1. Navigate to your project and open the **Vault** tab.
-2. Select the environment you want to use as the source (e.g., **Development**).
-3. Click the **Create Template** button in the environment toolbar.
-4. Enter a **template name** (e.g., "Standard Backend Config").
-5. Review the list of variables that will be included. For each variable, the template captures:
-   - Variable name
-   - Description (if set)
-   - Validation rules (e.g., required, format regex, min/max length)
-   - Whether the variable is marked as required
-   - Whether the variable is marked as sensitive
-6. Click **Create**.
-
-**Important:** Actual variable values are never copied into the template. The template only stores metadata about each variable.
+1. Open the **Vault** tab and select the source environment.
+2. Click **Create Template** and enter a name (e.g., "Standard Backend Config").
+3. Review the variables — the template captures names, descriptions, validation rules, required/sensitive flags, but **never actual values**.
 
 ---
 
 ## What a Template Contains
 
-| Field | Included | Not Included |
-| --- | --- | --- |
-| Variable name | Yes | |
-| Description | Yes | |
-| Required flag | Yes | |
-| Sensitive flag | Yes | |
-| Validation rules | Yes | |
-| Actual values | | No — always blank |
-| Secret file contents | | No — only file names are listed |
-
-Secret file names are listed in the template so that users know which files need to be uploaded, but the encrypted file contents are never included. Files must be re-uploaded manually when applying the template.
+| Included | Not Included |
+| --- | --- |
+| Variable names, descriptions, required/sensitive flags, validation rules | Actual values (always blank) |
+| Secret file names (as a checklist) | Encrypted file contents |
 
 ---
 
 ## Applying a Template
 
-Apply a template to create a new environment pre-populated with variable definitions.
+1. In the **Vault** tab, click **New Environment**.
+2. Select **Apply Template** and choose a template.
+3. The new environment is created with all variable entries — values are blank and must be filled in.
 
-1. Navigate to your project's **Vault** tab.
-2. Click **New Environment**.
-3. Enter an environment name (e.g., **Staging**).
-4. Select **Apply Template** and choose a template from the dropdown.
-5. Click **Create**.
-
-The new environment is created with all variable entries from the template. Every value field is blank and must be filled in by the team. Required variables are flagged so users know what needs to be set before the environment is considered complete.
+Required variables are flagged so users know what to set before the environment is complete.
 
 ---
 
-## Template Diff View
+## Template Diff
 
-Compare a template against an existing environment to identify gaps.
+Compare a template against an existing environment to identify gaps:
 
-1. Open the template from the **Templates** section in the Vault tab.
-2. Click **Compare with Environment** and select the target environment.
-3. The diff view shows:
-   - **Missing in environment** — Variables defined in the template but not present in the environment (highlighted in red).
-   - **Extra in environment** — Variables in the environment that are not part of the template (highlighted in blue).
-   - **Matching** — Variables present in both with compatible definitions (no highlight).
-
-This comparison helps you verify that an environment has not drifted from the expected structure over time.
+- **Missing in environment** (red) — Variables in the template but not the environment.
+- **Extra in environment** (blue) — Variables in the environment but not the template.
+- **Matching** — Present in both with compatible definitions.
 
 ---
 
 ## Managing Templates
 
-### Viewing Templates
-
-All templates for a project are listed under the **Templates** section within the Vault tab. Each entry shows the template name, the number of variables defined, and the date it was last updated.
-
-### Editing a Template
-
-Click on a template to open it for editing. You can:
-
-- Add new variable definitions
-- Remove variable definitions
-- Update descriptions, required flags, and validation rules
-- Rename the template
-
-Changes to a template do not retroactively affect environments that were already created from it.
-
-### Deleting a Template
-
-Open the template and click **Delete Template** in the toolbar. This removes the template definition but does not affect any environments that were previously created from it.
+All templates are listed under the **Templates** section in the Vault tab. You can add, remove, or update variable definitions, rename the template, or delete it. Changes do not retroactively affect environments already created from it.
 
 ---
 
-## Onboarding Use Case
+## Onboarding
 
-Templates are particularly useful for onboarding new team members:
-
-1. The project owner creates a template from the canonical development environment.
-2. A new team member joins the project and navigates to the **Onboarding Checklist** page.
-3. The checklist shows all required variables from the template with empty fields to fill in.
-4. The team member fills in their local values (database credentials, API keys, etc.).
-5. Once all required variables are set, they can download a `.env.example` file or have the values injected directly into their local environment via the CLI.
-
-This ensures every developer starts with the correct set of variables and nothing is missed.
-
----
-
-## Bootstrapping New Environments
-
-When spinning up a new environment (e.g., adding a QA environment to your pipeline), templates eliminate guesswork:
-
-1. Apply the existing "Standard Backend Config" template to create the QA environment.
-2. Fill in QA-specific values for each variable.
-3. Use the **Environment Diff** view to compare QA against Staging or Production and verify completeness.
-
----
-
-## What's Next
-
-- **[Environment Vault](/guides/environment-vault)** — Manage variables within each environment.
-- **[Environment Diff](/guides/environment-diff)** — Compare environments side-by-side to spot drift.
-- **[Team Management](/guides/team-management)** — Invite members who need access to fill in template values.
+Templates drive the onboarding checklist for new team members. When a new member joins, they see all required variables with empty fields to fill in, then download a `.env.example` or use the CLI to inject values locally.

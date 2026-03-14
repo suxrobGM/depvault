@@ -1,75 +1,42 @@
 # Getting Started
 
-Learn how to set up DepVault, create your first project, and start analyzing dependencies and managing environment variables across your tech stack.
-
----
-
 ## Create Your Account
 
-DepVault offers two ways to create an account: email/password registration or GitHub OAuth.
+DepVault supports two registration methods: email/password or GitHub OAuth.
 
 ### Email and Password
 
-1. Navigate to the DepVault login page and click **Register**.
-2. Fill in your name, email address, and a password.
-3. Your password must meet the following requirements:
-   - At least **8 characters** long
-   - Contains at least **1 uppercase letter**
-   - Contains at least **1 number**
-4. Click **Create Account**.
+1. Navigate to the login page and click **Register**.
+2. Fill in your name, email, and a password (minimum 8 characters, at least 1 uppercase letter and 1 number).
+3. Click **Create Account**, then verify your email via the link sent to your inbox.
 
 ### GitHub OAuth
 
-1. On the login page, click **Continue with GitHub**.
-2. Authorize DepVault to access your GitHub profile.
-3. Your account is created automatically using your GitHub email and display name.
-
----
-
-## Verify Your Email
-
-After registering with email and password, DepVault sends a verification email to the address you provided. You **must verify your email** before you can log in.
-
-1. Open the verification email from DepVault.
-2. Click the **Verify Email** link. The link expires after 24 hours.
-3. Once verified, return to the login page and sign in with your credentials.
-
-If you do not receive the email, check your spam folder. You can request a new verification email from the login page.
-
-> GitHub OAuth accounts skip email verification since GitHub has already verified the email address.
+Click **Continue with GitHub** on the login page and authorize DepVault. Your account is created automatically from your GitHub profile.
 
 ---
 
 ## Create Your First Project
 
-Once logged in, you land on the **Dashboard**. To get started, create a project.
+1. From the **Dashboard**, click **+ New Project**.
+2. Enter a project name and optional description.
+3. Click **Create**.
 
-1. Click the **+ New Project** button in the top-right corner of the dashboard.
-2. Enter a **project name** (e.g., `my-web-app`).
-3. Optionally add a **description** to help teammates understand the project's purpose.
-4. Click **Create**.
-
-Your new project appears as a card on the dashboard. From here you can run dependency scans, store secrets, and manage environment variables.
+Your project appears as a card on the dashboard, ready for dependency scans and secret management.
 
 ---
 
 ## Run Your First Dependency Scan
 
-DepVault analyzes dependency files to detect outdated packages and known vulnerabilities. You can run a scan from the web UI or the CLI.
-
 ### Web UI
 
-1. Open your project from the dashboard.
-2. Navigate to the **Analysis** tab.
-3. Click **New Analysis**.
-4. Upload a dependency file (e.g., `package.json`, `requirements.txt`, `Cargo.toml`). DepVault auto-detects the ecosystem.
-5. Click **Analyze**.
-
-The results table shows each dependency with its current version, latest available version, update status (MAJOR, MINOR, or PATCH), and any known vulnerabilities.
+1. Open your project and go to the **Analysis** tab.
+2. Click **New Analysis** and upload a dependency file (e.g., `package.json`, `requirements.txt`, `Cargo.toml`).
+3. Click **Analyze** to view results with version status and vulnerability data.
 
 ### CLI
 
-Install the DepVault CLI and run a scan from your terminal:
+Install the CLI and run a scan:
 
 ```bash
 # Linux / macOS
@@ -79,69 +46,18 @@ curl -fsSL https://raw.githubusercontent.com/suxrobGM/depvault/main/apps/cli/ins
 irm https://raw.githubusercontent.com/suxrobGM/depvault/main/apps/cli/install.ps1 | iex
 ```
 
-Then authenticate and analyze:
-
 ```bash
 depvault analyze --file package.json
-```
-
-The CLI auto-detects the ecosystem from the file name. You can also specify it explicitly:
-
-```bash
-depvault analyze --file requirements.txt --ecosystem PYTHON
-```
-
-Output formats include `table` (default) and `json`:
-
-```bash
-depvault analyze --file go.mod --output json
 ```
 
 ---
 
 ## Store Your First Secret
 
-DepVault encrypts environment variables with **AES-256-GCM** at rest. Only authorized users can decrypt and view values.
+1. Open your project and go to the **Vault** tab.
+2. Select an environment (**DEVELOPMENT**, **STAGING**, **PRODUCTION**, or **GLOBAL**).
+3. Click **Add Variable**, enter the key (e.g., `DATABASE_URL`) and value, then click **Save**.
 
-1. Open your project and navigate to the **Vault** tab.
-2. Select an environment: **DEVELOPMENT**, **STAGING**, **PRODUCTION**, or **GLOBAL**.
-3. Click **Add Variable**.
-4. Enter the variable **key** (e.g., `DATABASE_URL`), its **value**, and an optional **description**.
-5. Click **Save**.
+Values are encrypted with AES-256-GCM immediately upon storage.
 
-The value is encrypted immediately upon storage. It is only decrypted in-memory when an authorized user requests it.
-
----
-
-## Bulk Import from a .env File
-
-If you already have a `.env` file with your variables, you can import them all at once.
-
-### Web UI
-
-1. In the **Vault** tab, click **Import**.
-2. Select the `.env` file format.
-3. Upload your file or paste its contents.
-4. Review the parsed variables and click **Import**.
-
-### CLI
-
-Use the `env push` command to bulk-import variables from a `.env` file:
-
-```bash
-depvault env push --vault-group <vault-group-id> --file .env
-```
-
-Replace `<vault-group-id>` with the ID of the vault group you want to import into. You can find this ID in the project settings or by running `depvault env list`.
-
----
-
-## Next Steps
-
-Now that you have a project set up with dependency analysis and environment variables, explore the rest of DepVault:
-
-- **[Dashboard](/guides/dashboard)** — Understand project health scores, filters, and quick stats.
-- **[Dependency Analysis](/guides/dependency-analysis)** — Dive deeper into supported ecosystems, vulnerability badges, and re-analysis.
-- **[Environment Vault](/guides/environment-vault)** — Learn about vault groups, version history, rotation policies, and bulk export.
-- **[Secret Sharing](/guides/secret-sharing)** — Generate one-time links to share secrets securely with teammates or external collaborators.
-- **[CI/CD Integration](/guides/ci-cd-integration)** — Automate secret injection in GitHub Actions, GitLab CI, and other pipelines.
+To bulk-import from an existing `.env` file, use the **Import** button in the Vault tab or the CLI command `depvault env push`. See the [Environment Vault](/guides/environment-vault) guide for details.

@@ -1,141 +1,68 @@
 # License Compliance
 
-Review and track the licenses of your project dependencies to ensure compliance with your organization's policies.
-
----
-
-## Overview
-
-DepVault automatically detects the license type of every dependency during analysis and lets you configure per-project compliance policies. You can define rules for specific SPDX license identifiers to allow, warn, or block them, helping your team avoid legal risks from incompatible licenses — especially restrictive copyleft licenses like GPL and AGPL in commercial projects.
+Track dependency licenses and enforce compliance policies to avoid legal risks from incompatible licenses.
 
 ---
 
 ## How License Detection Works
 
-When you run a dependency analysis, DepVault inspects each dependency's metadata to determine its license:
+During dependency analysis, DepVault:
 
-1. The package registry metadata is checked for declared license fields (e.g., `license` in `package.json`, license classifiers in PyPI).
-2. If the metadata is ambiguous, DepVault checks for a `LICENSE` or `COPYING` file in the package source.
-3. The detected license is mapped to a standardized **SPDX license identifier** (e.g., `MIT`, `Apache-2.0`, `GPL-3.0-only`).
-4. If no license can be determined, the dependency is marked as **Unknown**, which defaults to the WARN policy.
+1. Checks package registry metadata for declared license fields.
+2. Falls back to `LICENSE` or `COPYING` files in the package source.
+3. Maps the result to a standardized **SPDX identifier** (e.g., `MIT`, `Apache-2.0`, `GPL-3.0-only`).
+4. Marks undetectable licenses as **Unknown** (defaults to WARN policy).
 
 ---
 
 ## Compliance Summary
 
-After analysis, the compliance summary is available on the **Analysis** results page under the **Licenses** tab. Each dependency is listed with its compliance status:
+After analysis, the **Licenses** tab shows each dependency's compliance status:
 
 | Status | Indicator | Meaning |
 | --- | --- | --- |
-| **Pass** | Green checkmark | The dependency's license is explicitly allowed by your policy. |
-| **Warn** | Yellow warning | The license triggers a warning — review recommended but not blocking. |
-| **Fail** | Red X | The license is blocked by your policy. This dependency should be replaced or an exception obtained. |
+| **Pass** | Green | License is explicitly allowed. |
+| **Warn** | Yellow | Review recommended but not blocking. |
+| **Fail** | Red | License is blocked — replace the dependency or obtain an exception. |
 
-### Summary Bar
-
-At the top of the licenses tab, a summary bar shows aggregate counts:
-
-- **Passing:** Number of dependencies with allowed licenses.
-- **Warnings:** Number of dependencies with licenses that trigger warnings.
-- **Failing:** Number of dependencies with blocked licenses.
-- **Unknown:** Number of dependencies where no license could be detected.
+A summary bar shows aggregate counts: passing, warnings, failing, and unknown.
 
 ---
 
 ## Configuring License Policies
 
-Define rules per project that determine how each license type is treated.
-
-### Accessing Policy Settings
-
-1. Navigate to your project.
-2. Open **Settings** > **License Policies**.
-3. The policy table lists all SPDX license identifiers encountered across your analyses, plus any you have manually added.
-
-### Policy Actions
-
-For each license identifier, you can set one of three actions:
+Navigate to **Settings** > **License Policies** to define rules per SPDX identifier:
 
 | Action | Effect |
 | --- | --- |
-| **ALLOW** | Dependencies with this license pass compliance checks without any flag. |
-| **WARN** | Dependencies with this license are flagged with a yellow warning. They appear in the compliance report but do not block anything. |
-| **BLOCK** | Dependencies with this license fail compliance checks. They are highlighted in red and included prominently in the compliance report. |
+| **ALLOW** | Passes compliance checks silently. |
+| **WARN** | Flagged in the report but not blocking. |
+| **BLOCK** | Fails compliance checks, highlighted in red. |
 
-### Adding a Rule
+Licenses without an explicit rule default to **WARN**.
 
-1. Click **Add Rule** in the policy settings.
-2. Enter the SPDX license identifier (e.g., `AGPL-3.0-only`).
-3. Select the action: ALLOW, WARN, or BLOCK.
-4. Click **Save**.
+### GPL/AGPL Flagging
 
-### Default Behavior
-
-Licenses without an explicit rule default to **WARN**. This ensures that newly encountered licenses are surfaced for review rather than silently passing.
-
----
-
-## GPL and AGPL Flagging
-
-For commercial projects, copyleft licenses like GPL and AGPL pose particular risks because they can require you to open-source your own code. DepVault provides a dedicated toggle for this:
-
-1. Open **Settings** > **License Policies**.
-2. Enable the **Flag copyleft licenses** toggle.
-3. When enabled, any dependency with a GPL-family or AGPL-family license is automatically marked as **BLOCK**, regardless of individual rules.
-
-This is a convenience feature — you can also manually set BLOCK rules for each copyleft identifier individually if you prefer more granular control.
+Enable the **Flag copyleft licenses** toggle to automatically BLOCK all GPL-family and AGPL-family licenses — useful for commercial projects.
 
 ---
 
 ## Compliance Report
 
-Export a detailed compliance report for auditing or legal review.
-
-1. Navigate to the **Analysis** results page and open the **Licenses** tab.
-2. Click **Export Report**.
-3. Choose the format: **CSV**.
-4. The report includes:
-   - Dependency name and version
-   - Detected SPDX license identifier
-   - Policy action (ALLOW, WARN, BLOCK)
-   - Compliance status (Pass, Warn, Fail)
-   - Source of license detection (registry metadata, LICENSE file, or unknown)
-
-The CSV format can be imported into spreadsheets, compliance tracking tools, or attached to legal review tickets.
+Export a CSV report from the **Licenses** tab. Includes dependency name/version, SPDX identifier, policy action, compliance status, and detection source.
 
 ---
 
 ## Common License Categories
 
-For reference, here are common license types and their typical policy treatment:
-
 ### Permissive (typically ALLOW)
 
-- `MIT` — Very permissive, minimal restrictions.
-- `Apache-2.0` — Permissive with patent grant.
-- `BSD-2-Clause`, `BSD-3-Clause` — Permissive with attribution requirements.
-- `ISC` — Functionally equivalent to MIT.
+`MIT`, `Apache-2.0`, `BSD-2-Clause`, `BSD-3-Clause`, `ISC`
 
 ### Weak Copyleft (typically WARN)
 
-- `LGPL-2.1-only`, `LGPL-3.0-only` — Copyleft applies to the library itself but not to code that links against it.
-- `MPL-2.0` — File-level copyleft; modifications to MPL-licensed files must be shared.
+`LGPL-2.1-only`, `LGPL-3.0-only`, `MPL-2.0`
 
 ### Strong Copyleft (typically BLOCK for commercial)
 
-- `GPL-2.0-only`, `GPL-3.0-only` — Requires derivative works to be distributed under the same license.
-- `AGPL-3.0-only` — Extends GPL to network use; server-side use triggers the copyleft obligation.
-
----
-
-## Managing Policies from Project Settings
-
-All license policy rules are managed under **Settings** > **License Policies** within each project. Changes to policies take effect immediately and are reflected the next time you view analysis results. Existing analysis results are re-evaluated against updated policies without requiring a new scan.
-
----
-
-## What's Next
-
-- **[Dependency Analysis](/guides/dependency-analysis)** — License detection happens as part of the analysis process.
-- **[Dependency Tree](/guides/dependency-tree)** — View license information in the tree node detail panel.
-- **[Team Management](/guides/team-management)** — Only project owners can modify license policies.
+`GPL-2.0-only`, `GPL-3.0-only`, `AGPL-3.0-only` — requires derivative works to be distributed under the same license. AGPL extends this to network/server-side use.

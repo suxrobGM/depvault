@@ -1,18 +1,12 @@
 # Projects
 
-List, select, and inspect DepVault projects from the command line.
-
----
-
-## Overview
-
-Project commands let you browse your DepVault projects, set an active project for subsequent commands, and view project details. Most CLI commands that operate on a specific project (such as `env pull` or `analyze`) require an active project to be set.
+List, select, and inspect DepVault projects. Most CLI commands require an active project — set one with `depvault project select`.
 
 ---
 
 ## depvault project list
 
-List all projects accessible to the authenticated user. The currently active project is marked with an asterisk (`*`).
+List all accessible projects. The active project is marked with `*`.
 
 ```bash
 depvault project list
@@ -23,82 +17,30 @@ depvault project list
   ───────────────────────────────────────────────────────────────
 * b3f1a2c4-5678-9def-0123-456789abcdef   my-web-app        OWNER
   a1b2c3d4-e5f6-7890-abcd-ef1234567890   backend-service   MEMBER
-  f9e8d7c6-b5a4-3210-fedc-ba9876543210   mobile-app        VIEWER
 ```
 
-### Flags
-
-| Flag       | Description                                              |
-|------------|----------------------------------------------------------|
-| `--output` | Output format: `table` (default) or `json`.              |
-
-### JSON Output
-
-```bash
-depvault project list --output json
-```
-
-```json
-[
-  {
-    "id": "b3f1a2c4-5678-9def-0123-456789abcdef",
-    "name": "my-web-app",
-    "role": "OWNER",
-    "active": true
-  },
-  {
-    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-    "name": "backend-service",
-    "role": "MEMBER",
-    "active": false
-  }
-]
-```
+Use `--output json` for machine-readable output.
 
 ---
 
 ## depvault project select
 
-Set the active project. The selected project ID is persisted to `~/.depvault/config.json` and used by all subsequent commands that require a project context.
+Set the active project. The ID is persisted to `~/.depvault/config.json`.
 
 ```bash
 depvault project select <id>
 ```
 
-### Example
-
-```bash
-depvault project select b3f1a2c4-5678-9def-0123-456789abcdef
-```
-
-```
-Active project set to: my-web-app (b3f1a2c4-5678-9def-0123-456789abcdef)
-```
-
-### Arguments
-
-| Argument | Description                                   | Required |
-|----------|-----------------------------------------------|----------|
-| `<id>`   | The UUID of the project to set as active.     | Yes      |
-
-You can find project IDs by running `depvault project list`. After selecting a project, commands like `depvault env list`, `depvault env pull`, and `depvault analyze` operate on that project without needing to specify the ID each time.
+After selecting a project, commands like `env list`, `env pull`, and `analyze` operate on it automatically.
 
 ---
 
 ## depvault project info
 
-Display detailed information about a project, including its name, description, creation date, member count, and vault group count.
+Display details about a project. Uses the active project if no ID is provided.
 
 ```bash
 depvault project info [id]
-```
-
-If `<id>` is omitted, the command uses the currently active project. You can also pass `--project` to specify a project without changing the active selection.
-
-### Example (Active Project)
-
-```bash
-depvault project info
 ```
 
 ```
@@ -112,53 +54,4 @@ Analyses:      12
 Your Role:     OWNER
 ```
 
-### Example (Specific Project)
-
-```bash
-depvault project info a1b2c3d4-e5f6-7890-abcd-ef1234567890
-```
-
-### Flags
-
-| Flag        | Description                                                        |
-|-------------|--------------------------------------------------------------------|
-| `--project` | Project ID to query. Overrides the active project for this command. |
-
-### No Active Project
-
-If no project ID is provided and no active project is set, the command exits with an error:
-
-```
-Error: No active project. Run `depvault project select <id>` or pass --project.
-```
-
----
-
-## Workflow Example
-
-A typical workflow for setting up the CLI with a project:
-
-```bash
-# 1. Log in
-depvault login
-
-# 2. List available projects
-depvault project list
-
-# 3. Select the project you want to work with
-depvault project select b3f1a2c4-5678-9def-0123-456789abcdef
-
-# 4. Verify the selection
-depvault project info
-
-# 5. Now you can run commands against this project
-depvault env list
-depvault analyze --file package.json
-```
-
----
-
-## Next Steps
-
-- **[Environment](/cli/environment)** -- Pull, push, and manage environment variables for the active project.
-- **[Analyze](/cli/analyze)** -- Run dependency analysis on the active project.
+Use `--project <id>` to query a specific project without changing the active selection.

@@ -1,128 +1,47 @@
 # Dashboard
 
-Get an overview of your projects, recent activity, and key metrics from the DepVault dashboard.
-
----
-
-## Overview
-
-The dashboard is the first screen you see after logging in. It provides a high-level summary of all your projects with health indicators, vulnerability counts, and environment variable status. From here you can create new projects, search existing ones, and jump directly into any project's analysis or vault.
+The dashboard is your home screen after logging in — a summary of all projects with health indicators, vulnerability counts, and environment variable status.
 
 ---
 
 ## Project Cards
 
-Each project on the dashboard is displayed as a card. A project card surfaces the most important metrics at a glance:
+Each project is displayed as a card showing:
 
-| Field | Description |
-| --- | --- |
-| **Project Name** | The name you assigned when creating the project. |
-| **Health Score** | A computed percentage reflecting the overall health of the project (see below). |
-| **Vulnerability Count** | Total number of known vulnerabilities detected across the latest dependency analysis. |
-| **Outdated Count** | Number of dependencies that have newer versions available (MAJOR, MINOR, or PATCH). |
-| **Env Var Count** | Total number of environment variables stored in the project's vault across all environments. |
-| **Last Analyzed** | Timestamp of the most recent dependency analysis run. |
+- **Health Score** — A 0–100 percentage reflecting overall project hygiene.
+- **Vulnerability Count** — Total known vulnerabilities from the latest analysis.
+- **Outdated Count** — Dependencies with newer versions available.
+- **Env Var Count** — Total environment variables across all environments.
+- **Last Analyzed** — Timestamp of the most recent scan.
 
-Clicking a project card opens the project detail view with tabs for Analysis, Vault, Members, and Settings.
+Click a card to open the project detail view with tabs for Analysis, Vault, Members, and Settings. The context menu (three-dot icon) provides quick actions: View, Run Analysis, Open Vault, and Settings.
 
 ---
 
 ## Health Score
 
-The health score is a percentage from 0 to 100 that reflects the overall hygiene of a project. It is computed from three weighted factors:
+The health score is computed from three weighted factors:
 
-### Dependency Freshness
-
-Measures how up-to-date your dependencies are. Projects where most packages are on their latest version score higher. Major version gaps reduce the score more than minor or patch gaps.
-
-### Vulnerability Count
-
-The fewer known vulnerabilities, the higher the score. Critical and high-severity vulnerabilities have a larger negative impact than medium or low-severity ones.
-
-### Environment Hygiene
-
-Evaluates whether required environment variables are set across all environments, whether rotation policies are followed, and whether variables have descriptions and validation rules defined.
-
-### Score Ranges
-
-| Range | Indicator | Meaning |
-| --- | --- | --- |
-| 80 - 100 | Green | Project is well-maintained with few or no issues. |
-| 50 - 79 | Yellow | Some attention needed — outdated dependencies or missing variables. |
-| 0 - 49 | Red | Immediate action recommended — critical vulnerabilities or significant gaps. |
-
-The health score updates automatically whenever a new dependency analysis is run or vault variables are modified.
-
----
-
-## Sorting and Filtering
-
-The dashboard provides controls to organize your project list.
-
-### Sort Options
-
-You can sort projects by:
-
-- **Name** (A-Z or Z-A)
-- **Health Score** (highest first or lowest first)
-- **Last Analyzed** (most recent first)
-- **Vulnerability Count** (most first or fewest first)
-- **Created Date** (newest first or oldest first)
-
-### Filters
-
-Filter the project list to narrow down results:
-
-- **Health status** — Show only green, yellow, or red projects.
-- **Has vulnerabilities** — Show only projects with at least one known vulnerability.
-- **Has outdated dependencies** — Show only projects with outdated packages.
-
-### Search
-
-Use the search bar at the top of the dashboard to find projects by name. The search updates results as you type.
-
----
-
-## Creating a New Project
-
-Click the **+ New Project** button in the top-right corner of the dashboard to create a new project.
-
-1. Enter a **project name**. This must be unique within your account.
-2. Optionally provide a **description** for context.
-3. Click **Create**.
-
-The new project appears on the dashboard immediately. You can then navigate into it to run your first dependency analysis or add environment variables.
-
----
-
-## Quick Stats Overview
-
-At the top of the dashboard, a summary bar shows aggregate statistics across all your projects:
-
-| Stat | Description |
+| Factor | What it measures |
 | --- | --- |
-| **Total Projects** | Number of projects in your account. |
-| **Total Vulnerabilities** | Sum of all vulnerabilities across all projects. |
-| **Outdated Packages** | Total number of outdated dependencies across all projects. |
-| **Env Variables** | Total number of environment variables stored across all vaults. |
+| **Dependency Freshness** | How up-to-date packages are. Major version gaps reduce the score more than minor or patch gaps. |
+| **Vulnerability Count** | Fewer vulnerabilities = higher score. Critical/high severity has greater impact. |
+| **Environment Hygiene** | Whether required variables are set, rotation policies are followed, and descriptions are defined. |
 
-These stats give you a quick pulse check before diving into individual projects.
-
----
-
-## Project Actions
-
-Each project card includes a context menu (accessible via the three-dot icon) with the following actions:
-
-- **View Project** — Open the project detail view.
-- **Run Analysis** — Start a new dependency analysis for the project.
-- **Open Vault** — Jump directly to the environment vault.
-- **Project Settings** — Access project configuration, member management, and danger zone (delete project).
+| Range | Color | Meaning |
+| --- | --- | --- |
+| 80–100 | Green | Well-maintained, few or no issues |
+| 50–79 | Yellow | Some attention needed |
+| 0–49 | Red | Immediate action recommended |
 
 ---
 
-## What's Next
+## Sorting, Filtering, and Search
 
-- **[Dependency Analysis](/guides/dependency-analysis)** — Learn how to upload dependency files and interpret analysis results.
-- **[Environment Vault](/guides/environment-vault)** — Store and manage secrets for each environment.
-- **[Secret Sharing](/guides/secret-sharing)** — Share one-time links with teammates.
+Sort projects by name, health score, last analyzed date, vulnerability count, or creation date. Filter by health status, presence of vulnerabilities, or outdated dependencies. Use the search bar to find projects by name.
+
+---
+
+## Quick Stats
+
+A summary bar at the top shows aggregate counts across all projects: total projects, total vulnerabilities, outdated packages, and environment variables.

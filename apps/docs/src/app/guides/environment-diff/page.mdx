@@ -1,128 +1,51 @@
 # Environment Diff
 
-Compare environment variables across different environments to spot missing keys, value mismatches, and configuration drift.
-
----
-
-## Overview
-
-The environment diff view lets you compare two or three environments side-by-side within a single vault group. It highlights missing variables, value differences, and identical entries so you can quickly identify configuration drift between Development, Staging, and Production (or any custom environments you have defined). The diff is also available through the DepVault CLI for scripting and CI/CD workflows.
+Compare environment variables across environments to spot missing keys, value mismatches, and configuration drift.
 
 ---
 
 ## Accessing the Diff View
 
-1. Navigate to your project from the dashboard.
-2. Open the **Vault** tab.
-3. Click the **Diff** button in the vault toolbar.
-4. Select two or three environments from the dropdown menus to compare.
-5. Click **Compare** to generate the diff.
-
-The diff view opens in a multi-column layout with one column per selected environment.
+1. Open the **Vault** tab in your project.
+2. Click **Diff**, select two or three environments, and click **Compare**.
 
 ---
 
 ## Reading the Diff
 
-Variables are listed row by row. Each row spans all selected environment columns so you can compare values horizontally.
-
-### Color Coding
+Variables are listed row by row across environment columns.
 
 | Highlight | Meaning |
 | --- | --- |
-| **Red background** | The variable is missing from this environment. The cell is empty and highlighted red to draw attention. |
-| **Yellow background** | The variable exists in all selected environments but the value differs in this column compared to at least one other. |
-| **No highlight** | The variable exists in all selected environments and the value is identical across all of them. |
+| **Red** | Variable is missing from this environment. |
+| **Yellow** | Variable exists but the value differs from at least one other environment. |
+| **No highlight** | Value is identical across all selected environments. |
 
-### Row Sorting
-
-By default, rows are sorted to surface the most important differences first:
-
-1. Variables missing from at least one environment appear at the top.
-2. Variables with differing values appear next.
-3. Variables that are identical across all environments appear at the bottom.
-
-You can switch to alphabetical sorting using the sort toggle in the toolbar.
+Rows are sorted with differences first, then identical entries. Toggle to alphabetical sorting in the toolbar.
 
 ---
 
 ## Sensitive Value Handling
 
-Secret values are **masked by default** in the diff view. Each value cell shows `••••••••` instead of the actual content.
-
-- **Reveal a single value** — Click the eye icon next to any individual cell to reveal that specific value.
-- **Reveal all** — Use the **Show Values** toggle in the toolbar to unmask every value at once.
-- **Auto-hide** — Values are automatically re-masked if you navigate away from the diff view or after 60 seconds of inactivity.
-
-Users with the **Viewer** role cannot reveal values. They see the masked placeholder and the diff highlighting, but the eye icon is disabled.
-
----
-
-## Selecting Environments
-
-The diff view supports comparing **two or three** environments at a time. If your vault group has more than three environments, choose the ones you want to compare from the dropdowns. Common comparison patterns include:
-
-- **Development vs. Production** — Catch missing production config before deployment.
-- **Staging vs. Production** — Verify that staging mirrors production settings.
-- **Development vs. Staging vs. Production** — Full pipeline comparison to catch drift at every stage.
+Values are masked by default. Click the eye icon to reveal individual values, or use the **Show Values** toggle to unmask all. Values are re-masked after 60 seconds of inactivity or on navigation. Viewers cannot reveal values.
 
 ---
 
 ## Exporting the Diff
 
-You can export the current diff for documentation or audit purposes.
-
-1. Click the **Export** button in the diff toolbar.
-2. Choose a format:
-   - **Markdown** — A formatted table suitable for pasting into pull requests, wikis, or Slack.
-   - **CSV** — A comma-separated file for import into spreadsheets or other tools.
-3. The export includes variable names, presence/absence indicators, and value status (matching or differing). Actual secret values are **never included** in exports — they are replaced with `[REDACTED]`.
+Click **Export** and choose **Markdown** or **CSV**. Actual secret values are replaced with `[REDACTED]`.
 
 ---
 
 ## CLI Usage
 
-Run a diff from the command line using the DepVault CLI:
-
 ```bash
-depvault env diff --vault-group <vault-group-id> --environments DEVELOPMENT,PRODUCTION
+depvault env diff --vault-group <id> --environments DEVELOPMENT,PRODUCTION
 ```
-
-### Options
 
 | Flag | Description |
 | --- | --- |
-| `--vault-group` | The ID of the vault group to compare environments within. |
-| `--environments` | Comma-separated list of environment names (2 or 3). |
-| `--format` | Output format: `table` (default), `json`, `csv`, or `markdown`. |
-| `--show-values` | Include actual values in the output. Omit this flag to redact values. |
-
-### Example Output
-
-```text
-Variable          DEVELOPMENT    PRODUCTION
-─────────────────────────────────────────────
-DATABASE_URL      [set]          [MISSING]
-API_KEY           [differs]      [differs]
-NODE_ENV          development    production
-LOG_LEVEL         debug          [MISSING]
-PORT              3000           3000
-```
-
-Variables marked `[MISSING]` are absent from that environment. Variables marked `[differs]` have different values (redacted by default).
-
----
-
-## Common Use Cases
-
-- **Pre-deployment checklist** — Run a diff between staging and production before every release to confirm all required variables are set.
-- **Onboarding audit** — Compare a new team member's local environment against the development baseline to ensure nothing is missing.
-- **Incident investigation** — Quickly check whether a configuration mismatch between environments caused an outage.
-
----
-
-## What's Next
-
-- **[Environment Vault](/guides/environment-vault)** — Learn how to manage variables within each environment.
-- **[Environment Templates](/guides/env-templates)** — Create templates to standardize variable definitions across environments.
-- **[Secret Sharing](/guides/secret-sharing)** — Share one-time links for specific variables with team members.
+| `--vault-group` | Vault group ID. |
+| `--environments` | Comma-separated pair of environments (2 or 3). |
+| `--format` | `table` (default), `json`, `csv`, or `markdown`. |
+| `--show-values` | Include actual values (omit to redact). |

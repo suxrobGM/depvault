@@ -6,7 +6,11 @@ namespace DepVault.Cli.Config;
 public sealed class AppConfigData
 {
     [JsonPropertyName("server")]
+#if DEBUG
     public string Server { get; set; } = "http://localhost:4000";
+#else
+    public string Server { get; set; } = "https://depvault.com/api";
+#endif
 
     [JsonPropertyName("activeProjectId")]
     public string? ActiveProjectId { get; set; }

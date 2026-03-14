@@ -1,64 +1,41 @@
 # CI/CD Integration
 
-Integrate DepVault into your CI/CD pipelines to automate dependency analysis and environment variable injection during builds and deployments.
-
----
-
-## Overview
-
-DepVault provides scoped CI tokens that allow your pipelines to securely pull environment variables from the vault. Tokens are bound to a specific project and environment, ensuring that each pipeline only accesses the secrets it needs. Combined with the DepVault CLI, you can inject secrets into your build process with a single command.
+Automate environment variable injection in your build and deployment pipelines using scoped CI tokens.
 
 ---
 
 ## CI Tokens
 
-CI tokens are API tokens designed for automated pipelines. Unlike user sessions, CI tokens are long-lived, non-interactive, and scoped to specific resources.
+CI tokens are long-lived, non-interactive API tokens scoped to a specific project, environment, and vault group.
 
-### Generating a CI Token
+### Generating a Token
 
-1. Open your project and navigate to **Settings**.
-2. Select the **CI Tokens** section.
-3. Click **Generate Token**.
-4. Configure the token:
+1. Open your project and go to **Settings** > **CI Tokens**.
+2. Click **Generate Token** and configure:
 
 | Setting | Description |
 | --- | --- |
-| **Name** | A descriptive name for the token (e.g., `github-actions-prod`, `gitlab-staging`). |
-| **Environment** | The environment tier the token can access: DEVELOPMENT, STAGING, PRODUCTION, or GLOBAL. |
-| **Vault Group** | The specific vault group the token is scoped to. |
-| **Expiration** | When the token expires. Options include 30 days, 90 days, 1 year, or a custom date. |
-| **IP Allowlist** | Optional. A list of IP addresses or CIDR ranges that are permitted to use this token. Requests from other IPs are rejected. |
+| **Name** | Descriptive name (e.g., `github-actions-prod`). |
+| **Environment** | The environment tier this token can access. |
+| **Vault Group** | The vault group this token is scoped to. |
+| **Expiration** | 30 days, 90 days, 1 year, or custom date. |
+| **IP Allowlist** | Optional. Restrict to specific IPs or CIDR ranges. |
 
-5. Click **Create**.
-6. Copy the token immediately — it is shown only once and cannot be retrieved later.
+3. Click **Create** and copy the token — it is shown only once.
 
 ### Token Scoping
 
-Each CI token is bound to:
+Each token is bound to a single project, environment, and vault group. A compromised token has minimal blast radius. Generate separate tokens per pipeline/environment.
 
-- A **project** — the token cannot access other projects.
-- An **environment** — the token can only pull variables from the specified tier.
-- A **vault group** — the token is restricted to a single vault group within the project.
+### Revocation
 
-This principle of least privilege ensures that a compromised token has minimal blast radius.
-
-### Token Expiration
-
-Tokens expire according to the schedule you set during creation. Expired tokens are automatically rejected. You can revoke a token at any time from the CI Tokens settings page.
-
-### IP Allowlist
-
-For additional security, you can restrict a token to specific IP addresses or CIDR ranges. This is useful when your CI runners have static IPs. If the allowlist is empty, the token accepts requests from any IP.
+Revoke tokens at any time from the CI Tokens settings page. Revoked tokens are rejected immediately. Token usage is logged for auditing (timestamp, IP, action, status).
 
 ---
 
 ## CLI Usage
 
-The DepVault CLI uses the `DEPVAULT_TOKEN` environment variable for authentication in CI contexts. Set this variable in your pipeline configuration using your CI provider's secret management.
-
-### Pull Secrets
-
-The primary CI command pulls variables from the vault and writes them to a file:
+Set `DEPVAULT_TOKEN` as an environment variable in your CI provider, then pull secrets:
 
 ```bash
 depvault ci pull --format env --output .env
@@ -66,10 +43,10 @@ depvault ci pull --format env --output .env
 
 | Flag | Description | Default |
 | --- | --- | --- |
-| `--format <fmt>` | Output format: `env`, `json`, `yaml`, `toml`. | `env` |
-| `--output <path>` | File path to write the output to. Omit to print to stdout. | stdout |
+| `--format` | Output format: `env`, `json`. | `env` |
+| `--output` | File path. Omit for stdout. | stdout |
 
-The CLI reads the `DEPVAULT_TOKEN` environment variable to authenticate. The token determines which project, environment, and vault group to pull from.
+The token determines which project, environment, and vault group to pull from — no additional flags needed.
 
 ---
 
@@ -77,11 +54,10 @@ The CLI reads the `DEPVAULT_TOKEN` environment variable to authenticate. The tok
 
 ### GitHub Actions
 
-Add the following step to your GitHub Actions workflow. Store your DepVault CI token as a repository secret named `DEPVAULT_TOKEN`.
+Store `DEPVAULT_TOKEN` as a repository secret.
 
 ```yaml
 name: Deploy
-
 on:
   push:
     branches: [main]
@@ -93,30 +69,24 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install DepVault CLI
-        run: |
-          curl -fsSL https://get.depvault.dev | sh
+        run: curl -fsSL https://get.depvault.dev | sh
 
       - name: Pull secrets
         env:
           DEPVAULT_TOKEN: ${{ secrets.DEPVAULT_TOKEN }}
-        run: |
-          depvault ci pull --format env --output .env
+        run: depvault ci pull --format env --output .env
 
       - name: Build and deploy
         run: |
-          # Your build commands here — .env is now available
           npm ci
           npm run build
 ```
 
 ### GitLab CI
 
-Add the following to your `.gitlab-ci.yml`. Store the CI token as a GitLab CI/CD variable named `DEPVAULT_TOKEN` (masked and protected).
+Store `DEPVAULT_TOKEN` as a masked CI/CD variable.
 
 ```yaml
-stages:
-  - deploy
-
 deploy:
   stage: deploy
   image: node:20
@@ -134,13 +104,12 @@ deploy:
 
 ### Azure DevOps
 
-Add to your `azure-pipelines.yml`. Store the token as a pipeline variable (secret).
+Store the token as a secret pipeline variable.
 
 ```yaml
 trigger:
   branches:
-    include:
-      - main
+    include: [main]
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -154,99 +123,40 @@ steps:
     env:
       DEPVAULT_TOKEN: $(DEPVAULT_TOKEN)
 
-  - script: |
-      npm ci
-      npm run build
+  - script: npm ci && npm run build
     displayName: Build
 ```
 
-### Generic CI
+### Docker Build
 
-For any CI system, the pattern is the same:
-
-1. Set `DEPVAULT_TOKEN` as a secret environment variable in your CI provider.
-2. Install the DepVault CLI.
-3. Run `depvault ci pull --format env --output .env` before your build step.
+Inject secrets at build time without baking them into the image:
 
 ```bash
-# Ensure DEPVAULT_TOKEN is set in the environment
-export DEPVAULT_TOKEN="your-ci-token"
-
-# Install CLI
-curl -fsSL https://get.depvault.dev | sh
-
-# Pull secrets
 depvault ci pull --format env --output .env
-
-# Run your build
-npm ci && npm run build
+docker build --secret id=env,src=.env -t myapp .
+rm .env
 ```
 
----
+```dockerfile
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY . .
+RUN --mount=type=secret,id=env,target=/app/.env npm run build
 
-## Token Revocation
-
-If a CI token is compromised or no longer needed, revoke it immediately from the dashboard.
-
-1. Open your project and navigate to **Settings** > **CI Tokens**.
-2. Find the token in the list.
-3. Click **Revoke**.
-4. Confirm the revocation.
-
-Revoked tokens are rejected immediately on the next API call. Any pipeline using the revoked token will fail at the secret-pull step. Generate a new token and update your CI configuration to restore access.
-
----
-
-## Usage Logging
-
-Every CI token usage is logged for auditing purposes. The log captures:
-
-| Field | Description |
-| --- | --- |
-| **Timestamp** | When the token was used. |
-| **IP Address** | The source IP of the request. |
-| **Action** | The operation performed (e.g., `pull`). |
-| **Pipeline Run ID** | If provided by the CI system, the pipeline or job run identifier. |
-| **Status** | Whether the request was successful or rejected (e.g., expired token, IP not allowed). |
-
-You can view usage logs from the **CI Tokens** section in project settings. Logs are retained for 90 days.
-
----
-
-## Security Best Practices
-
-- **Use one token per pipeline** — Do not reuse tokens across different projects or environments.
-- **Set the shortest practical expiration** — Rotate tokens regularly. Shorter-lived tokens limit exposure if compromised.
-- **Enable IP allowlisting** when your CI runners have static IPs.
-- **Store tokens in your CI provider's secret management** — Never hard-code tokens in pipeline configuration files or commit them to version control.
-- **Revoke tokens immediately** when they are no longer needed or when team members with access leave.
-- **Monitor usage logs** for unexpected access patterns, such as requests from unfamiliar IP addresses.
-- **Use environment-scoped tokens** — A staging pipeline should not have a production token.
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=build /app/dist ./dist
+CMD ["node", "dist/index.js"]
+```
 
 ---
 
 ## Troubleshooting
 
-### Token rejected with "unauthorized"
-
-- Verify the `DEPVAULT_TOKEN` environment variable is set correctly in your CI configuration.
-- Check that the token has not expired. Generate a new one if needed.
-- If IP allowlisting is enabled, confirm your CI runner's IP is in the allowlist.
-
-### Pull command returns empty output
-
-- Ensure the vault group associated with the token has variables defined for the scoped environment.
-- Verify the token's environment scope matches the environment where variables are stored.
-
-### CLI not found
-
-- Confirm the CLI installation step completed successfully.
-- Ensure the CLI binary is on your `PATH`.
-
----
-
-## What's Next
-
-- **[Environment Vault](/guides/environment-vault)** — Manage the variables that your pipelines pull.
-- **[Secret Sharing](/guides/secret-sharing)** — Share secrets manually when a pipeline is not available.
-- **[Getting Started](/getting-started)** — Return to the basics if you need to set up your first project.
+| Error | Cause |
+| --- | --- |
+| `DEPVAULT_TOKEN is not set` | Set the environment variable in your CI config. |
+| `401 Unauthorized` | Token is expired, revoked, or invalid. |
+| `403 Forbidden` | IP not in allowlist or scope mismatch. |
+| Empty output | No variables in the scoped vault group/environment. |
+| CLI not found | Verify installation step completed and binary is on PATH. |
