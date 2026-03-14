@@ -42,7 +42,10 @@ public sealed class ProjectCommands(
             try
             {
                 var client = clientFactory.Create();
-                var result = await client.Projects.GetAsync(cancellationToken: cancellationToken);
+                var result = await client.Projects.GetAsync(config => {
+                    config.QueryParameters.Page = 1;
+                    config.QueryParameters.Limit = 100;
+                }, cancellationToken: cancellationToken);
                 var items = result?.Items;
 
                 if (items is null || items.Count == 0)
