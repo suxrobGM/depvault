@@ -96,9 +96,11 @@ depvault env push --vault-group <id> --file .env
 
 | Flag | Description | Default |
 | --- | --- | --- |
-| `--vault-group` | Vault group ID. | Required |
-| `--file` | Path to the file to import. | Required |
+| `--vault-group` | Vault group ID. Prompts interactively when omitted. | Interactive |
+| `--file` | Path to the file to import. Auto-detects env files when omitted. | Interactive |
 | `--environment` | Target environment. | `DEVELOPMENT` |
+
+In interactive mode, the CLI prompts for vault group and file selection when flags are omitted.
 
 ### List Variables
 

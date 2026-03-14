@@ -20,13 +20,13 @@ const ECOSYSTEM_FILES = [
 ];
 
 const TERMINAL_LINES = [
-  { prefix: "$", text: "depvault analyze --file package.json", color: "text.primary" },
-  { prefix: "→", text: "Detected Node.js — scanning 142 dependencies", color: "text.secondary" },
+  { prefix: "$", text: "depvault scan", color: "text.primary" },
+  { prefix: "→", text: "Scanning repository...", color: "text.secondary" },
+  { prefix: "✓", text: "Found 3 dependency files, 2 env files", color: "primary.main" },
+  { prefix: "→", text: "Analyzing package.json — 142 dependencies", color: "text.secondary" },
   { prefix: "!", text: "3 critical vulnerabilities found", color: "error.main" },
-  { prefix: "$", text: "depvault env pull --environment PRODUCTION", color: "text.primary" },
-  { prefix: "✓", text: "Pulled 24 variables → .env", color: "primary.main" },
-  { prefix: "$", text: "depvault ci pull --format env --output .env", color: "text.primary" },
-  { prefix: "✓", text: "8 secrets + 3 files synced to pipeline", color: "primary.main" },
+  { prefix: "✓", text: "Pushed 24 env variables to vault", color: "primary.main" },
+  { prefix: "✓", text: "No secret leaks detected", color: "primary.main" },
 ];
 
 export function HeroSection(): ReactElement {

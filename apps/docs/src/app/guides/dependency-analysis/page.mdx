@@ -33,22 +33,30 @@ The ecosystem is auto-detected from the file name. You can override it manually 
 ### CLI
 
 ```bash
-depvault analyze --file package.json
+depvault analyze [--file <path>]
 ```
 
 | Flag | Description | Default |
 | --- | --- | --- |
-| `--file` | Path to the dependency file. **Required.** | |
+| `--file` | Path to the dependency file. Auto-detects in current directory when omitted. | Auto-detected |
 | `--ecosystem` | Override auto-detected ecosystem. | Auto-detected |
 | `--output` | Output format: `table` or `json`. | `table` |
 
 ```bash
+# Auto-detect dependency files in current directory
+depvault analyze
+
+# Specify a file explicitly
+depvault analyze --file package.json
+
 # Override ecosystem detection
 depvault analyze --file deps.txt --ecosystem PYTHON
 
 # JSON output for scripting
 depvault analyze --file Cargo.toml --output json
 ```
+
+In interactive mode, when `--file` is omitted the CLI scans the current directory for dependency files and prompts you to select one.
 
 > Requires an active project. Set one with `depvault project select <id>`.
 

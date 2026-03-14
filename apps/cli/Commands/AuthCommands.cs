@@ -10,7 +10,8 @@ public sealed class AuthCommands(
     IAuthContext authContext,
     IConfigService configService,
     ICredentialStore credentialStore,
-    IOutputFormatter output)
+    IOutputFormatter output,
+    IConsolePrompter prompter)
 {
     public Command CreateLoginCommand()
     {
@@ -41,8 +42,8 @@ public sealed class AuthCommands(
                 configService.Save(config);
             }
 
-            var email = parseResult.GetValue(emailOpt) ?? Prompt("Email: ");
-            var password = parseResult.GetValue(passwordOpt) ?? PromptSecret("Password: ");
+            var email = parseResult.GetValue(emailOpt) ?? prompter.Ask("Email");
+            var password = parseResult.GetValue(passwordOpt) ?? prompter.AskSecret("Password");
 
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
@@ -109,7 +110,7 @@ public sealed class AuthCommands(
 
             if (mode == AuthMode.CiToken)
             {
-                Console.WriteLine("Auth: CI Token (DEPVAULT_TOKEN)");
+                output.PrintKeyValue("Auth", "CI Token (DEPVAULT_TOKEN)");
                 return;
             }
 
@@ -127,38 +128,5 @@ public sealed class AuthCommands(
             }
         });
         return cmd;
-    }
-
-    private static string? Prompt(string label)
-    {
-        Console.Write(label);
-        return Console.ReadLine()?.Trim();
-    }
-
-    private static string PromptSecret(string label)
-    {
-        Console.Write(label);
-        var password = "";
-        while (true)
-        {
-            var key = Console.ReadKey(intercept: true);
-            if (key.Key == ConsoleKey.Enter)
-            {
-                break;
-            }
-
-            if (key.Key == ConsoleKey.Backspace && password.Length > 0)
-            {
-                password = password[..^1];
-                Console.Write("\b \b");
-            }
-            else if (!char.IsControl(key.KeyChar))
-            {
-                password += key.KeyChar;
-                Console.Write('*');
-            }
-        }
-        Console.WriteLine();
-        return password;
     }
 }

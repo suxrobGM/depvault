@@ -27,47 +27,55 @@ public interface ICredentialStore
 
 public sealed class CredentialStore : ICredentialStore
 {
-    private static readonly string CredPath = Path.Combine(Constants.ConfigDir, "credentials.json");
+    private static readonly string credPath = Path.Combine(Constants.ConfigDir, "credentials.json");
 
-    private StoredCredentials? _cached;
-    private bool _loaded;
+    private StoredCredentials? cached;
+    private bool loaded;
 
     public StoredCredentials? Load()
     {
-        if (_loaded)
+        if (loaded)
         {
-            return _cached;
+            return cached;
         }
 
-        _loaded = true;
+        loaded = true;
 
-        if (!File.Exists(CredPath))
+        if (!File.Exists(credPath))
         {
-            return _cached = null;
+            return cached = null;
         }
 
-        var json = File.ReadAllText(CredPath);
+        var json = File.ReadAllText(credPath);
         var creds = JsonSerializer.Deserialize(json, CredentialJsonContext.Default.StoredCredentials);
-        _cached = string.IsNullOrEmpty(creds?.AccessToken) ? null : creds;
-        return _cached;
+        cached = string.IsNullOrEmpty(creds?.AccessToken) ? null : creds;
+        return cached;
     }
 
     public void Save(StoredCredentials credentials)
     {
         Directory.CreateDirectory(Constants.ConfigDir);
         var json = JsonSerializer.Serialize(credentials, CredentialJsonContext.Default.StoredCredentials);
-        File.WriteAllText(CredPath, json);
-        _cached = credentials;
-        _loaded = true;
+        File.WriteAllText(credPath, json);
+        cached = credentials;
+        loaded = true;
     }
 
     public void Delete()
     {
-        try { File.Delete(CredPath); }
-        catch (FileNotFoundException) { }
-        catch (DirectoryNotFoundException) { }
-        _cached = null;
-        _loaded = true;
+        try
+        {
+            File.Delete(credPath);
+        }
+        catch (FileNotFoundException)
+        {
+        }
+        catch (DirectoryNotFoundException)
+        {
+        }
+
+        cached = null;
+        loaded = true;
     }
 }
 

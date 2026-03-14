@@ -18,7 +18,7 @@ public sealed class ConfigCommands(IConfigService configService, IOutputFormatte
             keyArg,
             valueArg
         };
-        setCmd.SetAction((parseResult) =>
+        setCmd.SetAction(parseResult =>
         {
             var key = parseResult.GetValue(keyArg);
             var value = parseResult.GetValue(valueArg);
@@ -37,7 +37,7 @@ public sealed class ConfigCommands(IConfigService configService, IOutputFormatte
         {
             getKeyArg
         };
-        getCmd.SetAction((parseResult) =>
+        getCmd.SetAction(parseResult =>
         {
             var key = parseResult.GetValue(getKeyArg);
             var value = configService.Get(key!);

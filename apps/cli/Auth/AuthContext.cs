@@ -2,7 +2,12 @@ using DepVault.Cli.Config;
 
 namespace DepVault.Cli.Auth;
 
-public enum AuthMode { None, CiToken, Jwt }
+public enum AuthMode
+{
+    None,
+    CiToken,
+    Jwt
+}
 
 public interface IAuthContext
 {
@@ -35,8 +40,12 @@ public sealed class AuthContext(ICredentialStore credentialStore) : IAuthContext
             Console.Error.WriteLine("Not authenticated. Run 'depvault login' first.");
             return false;
         }
+
         return true;
     }
 
-    public bool IsCiMode() => GetMode() == AuthMode.CiToken;
+    public bool IsCiMode()
+    {
+        return GetMode() == AuthMode.CiToken;
+    }
 }

@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
+using Spectre.Console;
 
 namespace DepVault.Cli.Output;
 
@@ -15,80 +16,61 @@ public interface IOutputFormatter
 
 public sealed class OutputFormatter : IOutputFormatter
 {
-    private static readonly JsonSerializerOptions IndentedOptions = new() { WriteIndented = true };
+    private static readonly JsonSerializerOptions indentedOptions = new() { WriteIndented = true };
 
     public void PrintTable(string[] headers, List<string[]> rows)
     {
         if (rows.Count == 0)
         {
-            Console.WriteLine("No results found.");
+            AnsiConsole.MarkupLine("[grey]No results found.[/]");
             return;
         }
 
-        var widths = new int[headers.Length];
-        for (var i = 0; i < headers.Length; i++)
+        var table = new Table()
+            .Border(ConsoleTheme.Border)
+            .BorderStyle(new Style(ConsoleTheme.Muted));
+
+        foreach (var header in headers)
         {
-            widths[i] = headers[i].Length;
+            table.AddColumn(new TableColumn($"[cyan1]{Markup.Escape(header)}[/]"));
         }
 
         foreach (var row in rows)
         {
-            for (var i = 0; i < row.Length && i < widths.Length; i++)
-            {
-                widths[i] = Math.Max(widths[i], (row[i] ?? "").Length);
-            }
-        }
-
-        for (var i = 0; i < headers.Length; i++)
-        {
-            Console.Write(headers[i].PadRight(widths[i]));
-            if (i < headers.Length - 1)
-            {
-                Console.Write("  ");
-            }
-        }
-        Console.WriteLine();
-
-        for (var i = 0; i < headers.Length; i++)
-        {
-            Console.Write(new string('-', widths[i]));
-            if (i < headers.Length - 1)
-            {
-                Console.Write("  ");
-            }
-        }
-        Console.WriteLine();
-
-        foreach (var row in rows)
-        {
+            var cells = new string[headers.Length];
             for (var i = 0; i < headers.Length; i++)
             {
-                var val = i < row.Length ? row[i] ?? "" : "";
-                Console.Write(val.PadRight(widths[i]));
-                if (i < headers.Length - 1)
-                {
-                    Console.Write("  ");
-                }
+                cells[i] = Markup.Escape(i < row.Length ? row[i] ?? "" : "");
             }
-            Console.WriteLine();
+
+            table.AddRow(cells);
         }
+
+        AnsiConsole.Write(table);
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Only used with anonymous types for CLI output")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "Only used with anonymous types for CLI output")]
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Only used with anonymous types for CLI output")]
     public void PrintJson(object data)
     {
-        Console.WriteLine(JsonSerializer.Serialize(data, IndentedOptions));
+        Console.WriteLine(JsonSerializer.Serialize(data, indentedOptions));
     }
 
     public void PrintKeyValue(string key, string? value)
     {
-        Console.WriteLine($"{key}: {value ?? "(not set)"}");
+        AnsiConsole.MarkupLine($"[cyan1]{Markup.Escape(key)}[/]: {Markup.Escape(value ?? "(not set)")}");
     }
 
-    public void PrintSuccess(string message) => Console.WriteLine(message);
+    public void PrintSuccess(string message)
+    {
+        AnsiConsole.MarkupLine($"[green]{Markup.Escape(message)}[/]");
+    }
 
-    public void PrintError(string message) => Console.Error.WriteLine($"Error: {message}");
+    public void PrintError(string message)
+    {
+        AnsiConsole.MarkupLine($"[red]Error: {Markup.Escape(message)}[/]");
+    }
 
     public void WriteContent(string content, string? outputPath)
     {

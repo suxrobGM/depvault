@@ -1,7 +1,7 @@
 using System.CommandLine;
+using DepVault.Cli.ApiClient.ConvertNamespace;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Output;
-using DepVault.Cli.ApiClient.ConvertNamespace;
 
 namespace DepVault.Cli.Commands;
 
@@ -43,11 +43,13 @@ public sealed class ConvertCommands(
                 var content = File.ReadAllText(filePath);
                 var client = clientFactory.Create();
 
-                var result = await client.Convert.PostAsync(new()
+                var result = await client.Convert.PostAsync(new ConvertPostRequestBody
                 {
                     Content = content,
-                    FromFormat = CommandHelpers.ParseEnum(parseResult.GetValue(fromOpt)!, ConvertPostRequestBody_fromFormat.Env),
-                    ToFormat = CommandHelpers.ParseEnum(parseResult.GetValue(toOpt)!, ConvertPostRequestBody_toFormat.Env)
+                    FromFormat = CommandHelpers.ParseEnum(parseResult.GetValue(fromOpt)!,
+                        ConvertPostRequestBody_fromFormat.Env),
+                    ToFormat = CommandHelpers.ParseEnum(parseResult.GetValue(toOpt)!,
+                        ConvertPostRequestBody_toFormat.Env)
                 }, cancellationToken: cancellationToken);
 
                 output.WriteContent(result?.Content ?? "", parseResult.GetValue(outputOpt));

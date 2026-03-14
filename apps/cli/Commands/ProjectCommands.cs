@@ -24,7 +24,8 @@ public sealed class ProjectCommands(
 
     private Command CreateListCommand()
     {
-        var outputOpt = new Option<string>("--output") { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
+        var outputOpt = new Option<string>("--output")
+            { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
         var cmd = new Command("list", "List your projects")
         {
             outputOpt
@@ -42,10 +43,11 @@ public sealed class ProjectCommands(
             try
             {
                 var client = clientFactory.Create();
-                var result = await client.Projects.GetAsync(config => {
+                var result = await client.Projects.GetAsync(config =>
+                {
                     config.QueryParameters.Page = 1;
                     config.QueryParameters.Limit = 100;
-                }, cancellationToken: cancellationToken);
+                }, cancellationToken);
                 var items = result?.Items;
 
                 if (items is null || items.Count == 0)
@@ -88,7 +90,7 @@ public sealed class ProjectCommands(
             idArg
         };
 
-        cmd.SetAction((parseResult) =>
+        cmd.SetAction(parseResult =>
         {
             var id = parseResult.GetValue(idArg);
             var config = configService.Load();

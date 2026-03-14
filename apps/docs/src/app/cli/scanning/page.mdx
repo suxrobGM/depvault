@@ -1,0 +1,92 @@
+# Scanning
+
+The `scan` command is the fastest way to onboard a repository. It walks through dependency analysis, environment variable import, secret leak detection, and secret file upload in a single interactive session.
+
+---
+
+## Usage
+
+```bash
+depvault scan [--path <dir>] [--project <id>]
+```
+
+| Flag | Description | Default |
+| --- | --- | --- |
+| `--path` | Repository root path. | Current directory |
+| `--project` | Project ID to use. | Prompts interactively |
+
+Requires interactive mode. In CI pipelines, use the individual commands (`analyze`, `env push`, `ci pull`) instead.
+
+---
+
+## What It Does
+
+The scan runs six steps in sequence:
+
+1. **Project resolution** — Uses your active project, lets you select one, or creates a new project named after the repository directory.
+2. **Dependency analysis** — Discovers dependency files (package.json, requirements.txt, *.csproj, etc.), lets you select which to analyze, uploads each for vulnerability and version checking, and shows health scores.
+3. **Environment file push** — Finds .env, appsettings.json, secrets.yaml, and config.toml files. You select which to push, choose the environment type and vault group for each, and variables are imported.
+4. **Secret leak scan** — Scans source files locally for hardcoded secrets (AWS keys, private keys, API tokens, connection strings). Findings are shown in a severity-coded table. Optionally adds detected files to .gitignore.
+5. **Secret file upload** — Discovers certificate and credential files (*.pem, *.key, *.pfx, service-account.json). You select which to upload as encrypted secret files.
+6. **Summary dashboard** — Displays a summary panel with counts for dependencies analyzed, vulnerabilities found, variables pushed, leaks detected, and files uploaded.
+
+---
+
+## Example Session
+
+```bash
+$ depvault scan
+
+  ____            __     __            _  _
+ |  _ \  ___  _ _\ \   / /_ _  _   _| || |_
+ | | | |/ _ \| '_ \ \ / / _` || | | | || __|
+ | |_| |  __/| |_) \ V / (_| || |_| | || |_
+ |____/ \___|| .__/ \_/ \__,_| \__,_|_| \__|
+             |_|
+ Secure your stack. Analyze. Vault. Ship.
+ v0.1.0
+
+Scanning: /home/user/my-project
+
+? Use project 'my-project'? Yes
+
+── Dependency Analysis ──────────────────────────
+Found 2 dependency file(s)
+├── package.json
+└── apps/backend/package.json
+
+? Select files to analyze (all selected)
+  [x] package.json
+  [x] apps/backend/package.json
+
+✓ Analysis complete
+
+── Environment Files ────────────────────────────
+Found 1 environment file(s)
+└── .env.development
+
+? Select files to push (none selected)
+  [x] .env.development
+
+? Environment type for .env.development: DEVELOPMENT
+? Select vault group: default
+
+✓ Imported 12 variables from .env.development
+
+── Secret Leak Detection ────────────────────────
+✓ No secret leaks detected.
+
+── Secret Files ─────────────────────────────────
+No secret files found.
+
+┌─────────────────────────┬────────┐
+│ Metric                  │ Result │
+├─────────────────────────┼────────┤
+│ Dependencies analyzed   │ 284    │
+│ Files analyzed          │ 2      │
+│ Vulnerabilities found   │ 0      │
+│ Env variables pushed    │ 12     │
+│ Secret leaks detected   │ 0      │
+│ Secret files uploaded   │ 0      │
+└─────────────────────────┴────────┘
+```

@@ -29,43 +29,46 @@ public interface IConfigService
 
 public sealed class ConfigService : IConfigService
 {
-    private static readonly string ConfigPath = Path.Combine(Constants.ConfigDir, "config.json");
+    private static readonly string configPath = Path.Combine(Constants.ConfigDir, "config.json");
 
-    private AppConfigData? _cached;
+    private AppConfigData? cached;
 
     public AppConfigData Load()
     {
-        if (_cached is not null)
+        if (cached is not null)
         {
-            return _cached;
+            return cached;
         }
 
-        if (!File.Exists(ConfigPath))
+        if (!File.Exists(configPath))
         {
-            _cached = new AppConfigData();
-            return _cached;
+            cached = new AppConfigData();
+            return cached;
         }
 
-        var json = File.ReadAllText(ConfigPath);
-        _cached = JsonSerializer.Deserialize(json, ConfigJsonContext.Default.AppConfigData) ?? new AppConfigData();
-        return _cached;
+        var json = File.ReadAllText(configPath);
+        cached = JsonSerializer.Deserialize(json, ConfigJsonContext.Default.AppConfigData) ?? new AppConfigData();
+        return cached;
     }
 
     public void Save(AppConfigData config)
     {
         Directory.CreateDirectory(Constants.ConfigDir);
         var json = JsonSerializer.Serialize(config, ConfigJsonContext.Default.AppConfigData);
-        File.WriteAllText(ConfigPath, json);
-        _cached = config;
+        File.WriteAllText(configPath, json);
+        cached = config;
     }
 
-    public string? Get(string key) => key.ToLowerInvariant() switch
+    public string? Get(string key)
     {
-        "server" => Load().Server,
-        "activeprojectid" or "project" => Load().ActiveProjectId,
-        "outputformat" or "output" => Load().OutputFormat,
-        _ => null
-    };
+        return key.ToLowerInvariant() switch
+        {
+            "server" => Load().Server,
+            "activeprojectid" or "project" => Load().ActiveProjectId,
+            "outputformat" or "output" => Load().OutputFormat,
+            _ => null
+        };
+    }
 
     public bool Set(string key, string value)
     {
@@ -84,6 +87,7 @@ public sealed class ConfigService : IConfigService
             default:
                 return false;
         }
+
         Save(config);
         return true;
     }

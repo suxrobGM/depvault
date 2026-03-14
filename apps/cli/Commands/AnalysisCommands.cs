@@ -2,7 +2,9 @@ using System.CommandLine;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
+using DepVault.Cli.Services;
 using DepVault.Cli.ApiClient.Projects.Item.Analyses;
+using Spectre.Console;
 
 namespace DepVault.Cli.Commands;
 
@@ -10,29 +12,13 @@ public sealed class AnalysisCommands(
     IApiClientFactory clientFactory,
     IAuthContext authContext,
     IConfigService configService,
-    IOutputFormatter output)
+    IOutputFormatter output,
+    IConsolePrompter prompter,
+    IFileScanner fileScanner)
 {
-    private static readonly Dictionary<string, AnalysesPostRequestBody_ecosystem> EcosystemMap = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ["package.json"] = AnalysesPostRequestBody_ecosystem.NODEJS,
-        ["package-lock.json"] = AnalysesPostRequestBody_ecosystem.NODEJS,
-        ["yarn.lock"] = AnalysesPostRequestBody_ecosystem.NODEJS,
-        ["requirements.txt"] = AnalysesPostRequestBody_ecosystem.PYTHON,
-        ["pyproject.toml"] = AnalysesPostRequestBody_ecosystem.PYTHON,
-        ["Pipfile"] = AnalysesPostRequestBody_ecosystem.PYTHON,
-        ["poetry.lock"] = AnalysesPostRequestBody_ecosystem.PYTHON,
-        ["Cargo.toml"] = AnalysesPostRequestBody_ecosystem.RUST,
-        ["Cargo.lock"] = AnalysesPostRequestBody_ecosystem.RUST,
-        ["go.mod"] = AnalysesPostRequestBody_ecosystem.GO,
-        ["pom.xml"] = AnalysesPostRequestBody_ecosystem.KOTLIN,
-        ["build.gradle"] = AnalysesPostRequestBody_ecosystem.KOTLIN,
-        ["Gemfile"] = AnalysesPostRequestBody_ecosystem.RUBY,
-        ["composer.json"] = AnalysesPostRequestBody_ecosystem.PHP,
-    };
-
     public Command CreateAnalyzeCommand()
     {
-        var fileOpt = new Option<string>("--file") { Description = "Path to dependency file", Required = true };
+        var fileOpt = new Option<string?>("--file") { Description = "Path to dependency file (auto-detected if omitted)" };
         var projectOpt = new Option<string?>("--project") { Description = "Project ID" };
         var ecosystemOpt = new Option<string?>("--ecosystem") { Description = "Ecosystem (auto-detected from filename)" };
         var outputOpt = new Option<string>("--output") { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
@@ -58,7 +44,45 @@ public sealed class AnalysisCommands(
                 return;
             }
 
-            var filePath = parseResult.GetValue(fileOpt)!;
+            var filePath = parseResult.GetValue(fileOpt);
+
+            // Auto-detect dependency files if --file not provided
+            if (string.IsNullOrEmpty(filePath))
+            {
+                if (!prompter.IsInteractive)
+                {
+                    output.PrintError("--file is required in non-interactive mode.");
+                    return;
+                }
+
+                var discovered = fileScanner.FindDependencyFiles(Directory.GetCurrentDirectory());
+                if (discovered.Count == 0)
+                {
+                    output.PrintError("No dependency files found in current directory.");
+                    return;
+                }
+
+                if (discovered.Count == 1)
+                {
+                    if (prompter.Confirm($"Analyze [cyan1]{Markup.Escape(discovered[0].RelativePath)}[/]?"))
+                    {
+                        filePath = discovered[0].FullPath;
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+                else
+                {
+                    var selected = prompter.Select(
+                        "Select a dependency file to analyze",
+                        discovered,
+                        f => f.RelativePath);
+                    filePath = selected.FullPath;
+                }
+            }
+
             if (!CommandHelpers.RequireFile(filePath, output))
             {
                 return;
@@ -79,15 +103,8 @@ public sealed class AnalysisCommands(
             }
             else
             {
-                if (fileName.EndsWith(".csproj") || fileName == "packages.config" || fileName == "Directory.Packages.props")
-                {
-                    ecosystem = AnalysesPostRequestBody_ecosystem.DOTNET;
-                }
-                else if (EcosystemMap.TryGetValue(fileName, out var detected))
-                {
-                    ecosystem = detected;
-                }
-                else
+                ecosystem = EcosystemResolver.Resolve(fileName);
+                if (ecosystem is null)
                 {
                     output.PrintError($"Cannot detect ecosystem for '{fileName}'. Use --ecosystem.");
                     return;
@@ -100,14 +117,15 @@ public sealed class AnalysisCommands(
                 var client = clientFactory.Create();
                 var outputFmt = parseResult.GetValue(outputOpt);
 
-                Console.WriteLine($"Analyzing {fileName} ({ecosystem})...");
-
-                var result = await client.Projects[projectId].Analyses.PostAsync(new()
-                {
-                    FileName = fileName,
-                    Content = content,
-                    Ecosystem = ecosystem
-                }, cancellationToken: cancellationToken);
+                var result = await AnsiConsole.Status()
+                    .Spinner(Spinner.Known.Dots)
+                    .StartAsync($"Analyzing {fileName} ({ecosystem})...", async _ =>
+                        await client.Projects[projectId].Analyses.PostAsync(new()
+                        {
+                            FileName = fileName,
+                            Content = content,
+                            Ecosystem = ecosystem
+                        }, cancellationToken: cancellationToken));
 
                 if (result is null)
                 {
@@ -115,12 +133,12 @@ public sealed class AnalysisCommands(
                     return;
                 }
 
-                Console.WriteLine($"Analysis complete. Health score: {result.HealthScore}");
+                output.PrintSuccess($"Analysis complete. Health score: {result.HealthScore}");
 
                 var deps = result.Dependencies;
                 if (deps is null || deps.Count == 0)
                 {
-                    Console.WriteLine("No dependencies found.");
+                    AnsiConsole.MarkupLine("[grey]No dependencies found.[/]");
                     return;
                 }
 
