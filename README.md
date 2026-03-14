@@ -20,6 +20,7 @@
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Next.js-16-black?logo=next.js" alt="Next.js" />
   <img src="https://img.shields.io/badge/Elysia.js-latest-a855f7" alt="Elysia" />
+  <img src="https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white" alt=".NET" />
   <img src="https://img.shields.io/badge/PostgreSQL-18-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL" />
   <img src="https://img.shields.io/badge/MUI-7-007FFF?logo=mui&logoColor=white" alt="MUI" />
 </p>
@@ -109,7 +110,8 @@ DepVault is a full-stack web platform that scans dependencies across 8+ language
 depvault/
 ├── apps/
 │   ├── backend/         # Elysia REST API (port 4000)
-│   └── frontend/        # Next.js web app (port 4001)
+│   ├── frontend/        # Next.js web app (port 4001)
+│   └── cli/             # .NET 10 AOT CLI
 ├── packages/
 │   └── shared/          # Shared types, API client, utilities
 ├── deploy/              # Docker Compose, Nginx config
@@ -126,6 +128,7 @@ depvault/
 | DI         | tsyringe                | Decorator-based dependency injection               |
 | Auth       | JWT + GitHub OAuth      | httpOnly cookie storage, no localStorage           |
 | Encryption | AES-256-GCM             | Authenticated encryption for vault data            |
+| CLI        | .NET 10 (Native AOT)    | Single-file native binary with gzip compression    |
 | CI/CD      | GitHub Actions + Docker | Multi-stage builds, GHCR, automated VPS deployment |
 
 > For a deeper dive, see the [Architecture Guide](docs/architecture.md).
@@ -150,13 +153,13 @@ Two GitHub Actions workflows power the delivery pipeline:
 
 **CI** (`ci.yml`) - runs on every push and PR:
 
-- Format check (Prettier) → Typecheck (backend + frontend) → Unit tests → Build → Secret scanning (Gitleaks) → Dependency audit
+- Format check (Prettier) → Typecheck (backend + frontend) → Unit tests → Build (frontend + CLI) → Secret scanning (Gitleaks) → Dependency audit
 
 **Deploy** (`deploy.yml`) - runs on push to `prod`:
 
 - Build Docker images (backend + frontend) in parallel → Push to GitHub Container Registry → Deploy to VPS via SSH → Health check verification
 
-Both workflows use Bun with dependency caching for fast execution.
+Both workflows use Bun with dependency caching for fast execution. The CI pipeline also sets up .NET 10 SDK to build the CLI project.
 
 ---
 
@@ -166,6 +169,7 @@ Both workflows use Bun with dependency caching for fast execution.
 
 - [Bun](https://bun.sh) v1.3+
 - [PostgreSQL 18+](https://www.postgresql.org/download)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download) (for CLI development)
 
 ### Setup
 
@@ -224,6 +228,9 @@ cd apps/frontend && bun run build
 cd apps/backend
 bun run build:linux    # Linux binary
 bun run build:win      # Windows binary
+
+# CLI (from apps/cli/)
+dotnet publish -c Release    # Native AOT binary
 ```
 
 ---

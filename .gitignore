@@ -142,3 +142,6 @@ vite.config.ts.timestamp-*
 **.github-project-config.json
 
 .VSCodeCounter/
+
+.idea/
+.vs/
