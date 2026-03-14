@@ -239,7 +239,7 @@ dotnet publish -c Release    # Native AOT binary
 
 ## Documentation
 
-**User & developer docs**: [depvault.com/docs](https://depvault.com/docs) — getting started, user guides, API reference, CLI reference.
+**User & developer docs**: [depvault.com/docs](https://depvault.com/docs) — getting started, user guides, and CLI reference.
 
 **Internal project docs** are in the [`docs/`](docs/README.md) folder:
 
