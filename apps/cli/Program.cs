@@ -20,6 +20,9 @@ var services = new ServiceCollection()
     .AddSingleton<IConsolePrompter, ConsolePrompter>()
     .AddSingleton<IFileScanner, FileScanner>()
     .AddSingleton<ISecretDetector, SecretDetector>()
+    .AddSingleton<IGitHubReleaseClient, GitHubReleaseClient>()
+    .AddSingleton<IVersionChecker, VersionChecker>()
+    .AddSingleton<IUpdateService, UpdateService>()
     .AddSingleton<AnalysisClient>()
     // Scan steps
     .AddSingleton<ProjectResolver>()
@@ -38,6 +41,7 @@ var services = new ServiceCollection()
     .AddSingleton<ConvertCommands>()
     .AddSingleton<CiCommands>()
     .AddSingleton<ScanCommands>()
+    .AddSingleton<UpdateCommands>()
     .BuildServiceProvider();
 
 var auth = services.GetRequiredService<AuthCommands>();
@@ -48,6 +52,8 @@ var analysis = services.GetRequiredService<AnalysisCommands>();
 var convert = services.GetRequiredService<ConvertCommands>();
 var ci = services.GetRequiredService<CiCommands>();
 var scan = services.GetRequiredService<ScanCommands>();
+var update = services.GetRequiredService<UpdateCommands>();
+var versionChecker = services.GetRequiredService<IVersionChecker>();
 
 var rootCommand = new RootCommand("DepVault CLI — dependency analysis, env vault, and secret management")
 {
@@ -60,7 +66,8 @@ var rootCommand = new RootCommand("DepVault CLI — dependency analysis, env vau
     analysis.CreateAnalyzeCommand(),
     convert.CreateConvertCommand(),
     ci.CreateCiCommand(),
-    scan.CreateScanCommand()
+    scan.CreateScanCommand(),
+    update.CreateUpdateCommand()
 };
 
 rootCommand.SetAction(_ =>
@@ -81,4 +88,13 @@ var versionCmd = new Command("version", "Show CLI version");
 versionCmd.SetAction(_ => ConsoleTheme.PrintBanner());
 rootCommand.Add(versionCmd);
 
-return await rootCommand.Parse(args).InvokeAsync();
+var exitCode = await rootCommand.Parse(args).InvokeAsync();
+
+// Print update hint after command execution (skip for update/version commands)
+var firstArg = args.Length > 0 ? args[0] : null;
+if (firstArg is not "update" and not "version")
+{
+    await versionChecker.PrintUpdateHintAsync();
+}
+
+return exitCode;
