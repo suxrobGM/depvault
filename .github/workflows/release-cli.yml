@@ -34,11 +34,19 @@ jobs:
         run: dotnet publish -c Release -r ${{ matrix.rid }} -o publish/
         working-directory: apps/cli
 
+      - name: Archive binary (Unix)
+        if: runner.os != 'Windows'
+        run: tar -czf depvault-${{ matrix.rid }}.tar.gz -C apps/cli/publish depvault
+
+      - name: Archive binary (Windows)
+        if: runner.os == 'Windows'
+        run: Compress-Archive -Path apps/cli/publish/depvault.exe -DestinationPath depvault-${{ matrix.rid }}.zip
+
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: depvault-cli-${{ matrix.rid }}
-          path: apps/cli/publish/
+          name: depvault-${{ matrix.rid }}
+          path: depvault-${{ matrix.rid }}.*
 
   release:
     needs: build
@@ -53,5 +61,5 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: depvault-cli-*/*
+          files: depvault-*/*
           generate_release_notes: true

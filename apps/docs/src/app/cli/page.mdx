@@ -12,41 +12,58 @@ The DepVault CLI (`depvault`) is a .NET 10 Native AOT binary. It compiles to a s
 
 ## Installation
 
-### Download from GitHub Releases
+### Quick Install (Recommended)
 
-Pre-built binaries are available on the [GitHub Releases](https://github.com/depvault/depvault/releases) page for the following platforms:
-
-| Platform        | Asset name             |
-|-----------------|------------------------|
-| Linux x64       | `depvault-linux-x64`   |
-| macOS x64       | `depvault-osx-x64`     |
-| macOS ARM64     | `depvault-osx-arm64`   |
-| Windows x64     | `depvault-win-x64.exe` |
-
-Download the appropriate binary, make it executable (on Linux/macOS), and place it in your `PATH`:
+**Linux / macOS:**
 
 ```bash
-# Linux / macOS
-chmod +x depvault-linux-x64
-sudo mv depvault-linux-x64 /usr/local/bin/depvault
+curl -fsSL https://raw.githubusercontent.com/suxrobGM/depvault/main/apps/cli/install.sh | bash
+```
+
+**Windows (PowerShell):**
+
+```powershell
+irm https://raw.githubusercontent.com/suxrobGM/depvault/main/apps/cli/install.ps1 | iex
+```
+
+The installer automatically detects your platform, downloads the latest release, and adds it to your PATH. The binary is installed to `~/.depvault/bin/` by default.
+
+To customize the install location, set the `DEPVAULT_INSTALL_DIR` environment variable before running the script.
+
+### Manual Download
+
+Pre-built binaries are available on the [GitHub Releases](https://github.com/suxrobGM/depvault/releases) page:
+
+| Platform | Archive |
+| --- | --- |
+| Linux x64 | `depvault-linux-x64.tar.gz` |
+| macOS x64 | `depvault-osx-x64.tar.gz` |
+| macOS ARM64 | `depvault-osx-arm64.tar.gz` |
+| Windows x64 | `depvault-win-x64.zip` |
+
+```bash
+# Linux / macOS — download, extract, and move to PATH
+tar -xzf depvault-linux-x64.tar.gz
+sudo mv depvault /usr/local/bin/
 ```
 
 ```powershell
-# Windows (PowerShell)
-Move-Item depvault-win-x64.exe C:\Tools\depvault.exe
+# Windows — extract and add to PATH
+Expand-Archive depvault-win-x64.zip -DestinationPath C:\Tools
 # Add C:\Tools to your PATH if not already present
 ```
 
 ### Build from Source
 
-If you prefer to build from source, clone the repository and publish the CLI project:
+Requires [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
 
 ```bash
-cd apps/cli
+git clone https://github.com/suxrobGM/depvault.git
+cd depvault/apps/cli
 dotnet publish -c Release -r <rid>
 ```
 
-Replace `<rid>` with your runtime identifier: `linux-x64`, `osx-x64`, `osx-arm64`, or `win-x64`. The compiled binary is output to `bin/Release/net10.0/<rid>/publish/`.
+Replace `<rid>` with your runtime identifier: `linux-x64`, `osx-x64`, `osx-arm64`, or `win-x64`. The compiled binary is output to `bin/Release/net10.0/<rid>/publish/depvault`.
 
 ---
 

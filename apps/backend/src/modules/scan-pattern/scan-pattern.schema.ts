@@ -1,8 +1,7 @@
 import { t, type Static } from "elysia";
 import { DetectionSeverity } from "@/generated/prisma";
-import { tDateTime, tStringEnum } from "@/types/schema";
 
-const SeverityEnum = tStringEnum(DetectionSeverity);
+const SeverityEnum = t.Enum(DetectionSeverity);
 
 export const PatternProjectParamsSchema = t.Object({
   id: t.String({ format: "uuid" }),
@@ -32,7 +31,7 @@ export const PatternResponseSchema = t.Object({
   regex: t.String(),
   severity: SeverityEnum,
   isBuiltIn: t.Boolean(),
-  createdAt: tDateTime(),
+  createdAt: t.Date(),
 });
 
 export const PatternListResponseSchema = t.Object({

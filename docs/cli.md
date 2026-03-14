@@ -2,11 +2,21 @@
 
 The DepVault CLI is a .NET 10 command-line tool that provides the same core functionality as the web dashboard: authentication, environment variable management, dependency analysis, and config format conversion.
 
-## Prerequisites
+## Quick Install
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+```bash
+# Linux / macOS
+curl -fsSL https://raw.githubusercontent.com/suxrobGM/depvault/main/apps/cli/install.sh | bash
 
-## Setup
+# Windows (PowerShell)
+irm https://raw.githubusercontent.com/suxrobGM/depvault/main/apps/cli/install.ps1 | iex
+```
+
+The installer downloads the latest release binary and adds it to `~/.depvault/bin/`.
+
+## Build from Source
+
+Prerequisites: [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 
 ```bash
 # Restore .NET local tools (includes Kiota for API client generation)
@@ -17,7 +27,7 @@ cd apps/cli
 dotnet build
 ```
 
-## Publish (Native AOT)
+### Publish (Native AOT)
 
 ```bash
 # Publish a self-contained AOT binary
@@ -26,7 +36,7 @@ dotnet publish -c Release -r linux-x64  # Linux
 dotnet publish -c Release -r osx-arm64  # macOS Apple Silicon
 ```
 
-The compiled binary is in `apps/cli/bin/Release/net10.0/<rid>/publish/`.
+The compiled binary is in `apps/cli/bin/Release/net10.0/<rid>/publish/depvault`.
 
 ## Configuration
 

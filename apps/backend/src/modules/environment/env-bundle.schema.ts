@@ -1,9 +1,8 @@
 import { CONFIG_FORMAT_VALUES } from "@depvault/shared/constants";
 import { t, type Static } from "elysia";
-import { tStringUnion } from "@/types/schema";
 import { EnvironmentTypeSchema } from "./environment.schema";
 
-const ConfigFormatSchema = tStringUnion(CONFIG_FORMAT_VALUES);
+const ConfigFormatSchema = t.UnionEnum(CONFIG_FORMAT_VALUES);
 
 export const EnvBundleBodySchema = t.Object({
   vaultGroupId: t.String(),

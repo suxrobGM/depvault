@@ -1,5 +1,4 @@
 import { t, type Static } from "elysia";
-import { tDateTime, tStringUnion } from "@/types/schema";
 
 export const CreateEnvShareBodySchema = t.Object({
   variableIds: t.Array(t.String(), { minItems: 1, maxItems: 100 }),
@@ -17,11 +16,11 @@ export const AccessSecretBodySchema = t.Object({
 });
 
 export const SharedSecretInfoResponseSchema = t.Object({
-  payloadType: tStringUnion(["ENV_VARIABLES", "SECRET_FILE"] as const),
+  payloadType: t.UnionEnum(["ENV_VARIABLES", "SECRET_FILE"] as const),
   hasPassword: t.Boolean(),
   fileName: t.Nullable(t.String()),
   mimeType: t.Nullable(t.String()),
-  expiresAt: tDateTime(),
+  expiresAt: t.Date(),
 });
 
 export const SharedSecretVariableSchema = t.Object({
@@ -30,12 +29,12 @@ export const SharedSecretVariableSchema = t.Object({
 });
 
 export const AccessEnvSecretResponseSchema = t.Object({
-  payloadType: tStringUnion(["ENV_VARIABLES"] as const),
+  payloadType: t.UnionEnum(["ENV_VARIABLES"] as const),
   variables: t.Array(SharedSecretVariableSchema),
 });
 
 export const AccessFileSecretResponseSchema = t.Object({
-  payloadType: tStringUnion(["SECRET_FILE"] as const),
+  payloadType: t.UnionEnum(["SECRET_FILE"] as const),
   fileName: t.String(),
   mimeType: t.String(),
   content: t.String(), // base64-encoded file content
@@ -49,13 +48,13 @@ export const CreateShareResponseSchema = t.Object({
 export const SharedSecretAuditItemSchema = t.Object({
   id: t.String(),
   token: t.String(),
-  payloadType: tStringUnion(["ENV_VARIABLES", "SECRET_FILE"] as const),
-  status: tStringUnion(["PENDING", "VIEWED", "EXPIRED"] as const),
+  payloadType: t.UnionEnum(["ENV_VARIABLES", "SECRET_FILE"] as const),
+  status: t.UnionEnum(["PENDING", "VIEWED", "EXPIRED"] as const),
   hasPassword: t.Boolean(),
   fileName: t.Nullable(t.String()),
-  expiresAt: tDateTime(),
-  viewedAt: t.Nullable(tDateTime()),
-  createdAt: tDateTime(),
+  expiresAt: t.Date(),
+  viewedAt: t.Nullable(t.Date()),
+  createdAt: t.Date(),
 });
 
 export const SharedSecretAuditListResponseSchema = t.Object({

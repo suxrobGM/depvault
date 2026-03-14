@@ -130,9 +130,9 @@ public sealed class AnalysisCommands(
                     {
                         name = d.Name,
                         version = d.CurrentVersion,
-                        latestVersion = d.LatestVersion?.String,
+                        latestVersion = d.LatestVersion,
                         status = d.Status,
-                        license = d.License?.String,
+                        license = d.License,
                         vulnerabilities = d.Vulnerabilities?.Count ?? 0
                     }));
                     return;
@@ -143,9 +143,9 @@ public sealed class AnalysisCommands(
                 {
                     d.Name ?? "",
                     d.CurrentVersion ?? "",
-                    d.LatestVersion?.String ?? "",
+                    d.LatestVersion ?? "",
                     d.Status ?? "",
-                    d.License?.String ?? "",
+                    d.License ?? "",
                     (d.Vulnerabilities?.Count ?? 0).ToString()
                 }).ToList();
 

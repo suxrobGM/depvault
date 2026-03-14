@@ -1,6 +1,5 @@
 import { t, type Static } from "elysia";
 import { PaginatedResponseSchema } from "@/types/response";
-import { tDateTime } from "@/types/schema";
 
 export const CreateCiTokenBodySchema = t.Object({
   name: t.String({ minLength: 1, maxLength: 100 }),
@@ -23,10 +22,10 @@ export const CiTokenResponseSchema = t.Object({
   environmentId: t.String(),
   environmentLabel: t.String(),
   ipAllowlist: t.Array(t.String()),
-  expiresAt: tDateTime(),
-  lastUsedAt: t.Nullable(tDateTime()),
-  revokedAt: t.Nullable(tDateTime()),
-  createdAt: tDateTime(),
+  expiresAt: t.Date(),
+  lastUsedAt: t.Nullable(t.Date()),
+  revokedAt: t.Nullable(t.Date()),
+  createdAt: t.Date(),
   createdByEmail: t.String(),
 });
 
@@ -34,7 +33,7 @@ export const CiTokenCreatedResponseSchema = t.Object({
   id: t.String(),
   token: t.String(),
   tokenPrefix: t.String(),
-  expiresAt: tDateTime(),
+  expiresAt: t.Date(),
 });
 
 export const CiTokenListQuerySchema = t.Object({

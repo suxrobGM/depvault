@@ -1,5 +1,4 @@
 import { t, type Static } from "elysia";
-import { tDateTime } from "@/types/schema";
 
 export const EnvVariableVersionParamsSchema = t.Object({
   id: t.String(),
@@ -12,7 +11,7 @@ export const EnvVariableVersionResponseSchema = t.Object({
   variableId: t.String(),
   value: t.String(),
   changedByName: t.String(),
-  createdAt: tDateTime(),
+  createdAt: t.Date(),
 });
 
 export const EnvVariableVersionListResponseSchema = t.Object({

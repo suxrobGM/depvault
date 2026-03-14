@@ -2,9 +2,8 @@ import { t, type Static } from "elysia";
 import { Ecosystem } from "@/generated/prisma";
 import { PaginationQueryBaseSchema } from "@/types/pagination";
 import { PaginatedResponseSchema } from "@/types/response";
-import { tDateTime, tStringEnum } from "@/types/schema";
 
-const EcosystemEnum = tStringEnum(Ecosystem);
+const EcosystemEnum = t.Enum(Ecosystem);
 
 export const CreateAnalysisBodySchema = t.Object({
   fileName: t.String({ minLength: 1, maxLength: 255 }),
@@ -21,8 +20,8 @@ export const VulnerabilityResponseSchema = t.Object({
   severity: t.String(),
   fixedIn: t.Nullable(t.String()),
   url: t.Nullable(t.String()),
-  createdAt: tDateTime(),
-  updatedAt: tDateTime(),
+  createdAt: t.Date(),
+  updatedAt: t.Date(),
 });
 
 export const DependencyResponseSchema = t.Object({
@@ -35,8 +34,8 @@ export const DependencyResponseSchema = t.Object({
   licensePolicy: t.String(),
   isDirect: t.Boolean(),
   parentId: t.Nullable(t.String()),
-  createdAt: tDateTime(),
-  updatedAt: tDateTime(),
+  createdAt: t.Date(),
+  updatedAt: t.Date(),
   vulnerabilities: t.Array(VulnerabilityResponseSchema),
 });
 
@@ -48,8 +47,8 @@ export const AnalysisResponseSchema = t.Object({
   filePath: t.Nullable(t.String()),
   ecosystem: EcosystemEnum,
   healthScore: t.Nullable(t.Number()),
-  createdAt: tDateTime(),
-  updatedAt: tDateTime(),
+  createdAt: t.Date(),
+  updatedAt: t.Date(),
   dependencies: t.Array(DependencyResponseSchema),
 });
 
@@ -62,8 +61,8 @@ export const AnalysisSummaryResponseSchema = t.Object({
   ecosystem: EcosystemEnum,
   healthScore: t.Nullable(t.Number()),
   dependencyCount: t.Number(),
-  createdAt: tDateTime(),
-  updatedAt: tDateTime(),
+  createdAt: t.Date(),
+  updatedAt: t.Date(),
 });
 
 export const AnalysisListQuerySchema = PaginationQueryBaseSchema;

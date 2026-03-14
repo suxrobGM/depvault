@@ -69,7 +69,17 @@ The results table shows each dependency with its current version, latest availab
 
 ### CLI
 
-If you have the DepVault CLI installed, run a scan directly from your terminal:
+Install the DepVault CLI and run a scan from your terminal:
+
+```bash
+# Linux / macOS
+curl -fsSL https://raw.githubusercontent.com/suxrobGM/depvault/main/apps/cli/install.sh | bash
+
+# Windows (PowerShell)
+irm https://raw.githubusercontent.com/suxrobGM/depvault/main/apps/cli/install.ps1 | iex
+```
+
+Then authenticate and analyze:
 
 ```bash
 depvault analyze --file package.json

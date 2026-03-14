@@ -1,8 +1,7 @@
 import { t, type Static } from "elysia";
 import { EnvironmentType } from "@/generated/prisma";
-import { tDateTime, tStringEnum } from "@/types/schema";
 
-const EnvironmentTypeSchema = tStringEnum(EnvironmentType);
+const EnvironmentTypeSchema = t.Enum(EnvironmentType);
 
 export const CreateEnvTemplateBodySchema = t.Object({
   name: t.String({ minLength: 1, maxLength: 100 }),
@@ -39,8 +38,8 @@ export const EnvTemplateResponseSchema = t.Object({
   description: t.Nullable(t.String()),
   variableCount: t.Number(),
   createdBy: t.String(),
-  createdAt: tDateTime(),
-  updatedAt: tDateTime(),
+  createdAt: t.Date(),
+  updatedAt: t.Date(),
 });
 
 export const EnvTemplateDetailResponseSchema = t.Object({
@@ -48,8 +47,8 @@ export const EnvTemplateDetailResponseSchema = t.Object({
   name: t.String(),
   description: t.Nullable(t.String()),
   createdBy: t.String(),
-  createdAt: tDateTime(),
-  updatedAt: tDateTime(),
+  createdAt: t.Date(),
+  updatedAt: t.Date(),
   variables: t.Array(EnvTemplateVariableSchema),
 });
 

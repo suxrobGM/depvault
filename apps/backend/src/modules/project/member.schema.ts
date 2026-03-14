@@ -2,10 +2,9 @@ import { t, type Static } from "elysia";
 import { ProjectRole } from "@/generated/prisma";
 import { PaginationQueryBaseSchema } from "@/types/pagination";
 import { PaginatedResponseSchema } from "@/types/response";
-import { tDateTime, tStringEnum, tStringUnion } from "@/types/schema";
 
-export const ProjectRoleSchema = tStringEnum(ProjectRole);
-export const InviteRoleSchema = tStringUnion([ProjectRole.EDITOR, ProjectRole.VIEWER] as const);
+export const ProjectRoleSchema = t.Enum(ProjectRole);
+export const InviteRoleSchema = t.UnionEnum([ProjectRole.EDITOR, ProjectRole.VIEWER] as const);
 
 export const InviteMemberBodySchema = t.Object({
   email: t.String({ format: "email" }),
@@ -34,8 +33,8 @@ export const MemberResponseSchema = t.Object({
   projectId: t.String(),
   userId: t.String(),
   role: ProjectRoleSchema,
-  createdAt: tDateTime(),
-  updatedAt: tDateTime(),
+  createdAt: t.Date(),
+  updatedAt: t.Date(),
   user: t.Object({
     id: t.String(),
     email: t.String(),
