@@ -6,6 +6,7 @@ FROM base AS deps
 COPY bun.lock package.json ./
 COPY apps/backend/package.json apps/backend/package.json
 COPY apps/frontend/package.json apps/frontend/package.json
+COPY apps/docs/package.json apps/docs/package.json
 COPY packages/shared/package.json packages/shared/package.json
 RUN bun install --frozen-lockfile --ignore-scripts
 
