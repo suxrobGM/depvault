@@ -5,13 +5,13 @@
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>DepVault.Cli</RootNamespace>
     <AssemblyName>depvault</AssemblyName>
+    <Version>1.1.0</Version>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PublishAot>true</PublishAot>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <OptimizationPreference>Size</OptimizationPreference>
-    <AssemblyVersion>1.1.0</AssemblyVersion>
-    <FileVersion>1.1.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,14 +1,16 @@
 namespace DepVault.Cli.Services;
 
 /// <summary>
-/// Loads .gitignore files (including nested ones) and checks whether a relative path is ignored.
-/// Supports: exact names, directory patterns, wildcards (* prefix/suffix), negation (!), and path prefixes.
+///     Loads .gitignore files (including nested ones) and checks whether a relative path is ignored.
+///     Supports: exact names, directory patterns, wildcards (* prefix/suffix), negation (!), and path prefixes.
 /// </summary>
 public sealed class GitignoreFilter
 {
-    private readonly List<GitignoreRule> _rules = [];
+    private readonly List<GitignoreRule> rules = [];
 
-    private GitignoreFilter() { }
+    private GitignoreFilter()
+    {
+    }
 
     /// <summary>Loads all .gitignore files under rootPath (root + nested) and builds a filter.</summary>
     public static GitignoreFilter Load(string rootPath)
@@ -36,8 +38,12 @@ public sealed class GitignoreFilter
                 filter.LoadFile(gitignorePath, scope);
             }
         }
-        catch (UnauthorizedAccessException) { }
-        catch (DirectoryNotFoundException) { }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (DirectoryNotFoundException)
+        {
+        }
 
         return filter;
     }
@@ -47,7 +53,7 @@ public sealed class GitignoreFilter
     {
         var ignored = false;
 
-        foreach (var rule in _rules)
+        foreach (var rule in rules)
         {
             // Rule only applies if the file is within the rule's scope
             if (rule.Scope.Length > 0 && !relativePath.StartsWith(rule.Scope + "/", StringComparison.OrdinalIgnoreCase))
@@ -98,10 +104,13 @@ public sealed class GitignoreFilter
                     line = line[1..];
                 }
 
-                _rules.Add(new GitignoreRule(scope, line, isNegation));
+                rules.Add(new GitignoreRule(scope, line, isNegation));
             }
         }
-        catch { /* skip unreadable gitignore files */ }
+        catch
+        {
+            /* skip unreadable gitignore files */
+        }
     }
 
     private static bool MatchesPattern(string relativePath, string pattern)
@@ -173,30 +182,32 @@ public sealed class GitignoreFilter
     private static bool MatchesGlob(string path, string pattern)
     {
         // Handle ** (matches any number of directories)
-        if (pattern.Contains("**"))
+        if (!pattern.Contains("**"))
         {
-            var parts = pattern.Split("**/", 2, StringSplitOptions.None);
-            if (parts.Length == 2)
+            return MatchesWildcard(path, pattern);
+        }
+
+        var parts = pattern.Split("**/", 2);
+        if (parts.Length == 2)
+        {
+            var suffix = parts[1];
+            // "**/*.json" → check if any suffix of the path matches "*.json"
+            if (MatchesGlob(path, suffix))
             {
-                var suffix = parts[1];
-                // "**/*.json" → check if any suffix of the path matches "*.json"
-                if (MatchesGlob(path, suffix))
+                return true;
+            }
+
+            var pathSegments = path.Split('/');
+            for (var i = 1; i < pathSegments.Length; i++)
+            {
+                var subPath = string.Join('/', pathSegments[i..]);
+                if (MatchesGlob(subPath, suffix))
                 {
                     return true;
                 }
-
-                var pathSegments = path.Split('/');
-                for (var i = 1; i < pathSegments.Length; i++)
-                {
-                    var subPath = string.Join('/', pathSegments[i..]);
-                    if (MatchesGlob(subPath, suffix))
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
             }
+
+            return false;
         }
 
         // Simple * wildcard matching (within a single segment or the whole string)
@@ -242,8 +253,10 @@ public sealed class GitignoreFilter
         return pp == pattern.Length;
     }
 
-    private static bool CharEqualsIgnoreCase(char a, char b) =>
-        char.ToLowerInvariant(a) == char.ToLowerInvariant(b);
+    private static bool CharEqualsIgnoreCase(char a, char b)
+    {
+        return char.ToLowerInvariant(a) == char.ToLowerInvariant(b);
+    }
 
     private static string GetFileName(string path)
     {

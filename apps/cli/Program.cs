@@ -1,6 +1,8 @@
 using System.CommandLine;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Commands;
+using DepVault.Cli.Commands.Env;
+using DepVault.Cli.Commands.Scan;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
@@ -8,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Kiota.Abstractions.Authentication;
 
 var services = new ServiceCollection()
+    // Core services
     .AddSingleton<IConfigService, ConfigService>()
     .AddSingleton<ICredentialStore, CredentialStore>()
     .AddSingleton<IAuthContext, AuthContext>()
@@ -17,6 +20,16 @@ var services = new ServiceCollection()
     .AddSingleton<IConsolePrompter, ConsolePrompter>()
     .AddSingleton<IFileScanner, FileScanner>()
     .AddSingleton<ISecretDetector, SecretDetector>()
+    .AddSingleton<AnalysisClient>()
+    // Scan steps
+    .AddSingleton<ProjectResolver>()
+    .AddSingleton<DependencyScanner>()
+    .AddSingleton<EnvFileScanner>()
+    .AddSingleton<SecretLeakScanner>()
+    .AddSingleton<SecretFileScanner>()
+    // Shared resolvers
+    .AddSingleton<VaultGroupResolver>()
+    // Commands
     .AddSingleton<AuthCommands>()
     .AddSingleton<ConfigCommands>()
     .AddSingleton<ProjectCommands>()
@@ -50,7 +63,7 @@ var rootCommand = new RootCommand("DepVault CLI — dependency analysis, env vau
     scan.CreateScanCommand()
 };
 
-rootCommand.SetAction(parseResult =>
+rootCommand.SetAction(_ =>
 {
     ConsoleTheme.PrintBanner();
     Console.WriteLine(rootCommand.Description);

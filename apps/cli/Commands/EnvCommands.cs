@@ -1,6 +1,6 @@
 using System.CommandLine;
-using DepVault.Cli.ApiClient.Projects.Item.VaultGroups;
 using DepVault.Cli.Auth;
+using DepVault.Cli.Commands.Env;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
@@ -17,18 +17,18 @@ public sealed class EnvCommands(
     IConfigService configService,
     IOutputFormatter output,
     IConsolePrompter prompter,
-    IFileScanner fileScanner)
+    IFileScanner fileScanner,
+    VaultGroupResolver vaultGroupResolver)
 {
     public Command CreateEnvCommand()
     {
-        var cmd = new Command("env", "Manage environment variables")
+        return new Command("env", "Manage environment variables")
         {
             CreatePullCommand(),
             CreatePushCommand(),
             CreateListCommand(),
             CreateDiffCommand()
         };
-        return cmd;
     }
 
     private Command CreatePullCommand()
@@ -45,13 +45,7 @@ public sealed class EnvCommands(
         var outputOpt = new Option<string?>("--output") { Description = "Output file path (defaults to stdout)" };
 
         var cmd = new Command("pull", "Export environment variables to local file")
-        {
-            projectOpt,
-            vaultGroupOpt,
-            envOpt,
-            formatOpt,
-            outputOpt
-        };
+            { projectOpt, vaultGroupOpt, envOpt, formatOpt, outputOpt };
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
@@ -75,8 +69,8 @@ public sealed class EnvCommands(
                 var client = clientFactory.Create();
                 var result = await client.Projects[projectId].Environments.Export.GetAsync(config =>
                 {
-                    config.QueryParameters.EnvironmentType = CommandHelpers.ParseEnum(env,
-                        ExportNs.GetEnvironmentTypeQueryParameterType.DEVELOPMENT);
+                    config.QueryParameters.EnvironmentType =
+                        CommandHelpers.ParseEnum(env, ExportNs.GetEnvironmentTypeQueryParameterType.DEVELOPMENT);
                     config.QueryParameters.Format =
                         CommandHelpers.ParseEnum(format, ExportNs.GetFormatQueryParameterType.Env);
                     if (!string.IsNullOrEmpty(vaultGroupId))
@@ -108,13 +102,7 @@ public sealed class EnvCommands(
         var fileOpt = new Option<string?>("--file") { Description = "File to import (auto-detects if omitted)" };
 
         var cmd = new Command("push", "Import environment variables from local file")
-        {
-            projectOpt,
-            vaultGroupOpt,
-            envOpt,
-            formatOpt,
-            fileOpt
-        };
+            { projectOpt, vaultGroupOpt, envOpt, formatOpt, fileOpt };
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
@@ -129,55 +117,24 @@ public sealed class EnvCommands(
                 return;
             }
 
-            // Resolve file
-            var filePath = parseResult.GetValue(fileOpt);
-            if (string.IsNullOrEmpty(filePath))
-            {
-                if (!prompter.IsInteractive)
-                {
-                    output.PrintError("--file is required in non-interactive mode.");
-                    return;
-                }
-
-                var discovered = fileScanner.FindEnvFiles(Directory.GetCurrentDirectory());
-                if (discovered.Count == 0)
-                {
-                    output.PrintError("No environment files found in current directory.");
-                    return;
-                }
-
-                var selected = prompter.Select(
-                    "Select a file to import",
-                    discovered,
-                    f => f.RelativePath);
-                filePath = selected.FullPath;
-            }
-
-            if (!CommandHelpers.RequireFile(filePath, output))
+            var filePath = CommandHelpers.ResolveFileInteractive(
+                parseResult, fileOpt, prompter, output,
+                () => fileScanner.FindEnvFiles(Directory.GetCurrentDirectory()),
+                "environment");
+            if (filePath is null)
             {
                 return;
             }
 
-            // Resolve vault group
-            var vaultGroupId = parseResult.GetValue(vaultGroupOpt);
-            if (string.IsNullOrEmpty(vaultGroupId))
+            var vaultGroupId = await ResolveVaultGroupId(parseResult, vaultGroupOpt, projectId, cancellationToken);
+            if (vaultGroupId is null)
             {
-                if (!prompter.IsInteractive)
-                {
-                    output.PrintError("--vault-group is required in non-interactive mode.");
-                    return;
-                }
-
-                vaultGroupId = await ResolveVaultGroupAsync(projectId, cancellationToken);
-                if (vaultGroupId is null)
-                {
-                    return;
-                }
+                return;
             }
 
             try
             {
-                var content = File.ReadAllText(filePath);
+                var content = await File.ReadAllTextAsync(filePath, cancellationToken);
                 var envValue = parseResult.GetValue(envOpt) ?? "DEVELOPMENT";
                 var formatValue = parseResult.GetValue(formatOpt) ?? "env";
                 var client = clientFactory.Create();
@@ -207,51 +164,6 @@ public sealed class EnvCommands(
         return cmd;
     }
 
-    private async Task<string?> ResolveVaultGroupAsync(string projectId, CancellationToken ct)
-    {
-        var client = clientFactory.Create();
-
-        var groups = await AnsiConsole.Status()
-            .Spinner(Spinner.Known.Dots)
-            .StartAsync("Fetching vault groups...", async _ =>
-                await client.Projects[projectId].VaultGroups.GetAsync(cancellationToken: ct));
-
-        var createLabel = "+ Create new vault group";
-
-        if (groups is not null && groups.Count > 0)
-        {
-            var choices = groups
-                .Select(g => g.Name ?? g.Id ?? "Unknown")
-                .Append(createLabel)
-                .ToList();
-
-            var selected = prompter.Select("Select vault group", choices, c => c);
-
-            if (selected != createLabel)
-            {
-                var match = groups.FirstOrDefault(g => (g.Name ?? g.Id) == selected);
-                return match?.Id;
-            }
-        }
-
-        var name = prompter.Ask("Vault group name", "default");
-
-        var created = await AnsiConsole.Status()
-            .Spinner(Spinner.Known.Dots)
-            .StartAsync("Creating vault group...", async _ =>
-                await client.Projects[projectId].VaultGroups.PostAsync(new VaultGroupsPostRequestBody { Name = name },
-                    cancellationToken: ct));
-
-        if (created?.Id is null)
-        {
-            output.PrintError("Failed to create vault group.");
-            return null;
-        }
-
-        output.PrintSuccess($"Created vault group '{name}'");
-        return created.Id;
-    }
-
     private Command CreateListCommand()
     {
         var projectOpt = new Option<string?>("--project") { Description = "Project ID" };
@@ -261,12 +173,7 @@ public sealed class EnvCommands(
             { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
 
         var cmd = new Command("list", "List environment variables")
-        {
-            projectOpt,
-            vaultGroupOpt,
-            envOpt,
-            outputOpt
-        };
+            { projectOpt, vaultGroupOpt, envOpt, outputOpt };
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
@@ -281,24 +188,22 @@ public sealed class EnvCommands(
                 return;
             }
 
-            var vaultGroupId = parseResult.GetValue(vaultGroupOpt);
-            var env = parseResult.GetValue(envOpt);
-            var outputFmt = parseResult.GetValue(outputOpt);
-
             try
             {
                 var client = clientFactory.Create();
                 var result = await client.Projects[projectId].Environments.Variables.GetAsync(config =>
                 {
-                    if (!string.IsNullOrEmpty(vaultGroupId))
+                    var vgId = parseResult.GetValue(vaultGroupOpt);
+                    if (!string.IsNullOrEmpty(vgId))
                     {
-                        config.QueryParameters.VaultGroupId = vaultGroupId;
+                        config.QueryParameters.VaultGroupId = vgId;
                     }
 
+                    var env = parseResult.GetValue(envOpt);
                     if (!string.IsNullOrEmpty(env))
                     {
-                        config.QueryParameters.EnvironmentType = CommandHelpers.ParseEnum(env,
-                            VarNs.GetEnvironmentTypeQueryParameterType.DEVELOPMENT);
+                        config.QueryParameters.EnvironmentType =
+                            CommandHelpers.ParseEnum(env, VarNs.GetEnvironmentTypeQueryParameterType.DEVELOPMENT);
                     }
                 }, cancellationToken);
 
@@ -309,22 +214,16 @@ public sealed class EnvCommands(
                     return;
                 }
 
-                if (outputFmt == "json")
+                if (parseResult.GetValue(outputOpt) == "json")
                 {
                     output.PrintJson(items.Select(v => new
                         { key = v.Key, value = v.Value, environmentId = v.EnvironmentId }));
                     return;
                 }
 
-                var headers = new[] { "KEY", "VALUE", "ENVIRONMENT" };
-                var rows = items.Select(v => new[]
-                {
-                    v.Key ?? "",
-                    v.Value ?? "(masked)",
-                    v.EnvironmentId ?? ""
-                }).ToList();
-
-                output.PrintTable(headers, rows);
+                output.PrintTable(
+                    ["KEY", "VALUE", "ENVIRONMENT"],
+                    items.Select(v => new[] { v.Key ?? "", v.Value ?? "(masked)", v.EnvironmentId ?? "" }).ToList());
             }
             catch (Exception ex)
             {
@@ -345,12 +244,7 @@ public sealed class EnvCommands(
             { Description = "Output format", DefaultValueFactory = _ => "table" };
 
         var cmd = new Command("diff", "Compare environment variables across environments")
-        {
-            projectOpt,
-            vaultGroupOpt,
-            envsOpt,
-            outputOpt
-        };
+            { projectOpt, vaultGroupOpt, envsOpt, outputOpt };
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
@@ -365,17 +259,14 @@ public sealed class EnvCommands(
                 return;
             }
 
-            var vaultGroupId = parseResult.GetValue(vaultGroupOpt);
-            var envs = parseResult.GetValue(envsOpt)!;
-            var outputFmt = parseResult.GetValue(outputOpt);
-
             try
             {
-                var envList = envs.Split(',').Select(e => e.Trim().ToUpperInvariant()).ToArray();
+                var envList = parseResult.GetValue(envsOpt)!
+                    .Split(',').Select(e => e.Trim().ToUpperInvariant()).ToArray();
                 var client = clientFactory.Create();
                 var result = await client.Projects[projectId].Environments.Diff.GetAsync(config =>
                 {
-                    config.QueryParameters.VaultGroupId = vaultGroupId;
+                    config.QueryParameters.VaultGroupId = parseResult.GetValue(vaultGroupOpt);
                     config.QueryParameters.Environments = string.Join(",", envList);
                 }, cancellationToken);
 
@@ -386,20 +277,15 @@ public sealed class EnvCommands(
                     return;
                 }
 
-                if (outputFmt == "json")
+                if (parseResult.GetValue(outputOpt) == "json")
                 {
                     output.PrintJson(rows.Select(r => new { key = r.Key, status = r.Status?.ToString() }));
                     return;
                 }
 
-                var headers = new[] { "KEY", "STATUS" };
-                var tableRows = rows.Select(r => new[]
-                {
-                    r.Key ?? "",
-                    r.Status?.ToString() ?? ""
-                }).ToList();
-
-                output.PrintTable(headers, tableRows);
+                output.PrintTable(
+                    ["KEY", "STATUS"],
+                    rows.Select(r => new[] { r.Key ?? "", r.Status?.ToString() ?? "" }).ToList());
             }
             catch (Exception ex)
             {
@@ -408,5 +294,23 @@ public sealed class EnvCommands(
         });
 
         return cmd;
+    }
+
+    private async Task<string?> ResolveVaultGroupId(
+        ParseResult parseResult, Option<string?> vaultGroupOpt, string projectId, CancellationToken ct)
+    {
+        var vaultGroupId = parseResult.GetValue(vaultGroupOpt);
+        if (!string.IsNullOrEmpty(vaultGroupId))
+        {
+            return vaultGroupId;
+        }
+
+        if (!prompter.IsInteractive)
+        {
+            output.PrintError("--vault-group is required in non-interactive mode.");
+            return null;
+        }
+
+        return await vaultGroupResolver.ResolveAsync(projectId, ct);
     }
 }
