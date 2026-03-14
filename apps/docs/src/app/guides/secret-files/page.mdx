@@ -1,0 +1,134 @@
+# Secret Files
+
+Upload and manage sensitive configuration files like certificates, keys, and credentials within the encrypted vault.
+
+---
+
+## Overview
+
+Beyond environment variables, many projects depend on sensitive files that cannot be committed to version control — SSL/TLS certificates, private keys, keystores, provisioning profiles, and cloud credential files. DepVault's secret file management lets you upload, version, and distribute these files securely. All files are encrypted with AES-256-GCM at rest and access is controlled by project role permissions.
+
+---
+
+## Supported File Types
+
+You can upload any non-executable file up to **25 MB** in size. Common use cases include:
+
+| File Type | Examples |
+| --- | --- |
+| **SSL/TLS Certificates** | `.pem`, `.crt`, `.cer`, `.p12`, `.pfx` |
+| **Private Keys** | `.key`, `.pem` |
+| **Keystores** | `.jks`, `.keystore`, `.p12` |
+| **iOS Provisioning Profiles** | `.mobileprovision` |
+| **Cloud Credentials** | `credentials.json`, `serviceAccountKey.json` |
+| **SSH Keys** | `id_rsa`, `id_ed25519`, `.pub` |
+| **GPG Keys** | `.gpg`, `.asc` |
+| **Other Config** | `.yaml`, `.toml`, `.xml`, `.conf` |
+
+**Blocked:** Executable files (`.exe`, `.sh`, `.bat`, `.cmd`, `.msi`, `.dll`, `.so`, `.dylib`) are rejected at upload time to prevent accidental distribution of binaries.
+
+---
+
+## Uploading a File
+
+1. Navigate to your project and open the **Vault** tab.
+2. Select the target environment (e.g., **Production**).
+3. Click the **Files** section within the environment view.
+4. Click **Upload File**.
+5. Select the file from your local machine or drag and drop it into the upload area.
+6. Optionally add a **description** explaining what the file is used for.
+7. Click **Upload**.
+
+The file is encrypted immediately upon upload using AES-256-GCM. The plaintext content never touches disk on the server — encryption happens in memory before storage.
+
+---
+
+## Per-Environment Organization
+
+Secret files are organized by environment, just like environment variables. Each environment has its own file list. This means you can store different certificates for Development and Production without confusion.
+
+When viewing the Vault tab, switch between environments using the environment selector, and the file list updates to show only the files belonging to that environment.
+
+---
+
+## Version History
+
+Every time you upload a new version of an existing file (same file name within the same environment), DepVault creates a new version entry rather than overwriting the previous one.
+
+### Viewing Version History
+
+1. Click on a file in the file list to open its detail panel.
+2. Select the **History** tab.
+3. Each version entry shows:
+   - Version number
+   - Upload timestamp
+   - Uploaded by (user name)
+   - File size
+   - Description (if provided)
+
+### Rolling Back to a Previous Version
+
+1. In the version history list, find the version you want to restore.
+2. Click **Restore** next to that version.
+3. Confirm the rollback.
+
+The restored version becomes the current active version. The version that was replaced is still retained in history and can be restored again later if needed.
+
+---
+
+## Downloading and Decrypting Files
+
+Authorized users can download the decrypted file to their local machine.
+
+1. Click on the file in the file list.
+2. Click the **Download** button.
+3. The file is decrypted on the server and streamed to your browser over HTTPS.
+
+### Role Restrictions
+
+| Role | Can Upload | Can Download/Decrypt | Can Delete |
+| --- | --- | --- | --- |
+| **Owner** | Yes | Yes | Yes |
+| **Editor** | Yes | Yes | No |
+| **Viewer** | No | No | No |
+
+Users with the **Viewer** role can see that a file exists (file name, description, upload date) but cannot download or decrypt it. The download button is hidden for viewers.
+
+---
+
+## Deleting a File
+
+Only the project **Owner** can delete a secret file.
+
+1. Open the file detail panel.
+2. Click **Delete File**.
+3. Confirm the deletion.
+
+Deleting a file removes all versions permanently. This action cannot be undone.
+
+---
+
+## Encryption Details
+
+- **Algorithm:** AES-256-GCM (authenticated encryption with associated data).
+- **Key management:** Encryption keys are derived per-project and stored separately from the encrypted file contents.
+- **At rest:** Files are stored in their encrypted form. The plaintext is never written to disk on the server.
+- **In transit:** All uploads and downloads occur over HTTPS/TLS.
+- **Audit log:** Every upload, download, and deletion is recorded in the project audit log.
+
+---
+
+## Best Practices
+
+- **Rotate regularly** — Upload new versions of certificates and keys before they expire. Use the version history to track rotation dates.
+- **Add descriptions** — Document what each file is for, which service uses it, and when it expires.
+- **Limit access** — Use the Viewer role for team members who need to know a file exists but should not have access to its contents.
+- **Use environment separation** — Store production certificates only in the Production environment, not in Development or Staging.
+
+---
+
+## What's Next
+
+- **[Environment Vault](/guides/environment-vault)** — Manage environment variables alongside secret files.
+- **[Environment Templates](/guides/env-templates)** — Templates list secret file names so new environments know which files are needed.
+- **[Secret Sharing](/guides/secret-sharing)** — Share one-time links for variables (files must be shared via the vault directly).

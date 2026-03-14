@@ -1,0 +1,51 @@
+# DepVault Documentation
+
+Welcome to the DepVault documentation. DepVault is a platform that analyzes dependencies, detects vulnerabilities, and securely stores environment variables and secret files across any tech stack.
+
+## What is DepVault?
+
+DepVault provides three core tools in one unified platform:
+
+- **Dependency Analysis** — Upload dependency files from 9+ ecosystems (Node.js, Python, .NET, Rust, Go, Java, Kotlin, Ruby, PHP) and get instant reports on outdated packages, known CVEs, and license conflicts.
+- **Encrypted Vault** — Store environment variables and secret files with AES-256-GCM encryption at rest. Manage multiple environments (development, staging, production) with diff views and version history.
+- **Secret Sharing & CI/CD** — Share secrets via one-time encrypted links, inject secrets into CI/CD pipelines with scoped tokens, and scan git repos for accidentally committed credentials.
+
+## Quick Links
+
+- [**Getting Started**](/getting-started) — Create your account, set up your first project, and run your first dependency scan.
+- [**Environment Vault**](/guides/environment-vault) — Store and manage encrypted environment variables across environments.
+- [**API Reference**](/api) — Integrate with the DepVault REST API using JWT or CI tokens.
+- [**CLI Reference**](/cli) — Use the DepVault CLI for terminal-based access and CI/CD integration.
+
+## Platform Overview
+
+DepVault is available as:
+
+| Interface | Description |
+| --- | --- |
+| **Web Dashboard** | Full-featured web app at [depvault.com](https://depvault.com) |
+| **REST API** | Programmatic access with interactive [Swagger docs](https://depvault.com/api/swagger) |
+| **CLI** | Native AOT binary for terminal access and CI/CD pipelines |
+
+## Supported Ecosystems
+
+| Ecosystem | Files |
+| --- | --- |
+| Node.js | `package.json`, `package-lock.json`, `yarn.lock`, `bun.lock` |
+| Python | `requirements.txt`, `pyproject.toml`, `Pipfile`, `poetry.lock` |
+| .NET | `*.csproj`, `Directory.Packages.props` |
+| Rust | `Cargo.toml` |
+| Go | `go.mod` |
+| Java | `pom.xml` |
+| Kotlin | `build.gradle.kts` |
+| Ruby | `Gemfile` |
+| PHP | `composer.json` |
+
+## Supported Config Formats
+
+DepVault can import, export, and convert between:
+
+- `.env` (dotenv)
+- `appsettings.json` (ASP.NET)
+- `secrets.yaml` (Kubernetes)
+- `config.toml` (TOML)

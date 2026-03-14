@@ -1,0 +1,171 @@
+# Authentication
+
+Authenticate the DepVault CLI with your account using interactive login or CI tokens.
+
+---
+
+## Overview
+
+The CLI supports two authentication modes. **Interactive mode** is for local development -- you log in with your email and password, and the CLI stores JWT tokens in `~/.depvault/credentials.json`. **CI token mode** is for automated pipelines -- you set the `DEPVAULT_TOKEN` environment variable with a project-scoped token generated from the web dashboard.
+
+The CLI automatically detects which mode to use. When `DEPVAULT_TOKEN` is present in the environment, all requests use that token and interactive login commands are blocked.
+
+---
+
+## depvault login
+
+Authenticate interactively with your DepVault account. The CLI prompts for your email and password, then stores the returned JWT tokens in `~/.depvault/credentials.json`.
+
+```bash
+depvault login
+```
+
+```
+Email: user@example.com
+Password: ********
+Logged in as user@example.com
+```
+
+### Flags
+
+| Flag           | Description                                                        |
+|----------------|--------------------------------------------------------------------|
+| `--email`      | Provide email non-interactively (skips prompt).                    |
+| `--password`   | Provide password non-interactively (skips prompt).                 |
+| `--server`     | Set the API server URL before authenticating. Persists to config.  |
+
+### Non-interactive Login
+
+You can pass credentials directly to skip the interactive prompts. This is useful for scripting but should not be used in CI/CD -- use `DEPVAULT_TOKEN` instead.
+
+```bash
+depvault login --email user@example.com --password MyP@ssw0rd
+```
+
+### Setting the Server URL
+
+When connecting to a self-hosted DepVault instance, pass `--server` to set the API URL. The URL is persisted to `~/.depvault/config.json` so subsequent commands use it automatically.
+
+```bash
+depvault login --server https://api.example.com
+```
+
+This is equivalent to running `depvault config set server https://api.example.com` followed by `depvault login`.
+
+### CI Mode Blocked
+
+If the `DEPVAULT_TOKEN` environment variable is set, `depvault login` exits with an error:
+
+```
+Error: Cannot use interactive login when DEPVAULT_TOKEN is set.
+Remove the DEPVAULT_TOKEN environment variable to use interactive login.
+```
+
+This prevents accidental credential conflicts in CI/CD environments.
+
+---
+
+## depvault logout
+
+Clear stored credentials by deleting `~/.depvault/credentials.json`. After logging out, you must run `depvault login` again to authenticate.
+
+```bash
+depvault logout
+```
+
+```
+Credentials removed. You are now logged out.
+```
+
+If no credentials file exists, the command exits silently without error.
+
+---
+
+## depvault whoami
+
+Display information about the currently authenticated user. The output varies depending on the authentication mode.
+
+```bash
+depvault whoami
+```
+
+### Interactive (JWT) Mode
+
+In JWT mode, the CLI sends a `GET /users/me` request and displays the user's profile:
+
+```
+Auth mode: JWT (interactive)
+Email:     user@example.com
+Name:      Jane Doe
+Role:      OWNER
+```
+
+### CI Token Mode
+
+In CI token mode, the CLI confirms the token is set but does not fetch user details:
+
+```
+Auth mode: CI Token (DEPVAULT_TOKEN)
+Token:     depvault_ci_****abcd
+```
+
+### Not Authenticated
+
+If no credentials are found and `DEPVAULT_TOKEN` is not set:
+
+```
+Not authenticated. Run `depvault login` or set the DEPVAULT_TOKEN environment variable.
+```
+
+---
+
+## CI Token Mode
+
+For CI/CD pipelines, use a project-scoped token instead of interactive login. Tokens are generated from the DepVault web dashboard and passed to the CLI via the `DEPVAULT_TOKEN` environment variable.
+
+### Generating a Token
+
+1. Open your project in the DepVault web dashboard.
+2. Navigate to **Settings** > **CI Tokens**.
+3. Click **Generate Token**.
+4. Select the target **environment** (e.g., PRODUCTION).
+5. Optionally configure an **IP allowlist** and **expiration date**.
+6. Click **Create** and copy the token value.
+
+> The token is shown only once. Store it as a secret in your CI provider (e.g., GitHub Actions secret, GitLab CI variable).
+
+### Using the Token
+
+Set `DEPVAULT_TOKEN` in your pipeline environment:
+
+```bash
+export DEPVAULT_TOKEN=depvault_ci_xxxxxxxxxxxxxxxxxxxx
+depvault ci pull --format env --output .env
+```
+
+When `DEPVAULT_TOKEN` is set, all API requests use the token for authentication. Interactive commands (`login`, `logout`) are blocked to prevent conflicts.
+
+### Token Scope and Security
+
+- Each token is scoped to a **single project and environment**.
+- Tokens can have an optional **IP allowlist** to restrict usage to specific CI runner IPs.
+- Tokens can have a configurable **expiration** date. Expired tokens are rejected with a `401 Unauthorized` response.
+- Revoke tokens at any time from the web dashboard under **Settings** > **CI Tokens**.
+
+---
+
+## Credential Storage
+
+| File                              | Contents                        | Created by       |
+|-----------------------------------|---------------------------------|------------------|
+| `~/.depvault/config.json`        | Server URL, active project, output format | `config set`, `login --server` |
+| `~/.depvault/credentials.json`   | JWT access and refresh tokens   | `depvault login`  |
+
+Both files are stored in your home directory. The credentials file is deleted by `depvault logout`. Never commit these files to version control.
+
+---
+
+## Next Steps
+
+- **[Projects](/cli/projects)** -- List and select projects after authenticating.
+- **[CI/CD](/cli/ci)** -- Pull secrets in CI/CD pipelines using `DEPVAULT_TOKEN`.

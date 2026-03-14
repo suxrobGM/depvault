@@ -1,0 +1,157 @@
+# Secret Scanning
+
+Scan your Git repositories for accidentally committed secrets, API keys, and credentials across the full commit history.
+
+---
+
+## Overview
+
+Secret scanning connects to your GitHub repositories and analyzes commit history to detect accidentally exposed credentials. It matches content against a library of built-in regex patterns for common secret types (API keys, tokens, connection strings, private keys) and supports custom patterns for project-specific secrets. When a secret is detected, the project owner is notified immediately and remediation guidance is provided.
+
+---
+
+## Connecting a Repository
+
+1. Navigate to your project and open the **Settings** tab.
+2. Under **Integrations**, click **Connect GitHub**.
+3. Authenticate with GitHub via OAuth. DepVault requests read-only access to repository contents and commit history.
+4. Select the repository to link to this project.
+5. Click **Connect**.
+
+Once connected, you can trigger scans manually or configure automatic scanning on new pushes.
+
+---
+
+## Running a Scan
+
+### Manual Scan
+
+1. Open the **Secret Scanning** tab within your project.
+2. Click **Run Scan**.
+3. The scanner analyzes the full commit history of the connected repository.
+4. Results appear in the detections table once the scan completes.
+
+### Automatic Scanning
+
+When enabled, DepVault automatically scans new commits whenever code is pushed to the connected repository. Enable this from **Settings** > **Integrations** > **Auto-scan on push**.
+
+---
+
+## Detection Results
+
+Each detection represents a potential secret found in the commit history. The detections table shows:
+
+| Column | Description |
+| --- | --- |
+| **Pattern** | The type of secret matched (e.g., "AWS Access Key", "GitHub Token", "Generic API Key"). |
+| **Severity** | The severity level of the detection: **Critical**, **High**, **Medium**, or **Low**. |
+| **Commit Hash** | The short SHA of the commit where the secret was found. Clicking it opens the commit on GitHub. |
+| **File Path** | The file within the repository that contains the detection. |
+| **Line Number** | The specific line number where the match was found. |
+| **Status** | The current status of the detection (see below). |
+| **Detected At** | Timestamp of when the scan found this match. |
+
+---
+
+## Detection Statuses
+
+Each detection has one of three statuses:
+
+| Status | Meaning |
+| --- | --- |
+| **OPEN** | The detection is new and has not been addressed. This is the default status for all new detections. |
+| **RESOLVED** | The secret has been rotated or removed, and the detection is considered addressed. |
+| **FALSE_POSITIVE** | The match is not an actual secret (e.g., a placeholder, example value, or test fixture). |
+
+### Updating a Detection Status
+
+1. Click on a detection to open its detail panel.
+2. Select the new status from the **Status** dropdown.
+3. Optionally add a note explaining the resolution (e.g., "Key rotated on 2026-03-10").
+4. Click **Update**.
+
+### Batch Updates
+
+To update multiple detections at once:
+
+1. Select detections using the checkboxes in the table.
+2. Click the **Batch Update** button in the toolbar.
+3. Choose the new status to apply to all selected detections.
+4. Confirm the update.
+
+---
+
+## Severity Levels
+
+Severity is assigned based on the type of secret detected:
+
+| Severity | Examples |
+| --- | --- |
+| **Critical** | Cloud provider root credentials (AWS, GCP, Azure), database connection strings with passwords, private signing keys. |
+| **High** | API tokens for third-party services, OAuth client secrets, JWT signing keys. |
+| **Medium** | Generic API keys, webhook secrets, SMTP passwords. |
+| **Low** | Internal service tokens, non-production test keys, basic auth passwords in non-production configs. |
+
+---
+
+## Notifications
+
+When a scan detects one or more secrets, DepVault sends notifications to the project owner:
+
+- **In-app notification** — A badge appears on the notification bell in the top navigation bar with a summary of new detections.
+- **Email notification** — An email is sent to the project owner with the number of new detections, their severities, and a link to the scanning results page.
+
+Notifications are sent immediately when the scan completes, not batched or delayed.
+
+---
+
+## Remediation Guidance
+
+Each detection includes a remediation section in its detail panel with actionable steps:
+
+1. **Rotate the secret** — Generate a new key/token in the provider's dashboard and update all services that use it.
+2. **Remove from history** — Use `git filter-repo` or BFG Repo-Cleaner to purge the secret from Git history.
+3. **Store securely** — Add the new secret to the DepVault vault instead of hardcoding it in source files.
+4. **Add to .gitignore** — If the secret was in a file that should not be committed, add that file to `.gitignore`.
+
+The guidance is tailored to the type of secret detected (e.g., AWS key remediation includes a link to the AWS IAM console).
+
+---
+
+## Custom Scan Patterns
+
+Create project-specific regex patterns to detect secrets unique to your organization.
+
+1. Open the **Secret Scanning** tab.
+2. Click **Custom Patterns**.
+3. Click **Add Pattern**.
+4. Fill in the fields:
+   - **Name** — A descriptive name (e.g., "Internal Service Token").
+   - **Regex** — The regular expression to match (e.g., `INTERNAL_[A-Z0-9]{32}`).
+   - **Severity** — The severity to assign when this pattern matches.
+   - **Description** — Optional context about what this pattern detects.
+5. Click **Save**.
+
+Custom patterns are included in all subsequent scans alongside the built-in patterns. They can be edited or deleted from the Custom Patterns list.
+
+---
+
+## Scan History
+
+The **History** section within the Secret Scanning tab shows a timeline of all previous scans:
+
+- Scan timestamp
+- Trigger type (manual or automatic)
+- Number of new detections found
+- Total files scanned
+- Scan duration
+
+Click any scan entry to view the detections found during that specific run.
+
+---
+
+## What's Next
+
+- **[Dependency Analysis](/guides/dependency-analysis)** — Analyze dependencies for vulnerabilities alongside secret scanning.
+- **[License Compliance](/guides/license-compliance)** — Review dependency licenses detected during analysis.
+- **[Team Management](/guides/team-management)** — Control who has access to view and manage scan results.

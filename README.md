@@ -29,7 +29,7 @@
 
 DepVault is a full-stack web platform that scans dependencies across 8+ language ecosystems, detects vulnerabilities via OSV.dev, and provides an AES-256-GCM encrypted vault for environment variables and secret files - all from a single dashboard.
 
-> **Live at [depvault.com](https://depvault.com)** | **[API Docs (Swagger)](https://depvault.com/api/swagger)** | **[Full Documentation](docs/README.md)**
+> **Live at [depvault.com](https://depvault.com)** | **[Documentation](https://depvault.com/docs)** | **[API Docs (Swagger)](https://depvault.com/api/swagger)**
 
 ---
 
@@ -111,7 +111,8 @@ depvault/
 ├── apps/
 │   ├── backend/         # Elysia REST API (port 4000)
 │   ├── frontend/        # Next.js web app (port 4001)
-│   └── cli/             # .NET 10 AOT CLI
+│   ├── cli/             # .NET 10 AOT CLI
+│   └── docs/            # Nextra 4 documentation site
 ├── packages/
 │   └── shared/          # Shared types, API client, utilities
 ├── deploy/              # Docker Compose, Nginx config
@@ -129,6 +130,7 @@ depvault/
 | Auth       | JWT + GitHub OAuth      | httpOnly cookie storage, no localStorage           |
 | Encryption | AES-256-GCM             | Authenticated encryption for vault data            |
 | CLI        | .NET 10 (Native AOT)    | Single-file native binary with gzip compression    |
+| Docs       | Nextra 4                | Developer and user documentation site              |
 | CI/CD      | GitHub Actions + Docker | Multi-stage builds, GHCR, automated VPS deployment |
 
 > For a deeper dive, see the [Architecture Guide](docs/architecture.md).
@@ -237,11 +239,12 @@ dotnet publish -c Release    # Native AOT binary
 
 ## Documentation
 
-The full documentation package is available in the [`docs/`](docs/README.md) folder:
+**User & developer docs**: [depvault.com/docs](https://depvault.com/docs) — getting started, user guides, API reference, CLI reference.
+
+**Internal project docs** are in the [`docs/`](docs/README.md) folder:
 
 - [Product Requirements Document](docs/prd.md)
 - [Architecture Guide](docs/architecture.md)
-- [API Reference](docs/api-reference.md)
 - [Deployment Guide](docs/deployment-guide.md)
 - [Screenshots Gallery](docs/screenshots.md)
 - [UI Mockups](docs/ui-mockups.md)

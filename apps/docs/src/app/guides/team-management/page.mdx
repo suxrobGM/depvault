@@ -1,0 +1,158 @@
+# Team Management
+
+Invite members, assign roles, and manage access permissions for your DepVault projects.
+
+---
+
+## Overview
+
+Every DepVault project has a team of members with role-based access control. The role system is intentionally simple — three roles cover the access patterns needed for most teams. The project owner has full administrative control, editors can work with data, and viewers have read-only access with restrictions on sensitive content.
+
+---
+
+## Roles
+
+DepVault uses three roles with clearly defined permission boundaries:
+
+| Permission | Owner | Editor | Viewer |
+| --- | --- | --- | --- |
+| View project dashboard and analysis results | Yes | Yes | Yes |
+| Run dependency analysis | Yes | Yes | No |
+| View environment variable names | Yes | Yes | Yes |
+| Read/write environment variable values | Yes | Yes | No |
+| Decrypt and view secret values | Yes | Yes | No |
+| Upload and download secret files | Yes | Yes | No |
+| Generate secret sharing links | Yes | Yes | No |
+| Manage scan results and detections | Yes | Yes | No |
+| Invite and remove members | Yes | No | No |
+| Change member roles | Yes | No | No |
+| Modify project settings | Yes | No | No |
+| Configure license policies | Yes | No | No |
+| Delete project | Yes | No | No |
+| Transfer ownership | Yes | No | No |
+
+### Owner
+
+The project creator is automatically assigned the Owner role. Owners have unrestricted access to every feature and are the only role that can perform administrative actions such as managing members, modifying project settings, and deleting the project.
+
+Each project has exactly **one** owner at any time. Ownership can be transferred to another member (see below).
+
+### Editor
+
+Editors are full contributors who can read and write environment variables, upload and download secret files, run analyses, and generate secret sharing links. They cannot perform administrative actions like inviting members, changing roles, or modifying project settings.
+
+### Viewer
+
+Viewers have read-only access to the project. They can see analysis results, environment variable names, and file names, but they **cannot**:
+
+- Decrypt or view actual secret values (values are masked with no reveal option)
+- Download secret files
+- Modify any data
+- Run analyses
+
+The Viewer role is useful for stakeholders, auditors, or junior team members who need visibility without write access.
+
+---
+
+## Inviting Members
+
+1. Navigate to your project and open the **Members** tab.
+2. Click **Invite Member**.
+3. Enter the email address of the person you want to invite.
+4. Select a role: **Editor** or **Viewer**.
+5. Click **Send Invite**.
+
+The invited user receives an email with a link to accept the invitation. If they do not have a DepVault account, they are prompted to register first.
+
+### Invite Constraints
+
+- Only the project **Owner** can send invitations.
+- You cannot invite someone who is already a member of the project.
+- The Owner role cannot be assigned via invitation — it can only be obtained through ownership transfer.
+
+---
+
+## Viewing Members
+
+The **Members** tab shows a table of all current project members:
+
+| Column | Description |
+| --- | --- |
+| **Name** | The member's display name. |
+| **Email** | The member's email address. |
+| **Role** | Their current role (Owner, Editor, or Viewer). |
+| **Joined** | The date they accepted the invitation and joined the project. |
+
+The current owner is always listed first and marked with an owner badge.
+
+---
+
+## Changing a Member's Role
+
+1. Open the **Members** tab.
+2. Find the member whose role you want to change.
+3. Click the role dropdown next to their name.
+4. Select the new role: **Editor** or **Viewer**.
+5. The change takes effect immediately.
+
+Only the project **Owner** can change roles. You cannot change the owner's own role — use ownership transfer instead.
+
+---
+
+## Removing Members
+
+1. Open the **Members** tab.
+2. Find the member you want to remove.
+3. Click the **Remove** button (trash icon) next to their entry.
+4. Confirm the removal.
+
+Removed members immediately lose access to the project. They no longer see it in their dashboard and cannot access any of its data. If they need access again later, a new invitation must be sent.
+
+Only the project **Owner** can remove members. The owner cannot remove themselves — use ownership transfer first if you need to leave the project.
+
+---
+
+## Transferring Ownership
+
+Transfer project ownership to another member when the current owner is leaving the team, changing responsibilities, or delegating project management.
+
+1. Open the **Members** tab.
+2. Click **Transfer Ownership** in the toolbar.
+3. Select the member who will become the new owner from the dropdown. Only existing members are eligible.
+4. Confirm the transfer.
+
+After transfer:
+
+- The selected member becomes the new **Owner** with full administrative permissions.
+- The previous owner is demoted to **Editor** and retains contributor access but loses administrative privileges.
+- This action is immediate and cannot be undone (the new owner would need to transfer back).
+
+---
+
+## Project Deletion
+
+Only the project **Owner** can delete a project.
+
+1. Navigate to **Settings** > **Danger Zone**.
+2. Click **Delete Project**.
+3. Type the project name to confirm.
+4. Click **Delete Permanently**.
+
+Deleting a project removes all associated data: analyses, vault entries, secret files, scan results, and member associations. This action is irreversible.
+
+---
+
+## Best Practices
+
+- **Principle of least privilege** — Assign the Viewer role to anyone who only needs to see project status. Upgrade to Editor only when they need to modify data.
+- **Limit owners** — Since only one owner exists per project, make sure the owner is someone who actively manages the project.
+- **Audit periodically** — Review the members list regularly and remove anyone who no longer needs access.
+- **Transfer before leaving** — If you are the owner and plan to leave the team, transfer ownership first to avoid a project with no active administrator.
+
+---
+
+## What's Next
+
+- **[Environment Vault](/guides/environment-vault)** — Manage variables with role-based access control.
+- **[Secret Sharing](/guides/secret-sharing)** — Generate one-time links when you need to share secrets beyond the team.
+- **[Environment Templates](/guides/env-templates)** — Use templates to onboard new team members quickly.

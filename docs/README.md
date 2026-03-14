@@ -1,6 +1,6 @@
 # DepVault Documentation
 
-Welcome to the DepVault documentation. This index links to every document in the project, organized by category.
+This folder contains **internal project documentation** (PRD, architecture, deployment). For user-facing docs, visit the **[live documentation site](https://depvault.com/docs)** (source: `apps/docs/`).
 
 > **Looking for setup instructions?** See the main [README.md](../README.md) in the repository root.
 

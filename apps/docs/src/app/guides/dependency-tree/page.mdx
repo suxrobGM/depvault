@@ -1,0 +1,110 @@
+# Dependency Tree
+
+Visualize the full dependency graph of your project to understand transitive dependencies and identify potential conflicts.
+
+---
+
+## Overview
+
+The dependency tree provides an interactive graph visualization of every direct and transitive dependency in your project. Built on top of an interactive node graph, the tree lets you explore relationships between packages, spot deeply nested transitive dependencies, and immediately identify which packages carry known vulnerabilities. The tree is generated automatically after each dependency analysis run.
+
+---
+
+## Accessing the Tree
+
+1. Navigate to your project from the dashboard.
+2. Open the **Analysis** tab.
+3. Select a completed analysis run from the history list.
+4. Click the **Dependency Tree** button in the analysis toolbar.
+
+The tree opens in a full-width panel with your root project node at the center and direct dependencies radiating outward.
+
+---
+
+## Node Color Coding
+
+Each node in the tree is color-coded to reflect its vulnerability status at a glance:
+
+| Color | Meaning |
+| --- | --- |
+| **Green** | No known vulnerabilities. The package is considered safe. |
+| **Yellow** | One or more warnings — medium or low-severity advisories exist. |
+| **Red** | Critical or high-severity vulnerabilities detected. Immediate attention recommended. |
+
+Transitive dependency nodes inherit the highest severity of their own advisories. A green parent can still have red children if a nested package is vulnerable.
+
+---
+
+## Expanding and Collapsing Nodes
+
+The tree loads with only direct dependencies expanded by default. This keeps the initial view manageable even for projects with hundreds of transitive dependencies.
+
+- **Expand a node** — Click the arrow icon on any node to reveal its child dependencies.
+- **Collapse a node** — Click the arrow icon again to hide children and simplify the view.
+- **Collapse All** — Use the **Collapse All** button in the toolbar to reset the tree to its initial state showing only direct dependencies.
+- **Expand All** — Use the **Expand All** button to open every node in the tree. This can be slow for very large dependency graphs.
+
+---
+
+## Searching the Tree
+
+The search bar at the top of the tree panel lets you find specific packages without manually expanding nodes.
+
+1. Type a package name (or partial name) into the search field.
+2. Matching nodes are highlighted and the viewport pans to center on the first result.
+3. Use the **Next** and **Previous** arrows to cycle through multiple matches.
+4. Ancestor nodes along the path from the root to the matched node are automatically expanded so you can see the full dependency chain.
+
+---
+
+## Node Detail Panel
+
+Click any node in the tree to open a detail panel on the right side of the screen. The panel displays:
+
+| Field | Description |
+| --- | --- |
+| **Package Name** | Full package identifier (e.g., `lodash`, `Newtonsoft.Json`). |
+| **Installed Version** | The version resolved in your project. |
+| **Latest Version** | The newest version available in the package registry. |
+| **License** | The SPDX license identifier detected for this package. |
+| **CVE IDs** | List of known CVE identifiers associated with the installed version, if any. |
+| **Fixed Version** | The minimum version that resolves each listed CVE. |
+| **Changelog Link** | A direct link to the package changelog or release notes for the fixed version. |
+| **Dependents** | The list of packages in your project that depend on this node. |
+
+If the package has no vulnerabilities, the CVE and fixed version fields are omitted and a green checkmark is shown instead.
+
+---
+
+## Zoom and Navigation Controls
+
+The tree panel includes standard navigation controls in the bottom-right corner:
+
+- **Zoom In / Zoom Out** — Adjust the zoom level using the `+` and `-` buttons or your mouse scroll wheel.
+- **Fit to View** — Click the fit button to automatically zoom and center the entire visible tree within the viewport.
+- **Pan** — Click and drag on empty space to move the viewport around the graph.
+- **Minimap** — A small overview map in the corner shows your current viewport position relative to the full tree. Click anywhere on the minimap to jump to that area.
+
+---
+
+## Interpreting the Tree
+
+### Direct vs. Transitive Dependencies
+
+Top-level nodes connected directly to the root are your **direct dependencies** — the packages you explicitly declared in your dependency file. Everything below them represents **transitive dependencies** pulled in automatically by your package manager.
+
+### Identifying Conflicts
+
+When two branches of the tree depend on different versions of the same package, the tree highlights those nodes with a conflict icon. This helps you spot version resolution issues that could cause runtime errors or bloated bundles.
+
+### Depth Indicator
+
+Each node displays a small depth badge showing how many levels deep it is from the root. Deeply nested dependencies (depth 5+) are worth reviewing since they increase supply chain risk and are harder to audit.
+
+---
+
+## What's Next
+
+- **[Dependency Analysis](/guides/dependency-analysis)** — Learn how analysis results feed into the dependency tree.
+- **[License Compliance](/guides/license-compliance)** — Review license information surfaced in tree node details.
+- **[Secret Scanning](/guides/secret-scanning)** — Scan your repository for accidentally committed secrets.

@@ -44,6 +44,8 @@ jobs:
             file: ./apps/backend/Dockerfile
           - image: frontend
             file: ./apps/frontend/Dockerfile
+          - image: docs
+            file: ./apps/docs/Dockerfile
 
     steps:
       - name: Checkout code

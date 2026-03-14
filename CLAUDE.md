@@ -6,6 +6,7 @@ DepVault is a web dashboard that analyzes dependencies, detects vulnerabilities,
 
 - **Runtime**: Bun - **Backend**: Elysia.js - **DB**: PostgreSQL + Prisma 7 - **DI**: tsyringe
 - **Web**: Next.js 16 + MUI 7
+- **Docs**: Nextra 4
 - **Shared**: `@depvault/shared` package in `packages/shared/`
 
 ## PRD & Design References
@@ -36,6 +37,7 @@ DepVault is a web dashboard that analyzes dependencies, detects vulnerabilities,
 ```text
 apps/backend/    → Elysia REST API (port 4000)
 apps/frontend/   → Next.js web app (port 4001)
+apps/docs/       → Nextra documentation site (port 4002)
 apps/cli/        → .NET 10 CLI (Native AOT)
 packages/shared/ → Shared types & utils
 ```
@@ -50,6 +52,9 @@ bun run db:generate / db:migrate / db:migrate:apply
 bun run build:types
 
 # Web (cd apps/frontend)
+bun run dev / build / start
+
+# Docs (cd apps/docs)
 bun run dev / build / start
 
 # CLI (cd apps/cli)

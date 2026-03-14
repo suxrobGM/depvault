@@ -34,7 +34,7 @@ const footerLinks: Record<string, FooterLink[]> = {
     { label: "Profile", href: ROUTES.profileGeneral },
   ],
   Resources: [
-    { label: "Documentation", href: "#" },
+    { label: "Documentation", href: ROUTES.docs },
     { label: "Changelog", href: "#" },
     { label: "Status", href: "#" },
   ],

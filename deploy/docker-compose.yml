@@ -38,5 +38,15 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  docs:
+    image: ghcr.io/suxrobgm/depvault/docs:latest
+    ports:
+      - "127.0.0.1:${DOCS_PORT:-4002}:4002"
+    environment:
+      - NODE_ENV=production
+      - PORT=4002
+      - HOSTNAME=0.0.0.0
+    restart: unless-stopped
+
 volumes:
   backend-uploads:

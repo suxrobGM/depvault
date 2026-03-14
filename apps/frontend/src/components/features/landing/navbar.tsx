@@ -21,10 +21,13 @@ import { LinkButton } from "@/components/ui/inputs";
 import { useScrollTo } from "@/hooks/use-scroll-to";
 import { ROUTES } from "@/lib/constants";
 
-const NAV_ITEMS = [
+type NavItem = { label: string } & ({ id: string } | { href: string });
+
+const NAV_ITEMS: NavItem[] = [
   { label: "Features", id: "features" },
   { label: "How It Works", id: "how-it-works" },
   { label: "Ecosystems", id: "ecosystems" },
+  { label: "Docs", href: ROUTES.docs },
 ];
 
 export function LandingNavbar(): ReactElement {
@@ -68,17 +71,30 @@ export function LandingNavbar(): ReactElement {
             alignItems="center"
             sx={{ display: { xs: "none", md: "flex" }, flexGrow: 1, justifyContent: "center" }}
           >
-            {NAV_ITEMS.map((item) => (
-              <Button
-                key={item.id}
-                onClick={() => handleNavClick(item.id)}
-                color="inherit"
-                size="small"
-                sx={{ fontWeight: 500 }}
-              >
-                {item.label}
-              </Button>
-            ))}
+            {NAV_ITEMS.map((item) =>
+              "href" in item ? (
+                <Button
+                  key={item.label}
+                  component="a"
+                  href={item.href}
+                  color="inherit"
+                  size="small"
+                  sx={{ fontWeight: 500 }}
+                >
+                  {item.label}
+                </Button>
+              ) : (
+                <Button
+                  key={item.id}
+                  onClick={() => handleNavClick(item.id)}
+                  color="inherit"
+                  size="small"
+                  sx={{ fontWeight: 500 }}
+                >
+                  {item.label}
+                </Button>
+              ),
+            )}
           </Stack>
           <Box sx={{ flexGrow: { xs: 1, md: 0 } }} />
           <Stack direction="row" spacing={1.5} alignItems="center">
@@ -129,11 +145,22 @@ export function LandingNavbar(): ReactElement {
           </IconButton>
         </Box>
         <List sx={{ px: 1 }}>
-          {NAV_ITEMS.map((item) => (
-            <ListItemButton key={item.id} onClick={() => handleNavClick(item.id)}>
-              <ListItemText primary={item.label} />
-            </ListItemButton>
-          ))}
+          {NAV_ITEMS.map((item) =>
+            "href" in item ? (
+              <ListItemButton
+                key={item.label}
+                component="a"
+                href={item.href}
+                onClick={() => setDrawerOpen(false)}
+              >
+                <ListItemText primary={item.label} />
+              </ListItemButton>
+            ) : (
+              <ListItemButton key={item.id} onClick={() => handleNavClick(item.id)}>
+                <ListItemText primary={item.label} />
+              </ListItemButton>
+            ),
+          )}
         </List>
         <Divider sx={{ my: 1 }} />
         <Stack spacing={1.5} sx={{ px: 2, py: 2 }}>

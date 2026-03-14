@@ -1,0 +1,198 @@
+# SDKs & Clients
+
+DepVault provides end-to-end type-safe API access for TypeScript projects through Eden Treaty, and supports client generation for any language via the OpenAPI specification.
+
+## TypeScript / JavaScript -- Eden Treaty
+
+The DepVault backend is built with [Elysia.js](https://elysiajs.com/), which exposes its full type signature at compile time. The [`@elysiajs/eden`](https://elysiajs.com/eden/overview) package uses this signature to generate a fully typed API client with no code generation step.
+
+### Installation
+
+```bash
+bun add @elysiajs/eden
+# or
+npm install @elysiajs/eden
+```
+
+### Setup
+
+```typescript
+import { treaty } from "@elysiajs/eden";
+import type { App } from "@depvault/backend"; // Import the app type from the backend
+
+const api = treaty<App>("localhost:4000");
+```
+
+For production, replace the base URL:
+
+```typescript
+const api = treaty<App>("depvault.com");
+```
+
+### Usage Examples
+
+Every endpoint is available as a typed method. Request bodies, query parameters, and responses are all fully typed -- you get autocomplete and compile-time checks.
+
+**List projects:**
+
+```typescript
+const { data, error } = await api.api.projects.get({
+  query: { page: 1, limit: 20 },
+});
+
+if (error) {
+  console.error(error.value.message);
+} else {
+  for (const project of data.items) {
+    console.log(project.name);
+  }
+}
+```
+
+**Create an analysis:**
+
+```typescript
+const { data, error } = await api.api.analyses.post({
+  body: {
+    projectId: "550e8400-e29b-41d4-a716-446655440000",
+    file: packageJsonFile, // File or Blob
+  },
+});
+
+if (data) {
+  console.log(`Found ${data.dependencies.length} dependencies`);
+}
+```
+
+**Get environment variables:**
+
+```typescript
+const { data } = await api.api["env-variables"].get({
+  query: {
+    environmentId: "env-uuid-here",
+  },
+});
+
+if (data) {
+  for (const variable of data.items) {
+    console.log(`${variable.key} = ${variable.value}`);
+  }
+}
+```
+
+### Error Handling with Eden
+
+Eden returns a discriminated union of `{ data, error }`. When the request succeeds, `data` is typed to the response schema and `error` is `null`. When it fails, `data` is `null` and `error` contains the status code and error body.
+
+```typescript
+const { data, error } = await api.api.projects({ id: projectId }).get();
+
+if (error) {
+  switch (error.status) {
+    case 401:
+      // Redirect to login
+      break;
+    case 404:
+      // Project not found
+      break;
+    default:
+      console.error(error.value.message);
+  }
+} else {
+  // data is fully typed as the project response
+  console.log(data.name);
+}
+```
+
+## Other Languages -- OpenAPI Client Generation
+
+The DepVault API publishes a complete OpenAPI 3.x specification. You can use it to generate typed clients for any language.
+
+### Download the Spec
+
+The specification is available at:
+
+```
+GET /api/swagger/json
+```
+
+For local development:
+
+```bash
+curl http://localhost:4000/api/swagger/json -o openapi.json
+```
+
+### Generate a Client
+
+Use any OpenAPI code generator. Some popular options:
+
+| Generator | Languages | Command |
+|---|---|---|
+| [openapi-typescript](https://github.com/drwpow/openapi-typescript) | TypeScript | `npx openapi-typescript openapi.json -o types.ts` |
+| [Kiota](https://learn.microsoft.com/en-us/openapi/kiota/) | C#, Java, Go, Python, TypeScript | `kiota generate -l csharp -d openapi.json -o ./client` |
+| [openapi-generator](https://openapi-generator.tech/) | 50+ languages | `openapi-generator-cli generate -i openapi.json -g python -o ./client` |
+
+The DepVault CLI itself uses a **Kiota-generated C# client** built from this same OpenAPI spec, so the generated types are always in sync with the backend.
+
+## curl Examples
+
+For quick testing or scripting, you can call the API directly with curl.
+
+**Login and capture cookies:**
+
+```bash
+curl -X POST https://depvault.com/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "dev@example.com", "password": "my-password"}' \
+  -c cookies.txt
+```
+
+**List projects (using saved cookies):**
+
+```bash
+curl https://depvault.com/api/projects \
+  -b cookies.txt
+```
+
+**Create a project:**
+
+```bash
+curl -X POST https://depvault.com/api/projects \
+  -H "Content-Type: application/json" \
+  -b cookies.txt \
+  -d '{"name": "my-app", "description": "My application"}'
+```
+
+**Upload a dependency file for analysis:**
+
+```bash
+curl -X POST https://depvault.com/api/analyses \
+  -b cookies.txt \
+  -F "projectId=550e8400-e29b-41d4-a716-446655440000" \
+  -F "file=@package.json"
+```
+
+**Fetch env variables with a CI token:**
+
+```bash
+curl https://depvault.com/api/ci-access/env/my-project/production \
+  -H "Authorization: Bearer $DEPVAULT_TOKEN"
+```
+
+**Export environment as .env file:**
+
+```bash
+curl https://depvault.com/api/env-io/export/ENV_ID?format=dotenv \
+  -b cookies.txt \
+  -o .env
+```
+
+## Authentication in Clients
+
+Regardless of which client you use, authentication follows one of two patterns:
+
+1. **Browser / cookie-based:** Call `/auth/login` or `/auth/register`. The server sets httpOnly cookies that are sent automatically with subsequent requests. No manual header management needed.
+
+2. **CI / programmatic:** Create a CI token via the dashboard, then pass it as a `Authorization: Bearer <token>` header on every request.
+
+See the [Authentication](/api/authentication) page for full details on both flows.

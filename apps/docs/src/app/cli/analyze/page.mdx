@@ -1,0 +1,190 @@
+# Analyze
+
+Run dependency analysis on local project files and view vulnerability and outdated package reports from the CLI.
+
+---
+
+## Overview
+
+The `depvault analyze` command uploads a dependency file to the DepVault API, which parses it, checks each package for the latest available version, and scans for known vulnerabilities. Results are returned as a table or JSON output.
+
+This command requires an active project. Set one with `depvault project select <id>` before running analysis.
+
+---
+
+## depvault analyze
+
+Upload and analyze a dependency file.
+
+```bash
+depvault analyze --file <path> [flags]
+```
+
+### Flags
+
+| Flag          | Description                                                         | Default         |
+|---------------|---------------------------------------------------------------------|-----------------|
+| `--file`      | Path to the dependency file to analyze. **Required.**               |                 |
+| `--ecosystem` | Override the auto-detected ecosystem.                               | Auto-detected   |
+| `--output`    | Output format: `table` (default) or `json`.                        | `table`         |
+
+---
+
+## Ecosystem Detection
+
+The CLI auto-detects the package ecosystem from the filename. You can override detection with the `--ecosystem` flag.
+
+| Filename             | Detected Ecosystem |
+|----------------------|--------------------|
+| `package.json`       | NODEJS             |
+| `requirements.txt`   | PYTHON             |
+| `Cargo.toml`         | RUST               |
+| `go.mod`             | GO                 |
+| `pom.xml`            | KOTLIN             |
+| `build.gradle`       | KOTLIN             |
+| `Gemfile`            | RUBY               |
+| `composer.json`      | PHP                |
+| `*.csproj`           | DOTNET             |
+
+### Supported `--ecosystem` Values
+
+`NODEJS`, `PYTHON`, `DOTNET`, `RUST`, `GO`, `KOTLIN`, `JAVA`, `RUBY`, `PHP`
+
+Use `--ecosystem` when the file has a non-standard name or when the auto-detection does not match your project:
+
+```bash
+depvault analyze --file deps.txt --ecosystem PYTHON
+```
+
+---
+
+## Table Output
+
+The default table output displays each dependency with its current version, latest available version, update status, and vulnerability count.
+
+```bash
+depvault analyze --file package.json
+```
+
+```
+  Package          Current    Latest     Status    Vulnerabilities
+  ─────────────────────────────────────────────────────────────────
+  express          4.18.2     4.21.0     MINOR     0
+  lodash           4.17.15    4.17.21    PATCH     2 (1 HIGH, 1 MEDIUM)
+  webpack          4.46.0     5.95.0     MAJOR     0
+  typescript       5.3.3      5.7.2      MINOR     0
+  jsonwebtoken     8.5.1      9.0.2      MAJOR     1 (1 CRITICAL)
+  dotenv           16.3.1     16.4.7     PATCH     0
+```
+
+### Status Badges
+
+| Status   | Meaning                                                 |
+|----------|---------------------------------------------------------|
+| `MAJOR`  | A major version update is available (breaking changes). |
+| `MINOR`  | A minor version update is available (new features).     |
+| `PATCH`  | A patch version update is available (bug fixes).        |
+| `UP_TO_DATE` | The package is on the latest version.              |
+
+### Vulnerability Severities
+
+Vulnerabilities are categorized by severity: **CRITICAL**, **HIGH**, **MEDIUM**, and **LOW**. The table summarizes the count and highest severities for each package.
+
+---
+
+## JSON Output
+
+Use `--output json` for machine-readable results, suitable for scripting or integration with other tools.
+
+```bash
+depvault analyze --file package.json --output json
+```
+
+```json
+{
+  "projectId": "b3f1a2c4-5678-9def-0123-456789abcdef",
+  "ecosystem": "NODEJS",
+  "analyzedAt": "2026-01-15T10:30:00Z",
+  "dependencies": [
+    {
+      "name": "express",
+      "currentVersion": "4.18.2",
+      "latestVersion": "4.21.0",
+      "status": "MINOR",
+      "vulnerabilities": []
+    },
+    {
+      "name": "lodash",
+      "currentVersion": "4.17.15",
+      "latestVersion": "4.17.21",
+      "status": "PATCH",
+      "vulnerabilities": [
+        {
+          "id": "CVE-2021-23337",
+          "severity": "HIGH",
+          "title": "Prototype Pollution in lodash"
+        },
+        {
+          "id": "CVE-2020-28500",
+          "severity": "MEDIUM",
+          "title": "Regular Expression Denial of Service"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total": 6,
+    "major": 2,
+    "minor": 2,
+    "patch": 2,
+    "upToDate": 0,
+    "vulnerabilities": 3
+  }
+}
+```
+
+---
+
+## Examples
+
+Analyze a Python requirements file:
+
+```bash
+depvault analyze --file requirements.txt
+```
+
+Analyze a Rust project with JSON output:
+
+```bash
+depvault analyze --file Cargo.toml --output json
+```
+
+Analyze a .NET project file:
+
+```bash
+depvault analyze --file MyApp.csproj
+```
+
+Override ecosystem detection for a Go project:
+
+```bash
+depvault analyze --file go.mod --ecosystem GO
+```
+
+---
+
+## Error Cases
+
+| Error                                        | Cause                                              |
+|----------------------------------------------|----------------------------------------------------|
+| `Error: No active project`                   | Run `depvault project select <id>` first.          |
+| `Error: File not found: <path>`              | The specified file does not exist.                  |
+| `Error: Unable to detect ecosystem`          | Use `--ecosystem` to specify the ecosystem.         |
+| `Error: Unsupported ecosystem: <value>`      | The ecosystem name is invalid. See supported list.  |
+
+---
+
+## Next Steps
+
+- **[Environment](/cli/environment)** -- Manage environment variables for the analyzed project.
+- **[Convert](/cli/convert)** -- Convert configuration files between formats.

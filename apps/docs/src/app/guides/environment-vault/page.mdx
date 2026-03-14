@@ -1,0 +1,244 @@
+# Environment Vault
+
+Securely store, organize, and manage environment variables for each project environment using the encrypted vault.
+
+---
+
+## Overview
+
+The Environment Vault is where you store configuration values and secrets for your projects. Every value is encrypted with **AES-256-GCM** at rest and is only decrypted in-memory when an authorized user or CI pipeline requests it. Variables are organized by environment and vault group, with full version history and rollback support.
+
+---
+
+## Environments
+
+Each project supports four environment tiers:
+
+| Environment | Purpose |
+| --- | --- |
+| **DEVELOPMENT** | Local development configuration. Values used by engineers on their machines. |
+| **STAGING** | Pre-production environment. Mirrors production for testing and QA. |
+| **PRODUCTION** | Live production configuration. Access is restricted to authorized roles. |
+| **GLOBAL** | Values shared across all environments. Useful for non-sensitive defaults like API base URLs or feature flags. |
+
+When a variable exists in both GLOBAL and a specific environment, the environment-specific value takes precedence.
+
+---
+
+## Vault Groups
+
+Vault groups let you organize environments within a project. A vault group represents a logical grouping — for example, a microservice, a region, or a deployment target.
+
+Each vault group contains its own set of variables for each environment tier. This allows a single project to manage configuration for multiple services or deployment contexts without mixing values.
+
+### Creating a Vault Group
+
+1. Open your project and navigate to the **Vault** tab.
+2. Click **New Vault Group**.
+3. Enter a name (e.g., `api-server`, `us-east-1`, `worker`).
+4. Click **Create**.
+
+---
+
+## Managing Variables
+
+### Adding a Variable
+
+1. Select an environment tier (DEVELOPMENT, STAGING, PRODUCTION, or GLOBAL).
+2. Click **Add Variable**.
+3. Fill in the following fields:
+
+| Field | Required | Description |
+| --- | --- | --- |
+| **Key** | Yes | The variable name (e.g., `DATABASE_URL`, `API_KEY`). Must be unique within the environment. |
+| **Value** | Yes | The variable value. Encrypted with AES-256-GCM upon save. |
+| **Description** | No | A human-readable description of what this variable is for. |
+| **Validation Rule** | No | A regex pattern that the value must match. Enforced on save and update. |
+| **Required for Local Setup** | No | Flag indicating whether this variable is needed for local development. Used when generating `.env.example` files. |
+| **Rotation Policy** | No | How often this secret should be rotated (e.g., every 30, 60, or 90 days). DepVault alerts you when a secret is due for rotation. |
+
+4. Click **Save**. The value is encrypted immediately.
+
+### Editing a Variable
+
+1. Click the variable row in the table.
+2. Modify the fields you want to change.
+3. Click **Save**. A new version is created automatically.
+
+### Deleting a Variable
+
+1. Click the delete icon on the variable row.
+2. Confirm deletion in the dialog.
+
+Deleted variables are removed permanently. If you need to restore a value, check the version history before deleting.
+
+---
+
+## Encryption
+
+All variable values are encrypted using **AES-256-GCM** before being stored in the database.
+
+- **At rest**: Values are stored as ciphertext. The database never contains plaintext secret values.
+- **In transit**: All API communication uses HTTPS/TLS.
+- **In memory**: Values are decrypted only when an authorized request is made. Decrypted values are never logged.
+
+### Role-Based Access
+
+| Role | Can view keys | Can decrypt values | Can edit variables |
+| --- | --- | --- | --- |
+| **Owner** | Yes | Yes | Yes |
+| **Admin** | Yes | Yes | Yes |
+| **Member** | Yes | Yes | Yes |
+| **Viewer** | Yes | No | No |
+
+Users with the **Viewer** role can see variable keys and metadata but **cannot decrypt or view the actual values**.
+
+---
+
+## Version History
+
+Every time a variable's value is updated, DepVault creates a new version entry. The version history includes:
+
+- The previous encrypted value.
+- A timestamp of when the change was made.
+- The user who made the change.
+
+### Viewing History
+
+1. Click a variable to open its detail view.
+2. Select the **History** tab.
+3. Browse previous versions with timestamps and authors.
+
+### Rolling Back
+
+1. In the version history, find the version you want to restore.
+2. Click **Rollback**.
+3. Confirm the rollback. The selected version becomes the current value, and a new version entry is created for the rollback.
+
+---
+
+## Bulk Import and Export
+
+### Supported Formats
+
+DepVault supports bulk import and export in the following formats:
+
+| Format | File Extension | Description |
+| --- | --- | --- |
+| **dotenv** | `.env` | Standard `KEY=VALUE` format used by most frameworks. |
+| **appsettings** | `.json` | ASP.NET-style `appsettings.json` with nested configuration. |
+| **secrets YAML** | `.yaml` / `.yml` | Kubernetes-style secrets manifest. |
+| **config TOML** | `.toml` | TOML configuration files. |
+
+### Importing Variables
+
+#### Web UI
+
+1. In the Vault tab, click **Import**.
+2. Select the file format.
+3. Upload the file or paste its contents.
+4. Review the parsed key-value pairs. Existing keys can be skipped or overwritten.
+5. Click **Import** to save.
+
+#### CLI
+
+```bash
+depvault env push --vault-group <vault-group-id> --file .env
+```
+
+The CLI detects the format from the file extension. All values are encrypted before transmission.
+
+### Exporting Variables
+
+#### Web UI
+
+1. In the Vault tab, click **Export**.
+2. Choose the output format.
+3. Download the file. Values are decrypted for the export.
+
+#### CLI
+
+```bash
+depvault env pull --vault-group <vault-group-id> --format env --output .env
+```
+
+### Generate .env.example
+
+DepVault can generate a `.env.example` file containing only keys and placeholder values — no real secrets. This is safe to commit to version control and helps new team members understand which variables are required.
+
+1. In the Vault tab, click **Generate .env.example**.
+2. Variables flagged as **Required for Local Setup** are included automatically.
+3. Download the generated file or copy its contents.
+
+The output looks like:
+
+```bash
+# Database connection string
+DATABASE_URL=<your-database-url>
+
+# Third-party API key
+STRIPE_API_KEY=<your-stripe-api-key>
+
+# Application port
+PORT=3000
+```
+
+---
+
+## CLI Commands
+
+### Pull Variables
+
+Download variables for a vault group and environment:
+
+```bash
+depvault env pull --vault-group <id> --environment PRODUCTION --format env --output .env
+```
+
+| Flag | Description | Default |
+| --- | --- | --- |
+| `--vault-group <id>` | The vault group ID to pull from. | Required |
+| `--environment <name>` | Environment tier: DEVELOPMENT, STAGING, PRODUCTION, GLOBAL. | DEVELOPMENT |
+| `--format <fmt>` | Output format: `env`, `json`, `yaml`, `toml`. | `env` |
+| `--output <path>` | File path to write the output to. | stdout |
+
+### Push Variables
+
+Upload variables from a file into a vault group:
+
+```bash
+depvault env push --vault-group <id> --file .env
+```
+
+| Flag | Description | Default |
+| --- | --- | --- |
+| `--vault-group <id>` | The vault group ID to push to. | Required |
+| `--file <path>` | Path to the file containing variables. | Required |
+
+### List Variables
+
+List all variable keys in a vault group:
+
+```bash
+depvault env list --vault-group <id> --environment DEVELOPMENT
+```
+
+This command shows keys and metadata only. Values are not printed unless you add the `--decrypt` flag and have the appropriate role.
+
+---
+
+## Best Practices
+
+- **Never store secrets in code or git** — Use the vault for all sensitive configuration.
+- **Set rotation policies** on high-value secrets like API keys and database passwords.
+- **Use descriptions** to document what each variable is for. Future team members will thank you.
+- **Use validation rules** to prevent malformed values (e.g., a regex for URLs or connection strings).
+- **Generate .env.example** for your repository so onboarding is straightforward.
+- **Use GLOBAL** for values that rarely change and are shared across environments.
+
+---
+
+## What's Next
+
+- **[Secret Sharing](/guides/secret-sharing)** — Share vault variables via secure one-time links.
+- **[CI/CD Integration](/guides/ci-cd-integration)** — Pull secrets into your build pipelines automatically.

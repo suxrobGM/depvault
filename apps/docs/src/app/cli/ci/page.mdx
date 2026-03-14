@@ -1,0 +1,225 @@
+# CI/CD
+
+Use the DepVault CLI in CI/CD pipelines to automate environment variable injection during builds and deployments.
+
+---
+
+## Overview
+
+The `depvault ci` commands are designed for automated pipelines where interactive login is not possible. Instead of username and password, CI/CD mode uses a project-scoped token passed via the `DEPVAULT_TOKEN` environment variable. The token is generated from the DepVault web dashboard and determines which project and environment the CLI can access.
+
+---
+
+## depvault ci pull
+
+Fetch environment variables using a CI token and write them to a file or stdout. The token determines the project and environment scope, so no `--project` or `--environment` flags are needed.
+
+```bash
+depvault ci pull [flags]
+```
+
+### Flags
+
+| Flag       | Description                                                        | Default |
+|------------|--------------------------------------------------------------------|---------|
+| `--format` | Output format: `env` or `json`.                                   | `env`   |
+| `--output` | File path to write output. Prints to stdout if omitted.            | stdout  |
+
+### Requirements
+
+- The `DEPVAULT_TOKEN` environment variable must be set.
+- The token must be valid (not expired, not revoked).
+- If the token has an IP allowlist, the request must originate from an allowed IP.
+
+### Output Formats
+
+**env** (default) -- standard KEY=VALUE format, one variable per line:
+
+```
+DATABASE_URL=postgresql://prod-db:5432/myapp
+REDIS_URL=redis://prod-cache:6379
+API_KEY=sk-prod-abc123
+SENTRY_DSN=https://abc@sentry.io/123
+```
+
+**json** -- a flat JSON object with string values:
+
+```json
+{
+  "DATABASE_URL": "postgresql://prod-db:5432/myapp",
+  "REDIS_URL": "redis://prod-cache:6379",
+  "API_KEY": "sk-prod-abc123",
+  "SENTRY_DSN": "https://abc@sentry.io/123"
+}
+```
+
+---
+
+## Token Setup
+
+### Generating a CI Token
+
+1. Open your project in the DepVault web dashboard.
+2. Navigate to **Settings** > **CI Tokens**.
+3. Click **Generate Token**.
+4. Configure the token:
+   - **Environment** -- Select the environment this token can access (e.g., PRODUCTION, STAGING).
+   - **IP Allowlist** (optional) -- Restrict token usage to specific IP addresses or CIDR ranges.
+   - **Expiration** (optional) -- Set an expiration date after which the token is automatically rejected.
+5. Click **Create** and copy the token.
+
+> The token value is displayed only once. Store it immediately as a secret in your CI provider.
+
+### Token Scope
+
+Each CI token is scoped to a **single project and environment**. A token generated for the PRODUCTION environment of project "my-web-app" cannot access STAGING variables or variables from other projects. Generate separate tokens for each project-environment combination you need in CI.
+
+### Token Security
+
+- Tokens can have an **IP allowlist** to ensure they are only used from known CI runner IP ranges.
+- Tokens can have a configurable **expiration** date. Once expired, all requests using the token receive a `401 Unauthorized` response.
+- Tokens can be **revoked** at any time from the web dashboard under **Settings** > **CI Tokens**.
+- Rotate tokens periodically as a security best practice.
+
+---
+
+## CI Provider Examples
+
+### GitHub Actions
+
+```yaml
+name: Deploy
+on:
+  push:
+    branches: [main]
+
+env:
+  DEPVAULT_TOKEN: ${{ secrets.DEPVAULT_TOKEN }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install DepVault CLI
+        run: |
+          curl -L https://github.com/depvault/depvault/releases/latest/download/depvault-linux-x64 -o depvault
+          chmod +x depvault
+          sudo mv depvault /usr/local/bin/
+
+      - name: Pull secrets
+        run: depvault ci pull --format env --output .env
+
+      - name: Build and deploy
+        run: |
+          source .env
+          npm run build
+          npm run deploy
+```
+
+### GitLab CI
+
+```yaml
+deploy:
+  stage: deploy
+  variables:
+    DEPVAULT_TOKEN: $DEPVAULT_TOKEN
+  script:
+    - curl -L https://github.com/depvault/depvault/releases/latest/download/depvault-linux-x64 -o depvault
+    - chmod +x depvault
+    - ./depvault ci pull --format env --output .env
+    - source .env
+    - npm run build
+    - npm run deploy
+```
+
+### Azure Pipelines
+
+```yaml
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - script: |
+      curl -L https://github.com/depvault/depvault/releases/latest/download/depvault-linux-x64 -o depvault
+      chmod +x depvault
+      ./depvault ci pull --format env --output .env
+    displayName: Pull secrets
+    env:
+      DEPVAULT_TOKEN: $(DEPVAULT_TOKEN)
+
+  - script: |
+      source .env
+      npm run build
+    displayName: Build
+```
+
+### Docker Build
+
+Inject secrets at build time without baking them into the image:
+
+```dockerfile
+# Dockerfile
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY . .
+RUN --mount=type=secret,id=env,target=/app/.env npm run build
+
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=build /app/dist ./dist
+CMD ["node", "dist/index.js"]
+```
+
+```bash
+# Build script
+depvault ci pull --format env --output .env
+docker build --secret id=env,src=.env -t myapp .
+rm .env
+```
+
+---
+
+## JSON Format for Application Config
+
+If your application reads configuration from a JSON file rather than environment variables, use the `--format json` flag:
+
+```bash
+depvault ci pull --format json --output config/secrets.json
+```
+
+This produces a flat JSON object that your application can load at startup.
+
+---
+
+## Error Cases
+
+| Error                                        | Cause                                                |
+|----------------------------------------------|------------------------------------------------------|
+| `Error: DEPVAULT_TOKEN is not set`           | Set the environment variable in your CI config.      |
+| `Error: 401 Unauthorized`                    | Token is expired, revoked, or invalid.               |
+| `Error: 403 Forbidden`                       | Token IP not in allowlist or scope mismatch.         |
+
+---
+
+## Security Best Practices
+
+- **Never log the token value.** Most CI providers mask secrets in logs, but avoid printing `DEPVAULT_TOKEN` explicitly.
+- **Use IP allowlists** when your CI runners have static IPs to prevent token misuse.
+- **Set token expiration** to limit the window of exposure if a token is leaked.
+- **Delete `.env` files after use** in CI to avoid secrets persisting on shared runners.
+- **Use separate tokens** for each environment (staging, production) to follow the principle of least privilege.
+
+---
+
+## Next Steps
+
+- **[Authentication](/cli/authentication)** -- Learn about interactive login and CI token modes.
+- **[Environment](/cli/environment)** -- Manage environment variables interactively during development.
+- **[Convert](/cli/convert)** -- Transform secrets into the format your application expects.

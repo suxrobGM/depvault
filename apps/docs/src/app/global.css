@@ -1,0 +1,27 @@
+:root {
+  --nextra-primary-hue: 160deg;
+  --nextra-primary-saturation: 84%;
+  --nextra-primary-lightness: 39%;
+}
+
+html[class~="dark"] {
+  --nextra-bg: 10, 14, 23;
+  --nextra-primary-hue: 160deg;
+  --nextra-primary-saturation: 84%;
+  --nextra-primary-lightness: 39%;
+}
+
+body {
+  font-family:
+    var(--font-geist-sans),
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+pre,
+code {
+  font-family:
+    var(--font-geist-mono), ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}

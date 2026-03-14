@@ -20,12 +20,13 @@ const ECOSYSTEM_FILES = [
 ];
 
 const TERMINAL_LINES = [
-  { prefix: "→", text: "Connected github.com/acme/api-service", color: "text.primary" },
-  { prefix: "→", text: "Detected package.json (Node.js)", color: "text.secondary" },
-  { prefix: "→", text: "Analyzing 142 dependencies...", color: "text.secondary" },
-  { prefix: "✓", text: "3 critical vulnerabilities found", color: "error.main" },
-  { prefix: "✓", text: "12 outdated packages flagged", color: "warning.main" },
-  { prefix: "✓", text: "Vault synced — 8 secrets + 3 files encrypted", color: "primary.main" },
+  { prefix: "$", text: "depvault analyze --file package.json", color: "text.primary" },
+  { prefix: "→", text: "Detected Node.js — scanning 142 dependencies", color: "text.secondary" },
+  { prefix: "!", text: "3 critical vulnerabilities found", color: "error.main" },
+  { prefix: "$", text: "depvault env pull --environment PRODUCTION", color: "text.primary" },
+  { prefix: "✓", text: "Pulled 24 variables → .env", color: "primary.main" },
+  { prefix: "$", text: "depvault ci pull --format env --output .env", color: "text.primary" },
+  { prefix: "✓", text: "8 secrets + 3 files synced to pipeline", color: "primary.main" },
 ];
 
 export function HeroSection(): ReactElement {
@@ -127,7 +128,7 @@ export function HeroSection(): ReactElement {
             <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "warning.main" }} />
             <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "success.main" }} />
             <Typography variant="mono" color="text.secondary" sx={{ ml: 1.5 }}>
-              depvault — analysis
+              depvault cli
             </Typography>
           </Box>
 

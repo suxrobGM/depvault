@@ -30,6 +30,7 @@ export const ROUTES = {
   settings: "/settings",
   secrets: "/secrets",
   notifications: "/notifications",
+  docs: "/docs",
 } as const;
 
 export const COOKIE_NAMES = {

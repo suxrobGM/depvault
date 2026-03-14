@@ -1,0 +1,161 @@
+# Dependency Analysis
+
+Upload and analyze dependency files to detect outdated packages, known vulnerabilities, and version drift across your projects.
+
+---
+
+## Overview
+
+DepVault parses dependency manifest files from nine ecosystems, resolves the latest available versions, and cross-references packages against vulnerability databases. The result is a clear table showing which packages need attention and why.
+
+---
+
+## Supported Ecosystems
+
+DepVault supports the following ecosystems and file types:
+
+| Ecosystem | Supported Files | Identifier |
+| --- | --- | --- |
+| **Node.js** | `package.json`, `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`, `bun.lockb` | `NODEJS` |
+| **Python** | `requirements.txt`, `pyproject.toml`, `Pipfile` | `PYTHON` |
+| **.NET** | `*.csproj` | `DOTNET` |
+| **Rust** | `Cargo.toml` | `RUST` |
+| **Go** | `go.mod` | `GO` |
+| **Java** | `pom.xml` | `JAVA` |
+| **Kotlin** | `build.gradle.kts` | `KOTLIN` |
+| **Ruby** | `Gemfile` | `RUBY` |
+| **PHP** | `composer.json` | `PHP` |
+
+When you upload a file, DepVault auto-detects the ecosystem from the file name and structure. You can also specify it manually if needed.
+
+---
+
+## Running an Analysis
+
+### From the Web UI
+
+1. Open your project from the dashboard.
+2. Navigate to the **Analysis** tab.
+3. Click **New Analysis**.
+4. Choose one of two input methods:
+   - **Upload file** — Select a dependency file from your machine.
+   - **Paste content** — Paste the raw contents of a dependency file into the text area.
+5. DepVault detects the ecosystem automatically. If detection fails, select the ecosystem from the dropdown.
+6. Click **Analyze** to start the scan.
+
+Analysis typically completes in a few seconds depending on the number of dependencies and the ecosystem's package registry response time.
+
+### From the CLI
+
+Run an analysis directly from your terminal:
+
+```bash
+depvault analyze --file package.json
+```
+
+#### CLI Options
+
+| Flag | Description | Default |
+| --- | --- | --- |
+| `--file <path>` | Path to the dependency file to analyze. | Required |
+| `--ecosystem <name>` | Ecosystem identifier (see table above). | Auto-detected |
+| `--output <format>` | Output format: `table` or `json`. | `table` |
+
+#### Examples
+
+Analyze a Python project:
+
+```bash
+depvault analyze --file requirements.txt --ecosystem PYTHON
+```
+
+Get JSON output for scripting:
+
+```bash
+depvault analyze --file Cargo.toml --output json
+```
+
+Analyze a .NET project file:
+
+```bash
+depvault analyze --file MyApp.csproj --ecosystem DOTNET
+```
+
+---
+
+## Understanding Results
+
+### Results Table
+
+After analysis, DepVault displays a results table with the following columns:
+
+| Column | Description |
+| --- | --- |
+| **Package** | The dependency name (e.g., `express`, `numpy`, `serde`). |
+| **Current Version** | The version specified in your dependency file. |
+| **Latest Version** | The most recent stable version available in the package registry. |
+| **Status** | A chip indicating the type of update available. |
+| **Vulnerabilities** | Badges showing known vulnerabilities, if any. |
+
+### Status Chips
+
+Each dependency receives a status chip based on the difference between the current and latest version:
+
+| Status | Meaning | Example |
+| --- | --- | --- |
+| **MAJOR** | A major version update is available. May include breaking changes. | `2.1.0` to `3.0.0` |
+| **MINOR** | A minor version update is available. Typically backward-compatible new features. | `2.1.0` to `2.3.0` |
+| **PATCH** | A patch update is available. Usually bug fixes only. | `2.1.0` to `2.1.4` |
+| **UP TO DATE** | You are on the latest version. | `2.1.0` matches latest |
+
+### Vulnerability Badges
+
+If a package has known vulnerabilities, badges appear next to it indicating severity:
+
+| Severity | Color | Description |
+| --- | --- | --- |
+| **CRITICAL** | Red | Actively exploited or trivially exploitable. Patch immediately. |
+| **HIGH** | Orange | Significant risk. Should be addressed in the current sprint. |
+| **MEDIUM** | Yellow | Moderate risk. Plan to address soon. |
+| **LOW** | Blue | Minimal risk. Address when convenient. |
+| **NONE** | Green | No known vulnerabilities for this package. |
+
+A single package can have multiple vulnerability badges if it is affected by more than one CVE.
+
+---
+
+## Re-Analyzing
+
+You can re-run an analysis on a previously uploaded file to check for new updates or newly disclosed vulnerabilities.
+
+1. Open an existing analysis from the **Analysis** tab.
+2. Click **Re-Analyze**.
+3. DepVault fetches the latest version data and vulnerability information and updates the results.
+
+Re-analysis is useful for periodic checks without needing to re-upload the same file.
+
+---
+
+## Analysis History
+
+DepVault stores a history of all analyses for each project. From the **Analysis** tab you can:
+
+- View past analysis results with timestamps.
+- Compare results between two analysis runs to see what changed.
+- Delete old analyses you no longer need.
+
+---
+
+## Best Practices
+
+- **Run analyses regularly** — Package vulnerabilities are disclosed daily. Schedule periodic scans to catch new issues early.
+- **Address CRITICAL and HIGH vulnerabilities first** — These pose the greatest risk and should be prioritized.
+- **Keep MAJOR updates on your radar** — Major version bumps may require code changes but often include important security fixes.
+- **Use the CLI in CI/CD** — Automate dependency scanning as part of your build pipeline to catch issues before deployment. See the [CI/CD Integration guide](/guides/ci-cd-integration) for details.
+
+---
+
+## What's Next
+
+- **[Environment Vault](/guides/environment-vault)** — Store and manage secrets alongside your dependency data.
+- **[CI/CD Integration](/guides/ci-cd-integration)** — Automate analysis in your build pipelines.

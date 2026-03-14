@@ -1,0 +1,157 @@
+# Secret Sharing
+
+Generate secure one-time links to share environment variables and secrets with team members or external collaborators.
+
+---
+
+## Overview
+
+Sometimes you need to share a secret outside of the vault — with a contractor, a teammate who does not have vault access, or during an incident. DepVault's secret sharing feature generates **one-time links** that destroy their content after a single view. Links can be password-protected and configured with custom expiry times.
+
+---
+
+## How It Works
+
+1. **Creator** selects variables or uploads a secret file and generates a link.
+2. DepVault encrypts the content and stores it with a unique, cryptographically random token.
+3. The creator shares the link URL with the recipient.
+4. **Recipient** visits the link, optionally enters a password, and views the secrets.
+5. The content is **permanently deleted** after the first access. The link cannot be used again.
+
+This one-time access model ensures that secrets are not left sitting in chat logs, emails, or shared documents indefinitely.
+
+---
+
+## Creating a Shared Link
+
+### From Vault Variables
+
+1. Open your project and navigate to the **Vault** tab.
+2. Select the variables you want to share by checking their checkboxes.
+3. Click **Share Selected**.
+4. Configure the link options:
+   - **Password protection** (optional) — Require the recipient to enter a password before viewing.
+   - **Expiry time** — How long the link remains valid before it expires automatically.
+5. Click **Generate Link**.
+6. Copy the generated URL and send it to the recipient.
+
+### From a Secret File
+
+1. In the secret sharing interface, select **Share File**.
+2. Upload the file containing secrets (e.g., a `.env` file, a certificate, or a key file).
+3. Configure password and expiry options.
+4. Click **Generate Link**.
+
+---
+
+## Link Options
+
+### Password Protection
+
+Adding a password provides an extra layer of security. Even if the link URL is intercepted, the content cannot be viewed without the password. Share the password through a separate channel (e.g., a phone call or a different messaging app).
+
+### Expiry Times
+
+Choose how long the link stays active:
+
+| Option | Duration |
+| --- | --- |
+| **1 hour** | For time-sensitive sharing during active collaboration. |
+| **24 hours** | The default. Gives the recipient a day to access the link. |
+| **7 days** | For recipients who may not be available immediately. |
+| **Custom** | Set a specific date and time for expiration. |
+
+If the link is not accessed before the expiry time, the content is automatically destroyed and the link becomes invalid.
+
+> A link is destroyed after its **first access** or its **expiry time**, whichever comes first.
+
+---
+
+## Share Link URL Format
+
+Generated links follow this format:
+
+```
+https://your-depvault-instance.com/s/[token]
+```
+
+The `[token]` is a cryptographically random string that uniquely identifies the shared content. Tokens are generated using a secure random number generator and are long enough to prevent brute-force guessing.
+
+---
+
+## Recipient Experience
+
+When a recipient visits a share link, the following flow occurs:
+
+### Step 1: Access the Link
+
+The recipient opens the URL in their browser. If the link has expired or has already been viewed, they see an error message indicating the link is no longer valid.
+
+### Step 2: Enter Password (If Required)
+
+If the creator set a password, the recipient is prompted to enter it. Incorrect passwords do not consume the link — the recipient can retry.
+
+### Step 3: View Secrets
+
+Once authenticated (or immediately if no password was set), the secrets are displayed on screen. The content includes:
+
+- Variable keys and their decrypted values (if sharing vault variables).
+- File contents (if sharing a secret file).
+
+### Step 4: Automatic Deletion
+
+After the recipient views the content, it is **permanently deleted** from DepVault's servers. The link token is invalidated. Any subsequent visit to the same URL returns a "link expired" message.
+
+> The recipient should copy the secrets they need before leaving the page. There is no way to access the content again after the initial view.
+
+---
+
+## Link Status and Audit Log
+
+Creators can track the status of their shared links from the project's sharing interface.
+
+### Link Statuses
+
+| Status | Meaning |
+| --- | --- |
+| **PENDING** | The link has been created but has not been accessed yet. |
+| **VIEWED** | The recipient has accessed and viewed the content. Content has been destroyed. |
+| **EXPIRED** | The link reached its expiry time without being accessed. Content has been destroyed. |
+
+### Audit Log
+
+The audit log records the following events for each shared link:
+
+- **Created** — Timestamp, creator identity, number of variables or file name shared, and expiry setting.
+- **Viewed** — Timestamp when the recipient accessed the link.
+- **Expired** — Timestamp when the link expired without being viewed.
+
+The audit log does **not** record the actual secret values, ensuring that sensitive data is never persisted in logs.
+
+---
+
+## Security Considerations
+
+- **Cryptographically random tokens** — Link tokens are generated using secure random number generators. They cannot be predicted or enumerated.
+- **Single-use enforcement** — Content is deleted from the database immediately after the first successful view. There is no caching or retention.
+- **Password hashing** — If a password is set, it is hashed before storage. The raw password is never stored.
+- **No content in logs** — Decrypted secret values are never written to application logs or audit trails.
+- **Encrypted at rest** — Shared content is encrypted with AES-256-GCM while waiting to be viewed, just like vault variables.
+- **HTTPS only** — Share links are served over TLS. DepVault does not support unencrypted access.
+
+---
+
+## Best Practices
+
+- **Use password protection** for highly sensitive secrets, especially when sharing with external collaborators.
+- **Choose the shortest practical expiry** — If the recipient is online now, use 1-hour expiry.
+- **Share the password via a separate channel** — Do not send the link and password in the same message or medium.
+- **Check the audit log** to confirm the recipient accessed the link. If a link stays in PENDING status for too long, reach out to the recipient directly.
+- **Prefer vault access over sharing** — If the recipient needs ongoing access to secrets, add them as a project member with the appropriate role instead of sharing one-time links repeatedly.
+
+---
+
+## What's Next
+
+- **[Environment Vault](/guides/environment-vault)** — Manage the source variables that feed into shared links.
+- **[CI/CD Integration](/guides/ci-cd-integration)** — Inject secrets into pipelines without manual sharing.

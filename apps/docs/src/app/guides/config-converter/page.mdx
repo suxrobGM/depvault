@@ -1,0 +1,132 @@
+# Config Converter
+
+Convert configuration files between formats such as `.env`, `appsettings.json`, `secrets.yaml`, and `config.toml`.
+
+---
+
+## Overview
+
+The config converter is a standalone utility that transforms configuration data between popular formats. It does not require a project — you can use it directly from the web dashboard or the CLI without signing in to a vault. The converter handles edge cases like comments, multiline values, and special characters to produce clean output ready for use in your application.
+
+---
+
+## Supported Formats
+
+| Format | Extension | Description |
+| --- | --- | --- |
+| **dotenv** | `.env` | Standard key-value pairs used by Node.js, Python, Ruby, and many other runtimes. |
+| **ASP.NET Settings** | `appsettings.json` | Nested JSON structure used by .NET applications with `IConfiguration`. |
+| **Kubernetes Secrets** | `secrets.yaml` | YAML manifest for Kubernetes Secret resources with base64-encoded values. |
+| **TOML** | `config.toml` | Tom's Obvious Minimal Language, used by Rust (Cargo), Python (pyproject), and others. |
+
+Conversions are supported in any direction between these four formats. For example, you can convert from `.env` to `appsettings.json`, from `secrets.yaml` to `.env`, or from `config.toml` to `secrets.yaml`.
+
+---
+
+## Using the Web Converter
+
+The converter is available at `/converter` in the web dashboard.
+
+### Layout
+
+The converter uses a side-by-side layout:
+
+- **Left panel (Source)** — Input area where you paste or upload your source configuration.
+- **Right panel (Output)** — Preview of the converted result in the target format.
+
+### Steps
+
+1. Navigate to **/converter** from the sidebar or top navigation.
+2. In the left panel, choose your **source format** from the dropdown (e.g., `.env`).
+3. Paste your configuration content into the text area, or click **Upload File** to select a file from your machine.
+4. In the right panel, choose your **target format** from the dropdown (e.g., `appsettings.json`).
+5. The converted output appears automatically in the right panel as you type or after uploading.
+6. Review the output. If the conversion looks correct, click **Copy** to copy to your clipboard or **Download** to save as a file.
+
+---
+
+## CLI Usage
+
+Convert configuration files from the command line:
+
+```bash
+depvault convert --file .env --from env --to appsettings.json
+```
+
+### Options
+
+| Flag | Description |
+| --- | --- |
+| `--file` | Path to the source configuration file. |
+| `--from` | Source format: `env`, `appsettings`, `secrets-yaml`, or `toml`. |
+| `--to` | Target format (same options as `--from`), or a file path with the target extension. |
+| `--output` | Optional output file path. If omitted, the result is printed to stdout. |
+
+### Examples
+
+```bash
+# Convert .env to appsettings.json and write to file
+depvault convert --file .env --from env --to appsettings --output appsettings.json
+
+# Convert Kubernetes secrets to dotenv and print to stdout
+depvault convert --file secrets.yaml --from secrets-yaml --to env
+
+# Convert TOML config to .env
+depvault convert --file config.toml --from toml --to env --output .env
+```
+
+---
+
+## Edge Case Handling
+
+The converter is designed to handle real-world configuration files that include non-trivial syntax.
+
+### Comments
+
+- **dotenv:** Lines starting with `#` are treated as comments. They are preserved as comments in the output when the target format supports them (TOML) and stripped when it does not (JSON, YAML).
+- **TOML:** Lines starting with `#` are handled similarly.
+- **JSON / YAML:** These formats do not natively support comments, so comments from the source are discarded.
+
+### Multiline Values
+
+- **dotenv:** Values enclosed in double quotes with `\n` escape sequences are treated as multiline. The converter expands them into proper multiline syntax in YAML and TOML.
+- **TOML:** Multi-line basic strings (triple-quoted) are preserved correctly.
+- **JSON:** Multiline values are stored as strings with `\n` characters.
+
+### Special Characters
+
+- Values containing `=`, `#`, quotes, or whitespace are properly escaped or quoted in the output format.
+- Kubernetes secrets YAML output automatically base64-encodes all values as required by the Kubernetes Secret spec.
+- JSON output properly escapes backslashes, quotes, and control characters.
+
+### Nested Keys
+
+- **appsettings.json** uses nested objects (e.g., `ConnectionStrings.Default`). When converting to flat formats like `.env`, nested keys are flattened using double underscores: `CONNECTIONSTRINGS__DEFAULT`.
+- When converting from `.env` to `appsettings.json`, keys containing `__` are expanded into nested objects.
+
+---
+
+## Conversion Matrix
+
+| From \ To | `.env` | `appsettings.json` | `secrets.yaml` | `config.toml` |
+| --- | --- | --- | --- | --- |
+| `.env` | -- | Flat to nested via `__` | Base64 encode values | Group by key prefix |
+| `appsettings.json` | Flatten with `__` | -- | Base64 encode values | Map JSON objects to TOML tables |
+| `secrets.yaml` | Base64 decode values | Decode and nest | -- | Decode and group |
+| `config.toml` | Flatten tables with `__` | Map tables to objects | Base64 encode values | -- |
+
+---
+
+## Limitations
+
+- The converter processes key-value configuration data. It does not handle arbitrary YAML structures like Kubernetes Deployments or Helm charts.
+- Maximum input size is **1 MB** in the web interface. The CLI has no size limit.
+- Binary values in YAML or TOML are not supported — only string data is converted.
+
+---
+
+## What's Next
+
+- **[Environment Vault](/guides/environment-vault)** — Store converted configuration values securely in the vault.
+- **[CI/CD Integration](/guides/ci-cd-integration)** — Use the CLI converter in your build pipelines.
+- **[Environment Diff](/guides/environment-diff)** — Compare environments after importing converted configuration.
