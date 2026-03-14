@@ -185,16 +185,16 @@ Developers working across multiple projects and tech stacks waste time switching
 
 **Dependency files:**
 
-| Ecosystem   | Files                                                  |
-| ----------- | ------------------------------------------------------ |
-| Node.js     | package.json, package-lock.json, yarn.lock             |
-| Python      | requirements.txt, pyproject.toml, Pipfile, poetry.lock |
-| Rust        | Cargo.toml, Cargo.lock                                 |
-| .NET        | .csproj, packages.config, Directory.Packages.props     |
-| Go          | go.mod                                                 |
-| Java/Kotlin | pom.xml, build.gradle                                  |
-| Ruby        | Gemfile                                                |
-| PHP         | composer.json                                          |
+| Ecosystem   | Files                                              |
+| ----------- | -------------------------------------------------- |
+| Node.js     | package.json                                       |
+| Python      | requirements.txt, pyproject.toml, Pipfile          |
+| Rust        | Cargo.toml, Cargo.lock                             |
+| .NET        | .csproj, packages.config, Directory.Packages.props |
+| Go          | go.mod                                             |
+| Java/Kotlin | pom.xml, build.gradle, libs.versions.toml          |
+| Ruby        | Gemfile                                            |
+| PHP         | composer.json                                      |
 
 **Environment/config files:**
 

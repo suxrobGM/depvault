@@ -14,7 +14,6 @@ internal static class EcosystemResolver
             ["requirements.txt"] = AnalysesPostRequestBody_ecosystem.PYTHON,
             ["pyproject.toml"] = AnalysesPostRequestBody_ecosystem.PYTHON,
             ["Pipfile"] = AnalysesPostRequestBody_ecosystem.PYTHON,
-            ["poetry.lock"] = AnalysesPostRequestBody_ecosystem.PYTHON,
             ["Cargo.toml"] = AnalysesPostRequestBody_ecosystem.RUST,
             ["Cargo.lock"] = AnalysesPostRequestBody_ecosystem.RUST,
             ["go.mod"] = AnalysesPostRequestBody_ecosystem.GO,

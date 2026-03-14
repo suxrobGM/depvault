@@ -6,17 +6,17 @@ Upload dependency files to detect outdated packages, known vulnerabilities, and 
 
 ## Supported Ecosystems
 
-| Ecosystem | Supported Files | Identifier |
-| --- | --- | --- |
-| **Node.js** | `package.json`, `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`, `bun.lockb` | `NODEJS` |
-| **Python** | `requirements.txt`, `pyproject.toml`, `Pipfile` | `PYTHON` |
-| **.NET** | `*.csproj` | `DOTNET` |
-| **Rust** | `Cargo.toml` | `RUST` |
-| **Go** | `go.mod` | `GO` |
-| **Java** | `pom.xml` | `JAVA` |
-| **Kotlin** | `build.gradle.kts` | `KOTLIN` |
-| **Ruby** | `Gemfile` | `RUBY` |
-| **PHP** | `composer.json` | `PHP` |
+| Ecosystem   | Supported Files                                 | Identifier |
+| ----------- | ----------------------------------------------- | ---------- |
+| **Node.js** | `package.json`                                  | `NODEJS`   |
+| **Python**  | `requirements.txt`, `pyproject.toml`, `Pipfile` | `PYTHON`   |
+| **.NET**    | `*.csproj`                                      | `DOTNET`   |
+| **Rust**    | `Cargo.toml`                                    | `RUST`     |
+| **Go**      | `go.mod`                                        | `GO`       |
+| **Java**    | `pom.xml`                                       | `JAVA`     |
+| **Kotlin**  | `build.gradle.kts`, `libs.versions.toml`        | `KOTLIN`   |
+| **Ruby**    | `Gemfile`                                       | `RUBY`     |
+| **PHP**     | `composer.json`                                 | `PHP`      |
 
 The ecosystem is auto-detected from the file name. You can override it manually if needed.
 
@@ -36,11 +36,11 @@ The ecosystem is auto-detected from the file name. You can override it manually 
 depvault analyze [--file <path>]
 ```
 
-| Flag | Description | Default |
-| --- | --- | --- |
-| `--file` | Path to the dependency file. Auto-detects in current directory when omitted. | Auto-detected |
-| `--ecosystem` | Override auto-detected ecosystem. | Auto-detected |
-| `--output` | Output format: `table` or `json`. | `table` |
+| Flag          | Description                                                                  | Default       |
+| ------------- | ---------------------------------------------------------------------------- | ------------- |
+| `--file`      | Path to the dependency file. Auto-detects in current directory when omitted. | Auto-detected |
+| `--ecosystem` | Override auto-detected ecosystem.                                            | Auto-detected |
+| `--output`    | Output format: `table` or `json`.                                            | `table`       |
 
 ```bash
 # Auto-detect dependency files in current directory
@@ -66,21 +66,21 @@ In interactive mode, when `--file` is omitted the CLI scans the current director
 
 ### Status Chips
 
-| Status | Meaning |
-| --- | --- |
-| **MAJOR** | Major version update available — may include breaking changes. |
-| **MINOR** | Minor update — typically backward-compatible new features. |
-| **PATCH** | Patch update — bug fixes only. |
-| **UP TO DATE** | On the latest version. |
+| Status         | Meaning                                                        |
+| -------------- | -------------------------------------------------------------- |
+| **MAJOR**      | Major version update available — may include breaking changes. |
+| **MINOR**      | Minor update — typically backward-compatible new features.     |
+| **PATCH**      | Patch update — bug fixes only.                                 |
+| **UP TO DATE** | On the latest version.                                         |
 
 ### Vulnerability Badges
 
-| Severity | Color | Description |
-| --- | --- | --- |
-| **CRITICAL** | Red | Actively exploited or trivially exploitable. |
-| **HIGH** | Orange | Significant risk — address promptly. |
-| **MEDIUM** | Yellow | Moderate risk — plan to address soon. |
-| **LOW** | Blue | Minimal risk. |
+| Severity     | Color  | Description                                  |
+| ------------ | ------ | -------------------------------------------- |
+| **CRITICAL** | Red    | Actively exploited or trivially exploitable. |
+| **HIGH**     | Orange | Significant risk — address promptly.         |
+| **MEDIUM**   | Yellow | Moderate risk — plan to address soon.        |
+| **LOW**      | Blue   | Minimal risk.                                |
 
 ---
 
