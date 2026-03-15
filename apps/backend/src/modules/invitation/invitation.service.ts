@@ -2,7 +2,7 @@ import { singleton } from "tsyringe";
 import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { PrismaClient } from "@/generated/prisma";
-import { NotificationService } from "@/modules/notification";
+import { NotificationService } from "@/modules/notification/notification.service";
 import type { PaginatedResponse } from "@/types/response";
 import { InvitationEmailService } from "./invitation-email.service";
 import { INVITATION_INCLUDE, toInvitationResponse } from "./invitation.mapper";
