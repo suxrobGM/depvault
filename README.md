@@ -1,9 +1,3 @@
-<p align="center">
-  <a href="docs/images/depvault-demo.mp4">
-    <img src="docs/images/dashboard.jpg" alt="DepVault Demo — click to watch" width="100%" />
-  </a>
-</p>
-
 <h1 align="center">DepVault</h1>
 
 <p align="center">
@@ -25,6 +19,10 @@
   <img src="https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white" alt=".NET" />
   <img src="https://img.shields.io/badge/PostgreSQL-18-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL" />
   <img src="https://img.shields.io/badge/MUI-7-007FFF?logo=mui&logoColor=white" alt="MUI" />
+</p>
+
+<p align="center">
+  <img src="docs/images/dashboard.jpg" alt="DepVault Dashboard" width="100%" />
 </p>
 
 ---
