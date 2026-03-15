@@ -5,6 +5,9 @@ interface LoadingScreenProps {
   message?: string;
 }
 
+/**
+ * A full-page loading screen for longer loading states (e.g., initial app load, project switch).
+ */
 export function LoadingScreen(props: LoadingScreenProps): ReactElement {
   const { message } = props;
 

@@ -2,16 +2,9 @@
 
 import type { ReactElement } from "react";
 import { GitHub as GitHubIcon, Search as SearchIcon } from "@mui/icons-material";
-import {
-  Box,
-  Chip,
-  CircularProgress,
-  InputAdornment,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, Chip, InputAdornment, Stack, TextField, Typography } from "@mui/material";
 import { GlassCard } from "@/components/ui/cards";
+import { LoadingSpinner } from "@/components/ui/feedback";
 import type { GitHubRepoListResponse } from "@/types/api/github";
 
 interface GitHubRepoSelectorProps {
@@ -49,11 +42,7 @@ export function GitHubRepoSelector(props: GitHubRepoSelectorProps): ReactElement
           },
         }}
       />
-      {isLoading && (
-        <Stack alignItems="center" sx={{ py: 3 }}>
-          <CircularProgress size={32} />
-        </Stack>
-      )}
+      {isLoading && <LoadingSpinner size={32} py={3} />}
       <Box
         sx={{
           maxHeight: 300,

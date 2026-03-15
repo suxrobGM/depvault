@@ -7,12 +7,12 @@ import {
   Button,
   Checkbox,
   Chip,
-  CircularProgress,
   DialogActions,
   FormControlLabel,
   Stack,
   Typography,
 } from "@mui/material";
+import { LoadingSpinner } from "@/components/ui/feedback";
 import type { GitHubDependencyFile } from "@/types/api/github";
 
 interface GitHubFileSelectorProps {
@@ -56,11 +56,7 @@ export function GitHubFileSelector(props: GitHubFileSelectorProps): ReactElement
         {repoLabel}
       </Typography>
 
-      {isLoading && (
-        <Stack alignItems="center" sx={{ py: 3 }}>
-          <CircularProgress size={32} />
-        </Stack>
-      )}
+      {isLoading && <LoadingSpinner size={32} py={3} />}
 
       {files && files.length === 0 && (
         <Alert severity="info">No dependency files found in this repository.</Alert>

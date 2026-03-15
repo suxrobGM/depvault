@@ -7,13 +7,16 @@ const AUTH_ROUTES = [
   ROUTES.forgotPassword,
   ROUTES.resetPassword,
   ROUTES.verifyEmail,
+];
+
+const PUBLIC_ROUTES = [
+  ROUTES.home,
+  ROUTES.secrets,
   ROUTES.pricing,
   ROUTES.terms,
   ROUTES.privacy,
   ROUTES.docs,
 ];
-
-const PUBLIC_ROUTES = [ROUTES.home, ROUTES.secrets];
 
 export function proxy(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
