@@ -127,17 +127,13 @@ jobs:
             # Login to GitHub Container Registry
             echo "$GHCR_PAT" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            # Stop existing containers
-            docker compose down
-
-            # Remove old images
-            docker images --format "{{.ID}}" --filter "reference=ghcr.io/$REPO_LOWER/*" | xargs -r docker rmi -f || true
-
-            # Pull latest images and deploy
+            # Pull new images while old containers are still running
             docker compose pull
+
+            # Recreate containers with new images (stops old, starts new)
             docker compose up -d --force-recreate --remove-orphans
 
-            # Clean up dangling images
+            # Clean up old images
             docker image prune -f
 
             echo "=== Running Containers ==="
