@@ -35,6 +35,7 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
         body: RegisterBodySchema,
         response: { 200: AuthResponseSchema, ...TooManyRequestsErrorSchema },
         detail: {
+          operationId: "registerUser",
           summary: "Register with email and password",
           description:
             "Create a new account with email, username, and password. Returns JWT tokens. A verification email is sent to confirm the address.",
@@ -56,6 +57,7 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
         body: LoginBodySchema,
         response: { 200: AuthResponseSchema, ...TooManyRequestsErrorSchema },
         detail: {
+          operationId: "loginUser",
           summary: "Login with email and password",
           description:
             "Authenticate with email and password. Returns JWT access and refresh tokens. Email must be verified before login is allowed.",
@@ -76,6 +78,7 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
     {
       response: AuthResponseSchema,
       detail: {
+        operationId: "refreshToken",
         summary: "Refresh access token",
         description:
           "Exchange the refresh_token cookie for a new access/refresh token pair. The old refresh token is invalidated (rotation).",
@@ -91,6 +94,7 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
     {
       response: MessageResponseSchema,
       detail: {
+        operationId: "logoutUser",
         summary: "Logout and clear auth cookies",
         description: "Clears httpOnly auth cookies from the browser.",
       },
@@ -105,6 +109,7 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
         body: ForgotPasswordBodySchema,
         response: { 200: MessageResponseSchema, ...TooManyRequestsErrorSchema },
         detail: {
+          operationId: "forgotPassword",
           summary: "Request password reset email",
           description:
             "Send a password reset link to the provided email. Always returns success to prevent email enumeration.",
@@ -114,6 +119,7 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
         body: ResetPasswordBodySchema,
         response: { 200: MessageResponseSchema, ...TooManyRequestsErrorSchema },
         detail: {
+          operationId: "resetPassword",
           summary: "Reset password with token",
           description:
             "Set a new password using the reset token from the email link. Revokes all existing refresh tokens for security.",
@@ -123,6 +129,7 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
         body: VerifyEmailBodySchema,
         response: { 200: MessageResponseSchema, ...TooManyRequestsErrorSchema },
         detail: {
+          operationId: "verifyEmail",
           summary: "Verify email address",
           description:
             "Confirm email ownership using the verification token sent during registration or email change.",
@@ -140,6 +147,7 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
     },
     {
       detail: {
+        operationId: "initiateGithubOAuth",
         summary: "Initiate GitHub OAuth",
         description:
           "Redirect the user to GitHub's OAuth authorization page to begin the login flow.",
@@ -164,6 +172,7 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
     {
       query: GitHubCallbackQuerySchema,
       detail: {
+        operationId: "githubOAuthCallback",
         summary: "GitHub OAuth callback",
         description:
           "Handle the OAuth callback from GitHub. Sets auth cookies and redirects to the frontend.",
@@ -177,6 +186,7 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
     body: LinkGitHubBodySchema,
     response: MessageResponseSchema,
     detail: {
+      operationId: "linkGithubAccount",
       summary: "Link GitHub account",
       description: "Link a GitHub account to the current authenticated user for OAuth login.",
       security: [{ bearerAuth: [] }],

@@ -23,6 +23,7 @@ export const scanPatternController = new Elysia({
     params: PatternProjectParamsSchema,
     response: PatternListResponseSchema,
     detail: {
+      operationId: "listScanPatterns",
       summary: "List scan patterns",
       description: "Return built-in and custom scan patterns for the project.",
       security: [{ bearerAuth: [] }],
@@ -33,6 +34,7 @@ export const scanPatternController = new Elysia({
     body: CreatePatternBodySchema,
     response: PatternResponseSchema,
     detail: {
+      operationId: "createScanPattern",
       summary: "Create custom pattern",
       description:
         "Create a new custom scan pattern for the project. Requires editor or owner role.",
@@ -48,6 +50,7 @@ export const scanPatternController = new Elysia({
       body: UpdatePatternBodySchema,
       response: PatternResponseSchema,
       detail: {
+        operationId: "updateScanPattern",
         summary: "Update custom pattern",
         description: "Update a custom scan pattern. Built-in patterns cannot be modified.",
         security: [{ bearerAuth: [] }],
@@ -61,6 +64,7 @@ export const scanPatternController = new Elysia({
       params: PatternParamsSchema,
       response: MessageResponseSchema,
       detail: {
+        operationId: "deleteScanPattern",
         summary: "Delete custom pattern",
         description: "Delete a custom scan pattern. Built-in patterns cannot be deleted.",
         security: [{ bearerAuth: [] }],

@@ -25,6 +25,7 @@ export const githubApiController = new Elysia({
       query: GitHubRepoListQuerySchema,
       response: GitHubRepoListResponseSchema,
       detail: {
+        operationId: "listGithubRepos",
         summary: "List GitHub repositories",
         description:
           "List the authenticated user's GitHub repositories. Requires a linked GitHub account with repo scope.",
@@ -39,6 +40,7 @@ export const githubApiController = new Elysia({
       params: GitHubRepoParamsSchema,
       response: GitHubDependencyFilesResponseSchema,
       detail: {
+        operationId: "discoverDependencyFiles",
         summary: "Discover dependency files",
         description:
           "Scan a GitHub repository for known dependency files (package.json, requirements.txt, etc.). Supports monorepos with nested projects.",
@@ -55,6 +57,7 @@ export const githubApiController = new Elysia({
       query: GitHubFileContentQuerySchema,
       response: GitHubFileContentResponseSchema,
       detail: {
+        operationId: "getGithubFileContent",
         summary: "Get file content",
         description: "Fetch the content of a specific file from a GitHub repository.",
         security: [{ bearerAuth: [] }],

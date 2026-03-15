@@ -15,6 +15,7 @@ export const convertController = new Elysia({
     body: ConvertBodySchema,
     response: ConvertResponseSchema,
     detail: {
+      operationId: "convertConfigFormat",
       summary: "Convert between config formats",
       description:
         "Convert configuration content between supported formats (.env, appsettings.json, secrets.yaml, config.toml). No project needed — standalone conversion with preview.",

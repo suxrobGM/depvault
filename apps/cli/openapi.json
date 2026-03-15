@@ -265,7 +265,7 @@
             }
           }
         },
-        "operationId": "postAuthRegister",
+        "operationId": "registerUser",
         "tags": ["Auth"],
         "summary": "Register with email and password",
         "description": "Create a new account with email, username, and password. Returns JWT tokens. A verification email is sent to confirm the address.",
@@ -483,7 +483,7 @@
             }
           }
         },
-        "operationId": "postAuthLogin",
+        "operationId": "loginUser",
         "tags": ["Auth"],
         "summary": "Login with email and password",
         "description": "Authenticate with email and password. Returns JWT access and refresh tokens. Email must be verified before login is allowed.",
@@ -668,7 +668,7 @@
             }
           }
         },
-        "operationId": "postAuthRefresh",
+        "operationId": "refreshToken",
         "tags": ["Auth"],
         "summary": "Refresh access token",
         "description": "Exchange the refresh_token cookie for a new access/refresh token pair. The old refresh token is invalidated (rotation)."
@@ -794,7 +794,7 @@
             }
           }
         },
-        "operationId": "postAuthLogout",
+        "operationId": "logoutUser",
         "tags": ["Auth"],
         "summary": "Logout and clear auth cookies",
         "description": "Clears httpOnly auth cookies from the browser."
@@ -941,7 +941,7 @@
             }
           }
         },
-        "operationId": "postAuthForgot-password",
+        "operationId": "forgotPassword",
         "tags": ["Auth"],
         "summary": "Request password reset email",
         "description": "Send a password reset link to the provided email. Always returns success to prevent email enumeration.",
@@ -1105,7 +1105,7 @@
             }
           }
         },
-        "operationId": "postAuthReset-password",
+        "operationId": "resetPassword",
         "tags": ["Auth"],
         "summary": "Reset password with token",
         "description": "Set a new password using the reset token from the email link. Revokes all existing refresh tokens for security.",
@@ -1273,7 +1273,7 @@
             }
           }
         },
-        "operationId": "postAuthVerify-email",
+        "operationId": "verifyEmail",
         "tags": ["Auth"],
         "summary": "Verify email address",
         "description": "Confirm email ownership using the verification token sent during registration or email change.",
@@ -1399,7 +1399,7 @@
             }
           }
         },
-        "operationId": "getAuthGithub",
+        "operationId": "initiateGithubOAuth",
         "tags": ["Auth"],
         "summary": "Initiate GitHub OAuth",
         "description": "Redirect the user to GitHub's OAuth authorization page to begin the login flow."
@@ -1527,7 +1527,7 @@
             }
           }
         },
-        "operationId": "getAuthGithubCallback",
+        "operationId": "githubOAuthCallback",
         "tags": ["Auth"],
         "summary": "GitHub OAuth callback",
         "description": "Handle the OAuth callback from GitHub. Sets auth cookies and redirects to the frontend."
@@ -1654,7 +1654,7 @@
             }
           }
         },
-        "operationId": "postAuthLink-github",
+        "operationId": "linkGithubAccount",
         "tags": ["Auth"],
         "summary": "Link GitHub account",
         "description": "Link a GitHub account to the current authenticated user for OAuth login.",
@@ -1815,7 +1815,7 @@
             }
           }
         },
-        "operationId": "getProjectsStats",
+        "operationId": "getDashboardStats",
         "tags": ["Projects"],
         "summary": "Get dashboard stats",
         "description": "Return aggregate statistics across all projects the authenticated user is a member of.",
@@ -1986,7 +1986,7 @@
             }
           }
         },
-        "operationId": "getProjectsById",
+        "operationId": "getProject",
         "tags": ["Projects"],
         "summary": "Get project details",
         "description": "Return details of a specific project. The authenticated user must be a member of the project.",
@@ -2155,7 +2155,7 @@
             }
           }
         },
-        "operationId": "putProjectsById",
+        "operationId": "updateProject",
         "tags": ["Projects"],
         "summary": "Update project",
         "description": "Update project name and/or description. Only owners and editors are allowed to update.",
@@ -2319,7 +2319,7 @@
             }
           }
         },
-        "operationId": "deleteProjectsById",
+        "operationId": "deleteProject",
         "tags": ["Projects"],
         "summary": "Delete project",
         "description": "Permanently delete a project and all associated data (analyses, environments, variables). Only the project owner can delete.",
@@ -2508,7 +2508,7 @@
             }
           }
         },
-        "operationId": "postProjectsByIdMembers",
+        "operationId": "inviteMember",
         "tags": ["Members"],
         "summary": "Invite member to project",
         "description": "Invite a user by email to join the project with a specified role (editor or viewer). Only the project owner can invite members.",
@@ -2762,7 +2762,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdMembers",
+        "operationId": "listMembers",
         "tags": ["Members"],
         "summary": "List project members",
         "description": "Return a paginated list of all members in the project with their roles. Any project member can view the member list.",
@@ -2959,7 +2959,7 @@
             }
           }
         },
-        "operationId": "putProjectsByIdMembersByMemberId",
+        "operationId": "updateMemberRole",
         "tags": ["Members"],
         "summary": "Update member role",
         "description": "Update the role of a project member. Only the project owner can change member roles.",
@@ -3123,7 +3123,7 @@
             }
           }
         },
-        "operationId": "deleteProjectsByIdMembersByMemberId",
+        "operationId": "removeMember",
         "tags": ["Members"],
         "summary": "Remove member from project",
         "description": "Remove a member from the project. Only the project owner can remove members. The owner cannot be removed.",
@@ -3264,7 +3264,7 @@
             }
           }
         },
-        "operationId": "postProjectsByIdTransfer",
+        "operationId": "transferProjectOwnership",
         "tags": ["Members"],
         "summary": "Transfer project ownership",
         "description": "Transfer project ownership to another member. The current owner becomes an editor. Only the current owner can transfer ownership.",
@@ -3467,7 +3467,7 @@
             }
           }
         },
-        "operationId": "putProjectsByIdVault-groupsByGroupId",
+        "operationId": "updateVaultGroup",
         "tags": ["Vault Groups"],
         "summary": "Update vault group",
         "description": "Update a vault group's name, description, or sort order.",
@@ -3645,7 +3645,7 @@
             }
           }
         },
-        "operationId": "deleteProjectsByIdVault-groupsByGroupId",
+        "operationId": "deleteVaultGroup",
         "tags": ["Vault Groups"],
         "summary": "Delete vault group",
         "description": "Delete a vault group and all its environments and variables. This action cannot be undone.",
@@ -3794,7 +3794,7 @@
             }
           }
         },
-        "operationId": "deleteProjectsByIdEnvironmentsByEnvId",
+        "operationId": "deleteEnvironment",
         "tags": ["Environments"],
         "summary": "Delete an environment",
         "description": "Permanently delete an environment and all its variables. Only owners and editors can delete.",
@@ -3968,7 +3968,7 @@
             }
           }
         },
-        "operationId": "postProjectsByIdEnvironmentsVariables",
+        "operationId": "createEnvVariable",
         "tags": ["Environment Variables"],
         "summary": "Create an environment variable",
         "description": "Create a new encrypted environment variable for the project. The environment is auto-created if it doesn't exist. Only owners and editors can create variables.",
@@ -4238,7 +4238,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdEnvironmentsVariables",
+        "operationId": "listEnvVariables",
         "tags": ["Environment Variables"],
         "summary": "List environment variables",
         "description": "List environment variables for a project, optionally filtered by environment type. Viewers see masked values; editors and owners see decrypted values.",
@@ -4420,7 +4420,7 @@
             }
           }
         },
-        "operationId": "putProjectsByIdEnvironmentsVariablesByVarId",
+        "operationId": "updateEnvVariable",
         "tags": ["Environment Variables"],
         "summary": "Update an environment variable",
         "description": "Update key, value, or metadata of an environment variable. When the value changes, the previous value is saved as a version snapshot. Only owners and editors can update.",
@@ -4594,7 +4594,7 @@
             }
           }
         },
-        "operationId": "deleteProjectsByIdEnvironmentsVariablesByVarId",
+        "operationId": "deleteEnvVariable",
         "tags": ["Environment Variables"],
         "summary": "Delete an environment variable",
         "description": "Permanently delete an environment variable and all its version history. Only owners and editors can delete.",
@@ -4765,7 +4765,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdEnvironmentsVariablesByVarIdVersions",
+        "operationId": "listEnvVariableVersions",
         "tags": ["Environment Variables"],
         "summary": "List variable version history",
         "description": "List the version history for an environment variable. Editors and owners see decrypted values; viewers see masked values.",
@@ -4955,7 +4955,7 @@
             }
           }
         },
-        "operationId": "postProjectsByIdEnvironmentsVariablesByVarIdVersionsByVersionIdRollback",
+        "operationId": "rollbackEnvVariable",
         "tags": ["Environment Variables"],
         "summary": "Rollback variable to a previous version",
         "description": "Restore an environment variable to a previous version. The current value is saved as a new version snapshot before rolling back. Only owners and editors can rollback.",
@@ -5142,7 +5142,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdEnvironmentsDiff",
+        "operationId": "diffEnvironments",
         "tags": ["Environment Diff & Clone"],
         "summary": "Diff environments",
         "description": "Compare variables across 2-3 environments. Returns rows with match/mismatch/missing status.",
@@ -5290,7 +5290,7 @@
             }
           }
         },
-        "operationId": "postProjectsByIdEnvironmentsClone",
+        "operationId": "cloneEnvironment",
         "tags": ["Environment Diff & Clone"],
         "summary": "Clone environment",
         "description": "Clone an environment's variables (keys, values, and metadata) into a new environment.",
@@ -5503,7 +5503,7 @@
             }
           }
         },
-        "operationId": "postProjectsByIdEnvironmentsImport",
+        "operationId": "importEnvVariables",
         "tags": ["Environment Import/Export"],
         "summary": "Bulk import environment variables",
         "description": "Import environment variables from a config file (.env, appsettings.json, secrets.yaml, config.toml). Existing keys are skipped. Only owners and editors can import.",
@@ -5705,7 +5705,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdEnvironmentsExport",
+        "operationId": "exportEnvVariables",
         "tags": ["Environment Import/Export"],
         "summary": "Export environment variables",
         "description": "Export all environment variables for a given environment in the specified format (.env, appsettings.json, secrets.yaml, config.toml). Only owners and editors can export.",
@@ -5867,7 +5867,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdEnvironmentsExample",
+        "operationId": "generateEnvExample",
         "tags": ["Environment Import/Export"],
         "summary": "Generate .env.example template",
         "description": "Generate a .env.example template with keys and placeholder annotations but no real values. Any project member can access this.",
@@ -6011,7 +6011,7 @@
             }
           }
         },
-        "operationId": "postProjectsByIdEnvironmentsBundle",
+        "operationId": "downloadEnvBundle",
         "tags": ["Environment Bundle"],
         "summary": "Download environment bundle",
         "description": "Download selected environment variables and secret files as a base64-encoded zip archive. Only owners and editors can download bundles.",
@@ -6255,7 +6255,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdEnv-templatesByTemplateId",
+        "operationId": "getEnvTemplate",
         "tags": ["Environment Templates"],
         "summary": "Get template detail",
         "description": "Get a template with its variables.",
@@ -6431,7 +6431,7 @@
             }
           }
         },
-        "operationId": "putProjectsByIdEnv-templatesByTemplateId",
+        "operationId": "updateEnvTemplate",
         "tags": ["Environment Templates"],
         "summary": "Update template",
         "description": "Update template name or description.",
@@ -6599,7 +6599,7 @@
             }
           }
         },
-        "operationId": "deleteProjectsByIdEnv-templatesByTemplateId",
+        "operationId": "deleteEnvTemplate",
         "tags": ["Environment Templates"],
         "summary": "Delete template",
         "description": "Delete a template and all its variables.",
@@ -6755,7 +6755,7 @@
             }
           }
         },
-        "operationId": "postProjectsByIdEnv-templatesByTemplateIdApply",
+        "operationId": "applyEnvTemplate",
         "tags": ["Environment Templates"],
         "summary": "Apply template",
         "description": "Apply a template to create a new environment with empty-valued variables.",
@@ -6908,7 +6908,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdSecretsByFileIdDownload",
+        "operationId": "downloadSecretFile",
         "tags": ["Secret Files"],
         "summary": "Download a secret file",
         "description": "Download and decrypt a secret file. Only owners and editors can download file contents. Viewers can only see metadata via the list endpoint.",
@@ -7102,7 +7102,7 @@
             }
           }
         },
-        "operationId": "putProjectsByIdSecretsByFileId",
+        "operationId": "updateSecretFile",
         "tags": ["Secret Files"],
         "summary": "Update secret file metadata",
         "description": "Update the name, description, or environment of a secret file. Only owners and editors can update.",
@@ -7277,7 +7277,7 @@
             }
           }
         },
-        "operationId": "deleteProjectsByIdSecretsByFileId",
+        "operationId": "deleteSecretFile",
         "tags": ["Secret Files"],
         "summary": "Delete a secret file",
         "description": "Permanently delete a secret file and all its version history. Only owners and editors can delete.",
@@ -7448,7 +7448,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdSecretsByFileIdVersions",
+        "operationId": "listSecretFileVersions",
         "tags": ["Secret Files"],
         "summary": "List secret file versions",
         "description": "List all version history entries for a secret file. Any project member can view version metadata.",
@@ -7642,7 +7642,7 @@
             }
           }
         },
-        "operationId": "postProjectsByIdSecretsByFileIdContent",
+        "operationId": "uploadSecretFileVersion",
         "tags": ["Secret Files"],
         "summary": "Upload a new version of a secret file",
         "description": "Replace a secret file's content with a new upload. The current content is saved as a version before being replaced. Only owners and editors can upload new versions.",
@@ -7800,7 +7800,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdSecretsByFileIdVersionsByVersionIdDownload",
+        "operationId": "downloadSecretFileVersion",
         "tags": ["Secret Files"],
         "summary": "Download a specific version of a secret file",
         "description": "Download and decrypt a previous version of a secret file. Only owners and editors can download.",
@@ -8002,7 +8002,7 @@
             }
           }
         },
-        "operationId": "postProjectsByIdSecretsByFileIdRollbackByVersionId",
+        "operationId": "rollbackSecretFile",
         "tags": ["Secret Files"],
         "summary": "Rollback to a previous version",
         "description": "Rollback a secret file to a previous version. The current content is saved as a new version before restoring. Only owners and editors can rollback.",
@@ -8199,7 +8199,7 @@
             }
           }
         },
-        "operationId": "getSecretsSharedByTokenInfo",
+        "operationId": "getSharedSecretInfo",
         "tags": ["Shared Secrets"],
         "summary": "Check shared secret info",
         "description": "Returns metadata (type, password-protected, expiry) without consuming the secret."
@@ -8414,7 +8414,7 @@
             }
           }
         },
-        "operationId": "postSecretsSharedByToken",
+        "operationId": "accessSharedSecret",
         "tags": ["Shared Secrets"],
         "summary": "Access a one-time shared secret",
         "description": "Retrieve and permanently consume a shared secret. Content is destroyed after this call — no second access is possible.",
@@ -8568,7 +8568,7 @@
             }
           }
         },
-        "operationId": "postProjectsByIdSecretsSharedEnv",
+        "operationId": "shareEnvVariables",
         "tags": ["Shared Secrets"],
         "summary": "Create a share link for environment variables",
         "description": "Generate a one-time shareable link for one or more environment variables. Optional password and expiry supported.",
@@ -8751,7 +8751,7 @@
             }
           }
         },
-        "operationId": "postProjectsByIdSecretsSharedFileByFileId",
+        "operationId": "shareSecretFile",
         "tags": ["Shared Secrets"],
         "summary": "Create a share link for a secret file",
         "description": "Generate a one-time shareable download link for a secret file. Optional password and expiry supported.",
@@ -8923,7 +8923,7 @@
             }
           }
         },
-        "operationId": "deleteProjectsByIdSecretsSharedBySecretId",
+        "operationId": "revokeSharedSecret",
         "tags": ["Shared Secrets"],
         "summary": "Revoke a pending share link",
         "description": "Permanently delete a pending share link. Already-viewed links cannot be revoked.",
@@ -9099,7 +9099,7 @@
             }
           }
         },
-        "operationId": "getUsersMe",
+        "operationId": "getProfile",
         "tags": ["Users"],
         "summary": "Get current user profile",
         "description": "Return the authenticated user's profile including email, username, avatar, and linked accounts.",
@@ -9274,7 +9274,7 @@
             }
           }
         },
-        "operationId": "patchUsersMe",
+        "operationId": "updateProfile",
         "tags": ["Users"],
         "summary": "Update profile",
         "description": "Update the authenticated user's username and/or avatar URL. Username must be unique.",
@@ -9429,7 +9429,7 @@
             }
           }
         },
-        "operationId": "deleteUsersMe",
+        "operationId": "deleteAccount",
         "tags": ["Users"],
         "summary": "Delete account",
         "description": "Permanently delete the authenticated user's account and all associated data including projects, analyses, uploads, and secret files. This action is irreversible.",
@@ -9561,7 +9561,7 @@
             }
           }
         },
-        "operationId": "patchUsersMePassword",
+        "operationId": "changePassword",
         "tags": ["Users"],
         "summary": "Change password",
         "description": "Change the authenticated user's password. Requires the current password for verification. Not available for OAuth-only accounts.",
@@ -9714,7 +9714,7 @@
             }
           }
         },
-        "operationId": "patchUsersMeEmail",
+        "operationId": "changeEmail",
         "tags": ["Users"],
         "summary": "Change email address",
         "description": "Change the authenticated user's email. Requires password verification. A new verification email is sent to the updated address.",
@@ -9866,7 +9866,7 @@
             }
           }
         },
-        "operationId": "postUsersMeAvatar",
+        "operationId": "uploadAvatar",
         "tags": ["Users"],
         "summary": "Upload avatar",
         "description": "Upload and set the authenticated user's avatar image. Accepts jpg, png, gif, or webp up to 5 MB.",
@@ -10196,7 +10196,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdAnalysesByAnalysisId",
+        "operationId": "getAnalysis",
         "tags": ["Analyses"],
         "summary": "Get analysis details",
         "description": "Return analysis details with all parsed dependencies. The authenticated user must be a member of the project.",
@@ -10507,7 +10507,7 @@
             }
           }
         },
-        "operationId": "patchProjectsByIdAnalysesByAnalysisId",
+        "operationId": "updateAnalysis",
         "tags": ["Analyses"],
         "summary": "Update analysis",
         "description": "Update analysis metadata such as file path. Only owners and editors can update.",
@@ -10673,7 +10673,7 @@
             }
           }
         },
-        "operationId": "deleteProjectsByIdAnalysesByAnalysisId",
+        "operationId": "deleteAnalysis",
         "tags": ["Analyses"],
         "summary": "Delete analysis",
         "description": "Delete an analysis and all its dependencies. Only owners and editors can delete analyses.",
@@ -10986,7 +10986,7 @@
             }
           }
         },
-        "operationId": "postProjectsByIdAnalysesByAnalysisIdRescan",
+        "operationId": "rescanAnalysis",
         "tags": ["Analyses"],
         "summary": "Rescan analysis",
         "description": "Re-check version updates and vulnerabilities for all dependencies in an existing analysis.",
@@ -11179,7 +11179,7 @@
             }
           }
         },
-        "operationId": "getGithubRepos",
+        "operationId": "listGithubRepos",
         "tags": ["GitHub"],
         "summary": "List GitHub repositories",
         "description": "List the authenticated user's GitHub repositories. Requires a linked GitHub account with repo scope.",
@@ -11348,7 +11348,7 @@
             }
           }
         },
-        "operationId": "getGithubReposByOwnerByRepoDependency-files",
+        "operationId": "discoverDependencyFiles",
         "tags": ["GitHub"],
         "summary": "Discover dependency files",
         "description": "Scan a GitHub repository for known dependency files (package.json, requirements.txt, etc.). Supports monorepos with nested projects.",
@@ -11509,7 +11509,7 @@
             }
           }
         },
-        "operationId": "getGithubReposByOwnerByRepoContent",
+        "operationId": "getGithubFileContent",
         "tags": ["GitHub"],
         "summary": "Get file content",
         "description": "Fetch the content of a specific file from a GitHub repository.",
@@ -11640,7 +11640,7 @@
             }
           }
         },
-        "operationId": "getNotificationsUnread-count",
+        "operationId": "getUnreadCount",
         "tags": ["Notifications"],
         "summary": "Get unread count",
         "description": "Return the number of unread notifications for the authenticated user.",
@@ -11771,7 +11771,7 @@
             }
           }
         },
-        "operationId": "patchNotificationsRead-all",
+        "operationId": "markAllNotificationsRead",
         "tags": ["Notifications"],
         "summary": "Mark all notifications read",
         "description": "Mark all unread notifications as read for the authenticated user.",
@@ -11956,7 +11956,7 @@
             }
           }
         },
-        "operationId": "getNotificationsByNotificationId",
+        "operationId": "getNotification",
         "tags": ["Notifications"],
         "summary": "Get notification",
         "description": "Return a single notification by ID.",
@@ -12095,7 +12095,7 @@
             }
           }
         },
-        "operationId": "deleteNotificationsByNotificationId",
+        "operationId": "deleteNotification",
         "tags": ["Notifications"],
         "summary": "Delete notification",
         "description": "Delete a single notification.",
@@ -12280,7 +12280,7 @@
             }
           }
         },
-        "operationId": "patchNotificationsByNotificationIdRead",
+        "operationId": "markNotificationRead",
         "tags": ["Notifications"],
         "summary": "Mark notification read",
         "description": "Mark a single notification as read.",
@@ -12467,7 +12467,7 @@
             }
           }
         },
-        "operationId": "postProjectsByIdScans",
+        "operationId": "triggerSecretScan",
         "tags": ["Secret Scanning"],
         "summary": "Trigger secret scan",
         "description": "Start a new secret scan for the project's connected GitHub repository. Requires editor or owner role.",
@@ -12698,7 +12698,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdScans",
+        "operationId": "listSecretScans",
         "tags": ["Secret Scanning"],
         "summary": "List secret scans",
         "description": "Return a paginated list of secret scans for the project.",
@@ -12894,7 +12894,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdScansByScanId",
+        "operationId": "getSecretScan",
         "tags": ["Secret Scanning"],
         "summary": "Get scan details",
         "description": "Return details for a specific secret scan.",
@@ -13162,7 +13162,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdDetections",
+        "operationId": "listSecretDetections",
         "tags": ["Secret Scanning"],
         "summary": "List secret detections",
         "description": "Return a paginated list of secret detections with optional status and severity filters.",
@@ -13302,7 +13302,7 @@
             }
           }
         },
-        "operationId": "patchProjectsByIdDetections",
+        "operationId": "batchUpdateDetections",
         "tags": ["Secret Scanning"],
         "summary": "Batch update detection statuses",
         "description": "Mark multiple detections as resolved or false positive in one request. Only updates OPEN detections. Requires editor or owner role.",
@@ -13541,7 +13541,7 @@
             }
           }
         },
-        "operationId": "patchProjectsByIdDetectionsByDetectionId",
+        "operationId": "updateDetectionStatus",
         "tags": ["Secret Scanning"],
         "summary": "Update detection status",
         "description": "Mark a detection as resolved or false positive. Requires editor or owner role.",
@@ -13773,7 +13773,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdScan-summary",
+        "operationId": "getSecretScanSummary",
         "tags": ["Secret Scanning"],
         "summary": "Get scan summary",
         "description": "Return scan summary including last scan info, open detections by severity, and resolved count.",
@@ -13953,7 +13953,7 @@
             }
           }
         },
-        "operationId": "putProjectsByIdScan-patternsByPatternId",
+        "operationId": "updateScanPattern",
         "tags": ["Scan Patterns"],
         "summary": "Update custom pattern",
         "description": "Update a custom scan pattern. Built-in patterns cannot be modified.",
@@ -14128,7 +14128,7 @@
             }
           }
         },
-        "operationId": "deleteProjectsByIdScan-patternsByPatternId",
+        "operationId": "deleteScanPattern",
         "tags": ["Scan Patterns"],
         "summary": "Delete custom pattern",
         "description": "Delete a custom scan pattern. Built-in patterns cannot be deleted.",
@@ -14277,7 +14277,7 @@
             }
           }
         },
-        "operationId": "deleteProjectsByIdCi-tokensByTokenId",
+        "operationId": "revokeCiToken",
         "tags": ["CI/CD Tokens"],
         "summary": "Revoke CI token",
         "description": "Immediately revoke a CI/CD token.",
@@ -14410,7 +14410,7 @@
             }
           }
         },
-        "operationId": "getCiSecretsFilesByFileId",
+        "operationId": "downloadCiSecretFile",
         "tags": ["CI/CD Access"],
         "summary": "Download secret file",
         "description": "Download a specific secret file using a CI token."
@@ -14574,7 +14574,7 @@
             }
           }
         },
-        "operationId": "putProjectsByIdLicense-rulesByRuleId",
+        "operationId": "updateLicenseRule",
         "tags": ["License Rules"],
         "summary": "Update license rule",
         "description": "Update the policy for an existing license rule.",
@@ -14740,7 +14740,7 @@
             }
           }
         },
-        "operationId": "deleteProjectsByIdLicense-rulesByRuleId",
+        "operationId": "deleteLicenseRule",
         "tags": ["License Rules"],
         "summary": "Delete license rule",
         "description": "Delete a license policy rule from the project.",
@@ -14969,7 +14969,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdLicense-rulesCompliance",
+        "operationId": "getLicenseCompliance",
         "tags": ["License Rules"],
         "summary": "License compliance summary",
         "description": "Return a paginated compliance summary with pass/warn/fail counts for all dependencies in the project.",
@@ -15104,7 +15104,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdLicense-rulesExport",
+        "operationId": "exportLicenseReport",
         "tags": ["License Rules"],
         "summary": "Export license audit report",
         "description": "Export a license audit report as CSV or text.",
@@ -15436,7 +15436,7 @@
             }
           }
         },
-        "operationId": "postProjects",
+        "operationId": "createProject",
         "tags": ["Projects"],
         "summary": "Create a new project",
         "description": "Create a project and add the authenticated user as the owner. Projects serve as containers for dependency analyses and environment variables.",
@@ -15669,7 +15669,7 @@
             }
           }
         },
-        "operationId": "getProjects",
+        "operationId": "listProjects",
         "tags": ["Projects"],
         "summary": "List projects",
         "description": "Return a paginated list of projects where the authenticated user is a member (owner, editor, or viewer).",
@@ -15851,7 +15851,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdVault-groups",
+        "operationId": "listVaultGroups",
         "tags": ["Vault Groups"],
         "summary": "List vault groups",
         "description": "List all vault groups for a project with environment and variable counts.",
@@ -16028,7 +16028,7 @@
             }
           }
         },
-        "operationId": "postProjectsByIdVault-groups",
+        "operationId": "createVaultGroup",
         "tags": ["Vault Groups"],
         "summary": "Create vault group",
         "description": "Create a new vault group for organizing environment variables by sub-project or env file.",
@@ -16234,7 +16234,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdEnvironments",
+        "operationId": "listEnvironments",
         "tags": ["Environments"],
         "summary": "List environments",
         "description": "List all environments for a project with variable counts.",
@@ -16404,7 +16404,7 @@
             }
           }
         },
-        "operationId": "postProjectsByIdEnv-templates",
+        "operationId": "createEnvTemplate",
         "tags": ["Environment Templates"],
         "summary": "Create template",
         "description": "Create a template from an existing environment or a manual variable list.",
@@ -16626,7 +16626,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdEnv-templates",
+        "operationId": "listEnvTemplates",
         "tags": ["Environment Templates"],
         "summary": "List templates",
         "description": "List all environment templates for a project.",
@@ -16812,7 +16812,7 @@
             }
           }
         },
-        "operationId": "postProjectsByIdSecrets",
+        "operationId": "uploadSecretFile",
         "tags": ["Secret Files"],
         "summary": "Upload a secret file",
         "description": "Upload and encrypt a secret file for the project. Executable file types (.exe, .sh, .bat, .cmd, .ps1) are rejected. Max file size is 25 MB. Only owners and editors can upload.",
@@ -17079,7 +17079,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdSecrets",
+        "operationId": "listSecretFiles",
         "tags": ["Secret Files"],
         "summary": "List secret files",
         "description": "List secret file metadata for a project, optionally filtered by environment. File contents are not included — use the download endpoint to retrieve decrypted content.",
@@ -17270,7 +17270,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdSecretsShared",
+        "operationId": "listSharedSecrets",
         "tags": ["Shared Secrets"],
         "summary": "List shared secret links",
         "description": "List all share links created for this project with their status (PENDING, VIEWED, EXPIRED).",
@@ -17576,7 +17576,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdAudit-log",
+        "operationId": "listAuditLog",
         "tags": ["Audit Log"],
         "summary": "List audit log events",
         "description": "Return a paginated list of audit log events for a project. Only owners and editors can view audit logs. Audit logs are append-only and cannot be modified or deleted.",
@@ -17880,7 +17880,7 @@
             }
           }
         },
-        "operationId": "postProjectsByIdAnalyses",
+        "operationId": "createAnalysis",
         "tags": ["Analyses"],
         "summary": "Create analysis",
         "description": "Parse a dependency file and store the analysis results. Accepts file content, ecosystem type, and project ID. Supports Node.js (package.json, package-lock.json) and Python (requirements.txt, pyproject.toml).",
@@ -18159,7 +18159,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdAnalyses",
+        "operationId": "listAnalyses",
         "tags": ["Analyses"],
         "summary": "List project analyses",
         "description": "Return a paginated list of analyses for a specific project. The authenticated user must be a member of the project.",
@@ -18302,7 +18302,7 @@
             }
           }
         },
-        "operationId": "postConvert",
+        "operationId": "convertConfigFormat",
         "tags": ["Convert"],
         "summary": "Convert between config formats",
         "description": "Convert configuration content between supported formats (.env, appsettings.json, secrets.yaml, config.toml). No project needed — standalone conversion with preview.",
@@ -18574,7 +18574,7 @@
             }
           }
         },
-        "operationId": "getNotifications",
+        "operationId": "listNotifications",
         "tags": ["Notifications"],
         "summary": "List notifications",
         "description": "Return a paginated list of notifications for the authenticated user.",
@@ -18754,7 +18754,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdScan-patterns",
+        "operationId": "listScanPatterns",
         "tags": ["Scan Patterns"],
         "summary": "List scan patterns",
         "description": "Return built-in and custom scan patterns for the project.",
@@ -18923,7 +18923,7 @@
             }
           }
         },
-        "operationId": "postProjectsByIdScan-patterns",
+        "operationId": "createScanPattern",
         "tags": ["Scan Patterns"],
         "summary": "Create custom pattern",
         "description": "Create a new custom scan pattern for the project. Requires editor or owner role.",
@@ -19101,7 +19101,7 @@
             }
           }
         },
-        "operationId": "postProjectsByIdCi-tokens",
+        "operationId": "createCiToken",
         "tags": ["CI/CD Tokens"],
         "summary": "Create CI token",
         "description": "Generate a scoped CI/CD token bound to a specific environment.",
@@ -19377,7 +19377,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdCi-tokens",
+        "operationId": "listCiTokens",
         "tags": ["CI/CD Tokens"],
         "summary": "List CI tokens",
         "description": "List all CI/CD tokens for a project.",
@@ -19544,7 +19544,7 @@
             }
           }
         },
-        "operationId": "getCiSecrets",
+        "operationId": "fetchCiSecrets",
         "tags": ["CI/CD Access"],
         "summary": "Fetch secrets",
         "description": "Fetch all environment variables and secret file metadata for the token's bound environment."
@@ -19715,7 +19715,7 @@
             }
           }
         },
-        "operationId": "getProjectsByIdLicense-rules",
+        "operationId": "listLicenseRules",
         "tags": ["License Rules"],
         "summary": "List license rules",
         "description": "Return all license policy rules for the project.",
@@ -19873,7 +19873,7 @@
             }
           }
         },
-        "operationId": "postProjectsByIdLicense-rules",
+        "operationId": "createLicenseRule",
         "tags": ["License Rules"],
         "summary": "Create license rule",
         "description": "Create a license policy rule mapping an SPDX license ID to ALLOW, WARN, or BLOCK.",
@@ -20189,7 +20189,7 @@
             }
           }
         },
-        "operationId": "getActivity",
+        "operationId": "listActivity",
         "tags": ["Activity"],
         "summary": "List global activity",
         "description": "Return a paginated list of audit log events across all projects the user is a member of.",

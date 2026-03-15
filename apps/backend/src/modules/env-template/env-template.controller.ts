@@ -32,6 +32,7 @@ export const envTemplateController = new Elysia({
       body: CreateEnvTemplateBodySchema,
       response: EnvTemplateResponseSchema,
       detail: {
+        operationId: "createEnvTemplate",
         summary: "Create template",
         description: "Create a template from an existing environment or a manual variable list.",
         security: [{ bearerAuth: [] }],
@@ -42,6 +43,7 @@ export const envTemplateController = new Elysia({
     params: StringIdParamSchema,
     response: EnvTemplateListResponseSchema,
     detail: {
+      operationId: "listEnvTemplates",
       summary: "List templates",
       description: "List all environment templates for a project.",
       security: [{ bearerAuth: [] }],
@@ -54,6 +56,7 @@ export const envTemplateController = new Elysia({
       params: TemplateParamsSchema,
       response: EnvTemplateDetailResponseSchema,
       detail: {
+        operationId: "getEnvTemplate",
         summary: "Get template detail",
         description: "Get a template with its variables.",
         security: [{ bearerAuth: [] }],
@@ -75,6 +78,7 @@ export const envTemplateController = new Elysia({
       body: UpdateEnvTemplateBodySchema,
       response: EnvTemplateResponseSchema,
       detail: {
+        operationId: "updateEnvTemplate",
         summary: "Update template",
         description: "Update template name or description.",
         security: [{ bearerAuth: [] }],
@@ -89,6 +93,7 @@ export const envTemplateController = new Elysia({
       params: TemplateParamsSchema,
       response: MessageResponseSchema,
       detail: {
+        operationId: "deleteEnvTemplate",
         summary: "Delete template",
         description: "Delete a template and all its variables.",
         security: [{ bearerAuth: [] }],
@@ -110,6 +115,7 @@ export const envTemplateController = new Elysia({
       body: ApplyTemplateBodySchema,
       response: ApplyTemplateResponseSchema,
       detail: {
+        operationId: "applyEnvTemplate",
         summary: "Apply template",
         description: "Apply a template to create a new environment with empty-valued variables.",
         security: [{ bearerAuth: [] }],

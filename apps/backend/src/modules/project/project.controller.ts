@@ -36,6 +36,7 @@ export const projectController = new Elysia({
     body: CreateProjectBodySchema,
     response: ProjectResponseSchema,
     detail: {
+      operationId: "createProject",
       summary: "Create a new project",
       description:
         "Create a project and add the authenticated user as the owner. Projects serve as containers for dependency analyses and environment variables.",
@@ -46,6 +47,7 @@ export const projectController = new Elysia({
     query: ProjectListQuerySchema,
     response: ProjectListResponseSchema,
     detail: {
+      operationId: "listProjects",
       summary: "List projects",
       description:
         "Return a paginated list of projects where the authenticated user is a member (owner, editor, or viewer).",
@@ -55,6 +57,7 @@ export const projectController = new Elysia({
   .get("/stats", ({ user }) => projectService.getStats(user.id), {
     response: ProjectStatsResponseSchema,
     detail: {
+      operationId: "getDashboardStats",
       summary: "Get dashboard stats",
       description:
         "Return aggregate statistics across all projects the authenticated user is a member of.",
@@ -65,6 +68,7 @@ export const projectController = new Elysia({
     params: StringIdParamSchema,
     response: ProjectResponseSchema,
     detail: {
+      operationId: "getProject",
       summary: "Get project details",
       description:
         "Return details of a specific project. The authenticated user must be a member of the project.",
@@ -76,6 +80,7 @@ export const projectController = new Elysia({
     body: UpdateProjectBodySchema,
     response: ProjectResponseSchema,
     detail: {
+      operationId: "updateProject",
       summary: "Update project",
       description:
         "Update project name and/or description. Only owners and editors are allowed to update.",
@@ -86,6 +91,7 @@ export const projectController = new Elysia({
     params: StringIdParamSchema,
     response: MessageResponseSchema,
     detail: {
+      operationId: "deleteProject",
       summary: "Delete project",
       description:
         "Permanently delete a project and all associated data (analyses, environments, variables). Only the project owner can delete.",
@@ -101,6 +107,7 @@ export const projectController = new Elysia({
       body: InviteMemberBodySchema,
       response: MemberResponseSchema,
       detail: {
+        operationId: "inviteMember",
         tags: ["Members"],
         summary: "Invite member to project",
         description:
@@ -117,6 +124,7 @@ export const projectController = new Elysia({
       query: MemberListQuerySchema,
       response: MemberListResponseSchema,
       detail: {
+        operationId: "listMembers",
         tags: ["Members"],
         summary: "List project members",
         description:
@@ -133,6 +141,7 @@ export const projectController = new Elysia({
       body: UpdateMemberRoleBodySchema,
       response: MemberResponseSchema,
       detail: {
+        operationId: "updateMemberRole",
         tags: ["Members"],
         summary: "Update member role",
         description:
@@ -148,6 +157,7 @@ export const projectController = new Elysia({
       params: MemberParamsSchema,
       response: MessageResponseSchema,
       detail: {
+        operationId: "removeMember",
         tags: ["Members"],
         summary: "Remove member from project",
         description:
@@ -164,6 +174,7 @@ export const projectController = new Elysia({
       body: TransferOwnershipBodySchema,
       response: MessageResponseSchema,
       detail: {
+        operationId: "transferProjectOwnership",
         tags: ["Members"],
         summary: "Transfer project ownership",
         description:

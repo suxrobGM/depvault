@@ -29,6 +29,7 @@ export const envIOController = new Elysia({
       body: ImportEnvVariablesBodySchema,
       response: ImportEnvVariablesResponseSchema,
       detail: {
+        operationId: "importEnvVariables",
         summary: "Bulk import environment variables",
         description:
           "Import environment variables from a config file (.env, appsettings.json, secrets.yaml, config.toml). Existing keys are skipped. Only owners and editors can import.",
@@ -52,6 +53,7 @@ export const envIOController = new Elysia({
       query: ExportEnvVariablesQuerySchema,
       response: ExportEnvVariablesResponseSchema,
       detail: {
+        operationId: "exportEnvVariables",
         summary: "Export environment variables",
         description:
           "Export all environment variables for a given environment in the specified format (.env, appsettings.json, secrets.yaml, config.toml). Only owners and editors can export.",
@@ -73,6 +75,7 @@ export const envIOController = new Elysia({
       query: EnvExampleQuerySchema,
       response: EnvExampleResponseSchema,
       detail: {
+        operationId: "generateEnvExample",
         summary: "Generate .env.example template",
         description:
           "Generate a .env.example template with keys and placeholder annotations but no real values. Any project member can access this.",

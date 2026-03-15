@@ -33,6 +33,7 @@ export const auditLogController = new Elysia({
       query: AuditLogListQuerySchema,
       response: AuditLogListResponseSchema,
       detail: {
+        operationId: "listAuditLog",
         summary: "List audit log events",
         description:
           "Return a paginated list of audit log events for a project. Only owners and editors can view audit logs. Audit logs are append-only and cannot be modified or deleted.",

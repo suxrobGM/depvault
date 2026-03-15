@@ -32,6 +32,7 @@ export const activityController = new Elysia({
       query: GlobalAuditLogListQuerySchema,
       response: GlobalAuditLogListResponseSchema,
       detail: {
+        operationId: "listActivity",
         summary: "List global activity",
         description:
           "Return a paginated list of audit log events across all projects the user is a member of.",

@@ -35,6 +35,7 @@ export const envDiffController = new Elysia({
       query: EnvDiffQuerySchema,
       response: EnvDiffResponseSchema,
       detail: {
+        operationId: "diffEnvironments",
         summary: "Diff environments",
         description:
           "Compare variables across 2-3 environments. Returns rows with match/mismatch/missing status.",
@@ -56,6 +57,7 @@ export const envDiffController = new Elysia({
       body: CloneEnvironmentBodySchema,
       response: CloneEnvironmentResponseSchema,
       detail: {
+        operationId: "cloneEnvironment",
         summary: "Clone environment",
         description:
           "Clone an environment's variables (keys, values, and metadata) into a new environment.",

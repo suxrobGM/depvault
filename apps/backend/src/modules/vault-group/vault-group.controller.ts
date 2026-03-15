@@ -23,6 +23,7 @@ export const vaultGroupController = new Elysia({
     params: StringIdParamSchema,
     response: VaultGroupListResponseSchema,
     detail: {
+      operationId: "listVaultGroups",
       summary: "List vault groups",
       description: "List all vault groups for a project with environment and variable counts.",
       security: [{ bearerAuth: [] }],
@@ -33,6 +34,7 @@ export const vaultGroupController = new Elysia({
     body: CreateVaultGroupBodySchema,
     response: VaultGroupResponseSchema,
     detail: {
+      operationId: "createVaultGroup",
       summary: "Create vault group",
       description:
         "Create a new vault group for organizing environment variables by sub-project or env file.",
@@ -47,6 +49,7 @@ export const vaultGroupController = new Elysia({
       body: UpdateVaultGroupBodySchema,
       response: VaultGroupResponseSchema,
       detail: {
+        operationId: "updateVaultGroup",
         summary: "Update vault group",
         description: "Update a vault group's name, description, or sort order.",
         security: [{ bearerAuth: [] }],
@@ -60,6 +63,7 @@ export const vaultGroupController = new Elysia({
       params: VaultGroupParamsSchema,
       response: MessageResponseSchema,
       detail: {
+        operationId: "deleteVaultGroup",
         summary: "Delete vault group",
         description:
           "Delete a vault group and all its environments and variables. This action cannot be undone.",

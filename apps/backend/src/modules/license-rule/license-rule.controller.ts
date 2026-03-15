@@ -26,6 +26,7 @@ export const licenseRuleController = new Elysia({
     params: LicenseRuleProjectParamsSchema,
     response: LicenseRuleListResponseSchema,
     detail: {
+      operationId: "listLicenseRules",
       summary: "List license rules",
       description: "Return all license policy rules for the project.",
       security: [{ bearerAuth: [] }],
@@ -36,6 +37,7 @@ export const licenseRuleController = new Elysia({
     body: CreateLicenseRuleBodySchema,
     response: LicenseRuleResponseSchema,
     detail: {
+      operationId: "createLicenseRule",
       summary: "Create license rule",
       description:
         "Create a license policy rule mapping an SPDX license ID to ALLOW, WARN, or BLOCK.",
@@ -50,6 +52,7 @@ export const licenseRuleController = new Elysia({
       body: UpdateLicenseRuleBodySchema,
       response: LicenseRuleResponseSchema,
       detail: {
+        operationId: "updateLicenseRule",
         summary: "Update license rule",
         description: "Update the policy for an existing license rule.",
         security: [{ bearerAuth: [] }],
@@ -63,6 +66,7 @@ export const licenseRuleController = new Elysia({
       params: LicenseRuleParamsSchema,
       response: MessageResponseSchema,
       detail: {
+        operationId: "deleteLicenseRule",
         summary: "Delete license rule",
         description: "Delete a license policy rule from the project.",
         security: [{ bearerAuth: [] }],
@@ -84,6 +88,7 @@ export const licenseRuleController = new Elysia({
       query: ComplianceQuerySchema,
       response: LicenseComplianceSummarySchema,
       detail: {
+        operationId: "getLicenseCompliance",
         summary: "License compliance summary",
         description:
           "Return a paginated compliance summary with pass/warn/fail counts for all dependencies in the project.",
@@ -103,6 +108,7 @@ export const licenseRuleController = new Elysia({
       params: LicenseRuleProjectParamsSchema,
       query: ExportQuerySchema,
       detail: {
+        operationId: "exportLicenseReport",
         summary: "Export license audit report",
         description: "Export a license audit report as CSV or text.",
         security: [{ bearerAuth: [] }],

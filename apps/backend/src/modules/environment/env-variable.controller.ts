@@ -36,6 +36,7 @@ export const envVariableController = new Elysia({
       body: CreateEnvVariableBodySchema,
       response: EnvVariableWithValueResponseSchema,
       detail: {
+        operationId: "createEnvVariable",
         summary: "Create an environment variable",
         description:
           "Create a new encrypted environment variable for the project. The environment is auto-created if it doesn't exist. Only owners and editors can create variables.",
@@ -60,6 +61,7 @@ export const envVariableController = new Elysia({
       query: EnvVariableListQuerySchema,
       response: EnvVariableListResponseSchema,
       detail: {
+        operationId: "listEnvVariables",
         summary: "List environment variables",
         description:
           "List environment variables for a project, optionally filtered by environment type. Viewers see masked values; editors and owners see decrypted values.",
@@ -82,6 +84,7 @@ export const envVariableController = new Elysia({
       body: UpdateEnvVariableBodySchema,
       response: EnvVariableWithValueResponseSchema,
       detail: {
+        operationId: "updateEnvVariable",
         summary: "Update an environment variable",
         description:
           "Update key, value, or metadata of an environment variable. When the value changes, the previous value is saved as a version snapshot. Only owners and editors can update.",
@@ -97,6 +100,7 @@ export const envVariableController = new Elysia({
       params: EnvVariableParamsSchema,
       response: MessageResponseSchema,
       detail: {
+        operationId: "deleteEnvVariable",
         summary: "Delete an environment variable",
         description:
           "Permanently delete an environment variable and all its version history. Only owners and editors can delete.",
@@ -111,6 +115,7 @@ export const envVariableController = new Elysia({
       params: EnvVariableParamsSchema,
       response: EnvVariableVersionListResponseSchema,
       detail: {
+        operationId: "listEnvVariableVersions",
         summary: "List variable version history",
         description:
           "List the version history for an environment variable. Editors and owners see decrypted values; viewers see masked values.",
@@ -126,6 +131,7 @@ export const envVariableController = new Elysia({
       params: EnvVariableVersionParamsSchema,
       response: EnvVariableWithValueResponseSchema,
       detail: {
+        operationId: "rollbackEnvVariable",
         summary: "Rollback variable to a previous version",
         description:
           "Restore an environment variable to a previous version. The current value is saved as a new version snapshot before rolling back. Only owners and editors can rollback.",

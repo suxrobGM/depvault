@@ -29,6 +29,7 @@ export const secretScanController = new Elysia({
     params: ProjectParamsSchema,
     response: ScanResponseSchema,
     detail: {
+      operationId: "triggerSecretScan",
       summary: "Trigger secret scan",
       description:
         "Start a new secret scan for the project's connected GitHub repository. Requires editor or owner role.",
@@ -44,6 +45,7 @@ export const secretScanController = new Elysia({
       query: ScanListQuerySchema,
       response: ScanListResponseSchema,
       detail: {
+        operationId: "listSecretScans",
         summary: "List secret scans",
         description: "Return a paginated list of secret scans for the project.",
         security: [{ bearerAuth: [] }],
@@ -57,6 +59,7 @@ export const secretScanController = new Elysia({
       params: ScanParamsSchema,
       response: ScanResponseSchema,
       detail: {
+        operationId: "getSecretScan",
         summary: "Get scan details",
         description: "Return details for a specific secret scan.",
         security: [{ bearerAuth: [] }],
@@ -71,6 +74,7 @@ export const secretScanController = new Elysia({
       query: DetectionListQuerySchema,
       response: DetectionListResponseSchema,
       detail: {
+        operationId: "listSecretDetections",
         summary: "List secret detections",
         description:
           "Return a paginated list of secret detections with optional status and severity filters.",
@@ -87,6 +91,7 @@ export const secretScanController = new Elysia({
       body: UpdateDetectionBodySchema,
       response: DetectionResponseSchema,
       detail: {
+        operationId: "updateDetectionStatus",
         summary: "Update detection status",
         description:
           "Mark a detection as resolved or false positive. Requires editor or owner role.",
@@ -102,6 +107,7 @@ export const secretScanController = new Elysia({
       body: BatchUpdateDetectionsBodySchema,
       response: BatchUpdateDetectionsResponseSchema,
       detail: {
+        operationId: "batchUpdateDetections",
         summary: "Batch update detection statuses",
         description:
           "Mark multiple detections as resolved or false positive in one request. Only updates OPEN detections. Requires editor or owner role.",
@@ -116,6 +122,7 @@ export const secretScanController = new Elysia({
       params: ProjectParamsSchema,
       response: ScanSummaryResponseSchema,
       detail: {
+        operationId: "getSecretScanSummary",
         summary: "Get scan summary",
         description:
           "Return scan summary including last scan info, open detections by severity, and resolved count.",

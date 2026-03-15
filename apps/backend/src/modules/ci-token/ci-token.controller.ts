@@ -34,6 +34,7 @@ export const ciTokenController = new Elysia({
       body: CreateCiTokenBodySchema,
       response: CiTokenCreatedResponseSchema,
       detail: {
+        operationId: "createCiToken",
         summary: "Create CI token",
         description: "Generate a scoped CI/CD token bound to a specific environment.",
         security: [{ bearerAuth: [] }],
@@ -48,6 +49,7 @@ export const ciTokenController = new Elysia({
       query: CiTokenListQuerySchema,
       response: CiTokenListResponseSchema,
       detail: {
+        operationId: "listCiTokens",
         summary: "List CI tokens",
         description: "List all CI/CD tokens for a project.",
         security: [{ bearerAuth: [] }],
@@ -62,6 +64,7 @@ export const ciTokenController = new Elysia({
       params: CiTokenParamsSchema,
       response: MessageResponseSchema,
       detail: {
+        operationId: "revokeCiToken",
         summary: "Revoke CI token",
         description: "Immediately revoke a CI/CD token.",
         security: [{ bearerAuth: [] }],
@@ -85,6 +88,7 @@ export const ciAccessController = new Elysia({
     {
       response: CiSecretsResponseSchema,
       detail: {
+        operationId: "fetchCiSecrets",
         summary: "Fetch secrets",
         description:
           "Fetch all environment variables and secret file metadata for the token's bound environment.",
@@ -103,6 +107,7 @@ export const ciAccessController = new Elysia({
       params: CiFileParamsSchema,
       query: CiFileQuerySchema,
       detail: {
+        operationId: "downloadCiSecretFile",
         summary: "Download secret file",
         description: "Download a specific secret file using a CI token.",
       },

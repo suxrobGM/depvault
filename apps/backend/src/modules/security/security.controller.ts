@@ -14,6 +14,7 @@ export const securityController = new Elysia({
   .get("/overview", ({ user }) => securityService.getOverview(user.id), {
     response: SecurityOverviewResponseSchema,
     detail: {
+      operationId: "getSecurityOverview",
       summary: "Security overview",
       description:
         "Return aggregated vulnerability and secret scan statistics across all projects the user is a member of.",

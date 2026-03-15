@@ -27,6 +27,7 @@ export const secretController = new Elysia({
       ...TooManyRequestsErrorSchema,
     },
     detail: {
+      operationId: "getSharedSecretInfo",
       summary: "Check shared secret info",
       description:
         "Returns metadata (type, password-protected, expiry) without consuming the secret.",
@@ -45,6 +46,7 @@ export const secretController = new Elysia({
         ...TooManyRequestsErrorSchema,
       },
       detail: {
+        operationId: "accessSharedSecret",
         summary: "Access a one-time shared secret",
         description:
           "Retrieve and permanently consume a shared secret. Content is destroyed after this call — no second access is possible.",

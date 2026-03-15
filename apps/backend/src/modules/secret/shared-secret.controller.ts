@@ -37,6 +37,7 @@ export const sharedSecretController = new Elysia({
       body: CreateEnvShareBodySchema,
       response: CreateShareResponseSchema,
       detail: {
+        operationId: "shareEnvVariables",
         summary: "Create a share link for environment variables",
         description:
           "Generate a one-time shareable link for one or more environment variables. Optional password and expiry supported.",
@@ -59,6 +60,7 @@ export const sharedSecretController = new Elysia({
       body: CreateFileShareBodySchema,
       response: CreateShareResponseSchema,
       detail: {
+        operationId: "shareSecretFile",
         summary: "Create a share link for a secret file",
         description:
           "Generate a one-time shareable download link for a secret file. Optional password and expiry supported.",
@@ -70,6 +72,7 @@ export const sharedSecretController = new Elysia({
     params: StringIdParamSchema,
     response: SharedSecretAuditListResponseSchema,
     detail: {
+      operationId: "listSharedSecrets",
       summary: "List shared secret links",
       description:
         "List all share links created for this project with their status (PENDING, VIEWED, EXPIRED).",
@@ -84,6 +87,7 @@ export const sharedSecretController = new Elysia({
       params: SharedSecretParamsSchema,
       response: MessageResponseSchema,
       detail: {
+        operationId: "revokeSharedSecret",
         summary: "Revoke a pending share link",
         description:
           "Permanently delete a pending share link. Already-viewed links cannot be revoked.",

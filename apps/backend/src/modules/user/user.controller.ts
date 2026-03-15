@@ -19,6 +19,7 @@ export const userController = new Elysia({ prefix: "/users", detail: { tags: ["U
   .get("/me", ({ user }) => userService.getProfile(user.id), {
     response: UserProfileResponseSchema,
     detail: {
+      operationId: "getProfile",
       summary: "Get current user profile",
       description:
         "Return the authenticated user's profile including email, username, avatar, and linked accounts.",
@@ -29,6 +30,7 @@ export const userController = new Elysia({ prefix: "/users", detail: { tags: ["U
     body: UpdateProfileBodySchema,
     response: UserProfileResponseSchema,
     detail: {
+      operationId: "updateProfile",
       summary: "Update profile",
       description:
         "Update the authenticated user's username and/or avatar URL. Username must be unique.",
@@ -39,6 +41,7 @@ export const userController = new Elysia({ prefix: "/users", detail: { tags: ["U
     body: ChangePasswordBodySchema,
     response: MessageResponseSchema,
     detail: {
+      operationId: "changePassword",
       summary: "Change password",
       description:
         "Change the authenticated user's password. Requires the current password for verification. Not available for OAuth-only accounts.",
@@ -49,6 +52,7 @@ export const userController = new Elysia({ prefix: "/users", detail: { tags: ["U
     body: ChangeEmailBodySchema,
     response: MessageResponseSchema,
     detail: {
+      operationId: "changeEmail",
       summary: "Change email address",
       description:
         "Change the authenticated user's email. Requires password verification. A new verification email is sent to the updated address.",
@@ -59,6 +63,7 @@ export const userController = new Elysia({ prefix: "/users", detail: { tags: ["U
     body: AvatarUploadBodySchema,
     response: AvatarUploadResponseSchema,
     detail: {
+      operationId: "uploadAvatar",
       summary: "Upload avatar",
       description:
         "Upload and set the authenticated user's avatar image. Accepts jpg, png, gif, or webp up to 5 MB.",
@@ -68,6 +73,7 @@ export const userController = new Elysia({ prefix: "/users", detail: { tags: ["U
   .delete("/me", ({ user }) => userService.deleteAccount(user.id), {
     response: MessageResponseSchema,
     detail: {
+      operationId: "deleteAccount",
       summary: "Delete account",
       description:
         "Permanently delete the authenticated user's account and all associated data including projects, analyses, uploads, and secret files. This action is irreversible.",

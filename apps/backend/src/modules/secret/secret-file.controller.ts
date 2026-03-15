@@ -46,6 +46,7 @@ export const secretFileController = new Elysia({
       body: UploadSecretFileBodySchema,
       response: SecretFileResponseSchema,
       detail: {
+        operationId: "uploadSecretFile",
         summary: "Upload a secret file",
         description:
           "Upload and encrypt a secret file for the project. Executable file types (.exe, .sh, .bat, .cmd, .ps1) are rejected. Max file size is 25 MB. Only owners and editors can upload.",
@@ -62,6 +63,7 @@ export const secretFileController = new Elysia({
       query: SecretFileListQuerySchema,
       response: SecretFileListResponseSchema,
       detail: {
+        operationId: "listSecretFiles",
         summary: "List secret files",
         description:
           "List secret file metadata for a project, optionally filtered by environment. File contents are not included — use the download endpoint to retrieve decrypted content.",
@@ -85,6 +87,7 @@ export const secretFileController = new Elysia({
     {
       params: SecretFileParamsSchema,
       detail: {
+        operationId: "downloadSecretFile",
         summary: "Download a secret file",
         description:
           "Download and decrypt a secret file. Only owners and editors can download file contents. Viewers can only see metadata via the list endpoint.",
@@ -100,6 +103,7 @@ export const secretFileController = new Elysia({
       body: UpdateSecretFileBodySchema,
       response: SecretFileResponseSchema,
       detail: {
+        operationId: "updateSecretFile",
         summary: "Update secret file metadata",
         description:
           "Update the name, description, or environment of a secret file. Only owners and editors can update.",
@@ -115,6 +119,7 @@ export const secretFileController = new Elysia({
       params: SecretFileParamsSchema,
       response: MessageResponseSchema,
       detail: {
+        operationId: "deleteSecretFile",
         summary: "Delete a secret file",
         description:
           "Permanently delete a secret file and all its version history. Only owners and editors can delete.",
@@ -129,6 +134,7 @@ export const secretFileController = new Elysia({
       params: SecretFileParamsSchema,
       response: SecretFileVersionListResponseSchema,
       detail: {
+        operationId: "listSecretFileVersions",
         summary: "List secret file versions",
         description:
           "List all version history entries for a secret file. Any project member can view version metadata.",
@@ -151,6 +157,7 @@ export const secretFileController = new Elysia({
       body: UploadNewVersionBodySchema,
       response: SecretFileResponseSchema,
       detail: {
+        operationId: "uploadSecretFileVersion",
         summary: "Upload a new version of a secret file",
         description:
           "Replace a secret file's content with a new upload. The current content is saved as a version before being replaced. Only owners and editors can upload new versions.",
@@ -174,6 +181,7 @@ export const secretFileController = new Elysia({
     {
       params: SecretFileRollbackParamsSchema,
       detail: {
+        operationId: "downloadSecretFileVersion",
         summary: "Download a specific version of a secret file",
         description:
           "Download and decrypt a previous version of a secret file. Only owners and editors can download.",
@@ -189,6 +197,7 @@ export const secretFileController = new Elysia({
       params: SecretFileRollbackParamsSchema,
       response: SecretFileResponseSchema,
       detail: {
+        operationId: "rollbackSecretFile",
         summary: "Rollback to a previous version",
         description:
           "Rollback a secret file to a previous version. The current content is saved as a new version before restoring. Only owners and editors can rollback.",

@@ -27,6 +27,7 @@ export const environmentController = new Elysia({
       query: EnvironmentListQuerySchema,
       response: EnvironmentListResponseSchema,
       detail: {
+        operationId: "listEnvironments",
         summary: "List environments",
         description: "List all environments for a project with variable counts.",
         security: [{ bearerAuth: [] }],
@@ -46,6 +47,7 @@ export const environmentController = new Elysia({
       params: DeleteEnvironmentParamsSchema,
       response: MessageResponseSchema,
       detail: {
+        operationId: "deleteEnvironment",
         summary: "Delete an environment",
         description:
           "Permanently delete an environment and all its variables. Only owners and editors can delete.",

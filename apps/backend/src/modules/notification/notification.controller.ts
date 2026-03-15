@@ -32,6 +32,7 @@ export const notificationController = new Elysia({
       query: NotificationListQuerySchema,
       response: NotificationListResponseSchema,
       detail: {
+        operationId: "listNotifications",
         summary: "List notifications",
         description: "Return a paginated list of notifications for the authenticated user.",
         security: [{ bearerAuth: [] }],
@@ -41,6 +42,7 @@ export const notificationController = new Elysia({
   .get("/unread-count", ({ user }) => notificationService.getUnreadCount(user.id), {
     response: UnreadCountResponseSchema,
     detail: {
+      operationId: "getUnreadCount",
       summary: "Get unread count",
       description: "Return the number of unread notifications for the authenticated user.",
       security: [{ bearerAuth: [] }],
@@ -49,6 +51,7 @@ export const notificationController = new Elysia({
   .patch("/read-all", ({ user }) => notificationService.markAllRead(user.id), {
     response: MarkAllReadResponseSchema,
     detail: {
+      operationId: "markAllNotificationsRead",
       summary: "Mark all notifications read",
       description: "Mark all unread notifications as read for the authenticated user.",
       security: [{ bearerAuth: [] }],
@@ -61,6 +64,7 @@ export const notificationController = new Elysia({
       params: NotificationIdParamSchema,
       response: NotificationResponseSchema,
       detail: {
+        operationId: "getNotification",
         summary: "Get notification",
         description: "Return a single notification by ID.",
         security: [{ bearerAuth: [] }],
@@ -74,6 +78,7 @@ export const notificationController = new Elysia({
       params: NotificationIdParamSchema,
       response: NotificationResponseSchema,
       detail: {
+        operationId: "markNotificationRead",
         summary: "Mark notification read",
         description: "Mark a single notification as read.",
         security: [{ bearerAuth: [] }],
@@ -87,6 +92,7 @@ export const notificationController = new Elysia({
       params: NotificationIdParamSchema,
       response: MessageResponseSchema,
       detail: {
+        operationId: "deleteNotification",
         summary: "Delete notification",
         description: "Delete a single notification.",
         security: [{ bearerAuth: [] }],
