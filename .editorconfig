@@ -1,6 +1,5 @@
 root = true
 
-# All Files
 [*]
 indent_style = space
 indent_size = 4
@@ -9,119 +8,66 @@ charset = utf-8
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-# C# Files
+# C#
 [*.cs]
-
-# Organize usings
 dotnet_sort_system_directives_first = true
-
-# Prefer no this. qualification
 dotnet_style_qualification_for_field = false:warning
 dotnet_style_qualification_for_property = false:warning
 dotnet_style_qualification_for_method = false:warning
 dotnet_style_qualification_for_event = false:warning
-
-# Language keywords vs BCL types
 dotnet_style_predefined_type_for_locals_parameters_members = true:warning
 dotnet_style_predefined_type_for_member_access = true:warning
-
-# Modifier preferences
 dotnet_style_require_accessibility_modifiers = for_non_interface_members:warning
 dotnet_style_readonly_field = true:warning
-
-# Expression-level preferences
-dotnet_style_explicit_tuple_names = true:warning
-dotnet_style_prefer_is_null_check_over_reference_equality_method = true:warning
-
-# Expression-bodied members
-csharp_style_expression_bodied_constructors = false:suggestion
-
-# Pattern matching
+csharp_style_namespace_declarations = file_scoped:warning
+csharp_prefer_braces = true:warning
+csharp_prefer_static_local_function = true:warning
 csharp_style_pattern_matching_over_is_with_cast_check = true:warning
 csharp_style_pattern_matching_over_as_with_null_check = true:warning
-
-# Modifier preferences
-csharp_prefer_static_local_function = true:warning
-csharp_preferred_modifier_order = public, private, protected, internal, file, static, extern, new, virtual, abstract, sealed, override, readonly, unsafe, required, volatile, async:warning
-
-# Code block preferences
-csharp_prefer_braces = true:warning
-csharp_style_namespace_declarations = file_scoped:warning
-
-# Using directive placement
 csharp_using_directive_placement = outside_namespace:warning
 
-# Indentation
-csharp_indent_labels = one_less_than_current
-csharp_indent_case_contents_when_block = false
-
-# Wrapping
-csharp_preserve_single_line_statements = false
-
-# Naming: Interfaces must start with I
+# Naming
 dotnet_naming_rule.interface_should_be_begins_with_i.severity = warning
 dotnet_naming_rule.interface_should_be_begins_with_i.symbols = interface
 dotnet_naming_rule.interface_should_be_begins_with_i.style = begins_with_i
-
 dotnet_naming_symbols.interface.applicable_kinds = interface
 dotnet_naming_symbols.interface.applicable_accessibilities = *
-
 dotnet_naming_style.begins_with_i.required_prefix = I
 dotnet_naming_style.begins_with_i.capitalization = pascal_case
 
-# Naming: Types use PascalCase
 dotnet_naming_rule.types_should_be_pascal_case.severity = warning
 dotnet_naming_rule.types_should_be_pascal_case.symbols = types
 dotnet_naming_rule.types_should_be_pascal_case.style = pascal_case
-
 dotnet_naming_symbols.types.applicable_kinds = class, struct, interface, enum
 dotnet_naming_symbols.types.applicable_accessibilities = *
-
 dotnet_naming_style.pascal_case.capitalization = pascal_case
 
-# Naming: Non-field members use PascalCase
-dotnet_naming_rule.non_field_members_should_be_pascal_case.severity = warning
-dotnet_naming_rule.non_field_members_should_be_pascal_case.symbols = non_field_members
-dotnet_naming_rule.non_field_members_should_be_pascal_case.style = pascal_case
-
-dotnet_naming_symbols.non_field_members.applicable_kinds = property, event, method
-dotnet_naming_symbols.non_field_members.applicable_accessibilities = *
-
-# Naming: Private fields use camelCase
 dotnet_naming_rule.private_fields_should_be_camel_case.severity = warning
 dotnet_naming_rule.private_fields_should_be_camel_case.symbols = private_fields
 dotnet_naming_rule.private_fields_should_be_camel_case.style = camel_case
-
 dotnet_naming_symbols.private_fields.applicable_kinds = field
-dotnet_naming_symbols.private_fields.applicable_accessibilities = private, protected, protected_internal, private_protected
-
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private, protected
 dotnet_naming_style.camel_case.capitalization = camel_case
 
-# Naming: Constants use PascalCase
-dotnet_naming_rule.constants_should_be_pascal_case.severity = warning
-dotnet_naming_rule.constants_should_be_pascal_case.symbols = constants
-dotnet_naming_rule.constants_should_be_pascal_case.style = pascal_case
+# Analyzers
+dotnet_diagnostic.IDE0005.severity = warning
+dotnet_diagnostic.IDE0055.severity = warning
+dotnet_diagnostic.CA2007.severity = none
 
-dotnet_naming_symbols.constants.applicable_kinds = field
-dotnet_naming_symbols.constants.applicable_accessibilities = *
-dotnet_naming_symbols.constants.required_modifiers = const
-
-# Analyzer Rules
-dotnet_diagnostic.IDE0005.severity = warning  # Unnecessary using
-dotnet_diagnostic.IDE0055.severity = warning  # Fix formatting
-dotnet_diagnostic.IDE0011.severity = warning  # Add braces
-dotnet_diagnostic.CA2007.severity = none      # ConfigureAwait not needed in ASP.NET Core
-
-# Web Files (TypeScript, JavaScript, HTML, CSS, JSON)
-[*.{ts,tsx,js,jsx,mjs,cjs,html,css,scss,sass,less,json}]
+# Web (TS, JS, HTML, CSS, JSON)
+[*.{ts,tsx,js,jsx,mjs,cjs,html,css,scss,json}]
 indent_size = 2
 
 # YAML
 [*.{yml,yaml}]
 indent_size = 2
 
-# XML and Project Files
-[*.{xml,csproj,props,targets,ruleset,config,nuspec,resx}]
+# XML / .NET project files
+[*.{xml,csproj,props,targets}]
+indent_size = 2
+
+# Prisma
+[*.prisma]
 indent_size = 2
 
 # Markdown
@@ -129,20 +75,10 @@ indent_size = 2
 trim_trailing_whitespace = false
 indent_size = 2
 
-# Liquid Templates
-[*.liquid]
-indent_size = 2
-
-# Shell Scripts
-[*.{sh,bash,zsh}]
-indent_size = 2
-
+# Windows scripts
 [*.{cmd,bat,ps1}]
 end_of_line = crlf
 
-# Kotlin
-[*.{kt,kts}]
-
-# Solution Files
+# Solution files
 [*.sln]
 indent_style = tab

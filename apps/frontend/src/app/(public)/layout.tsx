@@ -6,7 +6,7 @@ export default function PublicLayout(props: PropsWithChildren): ReactElement {
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
       <LandingNavbar />
-      <Box sx={{ pt: 12 }}>{props.children}</Box>
+      {props.children}
       <LandingFooter />
     </Box>
   );

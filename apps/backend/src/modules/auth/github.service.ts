@@ -3,6 +3,7 @@ import { singleton } from "tsyringe";
 import { BadRequestError, ConflictError, UnauthorizedError } from "@/common/errors";
 import { logger } from "@/common/logger/logger";
 import { PrismaClient } from "@/generated/prisma";
+import { InvitationService } from "@/modules/project/invitation.service";
 import type { AuthResponse, GitHubCallbackQuery, LinkGitHubBody } from "./auth.schema";
 import { TokenService } from "./token.service";
 
@@ -11,6 +12,7 @@ export class GitHubService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly tokenService: TokenService,
+    private readonly invitationService: InvitationService,
   ) {}
 
   getAuthUrl(): string {
@@ -219,6 +221,8 @@ export class GitHubService {
         },
       },
     });
+
+    void this.invitationService.linkPendingInvitations(email, user.id);
 
     return this.tokenService.issueTokens(user, "GITHUB", profile.id.toString());
   }

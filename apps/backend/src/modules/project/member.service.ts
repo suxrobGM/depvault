@@ -1,16 +1,11 @@
 import { singleton } from "tsyringe";
-import { RoleChangeTemplate, TeamInviteTemplate } from "@/common/emails";
-import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from "@/common/errors";
+import { RoleChangeTemplate } from "@/common/emails";
+import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
 import { EmailService } from "@/common/services/email.service";
 import { PrismaClient } from "@/generated/prisma";
 import { NotificationService } from "@/modules/notification/notification.service";
 import type { PaginatedResponse } from "@/types/response";
-import type {
-  InviteMemberBody,
-  MemberResponse,
-  TransferOwnershipBody,
-  UpdateMemberRoleBody,
-} from "./member.schema";
+import type { MemberResponse, TransferOwnershipBody, UpdateMemberRoleBody } from "./member.schema";
 
 const MEMBER_INCLUDE = {
   user: { select: { id: true, email: true, firstName: true, lastName: true, avatarUrl: true } },
@@ -25,69 +20,6 @@ export class MemberService {
     private readonly emailService: EmailService,
     private readonly notificationService: NotificationService,
   ) {}
-
-  async invite(projectId: string, body: InviteMemberBody, userId: string): Promise<MemberResponse> {
-    const actor = await this.requireOwner(projectId, userId);
-
-    const invitee = await this.prisma.user.findFirst({
-      where: { email: body.email, deletedAt: null },
-    });
-
-    if (!invitee) {
-      throw new NotFoundError("User not found with that email");
-    }
-
-    if (invitee.id === actor.userId) {
-      throw new BadRequestError("Cannot invite yourself");
-    }
-
-    const existing = await this.prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId: invitee.id } },
-    });
-
-    if (existing) {
-      throw new ConflictError("User is already a member of this project");
-    }
-
-    const [member, project, inviter] = await Promise.all([
-      this.prisma.projectMember.create({
-        data: {
-          projectId,
-          userId: invitee.id,
-          role: body.role,
-        },
-        include: MEMBER_INCLUDE,
-      }),
-      this.prisma.project.findUnique({ where: { id: projectId }, select: { name: true } }),
-      this.prisma.user.findUnique({
-        where: { id: userId },
-        select: { firstName: true, lastName: true },
-      }),
-    ]);
-
-    const inviterName = inviter
-      ? `${inviter.firstName} ${inviter.lastName}`.trim()
-      : "A team member";
-
-    void this.emailService.send({
-      to: body.email,
-      subject: `You've been invited to ${project?.name ?? "a project"} — DepVault`,
-      react: TeamInviteTemplate({
-        inviterName,
-        projectName: project?.name ?? "Unknown",
-        role: body.role,
-        dashboardUrl: `${this.frontendUrl}/dashboard`,
-      }),
-    });
-
-    void this.notificationService.notify({
-      type: "TEAM_INVITE",
-      userId: invitee.id,
-      projectId,
-    });
-
-    return this.toResponse(member);
-  }
 
   async list(
     projectId: string,
@@ -184,6 +116,7 @@ export class MemberService {
 
     const target = await this.prisma.projectMember.findFirst({
       where: { id: memberId, projectId },
+      include: { user: { select: { id: true, email: true, firstName: true } } },
     });
 
     if (!target) {
@@ -196,6 +129,12 @@ export class MemberService {
 
     await this.prisma.projectMember.delete({
       where: { id: memberId },
+    });
+
+    void this.notificationService.notify({
+      type: "MEMBER_REMOVED",
+      userId: target.userId,
+      projectId,
     });
 
     return { message: "Member removed successfully" };

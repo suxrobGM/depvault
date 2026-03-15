@@ -16,7 +16,15 @@ export type NotifyPayload =
       severityBreakdown?: { critical: number; high: number; medium: number; low: number };
     }
   | { type: "TEAM_INVITE"; userId: string; projectId: string }
-  | { type: "ROLE_CHANGE"; userId: string; projectId: string; oldRole: string; newRole: string };
+  | { type: "ROLE_CHANGE"; userId: string; projectId: string; oldRole: string; newRole: string }
+  | {
+      type: "INVITATION_RECEIVED";
+      userId: string;
+      projectId: string;
+      inviterName: string;
+      token: string;
+    }
+  | { type: "MEMBER_REMOVED"; userId: string; projectId: string };
 
 interface NotificationContent {
   title: string;
@@ -80,6 +88,18 @@ export function createNotificationContent(
         title: "Role Updated",
         message: `Your role in ${projectName} changed from ${payload.oldRole} to ${payload.newRole}`,
         metadata: { ...base, oldRole: payload.oldRole, newRole: payload.newRole },
+      };
+    case "INVITATION_RECEIVED":
+      return {
+        title: "Project Invitation",
+        message: `${payload.inviterName} invited you to join ${projectName}`,
+        metadata: { ...base, inviterName: payload.inviterName, token: payload.token },
+      };
+    case "MEMBER_REMOVED":
+      return {
+        title: "Removed from Project",
+        message: `You have been removed from ${projectName}`,
+        metadata: base,
       };
   }
 }

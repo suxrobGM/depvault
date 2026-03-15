@@ -9,7 +9,7 @@ interface LegalPageProps extends PropsWithChildren {
 
 export function LegalPage(props: LegalPageProps): ReactElement {
   return (
-    <Box sx={{ pb: 4 }}>
+    <Box sx={{ pt: 12, pb: 4 }}>
       <SectionContainer sx={{ maxWidth: 800 }}>
         <Typography variant="h3" component="h1" sx={{ fontWeight: 800, mb: 1 }}>
           {props.title}

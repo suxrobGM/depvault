@@ -1,17 +1,18 @@
 import type { ReactElement } from "react";
-import { Button, Text } from "@react-email/components";
+import { Button, Link, Text } from "@react-email/components";
 import { BaseLayout } from "../components/base-layout";
-import { button, heading, highlight, paragraph } from "../components/styles";
+import { button, heading, highlight, muted, paragraph } from "../components/styles";
 
 interface TeamInviteProps {
   inviterName: string;
   projectName: string;
   role: string;
-  dashboardUrl: string;
+  acceptUrl: string;
+  declineUrl: string;
 }
 
 export function TeamInviteTemplate(props: TeamInviteProps): ReactElement {
-  const { inviterName, projectName, role, dashboardUrl } = props;
+  const { inviterName, projectName, role, acceptUrl, declineUrl } = props;
 
   return (
     <BaseLayout preview={`${inviterName} invited you to ${projectName} on DepVault`}>
@@ -21,12 +22,18 @@ export function TeamInviteTemplate(props: TeamInviteProps): ReactElement {
         <span style={highlight}>{projectName}</span> as a <span style={highlight}>{role}</span>.
       </Text>
       <Text style={paragraph}>
-        You can now access the project's dependencies, environment variables, and collaboration
-        features.
+        Accept the invitation to access the project's dependencies, environment variables, and
+        collaboration features.
       </Text>
-      <Button style={button} href={dashboardUrl}>
-        Open Dashboard
+      <Button style={button} href={acceptUrl}>
+        Accept Invitation
       </Button>
+      <Text style={muted}>
+        Not interested?{" "}
+        <Link href={declineUrl} style={muted}>
+          Decline this invitation
+        </Link>
+      </Text>
     </BaseLayout>
   );
 }

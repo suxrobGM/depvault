@@ -12,3 +12,9 @@ export type MemberListResponse = Data<ProjectById["members"]["get"]>;
 export type Member = MemberListResponse["items"][number];
 
 export type ProjectStatsResponse = Data<(typeof client)["api"]["projects"]["stats"]["get"]>;
+
+export type InvitationListResponse = Data<ProjectById["invitations"]["get"]>;
+export type Invitation = InvitationListResponse["items"][number];
+
+type InvitationsByUser = (typeof client)["api"]["invitations"];
+export type PendingInvitationListResponse = Data<InvitationsByUser["pending"]["get"]>;

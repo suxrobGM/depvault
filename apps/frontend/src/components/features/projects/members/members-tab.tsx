@@ -2,8 +2,12 @@
 
 import { useState, type ReactElement } from "react";
 import {
+  Cancel as CancelIcon,
   Delete as DeleteIcon,
+  Email as EmailIcon,
+  HourglassEmpty as HourglassIcon,
   PersonAdd as PersonAddIcon,
+  Replay as ReplayIcon,
   SwapHoriz as SwapHorizIcon,
 } from "@mui/icons-material";
 import { Box, Button, Chip, Skeleton, Stack, Typography } from "@mui/material";
@@ -15,7 +19,12 @@ import { useApiQuery } from "@/hooks/use-api-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useConfirm } from "@/hooks/use-confirm";
 import { client } from "@/lib/api";
-import type { Member, MemberListResponse } from "@/types/api/project";
+import type {
+  Invitation,
+  InvitationListResponse,
+  Member,
+  MemberListResponse,
+} from "@/types/api/project";
 import { InviteMemberDialog } from "./invite-member-dialog";
 import { TransferOwnershipDialog } from "./transfer-ownership-dialog";
 
@@ -42,6 +51,11 @@ export function MembersTab(props: MembersTabProps): ReactElement {
     () => client.api.projects({ id: projectId }).members.get({ query: { page: 1, limit: 50 } }),
   );
 
+  const { data: invitationsData } = useApiQuery<InvitationListResponse>(
+    ["projects", projectId, "invitations"],
+    () => client.api.projects({ id: projectId }).invitations.get({ query: { page: 1, limit: 50 } }),
+  );
+
   const isOwner = data?.items.find((m) => m.user.id === user?.id)?.role === "OWNER";
 
   const updateRoleMutation = useApiMutation(
@@ -65,6 +79,30 @@ export function MembersTab(props: MembersTabProps): ReactElement {
     },
   );
 
+  const resendMutation = useApiMutation(
+    (vars: { invitationId: string }) =>
+      client.api
+        .projects({ id: projectId })
+        .invitations({ invitationId: vars.invitationId })
+        .resend.post(),
+    {
+      invalidateKeys: [["projects", projectId, "invitations"]],
+      successMessage: "Invitation resent",
+    },
+  );
+
+  const cancelMutation = useApiMutation(
+    (vars: { invitationId: string }) =>
+      client.api
+        .projects({ id: projectId })
+        .invitations({ invitationId: vars.invitationId })
+        .delete(),
+    {
+      invalidateKeys: [["projects", projectId, "invitations"]],
+      successMessage: "Invitation cancelled",
+    },
+  );
+
   const handleRemove = async (member: Member) => {
     const ok = await confirm({
       title: "Remove Member",
@@ -72,7 +110,21 @@ export function MembersTab(props: MembersTabProps): ReactElement {
       confirmLabel: "Remove",
       destructive: true,
     });
-    if (ok) removeMutation.mutate({ memberId: member.id });
+    if (ok) {
+      removeMutation.mutate({ memberId: member.id });
+    }
+  };
+
+  const handleCancelInvitation = async (invitation: Invitation) => {
+    const ok = await confirm({
+      title: "Cancel Invitation",
+      description: `Are you sure you want to cancel the invitation to ${invitation.email}?`,
+      confirmLabel: "Cancel Invitation",
+      destructive: true,
+    });
+    if (ok) {
+      cancelMutation.mutate({ invitationId: invitation.id });
+    }
   };
 
   if (isLoading) {
@@ -87,6 +139,7 @@ export function MembersTab(props: MembersTabProps): ReactElement {
 
   const members = data?.items ?? [];
   const nonOwnerMembers = members.filter((m) => m.role !== "OWNER");
+  const pendingInvitations = invitationsData?.items ?? [];
 
   return (
     <Box className="vault-fade-up vault-delay-2">
@@ -109,6 +162,71 @@ export function MembersTab(props: MembersTabProps): ReactElement {
             </Button>
           )}
         </Stack>
+      )}
+
+      {isOwner && pendingInvitations.length > 0 && (
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1.5 }}>
+            Pending Invitations
+          </Typography>
+          <Stack spacing={1.5}>
+            {pendingInvitations.map((invitation) => (
+              <GlassCard key={invitation.id} hoverGlow={false}>
+                <Stack direction="row" alignItems="center" sx={{ px: 3, py: 2 }} spacing={2}>
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: "50%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      bgcolor: "action.hover",
+                    }}
+                  >
+                    <EmailIcon fontSize="small" color="action" />
+                  </Box>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography variant="body1" fontWeight={500} noWrap>
+                      {invitation.email}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" noWrap>
+                      Invited by {invitation.invitedBy.firstName} {invitation.invitedBy.lastName}
+                    </Typography>
+                  </Box>
+                  <Chip
+                    label={invitation.role}
+                    size="small"
+                    color={ROLE_COLORS[invitation.role]}
+                    variant="outlined"
+                  />
+                  <Chip
+                    icon={<HourglassIcon />}
+                    label="Pending"
+                    size="small"
+                    color="warning"
+                    variant="outlined"
+                  />
+                  <ActionMenu
+                    items={[
+                      {
+                        label: "Resend",
+                        icon: <ReplayIcon fontSize="small" />,
+                        onClick: () => resendMutation.mutate({ invitationId: invitation.id }),
+                      },
+                      {
+                        label: "Cancel",
+                        icon: <CancelIcon fontSize="small" />,
+                        onClick: () => handleCancelInvitation(invitation),
+                        destructive: true,
+                      },
+                    ]}
+                  />
+                </Stack>
+              </GlassCard>
+            ))}
+          </Stack>
+        </Box>
       )}
 
       <Stack spacing={1.5}>

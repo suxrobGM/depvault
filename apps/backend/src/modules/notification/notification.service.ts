@@ -2,6 +2,7 @@ import { singleton } from "tsyringe";
 import {
   EnvDriftWarningTemplate,
   GitSecretAlertTemplate,
+  MemberRemovedTemplate,
   SecretRotationReminderTemplate,
   VulnerabilityAlertTemplate,
 } from "@/common/emails";
@@ -238,6 +239,18 @@ export class NotificationService {
         break;
       case "TEAM_INVITE":
       case "ROLE_CHANGE":
+      case "INVITATION_RECEIVED":
+        break;
+      case "MEMBER_REMOVED":
+        void this.emailService.send({
+          to: email,
+          subject: `You've been removed from ${projectName} — DepVault`,
+          react: MemberRemovedTemplate({
+            firstName,
+            projectName,
+            dashboardUrl,
+          }),
+        });
         break;
     }
   }

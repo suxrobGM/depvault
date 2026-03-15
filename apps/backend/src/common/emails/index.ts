@@ -8,3 +8,5 @@ export { SecretRotationReminderTemplate } from "./templates/secret-rotation-remi
 export { EnvDriftWarningTemplate } from "./templates/env-drift-warning";
 export { RoleChangeTemplate } from "./templates/role-change";
 export { GitSecretAlertTemplate } from "./templates/git-secret-alert";
+export { PlatformInviteTemplate } from "./templates/platform-invite";
+export { MemberRemovedTemplate } from "./templates/member-removed";

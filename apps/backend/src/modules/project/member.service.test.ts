@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
-import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from "@/common/errors";
+import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
 import { MemberService } from "./member.service";
 
 const now = new Date();
@@ -79,112 +79,6 @@ describe("MemberService", () => {
     mockPrisma = createMockPrisma();
     mockEmailService = createMockEmailService();
     service = new MemberService(mockPrisma, mockEmailService, createMockNotificationService());
-  });
-
-  describe("invite", () => {
-    it("should invite a user by email", async () => {
-      mockPrisma.projectMember.findUnique
-        .mockResolvedValueOnce(ownerMembership)
-        .mockResolvedValueOnce(null);
-      mockPrisma.user.findFirst.mockResolvedValueOnce(mockUser);
-      mockPrisma.user.findUnique.mockResolvedValueOnce({
-        firstName: "Owner",
-        lastName: "User",
-      });
-
-      const result = await service.invite(
-        "project-uuid",
-        { email: "invitee@example.com", role: "EDITOR" },
-        "owner-uuid",
-      );
-
-      expect(result.userId).toBe("invitee-uuid");
-      expect(result.role).toBe("EDITOR");
-      expect(mockPrisma.projectMember.create).toHaveBeenCalledWith({
-        data: { projectId: "project-uuid", userId: "invitee-uuid", role: "EDITOR" },
-        include: expect.any(Object),
-      });
-    });
-
-    it("should send an invite email", async () => {
-      mockPrisma.projectMember.findUnique
-        .mockResolvedValueOnce(ownerMembership)
-        .mockResolvedValueOnce(null);
-      mockPrisma.user.findFirst.mockResolvedValueOnce(mockUser);
-      mockPrisma.user.findUnique.mockResolvedValueOnce({
-        firstName: "Owner",
-        lastName: "User",
-      });
-
-      await service.invite(
-        "project-uuid",
-        { email: "invitee@example.com", role: "EDITOR" },
-        "owner-uuid",
-      );
-
-      expect(mockEmailService.send).toHaveBeenCalledWith(
-        expect.objectContaining({
-          to: "invitee@example.com",
-          subject: expect.stringContaining("invited"),
-        }),
-      );
-    });
-
-    it("should throw NotFoundError when invitee email not found", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce(ownerMembership);
-      mockPrisma.user.findFirst.mockResolvedValueOnce(null);
-
-      expect(
-        service.invite(
-          "project-uuid",
-          { email: "unknown@example.com", role: "VIEWER" },
-          "owner-uuid",
-        ),
-      ).rejects.toBeInstanceOf(NotFoundError);
-    });
-
-    it("should throw ForbiddenError when non-owner tries to invite", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({
-        ...ownerMembership,
-        role: "EDITOR",
-      });
-
-      expect(
-        service.invite(
-          "project-uuid",
-          { email: "invitee@example.com", role: "VIEWER" },
-          "editor-uuid",
-        ),
-      ).rejects.toBeInstanceOf(ForbiddenError);
-    });
-
-    it("should throw BadRequestError when inviting yourself", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce(ownerMembership);
-      mockPrisma.user.findFirst.mockResolvedValueOnce({ ...mockUser, id: "owner-uuid" });
-
-      expect(
-        service.invite(
-          "project-uuid",
-          { email: "owner@example.com", role: "EDITOR" },
-          "owner-uuid",
-        ),
-      ).rejects.toBeInstanceOf(BadRequestError);
-    });
-
-    it("should throw ConflictError when user is already a member", async () => {
-      mockPrisma.projectMember.findUnique
-        .mockResolvedValueOnce(ownerMembership)
-        .mockResolvedValueOnce(mockMember);
-      mockPrisma.user.findFirst.mockResolvedValueOnce(mockUser);
-
-      expect(
-        service.invite(
-          "project-uuid",
-          { email: "invitee@example.com", role: "EDITOR" },
-          "owner-uuid",
-        ),
-      ).rejects.toBeInstanceOf(ConflictError);
-    });
   });
 
   describe("list", () => {

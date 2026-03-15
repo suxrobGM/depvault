@@ -28,18 +28,20 @@ model User {
   createdAt              DateTime  @default(now()) @map("created_at")
   updatedAt              DateTime  @updatedAt @map("updated_at")
 
-  accounts           Account[]
-  ownedProjects      Project[]
-  projectMemberships ProjectMember[]
-  analyses           Analysis[]
-  sharedSecrets      SharedSecret[]
-  notifications      Notification[]
-  uploadedFiles      SecretFile[]
-  envTemplates       EnvTemplate[]     @relation("envTemplateCreator")
-  auditLogs          AuditLog[]
-  triggeredScans     SecretScan[]      @relation("scanTriggeredBy")
-  resolvedDetections SecretDetection[] @relation("detectionResolvedBy")
-  ciTokens           CiToken[]
+  accounts            Account[]
+  ownedProjects       Project[]
+  projectMemberships  ProjectMember[]
+  analyses            Analysis[]
+  sharedSecrets       SharedSecret[]
+  notifications       Notification[]
+  uploadedFiles       SecretFile[]
+  envTemplates        EnvTemplate[]       @relation("envTemplateCreator")
+  auditLogs           AuditLog[]
+  triggeredScans      SecretScan[]        @relation("scanTriggeredBy")
+  resolvedDetections  SecretDetection[]   @relation("detectionResolvedBy")
+  ciTokens            CiToken[]
+  invitationsSent     ProjectInvitation[] @relation("invitationsSent")
+  invitationsReceived ProjectInvitation[] @relation("invitationsReceived")
 
   @@map("users")
 }

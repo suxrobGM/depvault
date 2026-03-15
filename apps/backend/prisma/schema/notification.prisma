@@ -5,6 +5,8 @@ enum NotificationType {
   TEAM_INVITE
   ROLE_CHANGE
   GIT_SECRET_DETECTION
+  INVITATION_RECEIVED
+  MEMBER_REMOVED
 }
 
 model Notification {

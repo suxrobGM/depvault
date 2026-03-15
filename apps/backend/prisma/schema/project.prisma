@@ -13,8 +13,9 @@ model Project {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
-  owner            User              @relation(fields: [ownerId], references: [id])
+  owner            User                @relation(fields: [ownerId], references: [id])
   members          ProjectMember[]
+  invitations      ProjectInvitation[]
   analyses         Analysis[]
   vaultGroups      VaultGroup[]
   environments     Environment[]
@@ -57,4 +58,32 @@ model ProjectMember {
 
   @@unique([projectId, userId])
   @@map("project_members")
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  CANCELLED
+}
+
+model ProjectInvitation {
+  id          String           @id @default(uuid()) @db.Uuid
+  projectId   String           @map("project_id") @db.Uuid
+  email       String
+  role        ProjectRole      @default(VIEWER)
+  status      InvitationStatus @default(PENDING)
+  token       String           @unique @default(uuid())
+  invitedById String           @map("invited_by_id") @db.Uuid
+  userId      String?          @map("user_id") @db.Uuid
+  expiresAt   DateTime         @map("expires_at")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  invitedBy User    @relation("invitationsSent", fields: [invitedById], references: [id])
+  user      User?   @relation("invitationsReceived", fields: [userId], references: [id])
+
+  @@unique([projectId, email, status])
+  @@map("project_invitations")
 }

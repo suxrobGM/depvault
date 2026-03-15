@@ -8,6 +8,7 @@ import { EmailService } from "@/common/services/email.service";
 import { verifyRefreshToken } from "@/common/utils/jwt";
 import { hashPassword, verifyPassword } from "@/common/utils/password";
 import { PrismaClient } from "@/generated/prisma";
+import { InvitationService } from "@/modules/project/invitation.service";
 import type {
   AuthResponse,
   ForgotPasswordBody,
@@ -28,6 +29,7 @@ export class AuthService {
     private readonly prisma: PrismaClient,
     private readonly tokenService: TokenService,
     private readonly emailService: EmailService,
+    private readonly invitationService: InvitationService,
   ) {}
 
   async register(body: RegisterBody): Promise<AuthResponse> {
@@ -73,6 +75,8 @@ export class AuthService {
       subject: "Verify your email — DepVault",
       react: VerifyEmailTemplate({ firstName: body.firstName, verificationUrl }),
     });
+
+    void this.invitationService.linkPendingInvitations(email, user.id);
 
     return this.tokenService.issueTokens(user, "EMAIL", email);
   }

@@ -76,17 +76,28 @@ function createMockEmailService() {
   return { send: mock(() => Promise.resolve()) } as any;
 }
 
+function createMockInvitationService() {
+  return { linkPendingInvitations: mock(() => Promise.resolve()) } as any;
+}
+
 describe("AuthService", () => {
   let service: AuthService;
   let mockPrisma: ReturnType<typeof createMockPrisma>;
   let mockTokenService: ReturnType<typeof createMockTokenService>;
   let mockEmailService: ReturnType<typeof createMockEmailService>;
+  let mockInvitationService: ReturnType<typeof createMockInvitationService>;
 
   beforeEach(() => {
     mockPrisma = createMockPrisma();
     mockTokenService = createMockTokenService();
     mockEmailService = createMockEmailService();
-    service = new AuthService(mockPrisma, mockTokenService, mockEmailService);
+    mockInvitationService = createMockInvitationService();
+    service = new AuthService(
+      mockPrisma,
+      mockTokenService,
+      mockEmailService,
+      mockInvitationService,
+    );
   });
 
   describe("register", () => {

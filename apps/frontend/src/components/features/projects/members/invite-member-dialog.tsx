@@ -21,8 +21,11 @@ export function InviteMemberDialog(props: InviteMemberDialogProps): ReactElement
     (values: { email: string; role: "EDITOR" | "VIEWER" }) =>
       client.api.projects({ id: projectId }).members.post(values),
     {
-      invalidateKeys: [["projects", projectId, "members"]],
-      successMessage: "Member invited",
+      invalidateKeys: [
+        ["projects", projectId, "members"],
+        ["projects", projectId, "invitations"],
+      ],
+      successMessage: "Invitation sent",
       onSuccess: () => handleClose(),
     },
   );
