@@ -16,8 +16,10 @@ public interface IApiClientFactory
     KiotaClient.ApiClient Create();
 }
 
-public sealed class ApiClientFactory(IConfigService configService, IAuthenticationProvider authProvider)
-    : IApiClientFactory
+public sealed class ApiClientFactory(
+    IConfigService configService,
+    IAuthenticationProvider authProvider,
+    ICredentialStore credentialStore) : IApiClientFactory
 {
     private KiotaClient.ApiClient? client;
 
@@ -29,7 +31,14 @@ public sealed class ApiClientFactory(IConfigService configService, IAuthenticati
         }
 
         var config = configService.Load();
-        var httpClient = new HttpClient(new JsonContentTypeHandler())
+
+        var refreshHandler = new TokenRefreshHandler(credentialStore, config.Server)
+        {
+            InnerHandler = new HttpClientHandler()
+        };
+
+        var jsonHandler = new JsonContentTypeHandler(refreshHandler);
+        var httpClient = new HttpClient(jsonHandler)
         {
             BaseAddress = new Uri(config.Server)
         };
@@ -78,6 +87,10 @@ public sealed class ApiClientFactory(IConfigService configService, IAuthenticati
 internal sealed class JsonContentTypeHandler : DelegatingHandler
 {
     public JsonContentTypeHandler() : base(new HttpClientHandler())
+    {
+    }
+
+    public JsonContentTypeHandler(HttpMessageHandler innerHandler) : base(innerHandler)
     {
     }
 
