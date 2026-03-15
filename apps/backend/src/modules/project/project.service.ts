@@ -29,7 +29,7 @@ export class ProjectService {
       },
     });
 
-    return project;
+    return { ...project, currentUserRole: "OWNER" };
   }
 
   async list(
@@ -41,9 +41,10 @@ export class ProjectService {
       members: { some: { userId } },
     };
 
-    const [items, total] = await Promise.all([
+    const [projects, total] = await Promise.all([
       this.prisma.project.findMany({
         where,
+        include: { members: { where: { userId }, select: { role: true } } },
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: "desc" },
@@ -52,7 +53,10 @@ export class ProjectService {
     ]);
 
     return {
-      items,
+      items: projects.map(({ members, ...rest }) => ({
+        ...rest,
+        currentUserRole: members[0]!.role,
+      })),
       pagination: {
         page,
         limit,
@@ -68,13 +72,15 @@ export class ProjectService {
         id: projectId,
         members: { some: { userId } },
       },
+      include: { members: { where: { userId }, select: { role: true } } },
     });
 
     if (!project) {
       throw new NotFoundError("Project not found");
     }
 
-    return project;
+    const { members, ...rest } = project;
+    return { ...rest, currentUserRole: members[0]!.role };
   }
 
   async update(
@@ -103,7 +109,7 @@ export class ProjectService {
       },
     });
 
-    return project;
+    return { ...project, currentUserRole: member.role };
   }
 
   async delete(projectId: string, userId: string): Promise<{ message: string }> {

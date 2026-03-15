@@ -20,6 +20,7 @@ export const ProjectResponseSchema = t.Object({
   description: t.Nullable(t.String()),
   repositoryUrl: t.Nullable(t.String()),
   ownerId: t.String(),
+  currentUserRole: t.String(),
   createdAt: t.Date(),
   updatedAt: t.Date(),
 });

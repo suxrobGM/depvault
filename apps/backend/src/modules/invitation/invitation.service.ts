@@ -164,10 +164,26 @@ export class InvitationService {
     return { message: "Invitation cancelled" };
   }
 
+  /** Accepts an invitation by token during registration (skips recipient check). */
+  async acceptByToken(token: string, userId: string): Promise<void> {
+    try {
+      const invitation = await this.findByToken(token);
+      await this.acceptInvitation(invitation, userId);
+    } catch (error) {
+      logger.error({ error, token }, "Failed to auto-accept invitation during registration");
+    }
+  }
+
   async accept(token: string, userId: string): Promise<{ message: string }> {
     const invitation = await this.findByToken(token);
     await this.verifyRecipient(invitation.email, userId);
+    return this.acceptInvitation(invitation, userId);
+  }
 
+  private async acceptInvitation(
+    invitation: Awaited<ReturnType<typeof this.findByToken>>,
+    userId: string,
+  ): Promise<{ message: string }> {
     const existingMember = await this.prisma.projectMember.findUnique({
       where: { projectId_userId: { projectId: invitation.projectId, userId } },
     });

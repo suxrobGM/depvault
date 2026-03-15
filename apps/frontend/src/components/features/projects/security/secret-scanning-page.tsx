@@ -60,6 +60,8 @@ export function SecretScanningPage(props: SecretScanningPageProps): ReactElement
     },
   );
 
+  const isViewer = project?.currentUserRole === "VIEWER";
+
   const isScanning =
     summary?.lastScan?.status === "RUNNING" || summary?.lastScan?.status === "PENDING";
 
@@ -90,15 +92,17 @@ export function SecretScanningPage(props: SecretScanningPageProps): ReactElement
             >
               Back to Project
             </LinkButton>
-            <Button
-              variant="contained"
-              size="small"
-              startIcon={<PlayIcon />}
-              onClick={() => triggerScan.mutate()}
-              disabled={triggerScan.isPending || isScanning}
-            >
-              {isScanning ? "Scanning..." : "Run Scan"}
-            </Button>
+            {!isViewer && (
+              <Button
+                variant="contained"
+                size="small"
+                startIcon={<PlayIcon />}
+                onClick={() => triggerScan.mutate()}
+                disabled={triggerScan.isPending || isScanning}
+              >
+                {isScanning ? "Scanning..." : "Run Scan"}
+              </Button>
+            )}
           </Stack>
         }
       />
@@ -193,21 +197,23 @@ export function SecretScanningPage(props: SecretScanningPageProps): ReactElement
         sx={{ mt: 4, mb: 2 }}
         className="vault-fade-up vault-delay-2"
       >
-        {(["detections", "history", "patterns"] as const).map((section) => (
-          <Chip
-            key={section}
-            label={
-              section === "detections"
-                ? "Detections"
-                : section === "history"
-                  ? "Scan History"
-                  : "Patterns"
-            }
-            onClick={() => setActiveSection(section)}
-            variant={activeSection === section ? "filled" : "outlined"}
-            color={activeSection === section ? "primary" : "default"}
-          />
-        ))}
+        {(["detections", "history", ...(isViewer ? [] : ["patterns" as const])] as const).map(
+          (section) => (
+            <Chip
+              key={section}
+              label={
+                section === "detections"
+                  ? "Detections"
+                  : section === "history"
+                    ? "Scan History"
+                    : "Patterns"
+              }
+              onClick={() => setActiveSection(section)}
+              variant={activeSection === section ? "filled" : "outlined"}
+              color={activeSection === section ? "primary" : "default"}
+            />
+          ),
+        )}
       </Stack>
 
       <Box className="vault-fade-up vault-delay-3">

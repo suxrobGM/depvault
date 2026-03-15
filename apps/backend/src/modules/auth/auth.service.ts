@@ -70,7 +70,9 @@ export class AuthService {
       },
     });
 
-    if (!isInvitedRegistration) {
+    if (isInvitedRegistration) {
+      void this.invitationService.acceptByToken(body.inviteToken!, user.id);
+    } else {
       const verificationUrl = `${this.frontendUrl}/verify-email?token=${emailVerificationToken}`;
 
       void this.emailService.send({

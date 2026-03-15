@@ -46,14 +46,14 @@ export function ProjectLayoutShell(props: ProjectLayoutShellProps): ReactElement
     <Box>
       <PageHeader
         title={project.name}
-        subtitle={project.description || undefined}
+        subtitle={project.description}
         breadcrumbs={[
           { label: "Dashboard", href: ROUTES.dashboard },
           { label: "Projects", href: ROUTES.projects },
           { label: project.name },
         ]}
       />
-      <ProjectTabs projectId={projectId} />
+      <ProjectTabs projectId={projectId} currentUserRole={project.currentUserRole} />
       {children}
     </Box>
   );
