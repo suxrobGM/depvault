@@ -1,6 +1,7 @@
 using System.CommandLine;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Commands.Scan;
+using DepVault.Cli.Config;
 using DepVault.Cli.Output;
 using Spectre.Console;
 
@@ -8,6 +9,7 @@ namespace DepVault.Cli.Commands;
 
 internal sealed class ScanCommands(
     IAuthContext authContext,
+    IConfigService configService,
     IConsolePrompter prompter,
     IOutputFormatter output,
     ProjectResolver projectResolver,
@@ -79,7 +81,7 @@ internal sealed class ScanCommands(
             await secretFileScanner.RunAsync(projectId, repoPath, results, cancellationToken);
 
             AnsiConsole.WriteLine();
-            ScanSummary.Print(results);
+            ScanSummary.Print(results, projectId, configService.Load().Server);
         });
 
         return cmd;

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using DepVault.Cli.ApiClient.Projects;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Config;
@@ -85,12 +86,14 @@ internal sealed class ProjectResolver(
     {
         var defaultName = new DirectoryInfo(repoPath).Name;
         var name = prompter.Ask("Project name", defaultName);
+        var repoUrl = DetectGitRemoteUrl(repoPath);
 
         var created = await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .StartAsync("Creating project...", async _ =>
                 await client.Projects.PostAsync(
-                    new ProjectsPostRequestBody { Name = name }, cancellationToken: ct));
+                    new ProjectsPostRequestBody { Name = name, RepositoryUrl = repoUrl },
+                    cancellationToken: ct));
 
         if (created?.Id is null)
         {
@@ -101,6 +104,42 @@ internal sealed class ProjectResolver(
         config.ActiveProjectId = created.Id;
         configService.Save(config);
         output.PrintSuccess($"Created project '{name}'");
+
+        if (!string.IsNullOrEmpty(repoUrl))
+        {
+            AnsiConsole.MarkupLine($"[grey]Repository: {Markup.Escape(repoUrl)}[/]");
+        }
+
         return created.Id;
+    }
+
+    private static string? DetectGitRemoteUrl(string repoPath)
+    {
+        try
+        {
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "git",
+                    ArgumentList = { "remote", "get-url", "origin" },
+                    WorkingDirectory = repoPath,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+
+            process.Start();
+            var url = process.StandardOutput.ReadToEnd().Trim();
+            process.WaitForExit(3000);
+
+            return process.ExitCode == 0 && !string.IsNullOrEmpty(url) ? url : null;
+        }
+        catch
+        {
+            return null;
+        }
     }
 }

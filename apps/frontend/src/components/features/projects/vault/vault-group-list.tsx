@@ -68,7 +68,17 @@ export function VaultGroupList(props: VaultGroupListProps): ReactElement {
                 <Typography variant="subtitle1" fontWeight={600} noWrap>
                   {group.name}
                 </Typography>
-                {group.description && (
+                {group.directoryPath && (
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    noWrap
+                    sx={{ fontFamily: "monospace" }}
+                  >
+                    {group.directoryPath}
+                  </Typography>
+                )}
+                {!group.directoryPath && group.description && (
                   <Typography variant="caption" color="text.secondary" noWrap>
                     {group.description}
                   </Typography>
