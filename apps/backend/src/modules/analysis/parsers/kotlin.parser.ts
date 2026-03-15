@@ -7,10 +7,6 @@ export const kotlinParser: DependencyParser = {
   },
 
   parse(content: string, fileName: string): ParseResult {
-    if (fileName.toLowerCase() !== "libs.versions.toml") {
-      throw new BadRequestError(`Unsupported Kotlin file: ${fileName}`);
-    }
-
     return parseVersionCatalog(content, fileName);
   },
 };

@@ -188,12 +188,6 @@ ktor = "2.3.7"
       expect(() => kotlinParser.parse("   ", "libs.versions.toml")).toThrow("Empty file");
     });
 
-    it("should throw for unsupported file name", () => {
-      expect(() => kotlinParser.parse("[versions]", "build.gradle.kts")).toThrow(
-        "Unsupported Kotlin file",
-      );
-    });
-
     it("should ignore unknown sections", () => {
       const content = `
 [versions]

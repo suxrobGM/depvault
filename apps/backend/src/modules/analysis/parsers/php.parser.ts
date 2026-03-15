@@ -1,17 +1,17 @@
 import { BadRequestError } from "@/common/errors";
 import type { DependencyParser, ParsedDependency, ParseResult } from "./types";
 
-export const nodejsParser: DependencyParser = {
+export const phpParser: DependencyParser = {
   canParse(fileName: string): boolean {
-    return fileName.toLowerCase() === "package.json";
+    return fileName.toLowerCase() === "composer.json";
   },
 
   parse(content: string, fileName: string): ParseResult {
-    return parsePackageJson(content, fileName);
+    return parseComposerJson(content, fileName);
   },
 };
 
-function parsePackageJson(content: string, fileName: string): ParseResult {
+function parseComposerJson(content: string, fileName: string): ParseResult {
   let json: unknown;
   try {
     json = JSON.parse(content);
@@ -20,14 +20,14 @@ function parsePackageJson(content: string, fileName: string): ParseResult {
   }
 
   if (typeof json !== "object" || json === null || Array.isArray(json)) {
-    throw new BadRequestError("package.json must be a JSON object");
+    throw new BadRequestError("composer.json must be a JSON object");
   }
 
   const record = json as Record<string, unknown>;
   const dependencies: ParsedDependency[] = [];
 
-  extractDeps(record.dependencies, dependencies);
-  extractDeps(record.devDependencies, dependencies);
+  extractDeps(record.require, dependencies);
+  extractDeps(record["require-dev"], dependencies);
 
   return { dependencies, fileName };
 }
@@ -36,8 +36,11 @@ function extractDeps(section: unknown, result: ParsedDependency[]): void {
   if (!section || typeof section !== "object" || Array.isArray(section)) return;
 
   for (const [name, version] of Object.entries(section as Record<string, unknown>)) {
-    if (typeof version === "string") {
-      result.push({ name, version, isDirect: true });
-    }
+    if (typeof version !== "string") continue;
+
+    // Skip PHP platform requirements (php, ext-*, lib-*)
+    if (name === "php" || name.startsWith("ext-") || name.startsWith("lib-")) continue;
+
+    result.push({ name, version, isDirect: true });
   }
 }

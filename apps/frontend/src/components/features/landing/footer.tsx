@@ -70,7 +70,7 @@ export function LandingFooter(): ReactElement {
             </Typography>
             <IconButton
               component="a"
-              href="https://github.com"
+              href="https://github.com/suxrobGM/depvault"
               target="_blank"
               rel="noopener noreferrer"
               size="small"

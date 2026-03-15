@@ -124,9 +124,5 @@ describe("nodejsParser", () => {
         isDirect: true,
       });
     });
-
-    it("should throw for unsupported file name", () => {
-      expect(() => nodejsParser.parse("{}", "yarn.lock")).toThrow("Unsupported Node.js file");
-    });
   });
 });

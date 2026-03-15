@@ -9,7 +9,17 @@ export type { EcosystemValue };
 export { getEcosystemLabel, getPackageUrl };
 
 /** Ecosystems with active parser support, for the upload form dropdown. */
-const SUPPORTED_ECOSYSTEMS: ReadonlySet<string> = new Set(["NODEJS", "PYTHON", "DOTNET", "KOTLIN"]);
+const SUPPORTED_ECOSYSTEMS: ReadonlySet<string> = new Set([
+  "NODEJS",
+  "PYTHON",
+  "DOTNET",
+  "KOTLIN",
+  "RUST",
+  "GO",
+  "JAVA",
+  "RUBY",
+  "PHP",
+]);
 
 export const ECOSYSTEMS = ECOSYSTEM_CONFIGS.filter((c) => SUPPORTED_ECOSYSTEMS.has(c.value)).map(
   (c) => ({ value: c.value, label: c.label, defaultFile: c.defaultFile }),

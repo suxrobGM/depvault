@@ -3,3 +3,8 @@ export { nodejsParser } from "./nodejs.parser";
 export { pythonParser } from "./python.parser";
 export { dotnetParser } from "./dotnet.parser";
 export { kotlinParser } from "./kotlin.parser";
+export { rustParser } from "./rust.parser";
+export { goParser } from "./go.parser";
+export { javaParser } from "./java.parser";
+export { rubyParser } from "./ruby.parser";
+export { phpParser } from "./php.parser";

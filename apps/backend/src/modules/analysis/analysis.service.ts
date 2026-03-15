@@ -14,9 +14,14 @@ import { calculateHealthScore } from "./analysis.utils";
 import { checkVersions, resolveLicensePolicy, scanVulnerabilities } from "./checkers";
 import {
   dotnetParser,
+  goParser,
+  javaParser,
   kotlinParser,
   nodejsParser,
+  phpParser,
   pythonParser,
+  rubyParser,
+  rustParser,
   type DependencyParser,
 } from "./parsers";
 
@@ -25,6 +30,11 @@ const PARSERS: Record<string, DependencyParser> = {
   PYTHON: pythonParser,
   DOTNET: dotnetParser,
   KOTLIN: kotlinParser,
+  RUST: rustParser,
+  GO: goParser,
+  JAVA: javaParser,
+  RUBY: rubyParser,
+  PHP: phpParser,
 };
 
 const INCLUDE_DEPS_WITH_VULNS = {

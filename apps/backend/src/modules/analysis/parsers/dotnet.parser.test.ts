@@ -131,11 +131,5 @@ describe("dotnetParser", () => {
       expect(() => dotnetParser.parse("", "MyApp.csproj")).toThrow("Empty file");
       expect(() => dotnetParser.parse("   ", "MyApp.csproj")).toThrow("Empty file");
     });
-
-    it("should throw for unsupported file name", () => {
-      expect(() => dotnetParser.parse("<Project/>", "package.json")).toThrow(
-        "Unsupported .NET file",
-      );
-    });
   });
 });

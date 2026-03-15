@@ -10,12 +10,6 @@ export const dotnetParser: DependencyParser = {
   },
 
   parse(content: string, fileName: string): ParseResult {
-    const lower = fileName.toLowerCase();
-
-    if (!SUPPORTED_EXTENSIONS.some((ext) => lower.endsWith(ext))) {
-      throw new BadRequestError(`Unsupported .NET file: ${fileName}`);
-    }
-
     return parseCsproj(content, fileName);
   },
 };

@@ -38,7 +38,9 @@ function parseRequirementsTxt(content: string, fileName: string): ParseResult {
     // Skip URLs and file paths
     if (line.includes("://") || line.startsWith(".") || line.startsWith("/")) continue;
 
-    const parsed = parseRequirementLine(line);
+    // Strip inline comments
+    const withoutComment = line.split("#")[0]!.trim();
+    const parsed = parsePythonDependency(withoutComment);
     if (parsed) {
       dependencies.push(parsed);
     }
@@ -47,17 +49,29 @@ function parseRequirementsTxt(content: string, fileName: string): ParseResult {
   return { dependencies, fileName };
 }
 
-const VERSION_SPECIFIER_REGEX =
-  /^([a-zA-Z0-9_][a-zA-Z0-9._-]*(?:\[[^\]]*\])?)\s*((?:[=!<>~]=?|===?).+)?$/;
+function parsePyprojectToml(content: string, fileName: string): ParseResult {
+  const dependencies: ParsedDependency[] = [];
 
-function parseRequirementLine(line: string): ParsedDependency | null {
-  // Strip inline comments and environment markers
-  const withoutComment = line.split("#")[0]!.trim();
-  const withoutMarker = withoutComment.split(";")[0]!.trim();
+  const depsArray = extractTomlArray(content, "project", "dependencies");
+  for (const dep of depsArray) {
+    const parsed = parsePythonDependency(dep);
+    if (parsed) {
+      dependencies.push(parsed);
+    }
+  }
 
+  return { dependencies, fileName };
+}
+
+const DEPENDENCY_REGEX = /^([a-zA-Z0-9_][a-zA-Z0-9._-]*(?:\[[^\]]*\])?)\s*((?:[=!<>~]=?|===?).+)?$/;
+
+/** Parses a single Python dependency specifier (PEP 508 / PEP 621). */
+function parsePythonDependency(raw: string): ParsedDependency | null {
+  // Strip environment markers
+  const withoutMarker = raw.split(";")[0]!.trim();
   if (!withoutMarker) return null;
 
-  const match = withoutMarker.match(VERSION_SPECIFIER_REGEX);
+  const match = withoutMarker.match(DEPENDENCY_REGEX);
   if (!match) return null;
 
   let name = match[1]!;
@@ -69,25 +83,10 @@ function parseRequirementLine(line: string): ParsedDependency | null {
     name = name.substring(0, bracketIndex);
   }
 
-  return { name: normalizePackageName(name), version: versionSpec, isDirect: true };
-}
+  // Normalize: underscores/dots to hyphens, lowercase
+  name = name.replace(/[-_.]+/g, "-").toLowerCase();
 
-function normalizePackageName(name: string): string {
-  return name.replace(/[-_.]+/g, "-").toLowerCase();
-}
-
-function parsePyprojectToml(content: string, fileName: string): ParseResult {
-  const dependencies: ParsedDependency[] = [];
-
-  const depsArray = extractTomlArray(content, "project", "dependencies");
-  for (const dep of depsArray) {
-    const parsed = parsePep621Dependency(dep);
-    if (parsed) {
-      dependencies.push(parsed);
-    }
-  }
-
-  return { dependencies, fileName };
+  return { name, version: versionSpec, isDirect: true };
 }
 
 function extractTomlArray(content: string, table: string, key: string): string[] {
@@ -133,7 +132,6 @@ function extractTomlArray(content: string, table: string, key: string): string[]
 }
 
 function isArrayClosing(line: string): boolean {
-  // Check if ] appears outside of quoted strings
   let inDouble = false;
   let inSingle = false;
   for (const ch of line) {
@@ -145,7 +143,6 @@ function isArrayClosing(line: string): boolean {
 }
 
 function collectArrayItems(text: string, result: string[]): void {
-  // Split by comma, extract quoted strings
   const matches = text.matchAll(/"([^"]*?)"|'([^']*?)'/g);
   for (const match of matches) {
     const value = match[1] ?? match[2];
@@ -153,25 +150,4 @@ function collectArrayItems(text: string, result: string[]): void {
       result.push(value);
     }
   }
-}
-
-const PEP621_REGEX = /^([a-zA-Z0-9_][a-zA-Z0-9._-]*(?:\[[^\]]*\])?)\s*((?:[=!<>~]=?|===?).+)?$/;
-
-function parsePep621Dependency(dep: string): ParsedDependency | null {
-  // Strip environment markers
-  const withoutMarker = dep.split(";")[0]!.trim();
-  if (!withoutMarker) return null;
-
-  const match = withoutMarker.match(PEP621_REGEX);
-  if (!match) return null;
-
-  let name = match[1]!;
-  const versionSpec = match[2]?.trim() || "*";
-
-  const bracketIndex = name.indexOf("[");
-  if (bracketIndex !== -1) {
-    name = name.substring(0, bracketIndex);
-  }
-
-  return { name: normalizePackageName(name), version: versionSpec, isDirect: true };
 }
