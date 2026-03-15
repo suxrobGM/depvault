@@ -2,6 +2,7 @@ using System.CommandLine;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
+using DepVault.Cli.Utils;
 using Spectre.Console;
 using SecretListNs = DepVault.Cli.ApiClient.Projects.Item.Secrets;
 
@@ -26,10 +27,10 @@ public sealed class SecretsCommands(
         var projectOpt = new Option<string?>("--project") { Description = "Project ID" };
         var envOpt = new Option<string?>("--environment") { Description = "Environment type filter" };
         var outputOpt = new Option<string>("--output")
-        { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
+            { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
 
         var cmd = new Command("list", "List secret file metadata")
-        { projectOpt, envOpt, outputOpt };
+            { projectOpt, envOpt, outputOpt };
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
@@ -38,7 +39,7 @@ public sealed class SecretsCommands(
                 return;
             }
 
-            var projectId = CommandHelpers.RequireProjectId(parseResult, projectOpt, configService, output);
+            var projectId = CommandUtils.RequireProjectId(parseResult, projectOpt, configService, output);
             if (projectId is null)
             {
                 return;
@@ -53,7 +54,7 @@ public sealed class SecretsCommands(
                     if (!string.IsNullOrEmpty(env))
                     {
                         config.QueryParameters.EnvironmentType =
-                            CommandHelpers.ParseEnum(env, SecretListNs.GetEnvironmentTypeQueryParameterType.DEVELOPMENT);
+                            CommandUtils.ParseEnum(env, SecretListNs.GetEnvironmentTypeQueryParameterType.DEVELOPMENT);
                     }
 
                     config.QueryParameters.Page = 1;

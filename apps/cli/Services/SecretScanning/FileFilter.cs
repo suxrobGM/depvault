@@ -1,15 +1,17 @@
+using DepVault.Cli.Utils;
+
 namespace DepVault.Cli.Services.SecretScanning;
 
 /// <summary>Determines which files should be scanned for secrets and which pattern set to use.</summary>
 internal static class FileFilter
 {
-    private const int MaxFileSizeBytes = 1_048_576; // 1MB
+    private const int maxFileSizeBytes = 1_048_576; // 1MB
 
-    private static readonly HashSet<string> excludedDirs = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly IReadOnlySet<string> excludedDirs = ExcludedDirectories.Names;
+
+    private static readonly HashSet<string> extraExcludedDirs = new(StringComparer.OrdinalIgnoreCase)
     {
-        "node_modules", ".git", "bin", "obj", "target", "vendor",
-        "__pycache__", "dist", "build", ".next", ".nuget", "packages",
-        ".vs", ".idea", "coverage", "generated"
+        "fixtures", "testdata", "tests", "docs", "__tests__"
     };
 
     private static readonly HashSet<string> excludedExtensions = new(StringComparer.OrdinalIgnoreCase)
@@ -55,7 +57,7 @@ internal static class FileFilter
 
         try
         {
-            if (new FileInfo(filePath).Length > MaxFileSizeBytes)
+            if (new FileInfo(filePath).Length > maxFileSizeBytes)
             {
                 return true;
             }
@@ -70,10 +72,7 @@ internal static class FileFilter
         for (var i = 0; i < parts.Length - 1; i++)
         {
             var segment = parts[i];
-            if (excludedDirs.Contains(segment)
-                || string.Equals(segment, "__tests__", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(segment, "fixtures", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(segment, "testdata", StringComparison.OrdinalIgnoreCase))
+            if (excludedDirs.Contains(segment) || extraExcludedDirs.Contains(segment))
             {
                 return true;
             }

@@ -2,14 +2,18 @@ using System.CommandLine;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
+using Spectre.Console;
 
-namespace DepVault.Cli.Commands;
+namespace DepVault.Cli.Utils;
 
-internal static class CommandHelpers
+/// <summary>
+///     Utility methods for command-line parsing and validation.
+/// </summary>
+internal static class CommandUtils
 {
     private static readonly string[] environmentTypes = ["DEVELOPMENT", "STAGING", "PRODUCTION", "GLOBAL"];
 
-    /// <summary>Resolves project ID from CLI option or active config.</summary>
+    /// <summary>Resolves project ID from the CLI option or active config.</summary>
     public static string? RequireProjectId(
         ParseResult parseResult, Option<string?> projectOpt,
         IConfigService configService, IOutputFormatter output)
@@ -44,12 +48,14 @@ internal static class CommandHelpers
     }
 
     /// <summary>Parses a Kiota-generated enum by member name, returning fallback on mismatch.</summary>
-    public static T ParseEnum<T>(string value, T fallback) where T : struct, Enum =>
-        Enum.TryParse<T>(value, ignoreCase: true, out var result) ? result : fallback;
+    public static T ParseEnum<T>(string value, T fallback) where T : struct, Enum
+    {
+        return Enum.TryParse<T>(value, true, out var result) ? result : fallback;
+    }
 
     /// <summary>
-    /// Resolves environment type from an explicit flag value, filename detection, or interactive prompt.
-    /// <paramref name="explicitEnv"/> is the --environment flag; <paramref name="detected"/> is from filename inference.
+    ///     Resolves environment type from an explicit flag value, filename detection, or interactive prompt.
+    ///     <paramref name="explicitEnv" /> is the --environment flag; <paramref name="detected" /> is from filename inference.
     /// </summary>
     public static string ResolveEnvironmentType(
         string? explicitEnv, string? detected, IConsolePrompter prompter)
@@ -76,8 +82,8 @@ internal static class CommandHelpers
     }
 
     /// <summary>
-    /// Resolves a file path from CLI option or interactive file discovery.
-    /// Returns null on failure (with error printed).
+    ///     Resolves a file path from CLI option or interactive file discovery.
+    ///     Returns null on failure (with error printed).
     /// </summary>
     public static string? ResolveFileInteractive(
         ParseResult parseResult, Option<string?> fileOpt,
@@ -93,7 +99,7 @@ internal static class CommandHelpers
 
         if (!prompter.IsInteractive)
         {
-            output.PrintError($"--file is required in non-interactive mode.");
+            output.PrintError("--file is required in non-interactive mode.");
             return null;
         }
 
@@ -106,7 +112,7 @@ internal static class CommandHelpers
 
         if (discovered.Count == 1)
         {
-            return prompter.Confirm($"Use [cyan1]{Spectre.Console.Markup.Escape(discovered[0].RelativePath)}[/]?")
+            return prompter.Confirm($"Use [cyan1]{Markup.Escape(discovered[0].RelativePath)}[/]?")
                 ? discovered[0].FullPath
                 : null;
         }

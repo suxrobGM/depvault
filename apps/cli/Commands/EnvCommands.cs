@@ -2,6 +2,7 @@ using System.CommandLine;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
+using DepVault.Cli.Utils;
 using Spectre.Console;
 using VarNs = DepVault.Cli.ApiClient.Projects.Item.Environments.Variables;
 
@@ -28,7 +29,7 @@ public sealed class EnvCommands(
         var vaultGroupOpt = new Option<string?>("--vault-group") { Description = "Vault group ID" };
         var envOpt = new Option<string?>("--environment") { Description = "Environment type" };
         var outputOpt = new Option<string>("--output")
-        { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
+            { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
 
         var cmd = new Command("list", "List environment variables")
             { projectOpt, vaultGroupOpt, envOpt, outputOpt };
@@ -40,7 +41,7 @@ public sealed class EnvCommands(
                 return;
             }
 
-            var projectId = CommandHelpers.RequireProjectId(parseResult, projectOpt, configService, output);
+            var projectId = CommandUtils.RequireProjectId(parseResult, projectOpt, configService, output);
             if (projectId is null)
             {
                 return;
@@ -61,7 +62,7 @@ public sealed class EnvCommands(
                     if (!string.IsNullOrEmpty(env))
                     {
                         config.QueryParameters.EnvironmentType =
-                            CommandHelpers.ParseEnum(env, VarNs.GetEnvironmentTypeQueryParameterType.DEVELOPMENT);
+                            CommandUtils.ParseEnum(env, VarNs.GetEnvironmentTypeQueryParameterType.DEVELOPMENT);
                     }
                 }, cancellationToken);
 
@@ -75,7 +76,7 @@ public sealed class EnvCommands(
                 if (parseResult.GetValue(outputOpt) == "json")
                 {
                     output.PrintJson(items.Select(v => new
-                    { key = v.Key, value = v.Value, environmentId = v.EnvironmentId }));
+                        { key = v.Key, value = v.Value, environmentId = v.EnvironmentId }));
                     return;
                 }
 
@@ -97,9 +98,9 @@ public sealed class EnvCommands(
         var projectOpt = new Option<string?>("--project") { Description = "Project ID" };
         var vaultGroupOpt = new Option<string>("--vault-group") { Description = "Vault group ID", Required = true };
         var envsOpt = new Option<string>("--environments")
-        { Description = "Comma-separated environment types", Required = true };
+            { Description = "Comma-separated environment types", Required = true };
         var outputOpt = new Option<string>("--output")
-        { Description = "Output format", DefaultValueFactory = _ => "table" };
+            { Description = "Output format", DefaultValueFactory = _ => "table" };
 
         var cmd = new Command("diff", "Compare environment variables across environments")
             { projectOpt, vaultGroupOpt, envsOpt, outputOpt };
@@ -111,7 +112,7 @@ public sealed class EnvCommands(
                 return;
             }
 
-            var projectId = CommandHelpers.RequireProjectId(parseResult, projectOpt, configService, output);
+            var projectId = CommandUtils.RequireProjectId(parseResult, projectOpt, configService, output);
             if (projectId is null)
             {
                 return;
@@ -153,5 +154,4 @@ public sealed class EnvCommands(
 
         return cmd;
     }
-
 }

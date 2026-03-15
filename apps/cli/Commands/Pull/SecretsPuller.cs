@@ -1,5 +1,6 @@
 using DepVault.Cli.Auth;
 using DepVault.Cli.Output;
+using DepVault.Cli.Utils;
 using Spectre.Console;
 using SecretListNs = DepVault.Cli.ApiClient.Projects.Item.Secrets;
 using VaultGroupsModel = DepVault.Cli.ApiClient.Projects.Item.VaultGroups.VaultGroups;
@@ -29,7 +30,8 @@ public sealed class SecretsPuller(
                     await client.Projects[projectId].Secrets.GetAsync(config =>
                     {
                         config.QueryParameters.EnvironmentType =
-                            CommandHelpers.ParseEnum(envType, SecretListNs.GetEnvironmentTypeQueryParameterType.DEVELOPMENT);
+                            CommandUtils.ParseEnum(envType,
+                                SecretListNs.GetEnvironmentTypeQueryParameterType.DEVELOPMENT);
                         config.QueryParameters.Page = 1;
                         config.QueryParameters.Limit = 100;
                     }, ct));
@@ -62,7 +64,8 @@ public sealed class SecretsPuller(
 
                 var filePath = Path.Combine(secretsDir, file.Name ?? $"secret-{file.Id}");
 
-                await using var stream = await client.Projects[projectId].Secrets[file.Id!].Download.GetAsync(cancellationToken: ct);
+                await using var stream = await client.Projects[projectId].Secrets[file.Id!].Download
+                    .GetAsync(cancellationToken: ct);
                 if (stream is null)
                 {
                     output.PrintError($"Failed to download {file.Name}: empty response");

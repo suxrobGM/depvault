@@ -2,6 +2,7 @@ using System.CommandLine;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
+using DepVault.Cli.Utils;
 
 namespace DepVault.Cli.Commands;
 
@@ -25,7 +26,7 @@ public sealed class ProjectCommands(
     private Command CreateListCommand()
     {
         var outputOpt = new Option<string>("--output")
-        { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
+            { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
         var cmd = new Command("list", "List your projects")
         {
             outputOpt
@@ -118,7 +119,7 @@ public sealed class ProjectCommands(
                 return;
             }
 
-            var id = CommandHelpers.RequireProjectId(parseResult, projectOpt, configService, output);
+            var id = CommandUtils.RequireProjectId(parseResult, projectOpt, configService, output);
             if (id is null)
             {
                 return;

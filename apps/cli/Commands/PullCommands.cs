@@ -3,6 +3,7 @@ using DepVault.Cli.Auth;
 using DepVault.Cli.Commands.Pull;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
+using DepVault.Cli.Utils;
 using Spectre.Console;
 
 namespace DepVault.Cli.Commands;
@@ -20,16 +21,17 @@ public sealed class PullCommands(
     {
         var projectOpt = new Option<string?>("--project") { Description = "Project ID (defaults to active)" };
         var envOpt = new Option<string>("--environment")
-        { Description = "Environment type", DefaultValueFactory = _ => "DEVELOPMENT" };
-        var vaultGroupsOpt = new Option<string?>("--vault-groups") { Description = "Comma-separated vault group names" };
+            { Description = "Environment type", DefaultValueFactory = _ => "DEVELOPMENT" };
+        var vaultGroupsOpt = new Option<string?>("--vault-groups")
+            { Description = "Comma-separated vault group names" };
         var includeSecretsOpt = new Option<bool>("--include-secrets")
-        { Description = "Also download secret files", DefaultValueFactory = _ => true };
+            { Description = "Also download secret files", DefaultValueFactory = _ => true };
         var outputDirOpt = new Option<string>("--output-dir")
-        { Description = "Base output directory", DefaultValueFactory = _ => "." };
+            { Description = "Base output directory", DefaultValueFactory = _ => "." };
         var forceOpt = new Option<bool>("--force") { Description = "Overwrite without prompting" };
 
         var cmd = new Command("pull", "Pull environment variables and secret files")
-        { projectOpt, envOpt, vaultGroupsOpt, includeSecretsOpt, outputDirOpt, forceOpt };
+            { projectOpt, envOpt, vaultGroupsOpt, includeSecretsOpt, outputDirOpt, forceOpt };
 
         cmd.SetAction(async (parseResult, ct) =>
         {
@@ -53,16 +55,20 @@ public sealed class PullCommands(
     {
         var projectOpt = new Option<string?>("--project") { Description = "Project ID (defaults to active)" };
         var envOpt = new Option<string>("--environment")
-        { Description = "Environment type", DefaultValueFactory = _ => "DEVELOPMENT" };
-        var vaultGroupsOpt = new Option<string?>("--vault-groups") { Description = "Comma-separated vault group names" };
+            { Description = "Environment type", DefaultValueFactory = _ => "DEVELOPMENT" };
+        var vaultGroupsOpt = new Option<string?>("--vault-groups")
+            { Description = "Comma-separated vault group names" };
         var formatOpt = new Option<string>("--format")
-        { Description = "Export format (env, appsettings.json, secrets.yaml, config.toml)", DefaultValueFactory = _ => "env" };
+        {
+            Description = "Export format (env, appsettings.json, secrets.yaml, config.toml)",
+            DefaultValueFactory = _ => "env"
+        };
         var outputDirOpt = new Option<string>("--output-dir")
-        { Description = "Base output directory", DefaultValueFactory = _ => "." };
+            { Description = "Base output directory", DefaultValueFactory = _ => "." };
         var forceOpt = new Option<bool>("--force") { Description = "Overwrite without prompting" };
 
         var cmd = new Command("env", "Pull only environment variables")
-        { projectOpt, envOpt, vaultGroupsOpt, formatOpt, outputDirOpt, forceOpt };
+            { projectOpt, envOpt, vaultGroupsOpt, formatOpt, outputDirOpt, forceOpt };
 
         cmd.SetAction(async (parseResult, ct) =>
         {
@@ -84,14 +90,15 @@ public sealed class PullCommands(
     {
         var projectOpt = new Option<string?>("--project") { Description = "Project ID (defaults to active)" };
         var envOpt = new Option<string>("--environment")
-        { Description = "Environment type", DefaultValueFactory = _ => "DEVELOPMENT" };
-        var vaultGroupsOpt = new Option<string?>("--vault-groups") { Description = "Comma-separated vault group names" };
+            { Description = "Environment type", DefaultValueFactory = _ => "DEVELOPMENT" };
+        var vaultGroupsOpt = new Option<string?>("--vault-groups")
+            { Description = "Comma-separated vault group names" };
         var outputDirOpt = new Option<string>("--output-dir")
-        { Description = "Base output directory", DefaultValueFactory = _ => "." };
+            { Description = "Base output directory", DefaultValueFactory = _ => "." };
         var forceOpt = new Option<bool>("--force") { Description = "Overwrite without prompting" };
 
         var cmd = new Command("secrets", "Pull only secret files")
-        { projectOpt, envOpt, vaultGroupsOpt, outputDirOpt, forceOpt };
+            { projectOpt, envOpt, vaultGroupsOpt, outputDirOpt, forceOpt };
 
         cmd.SetAction(async (parseResult, ct) =>
         {
@@ -100,7 +107,7 @@ public sealed class PullCommands(
                 return;
             }
 
-            var projectId = CommandHelpers.RequireProjectId(parseResult, projectOpt, configService, output);
+            var projectId = CommandUtils.RequireProjectId(parseResult, projectOpt, configService, output);
             if (projectId is null)
             {
                 return;
@@ -119,7 +126,8 @@ public sealed class PullCommands(
                 return;
             }
 
-            AnsiConsole.MarkupLine($"[cyan1]Pulling secret files ({parseResult.GetValue(envOpt) ?? "DEVELOPMENT"})...[/]");
+            AnsiConsole.MarkupLine(
+                $"[cyan1]Pulling secret files ({parseResult.GetValue(envOpt) ?? "DEVELOPMENT"})...[/]");
             var count = await secretsPuller.PullAsync(
                 projectId, groups, parseResult.GetValue(envOpt) ?? "DEVELOPMENT", outputDir, ct);
 
@@ -139,7 +147,7 @@ public sealed class PullCommands(
             return;
         }
 
-        var projectId = CommandHelpers.RequireProjectId(projectArg, configService, output);
+        var projectId = CommandUtils.RequireProjectId(projectArg, configService, output);
         if (projectId is null)
         {
             return;
@@ -180,7 +188,7 @@ public sealed class PullCommands(
         }
 
         var hasExisting = Directory.Exists(outputDir) &&
-            Directory.EnumerateFiles(outputDir, ".env*", SearchOption.AllDirectories).Any();
+                          Directory.EnumerateFiles(outputDir, ".env*", SearchOption.AllDirectories).Any();
 
         if (hasExisting)
         {

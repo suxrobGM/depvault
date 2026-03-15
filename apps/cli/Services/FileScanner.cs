@@ -1,3 +1,5 @@
+using DepVault.Cli.Utils;
+
 namespace DepVault.Cli.Services;
 
 public enum FileCategory
@@ -18,12 +20,7 @@ public interface IFileScanner
 
 public sealed class FileScanner : IFileScanner
 {
-    private static readonly HashSet<string> excludedDirs = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "node_modules", ".git", "bin", "obj", "target", "vendor",
-        "__pycache__", "dist", "build", ".next", ".nuget", "packages",
-        ".vs", ".idea", "coverage", ".output", ".cache", "generated"
-    };
+    private static readonly IReadOnlySet<string> excludedDirs = ExcludedDirectories.Names;
 
     private static readonly HashSet<string> envFileNames = new(StringComparer.OrdinalIgnoreCase)
     {

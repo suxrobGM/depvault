@@ -1,5 +1,6 @@
 using DepVault.Cli.Auth;
 using DepVault.Cli.Output;
+using DepVault.Cli.Utils;
 using Spectre.Console;
 using ExportNs = DepVault.Cli.ApiClient.Projects.Item.Environments.Export;
 using VaultGroupsModel = DepVault.Cli.ApiClient.Projects.Item.VaultGroups.VaultGroups;
@@ -30,9 +31,9 @@ public sealed class EnvPuller(
                         {
                             config.QueryParameters.VaultGroupId = group.Id;
                             config.QueryParameters.EnvironmentType =
-                                CommandHelpers.ParseEnum(envType, ExportNs.GetEnvironmentTypeQueryParameterType.DEVELOPMENT);
+                                CommandUtils.ParseEnum(envType, ExportNs.GetEnvironmentTypeQueryParameterType.DEVELOPMENT);
                             config.QueryParameters.Format =
-                                CommandHelpers.ParseEnum(format, ExportNs.GetFormatQueryParameterType.Env);
+                                CommandUtils.ParseEnum(format, ExportNs.GetFormatQueryParameterType.Env);
                         }, ct));
 
                 var content = result?.Content;

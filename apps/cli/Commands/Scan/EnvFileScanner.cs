@@ -2,6 +2,7 @@ using DepVault.Cli.Auth;
 using DepVault.Cli.Commands.Pull;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
+using DepVault.Cli.Utils;
 using Spectre.Console;
 using ImportNs = DepVault.Cli.ApiClient.Projects.Item.Environments.Import;
 
@@ -58,7 +59,7 @@ internal sealed class EnvFileScanner(
         string? defaultEnvType = null;
         if (hasAmbiguous)
         {
-            defaultEnvType = CommandHelpers.ResolveEnvironmentType(null, null, prompter);
+            defaultEnvType = CommandUtils.ResolveEnvironmentType(null, null, prompter);
         }
 
         foreach (var file in files)
@@ -85,9 +86,9 @@ internal sealed class EnvFileScanner(
                             {
                                 Content = content,
                                 VaultGroupId = vaultGroupId,
-                                EnvironmentType = CommandHelpers.ParseEnum(envType,
+                                EnvironmentType = CommandUtils.ParseEnum(envType,
                                     ImportNs.ImportPostRequestBody_environmentType.DEVELOPMENT),
-                                Format = CommandHelpers.ParseEnum(format, ImportNs.ImportPostRequestBody_format.Env)
+                                Format = CommandUtils.ParseEnum(format, ImportNs.ImportPostRequestBody_format.Env)
                             }, cancellationToken: ct));
 
                 results.EnvVariablesPushed += (int)(result?.Imported ?? 0);
@@ -113,8 +114,8 @@ internal sealed class EnvFileScanner(
     }
 
     /// <summary>
-    /// Infers environment type from filename. Returns null if the filename
-    /// gives no hint (e.g. plain ".env").
+    ///     Infers environment type from filename. Returns null if the filename
+    ///     gives no hint (e.g. plain ".env").
     /// </summary>
     internal static string? DetectEnvironmentType(string fileName)
     {

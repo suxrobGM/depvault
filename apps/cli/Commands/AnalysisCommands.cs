@@ -4,6 +4,7 @@ using DepVault.Cli.Auth;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
+using DepVault.Cli.Utils;
 using Spectre.Console;
 
 namespace DepVault.Cli.Commands;
@@ -36,13 +37,13 @@ public sealed class AnalysisCommands(
                 return;
             }
 
-            var projectId = CommandHelpers.RequireProjectId(parseResult, projectOpt, configService, output);
+            var projectId = CommandUtils.RequireProjectId(parseResult, projectOpt, configService, output);
             if (projectId is null)
             {
                 return;
             }
 
-            var filePath = CommandHelpers.ResolveFileInteractive(
+            var filePath = CommandUtils.ResolveFileInteractive(
                 parseResult, fileOpt, prompter, output,
                 () => fileScanner.FindDependencyFiles(Directory.GetCurrentDirectory()),
                 "dependency");
