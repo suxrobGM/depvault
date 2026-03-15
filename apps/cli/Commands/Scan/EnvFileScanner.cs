@@ -1,10 +1,9 @@
-using DepVault.Cli.ApiClient.Projects.Item.VaultGroups;
 using DepVault.Cli.Auth;
+using DepVault.Cli.Commands.Pull;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using Spectre.Console;
 using ImportNs = DepVault.Cli.ApiClient.Projects.Item.Environments.Import;
-using VaultGroupsModel = DepVault.Cli.ApiClient.Projects.Item.VaultGroups.VaultGroups;
 
 namespace DepVault.Cli.Commands.Scan;
 
@@ -12,7 +11,8 @@ internal sealed class EnvFileScanner(
     IApiClientFactory clientFactory,
     IOutputFormatter output,
     IConsolePrompter prompter,
-    IFileScanner fileScanner)
+    IFileScanner fileScanner,
+    DirectoryVaultGroupMapper dirMapper)
 {
     public async Task RunAsync(string projectId, string repoPath, ScanResults results, CancellationToken ct)
     {
@@ -37,73 +37,30 @@ internal sealed class EnvFileScanner(
             return;
         }
 
-        var client = clientFactory.Create();
-        var existingGroups = await FetchVaultGroupsAsync(client, projectId, ct);
-        var dirVaultGroupMap = await MapDirectoriesToVaultGroups(client, projectId, selected, existingGroups, ct);
-
-        AnsiConsole.WriteLine();
-        await PushFilesAsync(client, projectId, selected, dirVaultGroupMap, results, ct);
-    }
-
-    private async Task<List<VaultGroupsModel>> FetchVaultGroupsAsync(
-        ApiClient.ApiClient client, string projectId, CancellationToken ct)
-    {
-        return await AnsiConsole.Status()
-            .Spinner(Spinner.Known.Dots)
-            .StartAsync("Fetching vault groups...", async _ =>
-                await client.Projects[projectId].VaultGroups.GetAsync(cancellationToken: ct)) ?? [];
-    }
-
-    private async Task<Dictionary<string, string>> MapDirectoriesToVaultGroups(
-        ApiClient.ApiClient client, string projectId, List<DiscoveredFile> selected,
-        List<VaultGroupsModel> existingGroups, CancellationToken ct)
-    {
-        var map = new Dictionary<string, string>();
-
-        var filesByDir = selected
-            .GroupBy(f => Path.GetDirectoryName(f.RelativePath)?.Replace('\\', '/') ?? ".")
-            .ToList();
-
-        foreach (var dirGroup in filesByDir)
+        var dirVaultGroupMap = await dirMapper.MapAsync(projectId, selected, ct);
+        if (dirVaultGroupMap is null)
         {
-            var dir = dirGroup.Key;
-            var suggestedName = SuggestVaultGroupName(dir);
-            var fileList = string.Join(", ", dirGroup.Select(f => f.FileName));
-
-            AnsiConsole.MarkupLine($"[cyan1]{Markup.Escape(dir)}/[/] [grey]({Markup.Escape(fileList)})[/]");
-
-            var existingMatch = existingGroups.FirstOrDefault(g =>
-                string.Equals(g.Name, suggestedName, StringComparison.OrdinalIgnoreCase));
-
-            if (existingMatch?.Id is not null)
-            {
-                map[dir] = existingMatch.Id;
-                AnsiConsole.MarkupLine(
-                    $"  [grey]→ vault group:[/] [cyan1]{Markup.Escape(existingMatch.Name ?? suggestedName)}[/]");
-                continue;
-            }
-
-            var name = prompter.Ask("  Vault group name", suggestedName);
-            var created = await CreateVaultGroupAsync(client, projectId, name, ct);
-
-            if (created?.Id is null)
-            {
-                output.PrintError($"Failed to create vault group for {dir}. Skipping.");
-                continue;
-            }
-
-            output.PrintSuccess($"Created vault group '{name}'");
-            map[dir] = created.Id;
-            existingGroups.Add(new VaultGroupsModel { Id = created.Id, Name = created.Name });
+            return;
         }
 
-        return map;
+        AnsiConsole.WriteLine();
+        await PushFilesAsync(projectId, selected, dirVaultGroupMap, results, ct);
     }
 
     private async Task PushFilesAsync(
-        ApiClient.ApiClient client, string projectId, List<DiscoveredFile> files,
+        string projectId, List<DiscoveredFile> files,
         Dictionary<string, string> dirVaultGroupMap, ScanResults results, CancellationToken ct)
     {
+        var client = clientFactory.Create();
+
+        // Prompt once for ambiguous files instead of per-file
+        var hasAmbiguous = files.Any(f => DetectEnvironmentType(f.FileName) is null);
+        string? defaultEnvType = null;
+        if (hasAmbiguous)
+        {
+            defaultEnvType = CommandHelpers.ResolveEnvironmentType(null, null, prompter);
+        }
+
         foreach (var file in files)
         {
             var dir = Path.GetDirectoryName(file.RelativePath)?.Replace('\\', '/') ?? ".";
@@ -113,7 +70,7 @@ internal sealed class EnvFileScanner(
                 continue;
             }
 
-            var envType = DetectEnvironmentType(file.FileName);
+            var envType = DetectEnvironmentType(file.FileName) ?? defaultEnvType ?? "DEVELOPMENT";
             var format = DetectEnvFormat(file.FileName);
 
             try
@@ -143,16 +100,6 @@ internal sealed class EnvFileScanner(
         }
     }
 
-    private static async Task<VaultGroupsPostResponse?> CreateVaultGroupAsync(
-        ApiClient.ApiClient client, string projectId, string name, CancellationToken ct)
-    {
-        return await AnsiConsole.Status()
-            .Spinner(Spinner.Known.Dots)
-            .StartAsync($"Creating vault group '{name}'...", async _ =>
-                await client.Projects[projectId].VaultGroups.PostAsync(
-                    new VaultGroupsPostRequestBody { Name = name }, cancellationToken: ct));
-    }
-
     private static void PrintFileTree(List<DiscoveredFile> files)
     {
         var tree = new Tree($"[cyan1]Found {files.Count} environment file(s)[/]");
@@ -165,18 +112,11 @@ internal sealed class EnvFileScanner(
         AnsiConsole.WriteLine();
     }
 
-    internal static string SuggestVaultGroupName(string directory)
-    {
-        if (string.IsNullOrEmpty(directory) || directory == ".")
-        {
-            return "default";
-        }
-
-        var parts = directory.Split('/', StringSplitOptions.RemoveEmptyEntries);
-        return parts[^1];
-    }
-
-    internal static string DetectEnvironmentType(string fileName)
+    /// <summary>
+    /// Infers environment type from filename. Returns null if the filename
+    /// gives no hint (e.g. plain ".env").
+    /// </summary>
+    internal static string? DetectEnvironmentType(string fileName)
     {
         var lower = fileName.ToLowerInvariant();
         if (lower.Contains("production") || lower.Contains("prod"))
@@ -189,7 +129,12 @@ internal sealed class EnvFileScanner(
             return "STAGING";
         }
 
-        return "DEVELOPMENT";
+        if (lower.Contains("development") || lower.Contains("dev"))
+        {
+            return "DEVELOPMENT";
+        }
+
+        return null;
     }
 
     internal static string DetectEnvFormat(string fileName)

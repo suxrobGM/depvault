@@ -33,6 +33,7 @@ export class VaultGroupService {
       id: g.id,
       name: g.name,
       description: g.description,
+      directoryPath: g.directoryPath,
       sortOrder: g.sortOrder,
       environmentCount: g.environments.length,
       variableCount: g.environments.reduce((sum, e) => sum + e._count.variables, 0),
@@ -67,6 +68,7 @@ export class VaultGroupService {
         projectId,
         name: body.name,
         description: body.description,
+        directoryPath: body.directoryPath,
         sortOrder: (maxOrder._max.sortOrder ?? -1) + 1,
       },
     });
@@ -75,6 +77,7 @@ export class VaultGroupService {
       id: group.id,
       name: group.name,
       description: group.description,
+      directoryPath: group.directoryPath,
       sortOrder: group.sortOrder,
       environmentCount: 0,
       variableCount: 0,
@@ -107,6 +110,7 @@ export class VaultGroupService {
       data: {
         name: body.name,
         description: body.description,
+        directoryPath: body.directoryPath,
         sortOrder: body.sortOrder,
       },
       include: {
@@ -120,6 +124,7 @@ export class VaultGroupService {
       id: updated.id,
       name: updated.name,
       description: updated.description,
+      directoryPath: updated.directoryPath,
       sortOrder: updated.sortOrder,
       environmentCount: updated.environments.length,
       variableCount: updated.environments.reduce((sum, e) => sum + e._count.variables, 0),

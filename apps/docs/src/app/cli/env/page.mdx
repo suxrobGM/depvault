@@ -1,78 +1,8 @@
 # Environment Variables
 
-The `depvault env` command group manages environment variables — pull secrets to local files, push local files to the vault, list variables, and compare across environments.
+The `depvault env` command group lists and compares environment variables. For pulling and pushing, see [`depvault pull`](/cli/pull) and [`depvault push`](/cli/pull#push-env).
 
 All commands default to the active project (set with `depvault project select`). Override with `--project`.
-
----
-
-## env pull
-
-Export environment variables from a vault group to a local file or stdout.
-
-```bash
-depvault env pull --vault-group <id> --environment PRODUCTION --format env --output .env
-```
-
-| Flag | Description | Default |
-| --- | --- | --- |
-| `--project` | Project ID. Uses active project if omitted. | Active project |
-| `--vault-group` | Vault group ID. | — |
-| `--environment` | Environment type: `DEVELOPMENT`, `STAGING`, `PRODUCTION`. | `DEVELOPMENT` |
-| `--format` | Output format: `env`, `appsettings.json`, `secrets.yaml`, `config.toml`. | `env` |
-| `--output` | File path. Omit to print to stdout. | stdout |
-
-### Examples
-
-Pull development variables to `.env`:
-
-```bash
-depvault env pull --output .env
-```
-
-Pull production config as `appsettings.json`:
-
-```bash
-depvault env pull --environment PRODUCTION --format appsettings.json --output appsettings.Production.json
-```
-
-Pull to stdout and pipe into another command:
-
-```bash
-depvault env pull --vault-group abc123 | grep DATABASE
-```
-
----
-
-## env push
-
-Import environment variables from a local file into a vault group. If `--file` is omitted, the CLI auto-discovers `.env` files in the current directory and prompts for selection. If `--vault-group` is omitted, prompts interactively.
-
-```bash
-depvault env push --vault-group <id> --file .env.production --environment PRODUCTION
-```
-
-| Flag | Description | Default |
-| --- | --- | --- |
-| `--project` | Project ID. | Active project |
-| `--vault-group` | Vault group ID. Prompts interactively if omitted. | — |
-| `--environment` | Environment type. | `DEVELOPMENT` |
-| `--format` | Import format: `env`, `appsettings.json`, `secrets.yaml`, `config.toml`. | `env` |
-| `--file` | File to import. Auto-detects `.env` files if omitted. | Auto-detect |
-
-### Examples
-
-Push a `.env` file with auto-detection:
-
-```bash
-depvault env push
-```
-
-Push an `appsettings.json` for staging:
-
-```bash
-depvault env push --file appsettings.Staging.json --format appsettings.json --environment STAGING
-```
 
 ---
 

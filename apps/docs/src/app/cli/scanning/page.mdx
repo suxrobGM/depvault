@@ -15,7 +15,7 @@ depvault scan [--path <dir>] [--project <id>]
 | `--path`    | Repository root path. | Current directory     |
 | `--project` | Project ID to use.    | Prompts interactively |
 
-Requires interactive mode. In CI pipelines, use the individual commands (`analyze`, `env push`, `ci pull`) instead.
+Requires interactive mode. In CI pipelines, use the individual commands (`analyze`, `push env`, `ci pull`) instead.
 
 ---
 
@@ -25,7 +25,7 @@ The scan runs six steps in sequence:
 
 1. **Project resolution** — Uses your active project, lets you select one, or creates a new project named after the repository directory.
 2. **Dependency analysis** — Discovers dependency files (package.json, requirements.txt, \*.csproj, etc.), lets you select which to analyze, uploads each for vulnerability and version checking, and shows health scores.
-3. **Environment file push** — Finds .env, appsettings.json, secrets.yaml, and config.toml files. You select which to push, choose the environment type and vault group for each, and variables are imported.
+3. **Environment file push** — Finds .env, appsettings.json, secrets.yaml, and config.toml files. You select which to push. Each file is mapped to a vault group by directory (matched by `directoryPath` or name, or created if new). When filenames don't indicate the environment type (e.g. plain `.env`), you're prompted to choose one.
 4. **Secret leak scan** — Scans source files locally for hardcoded secrets (AWS keys, private keys, API tokens, connection strings). Findings are shown in a severity-coded table. Optionally adds detected files to .gitignore.
 5. **Secret file upload** — Discovers certificate and credential files (_.pem, _.key, \*.pfx, service-account.json). You select which to upload as encrypted secret files.
 6. **Summary dashboard** — Displays a summary panel with counts for dependencies analyzed, vulnerabilities found, variables pushed, leaks detected, and files uploaded.
@@ -57,16 +57,23 @@ Found 2 dependency file(s)
 ✓ Analysis complete
 
 ── Environment Files ────────────────────────────
-Found 1 environment file(s)
-└── .env.development
+Found 2 environment file(s)
+├── apps/backend/.env
+└── apps/frontend/.env
 
 ? Select files to push (none selected)
-  [x] .env.development
+  [x] apps/backend/.env
+  [x] apps/frontend/.env
 
-? Environment type for .env.development: DEVELOPMENT
-? Select vault group: default
+apps/backend/ (.env)
+  vault group: backend
+apps/frontend/ (.env)
+  vault group: frontend
 
-✓ Imported 12 variables from .env.development
+? Select environment type: DEVELOPMENT
+
+✓ Imported 12 variables from apps/backend/.env
+✓ Imported 8 variables from apps/frontend/.env
 
 ── Secret Leak Detection ────────────────────────
 ✓ No secret leaks detected.
@@ -80,7 +87,7 @@ No secret files found.
 │ Dependencies analyzed   │ 284    │
 │ Files analyzed          │ 2      │
 │ Vulnerabilities found   │ 0      │
-│ Env variables pushed    │ 12     │
+│ Env variables pushed    │ 20     │
 │ Secret leaks detected   │ 0      │
 │ Secret files uploaded   │ 0      │
 └─────────────────────────┴────────┘

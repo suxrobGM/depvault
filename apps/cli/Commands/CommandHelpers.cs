@@ -7,12 +7,21 @@ namespace DepVault.Cli.Commands;
 
 internal static class CommandHelpers
 {
+    private static readonly string[] environmentTypes = ["DEVELOPMENT", "STAGING", "PRODUCTION", "GLOBAL"];
+
     /// <summary>Resolves project ID from CLI option or active config.</summary>
     public static string? RequireProjectId(
         ParseResult parseResult, Option<string?> projectOpt,
         IConfigService configService, IOutputFormatter output)
     {
-        var projectId = parseResult.GetValue(projectOpt) ?? configService.Load().ActiveProjectId;
+        return RequireProjectId(parseResult.GetValue(projectOpt), configService, output);
+    }
+
+    /// <summary>Resolves project ID from explicit value or active config.</summary>
+    public static string? RequireProjectId(
+        string? projectId, IConfigService configService, IOutputFormatter output)
+    {
+        projectId ??= configService.Load().ActiveProjectId;
         if (string.IsNullOrEmpty(projectId))
         {
             output.PrintError("No project specified. Use --project or 'depvault project select <id>'.");
@@ -37,6 +46,34 @@ internal static class CommandHelpers
     /// <summary>Parses a Kiota-generated enum by member name, returning fallback on mismatch.</summary>
     public static T ParseEnum<T>(string value, T fallback) where T : struct, Enum =>
         Enum.TryParse<T>(value, ignoreCase: true, out var result) ? result : fallback;
+
+    /// <summary>
+    /// Resolves environment type from an explicit flag value, filename detection, or interactive prompt.
+    /// <paramref name="explicitEnv"/> is the --environment flag; <paramref name="detected"/> is from filename inference.
+    /// </summary>
+    public static string ResolveEnvironmentType(
+        string? explicitEnv, string? detected, IConsolePrompter prompter)
+    {
+        // Explicit flag always wins
+        if (!string.IsNullOrEmpty(explicitEnv))
+        {
+            return explicitEnv;
+        }
+
+        // Filename-inferred value
+        if (!string.IsNullOrEmpty(detected))
+        {
+            return detected;
+        }
+
+        // Interactive prompt when we can't determine from filename
+        if (prompter.IsInteractive)
+        {
+            return prompter.Select("Select environment type", environmentTypes, e => e);
+        }
+
+        return "DEVELOPMENT";
+    }
 
     /// <summary>
     /// Resolves a file path from CLI option or interactive file discovery.

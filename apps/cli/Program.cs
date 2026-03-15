@@ -2,6 +2,7 @@ using System.CommandLine;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Commands;
 using DepVault.Cli.Commands.Env;
+using DepVault.Cli.Commands.Pull;
 using DepVault.Cli.Commands.Scan;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
@@ -32,14 +33,20 @@ var services = new ServiceCollection()
     .AddSingleton<SecretFileScanner>()
     // Shared resolvers
     .AddSingleton<VaultGroupResolver>()
+    .AddSingleton<VaultGroupSelector>()
+    .AddSingleton<DirectoryVaultGroupMapper>()
+    .AddSingleton<EnvPuller>()
+    .AddSingleton<SecretsPuller>()
     // Commands
     .AddSingleton<AuthCommands>()
     .AddSingleton<ConfigCommands>()
     .AddSingleton<ProjectCommands>()
     .AddSingleton<EnvCommands>()
     .AddSingleton<AnalysisCommands>()
-    .AddSingleton<ConvertCommands>()
     .AddSingleton<CiCommands>()
+    .AddSingleton<PullCommands>()
+    .AddSingleton<PushCommands>()
+    .AddSingleton<SecretsCommands>()
     .AddSingleton<ScanCommands>()
     .AddSingleton<UpdateCommands>()
     .BuildServiceProvider();
@@ -49,8 +56,10 @@ var config = services.GetRequiredService<ConfigCommands>();
 var project = services.GetRequiredService<ProjectCommands>();
 var env = services.GetRequiredService<EnvCommands>();
 var analysis = services.GetRequiredService<AnalysisCommands>();
-var convert = services.GetRequiredService<ConvertCommands>();
 var ci = services.GetRequiredService<CiCommands>();
+var pull = services.GetRequiredService<PullCommands>();
+var push = services.GetRequiredService<PushCommands>();
+var secrets = services.GetRequiredService<SecretsCommands>();
 var scan = services.GetRequiredService<ScanCommands>();
 var update = services.GetRequiredService<UpdateCommands>();
 var versionChecker = services.GetRequiredService<IVersionChecker>();
@@ -62,9 +71,11 @@ var rootCommand = new RootCommand("DepVault CLI — dependency analysis, env vau
     auth.CreateWhoamiCommand(),
     config.CreateConfigCommand(),
     project.CreateProjectCommand(),
+    pull.CreatePullCommand(),
+    push.CreatePushCommand(),
     env.CreateEnvCommand(),
+    secrets.CreateSecretsCommand(),
     analysis.CreateAnalyzeCommand(),
-    convert.CreateConvertCommand(),
     ci.CreateCiCommand(),
     scan.CreateScanCommand(),
     update.CreateUpdateCommand()

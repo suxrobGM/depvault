@@ -11,6 +11,7 @@ import { client } from "@/lib/api";
 const createGroupSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
   description: z.string().max(500),
+  directoryPath: z.string().max(500),
 });
 
 interface CreateGroupDialogProps {
@@ -23,7 +24,7 @@ export function CreateGroupDialog(props: CreateGroupDialogProps): ReactElement {
   const { open, onClose, projectId } = props;
 
   const mutation = useApiMutation(
-    (values: { name: string; description?: string }) =>
+    (values: { name: string; description?: string; directoryPath?: string }) =>
       client.api.projects({ id: projectId })["vault-groups"].post(values),
     {
       invalidateKeys: [["vault-groups", projectId]],
@@ -36,12 +37,14 @@ export function CreateGroupDialog(props: CreateGroupDialogProps): ReactElement {
     defaultValues: {
       name: "",
       description: "",
+      directoryPath: "",
     },
     validators: { onSubmit: createGroupSchema },
     onSubmit: async ({ value }) => {
       await mutation.mutateAsync({
         name: value.name,
-        description: value.description,
+        description: value.description || undefined,
+        directoryPath: value.directoryPath || undefined,
       });
     },
   });
@@ -76,6 +79,12 @@ export function CreateGroupDialog(props: CreateGroupDialogProps): ReactElement {
               placeholder="Optional description for this group"
               multiline
               minRows={2}
+            />
+            <FormTextField
+              form={form}
+              name="directoryPath"
+              label="Directory Path"
+              placeholder="e.g. apps/backend"
             />
           </Stack>
         </DialogContent>

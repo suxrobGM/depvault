@@ -1,0 +1,150 @@
+# Pull & Push
+
+The `depvault pull` and `depvault push` commands sync environment variables and secret files between the vault and your local repository. Files are routed to the correct folder using each vault group's **Directory Path** setting.
+
+---
+
+## pull
+
+Pull all environment variables and secret files for the active project.
+
+```bash
+depvault pull
+```
+
+| Flag | Description | Default |
+| --- | --- | --- |
+| `--project` | Project ID. Uses active project if omitted. | Active project |
+| `--environment` | Environment type: `DEVELOPMENT`, `STAGING`, `PRODUCTION`, `GLOBAL`. | `DEVELOPMENT` |
+| `--vault-groups` | Comma-separated vault group names. Prompts interactively if omitted. | All |
+| `--include-secrets` | Also download secret files. | `true` |
+| `--output-dir` | Base directory for output files. | `.` |
+| `--force` | Overwrite existing files without prompting. | `false` |
+
+### Output structure
+
+Each vault group's `directoryPath` determines where its `.env` file is written. Secret files go into a `.secrets/` subfolder.
+
+```text
+./
+├── apps/backend/.env              # vault group with directoryPath="apps/backend"
+├── apps/frontend/.env             # vault group with directoryPath="apps/frontend"
+├── .env.shared                    # vault group with no directoryPath set
+└── apps/backend/.secrets/
+    └── firebase-config.json
+```
+
+### Examples
+
+Pull everything for development:
+
+```bash
+depvault pull
+```
+
+Pull only the backend vault group for production:
+
+```bash
+depvault pull --vault-groups backend --environment PRODUCTION
+```
+
+Pull without secret files:
+
+```bash
+depvault pull --include-secrets false
+```
+
+---
+
+## pull env
+
+Pull only environment variables (no secret files).
+
+```bash
+depvault pull env
+```
+
+Supports the same flags as `pull`, plus:
+
+| Flag | Description | Default |
+| --- | --- | --- |
+| `--format` | Export format: `env`, `appsettings.json`, `secrets.yaml`, `config.toml`. | `env` |
+
+---
+
+## pull secrets
+
+Pull only secret files (no environment variables).
+
+```bash
+depvault pull secrets
+```
+
+Supports `--project`, `--environment`, `--vault-groups`, `--output-dir`, and `--force`.
+
+---
+
+## push env
+
+Push environment variables from local files. When `--file` is omitted, the CLI discovers `.env` files in the current directory and prompts you to multi-select which ones to push.
+
+Files are automatically grouped by directory and matched to vault groups by `directoryPath` or name. If no vault group exists for a directory, you're prompted to create one.
+
+When filenames are ambiguous (plain `.env` without environment hint), the CLI prompts you to select the target environment type.
+
+```bash
+depvault push env
+```
+
+| Flag | Description | Default |
+| --- | --- | --- |
+| `--project` | Project ID. | Active project |
+| `--environment` | Target environment type. Prompts if not set and filename is ambiguous. | Prompts |
+| `--format` | Import format: `env`, `appsettings.json`, `secrets.yaml`, `config.toml`. | `env` |
+| `--file` | Single file to import. Discovers and multi-selects if omitted. | Auto-discover |
+
+### Examples
+
+Push with auto-discovery and directory mapping:
+
+```bash
+depvault push env
+```
+
+Push a single file explicitly:
+
+```bash
+depvault push env --file apps/backend/.env --environment PRODUCTION
+```
+
+---
+
+## push secrets
+
+Upload secret files. When `--file` is omitted, the CLI discovers secret files (`.pem`, `.key`, `.pfx`, `credentials.json`, etc.) and prompts you to multi-select which ones to upload.
+
+Files are grouped by directory and matched to vault groups, just like `push env`.
+
+```bash
+depvault push secrets
+```
+
+| Flag | Description | Default |
+| --- | --- | --- |
+| `--project` | Project ID. | Active project |
+| `--environment` | Target environment type. Prompts if not set. | Prompts |
+| `--file` | Single file to upload. Discovers and multi-selects if omitted. | Auto-discover |
+
+### Examples
+
+Upload with auto-discovery:
+
+```bash
+depvault push secrets
+```
+
+Upload a single file:
+
+```bash
+depvault push secrets --file certs/server.pem --environment PRODUCTION
+```

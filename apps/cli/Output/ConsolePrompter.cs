@@ -2,6 +2,9 @@ using Spectre.Console;
 
 namespace DepVault.Cli.Output;
 
+/// <summary>
+/// Console-based prompter using Spectre.Console.
+/// </summary>
 public interface IConsolePrompter
 {
     bool IsInteractive { get; }

@@ -46,9 +46,26 @@ curl -fsSL https://get.depvault.com | bash
 irm https://get.depvault.com | iex
 ```
 
+---
+
+## Set Up Your Environment
+
+Scan your repository to discover environment files and push them to the vault:
+
 ```bash
-depvault analyze --file package.json
+depvault login
+depvault scan
 ```
+
+The scan command detects `.env` files, maps each directory to a vault group, and uploads variables. Each vault group stores the directory path so pull knows where to write files.
+
+Pull environment variables and secret files back to the correct folders:
+
+```bash
+depvault pull
+```
+
+This writes `.env` files to each vault group's configured directory and downloads secret files to `.secrets/` folders. See the [Pull & Push](/cli/pull) reference for all options.
 
 ---
 
@@ -60,4 +77,4 @@ depvault analyze --file package.json
 
 Values are encrypted with AES-256-GCM immediately upon storage.
 
-To bulk-import from an existing `.env` file, use the **Import** button in the Vault tab or the CLI command `depvault env push`. See the [Environment Vault](/guides/environment-vault) guide for details.
+To bulk-import from an existing `.env` file, use the **Import** button in the Vault tab or `depvault push env` from the CLI. See the [Environment Vault](/guides/environment-vault) guide for details.

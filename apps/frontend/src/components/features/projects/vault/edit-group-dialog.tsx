@@ -12,6 +12,7 @@ import type { VaultGroup } from "@/types/api/vault-group";
 const updateGroupSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
   description: z.string().max(500),
+  directoryPath: z.string().max(500),
 });
 
 interface EditGroupDialogProps {
@@ -25,7 +26,7 @@ export function EditGroupDialog(props: EditGroupDialogProps): ReactElement {
   const { open, onClose, projectId, group } = props;
 
   const mutation = useApiMutation(
-    (values: { name?: string; description?: string | null }) =>
+    (values: { name?: string; description?: string | null; directoryPath?: string | null }) =>
       client.api.projects({ id: projectId })["vault-groups"]({ groupId: group.id }).put(values),
     {
       invalidateKeys: [["vault-groups", projectId]],
@@ -38,12 +39,14 @@ export function EditGroupDialog(props: EditGroupDialogProps): ReactElement {
     defaultValues: {
       name: group.name,
       description: group.description ?? "",
+      directoryPath: group.directoryPath ?? "",
     },
     validators: { onSubmit: updateGroupSchema },
     onSubmit: async ({ value }) => {
       await mutation.mutateAsync({
         name: value.name,
-        description: value.description || null,
+        description: value.description,
+        directoryPath: value.directoryPath,
       });
     },
   });
@@ -67,6 +70,12 @@ export function EditGroupDialog(props: EditGroupDialogProps): ReactElement {
               placeholder="Optional description for this group"
               multiline
               minRows={2}
+            />
+            <FormTextField
+              form={form}
+              name="directoryPath"
+              label="Directory Path"
+              placeholder="e.g. apps/backend"
             />
           </Stack>
         </DialogContent>

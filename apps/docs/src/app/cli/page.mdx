@@ -77,18 +77,22 @@ When `DEPVAULT_TOKEN` is set, the CLI uses it for all requests and blocks intera
 | Command | Description | Details |
 | --- | --- | --- |
 | `depvault scan` | Scan repo: analyze deps, push env, detect secrets | [Scanning](/cli/scanning) |
-| `depvault version` | Print CLI version | |
-| `depvault config set <k> <v>` | Set a configuration value | |
+| `depvault pull` | Pull env vars and secret files to local folders | [Pull & Push](/cli/pull) |
+| `depvault pull env` | Pull only environment variables | [Pull & Push](/cli/pull#pull-env) |
+| `depvault pull secrets` | Pull only secret files | [Pull & Push](/cli/pull#pull-secrets) |
+| `depvault push env` | Push env vars from local files | [Pull & Push](/cli/pull#push-env) |
+| `depvault push secrets` | Upload secret files | [Pull & Push](/cli/pull#push-secrets) |
+| `depvault env list` | List environment variables | [Env](/cli/env#env-list) |
+| `depvault env diff` | Compare environments | [Env](/cli/env#env-diff) |
+| `depvault secrets list` | List secret file metadata | [Secret Files](/cli/secrets) |
+| `depvault analyze` | Analyze a dependency file | [Analysis](/guides/dependency-analysis) |
+| `depvault ci pull` | Fetch secrets with CI token | [CI/CD](/guides/ci-cd-integration) |
 | `depvault login` | Authenticate with email/password | [Auth](/cli/authentication) |
 | `depvault logout` | Clear stored credentials | [Auth](/cli/authentication) |
 | `depvault whoami` | Show current user | [Auth](/cli/authentication) |
 | `depvault project list` | List all projects | [Projects](/cli/projects) |
 | `depvault project select` | Set active project | [Projects](/cli/projects) |
 | `depvault project info` | Show project details | [Projects](/cli/projects) |
-| `depvault env pull` | Export variables to file | [Env](/cli/env#env-pull) |
-| `depvault env push` | Import variables from file | [Env](/cli/env#env-push) |
-| `depvault env list` | List environment variables | [Env](/cli/env#env-list) |
-| `depvault env diff` | Compare environments | [Env](/cli/env#env-diff) |
-| `depvault analyze` | Analyze a dependency file | [Analysis](/guides/dependency-analysis) |
-| `depvault convert` | Convert config file formats | [Converter](/guides/config-converter) |
-| `depvault ci pull` | Fetch secrets with CI token | [CI/CD](/guides/ci-cd-integration) |
+| `depvault update` | Update CLI to latest version | |
+| `depvault version` | Print CLI version | |
+| `depvault config set <k> <v>` | Set a configuration value | |
