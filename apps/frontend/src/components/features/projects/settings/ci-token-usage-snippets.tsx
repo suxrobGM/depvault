@@ -4,27 +4,25 @@ import { useState, type ReactElement } from "react";
 import { Box, Tab, Tabs, Typography } from "@mui/material";
 import { CopyButton } from "@/components/ui/inputs";
 
-const DEPVAULT_URL = "https://depvault.com";
+const GITHUB_ACTIONS_SNIPPET = `# Add DEPVAULT_TOKEN to your repository secrets
+- name: Setup DepVault CLI
+  uses: suxrobGM/depvault@v1
+  with:
+    token: \${{ secrets.DEPVAULT_TOKEN }}
 
-const GITHUB_ACTIONS_SNIPPET = `# Add DEPVAULT_CI_TOKEN to your repository secrets
-- name: Fetch secrets from DepVault
+- name: Pull secrets
   run: |
-    SECRETS=$(curl -sf \\
-      -H "Authorization: Bearer \${{ secrets.DEPVAULT_CI_TOKEN }}" \\
-      -H "X-Pipeline-Run-Id: \${{ github.run_id }}" \\
-      ${DEPVAULT_URL}/api/ci/secrets)
-    echo "$SECRETS" | jq -r '.variables[] | "\\(.key)=\\(.value)"' >> $GITHUB_ENV`;
+    depvault ci pull --format env --output .env
+    cat .env >> $GITHUB_ENV`;
 
-const GITLAB_CI_SNIPPET = `# Add DEPVAULT_CI_TOKEN and DEPVAULT_URL as CI/CD variables
-fetch_secrets:
-  script:
-    - |
-      SECRETS=$(curl -sf \\
-        -H "Authorization: Bearer $DEPVAULT_CI_TOKEN" \\
-        -H "X-Pipeline-Run-Id: $CI_PIPELINE_ID" \\
-        ${DEPVAULT_URL}/api/ci/secrets)
-      echo "$SECRETS" | jq -r '.variables[] | "\\(.key)=\\(.value)"' >> .env
-      export $(cat .env | xargs)`;
+const GITLAB_CI_SNIPPET = `# Add DEPVAULT_TOKEN as a masked CI/CD variable
+before_script:
+  - curl -fsSL https://get.depvault.com | bash
+
+script:
+  - depvault ci pull --format env --output .env
+  variables:
+    DEPVAULT_TOKEN: $DEPVAULT_TOKEN`;
 
 export function CiTokenUsageSnippets(): ReactElement {
   const [tab, setTab] = useState(0);

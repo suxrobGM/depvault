@@ -1,0 +1,98 @@
+name: "Setup DepVault CLI"
+description: "Install the DepVault CLI for dependency analysis, environment vault, and secret management"
+author: "suxrobGM"
+
+branding:
+  icon: "shield"
+  color: "green"
+
+inputs:
+  version:
+    description: "CLI version to install (e.g. 'v1.1.0'). Defaults to latest."
+    required: false
+    default: "latest"
+  token:
+    description: "DepVault CI token. Sets DEPVAULT_TOKEN for subsequent steps."
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Detect platform
+      id: platform
+      shell: bash
+      run: |
+        OS="$(uname -s)"
+        ARCH="$(uname -m)"
+
+        case "$OS" in
+          Linux*)  OS_NAME="linux" ;;
+          Darwin*) OS_NAME="osx" ;;
+          *)       echo "::error::Unsupported OS: $OS"; exit 1 ;;
+        esac
+
+        case "$ARCH" in
+          x86_64|amd64)   ARCH_NAME="x64" ;;
+          arm64|aarch64)  ARCH_NAME="arm64" ;;
+          *)              echo "::error::Unsupported architecture: $ARCH"; exit 1 ;;
+        esac
+
+        RID="${OS_NAME}-${ARCH_NAME}"
+        echo "rid=$RID" >> "$GITHUB_OUTPUT"
+
+    - name: Resolve version
+      id: version
+      shell: bash
+      env:
+        REQUESTED_VERSION: ${{ inputs.version }}
+      run: |
+        REPO="suxrobGM/depvault"
+
+        if [ "$REQUESTED_VERSION" = "latest" ]; then
+          VERSION=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases" \
+            | grep -o '"tag_name": *"cli/v[^"]*"' \
+            | head -1 \
+            | sed 's/.*"cli\/\(v[^"]*\)".*/\1/')
+
+          if [ -z "$VERSION" ]; then
+            echo "::error::Could not determine latest CLI version"
+            exit 1
+          fi
+        else
+          VERSION="$REQUESTED_VERSION"
+        fi
+
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+        echo "tag=cli/${VERSION}" >> "$GITHUB_OUTPUT"
+
+    - name: Download and install
+      shell: bash
+      env:
+        RID: ${{ steps.platform.outputs.rid }}
+        VERSION: ${{ steps.version.outputs.version }}
+        TAG: ${{ steps.version.outputs.tag }}
+      run: |
+        REPO="suxrobGM/depvault"
+        ARCHIVE="depvault-${RID}.tar.gz"
+        URL="https://github.com/${REPO}/releases/download/${TAG}/${ARCHIVE}"
+        INSTALL_DIR="${HOME}/.depvault/bin"
+
+        mkdir -p "$INSTALL_DIR"
+
+        echo "Downloading DepVault CLI ${VERSION} for ${RID}..."
+        curl -fsSL -o "/tmp/${ARCHIVE}" "$URL"
+        tar -xzf "/tmp/${ARCHIVE}" -C "$INSTALL_DIR"
+        chmod +x "${INSTALL_DIR}/depvault"
+        rm -f "/tmp/${ARCHIVE}"
+
+        echo "${INSTALL_DIR}" >> "$GITHUB_PATH"
+        echo "DepVault CLI ${VERSION} installed to ${INSTALL_DIR}"
+
+    - name: Set DEPVAULT_TOKEN
+      if: inputs.token != ''
+      shell: bash
+      run: echo "DEPVAULT_TOKEN=${{ inputs.token }}" >> "$GITHUB_ENV"
+
+    - name: Verify installation
+      shell: bash
+      run: depvault version

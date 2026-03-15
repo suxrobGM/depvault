@@ -13,12 +13,12 @@ CI tokens are long-lived, non-interactive API tokens scoped to a specific projec
 1. Open your project and go to **Settings** > **CI Tokens**.
 2. Click **Generate Token** and configure:
 
-| Setting | Description |
-| --- | --- |
-| **Name** | Descriptive name (e.g., `github-actions-prod`). |
-| **Environment** | The environment tier this token can access. |
-| **Vault Group** | The vault group this token is scoped to. |
-| **Expiration** | 30 days, 90 days, 1 year, or custom date. |
+| Setting          | Description                                        |
+| ---------------- | -------------------------------------------------- |
+| **Name**         | Descriptive name (e.g., `github-actions-prod`).    |
+| **Environment**  | The environment tier this token can access.        |
+| **Vault Group**  | The vault group this token is scoped to.           |
+| **Expiration**   | 30 days, 90 days, 1 year, or custom date.          |
 | **IP Allowlist** | Optional. Restrict to specific IPs or CIDR ranges. |
 
 3. Click **Create** and copy the token — it is shown only once.
@@ -41,12 +41,13 @@ Set `DEPVAULT_TOKEN` as an environment variable in your CI provider, then pull s
 depvault ci pull --format env --output .env
 ```
 
-| Flag | Description | Default |
-| --- | --- | --- |
-| `--format` | Output format: `env`, `json`. | `env` |
-| `--output` | File path. Omit for stdout. | stdout |
+| Flag       | Description                   | Default |
+| ---------- | ----------------------------- | ------- |
+| `--format` | Output format: `env`, `json`. | `env`   |
+| `--output` | File path. Omit for stdout.   | stdout  |
 
 The token determines which project, environment, and vault group to pull from — no additional flags needed.
+If you need secrets from multiple vault groups in the same pipeline, generate a separate token for each and run `ci pull` once per token.
 
 ---
 
@@ -54,7 +55,7 @@ The token determines which project, environment, and vault group to pull from �
 
 ### GitHub Actions
 
-Store `DEPVAULT_TOKEN` as a repository secret.
+Store `DEPVAULT_TOKEN` as a repository secret. Use the `setup-depvault` action to install the CLI and configure the token in one step.
 
 ```yaml
 name: Deploy
@@ -68,19 +69,45 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install DepVault CLI
-        run: curl -fsSL https://get.depvault.com | bash
+      - name: Setup DepVault CLI
+        uses: suxrobGM/depvault@v1
+        with:
+          token: ${{ secrets.DEPVAULT_TOKEN }}
 
       - name: Pull secrets
-        env:
-          DEPVAULT_TOKEN: ${{ secrets.DEPVAULT_TOKEN }}
-        run: depvault ci pull --format env --output .env
+        run: |
+          depvault ci pull --format env --output .env
+          cat .env >> $GITHUB_ENV
 
       - name: Build and deploy
         run: |
           npm ci
           npm run build
 ```
+
+The `cat .env >> $GITHUB_ENV` line makes all pulled variables available as environment variables in subsequent steps (e.g. `${{ env.DATABASE_URL }}`).
+Without it, the `.env` file exists on disk but variables aren't injected into the GitHub Actions environment.
+
+To pull from multiple vault groups, use separate tokens:
+
+```yaml
+- name: Pull API secrets
+  env:
+    DEPVAULT_TOKEN: ${{ secrets.DEPVAULT_API_TOKEN }}
+  run: depvault ci pull --format env --output api.env
+
+- name: Pull deploy secrets
+  env:
+    DEPVAULT_TOKEN: ${{ secrets.DEPVAULT_DEPLOY_TOKEN }}
+  run: depvault ci pull --format env --output deploy.env
+```
+
+The action accepts these inputs:
+
+| Input     | Description                                             | Default  |
+| --------- | ------------------------------------------------------- | -------- |
+| `version` | CLI version to install (e.g. `v1.1.0`).                 | `latest` |
+| `token`   | DepVault CI token. Sets `DEPVAULT_TOKEN` automatically. | —        |
 
 ### GitLab CI
 
@@ -112,7 +139,7 @@ trigger:
     include: [main]
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: "ubuntu-latest"
 
 steps:
   - script: curl -fsSL https://get.depvault.com | bash
@@ -153,10 +180,10 @@ CMD ["node", "dist/index.js"]
 
 ## Troubleshooting
 
-| Error | Cause |
-| --- | --- |
-| `DEPVAULT_TOKEN is not set` | Set the environment variable in your CI config. |
-| `401 Unauthorized` | Token is expired, revoked, or invalid. |
-| `403 Forbidden` | IP not in allowlist or scope mismatch. |
-| Empty output | No variables in the scoped vault group/environment. |
-| CLI not found | Verify installation step completed and binary is on PATH. |
+| Error                       | Cause                                                     |
+| --------------------------- | --------------------------------------------------------- |
+| `DEPVAULT_TOKEN is not set` | Set the environment variable in your CI config.           |
+| `401 Unauthorized`          | Token is expired, revoked, or invalid.                    |
+| `403 Forbidden`             | IP not in allowlist or scope mismatch.                    |
+| Empty output                | No variables in the scoped vault group/environment.       |
+| CLI not found               | Verify installation step completed and binary is on PATH. |
