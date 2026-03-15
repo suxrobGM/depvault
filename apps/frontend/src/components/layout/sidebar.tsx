@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactElement } from "react";
+import { type ReactElement } from "react";
 import { DEFAULT_ROLES } from "@depvault/shared/constants";
 import {
   ChevronLeft as ChevronLeftIcon,
@@ -33,6 +33,7 @@ import { UserAvatar } from "@/components/ui/data-display";
 import { useAuth } from "@/hooks/use-auth";
 import { ROUTES } from "@/lib/constants";
 import { SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH } from "./constants";
+import { FeedbackMenu } from "./feedback-menu";
 import { UserMenu } from "./user-menu";
 
 interface SidebarProps {
@@ -115,6 +116,8 @@ export function Sidebar(props: SidebarProps): ReactElement {
           );
         })}
       </List>
+      <FeedbackMenu open={open} />
+      <Divider />
       {user && (
         <>
           <List sx={{ px: open ? 1 : 0.5 }}>
