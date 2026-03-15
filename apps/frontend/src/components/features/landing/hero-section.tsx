@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactElement } from "react";
+import { type ReactElement } from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 import { GradientText } from "@/components/ui/cards";
@@ -8,6 +8,7 @@ import { SectionContainer } from "@/components/ui/containers";
 import { TypingEffect } from "@/components/ui/feedback";
 import { useScrollTo } from "@/hooks/use-scroll-to";
 import { ROUTES } from "@/lib/constants";
+import { DemoVideo } from "./demo-video";
 
 const ECOSYSTEM_FILES = [
   "package.json",
@@ -17,16 +18,6 @@ const ECOSYSTEM_FILES = [
   "*.csproj",
   ".env",
   "appsettings.json",
-];
-
-const TERMINAL_LINES = [
-  { prefix: "$", text: "depvault scan", color: "text.primary" },
-  { prefix: "→", text: "Scanning repository...", color: "text.secondary" },
-  { prefix: "✓", text: "Found 3 dependency files, 2 env files", color: "primary.main" },
-  { prefix: "→", text: "Analyzing package.json — 142 dependencies", color: "text.secondary" },
-  { prefix: "!", text: "3 critical vulnerabilities found", color: "error.main" },
-  { prefix: "✓", text: "Pushed 24 env variables to vault", color: "primary.main" },
-  { prefix: "✓", text: "No secret leaks detected", color: "primary.main" },
 ];
 
 export function HeroSection(): ReactElement {
@@ -95,67 +86,9 @@ export function HeroSection(): ReactElement {
         </Stack>
       </SectionContainer>
 
-      {/* Mock terminal */}
-      <SectionContainer sx={{ pb: { xs: 8, md: 12 }, mt: -2 }}>
-        <Box
-          className="vault-fade-up vault-delay-3"
-          sx={{
-            maxWidth: 640,
-            mx: "auto",
-            borderRadius: 2,
-            overflow: "hidden",
-            border: 1,
-            borderColor: "vault.glassBorder",
-            bgcolor: "rgba(0,0,0,0.4)",
-            backdropFilter: "blur(12px)",
-            position: "relative",
-            zIndex: 1,
-          }}
-        >
-          {/* Title bar */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 0.75,
-              px: 2,
-              py: 1.25,
-              borderBottom: 1,
-              borderColor: "vault.glassBorder",
-            }}
-          >
-            <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "error.main" }} />
-            <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "warning.main" }} />
-            <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "success.main" }} />
-            <Typography variant="mono" color="text.secondary" sx={{ ml: 1.5 }}>
-              depvault cli
-            </Typography>
-          </Box>
-
-          {/* Terminal content */}
-          <Box sx={{ p: 2 }}>
-            <Stack spacing={0.75}>
-              {TERMINAL_LINES.map((line) => (
-                <Typography
-                  key={line.text}
-                  variant="body2"
-                  sx={{
-                    fontFamily: "var(--font-jetbrains), monospace",
-                    fontSize: { xs: "0.7rem", sm: "0.8rem" },
-                    color: line.color,
-                    display: "flex",
-                    gap: 1,
-                  }}
-                >
-                  <Box component="span" sx={{ color: "text.secondary", flexShrink: 0 }}>
-                    {line.prefix}
-                  </Box>
-                  {line.text}
-                </Typography>
-              ))}
-            </Stack>
-          </Box>
-        </Box>
+      {/* Demo video */}
+      <SectionContainer>
+        <DemoVideo />
       </SectionContainer>
     </Box>
   );

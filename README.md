@@ -1,5 +1,7 @@
 <p align="center">
-  <img src="docs/images/dashboard.jpg" alt="DepVault Dashboard" width="100%" />
+  <a href="docs/images/depvault-demo.mp4">
+    <img src="docs/images/dashboard.jpg" alt="DepVault Demo — click to watch" width="100%" />
+  </a>
 </p>
 
 <h1 align="center">DepVault</h1>
