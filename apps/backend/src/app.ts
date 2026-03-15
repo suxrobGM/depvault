@@ -22,9 +22,10 @@ import {
   envVariableController,
 } from "@/modules/environment";
 import { githubApiController } from "@/modules/github";
+import { invitationController, projectInvitationController } from "@/modules/invitation";
 import { licenseRuleController } from "@/modules/license-rule";
 import { notificationController } from "@/modules/notification";
-import { invitationController, projectController } from "@/modules/project";
+import { projectController } from "@/modules/project";
 import { scanPatternController } from "@/modules/scan-pattern";
 import { secretController, secretFileController, sharedSecretController } from "@/modules/secret";
 import { secretScanController } from "@/modules/secret-scan";
@@ -54,6 +55,7 @@ const app = new Elysia()
       .use(authController)
       .use(projectController)
       .use(invitationController)
+      .use(projectInvitationController)
       .use(vaultGroupController)
       .use(environmentController)
       .use(envVariableController)

@@ -173,12 +173,19 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
                   </Typography>
                   <Typography variant="body1">{user.email}</Typography>
                 </Box>
-                <FormTextField form={emailForm} name="newEmail" label="New Email" type="email" />
+                <FormTextField
+                  form={emailForm}
+                  name="newEmail"
+                  label="New Email"
+                  type="email"
+                  autoComplete="off"
+                />
                 <FormTextField
                   form={emailForm}
                   name="password"
                   label="Confirm Password"
                   type="password"
+                  autoComplete="off"
                 />
                 <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
                   <Button type="submit" variant="contained" disabled={emailMutation.isPending}>

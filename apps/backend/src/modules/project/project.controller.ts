@@ -4,14 +4,6 @@ import { authGuard } from "@/common/middleware";
 import { StringIdParamSchema } from "@/types/request";
 import { MessageResponseSchema } from "@/types/response";
 import {
-  CreateInvitationBodySchema,
-  InvitationListQuerySchema,
-  InvitationListResponseSchema,
-  InvitationParamsSchema,
-  InvitationResponseSchema,
-} from "./invitation.schema";
-import { InvitationService } from "./invitation.service";
-import {
   MemberListQuerySchema,
   MemberListResponseSchema,
   MemberParamsSchema,
@@ -33,7 +25,6 @@ import { ProjectService } from "./project.service";
 
 const projectService = container.resolve(ProjectService);
 const memberService = container.resolve(MemberService);
-const invitationService = container.resolve(InvitationService);
 
 export const projectController = new Elysia({
   prefix: "/projects",
@@ -107,23 +98,6 @@ export const projectController = new Elysia({
     },
   })
   // Member management
-  .post(
-    "/:id/members",
-    ({ params, body, user }) => invitationService.create(params.id, body, user.id),
-    {
-      params: ProjectIdParamSchema,
-      body: CreateInvitationBodySchema,
-      response: InvitationResponseSchema,
-      detail: {
-        operationId: "inviteMember",
-        tags: ["Members"],
-        summary: "Invite member to project",
-        description:
-          "Create a pending invitation for a user by email to join the project with a specified role (editor or viewer). If the user is not on the platform, a registration invitation email is sent. Only the project owner can invite members.",
-        security: [{ bearerAuth: [] }],
-      },
-    },
-  )
   .get(
     "/:id/members",
     ({ params, query, user }) => memberService.list(params.id, user.id, query.page, query.limit),
@@ -187,56 +161,6 @@ export const projectController = new Elysia({
         summary: "Transfer project ownership",
         description:
           "Transfer project ownership to another member. The current owner becomes an editor. Only the current owner can transfer ownership.",
-        security: [{ bearerAuth: [] }],
-      },
-    },
-  )
-  // Invitation management
-  .get(
-    "/:id/invitations",
-    ({ params, query, user }) =>
-      invitationService.listByProject(params.id, user.id, query.page, query.limit),
-    {
-      params: ProjectIdParamSchema,
-      query: InvitationListQuerySchema,
-      response: InvitationListResponseSchema,
-      detail: {
-        operationId: "listProjectInvitations",
-        tags: ["Invitations"],
-        summary: "List project invitations",
-        description:
-          "Return a paginated list of pending invitations for the project. Any project member can view invitations.",
-        security: [{ bearerAuth: [] }],
-      },
-    },
-  )
-  .post(
-    "/:id/invitations/:invitationId/resend",
-    ({ params, user }) => invitationService.resend(params.id, params.invitationId, user.id),
-    {
-      params: InvitationParamsSchema,
-      response: MessageResponseSchema,
-      detail: {
-        operationId: "resendInvitation",
-        tags: ["Invitations"],
-        summary: "Resend project invitation",
-        description:
-          "Resend the invitation email for a pending invitation. Only the project owner can resend invitations.",
-        security: [{ bearerAuth: [] }],
-      },
-    },
-  )
-  .delete(
-    "/:id/invitations/:invitationId",
-    ({ params, user }) => invitationService.cancel(params.id, params.invitationId, user.id),
-    {
-      params: InvitationParamsSchema,
-      response: MessageResponseSchema,
-      detail: {
-        operationId: "cancelInvitation",
-        tags: ["Invitations"],
-        summary: "Cancel project invitation",
-        description: "Cancel a pending invitation. Only the project owner can cancel invitations.",
         security: [{ bearerAuth: [] }],
       },
     },

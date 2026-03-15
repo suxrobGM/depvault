@@ -2,7 +2,7 @@ import { singleton } from "tsyringe";
 import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { PrismaClient } from "@/generated/prisma";
-import { NotificationService } from "@/modules/notification/notification.service";
+import { NotificationService } from "@/modules/notification";
 import type { PaginatedResponse } from "@/types/response";
 import { InvitationEmailService } from "./invitation-email.service";
 import { INVITATION_INCLUDE, toInvitationResponse } from "./invitation.mapper";
@@ -100,6 +100,12 @@ export class InvitationService {
     return this.listPending({ userId }, page, limit);
   }
 
+  /** Returns minimal invitation info for the register form (no auth required). */
+  async getByToken(token: string): Promise<{ email: string; projectName: string }> {
+    const invitation = await this.findByToken(token);
+    return { email: invitation.email, projectName: invitation.project.name };
+  }
+
   async resend(
     projectId: string,
     invitationId: string,
@@ -141,10 +147,19 @@ export class InvitationService {
       throw new BadRequestError("Only pending invitations can be cancelled");
     }
 
-    await this.prisma.projectInvitation.update({
-      where: { id: invitationId },
-      data: { status: "CANCELLED" },
-    });
+    await this.prisma.$transaction([
+      this.prisma.projectInvitation.deleteMany({
+        where: {
+          projectId: invitation.projectId,
+          email: invitation.email,
+          status: "CANCELLED",
+        },
+      }),
+      this.prisma.projectInvitation.update({
+        where: { id: invitationId },
+        data: { status: "CANCELLED" },
+      }),
+    ]);
 
     return { message: "Invitation cancelled" };
   }
@@ -157,15 +172,27 @@ export class InvitationService {
       where: { projectId_userId: { projectId: invitation.projectId, userId } },
     });
 
+    const deleteOldAccepted = this.prisma.projectInvitation.deleteMany({
+      where: {
+        projectId: invitation.projectId,
+        email: invitation.email,
+        status: "ACCEPTED",
+      },
+    });
+
     if (existingMember) {
-      await this.prisma.projectInvitation.update({
-        where: { id: invitation.id },
-        data: { status: "ACCEPTED" },
-      });
+      await this.prisma.$transaction([
+        deleteOldAccepted,
+        this.prisma.projectInvitation.update({
+          where: { id: invitation.id },
+          data: { status: "ACCEPTED" },
+        }),
+      ]);
       return { message: "You are already a member of this project" };
     }
 
     await this.prisma.$transaction([
+      deleteOldAccepted,
       this.prisma.projectMember.create({
         data: { projectId: invitation.projectId, userId, role: invitation.role },
       }),
@@ -182,10 +209,19 @@ export class InvitationService {
     const invitation = await this.findByToken(token);
     await this.verifyRecipient(invitation.email, userId);
 
-    await this.prisma.projectInvitation.update({
-      where: { id: invitation.id },
-      data: { status: "DECLINED", userId },
-    });
+    await this.prisma.$transaction([
+      this.prisma.projectInvitation.deleteMany({
+        where: {
+          projectId: invitation.projectId,
+          email: invitation.email,
+          status: "DECLINED",
+        },
+      }),
+      this.prisma.projectInvitation.update({
+        where: { id: invitation.id },
+        data: { status: "DECLINED", userId },
+      }),
+    ]);
 
     return { message: "Invitation declined" };
   }

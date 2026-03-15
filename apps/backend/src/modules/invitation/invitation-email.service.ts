@@ -1,6 +1,6 @@
 import { singleton } from "tsyringe";
 import { PlatformInviteTemplate, TeamInviteTemplate } from "@/common/emails";
-import { EmailService } from "@/common/services/email.service";
+import { EmailService } from "@/common/services";
 
 type InviteEmailParams = {
   email: string;

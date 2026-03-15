@@ -8,7 +8,7 @@ import { EmailService } from "@/common/services/email.service";
 import { verifyRefreshToken } from "@/common/utils/jwt";
 import { hashPassword, verifyPassword } from "@/common/utils/password";
 import { PrismaClient } from "@/generated/prisma";
-import { InvitationService } from "@/modules/project/invitation.service";
+import { InvitationService } from "@/modules/invitation/invitation.service";
 import type {
   AuthResponse,
   ForgotPasswordBody,
@@ -38,6 +38,7 @@ export class AuthService {
     }
 
     const email = body.email.toLowerCase();
+    const isInvitedRegistration = await this.validateInviteToken(body.inviteToken, email);
 
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
@@ -48,7 +49,7 @@ export class AuthService {
     }
 
     const passwordHash = await hashPassword(body.password);
-    const emailVerificationToken = randomUUID();
+    const emailVerificationToken = isInvitedRegistration ? null : randomUUID();
     const tokenFamily = randomUUID();
 
     const user = await this.prisma.user.create({
@@ -57,6 +58,7 @@ export class AuthService {
         firstName: body.firstName,
         lastName: body.lastName,
         passwordHash,
+        emailVerified: isInvitedRegistration,
         emailVerificationToken,
         accounts: {
           create: {
@@ -68,13 +70,15 @@ export class AuthService {
       },
     });
 
-    const verificationUrl = `${this.frontendUrl}/verify-email?token=${emailVerificationToken}`;
+    if (!isInvitedRegistration) {
+      const verificationUrl = `${this.frontendUrl}/verify-email?token=${emailVerificationToken}`;
 
-    void this.emailService.send({
-      to: user.email,
-      subject: "Verify your email — DepVault",
-      react: VerifyEmailTemplate({ firstName: body.firstName, verificationUrl }),
-    });
+      void this.emailService.send({
+        to: user.email,
+        subject: "Verify your email — DepVault",
+        react: VerifyEmailTemplate({ firstName: body.firstName, verificationUrl }),
+      });
+    }
 
     void this.invitationService.linkPendingInvitations(email, user.id);
 
@@ -219,6 +223,28 @@ export class AuthService {
     });
 
     return { message: "Email verified successfully" };
+  }
+
+  /** Validates that the invite token exists, is pending, and matches the registration email. */
+  private async validateInviteToken(
+    inviteToken: string | undefined,
+    email: string,
+  ): Promise<boolean> {
+    if (!inviteToken) return false;
+
+    const invitation = await this.prisma.projectInvitation.findUnique({
+      where: { token: inviteToken },
+    });
+
+    if (!invitation || invitation.status !== "PENDING" || invitation.expiresAt <= new Date()) {
+      return false;
+    }
+
+    if (invitation.email.toLowerCase() !== email) {
+      throw new BadRequestError("Registration email must match the invitation email");
+    }
+
+    return true;
   }
 
   private async findMatchingAccount(

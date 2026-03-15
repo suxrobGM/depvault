@@ -5,6 +5,7 @@ export const RegisterBodySchema = t.Object({
   firstName: t.String({ minLength: 1, maxLength: 50 }),
   lastName: t.String({ minLength: 1, maxLength: 50 }),
   password: t.String({ minLength: 8, maxLength: 128 }),
+  inviteToken: t.Optional(t.String()),
 });
 
 export const LoginBodySchema = t.Object({

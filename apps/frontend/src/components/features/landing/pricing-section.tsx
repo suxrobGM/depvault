@@ -1,7 +1,6 @@
 import type { ReactElement } from "react";
 import { CheckCircleOutline as CheckIcon } from "@mui/icons-material";
 import {
-  Box,
   Button,
   Chip,
   Grid,

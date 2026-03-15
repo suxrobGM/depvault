@@ -8,10 +8,16 @@ export const metadata: Metadata = {
     "Create a free DepVault account to analyze dependencies, detect vulnerabilities, and securely manage environment variables across your projects.",
 };
 
-export default function RegisterPage(): ReactElement {
+interface RegisterPageProps {
+  searchParams: Promise<{ inviteToken?: string }>;
+}
+
+export default async function RegisterPage(props: RegisterPageProps): Promise<ReactElement> {
+  const { inviteToken } = await props.searchParams;
+
   return (
     <AuthCard title="Create an account" subtitle="Get started with DepVault">
-      <RegisterForm />
+      <RegisterForm inviteToken={inviteToken} />
     </AuthCard>
   );
 }

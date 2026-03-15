@@ -1,9 +1,18 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
 import { authGuard } from "@/common/middleware";
+import { ProjectIdParamSchema } from "@/modules/project/member.schema";
 import { PaginationQueryBaseSchema } from "@/types/pagination";
 import { MessageResponseSchema } from "@/types/response";
-import { InvitationListResponseSchema, InvitationTokenParamsSchema } from "./invitation.schema";
+import {
+  CreateInvitationBodySchema,
+  InvitationInfoResponseSchema,
+  InvitationListQuerySchema,
+  InvitationListResponseSchema,
+  InvitationParamsSchema,
+  InvitationResponseSchema,
+  InvitationTokenParamsSchema,
+} from "./invitation.schema";
 import { InvitationService } from "./invitation.service";
 
 const invitationService = container.resolve(InvitationService);
@@ -12,6 +21,16 @@ export const invitationController = new Elysia({
   prefix: "/invitations",
   detail: { tags: ["Invitations"] },
 })
+  .get("/:token/info", ({ params }) => invitationService.getByToken(params.token), {
+    params: InvitationTokenParamsSchema,
+    response: InvitationInfoResponseSchema,
+    detail: {
+      operationId: "getInvitationInfo",
+      summary: "Get invitation info by token",
+      description:
+        "Return minimal invitation details (email, project name) for the registration form. No authentication required.",
+    },
+  })
   .use(authGuard)
   .get(
     "/pending",

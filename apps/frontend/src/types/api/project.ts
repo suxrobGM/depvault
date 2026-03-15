@@ -16,5 +16,7 @@ export type ProjectStatsResponse = Data<(typeof client)["api"]["projects"]["stat
 export type InvitationListResponse = Data<ProjectById["invitations"]["get"]>;
 export type Invitation = InvitationListResponse["items"][number];
 
+export type InvitationInfo = Data<ReturnType<(typeof client)["api"]["invitations"]>["info"]["get"]>;
+
 type InvitationsByUser = (typeof client)["api"]["invitations"];
 export type PendingInvitationListResponse = Data<InvitationsByUser["pending"]["get"]>;

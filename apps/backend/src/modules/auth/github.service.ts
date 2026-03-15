@@ -3,7 +3,7 @@ import { singleton } from "tsyringe";
 import { BadRequestError, ConflictError, UnauthorizedError } from "@/common/errors";
 import { logger } from "@/common/logger/logger";
 import { PrismaClient } from "@/generated/prisma";
-import { InvitationService } from "@/modules/project/invitation.service";
+import { InvitationService } from "@/modules/invitation/invitation.service";
 import type { AuthResponse, GitHubCallbackQuery, LinkGitHubBody } from "./auth.schema";
 import { TokenService } from "./token.service";
 
