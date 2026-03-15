@@ -70,26 +70,23 @@ describe("SecretFileVersionService", () => {
 
   describe("listVersions", () => {
     it("should list versions for any project member", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.VIEWER });
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
 
-      const result = await service.listVersions(projectId, fileId, userId);
+      const result = await service.listVersions(projectId, fileId);
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0]!.id).toBe(versionId);
     });
 
     it("should throw NotFoundError when file doesn't exist", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(null);
 
-      expect(service.listVersions(projectId, fileId, userId)).rejects.toBeInstanceOf(NotFoundError);
+      expect(service.listVersions(projectId, fileId)).rejects.toBeInstanceOf(NotFoundError);
     });
   });
 
   describe("rollback", () => {
     it("should rollback to previous version and save current as version", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
       mockPrisma.secretFileVersion.findFirst.mockResolvedValueOnce(mockVersion);
 
@@ -118,20 +115,11 @@ describe("SecretFileVersionService", () => {
     });
 
     it("should throw NotFoundError when version doesn't exist", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
       mockPrisma.secretFileVersion.findFirst.mockResolvedValueOnce(null);
 
       expect(service.rollback(projectId, fileId, versionId, userId)).rejects.toBeInstanceOf(
         NotFoundError,
-      );
-    });
-
-    it("should throw ForbiddenError for VIEWER", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.VIEWER });
-
-      expect(service.rollback(projectId, fileId, versionId, userId)).rejects.toBeInstanceOf(
-        ForbiddenError,
       );
     });
   });

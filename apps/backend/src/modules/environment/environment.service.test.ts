@@ -168,39 +168,11 @@ describe("EnvironmentService", () => {
         data: { projectId, vaultGroupId, type: "STAGING" },
       });
     });
-
-    it("should throw ForbiddenError for VIEWER", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
-
-      expect(
-        service.create(
-          projectId,
-          { vaultGroupId, environmentType: "DEVELOPMENT", key: "K", value: "V" },
-          userId,
-          ipAddress,
-        ),
-      ).rejects.toBeInstanceOf(ForbiddenError);
-    });
-
-    it("should throw NotFoundError when user is not a member", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce(null);
-
-      expect(
-        service.create(
-          projectId,
-          { vaultGroupId, environmentType: "DEVELOPMENT", key: "K", value: "V" },
-          userId,
-          ipAddress,
-        ),
-      ).rejects.toBeInstanceOf(NotFoundError);
-    });
   });
 
   describe("list", () => {
     it("should return decrypted values for OWNER", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
-
-      const result = await service.list(projectId, userId, vaultGroupId, "DEVELOPMENT");
+      const result = await service.list(projectId, userId, "OWNER", vaultGroupId, "DEVELOPMENT");
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0]!.value).toBe("postgres://localhost/db");
@@ -208,9 +180,7 @@ describe("EnvironmentService", () => {
     });
 
     it("should write audit log when reading decrypted values", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
-
-      await service.list(projectId, userId, vaultGroupId, "DEVELOPMENT", 1, 20, ipAddress);
+      await service.list(projectId, userId, "OWNER", vaultGroupId, "DEVELOPMENT", 1, 20, ipAddress);
 
       expect(mockAuditLog.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -223,20 +193,17 @@ describe("EnvironmentService", () => {
     });
 
     it("should return masked values for VIEWER", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
       const decryptSpy = spyOn(encryption, "decrypt");
       decryptSpy.mockClear();
 
-      const result = await service.list(projectId, userId, vaultGroupId, "DEVELOPMENT");
+      const result = await service.list(projectId, userId, "VIEWER", vaultGroupId, "DEVELOPMENT");
 
       expect(result.items[0]!.value).toBe("********");
       expect(decryptSpy).not.toHaveBeenCalled();
     });
 
     it("should filter by environment type when provided", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "EDITOR" });
-
-      await service.list(projectId, userId, vaultGroupId, "STAGING", 1, 10);
+      await service.list(projectId, userId, "EDITOR", vaultGroupId, "STAGING", 1, 10);
 
       expect(mockPrisma.envVariable.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -246,9 +213,7 @@ describe("EnvironmentService", () => {
     });
 
     it("should list all environments when no filter provided", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
-
-      await service.list(projectId, userId, vaultGroupId, undefined, 1, 20);
+      await service.list(projectId, userId, "OWNER", vaultGroupId, undefined, 1, 20);
 
       expect(mockPrisma.envVariable.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -258,10 +223,9 @@ describe("EnvironmentService", () => {
     });
 
     it("should return correct pagination", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
       mockPrisma.envVariable.count.mockResolvedValueOnce(25);
 
-      const result = await service.list(projectId, userId, vaultGroupId, undefined, 2, 10);
+      const result = await service.list(projectId, userId, "OWNER", vaultGroupId, undefined, 2, 10);
 
       expect(result.pagination).toEqual({
         page: 2,
@@ -333,14 +297,6 @@ describe("EnvironmentService", () => {
         service.update(projectId, varId, { key: "X" }, userId, ipAddress),
       ).rejects.toBeInstanceOf(NotFoundError);
     });
-
-    it("should throw ForbiddenError for VIEWER", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
-
-      expect(
-        service.update(projectId, varId, { key: "X" }, userId, ipAddress),
-      ).rejects.toBeInstanceOf(ForbiddenError);
-    });
   });
 
   describe("delete", () => {
@@ -381,22 +337,6 @@ describe("EnvironmentService", () => {
     it("should throw NotFoundError when variable doesn't exist", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
       mockPrisma.envVariable.findFirst.mockResolvedValueOnce(null);
-
-      expect(service.delete(projectId, varId, userId, ipAddress)).rejects.toBeInstanceOf(
-        NotFoundError,
-      );
-    });
-
-    it("should throw ForbiddenError for VIEWER", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
-
-      expect(service.delete(projectId, varId, userId, ipAddress)).rejects.toBeInstanceOf(
-        ForbiddenError,
-      );
-    });
-
-    it("should throw NotFoundError when user is not a member", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce(null);
 
       expect(service.delete(projectId, varId, userId, ipAddress)).rejects.toBeInstanceOf(
         NotFoundError,

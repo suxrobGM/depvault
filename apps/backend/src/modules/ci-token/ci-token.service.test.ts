@@ -115,17 +115,6 @@ describe("CiTokenService", () => {
       );
     });
 
-    it("should throw ForbiddenError for viewer role", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({
-        ...baseProjectMember,
-        role: "VIEWER",
-      });
-
-      expect(service.create("project-uuid", "user-uuid", body, "127.0.0.1")).rejects.toBeInstanceOf(
-        ForbiddenError,
-      );
-    });
-
     it("should throw BadRequestError for invalid IP allowlist", async () => {
       expect(
         service.create(
@@ -157,17 +146,11 @@ describe("CiTokenService", () => {
       mockPrisma.ciToken.findMany.mockResolvedValueOnce([tokenWithRelations]);
       mockPrisma.ciToken.count.mockResolvedValueOnce(1);
 
-      const result = await service.list("project-uuid", "user-uuid");
+      const result = await service.list("project-uuid");
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0]!.environmentLabel).toBe("Default / PRODUCTION");
       expect(result.pagination.total).toBe(1);
-    });
-
-    it("should throw NotFoundError when user is not a member", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce(null);
-
-      expect(service.list("project-uuid", "user-uuid")).rejects.toBeInstanceOf(NotFoundError);
     });
   });
 

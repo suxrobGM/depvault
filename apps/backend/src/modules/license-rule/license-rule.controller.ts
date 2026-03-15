@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
-import { authGuard } from "@/common/middleware";
+import { projectGuard } from "@/common/middleware";
 import { MessageResponseSchema } from "@/types/response";
 import {
   ComplianceQuerySchema,
@@ -21,8 +21,8 @@ export const licenseRuleController = new Elysia({
   prefix: "/projects/:id/license-rules",
   detail: { tags: ["License Rules"] },
 })
-  .use(authGuard)
-  .get("/", ({ params, user }) => licenseRuleService.list(params.id, user.id), {
+  .use(projectGuard("VIEWER"))
+  .get("/", ({ params }) => licenseRuleService.list(params.id), {
     params: LicenseRuleProjectParamsSchema,
     response: LicenseRuleListResponseSchema,
     detail: {
@@ -32,57 +32,10 @@ export const licenseRuleController = new Elysia({
       security: [{ bearerAuth: [] }],
     },
   })
-  .post("/", ({ params, body, user }) => licenseRuleService.create(params.id, user.id, body), {
-    params: LicenseRuleProjectParamsSchema,
-    body: CreateLicenseRuleBodySchema,
-    response: LicenseRuleResponseSchema,
-    detail: {
-      operationId: "createLicenseRule",
-      summary: "Create license rule",
-      description:
-        "Create a license policy rule mapping an SPDX license ID to ALLOW, WARN, or BLOCK.",
-      security: [{ bearerAuth: [] }],
-    },
-  })
-  .put(
-    "/:ruleId",
-    ({ params, body, user }) => licenseRuleService.update(params.id, params.ruleId, user.id, body),
-    {
-      params: LicenseRuleParamsSchema,
-      body: UpdateLicenseRuleBodySchema,
-      response: LicenseRuleResponseSchema,
-      detail: {
-        operationId: "updateLicenseRule",
-        summary: "Update license rule",
-        description: "Update the policy for an existing license rule.",
-        security: [{ bearerAuth: [] }],
-      },
-    },
-  )
-  .delete(
-    "/:ruleId",
-    ({ params, user }) => licenseRuleService.delete(params.id, params.ruleId, user.id),
-    {
-      params: LicenseRuleParamsSchema,
-      response: MessageResponseSchema,
-      detail: {
-        operationId: "deleteLicenseRule",
-        summary: "Delete license rule",
-        description: "Delete a license policy rule from the project.",
-        security: [{ bearerAuth: [] }],
-      },
-    },
-  )
   .get(
     "/compliance",
-    ({ params, query, user }) =>
-      licenseRuleService.getComplianceSummary(
-        params.id,
-        user.id,
-        query.page,
-        query.limit,
-        query.search,
-      ),
+    ({ params, query }) =>
+      licenseRuleService.getComplianceSummary(params.id, query.page, query.limit, query.search),
     {
       params: LicenseRuleProjectParamsSchema,
       query: ComplianceQuerySchema,
@@ -98,8 +51,8 @@ export const licenseRuleController = new Elysia({
   )
   .get(
     "/export",
-    async ({ params, query, user, set }) => {
-      const result = await licenseRuleService.exportReport(params.id, user.id, query.format);
+    async ({ params, query, set }) => {
+      const result = await licenseRuleService.exportReport(params.id, query.format);
       set.headers["content-type"] = result.contentType;
       set.headers["content-disposition"] = `attachment; filename="${result.fileName}"`;
       return result.content;
@@ -114,4 +67,42 @@ export const licenseRuleController = new Elysia({
         security: [{ bearerAuth: [] }],
       },
     },
-  );
+  )
+  .use(projectGuard("EDITOR"))
+  .post("/", ({ params, body }) => licenseRuleService.create(params.id, body), {
+    params: LicenseRuleProjectParamsSchema,
+    body: CreateLicenseRuleBodySchema,
+    response: LicenseRuleResponseSchema,
+    detail: {
+      operationId: "createLicenseRule",
+      summary: "Create license rule",
+      description:
+        "Create a license policy rule mapping an SPDX license ID to ALLOW, WARN, or BLOCK.",
+      security: [{ bearerAuth: [] }],
+    },
+  })
+  .put(
+    "/:ruleId",
+    ({ params, body }) => licenseRuleService.update(params.id, params.ruleId, body),
+    {
+      params: LicenseRuleParamsSchema,
+      body: UpdateLicenseRuleBodySchema,
+      response: LicenseRuleResponseSchema,
+      detail: {
+        operationId: "updateLicenseRule",
+        summary: "Update license rule",
+        description: "Update the policy for an existing license rule.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .delete("/:ruleId", ({ params }) => licenseRuleService.delete(params.id, params.ruleId), {
+    params: LicenseRuleParamsSchema,
+    response: MessageResponseSchema,
+    detail: {
+      operationId: "deleteLicenseRule",
+      summary: "Delete license rule",
+      description: "Delete a license policy rule from the project.",
+      security: [{ bearerAuth: [] }],
+    },
+  });

@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
-import { authGuard } from "@/common/middleware";
+import { projectGuard } from "@/common/middleware";
 import { getClientIp } from "@/common/utils/ip";
 import { StringIdParamSchema } from "@/types/request";
 import { EnvBundleBodySchema, EnvBundleResponseSchema } from "./env-bundle.schema";
@@ -12,11 +12,16 @@ export const envBundleController = new Elysia({
   prefix: "/projects/:id/environments",
   detail: { tags: ["Environment Bundle"] },
 })
-  .use(authGuard)
+  .use(projectGuard("EDITOR"))
   .post(
     "/bundle",
-    ({ params, body, user, request, server }) =>
-      envBundleService.createBundle(params.id, body, user.id, getClientIp(request, server)),
+    ({ params, body, projectMember, request, server }) =>
+      envBundleService.createBundle(
+        params.id,
+        body,
+        projectMember.userId,
+        getClientIp(request, server),
+      ),
     {
       params: StringIdParamSchema,
       body: EnvBundleBodySchema,

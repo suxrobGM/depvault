@@ -29,8 +29,6 @@ export class CiTokenService {
     body: CreateCiTokenBody,
     ipAddress: string,
   ): Promise<CiTokenCreatedResponse> {
-    await this.requireEditorOrOwner(projectId, userId);
-
     const environment = await this.prisma.environment.findFirst({
       where: { id: body.environmentId, projectId },
     });
@@ -85,14 +83,7 @@ export class CiTokenService {
     };
   }
 
-  async list(
-    projectId: string,
-    userId: string,
-    page = 1,
-    limit = 20,
-  ): Promise<PaginatedResponse<CiTokenResponse>> {
-    await this.requireMember(projectId, userId);
-
+  async list(projectId: string, page = 1, limit = 20): Promise<PaginatedResponse<CiTokenResponse>> {
     const where = { projectId };
     const [tokens, total] = await Promise.all([
       this.prisma.ciToken.findMany({
@@ -137,8 +128,6 @@ export class CiTokenService {
     userId: string,
     ipAddress: string,
   ): Promise<{ message: string }> {
-    await this.requireEditorOrOwner(projectId, userId);
-
     const ciToken = await this.prisma.ciToken.findFirst({
       where: { id: tokenId, projectId },
     });
@@ -266,23 +255,5 @@ export class CiTokenService {
     );
 
     return { buffer, name: file.name, mimeType: file.mimeType };
-  }
-
-  private async requireMember(projectId: string, userId: string) {
-    const member = await this.prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId } },
-    });
-    if (!member) {
-      throw new NotFoundError("Project not found");
-    }
-    return member;
-  }
-
-  private async requireEditorOrOwner(projectId: string, userId: string) {
-    const member = await this.requireMember(projectId, userId);
-    if (member.role !== "OWNER" && member.role !== "EDITOR") {
-      throw new ForbiddenError("Only owners and editors can manage CI tokens");
-    }
-    return member;
   }
 }

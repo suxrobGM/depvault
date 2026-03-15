@@ -23,8 +23,6 @@ export class InvitationService {
     body: CreateInvitationBody,
     actorId: string,
   ): Promise<InvitationResponse> {
-    await this.requireOwner(projectId, actorId);
-
     const email = body.email.toLowerCase();
     const inviter = await this.getInviterName(actorId);
 
@@ -84,11 +82,9 @@ export class InvitationService {
 
   async listByProject(
     projectId: string,
-    userId: string,
     page: number,
     limit: number,
   ): Promise<PaginatedResponse<InvitationResponse>> {
-    await this.requireMember(projectId, userId);
     return this.listPending({ projectId }, page, limit);
   }
 
@@ -111,8 +107,6 @@ export class InvitationService {
     invitationId: string,
     actorId: string,
   ): Promise<{ message: string }> {
-    await this.requireOwner(projectId, actorId);
-
     const invitation = await this.findPendingInvitation(invitationId, projectId);
     const inviter = await this.getInviterName(actorId);
 
@@ -128,13 +122,7 @@ export class InvitationService {
     return { message: "Invitation resent" };
   }
 
-  async cancel(
-    projectId: string,
-    invitationId: string,
-    actorId: string,
-  ): Promise<{ message: string }> {
-    await this.requireOwner(projectId, actorId);
-
+  async cancel(projectId: string, invitationId: string): Promise<{ message: string }> {
     const invitation = await this.prisma.projectInvitation.findFirst({
       where: { id: invitationId, projectId },
     });
@@ -366,21 +354,5 @@ export class InvitationService {
     });
 
     if (existing) throw new ConflictError("An invitation is already pending for this email");
-  }
-
-  private async requireMember(projectId: string, userId: string) {
-    const member = await this.prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId } },
-    });
-
-    if (!member) throw new NotFoundError("Project not found");
-    return member;
-  }
-
-  private async requireOwner(projectId: string, userId: string) {
-    const member = await this.requireMember(projectId, userId);
-    if (member.role !== "OWNER")
-      throw new ForbiddenError("Only the project owner can perform this action");
-    return member;
   }
 }

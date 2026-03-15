@@ -23,12 +23,9 @@ export class MemberService {
 
   async list(
     projectId: string,
-    userId: string,
     page: number,
     limit: number,
   ): Promise<PaginatedResponse<MemberResponse>> {
-    await this.requireMember(projectId, userId);
-
     const where = { projectId };
 
     const [members, total] = await Promise.all([
@@ -57,10 +54,7 @@ export class MemberService {
     projectId: string,
     memberId: string,
     body: UpdateMemberRoleBody,
-    userId: string,
   ): Promise<MemberResponse> {
-    await this.requireOwner(projectId, userId);
-
     const target = await this.prisma.projectMember.findFirst({
       where: { id: memberId, projectId },
     });
@@ -111,9 +105,7 @@ export class MemberService {
     return this.toResponse(updated);
   }
 
-  async remove(projectId: string, memberId: string, userId: string): Promise<{ message: string }> {
-    await this.requireOwner(projectId, userId);
-
+  async remove(projectId: string, memberId: string): Promise<{ message: string }> {
     const target = await this.prisma.projectMember.findFirst({
       where: { id: memberId, projectId },
       include: { user: { select: { id: true, email: true, firstName: true } } },
@@ -143,11 +135,10 @@ export class MemberService {
   async transferOwnership(
     projectId: string,
     body: TransferOwnershipBody,
-    userId: string,
+    callerMemberId: string,
+    callerUserId: string,
   ): Promise<{ message: string }> {
-    const owner = await this.requireOwner(projectId, userId);
-
-    if (body.newOwnerId === userId) {
+    if (body.newOwnerId === callerUserId) {
       throw new BadRequestError("You are already the owner");
     }
 
@@ -165,7 +156,7 @@ export class MemberService {
         data: { role: "OWNER" },
       }),
       this.prisma.projectMember.update({
-        where: { id: owner.id },
+        where: { id: callerMemberId },
         data: { role: "EDITOR" },
       }),
       this.prisma.project.update({
@@ -175,28 +166,6 @@ export class MemberService {
     ]);
 
     return { message: "Ownership transferred successfully" };
-  }
-
-  private async requireMember(projectId: string, userId: string) {
-    const member = await this.prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId } },
-    });
-
-    if (!member) {
-      throw new NotFoundError("Project not found");
-    }
-
-    return member;
-  }
-
-  private async requireOwner(projectId: string, userId: string) {
-    const member = await this.requireMember(projectId, userId);
-
-    if (member.role !== "OWNER") {
-      throw new ForbiddenError("Only the project owner can perform this action");
-    }
-
-    return member;
   }
 
   private toResponse(member: {

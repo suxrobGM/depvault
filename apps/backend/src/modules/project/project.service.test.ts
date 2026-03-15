@@ -14,11 +14,16 @@ const mockProject = {
   updatedAt: now,
 };
 
+const mockProjectWithMembers = {
+  ...mockProject,
+  members: [{ role: "OWNER" }],
+};
+
 function createMockPrisma() {
   return {
     project: {
       create: mock(() => Promise.resolve(mockProject)),
-      findMany: mock(() => Promise.resolve([mockProject])),
+      findMany: mock(() => Promise.resolve([mockProjectWithMembers])),
       findFirst: mock(() => Promise.resolve(null)),
       count: mock(() => Promise.resolve(1)),
       update: mock(() => Promise.resolve({ ...mockProject, name: "Updated" })),
@@ -82,6 +87,7 @@ describe("ProjectService", () => {
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0]!.name).toBe("Test Project");
+      expect(result.items[0]!.currentUserRole).toBe("OWNER");
       expect(result.pagination).toEqual({
         page: 1,
         limit: 20,
@@ -95,6 +101,7 @@ describe("ProjectService", () => {
 
       expect(mockPrisma.project.findMany).toHaveBeenCalledWith({
         where: { members: { some: { userId: "user-uuid" } } },
+        include: { members: { where: { userId: "user-uuid" }, select: { role: true } } },
         skip: 0,
         take: 10,
         orderBy: { createdAt: "desc" },
@@ -116,12 +123,13 @@ describe("ProjectService", () => {
 
   describe("getById", () => {
     it("should return project when user is a member", async () => {
-      mockPrisma.project.findFirst.mockResolvedValueOnce(mockProject);
+      mockPrisma.project.findFirst.mockResolvedValueOnce(mockProjectWithMembers);
 
       const result = await service.getById("project-uuid", "user-uuid");
 
       expect(result.id).toBe("project-uuid");
       expect(result.name).toBe("Test Project");
+      expect(result.currentUserRole).toBe("OWNER");
     });
 
     it("should throw NotFoundError when project does not exist", async () => {

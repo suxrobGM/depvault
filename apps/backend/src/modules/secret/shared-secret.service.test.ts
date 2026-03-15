@@ -162,28 +162,6 @@ describe("SharedSecretService", () => {
         }),
       ).rejects.toBeInstanceOf(NotFoundError);
     });
-
-    it("should throw ForbiddenError for VIEWER role", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
-
-      expect(
-        service.createForEnvVariables(projectId, userId, {
-          variableIds: ["var-uuid"],
-          expiresIn: 86400,
-        }),
-      ).rejects.toBeInstanceOf(ForbiddenError);
-    });
-
-    it("should throw NotFoundError when not a project member", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce(null);
-
-      expect(
-        service.createForEnvVariables(projectId, userId, {
-          variableIds: ["var-uuid"],
-          expiresIn: 86400,
-        }),
-      ).rejects.toBeInstanceOf(NotFoundError);
-    });
   });
 
   describe("createForFile", () => {
@@ -227,14 +205,6 @@ describe("SharedSecretService", () => {
       expect(
         service.createForFile(projectId, userId, fileId, { expiresIn: 3600 }),
       ).rejects.toBeInstanceOf(NotFoundError);
-    });
-
-    it("should throw ForbiddenError for VIEWER role", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
-
-      expect(
-        service.createForFile(projectId, userId, fileId, { expiresIn: 3600 }),
-      ).rejects.toBeInstanceOf(ForbiddenError);
     });
   });
 
@@ -391,10 +361,9 @@ describe("SharedSecretService", () => {
 
   describe("list", () => {
     it("should expire stale PENDING records and return all secrets", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
       mockPrisma.sharedSecret.findMany.mockResolvedValueOnce([makeSharedSecret()]);
 
-      const result = await service.list(projectId, userId);
+      const result = await service.list(projectId);
 
       expect(mockPrisma.sharedSecret.updateMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -405,12 +374,6 @@ describe("SharedSecretService", () => {
       expect(result.items).toHaveLength(1);
       expect(result.items[0]!.token).toBe(token);
       expect(result.items[0]!.hasPassword).toBe(false);
-    });
-
-    it("should throw ForbiddenError for VIEWER", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
-
-      expect(service.list(projectId, userId)).rejects.toBeInstanceOf(ForbiddenError);
     });
   });
 
@@ -442,12 +405,6 @@ describe("SharedSecretService", () => {
       mockPrisma.sharedSecret.findFirst.mockResolvedValueOnce(null);
 
       expect(service.revoke(projectId, secretId, userId)).rejects.toBeInstanceOf(NotFoundError);
-    });
-
-    it("should throw ForbiddenError for VIEWER", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
-
-      expect(service.revoke(projectId, secretId, userId)).rejects.toBeInstanceOf(ForbiddenError);
     });
   });
 });

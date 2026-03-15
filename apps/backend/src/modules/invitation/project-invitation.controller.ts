@@ -1,6 +1,6 @@
 import Elysia from "elysia";
 import { container } from "@/common/di";
-import { authGuard } from "@/common/middleware";
+import { projectGuard } from "@/common/middleware";
 import { MessageResponseSchema } from "@/types/response";
 import { ProjectIdParamSchema } from "../project/member.schema";
 import {
@@ -19,27 +19,10 @@ export const projectInvitationController = new Elysia({
   prefix: "/projects/:id",
   detail: { tags: ["Invitations"] },
 })
-  .use(authGuard)
-  .post(
-    "/members",
-    ({ params, body, user }) => invitationService.create(params.id, body, user.id),
-    {
-      params: ProjectIdParamSchema,
-      body: CreateInvitationBodySchema,
-      response: InvitationResponseSchema,
-      detail: {
-        operationId: "inviteMember",
-        summary: "Invite member to project",
-        description:
-          "Create a pending invitation for a user by email to join the project with a specified role (editor or viewer). If the user is not on the platform, a registration invitation email is sent. Only the project owner can invite members.",
-        security: [{ bearerAuth: [] }],
-      },
-    },
-  )
+  .use(projectGuard("VIEWER"))
   .get(
     "/invitations",
-    ({ params, query, user }) =>
-      invitationService.listByProject(params.id, user.id, query.page, query.limit),
+    ({ params, query }) => invitationService.listByProject(params.id, query.page, query.limit),
     {
       params: ProjectIdParamSchema,
       query: InvitationListQuerySchema,
@@ -53,9 +36,28 @@ export const projectInvitationController = new Elysia({
       },
     },
   )
+  .use(projectGuard("OWNER"))
+  .post(
+    "/members",
+    ({ params, body, projectMember }) =>
+      invitationService.create(params.id, body, projectMember.userId),
+    {
+      params: ProjectIdParamSchema,
+      body: CreateInvitationBodySchema,
+      response: InvitationResponseSchema,
+      detail: {
+        operationId: "inviteMember",
+        summary: "Invite member to project",
+        description:
+          "Create a pending invitation for a user by email to join the project with a specified role (editor or viewer). If the user is not on the platform, a registration invitation email is sent. Only the project owner can invite members.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
   .post(
     "/invitations/:invitationId/resend",
-    ({ params, user }) => invitationService.resend(params.id, params.invitationId, user.id),
+    ({ params, projectMember }) =>
+      invitationService.resend(params.id, params.invitationId, projectMember.userId),
     {
       params: InvitationParamsSchema,
       response: MessageResponseSchema,
@@ -70,7 +72,7 @@ export const projectInvitationController = new Elysia({
   )
   .delete(
     "/invitations/:invitationId",
-    ({ params, user }) => invitationService.cancel(params.id, params.invitationId, user.id),
+    ({ params }) => invitationService.cancel(params.id, params.invitationId),
     {
       params: InvitationParamsSchema,
       response: MessageResponseSchema,

@@ -50,49 +50,11 @@ describe("LicenseRuleService", () => {
     service = new LicenseRuleService(prisma);
   });
 
-  // --- Authorization helpers ---
-
-  describe("authorization", () => {
-    it("should throw NotFoundError when user is not a project member (read)", async () => {
-      expect(service.list(PROJECT_ID, USER_ID)).rejects.toBeInstanceOf(NotFoundError);
-    });
-
-    it("should throw NotFoundError when user is not a member (write)", async () => {
-      expect(
-        service.create(PROJECT_ID, USER_ID, { licenseId: "MIT", policy: "ALLOW" as any }),
-      ).rejects.toBeInstanceOf(NotFoundError);
-    });
-
-    it("should throw ForbiddenError when VIEWER tries to create", async () => {
-      prisma.projectMember.findUnique.mockResolvedValueOnce(memberWith("VIEWER"));
-
-      expect(
-        service.create(PROJECT_ID, USER_ID, { licenseId: "MIT", policy: "ALLOW" as any }),
-      ).rejects.toBeInstanceOf(ForbiddenError);
-    });
-
-    it("should throw ForbiddenError when VIEWER tries to update", async () => {
-      prisma.projectMember.findUnique.mockResolvedValueOnce(memberWith("VIEWER"));
-
-      expect(
-        service.update(PROJECT_ID, RULE_ID, USER_ID, { policy: "BLOCK" as any }),
-      ).rejects.toBeInstanceOf(ForbiddenError);
-    });
-
-    it("should throw ForbiddenError when VIEWER tries to delete", async () => {
-      prisma.projectMember.findUnique.mockResolvedValueOnce(memberWith("VIEWER"));
-
-      expect(service.delete(PROJECT_ID, RULE_ID, USER_ID)).rejects.toBeInstanceOf(ForbiddenError);
-    });
-  });
-
   // --- list ---
 
   describe("list", () => {
     it("should return all rules for the project", async () => {
-      prisma.projectMember.findUnique.mockResolvedValueOnce(memberWith("VIEWER"));
-
-      const result = await service.list(PROJECT_ID, USER_ID);
+      const result = await service.list(PROJECT_ID);
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0]!.licenseId).toBe("MIT");
@@ -107,9 +69,7 @@ describe("LicenseRuleService", () => {
 
   describe("create", () => {
     it("should create a license rule", async () => {
-      prisma.projectMember.findUnique.mockResolvedValueOnce(memberWith("OWNER"));
-
-      const result = await service.create(PROJECT_ID, USER_ID, {
+      const result = await service.create(PROJECT_ID, {
         licenseId: "MIT",
         policy: "ALLOW" as any,
       });
@@ -120,23 +80,11 @@ describe("LicenseRuleService", () => {
       });
     });
 
-    it("should allow EDITOR to create rules", async () => {
-      prisma.projectMember.findUnique.mockResolvedValueOnce(memberWith("EDITOR"));
-
-      const result = await service.create(PROJECT_ID, USER_ID, {
-        licenseId: "MIT",
-        policy: "WARN" as any,
-      });
-
-      expect(result.id).toBe(RULE_ID);
-    });
-
     it("should throw ConflictError when rule already exists", async () => {
-      prisma.projectMember.findUnique.mockResolvedValueOnce(memberWith("OWNER"));
       prisma.licenseRule.findUnique.mockResolvedValueOnce(mockRule);
 
       expect(
-        service.create(PROJECT_ID, USER_ID, { licenseId: "MIT", policy: "ALLOW" as any }),
+        service.create(PROJECT_ID, { licenseId: "MIT", policy: "ALLOW" as any }),
       ).rejects.toBeInstanceOf(ConflictError);
     });
   });
@@ -145,10 +93,9 @@ describe("LicenseRuleService", () => {
 
   describe("update", () => {
     it("should update a rule policy", async () => {
-      prisma.projectMember.findUnique.mockResolvedValueOnce(memberWith("OWNER"));
       prisma.licenseRule.findFirst.mockResolvedValueOnce(mockRule);
 
-      const result = await service.update(PROJECT_ID, RULE_ID, USER_ID, {
+      const result = await service.update(PROJECT_ID, RULE_ID, {
         policy: "BLOCK" as any,
       });
 
@@ -160,10 +107,8 @@ describe("LicenseRuleService", () => {
     });
 
     it("should throw NotFoundError when rule does not exist", async () => {
-      prisma.projectMember.findUnique.mockResolvedValueOnce(memberWith("OWNER"));
-
       expect(
-        service.update(PROJECT_ID, RULE_ID, USER_ID, { policy: "BLOCK" as any }),
+        service.update(PROJECT_ID, RULE_ID, { policy: "BLOCK" as any }),
       ).rejects.toBeInstanceOf(NotFoundError);
     });
   });
@@ -172,19 +117,16 @@ describe("LicenseRuleService", () => {
 
   describe("delete", () => {
     it("should delete a rule", async () => {
-      prisma.projectMember.findUnique.mockResolvedValueOnce(memberWith("OWNER"));
       prisma.licenseRule.findFirst.mockResolvedValueOnce(mockRule);
 
-      const result = await service.delete(PROJECT_ID, RULE_ID, USER_ID);
+      const result = await service.delete(PROJECT_ID, RULE_ID);
 
       expect(result.message).toBe("License rule deleted successfully");
       expect(prisma.licenseRule.delete).toHaveBeenCalledWith({ where: { id: RULE_ID } });
     });
 
     it("should throw NotFoundError when rule does not exist", async () => {
-      prisma.projectMember.findUnique.mockResolvedValueOnce(memberWith("OWNER"));
-
-      expect(service.delete(PROJECT_ID, RULE_ID, USER_ID)).rejects.toBeInstanceOf(NotFoundError);
+      expect(service.delete(PROJECT_ID, RULE_ID)).rejects.toBeInstanceOf(NotFoundError);
     });
   });
 
@@ -215,13 +157,12 @@ describe("LicenseRuleService", () => {
     ];
 
     it("should return correct compliance counts", async () => {
-      prisma.projectMember.findUnique.mockResolvedValueOnce(memberWith("VIEWER"));
       prisma.dependency.findMany
         .mockResolvedValueOnce(mockDeps)
         .mockResolvedValueOnce(mockPaginatedDeps);
       prisma.dependency.count.mockResolvedValueOnce(5);
 
-      const result = await service.getComplianceSummary(PROJECT_ID, USER_ID);
+      const result = await service.getComplianceSummary(PROJECT_ID);
 
       expect(result.total).toBe(5);
       expect(result.allowed).toBe(2);
@@ -231,13 +172,12 @@ describe("LicenseRuleService", () => {
     });
 
     it("should return paginated dependencies", async () => {
-      prisma.projectMember.findUnique.mockResolvedValueOnce(memberWith("VIEWER"));
       prisma.dependency.findMany
         .mockResolvedValueOnce(mockDeps)
         .mockResolvedValueOnce(mockPaginatedDeps);
       prisma.dependency.count.mockResolvedValueOnce(5);
 
-      const result = await service.getComplianceSummary(PROJECT_ID, USER_ID, 1, 2);
+      const result = await service.getComplianceSummary(PROJECT_ID, 1, 2);
 
       expect(result.dependencies).toHaveLength(2);
       expect(result.dependencies[0]!.name).toBe("express");
@@ -251,11 +191,10 @@ describe("LicenseRuleService", () => {
     });
 
     it("should apply search filter to dependency query", async () => {
-      prisma.projectMember.findUnique.mockResolvedValueOnce(memberWith("VIEWER"));
       prisma.dependency.findMany.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
       prisma.dependency.count.mockResolvedValueOnce(0);
 
-      await service.getComplianceSummary(PROJECT_ID, USER_ID, 1, 25, "express");
+      await service.getComplianceSummary(PROJECT_ID, 1, 25, "express");
 
       const countCall = prisma.dependency.count.mock.calls[0]![0];
       expect(countCall.where).toHaveProperty("OR");
@@ -266,22 +205,20 @@ describe("LicenseRuleService", () => {
     });
 
     it("should not add search filter when search is empty", async () => {
-      prisma.projectMember.findUnique.mockResolvedValueOnce(memberWith("VIEWER"));
       prisma.dependency.findMany.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
       prisma.dependency.count.mockResolvedValueOnce(0);
 
-      await service.getComplianceSummary(PROJECT_ID, USER_ID, 1, 25);
+      await service.getComplianceSummary(PROJECT_ID, 1, 25);
 
       const countCall = prisma.dependency.count.mock.calls[0]![0];
       expect(countCall.where).not.toHaveProperty("OR");
     });
 
     it("should calculate correct pagination for page 2", async () => {
-      prisma.projectMember.findUnique.mockResolvedValueOnce(memberWith("VIEWER"));
       prisma.dependency.findMany.mockResolvedValueOnce(mockDeps).mockResolvedValueOnce([]);
       prisma.dependency.count.mockResolvedValueOnce(5);
 
-      const result = await service.getComplianceSummary(PROJECT_ID, USER_ID, 2, 2);
+      const result = await service.getComplianceSummary(PROJECT_ID, 2, 2);
 
       expect(result.pagination).toEqual({
         page: 2,
@@ -295,11 +232,10 @@ describe("LicenseRuleService", () => {
     });
 
     it("should handle zero dependencies", async () => {
-      prisma.projectMember.findUnique.mockResolvedValueOnce(memberWith("VIEWER"));
       prisma.dependency.findMany.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
       prisma.dependency.count.mockResolvedValueOnce(0);
 
-      const result = await service.getComplianceSummary(PROJECT_ID, USER_ID);
+      const result = await service.getComplianceSummary(PROJECT_ID);
 
       expect(result.total).toBe(0);
       expect(result.allowed).toBe(0);
@@ -314,7 +250,6 @@ describe("LicenseRuleService", () => {
 
   describe("exportReport", () => {
     beforeEach(() => {
-      prisma.projectMember.findUnique.mockResolvedValue(memberWith("VIEWER"));
       prisma.dependency.findMany
         .mockResolvedValue([{ license: "MIT", licensePolicy: "ALLOW" }])
         .mockResolvedValue([
@@ -329,7 +264,7 @@ describe("LicenseRuleService", () => {
     });
 
     it("should generate CSV report", async () => {
-      const result = await service.exportReport(PROJECT_ID, USER_ID, "csv");
+      const result = await service.exportReport(PROJECT_ID, "csv");
 
       expect(result.contentType).toBe("text/csv");
       expect(result.fileName).toBe("license-audit-report.csv");
@@ -339,7 +274,7 @@ describe("LicenseRuleService", () => {
     });
 
     it("should generate text report for pdf format", async () => {
-      const result = await service.exportReport(PROJECT_ID, USER_ID, "pdf");
+      const result = await service.exportReport(PROJECT_ID, "pdf");
 
       expect(result.contentType).toBe("text/plain");
       expect(result.fileName).toBe("license-audit-report.txt");
@@ -361,7 +296,7 @@ describe("LicenseRuleService", () => {
           },
         ]);
 
-      const result = await service.exportReport(PROJECT_ID, USER_ID, "csv");
+      const result = await service.exportReport(PROJECT_ID, "csv");
 
       expect(result.content).toContain('pkg-with-""quotes""');
     });

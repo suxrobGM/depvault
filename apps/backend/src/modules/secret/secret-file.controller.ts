@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
-import { authGuard } from "@/common/middleware";
+import { projectGuard } from "@/common/middleware";
 import { rateLimiter } from "@/common/middleware/rate-limiter";
 import { getClientIp } from "@/common/utils/ip";
 import { StringIdParamSchema } from "@/types/request";
@@ -26,14 +26,47 @@ export const secretFileController = new Elysia({
   prefix: "/projects/:id/secrets",
   detail: { tags: ["Secret Files"] },
 })
-  .use(authGuard)
+  .use(projectGuard("VIEWER"))
   .use(rateLimiter({ max: 20, windowMs: 60 * 1000 }))
+  .get(
+    "/",
+    ({ params, query }) =>
+      secretFileService.list(params.id, query.environmentType, query.page, query.limit),
+    {
+      params: StringIdParamSchema,
+      query: SecretFileListQuerySchema,
+      response: SecretFileListResponseSchema,
+      detail: {
+        operationId: "listSecretFiles",
+        summary: "List secret files",
+        description:
+          "List secret file metadata for a project, optionally filtered by environment. File contents are not included — use the download endpoint to retrieve decrypted content.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .get(
+    "/:fileId/versions",
+    ({ params }) => secretFileVersionService.listVersions(params.id, params.fileId),
+    {
+      params: SecretFileParamsSchema,
+      response: SecretFileVersionListResponseSchema,
+      detail: {
+        operationId: "listSecretFileVersions",
+        summary: "List secret file versions",
+        description:
+          "List all version history entries for a secret file. Any project member can view version metadata.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .use(projectGuard("EDITOR"))
   .post(
     "/",
-    async ({ params, body, user, request, server }) => {
+    async ({ params, body, projectMember, request, server }) => {
       return secretFileService.upload(
         params.id,
-        user.id,
+        projectMember.userId,
         body.file,
         body.vaultGroupId,
         body.environmentType,
@@ -55,29 +88,12 @@ export const secretFileController = new Elysia({
     },
   )
   .get(
-    "/",
-    ({ params, query, user }) =>
-      secretFileService.list(params.id, user.id, query.environmentType, query.page, query.limit),
-    {
-      params: StringIdParamSchema,
-      query: SecretFileListQuerySchema,
-      response: SecretFileListResponseSchema,
-      detail: {
-        operationId: "listSecretFiles",
-        summary: "List secret files",
-        description:
-          "List secret file metadata for a project, optionally filtered by environment. File contents are not included — use the download endpoint to retrieve decrypted content.",
-        security: [{ bearerAuth: [] }],
-      },
-    },
-  )
-  .get(
     "/:fileId/download",
-    async ({ params, user, set, request, server }) => {
+    async ({ params, projectMember, set, request, server }) => {
       const { buffer, name, mimeType } = await secretFileService.download(
         params.id,
         params.fileId,
-        user.id,
+        projectMember.userId,
         getClientIp(request, server),
       );
       set.headers["content-type"] = mimeType;
@@ -97,7 +113,7 @@ export const secretFileController = new Elysia({
   )
   .put(
     "/:fileId",
-    ({ params, body, user }) => secretFileService.update(params.id, params.fileId, user.id, body),
+    ({ params, body, projectMember }) => secretFileService.update(params.id, params.fileId, body),
     {
       params: SecretFileParamsSchema,
       body: UpdateSecretFileBodySchema,
@@ -113,8 +129,13 @@ export const secretFileController = new Elysia({
   )
   .delete(
     "/:fileId",
-    ({ params, user, request, server }) =>
-      secretFileService.delete(params.id, params.fileId, user.id, getClientIp(request, server)),
+    ({ params, projectMember, request, server }) =>
+      secretFileService.delete(
+        params.id,
+        params.fileId,
+        projectMember.userId,
+        getClientIp(request, server),
+      ),
     {
       params: SecretFileParamsSchema,
       response: MessageResponseSchema,
@@ -127,28 +148,13 @@ export const secretFileController = new Elysia({
       },
     },
   )
-  .get(
-    "/:fileId/versions",
-    ({ params, user }) => secretFileVersionService.listVersions(params.id, params.fileId, user.id),
-    {
-      params: SecretFileParamsSchema,
-      response: SecretFileVersionListResponseSchema,
-      detail: {
-        operationId: "listSecretFileVersions",
-        summary: "List secret file versions",
-        description:
-          "List all version history entries for a secret file. Any project member can view version metadata.",
-        security: [{ bearerAuth: [] }],
-      },
-    },
-  )
   .post(
     "/:fileId/content",
-    async ({ params, body, user, request, server }) =>
+    async ({ params, body, projectMember, request, server }) =>
       secretFileService.uploadNewVersion(
         params.id,
         params.fileId,
-        user.id,
+        projectMember.userId,
         body.file,
         getClientIp(request, server),
       ),
@@ -167,12 +173,11 @@ export const secretFileController = new Elysia({
   )
   .get(
     "/:fileId/versions/:versionId/download",
-    async ({ params, user, set }) => {
+    async ({ params, set }) => {
       const { buffer, name, mimeType } = await secretFileVersionService.downloadVersion(
         params.id,
         params.fileId,
         params.versionId,
-        user.id,
       );
       set.headers["content-type"] = mimeType;
       set.headers["content-disposition"] = `attachment; filename="${name}"`;
@@ -191,8 +196,13 @@ export const secretFileController = new Elysia({
   )
   .post(
     "/:fileId/rollback/:versionId",
-    ({ params, user }) =>
-      secretFileVersionService.rollback(params.id, params.fileId, params.versionId, user.id),
+    ({ params, projectMember }) =>
+      secretFileVersionService.rollback(
+        params.id,
+        params.fileId,
+        params.versionId,
+        projectMember.userId,
+      ),
     {
       params: SecretFileRollbackParamsSchema,
       response: SecretFileResponseSchema,

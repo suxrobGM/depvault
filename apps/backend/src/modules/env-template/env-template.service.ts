@@ -20,8 +20,6 @@ export class EnvTemplateService {
 
   /** Create a template — either from an existing environment or from a manual variable list. */
   async create(projectId: string, body: CreateEnvTemplateBody, userId: string, ipAddress: string) {
-    await this.envRepository.requireEditorOrOwner(projectId, userId);
-
     let variables: {
       key: string;
       description?: string;
@@ -97,9 +95,7 @@ export class EnvTemplateService {
     };
   }
 
-  async list(projectId: string, userId: string) {
-    await this.envRepository.requireMember(projectId, userId);
-
+  async list(projectId: string) {
     const templates = await this.prisma.envTemplate.findMany({
       where: { projectId },
       include: { _count: { select: { variables: true } } },
@@ -117,9 +113,7 @@ export class EnvTemplateService {
     }));
   }
 
-  async getDetail(projectId: string, templateId: string, userId: string) {
-    await this.envRepository.requireMember(projectId, userId);
-
+  async getDetail(projectId: string, templateId: string) {
     const template = await this.prisma.envTemplate.findFirst({
       where: { id: templateId, projectId },
       include: { variables: { orderBy: { sortOrder: "asc" } } },
@@ -153,8 +147,6 @@ export class EnvTemplateService {
     userId: string,
     ipAddress: string,
   ) {
-    await this.envRepository.requireEditorOrOwner(projectId, userId);
-
     const template = await this.prisma.envTemplate.findFirst({
       where: { id: templateId, projectId },
     });
@@ -194,8 +186,6 @@ export class EnvTemplateService {
   }
 
   async delete(projectId: string, templateId: string, userId: string, ipAddress: string) {
-    await this.envRepository.requireEditorOrOwner(projectId, userId);
-
     const template = await this.prisma.envTemplate.findFirst({
       where: { id: templateId, projectId },
     });
@@ -227,8 +217,6 @@ export class EnvTemplateService {
     userId: string,
     ipAddress: string,
   ) {
-    await this.envRepository.requireEditorOrOwner(projectId, userId);
-
     const template = await this.prisma.envTemplate.findFirst({
       where: { id: templateId, projectId },
       include: { variables: { orderBy: { sortOrder: "asc" } } },

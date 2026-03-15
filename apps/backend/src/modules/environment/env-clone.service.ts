@@ -21,8 +21,6 @@ export class EnvironmentCloneService {
     userId: string,
     ipAddress: string,
   ) {
-    await this.envHelper.requireEditorOrOwner(projectId, userId);
-
     const groupName = await this.envHelper.getVaultGroupName(body.vaultGroupId);
 
     const sourceEnv = await this.prisma.environment.findUnique({

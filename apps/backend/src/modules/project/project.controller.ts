@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
-import { authGuard } from "@/common/middleware";
+import { authGuard, projectGuard } from "@/common/middleware";
 import { StringIdParamSchema } from "@/types/request";
 import { MessageResponseSchema } from "@/types/response";
 import {
@@ -97,71 +97,81 @@ export const projectController = new Elysia({
       security: [{ bearerAuth: [] }],
     },
   })
-  // Member management
-  .get(
-    "/:id/members",
-    ({ params, query, user }) => memberService.list(params.id, user.id, query.page, query.limit),
-    {
-      params: ProjectIdParamSchema,
-      query: MemberListQuerySchema,
-      response: MemberListResponseSchema,
-      detail: {
-        operationId: "listMembers",
-        tags: ["Members"],
-        summary: "List project members",
-        description:
-          "Return a paginated list of all members in the project with their roles. Any project member can view the member list.",
-        security: [{ bearerAuth: [] }],
-      },
-    },
+  // Member management — viewer routes
+  .use(
+    new Elysia()
+      .use(projectGuard("VIEWER"))
+      .get(
+        "/:id/members",
+        ({ params, query }) => memberService.list(params.id, query.page, query.limit),
+        {
+          params: ProjectIdParamSchema,
+          query: MemberListQuerySchema,
+          response: MemberListResponseSchema,
+          detail: {
+            operationId: "listMembers",
+            tags: ["Members"],
+            summary: "List project members",
+            description:
+              "Return a paginated list of all members in the project with their roles. Any project member can view the member list.",
+            security: [{ bearerAuth: [] }],
+          },
+        },
+      ),
   )
-  .put(
-    "/:id/members/:memberId",
-    ({ params, body, user }) => memberService.updateRole(params.id, params.memberId, body, user.id),
-    {
-      params: MemberParamsSchema,
-      body: UpdateMemberRoleBodySchema,
-      response: MemberResponseSchema,
-      detail: {
-        operationId: "updateMemberRole",
-        tags: ["Members"],
-        summary: "Update member role",
-        description:
-          "Update the role of a project member. Only the project owner can change member roles.",
-        security: [{ bearerAuth: [] }],
-      },
-    },
-  )
-  .delete(
-    "/:id/members/:memberId",
-    ({ params, user }) => memberService.remove(params.id, params.memberId, user.id),
-    {
-      params: MemberParamsSchema,
-      response: MessageResponseSchema,
-      detail: {
-        operationId: "removeMember",
-        tags: ["Members"],
-        summary: "Remove member from project",
-        description:
-          "Remove a member from the project. Only the project owner can remove members. The owner cannot be removed.",
-        security: [{ bearerAuth: [] }],
-      },
-    },
-  )
-  .post(
-    "/:id/transfer",
-    ({ params, body, user }) => memberService.transferOwnership(params.id, body, user.id),
-    {
-      params: ProjectIdParamSchema,
-      body: TransferOwnershipBodySchema,
-      response: MessageResponseSchema,
-      detail: {
-        operationId: "transferProjectOwnership",
-        tags: ["Members"],
-        summary: "Transfer project ownership",
-        description:
-          "Transfer project ownership to another member. The current owner becomes an editor. Only the current owner can transfer ownership.",
-        security: [{ bearerAuth: [] }],
-      },
-    },
+  // Member management — owner routes
+  .use(
+    new Elysia()
+      .use(projectGuard("OWNER"))
+      .put(
+        "/:id/members/:memberId",
+        ({ params, body }) => memberService.updateRole(params.id, params.memberId, body),
+        {
+          params: MemberParamsSchema,
+          body: UpdateMemberRoleBodySchema,
+          response: MemberResponseSchema,
+          detail: {
+            operationId: "updateMemberRole",
+            tags: ["Members"],
+            summary: "Update member role",
+            description:
+              "Update the role of a project member. Only the project owner can change member roles.",
+            security: [{ bearerAuth: [] }],
+          },
+        },
+      )
+      .delete(
+        "/:id/members/:memberId",
+        ({ params }) => memberService.remove(params.id, params.memberId),
+        {
+          params: MemberParamsSchema,
+          response: MessageResponseSchema,
+          detail: {
+            operationId: "removeMember",
+            tags: ["Members"],
+            summary: "Remove member from project",
+            description:
+              "Remove a member from the project. Only the project owner can remove members. The owner cannot be removed.",
+            security: [{ bearerAuth: [] }],
+          },
+        },
+      )
+      .post(
+        "/:id/transfer",
+        ({ params, body, projectMember }) =>
+          memberService.transferOwnership(params.id, body, projectMember.id, projectMember.userId),
+        {
+          params: ProjectIdParamSchema,
+          body: TransferOwnershipBodySchema,
+          response: MessageResponseSchema,
+          detail: {
+            operationId: "transferProjectOwnership",
+            tags: ["Members"],
+            summary: "Transfer project ownership",
+            description:
+              "Transfer project ownership to another member. The current owner becomes an editor. Only the current owner can transfer ownership.",
+            security: [{ bearerAuth: [] }],
+          },
+        },
+      ),
   );

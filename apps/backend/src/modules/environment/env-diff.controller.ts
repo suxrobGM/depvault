@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
-import { authGuard } from "@/common/middleware";
+import { projectGuard } from "@/common/middleware";
 import { getClientIp } from "@/common/utils/ip";
 import { StringIdParamSchema } from "@/types/request";
 import { EnvironmentCloneService } from "./env-clone.service";
@@ -19,15 +19,16 @@ export const envDiffController = new Elysia({
   prefix: "/projects/:id/environments",
   detail: { tags: ["Environment Diff & Clone"] },
 })
-  .use(authGuard)
+  .use(projectGuard("VIEWER"))
   .get(
     "/diff",
-    ({ params, query, user, request, server }) =>
+    ({ params, query, projectMember, request, server }) =>
       environmentDiffService.diff(
         params.id,
         query.vaultGroupId,
         query.environments,
-        user.id,
+        projectMember.userId,
+        projectMember.role,
         getClientIp(request, server),
       ),
     {
@@ -43,13 +44,14 @@ export const envDiffController = new Elysia({
       },
     },
   )
+  .use(projectGuard("EDITOR"))
   .post(
     "/clone",
-    ({ params, body, user, request, server }) =>
+    ({ params, body, projectMember, request, server }) =>
       environmentCloneService.cloneEnvironment(
         params.id,
         body,
-        user.id,
+        projectMember.userId,
         getClientIp(request, server),
       ),
     {

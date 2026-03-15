@@ -120,18 +120,6 @@ describe("AuditLogService", () => {
       expect(result.items).toHaveLength(1);
     });
 
-    it("should throw ForbiddenError for VIEWER", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
-
-      expect(service.list(projectId, userId, {}, 1, 20)).rejects.toBeInstanceOf(ForbiddenError);
-    });
-
-    it("should throw NotFoundError when user is not a member", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce(null);
-
-      expect(service.list(projectId, userId, {}, 1, 20)).rejects.toBeInstanceOf(NotFoundError);
-    });
-
     it("should filter by action", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
 

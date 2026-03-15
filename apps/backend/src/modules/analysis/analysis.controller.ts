@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
-import { authGuard } from "@/common/middleware";
+import { projectGuard } from "@/common/middleware";
 import { MessageResponseSchema } from "@/types/response";
 import {
   AnalysisItemParamsSchema,
@@ -19,10 +19,35 @@ export const analysisController = new Elysia({
   prefix: "/projects/:id/analyses",
   detail: { tags: ["Analyses"] },
 })
-  .use(authGuard)
+  .use(projectGuard("VIEWER"))
+  .get("/", ({ params, query }) => analysisService.list(params.id, query.page, query.limit), {
+    params: AnalysisProjectParamsSchema,
+    query: AnalysisListQuerySchema,
+    response: AnalysisListResponseSchema,
+    detail: {
+      operationId: "listAnalyses",
+      summary: "List project analyses",
+      description:
+        "Return a paginated list of analyses for a specific project. The authenticated user must be a member of the project.",
+      security: [{ bearerAuth: [] }],
+    },
+  })
+  .get("/:analysisId", ({ params }) => analysisService.getById(params.id, params.analysisId), {
+    params: AnalysisItemParamsSchema,
+    response: AnalysisResponseSchema,
+    detail: {
+      operationId: "getAnalysis",
+      summary: "Get analysis details",
+      description:
+        "Return analysis details with all parsed dependencies. The authenticated user must be a member of the project.",
+      security: [{ bearerAuth: [] }],
+    },
+  })
+  .use(projectGuard("EDITOR"))
   .post(
     "/",
-    ({ params, body, user }) => analysisService.create({ ...body, projectId: params.id }, user.id),
+    ({ params, body, projectMember }) =>
+      analysisService.create({ ...body, projectId: params.id }, projectMember.userId),
     {
       params: AnalysisProjectParamsSchema,
       body: CreateAnalysisBodySchema,
@@ -36,41 +61,9 @@ export const analysisController = new Elysia({
       },
     },
   )
-  .get(
-    "/",
-    ({ params, query, user }) => analysisService.list(params.id, user.id, query.page, query.limit),
-    {
-      params: AnalysisProjectParamsSchema,
-      query: AnalysisListQuerySchema,
-      response: AnalysisListResponseSchema,
-      detail: {
-        operationId: "listAnalyses",
-        summary: "List project analyses",
-        description:
-          "Return a paginated list of analyses for a specific project. The authenticated user must be a member of the project.",
-        security: [{ bearerAuth: [] }],
-      },
-    },
-  )
-  .get(
-    "/:analysisId",
-    ({ params, user }) => analysisService.getById(params.id, params.analysisId, user.id),
-    {
-      params: AnalysisItemParamsSchema,
-      response: AnalysisResponseSchema,
-      detail: {
-        operationId: "getAnalysis",
-        summary: "Get analysis details",
-        description:
-          "Return analysis details with all parsed dependencies. The authenticated user must be a member of the project.",
-        security: [{ bearerAuth: [] }],
-      },
-    },
-  )
   .patch(
     "/:analysisId",
-    ({ params, body, user }) =>
-      analysisService.updateFilePath(params.id, params.analysisId, user.id, body),
+    ({ params, body }) => analysisService.updateFilePath(params.id, params.analysisId, body),
     {
       params: AnalysisItemParamsSchema,
       body: UpdateAnalysisBodySchema,
@@ -86,7 +79,8 @@ export const analysisController = new Elysia({
   )
   .post(
     "/:analysisId/rescan",
-    ({ params, user }) => analysisService.rescan(params.id, params.analysisId, user.id),
+    ({ params, projectMember }) =>
+      analysisService.rescan(params.id, params.analysisId, projectMember.userId),
     {
       params: AnalysisItemParamsSchema,
       response: AnalysisResponseSchema,
@@ -99,18 +93,14 @@ export const analysisController = new Elysia({
       },
     },
   )
-  .delete(
-    "/:analysisId",
-    ({ params, user }) => analysisService.delete(params.id, params.analysisId, user.id),
-    {
-      params: AnalysisItemParamsSchema,
-      response: MessageResponseSchema,
-      detail: {
-        operationId: "deleteAnalysis",
-        summary: "Delete analysis",
-        description:
-          "Delete an analysis and all its dependencies. Only owners and editors can delete analyses.",
-        security: [{ bearerAuth: [] }],
-      },
+  .delete("/:analysisId", ({ params }) => analysisService.delete(params.id, params.analysisId), {
+    params: AnalysisItemParamsSchema,
+    response: MessageResponseSchema,
+    detail: {
+      operationId: "deleteAnalysis",
+      summary: "Delete analysis",
+      description:
+        "Delete an analysis and all its dependencies. Only owners and editors can delete analyses.",
+      security: [{ bearerAuth: [] }],
     },
-  );
+  });

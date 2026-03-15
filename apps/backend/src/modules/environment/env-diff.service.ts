@@ -11,7 +11,7 @@ export class EnvironmentDiffService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly auditLogService: AuditLogService,
-    private readonly envHelper: EnvironmentRepository,
+    private readonly envRepository: EnvironmentRepository,
   ) {}
 
   /** Compare variables across 2-3 environments, highlighting missing and differing values. */
@@ -20,6 +20,7 @@ export class EnvironmentDiffService {
     vaultGroupId: string,
     environmentTypesCsv: string,
     userId: string,
+    memberRole: string,
     ipAddress: string,
   ): Promise<EnvDiffResponse> {
     const envTypes = environmentTypesCsv
@@ -31,9 +32,8 @@ export class EnvironmentDiffService {
       throw new BadRequestError("Provide 2 or 3 comma-separated environment types");
     }
 
-    const member = await this.envHelper.requireMember(projectId, userId);
-    const canReadValues = member.role === "OWNER" || member.role === "EDITOR";
-    const groupName = await this.envHelper.getVaultGroupName(vaultGroupId);
+    const canReadValues = memberRole === "OWNER" || memberRole === "EDITOR";
+    const groupName = await this.envRepository.getVaultGroupName(vaultGroupId);
 
     const environments = await this.prisma.environment.findMany({
       where: { projectId, vaultGroupId, type: { in: envTypes } },

@@ -1,10 +1,9 @@
 import { singleton } from "tsyringe";
-import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
+import { BadRequestError, NotFoundError } from "@/common/errors";
 import {
   DetectionSeverity,
   DetectionStatus,
   PrismaClient,
-  ProjectRole,
   ScanStatus,
   type Prisma,
 } from "@/generated/prisma";
@@ -33,8 +32,6 @@ export class SecretScanService {
   ) {}
 
   async triggerScan(projectId: string, userId: string): Promise<ScanResponse> {
-    await this.requireEditor(projectId, userId);
-
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },
       select: { repositoryUrl: true },
@@ -73,12 +70,9 @@ export class SecretScanService {
 
   async listScans(
     projectId: string,
-    userId: string,
     page: number,
     limit: number,
   ): Promise<PaginatedResponse<ScanResponse>> {
-    await this.requireMember(projectId, userId);
-
     const where = { projectId };
     const [rows, total] = await Promise.all([
       this.prisma.secretScan.findMany({
@@ -96,9 +90,7 @@ export class SecretScanService {
     };
   }
 
-  async getScan(projectId: string, scanId: string, userId: string): Promise<ScanResponse> {
-    await this.requireMember(projectId, userId);
-
+  async getScan(projectId: string, scanId: string): Promise<ScanResponse> {
     const scan = await this.prisma.secretScan.findFirst({
       where: { id: scanId, projectId },
     });
@@ -110,11 +102,8 @@ export class SecretScanService {
 
   async listDetections(
     projectId: string,
-    userId: string,
     filters: DetectionListQuery,
   ): Promise<PaginatedResponse<DetectionResponse>> {
-    await this.requireMember(projectId, userId);
-
     const { page, limit, status, severity } = filters;
 
     const where: Prisma.SecretDetectionWhereInput = {
@@ -146,8 +135,6 @@ export class SecretScanService {
     body: UpdateDetectionBody,
     userId: string,
   ): Promise<DetectionResponse> {
-    await this.requireEditor(projectId, userId);
-
     const detection = await this.prisma.secretDetection.findFirst({
       where: { id: detectionId, projectId },
     });
@@ -174,8 +161,6 @@ export class SecretScanService {
     body: BatchUpdateDetectionsBody,
     userId: string,
   ): Promise<BatchUpdateDetectionsResponse> {
-    await this.requireEditor(projectId, userId);
-
     const { count } = await this.prisma.secretDetection.updateMany({
       where: {
         id: { in: body.detectionIds },
@@ -192,9 +177,7 @@ export class SecretScanService {
     return { updatedCount: count };
   }
 
-  async getScanSummary(projectId: string, userId: string): Promise<ScanSummaryResponse> {
-    await this.requireMember(projectId, userId);
-
+  async getScanSummary(projectId: string): Promise<ScanSummaryResponse> {
     const [lastScan, openCounts, totalResolved] = await Promise.all([
       this.prisma.secretScan.findFirst({
         where: { projectId },
@@ -237,22 +220,5 @@ export class SecretScanService {
       openDetections: severityCounts,
       totalResolved,
     };
-  }
-
-  private async requireMember(projectId: string, userId: string): Promise<void> {
-    const member = await this.prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId } },
-    });
-    if (!member) throw new NotFoundError("Project not found");
-  }
-
-  private async requireEditor(projectId: string, userId: string): Promise<void> {
-    const member = await this.prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId } },
-    });
-    if (!member) throw new NotFoundError("Project not found");
-    if (member.role === ProjectRole.VIEWER) {
-      throw new ForbiddenError("Viewers cannot perform this action");
-    }
   }
 }

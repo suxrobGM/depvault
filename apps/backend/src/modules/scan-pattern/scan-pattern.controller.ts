@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
-import { authGuard } from "@/common/middleware";
+import { projectGuard } from "@/common/middleware";
 import { MessageResponseSchema } from "@/types/response";
 import {
   CreatePatternBodySchema,
@@ -18,8 +18,8 @@ export const scanPatternController = new Elysia({
   prefix: "/projects/:id/scan-patterns",
   detail: { tags: ["Scan Patterns"] },
 })
-  .use(authGuard)
-  .get("/", ({ params, user }) => scanPatternService.list(params.id, user.id), {
+  .use(projectGuard("VIEWER"))
+  .get("/", ({ params }) => scanPatternService.list(params.id), {
     params: PatternProjectParamsSchema,
     response: PatternListResponseSchema,
     detail: {
@@ -29,7 +29,8 @@ export const scanPatternController = new Elysia({
       security: [{ bearerAuth: [] }],
     },
   })
-  .post("/", ({ params, body, user }) => scanPatternService.create(params.id, user.id, body), {
+  .use(projectGuard("EDITOR"))
+  .post("/", ({ params, body }) => scanPatternService.create(params.id, body), {
     params: PatternProjectParamsSchema,
     body: CreatePatternBodySchema,
     response: PatternResponseSchema,
@@ -43,8 +44,7 @@ export const scanPatternController = new Elysia({
   })
   .put(
     "/:patternId",
-    ({ params, body, user }) =>
-      scanPatternService.update(params.id, params.patternId, user.id, body),
+    ({ params, body }) => scanPatternService.update(params.id, params.patternId, body),
     {
       params: PatternParamsSchema,
       body: UpdatePatternBodySchema,
@@ -57,17 +57,13 @@ export const scanPatternController = new Elysia({
       },
     },
   )
-  .delete(
-    "/:patternId",
-    ({ params, user }) => scanPatternService.delete(params.id, params.patternId, user.id),
-    {
-      params: PatternParamsSchema,
-      response: MessageResponseSchema,
-      detail: {
-        operationId: "deleteScanPattern",
-        summary: "Delete custom pattern",
-        description: "Delete a custom scan pattern. Built-in patterns cannot be deleted.",
-        security: [{ bearerAuth: [] }],
-      },
+  .delete("/:patternId", ({ params }) => scanPatternService.delete(params.id, params.patternId), {
+    params: PatternParamsSchema,
+    response: MessageResponseSchema,
+    detail: {
+      operationId: "deleteScanPattern",
+      summary: "Delete custom pattern",
+      description: "Delete a custom scan pattern. Built-in patterns cannot be deleted.",
+      security: [{ bearerAuth: [] }],
     },
-  );
+  });

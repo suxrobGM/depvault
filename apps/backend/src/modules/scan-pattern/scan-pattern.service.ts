@@ -1,6 +1,6 @@
 import { singleton } from "tsyringe";
 import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
-import { PrismaClient, ProjectRole } from "@/generated/prisma";
+import { PrismaClient } from "@/generated/prisma";
 import { BUILT_IN_PATTERNS } from "@/modules/secret-scan/secret-scan.patterns";
 import type { CreatePatternBody, PatternResponse, UpdatePatternBody } from "./scan-pattern.schema";
 
@@ -8,9 +8,7 @@ import type { CreatePatternBody, PatternResponse, UpdatePatternBody } from "./sc
 export class ScanPatternService {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async list(projectId: string, userId: string): Promise<{ items: PatternResponse[] }> {
-    await this.requireMember(projectId, userId);
-
+  async list(projectId: string): Promise<{ items: PatternResponse[] }> {
     const customPatterns = await this.prisma.scanPattern.findMany({
       where: { projectId },
       orderBy: { createdAt: "desc" },
@@ -39,12 +37,7 @@ export class ScanPatternService {
     return { items: [...builtIn, ...custom] };
   }
 
-  async create(
-    projectId: string,
-    userId: string,
-    body: CreatePatternBody,
-  ): Promise<PatternResponse> {
-    await this.requireEditor(projectId, userId);
+  async create(projectId: string, body: CreatePatternBody): Promise<PatternResponse> {
     this.validateRegex(body.regex);
 
     const pattern = await this.prisma.scanPattern.create({
@@ -71,11 +64,8 @@ export class ScanPatternService {
   async update(
     projectId: string,
     patternId: string,
-    userId: string,
     body: UpdatePatternBody,
   ): Promise<PatternResponse> {
-    await this.requireEditor(projectId, userId);
-
     const pattern = await this.prisma.scanPattern.findFirst({
       where: { id: patternId, projectId },
     });
@@ -105,9 +95,7 @@ export class ScanPatternService {
     };
   }
 
-  async delete(projectId: string, patternId: string, userId: string): Promise<{ message: string }> {
-    await this.requireEditor(projectId, userId);
-
+  async delete(projectId: string, patternId: string): Promise<{ message: string }> {
     const pattern = await this.prisma.scanPattern.findFirst({
       where: { id: patternId, projectId },
     });
@@ -125,23 +113,6 @@ export class ScanPatternService {
       new RegExp(regex);
     } catch {
       throw new BadRequestError("Invalid regular expression");
-    }
-  }
-
-  private async requireMember(projectId: string, userId: string): Promise<void> {
-    const member = await this.prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId } },
-    });
-    if (!member) throw new NotFoundError("Project not found");
-  }
-
-  private async requireEditor(projectId: string, userId: string): Promise<void> {
-    const member = await this.prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId } },
-    });
-    if (!member) throw new NotFoundError("Project not found");
-    if (member.role === ProjectRole.VIEWER) {
-      throw new ForbiddenError("Viewers cannot manage patterns");
     }
   }
 }

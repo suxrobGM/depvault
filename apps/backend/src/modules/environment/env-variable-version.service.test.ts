@@ -75,9 +75,7 @@ describe("EnvVariableVersionService", () => {
   beforeEach(() => {
     mock.restore();
     mockPrisma = createMockPrisma();
-    const { EnvironmentRepository } = require("./environment.repository");
-    const envHelper = new EnvironmentRepository(mockPrisma);
-    service = new EnvVariableVersionService(mockPrisma, envHelper);
+    service = new EnvVariableVersionService(mockPrisma);
 
     spyOn(encryption, "deriveProjectKey").mockReturnValue(fakeProjectKey);
     spyOn(encryption, "encrypt").mockReturnValue(mockEncrypted);
@@ -86,11 +84,10 @@ describe("EnvVariableVersionService", () => {
 
   describe("listVersions", () => {
     it("should return masked values for VIEWER", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
       mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
       mockPrisma.envVariableVersion.findMany.mockResolvedValueOnce([mockVersion]);
 
-      const result = await service.listVersions(projectId, varId, userId);
+      const result = await service.listVersions(projectId, varId, "VIEWER");
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0]!.value).toBe("********");
@@ -98,81 +95,68 @@ describe("EnvVariableVersionService", () => {
     });
 
     it("should return decrypted values for OWNER", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
       mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
       mockPrisma.envVariableVersion.findMany.mockResolvedValueOnce([mockVersion]);
 
-      const result = await service.listVersions(projectId, varId, userId);
+      const result = await service.listVersions(projectId, varId, "OWNER");
 
       expect(result.items[0]!.value).toBe("postgres://localhost/db");
       expect(encryption.decrypt).toHaveBeenCalled();
     });
 
     it("should return decrypted values for EDITOR", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "EDITOR" });
       mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
       mockPrisma.envVariableVersion.findMany.mockResolvedValueOnce([mockVersion]);
 
-      const result = await service.listVersions(projectId, varId, userId);
+      const result = await service.listVersions(projectId, varId, "EDITOR");
 
       expect(result.items[0]!.value).toBe("postgres://localhost/db");
     });
 
     it("should include changedByName from user lookup", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
       mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
       mockPrisma.envVariableVersion.findMany.mockResolvedValueOnce([mockVersion]);
 
-      const result = await service.listVersions(projectId, varId, userId);
+      const result = await service.listVersions(projectId, varId, "OWNER");
 
       expect(result.items[0]!.changedByName).toBe("Jane Doe");
     });
 
     it("should fallback to email when no name parts present", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
       mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
       mockPrisma.envVariableVersion.findMany.mockResolvedValueOnce([mockVersion]);
       mockPrisma.user.findMany.mockResolvedValueOnce([
         { id: userId, firstName: "", lastName: "", email: "jane@example.com" },
       ]);
 
-      const result = await service.listVersions(projectId, varId, userId);
+      const result = await service.listVersions(projectId, varId, "OWNER");
 
       expect(result.items[0]!.changedByName).toBe("jane@example.com");
     });
 
     it("should fallback to 'Unknown user' for deleted users", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
       mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
       mockPrisma.envVariableVersion.findMany.mockResolvedValueOnce([mockVersion]);
       mockPrisma.user.findMany.mockResolvedValueOnce([]);
 
-      const result = await service.listVersions(projectId, varId, userId);
+      const result = await service.listVersions(projectId, varId, "OWNER");
 
       expect(result.items[0]!.changedByName).toBe("Unknown user");
     });
 
     it("should return empty items when no versions exist", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
       mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
       mockPrisma.envVariableVersion.findMany.mockResolvedValueOnce([]);
 
-      const result = await service.listVersions(projectId, varId, userId);
+      const result = await service.listVersions(projectId, varId, "OWNER");
 
       expect(result.items).toHaveLength(0);
     });
 
     it("should throw NotFoundError when variable not in project", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
       mockPrisma.envVariable.findFirst.mockResolvedValueOnce(null);
 
-      expect(service.listVersions(projectId, varId, userId)).rejects.toBeInstanceOf(NotFoundError);
-    });
-
-    it("should throw NotFoundError when user is not a member", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce(null);
-
-      expect(service.listVersions(projectId, varId, userId)).rejects.toBeInstanceOf(NotFoundError);
+      expect(service.listVersions(projectId, varId, "OWNER")).rejects.toBeInstanceOf(NotFoundError);
     });
   });
 
@@ -228,14 +212,6 @@ describe("EnvVariableVersionService", () => {
 
       expect(result.id).toBe(varId);
       expect(result.value).toBe("postgres://localhost/db");
-    });
-
-    it("should throw ForbiddenError for VIEWER", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
-
-      expect(service.rollback(projectId, varId, versionId, userId)).rejects.toBeInstanceOf(
-        ForbiddenError,
-      );
     });
 
     it("should throw NotFoundError when variable not found", async () => {

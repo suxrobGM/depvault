@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
-import { authGuard } from "@/common/middleware";
+import { projectGuard } from "@/common/middleware";
 import { getClientIp } from "@/common/utils/ip";
 import { StringIdParamSchema } from "@/types/request";
 import { MessageResponseSchema } from "@/types/response";
@@ -18,15 +18,43 @@ import { EnvTemplateService } from "./env-template.service";
 
 const templateService = container.resolve(EnvTemplateService);
 
-export const envTemplateController = new Elysia({
+/** Read-only template endpoints (VIEWER+). */
+const envTemplateReadController = new Elysia({
   prefix: "/projects/:id/env-templates",
   detail: { tags: ["Environment Templates"] },
 })
-  .use(authGuard)
+  .use(projectGuard("VIEWER"))
+  .get("/", ({ params }) => templateService.list(params.id), {
+    params: StringIdParamSchema,
+    response: EnvTemplateListResponseSchema,
+    detail: {
+      operationId: "listEnvTemplates",
+      summary: "List templates",
+      description: "List all environment templates for a project.",
+      security: [{ bearerAuth: [] }],
+    },
+  })
+  .get("/:templateId", ({ params }) => templateService.getDetail(params.id, params.templateId), {
+    params: TemplateParamsSchema,
+    response: EnvTemplateDetailResponseSchema,
+    detail: {
+      operationId: "getEnvTemplate",
+      summary: "Get template detail",
+      description: "Get a template with its variables.",
+      security: [{ bearerAuth: [] }],
+    },
+  });
+
+/** Write template endpoints (EDITOR+). */
+const envTemplateWriteController = new Elysia({
+  prefix: "/projects/:id/env-templates",
+  detail: { tags: ["Environment Templates"] },
+})
+  .use(projectGuard("EDITOR"))
   .post(
     "/",
-    ({ params, body, user, request, server }) =>
-      templateService.create(params.id, body, user.id, getClientIp(request, server)),
+    ({ params, body, projectMember, request, server }) =>
+      templateService.create(params.id, body, projectMember.userId, getClientIp(request, server)),
     {
       params: StringIdParamSchema,
       body: CreateEnvTemplateBodySchema,
@@ -39,38 +67,14 @@ export const envTemplateController = new Elysia({
       },
     },
   )
-  .get("/", ({ params, user }) => templateService.list(params.id, user.id), {
-    params: StringIdParamSchema,
-    response: EnvTemplateListResponseSchema,
-    detail: {
-      operationId: "listEnvTemplates",
-      summary: "List templates",
-      description: "List all environment templates for a project.",
-      security: [{ bearerAuth: [] }],
-    },
-  })
-  .get(
-    "/:templateId",
-    ({ params, user }) => templateService.getDetail(params.id, params.templateId, user.id),
-    {
-      params: TemplateParamsSchema,
-      response: EnvTemplateDetailResponseSchema,
-      detail: {
-        operationId: "getEnvTemplate",
-        summary: "Get template detail",
-        description: "Get a template with its variables.",
-        security: [{ bearerAuth: [] }],
-      },
-    },
-  )
   .put(
     "/:templateId",
-    ({ params, body, user, request, server }) =>
+    ({ params, body, projectMember, request, server }) =>
       templateService.update(
         params.id,
         params.templateId,
         body,
-        user.id,
+        projectMember.userId,
         getClientIp(request, server),
       ),
     {
@@ -87,8 +91,13 @@ export const envTemplateController = new Elysia({
   )
   .delete(
     "/:templateId",
-    ({ params, user, request, server }) =>
-      templateService.delete(params.id, params.templateId, user.id, getClientIp(request, server)),
+    ({ params, projectMember, request, server }) =>
+      templateService.delete(
+        params.id,
+        params.templateId,
+        projectMember.userId,
+        getClientIp(request, server),
+      ),
     {
       params: TemplateParamsSchema,
       response: MessageResponseSchema,
@@ -102,12 +111,12 @@ export const envTemplateController = new Elysia({
   )
   .post(
     "/:templateId/apply",
-    ({ params, body, user, request, server }) =>
+    ({ params, body, projectMember, request, server }) =>
       templateService.apply(
         params.id,
         params.templateId,
         body,
-        user.id,
+        projectMember.userId,
         getClientIp(request, server),
       ),
     {
@@ -122,3 +131,7 @@ export const envTemplateController = new Elysia({
       },
     },
   );
+
+export const envTemplateController = new Elysia()
+  .use(envTemplateReadController)
+  .use(envTemplateWriteController);

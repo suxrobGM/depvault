@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { singleton } from "tsyringe";
-import { BadRequestError, ForbiddenError, GoneError, NotFoundError } from "@/common/errors";
+import { BadRequestError, GoneError, NotFoundError } from "@/common/errors";
 import { decrypt, decryptBinary, deriveProjectKey, encrypt } from "@/common/utils/encryption";
 import { createRandomToken, hashPassword } from "@/common/utils/password";
 import { PrismaClient } from "@/generated/prisma";
@@ -28,8 +28,6 @@ export class SharedSecretService {
     body: CreateEnvShareBody,
     ipAddress = "unknown",
   ): Promise<{ token: string; shareUrl: string }> {
-    await this.requireEditorOrOwner(projectId, userId);
-
     const variables = await this.prisma.envVariable.findMany({
       where: { id: { in: body.variableIds }, environment: { projectId } },
     });
@@ -83,8 +81,6 @@ export class SharedSecretService {
     body: CreateFileShareBody,
     ipAddress = "unknown",
   ): Promise<{ token: string; shareUrl: string }> {
-    await this.requireEditorOrOwner(projectId, userId);
-
     const file = await this.prisma.secretFile.findFirst({
       where: { id: fileId, environment: { projectId } },
     });
@@ -209,10 +205,7 @@ export class SharedSecretService {
     };
   }
 
-  async list(projectId: string, userId: string): Promise<{ items: SharedSecretAuditItem[] }> {
-    await this.requireEditorOrOwner(projectId, userId);
-
-    // Expire stale records inline before listing
+  async list(projectId: string): Promise<{ items: SharedSecretAuditItem[] }> {
     await this.prisma.sharedSecret.updateMany({
       where: { projectId, status: "PENDING", expiresAt: { lt: new Date() } },
       data: { status: "EXPIRED" },
@@ -244,8 +237,6 @@ export class SharedSecretService {
     userId: string,
     ipAddress = "unknown",
   ): Promise<{ message: string }> {
-    await this.requireEditorOrOwner(projectId, userId);
-
     const secret = await this.prisma.sharedSecret.findFirst({
       where: { id: secretId, projectId },
     });
@@ -313,19 +304,5 @@ export class SharedSecretService {
         authTag: "",
       },
     });
-  }
-
-  private async requireEditorOrOwner(projectId: string, userId: string) {
-    const member = await this.prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId } },
-    });
-
-    if (!member) throw new NotFoundError("Project not found");
-
-    if (member.role !== "OWNER" && member.role !== "EDITOR") {
-      throw new ForbiddenError("Only owners and editors can manage shared secrets");
-    }
-
-    return member;
   }
 }

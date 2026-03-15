@@ -1,7 +1,7 @@
 import { singleton } from "tsyringe";
-import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
+import { BadRequestError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
-import { DependencyStatus, PrismaClient, ProjectRole, type Ecosystem } from "@/generated/prisma";
+import { DependencyStatus, PrismaClient, type Ecosystem } from "@/generated/prisma";
 import { NotificationService } from "@/modules/notification/notification.service";
 import type { PaginatedResponse } from "@/types/response";
 import type {
@@ -42,8 +42,6 @@ export class AnalysisService {
     body: CreateAnalysisBody & { projectId: string },
     userId: string,
   ): Promise<AnalysisResponse> {
-    await this.requireEditor(body.projectId, userId, "create");
-
     const parser = PARSERS[body.ecosystem];
     if (!parser) {
       throw new BadRequestError(`Unsupported ecosystem: ${body.ecosystem}`);
@@ -126,12 +124,9 @@ export class AnalysisService {
 
   async list(
     projectId: string,
-    userId: string,
     page: number,
     limit: number,
   ): Promise<PaginatedResponse<AnalysisSummaryResponse>> {
-    await this.requireMember(projectId, userId);
-
     const where = { projectId };
 
     const [rows, total] = await Promise.all([
@@ -156,17 +151,11 @@ export class AnalysisService {
     };
   }
 
-  async getById(projectId: string, analysisId: string, userId: string): Promise<AnalysisResponse> {
-    await this.requireMember(projectId, userId);
+  async getById(projectId: string, analysisId: string): Promise<AnalysisResponse> {
     return this.findAnalysisOrThrow(analysisId, projectId, true);
   }
 
-  async delete(
-    projectId: string,
-    analysisId: string,
-    userId: string,
-  ): Promise<{ message: string }> {
-    await this.requireEditor(projectId, userId, "delete");
+  async delete(projectId: string, analysisId: string): Promise<{ message: string }> {
     await this.findAnalysisOrThrow(analysisId, projectId, false);
     await this.prisma.analysis.delete({ where: { id: analysisId } });
     return { message: "Analysis deleted successfully" };
@@ -175,10 +164,8 @@ export class AnalysisService {
   async updateFilePath(
     projectId: string,
     analysisId: string,
-    userId: string,
     body: UpdateAnalysisBody,
   ): Promise<AnalysisResponse> {
-    await this.requireEditor(projectId, userId, "update");
     await this.findAnalysisOrThrow(analysisId, projectId, false);
 
     return this.prisma.analysis.update({
@@ -191,7 +178,6 @@ export class AnalysisService {
   }
 
   async rescan(projectId: string, analysisId: string, userId: string): Promise<AnalysisResponse> {
-    await this.requireEditor(projectId, userId, "rescan");
     const analysis = await this.findAnalysisOrThrow(analysisId, projectId, true);
 
     await this.prisma.vulnerability.deleteMany({
@@ -224,30 +210,6 @@ export class AnalysisService {
   }
 
   // --- Private helpers ---
-
-  private async requireMember(projectId: string, userId: string): Promise<void> {
-    const member = await this.prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId } },
-    });
-
-    if (!member) {
-      throw new NotFoundError("Project not found");
-    }
-  }
-
-  private async requireEditor(projectId: string, userId: string, action: string): Promise<void> {
-    const member = await this.prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId } },
-    });
-
-    if (!member) {
-      throw new NotFoundError("Project not found");
-    }
-
-    if (member.role === ProjectRole.VIEWER) {
-      throw new ForbiddenError(`Viewers cannot ${action} analyses`);
-    }
-  }
 
   private async findAnalysisOrThrow(
     analysisId: string,

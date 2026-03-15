@@ -1,5 +1,5 @@
 import { singleton } from "tsyringe";
-import { ForbiddenError, NotFoundError } from "@/common/errors";
+import { NotFoundError } from "@/common/errors";
 import { decryptBinary, deriveProjectKey, encryptBinary } from "@/common/utils/encryption";
 import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
@@ -39,8 +39,6 @@ export class SecretFileService {
     description?: string,
     ipAddress = "unknown",
   ): Promise<SecretFileResponse> {
-    await this.requireEditorOrOwner(projectId, userId);
-
     validateFile(file);
 
     const environment = await this.findOrCreateEnvironment(
@@ -82,13 +80,10 @@ export class SecretFileService {
 
   async list(
     projectId: string,
-    userId: string,
     environmentType?: EnvironmentType,
     page = 1,
     limit = 20,
   ): Promise<PaginatedResponse<SecretFileResponse>> {
-    await this.requireMember(projectId, userId);
-
     const environmentFilter = environmentType
       ? { environment: { projectId, type: environmentType } }
       : { environment: { projectId } };
@@ -123,8 +118,6 @@ export class SecretFileService {
     userId: string,
     ipAddress = "unknown",
   ): Promise<{ buffer: Buffer; name: string; mimeType: string }> {
-    await this.requireEditorOrOwner(projectId, userId);
-
     const file = await this.findFileOrThrow(projectId, fileId);
 
     const projectKey = deriveProjectKey(projectId);
@@ -155,8 +148,6 @@ export class SecretFileService {
     file: File,
     ipAddress = "unknown",
   ): Promise<SecretFileResponse> {
-    await this.requireEditorOrOwner(projectId, userId);
-
     validateFile(file);
 
     const existing = await this.findFileOrThrow(projectId, fileId);
@@ -208,11 +199,8 @@ export class SecretFileService {
   async update(
     projectId: string,
     fileId: string,
-    userId: string,
     data: UpdateSecretFileBody,
   ): Promise<SecretFileResponse> {
-    await this.requireEditorOrOwner(projectId, userId);
-
     const file = await this.findFileOrThrow(projectId, fileId);
 
     if (data.name) {
@@ -248,8 +236,6 @@ export class SecretFileService {
     userId: string,
     ipAddress = "unknown",
   ): Promise<{ message: string }> {
-    await this.requireEditorOrOwner(projectId, userId);
-
     const file = await this.findFileOrThrow(projectId, fileId);
     await this.prisma.secretFile.delete({ where: { id: fileId } });
 
@@ -295,27 +281,5 @@ export class SecretFileService {
       data: { projectId, vaultGroupId, type },
       include: { vaultGroup: true },
     });
-  }
-
-  private async requireMember(projectId: string, userId: string) {
-    const member = await this.prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId } },
-    });
-
-    if (!member) {
-      throw new NotFoundError("Project not found");
-    }
-
-    return member;
-  }
-
-  private async requireEditorOrOwner(projectId: string, userId: string) {
-    const member = await this.requireMember(projectId, userId);
-
-    if (member.role !== "OWNER" && member.role !== "EDITOR") {
-      throw new ForbiddenError("Only owners and editors can manage secret files");
-    }
-
-    return member;
   }
 }

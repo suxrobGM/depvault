@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
-import { authGuard } from "@/common/middleware";
+import { projectGuard } from "@/common/middleware";
 import { getClientIp } from "@/common/utils/ip";
 import { StringIdParamSchema } from "@/types/request";
 import { MessageResponseSchema } from "@/types/response";
@@ -26,30 +26,14 @@ export const envVariableController = new Elysia({
   prefix: "/projects/:id/environments",
   detail: { tags: ["Environment Variables"] },
 })
-  .use(authGuard)
-  .post(
-    "/variables",
-    ({ params, body, user, request, server }) =>
-      environmentService.create(params.id, body, user.id, getClientIp(request, server)),
-    {
-      params: StringIdParamSchema,
-      body: CreateEnvVariableBodySchema,
-      response: EnvVariableWithValueResponseSchema,
-      detail: {
-        operationId: "createEnvVariable",
-        summary: "Create an environment variable",
-        description:
-          "Create a new encrypted environment variable for the project. The environment is auto-created if it doesn't exist. Only owners and editors can create variables.",
-        security: [{ bearerAuth: [] }],
-      },
-    },
-  )
+  .use(projectGuard("VIEWER"))
   .get(
     "/variables",
-    ({ params, query, user, request, server }) =>
+    ({ params, query, projectMember, request, server }) =>
       environmentService.list(
         params.id,
-        user.id,
+        projectMember.userId,
+        projectMember.role,
         query.vaultGroupId,
         query.environmentType,
         query.page,
@@ -69,14 +53,53 @@ export const envVariableController = new Elysia({
       },
     },
   )
+  .get(
+    "/variables/:varId/versions",
+    ({ params, projectMember }) =>
+      envVariableVersionService.listVersions(params.id, params.varId, projectMember.role),
+    {
+      params: EnvVariableParamsSchema,
+      response: EnvVariableVersionListResponseSchema,
+      detail: {
+        operationId: "listEnvVariableVersions",
+        summary: "List variable version history",
+        description:
+          "List the version history for an environment variable. Editors and owners see decrypted values; viewers see masked values.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .use(projectGuard("EDITOR"))
+  .post(
+    "/variables",
+    ({ params, body, projectMember, request, server }) =>
+      environmentService.create(
+        params.id,
+        body,
+        projectMember.userId,
+        getClientIp(request, server),
+      ),
+    {
+      params: StringIdParamSchema,
+      body: CreateEnvVariableBodySchema,
+      response: EnvVariableWithValueResponseSchema,
+      detail: {
+        operationId: "createEnvVariable",
+        summary: "Create an environment variable",
+        description:
+          "Create a new encrypted environment variable for the project. The environment is auto-created if it doesn't exist. Only owners and editors can create variables.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
   .put(
     "/variables/:varId",
-    ({ params, body, user, request, server }) =>
+    ({ params, body, projectMember, request, server }) =>
       environmentService.update(
         params.id,
         params.varId,
         body,
-        user.id,
+        projectMember.userId,
         getClientIp(request, server),
       ),
     {
@@ -94,8 +117,13 @@ export const envVariableController = new Elysia({
   )
   .delete(
     "/variables/:varId",
-    ({ params, user, request, server }) =>
-      environmentService.delete(params.id, params.varId, user.id, getClientIp(request, server)),
+    ({ params, projectMember, request, server }) =>
+      environmentService.delete(
+        params.id,
+        params.varId,
+        projectMember.userId,
+        getClientIp(request, server),
+      ),
     {
       params: EnvVariableParamsSchema,
       response: MessageResponseSchema,
@@ -108,25 +136,15 @@ export const envVariableController = new Elysia({
       },
     },
   )
-  .get(
-    "/variables/:varId/versions",
-    ({ params, user }) => envVariableVersionService.listVersions(params.id, params.varId, user.id),
-    {
-      params: EnvVariableParamsSchema,
-      response: EnvVariableVersionListResponseSchema,
-      detail: {
-        operationId: "listEnvVariableVersions",
-        summary: "List variable version history",
-        description:
-          "List the version history for an environment variable. Editors and owners see decrypted values; viewers see masked values.",
-        security: [{ bearerAuth: [] }],
-      },
-    },
-  )
   .post(
     "/variables/:varId/versions/:versionId/rollback",
-    ({ params, user }) =>
-      envVariableVersionService.rollback(params.id, params.varId, params.versionId, user.id),
+    ({ params, projectMember }) =>
+      envVariableVersionService.rollback(
+        params.id,
+        params.varId,
+        params.versionId,
+        projectMember.userId,
+      ),
     {
       params: EnvVariableVersionParamsSchema,
       response: EnvVariableWithValueResponseSchema,

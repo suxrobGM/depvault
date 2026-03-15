@@ -226,21 +226,5 @@ describe("EnvironmentCloneService", () => {
         NotFoundError,
       );
     });
-
-    it("should throw ForbiddenError for VIEWER role", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
-
-      expect(service.cloneEnvironment(projectId, body, userId, ipAddress)).rejects.toThrow(
-        ForbiddenError,
-      );
-    });
-
-    it("should throw NotFoundError if user is not a project member", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce(null);
-
-      expect(service.cloneEnvironment(projectId, body, userId, ipAddress)).rejects.toThrow(
-        NotFoundError,
-      );
-    });
   });
 });

@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
-import { authGuard } from "@/common/middleware";
+import { projectGuard } from "@/common/middleware";
 import { getClientIp } from "@/common/utils/ip";
 import { StringIdParamSchema } from "@/types/request";
 import { MessageResponseSchema } from "@/types/response";
@@ -17,11 +17,10 @@ export const environmentController = new Elysia({
   prefix: "/projects/:id/environments",
   detail: { tags: ["Environments"] },
 })
-  .use(authGuard)
+  .use(projectGuard("VIEWER"))
   .get(
     "/",
-    ({ params, query, user }) =>
-      environmentService.listEnvironments(params.id, user.id, query.vaultGroupId),
+    ({ params, query }) => environmentService.listEnvironments(params.id, query.vaultGroupId),
     {
       params: StringIdParamSchema,
       query: EnvironmentListQuerySchema,
@@ -34,13 +33,14 @@ export const environmentController = new Elysia({
       },
     },
   )
+  .use(projectGuard("EDITOR"))
   .delete(
     "/:envId",
-    ({ params, user, request, server }) =>
+    ({ params, projectMember, request, server }) =>
       environmentService.deleteEnvironment(
         params.id,
         params.envId,
-        user.id,
+        projectMember.userId,
         getClientIp(request, server),
       ),
     {

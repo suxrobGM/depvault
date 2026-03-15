@@ -1,5 +1,4 @@
 import { singleton } from "tsyringe";
-import { ForbiddenError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger/logger";
 import { PrismaClient, type AuditAction, type AuditResourceType } from "@/generated/prisma";
 import type { PaginatedResponse } from "@/types/response";
@@ -50,18 +49,6 @@ export class AuditLogService {
     page = 1,
     limit = 20,
   ): Promise<PaginatedResponse<AuditLogResponse>> {
-    const member = await this.prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId } },
-    });
-
-    if (!member) {
-      throw new NotFoundError("Project not found");
-    }
-
-    if (member.role !== "OWNER" && member.role !== "EDITOR") {
-      throw new ForbiddenError("Only owners and editors can view audit logs");
-    }
-
     const createdAtFilter = {
       ...(filters.from && { gte: new Date(filters.from) }),
       ...(filters.to && { lte: new Date(filters.to) }),

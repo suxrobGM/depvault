@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
-import { authGuard } from "@/common/middleware";
+import { projectGuard } from "@/common/middleware";
 import { rateLimiter } from "@/common/middleware/rate-limiter";
 import { getClientIp } from "@/common/utils/ip";
 import { StringIdParamSchema } from "@/types/request";
@@ -21,14 +21,14 @@ export const sharedSecretController = new Elysia({
   prefix: "/projects/:id/secrets/shared",
   detail: { tags: ["Shared Secrets"] },
 })
-  .use(authGuard)
+  .use(projectGuard("EDITOR"))
   .use(rateLimiter({ max: 30, windowMs: 60 * 1000 }))
   .post(
     "/env",
-    ({ params, body, user, request, server }) =>
+    ({ params, body, projectMember, request, server }) =>
       sharedSecretService.createForEnvVariables(
         params.id,
-        user.id,
+        projectMember.userId,
         body,
         getClientIp(request, server),
       ),
@@ -47,10 +47,10 @@ export const sharedSecretController = new Elysia({
   )
   .post(
     "/file/:fileId",
-    ({ params, body, user, request, server }) =>
+    ({ params, body, projectMember, request, server }) =>
       sharedSecretService.createForFile(
         params.id,
-        user.id,
+        projectMember.userId,
         params.fileId,
         body,
         getClientIp(request, server),
@@ -68,7 +68,7 @@ export const sharedSecretController = new Elysia({
       },
     },
   )
-  .get("/", ({ params, user }) => sharedSecretService.list(params.id, user.id), {
+  .get("/", ({ params }) => sharedSecretService.list(params.id), {
     params: StringIdParamSchema,
     response: SharedSecretAuditListResponseSchema,
     detail: {
@@ -81,8 +81,13 @@ export const sharedSecretController = new Elysia({
   })
   .delete(
     "/:secretId",
-    ({ params, user, request, server }) =>
-      sharedSecretService.revoke(params.id, params.secretId, user.id, getClientIp(request, server)),
+    ({ params, projectMember, request, server }) =>
+      sharedSecretService.revoke(
+        params.id,
+        params.secretId,
+        projectMember.userId,
+        getClientIp(request, server),
+      ),
     {
       params: SharedSecretParamsSchema,
       response: MessageResponseSchema,

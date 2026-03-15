@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
-import { ForbiddenError, NotFoundError } from "@/common/errors";
+import { NotFoundError } from "@/common/errors";
 import * as encryption from "@/common/utils/encryption";
 import { EnvironmentType } from "@/generated/prisma";
 import { EnvironmentIOService } from "./env-io.service";
@@ -172,32 +172,6 @@ describe("EnvironmentIOService", () => {
         }),
       );
     });
-
-    it("should throw ForbiddenError for VIEWER", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
-
-      expect(
-        service.bulkImport(
-          projectId,
-          { vaultGroupId, environmentType: "DEVELOPMENT", format: "env", content: "K=V" },
-          userId,
-          ipAddress,
-        ),
-      ).rejects.toBeInstanceOf(ForbiddenError);
-    });
-
-    it("should throw NotFoundError when user is not a member", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce(null);
-
-      expect(
-        service.bulkImport(
-          projectId,
-          { vaultGroupId, environmentType: "DEVELOPMENT", format: "env", content: "K=V" },
-          userId,
-          ipAddress,
-        ),
-      ).rejects.toBeInstanceOf(NotFoundError);
-    });
   });
 
   describe("export", () => {
@@ -257,21 +231,6 @@ describe("EnvironmentIOService", () => {
         ),
       ).rejects.toBeInstanceOf(NotFoundError);
     });
-
-    it("should throw ForbiddenError for VIEWER", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "VIEWER" });
-
-      expect(
-        service.export(
-          projectId,
-          vaultGroupId,
-          EnvironmentType.DEVELOPMENT,
-          "env",
-          userId,
-          ipAddress,
-        ),
-      ).rejects.toBeInstanceOf(ForbiddenError);
-    });
   });
 
   describe("generateExample", () => {
@@ -283,7 +242,6 @@ describe("EnvironmentIOService", () => {
         projectId,
         vaultGroupId,
         EnvironmentType.DEVELOPMENT,
-        userId,
       );
 
       expect(result.content).toContain("DATABASE_URL=");
@@ -300,7 +258,6 @@ describe("EnvironmentIOService", () => {
         projectId,
         vaultGroupId,
         EnvironmentType.DEVELOPMENT,
-        userId,
       );
 
       expect(result.environmentType).toBe("DEVELOPMENT");
@@ -312,7 +269,7 @@ describe("EnvironmentIOService", () => {
       const decryptSpy = spyOn(encryption, "decrypt");
       decryptSpy.mockClear();
 
-      await service.generateExample(projectId, vaultGroupId, EnvironmentType.DEVELOPMENT, userId);
+      await service.generateExample(projectId, vaultGroupId, EnvironmentType.DEVELOPMENT);
 
       expect(decryptSpy).not.toHaveBeenCalled();
     });
@@ -322,15 +279,7 @@ describe("EnvironmentIOService", () => {
       mockPrisma.environment.findUnique.mockResolvedValueOnce(null);
 
       expect(
-        service.generateExample(projectId, vaultGroupId, EnvironmentType.PRODUCTION, userId),
-      ).rejects.toBeInstanceOf(NotFoundError);
-    });
-
-    it("should throw NotFoundError when user is not a member", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce(null);
-
-      expect(
-        service.generateExample(projectId, vaultGroupId, EnvironmentType.DEVELOPMENT, userId),
+        service.generateExample(projectId, vaultGroupId, EnvironmentType.PRODUCTION),
       ).rejects.toBeInstanceOf(NotFoundError);
     });
   });

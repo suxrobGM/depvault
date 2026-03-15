@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
-import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
+import { BadRequestError, NotFoundError } from "@/common/errors";
 import * as encryption from "@/common/utils/encryption";
 import { EnvironmentType, ProjectRole } from "@/generated/prisma";
 import { SecretFileService } from "./secret-file.service";
@@ -148,22 +148,11 @@ describe("SecretFileService", () => {
         service.upload(projectId, userId, file, "vault-group-uuid", EnvironmentType.DEVELOPMENT),
       ).rejects.toBeInstanceOf(BadRequestError);
     });
-
-    it("should throw ForbiddenError for VIEWER", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.VIEWER });
-
-      const file = createMockFile("config.json");
-      expect(
-        service.upload(projectId, userId, file, "vault-group-uuid", EnvironmentType.DEVELOPMENT),
-      ).rejects.toBeInstanceOf(ForbiddenError);
-    });
   });
 
   describe("list", () => {
     it("should return file metadata without content", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.VIEWER });
-
-      const result = await service.list(projectId, userId, EnvironmentType.DEVELOPMENT);
+      const result = await service.list(projectId, EnvironmentType.DEVELOPMENT);
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0]!.name).toBe("config.json");
@@ -175,9 +164,7 @@ describe("SecretFileService", () => {
     });
 
     it("should filter by environment type", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
-
-      await service.list(projectId, userId, EnvironmentType.STAGING, 1, 10);
+      await service.list(projectId, EnvironmentType.STAGING, 1, 10);
 
       expect(mockPrisma.secretFile.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -187,9 +174,7 @@ describe("SecretFileService", () => {
     });
 
     it("should allow VIEWER to list files", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.VIEWER });
-
-      const result = await service.list(projectId, userId);
+      const result = await service.list(projectId);
 
       expect(result.items).toHaveLength(1);
     });
@@ -205,12 +190,6 @@ describe("SecretFileService", () => {
       expect(result.name).toBe("config.json");
       expect(result.mimeType).toBe("application/json");
       expect(encryption.decryptBinary).toHaveBeenCalled();
-    });
-
-    it("should throw ForbiddenError for VIEWER download", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.VIEWER });
-
-      expect(service.download(projectId, fileId, userId)).rejects.toBeInstanceOf(ForbiddenError);
     });
 
     it("should throw NotFoundError when file doesn't exist", async () => {
@@ -232,12 +211,6 @@ describe("SecretFileService", () => {
       expect(mockPrisma.secretFile.delete).toHaveBeenCalledWith({ where: { id: fileId } });
     });
 
-    it("should throw ForbiddenError for VIEWER", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.VIEWER });
-
-      expect(service.delete(projectId, fileId, userId)).rejects.toBeInstanceOf(ForbiddenError);
-    });
-
     it("should throw NotFoundError when file doesn't exist", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(null);
@@ -256,7 +229,7 @@ describe("SecretFileService", () => {
         description: "Updated desc",
       });
 
-      const result = await service.update(projectId, fileId, userId, {
+      const result = await service.update(projectId, fileId, {
         name: "updated.json",
         description: "Updated desc",
       });
@@ -283,7 +256,7 @@ describe("SecretFileService", () => {
         environmentId: "new-env-id",
       });
 
-      await service.update(projectId, fileId, userId, {
+      await service.update(projectId, fileId, {
         environmentType: EnvironmentType.STAGING,
         vaultGroupId,
       });
@@ -299,35 +272,27 @@ describe("SecretFileService", () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
 
-      expect(
-        service.update(projectId, fileId, userId, { name: "../etc/passwd" }),
-      ).rejects.toBeInstanceOf(BadRequestError);
+      expect(service.update(projectId, fileId, { name: "../etc/passwd" })).rejects.toBeInstanceOf(
+        BadRequestError,
+      );
     });
 
     it("should reject executable extension in new name", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
 
-      expect(
-        service.update(projectId, fileId, userId, { name: "script.exe" }),
-      ).rejects.toBeInstanceOf(BadRequestError);
-    });
-
-    it("should throw ForbiddenError for VIEWER", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.VIEWER });
-
-      expect(
-        service.update(projectId, fileId, userId, { name: "new.json" }),
-      ).rejects.toBeInstanceOf(ForbiddenError);
+      expect(service.update(projectId, fileId, { name: "script.exe" })).rejects.toBeInstanceOf(
+        BadRequestError,
+      );
     });
 
     it("should throw NotFoundError when file doesn't exist", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(null);
 
-      expect(
-        service.update(projectId, fileId, userId, { name: "new.json" }),
-      ).rejects.toBeInstanceOf(NotFoundError);
+      expect(service.update(projectId, fileId, { name: "new.json" })).rejects.toBeInstanceOf(
+        NotFoundError,
+      );
     });
   });
 });

@@ -26,13 +26,7 @@ export class EnvironmentService {
     private readonly notificationService: NotificationService,
   ) {}
 
-  async listEnvironments(
-    projectId: string,
-    userId: string,
-    vaultGroupId?: string,
-  ): Promise<EnvironmentResponse[]> {
-    await this.envHelper.requireMember(projectId, userId);
-
+  async listEnvironments(projectId: string, vaultGroupId?: string): Promise<EnvironmentResponse[]> {
     const where = vaultGroupId ? { projectId, vaultGroupId } : { projectId };
 
     const environments = await this.prisma.environment.findMany({
@@ -61,8 +55,6 @@ export class EnvironmentService {
     userId: string,
     ipAddress: string,
   ): Promise<EnvVariableWithValueResponse> {
-    await this.envHelper.requireEditorOrOwner(projectId, userId);
-
     const groupName = await this.envHelper.getVaultGroupName(body.vaultGroupId);
 
     const environment = await this.envHelper.findOrCreateEnvironment(
@@ -102,14 +94,14 @@ export class EnvironmentService {
   async list(
     projectId: string,
     userId: string,
+    memberRole: string,
     vaultGroupId: string,
     environmentType?: string,
     page = 1,
     limit = 20,
     ipAddress = "unknown",
   ): Promise<PaginatedResponse<EnvVariableWithValueResponse>> {
-    const member = await this.envHelper.requireMember(projectId, userId);
-    const canReadValues = member.role === "OWNER" || member.role === "EDITOR";
+    const canReadValues = memberRole === "OWNER" || memberRole === "EDITOR";
     const groupName = await this.envHelper.getVaultGroupName(vaultGroupId);
 
     const where = environmentType
@@ -167,8 +159,6 @@ export class EnvironmentService {
     userId: string,
     ipAddress: string,
   ): Promise<EnvVariableWithValueResponse> {
-    await this.envHelper.requireEditorOrOwner(projectId, userId);
-
     const variable = await this.prisma.envVariable.findFirst({
       where: { id: varId, environment: { projectId } },
       include: { environment: { include: { vaultGroup: { select: { name: true } } } } },
@@ -225,8 +215,6 @@ export class EnvironmentService {
     userId: string,
     ipAddress: string,
   ): Promise<{ message: string }> {
-    await this.envHelper.requireEditorOrOwner(projectId, userId);
-
     const variable = await this.prisma.envVariable.findFirst({
       where: { id: varId, environment: { projectId } },
       include: { environment: { include: { vaultGroup: { select: { name: true } } } } },
@@ -258,8 +246,6 @@ export class EnvironmentService {
     userId: string,
     ipAddress: string,
   ): Promise<{ message: string }> {
-    await this.envHelper.requireEditorOrOwner(projectId, userId);
-
     const environment = await this.prisma.environment.findFirst({
       where: { id: envId, projectId },
       include: { vaultGroup: { select: { name: true } }, _count: { select: { variables: true } } },

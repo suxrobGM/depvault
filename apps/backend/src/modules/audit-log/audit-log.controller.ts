@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
-import { authGuard } from "@/common/middleware";
+import { projectGuard } from "@/common/middleware";
 import { StringIdParamSchema } from "@/types/request";
 import { AuditLogListQuerySchema, AuditLogListResponseSchema } from "./audit-log.schema";
 import { AuditLogService } from "./audit-log.service";
@@ -11,13 +11,13 @@ export const auditLogController = new Elysia({
   prefix: "/projects/:id/audit-log",
   detail: { tags: ["Audit Log"] },
 })
-  .use(authGuard)
+  .use(projectGuard("EDITOR"))
   .get(
     "/",
-    ({ params, query, user }) =>
+    ({ params, query, projectMember }) =>
       auditLogService.list(
         params.id,
-        user.id,
+        projectMember.userId,
         {
           action: query.action,
           resourceType: query.resourceType,

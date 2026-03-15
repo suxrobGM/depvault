@@ -5,23 +5,17 @@ import { PrismaClient } from "@/generated/prisma";
 import type { EnvVariableVersionListResponse } from "./env-variable-version.schema";
 import type { EnvVariableWithValueResponse } from "./env-variable.schema";
 import { toDecryptedResponse } from "./environment.mapper";
-import { EnvironmentRepository } from "./environment.repository";
 
 @singleton()
 export class EnvVariableVersionService {
-  constructor(
-    private readonly prisma: PrismaClient,
-    private readonly envHelper: EnvironmentRepository,
-  ) {}
+  constructor(private readonly prisma: PrismaClient) {}
 
   /** List version history for an environment variable. Editors/owners see decrypted values; viewers see masked values. */
   async listVersions(
     projectId: string,
     varId: string,
-    userId: string,
+    memberRole: string,
   ): Promise<EnvVariableVersionListResponse> {
-    const member = await this.envHelper.requireMember(projectId, userId);
-
     const variable = await this.prisma.envVariable.findFirst({
       where: { id: varId, environment: { projectId } },
     });
@@ -30,7 +24,7 @@ export class EnvVariableVersionService {
       throw new NotFoundError("Environment variable not found");
     }
 
-    const canReadValues = member.role === "OWNER" || member.role === "EDITOR";
+    const canReadValues = memberRole === "OWNER" || memberRole === "EDITOR";
     const projectKey = canReadValues ? deriveProjectKey(projectId) : null;
 
     const versions = await this.prisma.envVariableVersion.findMany({
@@ -70,8 +64,6 @@ export class EnvVariableVersionService {
     versionId: string,
     userId: string,
   ): Promise<EnvVariableWithValueResponse> {
-    await this.envHelper.requireEditorOrOwner(projectId, userId);
-
     const variable = await this.prisma.envVariable.findFirst({
       where: { id: varId, environment: { projectId } },
     });

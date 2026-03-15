@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { PROJECT_ROLE_LEVEL } from "@depvault/shared/constants";
 import {
   Group as GroupIcon,
   History as HistoryIcon,
@@ -46,14 +47,12 @@ const TABS = [
   },
 ] as const;
 
-const ROLE_LEVEL = { VIEWER: 0, EDITOR: 1, OWNER: 2 } as const;
-
 export function ProjectTabs(props: ProjectTabsProps): ReactElement {
   const { projectId, currentUserRole } = props;
   const pathname = usePathname();
 
-  const userLevel = ROLE_LEVEL[currentUserRole as keyof typeof ROLE_LEVEL] ?? 0;
-  const visibleTabs = TABS.filter((tab) => userLevel >= ROLE_LEVEL[tab.minRole]);
+  const userLevel = PROJECT_ROLE_LEVEL[currentUserRole as keyof typeof PROJECT_ROLE_LEVEL] ?? 0;
+  const visibleTabs = TABS.filter((tab) => userLevel >= PROJECT_ROLE_LEVEL[tab.minRole]);
   const activeIndex = visibleTabs.findIndex((t) => pathname.endsWith(`/${t.segment}`));
 
   return (

@@ -1,6 +1,6 @@
 import { singleton } from "tsyringe";
-import { ForbiddenError, NotFoundError } from "@/common/errors";
-import { EnvironmentType, PrismaClient, ProjectRole } from "@/generated/prisma";
+import { NotFoundError } from "@/common/errors";
+import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 
 @singleton()
 export class EnvironmentRepository {
@@ -16,28 +16,6 @@ export class EnvironmentRepository {
     return this.prisma.environment.create({
       data: { projectId, vaultGroupId, type },
     });
-  }
-
-  async requireMember(projectId: string, userId: string) {
-    const member = await this.prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId } },
-    });
-
-    if (!member) {
-      throw new NotFoundError("Project not found");
-    }
-
-    return member;
-  }
-
-  async requireEditorOrOwner(projectId: string, userId: string) {
-    const member = await this.requireMember(projectId, userId);
-
-    if (member.role !== ProjectRole.OWNER && member.role !== ProjectRole.EDITOR) {
-      throw new ForbiddenError("Only owners and editors can modify environment variables");
-    }
-
-    return member;
   }
 
   /** Look up a vault group's display name by ID. */

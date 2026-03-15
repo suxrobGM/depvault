@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
-import { authGuard } from "@/common/middleware";
+import { projectGuard } from "@/common/middleware";
 import { StringIdParamSchema } from "@/types/request";
 import { MessageResponseSchema } from "@/types/response";
 import {
@@ -18,8 +18,8 @@ export const vaultGroupController = new Elysia({
   prefix: "/projects/:id/vault-groups",
   detail: { tags: ["Vault Groups"] },
 })
-  .use(authGuard)
-  .get("/", ({ params, user }) => vaultGroupService.list(params.id, user.id), {
+  .use(projectGuard("VIEWER"))
+  .get("/", ({ params }) => vaultGroupService.list(params.id), {
     params: StringIdParamSchema,
     response: VaultGroupListResponseSchema,
     detail: {
@@ -29,7 +29,8 @@ export const vaultGroupController = new Elysia({
       security: [{ bearerAuth: [] }],
     },
   })
-  .post("/", ({ params, body, user }) => vaultGroupService.create(params.id, body, user.id), {
+  .use(projectGuard("EDITOR"))
+  .post("/", ({ params, body }) => vaultGroupService.create(params.id, body), {
     params: StringIdParamSchema,
     body: CreateVaultGroupBodySchema,
     response: VaultGroupResponseSchema,
@@ -43,7 +44,7 @@ export const vaultGroupController = new Elysia({
   })
   .put(
     "/:groupId",
-    ({ params, body, user }) => vaultGroupService.update(params.id, params.groupId, body, user.id),
+    ({ params, body }) => vaultGroupService.update(params.id, params.groupId, body),
     {
       params: VaultGroupParamsSchema,
       body: UpdateVaultGroupBodySchema,
@@ -56,18 +57,14 @@ export const vaultGroupController = new Elysia({
       },
     },
   )
-  .delete(
-    "/:groupId",
-    ({ params, user }) => vaultGroupService.delete(params.id, params.groupId, user.id),
-    {
-      params: VaultGroupParamsSchema,
-      response: MessageResponseSchema,
-      detail: {
-        operationId: "deleteVaultGroup",
-        summary: "Delete vault group",
-        description:
-          "Delete a vault group and all its environments and variables. This action cannot be undone.",
-        security: [{ bearerAuth: [] }],
-      },
+  .delete("/:groupId", ({ params }) => vaultGroupService.delete(params.id, params.groupId), {
+    params: VaultGroupParamsSchema,
+    response: MessageResponseSchema,
+    detail: {
+      operationId: "deleteVaultGroup",
+      summary: "Delete vault group",
+      description:
+        "Delete a vault group and all its environments and variables. This action cannot be undone.",
+      security: [{ bearerAuth: [] }],
     },
-  );
+  });

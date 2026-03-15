@@ -1,6 +1,6 @@
 import { singleton } from "tsyringe";
-import { ConflictError, ForbiddenError, NotFoundError } from "@/common/errors";
-import { PrismaClient, ProjectRole } from "@/generated/prisma";
+import { ConflictError, NotFoundError } from "@/common/errors";
+import { PrismaClient } from "@/generated/prisma";
 import type {
   CreateLicenseRuleBody,
   LicenseComplianceSummary,
@@ -12,9 +12,7 @@ import type {
 export class LicenseRuleService {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async list(projectId: string, userId: string): Promise<{ items: LicenseRuleResponse[] }> {
-    await this.requireMember(projectId, userId);
-
+  async list(projectId: string): Promise<{ items: LicenseRuleResponse[] }> {
     const rules = await this.prisma.licenseRule.findMany({
       where: { projectId },
       orderBy: { licenseId: "asc" },
@@ -23,13 +21,7 @@ export class LicenseRuleService {
     return { items: rules };
   }
 
-  async create(
-    projectId: string,
-    userId: string,
-    body: CreateLicenseRuleBody,
-  ): Promise<LicenseRuleResponse> {
-    await this.requireEditor(projectId, userId);
-
+  async create(projectId: string, body: CreateLicenseRuleBody): Promise<LicenseRuleResponse> {
     const existing = await this.prisma.licenseRule.findUnique({
       where: { projectId_licenseId: { projectId, licenseId: body.licenseId } },
     });
@@ -46,11 +38,8 @@ export class LicenseRuleService {
   async update(
     projectId: string,
     ruleId: string,
-    userId: string,
     body: UpdateLicenseRuleBody,
   ): Promise<LicenseRuleResponse> {
-    await this.requireEditor(projectId, userId);
-
     const rule = await this.prisma.licenseRule.findFirst({
       where: { id: ruleId, projectId },
     });
@@ -63,9 +52,7 @@ export class LicenseRuleService {
     });
   }
 
-  async delete(projectId: string, ruleId: string, userId: string): Promise<{ message: string }> {
-    await this.requireEditor(projectId, userId);
-
+  async delete(projectId: string, ruleId: string): Promise<{ message: string }> {
     const rule = await this.prisma.licenseRule.findFirst({
       where: { id: ruleId, projectId },
     });
@@ -79,13 +66,10 @@ export class LicenseRuleService {
 
   async getComplianceSummary(
     projectId: string,
-    userId: string,
     page = 1,
     limit = 25,
     search?: string,
   ): Promise<LicenseComplianceSummary> {
-    await this.requireMember(projectId, userId);
-
     const baseWhere = { analysis: { projectId } };
     const searchWhere = search
       ? {
@@ -156,10 +140,9 @@ export class LicenseRuleService {
 
   async exportReport(
     projectId: string,
-    userId: string,
     format: "csv" | "pdf",
   ): Promise<{ content: string; contentType: string; fileName: string }> {
-    const summary = await this.getComplianceSummary(projectId, userId);
+    const summary = await this.getComplianceSummary(projectId);
 
     if (format === "csv") {
       return this.generateCsvReport(summary);
@@ -229,22 +212,5 @@ export class LicenseRuleService {
 
   private escapeCsv(value: string): string {
     return value.replace(/"/g, '""');
-  }
-
-  private async requireMember(projectId: string, userId: string): Promise<void> {
-    const member = await this.prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId } },
-    });
-    if (!member) throw new NotFoundError("Project not found");
-  }
-
-  private async requireEditor(projectId: string, userId: string): Promise<void> {
-    const member = await this.prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId } },
-    });
-    if (!member) throw new NotFoundError("Project not found");
-    if (member.role === ProjectRole.VIEWER) {
-      throw new ForbiddenError("Viewers cannot manage license rules");
-    }
   }
 }

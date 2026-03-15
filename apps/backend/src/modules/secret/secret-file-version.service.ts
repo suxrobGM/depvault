@@ -1,5 +1,5 @@
 import { singleton } from "tsyringe";
-import { ForbiddenError, NotFoundError } from "@/common/errors";
+import { NotFoundError } from "@/common/errors";
 import { decryptBinary, deriveProjectKey } from "@/common/utils/encryption";
 import { PrismaClient } from "@/generated/prisma";
 import { toSecretFileResponse } from "./secret-file.mapper";
@@ -9,9 +9,7 @@ import type { SecretFileResponse } from "./secret-file.schema";
 export class SecretFileVersionService {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async listVersions(projectId: string, fileId: string, userId: string) {
-    await this.requireMember(projectId, userId);
-
+  async listVersions(projectId: string, fileId: string) {
     const file = await this.findFileOrThrow(projectId, fileId);
 
     const versions = await this.prisma.secretFileVersion.findMany({
@@ -35,8 +33,6 @@ export class SecretFileVersionService {
     versionId: string,
     userId: string,
   ): Promise<SecretFileResponse> {
-    await this.requireEditorOrOwner(projectId, userId);
-
     const file = await this.findFileOrThrow(projectId, fileId);
 
     const version = await this.prisma.secretFileVersion.findFirst({
@@ -76,10 +72,7 @@ export class SecretFileVersionService {
     projectId: string,
     fileId: string,
     versionId: string,
-    userId: string,
   ): Promise<{ buffer: Buffer; name: string; mimeType: string }> {
-    await this.requireEditorOrOwner(projectId, userId);
-
     const file = await this.findFileOrThrow(projectId, fileId);
 
     const version = await this.prisma.secretFileVersion.findFirst({
@@ -111,27 +104,5 @@ export class SecretFileVersionService {
     }
 
     return file;
-  }
-
-  private async requireMember(projectId: string, userId: string) {
-    const member = await this.prisma.projectMember.findUnique({
-      where: { projectId_userId: { projectId, userId } },
-    });
-
-    if (!member) {
-      throw new NotFoundError("Project not found");
-    }
-
-    return member;
-  }
-
-  private async requireEditorOrOwner(projectId: string, userId: string) {
-    const member = await this.requireMember(projectId, userId);
-
-    if (member.role !== "OWNER" && member.role !== "EDITOR") {
-      throw new ForbiddenError("Only owners and editors can manage secret files");
-    }
-
-    return member;
   }
 }

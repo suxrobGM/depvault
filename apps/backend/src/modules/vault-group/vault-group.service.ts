@@ -1,7 +1,6 @@
 import { singleton } from "tsyringe";
 import { ConflictError, NotFoundError } from "@/common/errors";
 import { PrismaClient } from "@/generated/prisma";
-import { EnvironmentRepository } from "@/modules/environment/environment.repository";
 import type {
   CreateVaultGroupBody,
   UpdateVaultGroupBody,
@@ -10,15 +9,10 @@ import type {
 
 @singleton()
 export class VaultGroupService {
-  constructor(
-    private readonly prisma: PrismaClient,
-    private readonly envRepo: EnvironmentRepository,
-  ) {}
+  constructor(private readonly prisma: PrismaClient) {}
 
   /** List all vault groups for a project with environment and variable counts. */
-  async list(projectId: string, userId: string): Promise<VaultGroupResponse[]> {
-    await this.envRepo.requireMember(projectId, userId);
-
+  async list(projectId: string): Promise<VaultGroupResponse[]> {
     const groups = await this.prisma.vaultGroup.findMany({
       where: { projectId },
       include: {
@@ -43,13 +37,7 @@ export class VaultGroupService {
   }
 
   /** Create a new vault group for a project. */
-  async create(
-    projectId: string,
-    body: CreateVaultGroupBody,
-    userId: string,
-  ): Promise<VaultGroupResponse> {
-    await this.envRepo.requireEditorOrOwner(projectId, userId);
-
+  async create(projectId: string, body: CreateVaultGroupBody): Promise<VaultGroupResponse> {
     const existing = await this.prisma.vaultGroup.findUnique({
       where: { projectId_name: { projectId, name: body.name } },
     });
@@ -91,9 +79,7 @@ export class VaultGroupService {
     projectId: string,
     groupId: string,
     body: UpdateVaultGroupBody,
-    userId: string,
   ): Promise<VaultGroupResponse> {
-    await this.envRepo.requireEditorOrOwner(projectId, userId);
     const group = await this.requireGroup(projectId, groupId);
 
     if (body.name && body.name !== group.name) {
@@ -134,8 +120,7 @@ export class VaultGroupService {
   }
 
   /** Delete a vault group and all its environments (cascading). */
-  async delete(projectId: string, groupId: string, userId: string): Promise<{ message: string }> {
-    await this.envRepo.requireEditorOrOwner(projectId, userId);
+  async delete(projectId: string, groupId: string): Promise<{ message: string }> {
     const group = await this.requireGroup(projectId, groupId);
 
     await this.prisma.vaultGroup.delete({ where: { id: groupId } });

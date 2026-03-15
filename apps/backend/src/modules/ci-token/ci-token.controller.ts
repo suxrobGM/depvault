@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
-import { authGuard } from "@/common/middleware";
+import { projectGuard } from "@/common/middleware";
 import { getClientIp } from "@/common/utils/ip";
 import { StringIdParamSchema } from "@/types/request";
 import { MessageResponseSchema } from "@/types/response";
@@ -19,16 +19,34 @@ import { CiTokenService } from "./ci-token.service";
 
 const ciTokenService = container.resolve(CiTokenService);
 
-/** Management endpoints for CI/CD tokens (JWT-authenticated). */
-export const ciTokenController = new Elysia({
+/** Read-only CI token endpoints (VIEWER+). */
+const ciTokenReadController = new Elysia({
   prefix: "/projects/:id/ci-tokens",
   detail: { tags: ["CI/CD Tokens"] },
 })
-  .use(authGuard)
+  .use(projectGuard("VIEWER"))
+  .get("/", ({ params, query }) => ciTokenService.list(params.id, query.page, query.limit), {
+    params: StringIdParamSchema,
+    query: CiTokenListQuerySchema,
+    response: CiTokenListResponseSchema,
+    detail: {
+      operationId: "listCiTokens",
+      summary: "List CI tokens",
+      description: "List all CI/CD tokens for a project.",
+      security: [{ bearerAuth: [] }],
+    },
+  });
+
+/** Write CI token endpoints (EDITOR+). */
+const ciTokenWriteController = new Elysia({
+  prefix: "/projects/:id/ci-tokens",
+  detail: { tags: ["CI/CD Tokens"] },
+})
+  .use(projectGuard("EDITOR"))
   .post(
     "/",
-    ({ params, body, user, request, server }) =>
-      ciTokenService.create(params.id, user.id, body, getClientIp(request, server)),
+    ({ params, body, projectMember, request, server }) =>
+      ciTokenService.create(params.id, projectMember.userId, body, getClientIp(request, server)),
     {
       params: StringIdParamSchema,
       body: CreateCiTokenBodySchema,
@@ -41,25 +59,15 @@ export const ciTokenController = new Elysia({
       },
     },
   )
-  .get(
-    "/",
-    ({ params, query, user }) => ciTokenService.list(params.id, user.id, query.page, query.limit),
-    {
-      params: StringIdParamSchema,
-      query: CiTokenListQuerySchema,
-      response: CiTokenListResponseSchema,
-      detail: {
-        operationId: "listCiTokens",
-        summary: "List CI tokens",
-        description: "List all CI/CD tokens for a project.",
-        security: [{ bearerAuth: [] }],
-      },
-    },
-  )
   .delete(
     "/:tokenId",
-    ({ params, user, request, server }) =>
-      ciTokenService.revoke(params.id, params.tokenId, user.id, getClientIp(request, server)),
+    ({ params, projectMember, request, server }) =>
+      ciTokenService.revoke(
+        params.id,
+        params.tokenId,
+        projectMember.userId,
+        getClientIp(request, server),
+      ),
     {
       params: CiTokenParamsSchema,
       response: MessageResponseSchema,
@@ -71,6 +79,11 @@ export const ciTokenController = new Elysia({
       },
     },
   );
+
+/** Management endpoints for CI/CD tokens (JWT-authenticated). */
+export const ciTokenController = new Elysia()
+  .use(ciTokenReadController)
+  .use(ciTokenWriteController);
 
 /** CI/CD access endpoints (CI token authenticated). */
 export const ciAccessController = new Elysia({

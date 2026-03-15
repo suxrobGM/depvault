@@ -20,8 +20,6 @@ export class EnvBundleService {
 
   /** Assemble a zip bundle of selected env variables and secret files. */
   async createBundle(projectId: string, body: EnvBundleBody, userId: string, ipAddress: string) {
-    await this.envRepository.requireEditorOrOwner(projectId, userId);
-
     const groupName = await this.envRepository.getVaultGroupName(body.vaultGroupId);
 
     const env = await this.envRepository.requireEnvironment(
