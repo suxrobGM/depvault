@@ -1,20 +1,8 @@
 "use client";
 
-import { useState, type ReactElement } from "react";
+import { type ReactElement } from "react";
 import { Delete as DeleteIcon } from "@mui/icons-material";
-import {
-  Box,
-  Button,
-  CardContent,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Grid,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Box, Button, CardContent, Grid, Stack, Typography } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
@@ -23,6 +11,7 @@ import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useAuth } from "@/hooks/use-auth";
+import { useConfirm } from "@/hooks/use-confirm";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 import type { MemberListResponse, ProjectResponse } from "@/types/api/project";
@@ -37,7 +26,7 @@ export function SettingsTab(props: SettingsTabProps): ReactElement {
   const { projectId } = props;
   const router = useRouter();
   const { user } = useAuth();
-  const [deleteOpen, setDeleteOpen] = useState(false);
+  const confirm = useConfirm();
 
   const { data: project } = useApiQuery<ProjectResponse>(["projects", projectId], () =>
     client.api.projects({ id: projectId }).get(),
@@ -84,6 +73,20 @@ export function SettingsTab(props: SettingsTabProps): ReactElement {
       });
     },
   });
+
+  const handleDelete = async () => {
+    const confirmed = await confirm({
+      title: "Delete Project",
+      description: `Are you sure you want to delete ${project?.name}? This will permanently remove all associated data. This action cannot be undone.`,
+      confirmLabel: "Delete",
+      destructive: true,
+      confirmationText: project?.name,
+    });
+
+    if (confirmed) {
+      await deleteMutation.mutateAsync();
+    }
+  };
 
   if (!project) {
     return <></>;
@@ -151,33 +154,12 @@ export function SettingsTab(props: SettingsTabProps): ReactElement {
                 variant="outlined"
                 color="error"
                 startIcon={<DeleteIcon />}
-                onClick={() => setDeleteOpen(true)}
+                onClick={handleDelete}
               >
                 Delete Project
               </Button>
             </CardContent>
           </GlassCard>
-
-          <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
-            <DialogTitle>Delete Project</DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                Are you sure you want to delete <strong>{project.name}</strong>? This will
-                permanently remove all associated data. This action cannot be undone.
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setDeleteOpen(false)}>Cancel</Button>
-              <Button
-                color="error"
-                variant="contained"
-                onClick={() => deleteMutation.mutate()}
-                disabled={deleteMutation.isPending}
-              >
-                {deleteMutation.isPending ? "Deleting..." : "Delete"}
-              </Button>
-            </DialogActions>
-          </Dialog>
         </Grid>
       )}
     </Grid>
