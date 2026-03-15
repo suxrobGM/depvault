@@ -9,6 +9,9 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ci
+      cancel-in-progress: true
 
     steps:
       - name: Checkout
