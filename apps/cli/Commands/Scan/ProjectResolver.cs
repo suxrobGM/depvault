@@ -3,6 +3,7 @@ using DepVault.Cli.ApiClient.Projects;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
+using DepVault.Cli.Utils;
 using Spectre.Console;
 
 namespace DepVault.Cli.Commands.Scan;
@@ -88,12 +89,21 @@ internal sealed class ProjectResolver(
         var name = prompter.Ask("Project name", defaultName);
         var repoUrl = DetectGitRemoteUrl(repoPath);
 
-        var created = await AnsiConsole.Status()
-            .Spinner(Spinner.Known.Dots)
-            .StartAsync("Creating project...", async _ =>
-                await client.Projects.PostAsync(
-                    new ProjectsPostRequestBody { Name = name, RepositoryUrl = repoUrl },
-                    cancellationToken: ct));
+        ProjectsPostResponse? created;
+        try
+        {
+            created = await AnsiConsole.Status()
+                .Spinner(Spinner.Known.Dots)
+                .StartAsync("Creating project...", async _ =>
+                    await client.Projects.PostAsync(
+                        new ProjectsPostRequestBody { Name = name, RepositoryUrl = repoUrl },
+                        cancellationToken: ct));
+        }
+        catch (Exception ex)
+        {
+            ApiErrorHandler.HandleError(ex, "Failed to create project");
+            return null;
+        }
 
         if (created?.Id is null)
         {

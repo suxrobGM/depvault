@@ -1,6 +1,7 @@
 using DepVault.Cli.Auth;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
+using DepVault.Cli.Utils;
 using Spectre.Console;
 using SecretNs = DepVault.Cli.ApiClient.Projects.Item.Secrets;
 
@@ -55,7 +56,7 @@ internal sealed class SecretFileScanner(
             }
             catch (Exception ex)
             {
-                output.PrintError($"Failed to upload {file.RelativePath}: {ex.Message}");
+                ApiErrorHandler.HandleError(ex, $"Failed to upload {file.RelativePath}");
             }
         }
     }

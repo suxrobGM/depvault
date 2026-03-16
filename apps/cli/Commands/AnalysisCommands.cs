@@ -81,7 +81,7 @@ public sealed class AnalysisCommands(
             }
             catch (Exception ex)
             {
-                output.PrintError($"Analysis failed: {ex.Message}");
+                ApiErrorHandler.HandleError(ex, "Analysis failed");
             }
         });
 

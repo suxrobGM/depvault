@@ -114,7 +114,7 @@ public sealed class PushCommands(
                 }
                 catch (Exception ex)
                 {
-                    output.PrintError($"Failed to push {file.RelativePath}: {ex.Message}");
+                    ApiErrorHandler.HandleError(ex, $"Failed to push {file.RelativePath}");
                 }
             }
 
@@ -191,7 +191,7 @@ public sealed class PushCommands(
                 }
                 catch (Exception ex)
                 {
-                    output.PrintError($"Failed to upload {file.RelativePath}: {ex.Message}");
+                    ApiErrorHandler.HandleError(ex, $"Failed to upload {file.RelativePath}");
                 }
             }
 

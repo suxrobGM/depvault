@@ -96,7 +96,7 @@ internal sealed class EnvFileScanner(
             }
             catch (Exception ex)
             {
-                output.PrintError($"Failed to push {file.RelativePath}: {ex.Message}");
+                ApiErrorHandler.HandleError(ex, $"Failed to push {file.RelativePath}");
             }
         }
     }
