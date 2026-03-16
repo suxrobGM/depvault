@@ -88,7 +88,6 @@ export function SubscriptionsTable(): ReactElement {
             { value: "ACTIVE", label: "Active" },
             { value: "CANCELED", label: "Canceled" },
             { value: "PAST_DUE", label: "Past Due" },
-            { value: "TRIALING", label: "Trialing" },
           ]}
           minWidth={160}
         />

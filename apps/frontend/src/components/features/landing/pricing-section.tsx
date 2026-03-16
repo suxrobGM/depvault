@@ -62,7 +62,7 @@ const TIERS: PricingTier[] = [
       "Git secret scanning",
       "Env diff",
     ],
-    cta: "Start Pro Trial",
+    cta: "Upgrade to Pro",
     highlighted: true,
     badge: "Most popular",
   },
@@ -78,7 +78,7 @@ const TIERS: PricingTier[] = [
       "IP allowlists",
       "Priority support",
     ],
-    cta: "Start Team Trial",
+    cta: "Upgrade to Team",
     highlighted: false,
   },
 ];

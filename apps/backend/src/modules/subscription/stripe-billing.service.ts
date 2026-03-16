@@ -48,7 +48,6 @@ export class StripeBillingService {
       email,
       subscription.stripeCustomerId,
     );
-
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: "subscription",
       customer: customerId,

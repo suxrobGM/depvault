@@ -127,6 +127,9 @@ export function BillingOverview(): ReactElement {
             Current Plan
           </Typography>
           <StatusBadge label={plan} variant={PLAN_VARIANT[plan] ?? "default"} />
+          {subscription?.status === "PAST_DUE" && (
+            <Chip label="Past Due" color="error" size="small" variant="outlined" />
+          )}
           {subscription?.isComp && (
             <Chip label="Comp" color="warning" size="small" variant="outlined" />
           )}
@@ -164,15 +167,19 @@ export function BillingOverview(): ReactElement {
             <Divider sx={{ my: 2 }} />
             <Stack spacing={1.5}>
               <Stack spacing={0.5}>
+                {subscription?.status === "PAST_DUE" && (
+                  <Typography variant="body2" color="error.main" fontWeight={600}>
+                    Payment failed — please update your payment method to avoid losing access
+                  </Typography>
+                )}
                 {subscription?.cancelAtPeriodEnd && (
                   <Typography variant="body2" color="warning.main" fontWeight={600}>
                     {subscription.currentPeriodEnd
                       ? `Cancels on ${new Date(subscription.currentPeriodEnd).toLocaleDateString()}`
                       : "Scheduled for cancellation"}
-                    {" - you\u2019ll be downgraded to Free after this date"}
+                    {" \u2014 you\u2019ll be downgraded to Free after this date"}
                   </Typography>
                 )}
-
                 {!subscription?.cancelAtPeriodEnd && subscription?.currentPeriodEnd && (
                   <Typography variant="body2" color="text.secondary">
                     Next billing date:{" "}
