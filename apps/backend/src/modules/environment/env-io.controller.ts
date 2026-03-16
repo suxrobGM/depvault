@@ -55,7 +55,7 @@ export const envIOController = new Elysia({
         operationId: "importEnvVariables",
         summary: "Bulk import environment variables",
         description:
-          "Import environment variables from a config file (.env, appsettings.json, secrets.yaml, config.toml). Existing keys are skipped. Only owners and editors can import.",
+          "Import environment variables from a config file (.env, appsettings.json, secrets.yaml, config.toml). Existing keys are updated with new values. Only owners and editors can import.",
         security: [{ bearerAuth: [] }],
       },
     },

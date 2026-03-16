@@ -65,6 +65,7 @@ public sealed class ConsolePrompter : IConsolePrompter
         var prompt = new MultiSelectionPrompt<T>()
             .Title(title)
             .UseConverter(displaySelector)
+            .Required(false)
             .HighlightStyle(new Style(ConsoleTheme.Highlight))
             .InstructionsText("[grey](Press [cyan1]<space>[/] to toggle, [cyan1]<enter>[/] to confirm)[/]")
             .AddChoices(choices);

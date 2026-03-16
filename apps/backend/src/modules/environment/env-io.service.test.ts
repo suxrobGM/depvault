@@ -53,9 +53,8 @@ function createMockPrisma() {
       create: mock(() => Promise.resolve(mockEnvironment)),
     },
     envVariable: {
-      create: mock(() => Promise.resolve(mockVariable)),
+      upsert: mock(() => Promise.resolve(mockVariable)),
       findMany: mock(() => Promise.resolve([mockVariable])),
-      findUnique: mock(() => Promise.resolve(null)),
     },
     vaultGroup: {
       findUnique: mock(() => Promise.resolve({ name: "Default" })),
@@ -91,7 +90,6 @@ describe("EnvironmentIOService", () => {
     it("should import variables from .env format", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
       mockPrisma.environment.findUnique.mockResolvedValueOnce(mockEnvironment);
-      mockPrisma.envVariable.findUnique.mockResolvedValueOnce(null);
 
       const result = await service.bulkImport(
         projectId,
@@ -106,15 +104,16 @@ describe("EnvironmentIOService", () => {
       );
 
       expect(result.imported).toBe(1);
-      expect(result.skipped).toBe(0);
       expect(result.variables).toHaveLength(1);
       expect(encryption.encrypt).toHaveBeenCalled();
+      expect(mockPrisma.envVariable.upsert).toHaveBeenCalled();
     });
 
-    it("should skip existing keys", async () => {
+    it("should upsert existing keys instead of skipping", async () => {
+      const updatedVar = { ...mockVariable, updatedAt: new Date(now.getTime() + 1000) };
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "EDITOR" });
       mockPrisma.environment.findUnique.mockResolvedValueOnce(mockEnvironment);
-      mockPrisma.envVariable.findUnique.mockResolvedValueOnce(mockVariable);
+      mockPrisma.envVariable.upsert.mockResolvedValueOnce(updatedVar);
 
       const result = await service.bulkImport(
         projectId,
@@ -128,15 +127,20 @@ describe("EnvironmentIOService", () => {
         ipAddress,
       );
 
-      expect(result.imported).toBe(0);
-      expect(result.skipped).toBe(1);
-      expect(mockPrisma.envVariable.create).not.toHaveBeenCalled();
+      expect(result.imported).toBe(1);
+      expect(result.updated).toBe(1);
+      expect(mockPrisma.envVariable.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { environmentId_key: { environmentId: mockEnvironment.id, key: "DATABASE_URL" } },
+          create: expect.objectContaining({ key: "DATABASE_URL" }),
+          update: expect.objectContaining({ encryptedValue: "encrypted-base64" }),
+        }),
+      );
     });
 
     it("should auto-create environment if it doesn't exist", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
       mockPrisma.environment.findUnique.mockResolvedValueOnce(null);
-      mockPrisma.envVariable.findUnique.mockResolvedValueOnce(null);
 
       await service.bulkImport(
         projectId,
@@ -153,7 +157,6 @@ describe("EnvironmentIOService", () => {
     it("should write audit log on import", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
       mockPrisma.environment.findUnique.mockResolvedValueOnce(mockEnvironment);
-      mockPrisma.envVariable.findUnique.mockResolvedValueOnce(null);
 
       await service.bulkImport(
         projectId,
@@ -168,7 +171,7 @@ describe("EnvironmentIOService", () => {
           projectId,
           action: "UPLOAD",
           resourceType: "ENV_VARIABLE",
-          metadata: expect.objectContaining({ imported: 1, skipped: 0, format: "env" }),
+          metadata: expect.objectContaining({ imported: 1, format: "env" }),
         }),
       );
     });

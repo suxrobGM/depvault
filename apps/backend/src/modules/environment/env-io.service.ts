@@ -33,29 +33,26 @@ export class EnvironmentIOService {
 
     const projectKey = deriveProjectKey(projectId);
     const variables: EnvVariableWithValueResponse[] = [];
-    let skipped = 0;
+    let updated = 0;
 
     for (const entry of entries) {
-      const existing = await this.prisma.envVariable.findUnique({
-        where: { environmentId_key: { environmentId: environment.id, key: entry.key } },
-      });
-
-      if (existing) {
-        skipped++;
-        continue;
-      }
-
       const { ciphertext, iv, authTag } = encrypt(entry.value, projectKey);
 
-      const variable = await this.prisma.envVariable.create({
-        data: {
-          environmentId: environment.id,
-          key: entry.key,
-          encryptedValue: ciphertext,
-          iv,
-          authTag,
-        },
+      const data = {
+        encryptedValue: ciphertext,
+        iv,
+        authTag,
+      };
+
+      const variable = await this.prisma.envVariable.upsert({
+        where: { environmentId_key: { environmentId: environment.id, key: entry.key } },
+        create: { environmentId: environment.id, key: entry.key, ...data },
+        update: data,
       });
+
+      if (variable.updatedAt > variable.createdAt) {
+        updated++;
+      }
 
       variables.push(toResponseWithValue(variable, entry.value));
     }
@@ -69,13 +66,13 @@ export class EnvironmentIOService {
       ipAddress,
       metadata: {
         imported: variables.length,
-        skipped,
+        updated,
         format: body.format,
         vaultGroupName: groupName,
       },
     });
 
-    return { imported: variables.length, skipped, variables };
+    return { imported: variables.length, updated, variables };
   }
 
   async export(

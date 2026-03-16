@@ -48,7 +48,7 @@ export function ImportVariablesDialog(props: ImportVariablesDialogProps): ReactE
         ["environments", projectId],
         ["vault-groups", projectId],
       ],
-      successMessage: (data) => `Imported ${data?.imported} variables (${data?.skipped} skipped)`,
+      successMessage: (data) => `Imported ${data?.imported} variables (${data?.updated} updated)`,
       onSuccess: () => handleClose(),
     },
   );

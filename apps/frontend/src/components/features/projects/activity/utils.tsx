@@ -90,7 +90,7 @@ export function generateActivityDescription(
     if (action === "UPLOAD" && typeof meta.imported === "number") {
       return {
         summary: `imported ${meta.imported} variables`,
-        highlight: meta.skipped ? `${meta.skipped} skipped` : null,
+        highlight: meta.updated ? `${meta.updated} updated` : null,
         detail: joinDetail(group, typeof meta.format === "string" ? `${meta.format} format` : null),
       };
     }

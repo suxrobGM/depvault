@@ -68,7 +68,7 @@ export const ImportEnvVariablesBodySchema = t.Object({
 
 export const ImportEnvVariablesResponseSchema = t.Object({
   imported: t.Number(),
-  skipped: t.Number(),
+  updated: t.Number(),
   variables: t.Array(EnvVariableWithValueResponseSchema),
 });
 
