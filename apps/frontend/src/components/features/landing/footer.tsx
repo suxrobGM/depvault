@@ -42,6 +42,12 @@ const footerLinks: Record<string, FooterLink[]> = {
   ],
 };
 
+const linkSx = {
+  color: "text.secondary",
+  transition: "color 0.2s",
+  "&:hover": { color: "primary.main" },
+};
+
 export function LandingFooter(): ReactElement {
   const scrollTo = useScrollTo();
 
@@ -91,27 +97,33 @@ export function LandingFooter(): ReactElement {
                 {category}
               </Typography>
               <Stack spacing={1}>
-                {links.map((link) => (
-                  <MuiLink
-                    key={link.label}
-                    component={NextLink}
-                    href={link.href as Route}
-                    underline="none"
-                    variant="body2"
-                    onClick={
-                      link.label !== "Documentation"
-                        ? (e: MouseEvent<HTMLAnchorElement>) => handleClick(e, link.href)
-                        : undefined
-                    }
-                    sx={{
-                      color: "text.secondary",
-                      transition: "color 0.2s",
-                      "&:hover": { color: "primary.main" },
-                    }}
-                  >
-                    {link.label}
-                  </MuiLink>
-                ))}
+                {links.map((link) => {
+                  const isExternal = link.href === ROUTES.docs || link.href.startsWith("mailto:");
+
+                  return isExternal ? (
+                    <MuiLink
+                      key={link.label}
+                      href={link.href}
+                      underline="none"
+                      variant="body2"
+                      sx={linkSx}
+                    >
+                      {link.label}
+                    </MuiLink>
+                  ) : (
+                    <MuiLink
+                      key={link.label}
+                      component={NextLink}
+                      href={link.href as Route}
+                      underline="none"
+                      variant="body2"
+                      onClick={(e: MouseEvent<HTMLAnchorElement>) => handleClick(e, link.href)}
+                      sx={linkSx}
+                    >
+                      {link.label}
+                    </MuiLink>
+                  );
+                })}
               </Stack>
             </Grid>
           ))}
