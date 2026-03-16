@@ -14,7 +14,7 @@ internal static class ConsoleTheme
 
     public static readonly TableBorder Border = TableBorder.Rounded;
 
-    public static void PrintBanner()
+    public static void PrintBanner(string? activeProjectName = null)
     {
         var figlet = new FigletText("DepVault")
             .Color(Brand);
@@ -24,6 +24,16 @@ internal static class ConsoleTheme
         AnsiConsole.Write(figlet);
         AnsiConsole.MarkupLine("[grey]Secure your stack. Analyze. Vault. Ship.[/]");
         AnsiConsole.MarkupLine($"[grey]v{version}[/]");
+
+        if (activeProjectName is not null)
+        {
+            AnsiConsole.MarkupLine($"[cyan1]Active project:[/] {Markup.Escape(activeProjectName)}");
+        }
+        else
+        {
+            AnsiConsole.MarkupLine("[grey]No active project. Use 'depvault project' to select one.[/]");
+        }
+
         AnsiConsole.WriteLine();
     }
 

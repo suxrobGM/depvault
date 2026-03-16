@@ -6,19 +6,27 @@ import {
   ENVIRONMENT_TYPES,
   type EnvironmentTypeValue,
 } from "@depvault/shared/constants";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from "@mui/material";
+import {
+  Alert,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Stack,
+} from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod/v4";
 import { FormSelectField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
 
-const cloneSchema = z.object({
+const syncSchema = z.object({
   sourceType: z.enum(ENVIRONMENT_TYPE_VALUES),
   targetType: z.enum(ENVIRONMENT_TYPE_VALUES),
 });
 
-interface CloneEnvironmentDialogProps {
+interface SyncEnvironmentDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
@@ -27,16 +35,16 @@ interface CloneEnvironmentDialogProps {
   onSuccess: (envType: string) => void;
 }
 
-export function CloneEnvironmentDialog(props: CloneEnvironmentDialogProps): ReactElement {
+export function SyncEnvironmentDialog(props: SyncEnvironmentDialogProps): ReactElement {
   const { open, onClose, projectId, vaultGroupId, sourceType, onSuccess } = props;
 
   const mutation = useApiMutation(
     (values: { sourceType: EnvironmentTypeValue; targetType: EnvironmentTypeValue }) =>
-      client.api.projects({ id: projectId }).environments.clone.post({ ...values, vaultGroupId }),
+      client.api.projects({ id: projectId }).environments.sync.post({ ...values, vaultGroupId }),
     {
       invalidateKeys: [["environments", projectId]],
       successMessage: (data: { type: string; variableCount: number }) =>
-        `Cloned ${data.variableCount} variables to "${data.type}"`,
+        `Synced ${data.variableCount} variables to "${data.type}"`,
       onSuccess: (data: { type: string; variableCount: number }) => {
         onSuccess(data.type);
         handleClose();
@@ -49,7 +57,7 @@ export function CloneEnvironmentDialog(props: CloneEnvironmentDialogProps): Reac
       sourceType: sourceType as EnvironmentTypeValue,
       targetType: "DEVELOPMENT" as EnvironmentTypeValue,
     },
-    validators: { onSubmit: cloneSchema },
+    validators: { onSubmit: syncSchema },
     onSubmit: async ({ value }) => {
       await mutation.mutateAsync(value);
     },
@@ -68,9 +76,13 @@ export function CloneEnvironmentDialog(props: CloneEnvironmentDialogProps): Reac
           form.handleSubmit();
         }}
       >
-        <DialogTitle>Clone Environment</DialogTitle>
+        <DialogTitle>Sync Environment</DialogTitle>
         <DialogContent>
           <Stack spacing={2.5} sx={{ mt: 1 }}>
+            <Alert severity="info" variant="outlined">
+              Variables from the source will be copied to the target. Existing keys in the target
+              will be overwritten. Keys only in the target are left untouched.
+            </Alert>
             <FormSelectField
               form={form}
               name="sourceType"
@@ -90,7 +102,7 @@ export function CloneEnvironmentDialog(props: CloneEnvironmentDialogProps): Reac
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={handleClose}>Cancel</Button>
           <Button type="submit" variant="contained" disabled={mutation.isPending}>
-            {mutation.isPending ? "Cloning..." : "Clone"}
+            {mutation.isPending ? "Syncing..." : "Sync"}
           </Button>
         </DialogActions>
       </form>

@@ -1,4 +1,4 @@
-import { type PropsWithChildren, type ReactElement } from "react";
+import { Suspense, type PropsWithChildren, type ReactElement } from "react";
 import { UserRole } from "@depvault/shared/constants";
 import { Box } from "@mui/material";
 import { redirect } from "next/navigation";
@@ -14,7 +14,7 @@ async function getUser() {
   return data;
 }
 
-export default async function AdminLayout(props: PropsWithChildren): Promise<ReactElement> {
+async function AuthenticatedAdminShell(props: PropsWithChildren): Promise<ReactElement> {
   const { children } = props;
   const user = await getUser();
 
@@ -23,17 +23,26 @@ export default async function AdminLayout(props: PropsWithChildren): Promise<Rea
   }
 
   return (
+    <AuthProvider initialUser={user}>
+      <Box sx={{ display: "flex", minHeight: "100vh" }}>
+        <AdminSidebar />
+        <Box component="main" sx={{ flex: 1, p: 3, ml: "260px" }}>
+          {children}
+        </Box>
+      </Box>
+    </AuthProvider>
+  );
+}
+
+export default function AdminLayout(props: PropsWithChildren): ReactElement {
+  const { children } = props;
+  return (
     <QueryProvider>
       <NotificationProvider>
         <ConfirmProvider>
-          <AuthProvider initialUser={user}>
-            <Box sx={{ display: "flex", minHeight: "100vh" }}>
-              <AdminSidebar />
-              <Box component="main" sx={{ flex: 1, p: 3, ml: "260px" }}>
-                {children}
-              </Box>
-            </Box>
-          </AuthProvider>
+          <Suspense>
+            <AuthenticatedAdminShell>{children}</AuthenticatedAdminShell>
+          </Suspense>
         </ConfirmProvider>
       </NotificationProvider>
     </QueryProvider>

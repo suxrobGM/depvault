@@ -3,7 +3,7 @@ import { LegalPage, LegalParagraph, LegalSection } from "@/components/ui/legal";
 
 export default function PrivacyPolicyPage(): ReactElement {
   return (
-    <LegalPage title="Privacy Policy" lastUpdated="March 14, 2026">
+    <LegalPage title="Privacy Policy" lastUpdated="March 16, 2026">
       <LegalSection title="1. Information We Collect">
         <LegalParagraph>
           When you create an account, we collect your name, email address, and password (stored as a
@@ -50,9 +50,13 @@ export default function PrivacyPolicyPage(): ReactElement {
 
       <LegalSection title="6. Third-Party Services">
         <LegalParagraph>
-          We may use third-party services for email delivery, error monitoring, and infrastructure
-          hosting. These providers are contractually bound to protect your data. We do not share
-          your secrets or environment variable values with any third party.
+          We use Stripe, Inc. as our payment processor. When you subscribe to a paid plan, your
+          payment information (such as credit card number and billing address) is transmitted
+          directly to Stripe and is subject to Stripe&apos;s Privacy Policy
+          (https://stripe.com/privacy). We do not store your full credit card details. We may also
+          use third-party services for email delivery, error monitoring, and infrastructure hosting.
+          These providers are contractually bound to protect your data. We do not share your secrets
+          or environment variable values with any third party.
         </LegalParagraph>
       </LegalSection>
 
@@ -92,7 +96,16 @@ export default function PrivacyPolicyPage(): ReactElement {
 
       <LegalSection title="11. Contact">
         <LegalParagraph>
-          If you have questions about this Privacy Policy, contact us at privacy@depvault.com.
+          If you have questions about this Privacy Policy, contact us at privacy@depvault.com or by
+          mail at: Sukhrobbek Ilyosbekov, 132 Marginal Way, Apt 218, Portland, ME 04101.
+        </LegalParagraph>
+      </LegalSection>
+
+      <LegalSection title="12. Governing Law">
+        <LegalParagraph>
+          This Privacy Policy and any disputes arising from it shall be governed by and construed in
+          accordance with the laws of the State of Maine, United States, without regard to its
+          conflict of law provisions.
         </LegalParagraph>
       </LegalSection>
     </LegalPage>

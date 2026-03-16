@@ -26,40 +26,64 @@ export class SubscriptionService {
     return { plan: subscription.plan, limits: getPlanLimits(subscription.plan) };
   }
 
-  async getUsage(userId: string) {
+  async countProjects(userId: string): Promise<number> {
+    return this.prisma.project.count({ where: { ownerId: userId } });
+  }
+
+  /** Count distinct env variable keys per vault group across all owned projects. */
+  async countDistinctEnvVars(userId: string): Promise<number> {
+    const rows = await this.prisma.envVariable.findMany({
+      where: { environment: { project: { ownerId: userId } } },
+      select: { key: true, environment: { select: { vaultGroupId: true } } },
+    });
+    return new Set(rows.map((v) => `${v.environment.vaultGroupId}:${v.key}`)).size;
+  }
+
+  /** Count distinct secret file names per vault group across all owned projects. */
+  async countDistinctSecretFiles(userId: string): Promise<number> {
+    const rows = await this.prisma.secretFile.findMany({
+      where: { environment: { project: { ownerId: userId } } },
+      select: { name: true, environment: { select: { vaultGroupId: true } } },
+    });
+    return new Set(rows.map((f) => `${f.environment.vaultGroupId}:${f.name}`)).size;
+  }
+
+  async countAnalysesThisMonth(userId: string): Promise<number> {
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
 
-    const ownedProjectFilter = { project: { ownerId: userId } };
+    return this.prisma.analysis.count({
+      where: { project: { ownerId: userId }, createdAt: { gte: startOfMonth } },
+    });
+  }
 
-    const [projects, envVars, secretFiles, analyses, distinctMembers, ciTokens] = await Promise.all(
-      [
-        this.prisma.project.count({ where: { ownerId: userId } }),
-        this.prisma.envVariable.count({ where: { environment: ownedProjectFilter } }),
-        this.prisma.secretFile.count({ where: { environment: ownedProjectFilter } }),
-        this.prisma.analysis.count({
-          where: { ...ownedProjectFilter, createdAt: { gte: startOfMonth } },
-        }),
-        this.prisma.projectMember.findMany({
-          where: ownedProjectFilter,
-          distinct: ["userId"],
-          select: { userId: true },
-        }),
-        this.prisma.ciToken.count({
-          where: { ...ownedProjectFilter, revokedAt: null },
-        }),
-      ],
-    );
+  async countDistinctMembers(userId: string): Promise<number> {
+    const rows = await this.prisma.projectMember.findMany({
+      where: { project: { ownerId: userId } },
+      distinct: ["userId"],
+      select: { userId: true },
+    });
+    return rows.length;
+  }
 
-    return {
-      projects,
-      envVars,
-      secretFiles,
-      analyses,
-      members: distinctMembers.length,
-      ciTokens,
-    };
+  async countActiveCiTokens(userId: string): Promise<number> {
+    return this.prisma.ciToken.count({
+      where: { project: { ownerId: userId }, revokedAt: null },
+    });
+  }
+
+  async getUsage(userId: string) {
+    const [projects, envVars, secretFiles, analyses, members, ciTokens] = await Promise.all([
+      this.countProjects(userId),
+      this.countDistinctEnvVars(userId),
+      this.countDistinctSecretFiles(userId),
+      this.countAnalysesThisMonth(userId),
+      this.countDistinctMembers(userId),
+      this.countActiveCiTokens(userId),
+    ]);
+
+    return { projects, envVars, secretFiles, analyses, members, ciTokens };
   }
 
   async getSubscriptionResponse(userId: string): Promise<SubscriptionResponse> {

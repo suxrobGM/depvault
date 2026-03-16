@@ -63,7 +63,7 @@ export function UserDetailDialog(props: UserDetailDialogProps): ReactElement {
   };
 
   const fullName = user
-    ? [user.firstName, user.lastName].filter(Boolean).join(" ") || "No name"
+    ? ([user.firstName, user.lastName].filter(Boolean).join(" ") ?? "No name")
     : "";
 
   const sub = user?.subscription;
@@ -121,10 +121,10 @@ export function UserDetailDialog(props: UserDetailDialogProps): ReactElement {
                 </Box>
                 <Box>
                   <Typography variant="h6" fontWeight={700}>
-                    {user.usage.secrets}
+                    {user.usage.secretFiles}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Secrets
+                    Secret Files
                   </Typography>
                 </Box>
               </Stack>

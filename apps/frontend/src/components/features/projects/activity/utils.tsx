@@ -1,11 +1,11 @@
 import type { ReactElement } from "react";
 import {
-  ContentCopy as CloneIcon,
   Add as CreateIcon,
   Delete as DeleteIcon,
   Download as DownloadIcon,
   Edit as EditIcon,
   Share as ShareIcon,
+  Sync as SyncIcon,
   Upload as UploadIcon,
   Visibility as ViewIcon,
 } from "@mui/icons-material";
@@ -30,7 +30,7 @@ export const ACTIVITY_ACTION_CONFIG: Record<string, ActionConfig> = {
   DOWNLOAD: { icon: <DownloadIcon fontSize="small" />, color: "success.main", verb: "downloaded" },
   SHARE: { icon: <ShareIcon fontSize="small" />, color: "secondary.main", verb: "shared" },
   UPLOAD: { icon: <UploadIcon fontSize="small" />, color: "primary.main", verb: "uploaded" },
-  CLONE: { icon: <CloneIcon fontSize="small" />, color: "info.light", verb: "cloned" },
+  SYNC: { icon: <SyncIcon fontSize="small" />, color: "info.light", verb: "synced" },
 };
 
 export const RESOURCE_LABELS: Record<string, string> = {
@@ -72,7 +72,9 @@ export function generateActivityDescription(
     detail: null,
   };
 
-  if (!meta) return fallback;
+  if (!meta) {
+    return fallback;
+  }
 
   const group = typeof meta.vaultGroupName === "string" ? meta.vaultGroupName : null;
 
@@ -140,9 +142,9 @@ export function generateActivityDescription(
         detail: joinDetail(group, env, format),
       };
     }
-    if (action === "CLONE") {
+    if (action === "SYNC" || action === "CLONE") {
       return {
-        summary: "cloned environment",
+        summary: "synced environment",
         highlight: null,
         detail: joinDetail(
           group,

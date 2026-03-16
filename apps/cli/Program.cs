@@ -49,6 +49,7 @@ var services = new ServiceCollection()
     .AddSingleton<SecretsCommands>()
     .AddSingleton<ScanCommands>()
     .AddSingleton<UpdateCommands>()
+    .AddSingleton<RootHandler>()
     .BuildServiceProvider();
 
 var auth = services.GetRequiredService<AuthCommands>();
@@ -62,6 +63,7 @@ var push = services.GetRequiredService<PushCommands>();
 var secrets = services.GetRequiredService<SecretsCommands>();
 var scan = services.GetRequiredService<ScanCommands>();
 var update = services.GetRequiredService<UpdateCommands>();
+var rootHandler = services.GetRequiredService<RootHandler>();
 var versionChecker = services.GetRequiredService<IVersionChecker>();
 
 var rootCommand = new RootCommand("DepVault CLI — dependency analysis, env vault, and secret management")
@@ -81,19 +83,7 @@ var rootCommand = new RootCommand("DepVault CLI — dependency analysis, env vau
     update.CreateUpdateCommand()
 };
 
-rootCommand.SetAction(_ =>
-{
-    ConsoleTheme.PrintBanner();
-    Console.WriteLine(rootCommand.Description);
-    Console.WriteLine();
-    Console.WriteLine("Usage: depvault [command] [options]");
-    Console.WriteLine();
-    Console.WriteLine("Commands:");
-    foreach (var sub in rootCommand.Subcommands)
-    {
-        Console.WriteLine($"  {sub.Name,-16} {sub.Description}");
-    }
-});
+rootHandler.Configure(rootCommand);
 
 var versionCmd = new Command("version", "Show CLI version");
 versionCmd.SetAction(_ => ConsoleTheme.PrintBanner());

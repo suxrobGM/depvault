@@ -10,7 +10,8 @@ public sealed class ProjectCommands(
     IApiClientFactory clientFactory,
     IAuthContext authContext,
     IConfigService configService,
-    IOutputFormatter output)
+    IOutputFormatter output,
+    IConsolePrompter prompter)
 {
     public Command CreateProjectCommand()
     {
@@ -20,13 +21,63 @@ public sealed class ProjectCommands(
             CreateSelectCommand(),
             CreateInfoCommand()
         };
+
+        cmd.SetAction(async (parseResult, cancellationToken) =>
+        {
+            if (!authContext.RequireAuth())
+            {
+                return;
+            }
+
+            if (!prompter.IsInteractive)
+            {
+                output.PrintError("Interactive mode required. Use 'depvault project list' or 'depvault project select <id>' instead.");
+                return;
+            }
+
+            try
+            {
+                var apiClient = clientFactory.Create();
+                var result = await apiClient.Projects.GetAsync(config =>
+                {
+                    config.QueryParameters.Page = 1;
+                    config.QueryParameters.Limit = 100;
+                }, cancellationToken);
+
+                var items = result?.Items;
+                if (items is null || items.Count == 0)
+                {
+                    output.PrintError("No projects found. Create a project on the web dashboard first.");
+                    return;
+                }
+
+                var appConfig = configService.Load();
+                var selected = prompter.Select(
+                    "Select active project",
+                    items,
+                    p =>
+                    {
+                        var marker = p.Id == appConfig.ActiveProjectId ? " [green]*[/]" : "";
+                        return $"{p.Name}{marker}";
+                    });
+
+                appConfig.ActiveProjectId = selected.Id;
+                configService.Save(appConfig);
+                output.PrintSuccess($"Active project set to {selected.Name} ({selected.Id})");
+            }
+            catch (Exception ex)
+            {
+                output.PrintError($"Failed to load projects: {ex.Message}");
+            }
+        });
+
         return cmd;
     }
 
     private Command CreateListCommand()
     {
         var outputOpt = new Option<string>("--output")
-            { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
+        { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
         var cmd = new Command("list", "List your projects")
         {
             outputOpt

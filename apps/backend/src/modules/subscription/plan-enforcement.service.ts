@@ -22,7 +22,7 @@ export class PlanEnforcementService {
     const { limits } = await this.subscriptionService.getUserPlan(userId);
     if (limits.maxProjects === INFINITE_LIMIT) return;
 
-    const count = await this.prisma.project.count({ where: { ownerId: userId } });
+    const count = await this.subscriptionService.countProjects(userId);
     if (count >= limits.maxProjects) {
       throw new ForbiddenError(
         `Project limit reached (${count}/${limits.maxProjects}). Upgrade your plan to create more projects.`,
@@ -34,9 +34,7 @@ export class PlanEnforcementService {
     const { limits } = await this.subscriptionService.getUserPlan(userId);
     if (limits.maxEnvVars === INFINITE_LIMIT) return;
 
-    const count = await this.prisma.envVariable.count({
-      where: { environment: { project: { ownerId: userId } } },
-    });
+    const count = await this.subscriptionService.countDistinctEnvVars(userId);
     if (count >= limits.maxEnvVars) {
       throw new ForbiddenError(
         `Environment variable limit reached (${count}/${limits.maxEnvVars}). Upgrade your plan to store more variables.`,
@@ -48,9 +46,7 @@ export class PlanEnforcementService {
     const { limits } = await this.subscriptionService.getUserPlan(userId);
     if (limits.maxSecretFiles === INFINITE_LIMIT) return;
 
-    const count = await this.prisma.secretFile.count({
-      where: { environment: { project: { ownerId: userId } } },
-    });
+    const count = await this.subscriptionService.countDistinctSecretFiles(userId);
     if (count >= limits.maxSecretFiles) {
       throw new ForbiddenError(
         `Secret file limit reached (${count}/${limits.maxSecretFiles}). Upgrade your plan to store more secret files.`,
@@ -62,16 +58,7 @@ export class PlanEnforcementService {
     const { limits } = await this.subscriptionService.getUserPlan(userId);
     if (limits.maxAnalysesPerMonth === INFINITE_LIMIT) return;
 
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
-
-    const count = await this.prisma.analysis.count({
-      where: {
-        project: { ownerId: userId },
-        createdAt: { gte: startOfMonth },
-      },
-    });
+    const count = await this.subscriptionService.countAnalysesThisMonth(userId);
     if (count >= limits.maxAnalysesPerMonth) {
       throw new ForbiddenError(
         `Monthly analysis limit reached (${count}/${limits.maxAnalysesPerMonth}). Upgrade your plan for more analyses.`,
@@ -83,12 +70,7 @@ export class PlanEnforcementService {
     const { limits } = await this.subscriptionService.getUserPlan(userId);
     if (limits.maxUsers === INFINITE_LIMIT) return;
 
-    const distinctMembers = await this.prisma.projectMember.findMany({
-      where: { project: { ownerId: userId } },
-      distinct: ["userId"],
-      select: { userId: true },
-    });
-    const count = distinctMembers.length;
+    const count = await this.subscriptionService.countDistinctMembers(userId);
     if (count >= limits.maxUsers) {
       throw new ForbiddenError(
         `Member limit reached (${count}/${limits.maxUsers}). Upgrade your plan to add more team members.`,
@@ -100,9 +82,7 @@ export class PlanEnforcementService {
     const { limits } = await this.subscriptionService.getUserPlan(userId);
     if (limits.maxCiTokens === INFINITE_LIMIT) return;
 
-    const count = await this.prisma.ciToken.count({
-      where: { project: { ownerId: userId }, revokedAt: null },
-    });
+    const count = await this.subscriptionService.countActiveCiTokens(userId);
     if (count >= limits.maxCiTokens) {
       throw new ForbiddenError(
         `CI/CD token limit reached (${count}/${limits.maxCiTokens}). Upgrade your plan for more tokens.`,

@@ -3,12 +3,12 @@ import { LegalPage, LegalParagraph, LegalSection } from "@/components/ui/legal";
 
 export default function TermsOfServicePage(): ReactElement {
   return (
-    <LegalPage title="Terms of Service" lastUpdated="March 14, 2026">
+    <LegalPage title="Terms of Service" lastUpdated="March 16, 2026">
       <LegalSection title="1. Acceptance of Terms">
         <LegalParagraph>
-          By accessing or using DepVault (&quot;the Service&quot;), operated by DepVault
-          (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;), you agree to be bound by these Terms
-          of Service. If you do not agree to these terms, do not use the Service.
+          By accessing or using DepVault (&quot;the Service&quot;), operated by Sukhrobbek
+          Ilyosbekov (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;), you agree to be bound by
+          these Terms of Service. If you do not agree to these terms, do not use the Service.
         </LegalParagraph>
       </LegalSection>
 
@@ -53,7 +53,9 @@ export default function TermsOfServicePage(): ReactElement {
           DepVault offers free and paid subscription tiers. Paid subscriptions are billed monthly
           per user. You may upgrade, downgrade, or cancel your subscription at any time. Downgrades
           take effect at the end of the current billing period. Refunds are not provided for partial
-          billing periods.
+          billing periods. All payment processing is handled by Stripe, Inc. Your payment
+          information is transmitted directly to Stripe and is subject to Stripe&apos;s Privacy
+          Policy and Terms of Service. We do not store your full credit card number on our servers.
         </LegalParagraph>
       </LegalSection>
 
@@ -94,7 +96,8 @@ export default function TermsOfServicePage(): ReactElement {
 
       <LegalSection title="11. Contact">
         <LegalParagraph>
-          If you have questions about these terms, contact us at support@depvault.com.
+          If you have questions about these terms, contact us at support@depvault.com or by mail at:
+          Sukhrobbek Ilyosbekov, 132 Marginal Way, Apt 218, Portland, ME 04101.
         </LegalParagraph>
       </LegalSection>
     </LegalPage>

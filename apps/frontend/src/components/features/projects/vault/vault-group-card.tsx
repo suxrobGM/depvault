@@ -13,7 +13,6 @@ import { client } from "@/lib/api";
 import type { EnvVariable, EnvVariableListResponse } from "@/types/api/env-variable";
 import type { EnvironmentListResponse } from "@/types/api/environment";
 import type { VaultGroup } from "@/types/api/vault-group";
-import { CloneEnvironmentDialog } from "./clone-environment-dialog";
 import { CreateVariableDialog } from "./create-variable-dialog";
 import { EnvDiffView } from "./diff/env-diff-view";
 import { DownloadBundleDialog } from "./download-bundle-dialog";
@@ -22,6 +21,7 @@ import { EditVariableDialog } from "./edit-variable-dialog";
 import { EnvironmentSelector } from "./environment-selector";
 import { ExportVariablesDialog } from "./export-variables-dialog";
 import { ImportVariablesDialog } from "./import-variables-dialog";
+import { SyncEnvironmentDialog } from "./sync-environment-dialog";
 import { VaultToolbar } from "./vault-toolbar";
 import { VaultVariableTable } from "./vault-variable-table";
 
@@ -43,7 +43,7 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
   const [editTarget, setEditTarget] = useState<EnvVariable | null>(null);
   const [importOpen, setImportOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
-  const [cloneOpen, setCloneOpen] = useState(false);
+  const [syncOpen, setSyncOpen] = useState(false);
   const [editGroupOpen, setEditGroupOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [bundleOpen, setBundleOpen] = useState(false);
@@ -211,7 +211,7 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
             onImport={() => setImportOpen(true)}
             onExport={() => setExportOpen(true)}
             onCompare={() => setView("diff")}
-            onClone={() => setCloneOpen(true)}
+            onSync={() => setSyncOpen(true)}
             onShare={() => setShareOpen(true)}
             onBundle={() => setBundleOpen(true)}
             onEditGroup={() => setEditGroupOpen(true)}
@@ -260,9 +260,9 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
             vaultGroupId={group.id}
             environmentType={activeEnv}
           />
-          <CloneEnvironmentDialog
-            open={cloneOpen}
-            onClose={() => setCloneOpen(false)}
+          <SyncEnvironmentDialog
+            open={syncOpen}
+            onClose={() => setSyncOpen(false)}
             projectId={projectId}
             vaultGroupId={group.id}
             sourceType={activeEnv}

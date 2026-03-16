@@ -3,17 +3,17 @@ import { container } from "@/common/di/container";
 import { projectGuard } from "@/common/middleware";
 import { getClientIp } from "@/common/utils/ip";
 import { StringIdParamSchema } from "@/types/request";
-import { EnvironmentCloneService } from "./env-clone.service";
 import { EnvironmentDiffService } from "./env-diff.service";
+import { EnvironmentSyncService } from "./env-sync.service";
 import {
-  CloneEnvironmentBodySchema,
-  CloneEnvironmentResponseSchema,
   EnvDiffQuerySchema,
   EnvDiffResponseSchema,
+  SyncEnvironmentBodySchema,
+  SyncEnvironmentResponseSchema,
 } from "./environment.schema";
 
 const environmentDiffService = container.resolve(EnvironmentDiffService);
-const environmentCloneService = container.resolve(EnvironmentCloneService);
+const environmentSyncService = container.resolve(EnvironmentSyncService);
 
 export const envDiffController = new Elysia({
   prefix: "/projects/:id/environments",
@@ -46,9 +46,9 @@ export const envDiffController = new Elysia({
   )
   .use(projectGuard("EDITOR"))
   .post(
-    "/clone",
+    "/sync",
     ({ params, body, projectMember, request, server }) =>
-      environmentCloneService.cloneEnvironment(
+      environmentSyncService.syncEnvironment(
         params.id,
         body,
         projectMember.userId,
@@ -56,13 +56,13 @@ export const envDiffController = new Elysia({
       ),
     {
       params: StringIdParamSchema,
-      body: CloneEnvironmentBodySchema,
-      response: CloneEnvironmentResponseSchema,
+      body: SyncEnvironmentBodySchema,
+      response: SyncEnvironmentResponseSchema,
       detail: {
-        operationId: "cloneEnvironment",
-        summary: "Clone environment",
+        operationId: "syncEnvironment",
+        summary: "Sync environment",
         description:
-          "Clone an environment's variables (keys, values, and metadata) into a new environment.",
+          "Sync an environment's variables into another environment. Existing keys are overwritten, new keys are added.",
         security: [{ bearerAuth: [] }],
       },
     },

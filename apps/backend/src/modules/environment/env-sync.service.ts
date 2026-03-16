@@ -4,20 +4,20 @@ import { decrypt, deriveProjectKey, encrypt } from "@/common/utils/encryption";
 import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import { EnvironmentRepository } from "./environment.repository";
-import type { CloneEnvironmentBody } from "./environment.schema";
+import type { SyncEnvironmentBody } from "./environment.schema";
 
 @singleton()
-export class EnvironmentCloneService {
+export class EnvironmentSyncService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly auditLogService: AuditLogService,
     private readonly envHelper: EnvironmentRepository,
   ) {}
 
-  /** Clone an environment's variables (keys, values, and metadata) into a new environment. */
-  async cloneEnvironment(
+  /** Sync an environment's variables into another environment (upserts matching keys). */
+  async syncEnvironment(
     projectId: string,
-    body: CloneEnvironmentBody,
+    body: SyncEnvironmentBody,
     userId: string,
     ipAddress: string,
   ) {
@@ -45,21 +45,32 @@ export class EnvironmentCloneService {
 
     const projectKey = deriveProjectKey(projectId);
 
-    const created = await Promise.all(
+    const synced = await Promise.all(
       sourceEnv.variables.map((v) => {
         const plaintext = decrypt(v.encryptedValue, v.iv, v.authTag, projectKey);
         const { ciphertext, iv, authTag } = encrypt(plaintext, projectKey);
 
-        return this.prisma.envVariable.create({
-          data: {
+        const data = {
+          encryptedValue: ciphertext,
+          iv,
+          authTag,
+          description: v.description,
+          isRequired: v.isRequired,
+        };
+
+        return this.prisma.envVariable.upsert({
+          where: {
+            environmentId_key: {
+              environmentId: targetEnv.id,
+              key: v.key,
+            },
+          },
+          create: {
             environmentId: targetEnv.id,
             key: v.key,
-            encryptedValue: ciphertext,
-            iv,
-            authTag,
-            description: v.description,
-            isRequired: v.isRequired,
+            ...data,
           },
+          update: data,
         });
       }),
     );
@@ -67,14 +78,14 @@ export class EnvironmentCloneService {
     await this.auditLogService.log({
       userId,
       projectId,
-      action: "CLONE",
+      action: "SYNC",
       resourceType: "ENV_VARIABLE",
       resourceId: targetEnv.id,
       ipAddress,
       metadata: {
         source: body.sourceType,
         target: body.targetType,
-        variableCount: created.length,
+        variableCount: synced.length,
         vaultGroupName: groupName,
       },
     });
@@ -82,7 +93,7 @@ export class EnvironmentCloneService {
     return {
       id: targetEnv.id,
       type: targetEnv.type,
-      variableCount: created.length,
+      variableCount: synced.length,
     };
   }
 }

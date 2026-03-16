@@ -3,7 +3,6 @@
 import type { ReactElement } from "react";
 import {
   Add as AddIcon,
-  ContentCopy as CloneIcon,
   CompareArrows as CompareIcon,
   Delete as DeleteIcon,
   Edit as EditIcon,
@@ -11,6 +10,7 @@ import {
   FolderZip as FolderZipIcon,
   FileUpload as ImportIcon,
   Share as ShareIcon,
+  Sync as SyncIcon,
 } from "@mui/icons-material";
 import { Button, Stack } from "@mui/material";
 import { ActionMenu, type ActionMenuItem } from "@/components/ui/inputs";
@@ -23,7 +23,7 @@ interface VaultToolbarProps {
   onImport?: () => void;
   onExport?: () => void;
   onCompare?: () => void;
-  onClone?: () => void;
+  onSync?: () => void;
   onShare?: () => void;
   onBundle?: () => void;
   onEditGroup?: () => void;
@@ -39,7 +39,7 @@ export function VaultToolbar(props: VaultToolbarProps): ReactElement {
     onImport,
     onExport,
     onCompare,
-    onClone,
+    onSync,
     onShare,
     onBundle,
     onEditGroup,
@@ -54,9 +54,9 @@ export function VaultToolbar(props: VaultToolbarProps): ReactElement {
       hidden: !hasEnvironment,
     },
     {
-      label: "Clone",
-      icon: <CloneIcon fontSize="small" />,
-      onClick: () => onClone?.(),
+      label: "Sync",
+      icon: <SyncIcon fontSize="small" />,
+      onClick: () => onSync?.(),
       hidden: !canEdit || !hasEnvironment,
     },
     {

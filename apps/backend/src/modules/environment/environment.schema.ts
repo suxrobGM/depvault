@@ -44,13 +44,13 @@ export const EnvDiffResponseSchema = t.Object({
   rows: t.Array(EnvDiffRowSchema),
 });
 
-export const CloneEnvironmentBodySchema = t.Object({
+export const SyncEnvironmentBodySchema = t.Object({
   vaultGroupId: t.String(),
   sourceType: EnvironmentTypeSchema,
   targetType: EnvironmentTypeSchema,
 });
 
-export const CloneEnvironmentResponseSchema = t.Object({
+export const SyncEnvironmentResponseSchema = t.Object({
   id: t.String(),
   type: EnvironmentTypeSchema,
   variableCount: t.Number(),
@@ -64,4 +64,4 @@ export const DeleteEnvironmentParamsSchema = t.Object({
 export type EnvironmentResponse = Static<typeof EnvironmentResponseSchema>;
 export type EnvDiffResponse = Static<typeof EnvDiffResponseSchema>;
 export type EnvDiffRow = Static<typeof EnvDiffRowSchema>;
-export type CloneEnvironmentBody = Static<typeof CloneEnvironmentBodySchema>;
+export type SyncEnvironmentBody = Static<typeof SyncEnvironmentBodySchema>;

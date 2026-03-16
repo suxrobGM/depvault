@@ -38,6 +38,7 @@ const footerLinks: Record<string, FooterLink[]> = {
     { label: "Pricing", href: ROUTES.pricing },
     { label: "Terms of Service", href: ROUTES.terms },
     { label: "Privacy Policy", href: ROUTES.privacy },
+    { label: "Support", href: "mailto:support@depvault.com" },
   ],
 };
 
