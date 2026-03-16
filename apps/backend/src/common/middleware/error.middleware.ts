@@ -24,6 +24,11 @@ function createErrorResponse(code: number, message: string, details?: unknown): 
   return details !== undefined ? { code, message, details } : { code, message };
 }
 
+function getRouteInfo(request: Request): { method: string; path: string } {
+  const url = new URL(request.url);
+  return { method: request.method, path: url.pathname };
+}
+
 /**
  * Global error handling plugin.
  * Catches unhandled errors and returns consistent JSON error responses.
@@ -32,17 +37,23 @@ function createErrorResponse(code: number, message: string, details?: unknown): 
  */
 export const errorMiddleware = new Elysia({ name: "error-handler" }).onError(
   { as: "global" },
-  ({ code, error, set }) => {
+  ({ code, error, set, request }) => {
+    const route = getRouteInfo(request);
+
     if (error instanceof HttpError) {
       set.status = error.statusCode;
       const safeMessage = sanitizeErrorMessage(error.message);
-      logger.warn({ statusCode: error.statusCode, message: safeMessage }, "HTTP error");
+      logger.warn({ statusCode: error.statusCode, message: safeMessage, ...route }, "HTTP error");
       return createErrorResponse(error.statusCode, safeMessage);
     }
 
     switch (code) {
       case "VALIDATION":
         set.status = 400;
+        logger.warn(
+          { statusCode: 400, ...route, message: sanitizeErrorMessage(error.message) },
+          "Validation error",
+        );
         return createErrorResponse(
           400,
           "Validation error",
@@ -50,6 +61,7 @@ export const errorMiddleware = new Elysia({ name: "error-handler" }).onError(
         );
       case "PARSE":
         set.status = 400;
+        logger.warn({ statusCode: 400, ...route }, "Malformed request body");
         return createErrorResponse(400, "Malformed request body");
       case "NOT_FOUND":
         set.status = 404;
@@ -63,6 +75,7 @@ export const errorMiddleware = new Elysia({ name: "error-handler" }).onError(
           {
             code,
             message: safeMessage,
+            ...route,
             ...(isProduction ? {} : { stack: (error as Error).stack }),
           },
           "Unhandled error",

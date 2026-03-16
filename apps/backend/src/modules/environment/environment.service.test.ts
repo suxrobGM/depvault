@@ -90,7 +90,14 @@ describe("EnvironmentService", () => {
     const { EnvironmentRepository } = require("./environment.repository");
     const envHelper = new EnvironmentRepository(mockPrisma);
     const mockNotificationService = { notify: mock(() => Promise.resolve()) } as any;
-    service = new EnvironmentService(mockPrisma, mockAuditLog, envHelper, mockNotificationService);
+    const mockPlanEnforcement = { enforceForProject: mock(() => Promise.resolve()) } as any;
+    service = new EnvironmentService(
+      mockPrisma,
+      mockAuditLog,
+      envHelper,
+      mockNotificationService,
+      mockPlanEnforcement,
+    );
 
     spyOn(encryption, "deriveProjectKey").mockReturnValue(fakeProjectKey);
     spyOn(encryption, "encrypt").mockReturnValue(mockEncrypted);

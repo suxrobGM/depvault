@@ -8,6 +8,7 @@ import { uploadsStaticPlugin } from "@/common/plugins/static.plugin";
 import { validateEnv } from "@/env";
 import { secretScanCron } from "@/jobs/secret-scan.job";
 import { activityController } from "@/modules/activity/activity.controller";
+import { adminController } from "@/modules/admin";
 import { analysisController } from "@/modules/analysis";
 import { auditLogController } from "@/modules/audit-log/audit-log.controller";
 import { authController } from "@/modules/auth";
@@ -30,6 +31,7 @@ import { scanPatternController } from "@/modules/scan-pattern";
 import { secretController, secretFileController, sharedSecretController } from "@/modules/secret";
 import { secretScanController } from "@/modules/secret-scan";
 import { securityController } from "@/modules/security/security.controller";
+import { subscriptionController, subscriptionWebhookController } from "@/modules/subscription";
 import { userController } from "@/modules/user";
 import { vaultGroupController } from "@/modules/vault-group";
 import { HttpErrorResponses } from "@/types/response";
@@ -52,6 +54,7 @@ const app = new Elysia()
       .guard({
         response: HttpErrorResponses,
       })
+      .use(subscriptionWebhookController)
       .use(authController)
       .use(projectController)
       .use(invitationController)
@@ -78,7 +81,9 @@ const app = new Elysia()
       .use(ciAccessController)
       .use(licenseRuleController)
       .use(activityController)
-      .use(securityController),
+      .use(securityController)
+      .use(subscriptionController)
+      .use(adminController),
   )
   .listen(process.env.PORT!);
 

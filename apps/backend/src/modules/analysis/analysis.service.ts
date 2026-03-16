@@ -3,6 +3,7 @@ import { BadRequestError, NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { DependencyStatus, PrismaClient, type Ecosystem } from "@/generated/prisma";
 import { NotificationService } from "@/modules/notification/notification.service";
+import { PlanEnforcementService } from "@/modules/subscription/plan-enforcement.service";
 import type { PaginatedResponse } from "@/types/response";
 import type {
   AnalysisResponse,
@@ -46,12 +47,15 @@ export class AnalysisService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly notificationService: NotificationService,
+    private readonly planEnforcement: PlanEnforcementService,
   ) {}
 
   async create(
     body: CreateAnalysisBody & { projectId: string },
     userId: string,
   ): Promise<AnalysisResponse> {
+    await this.planEnforcement.enforceForProject(body.projectId, "analysis");
+
     const parser = PARSERS[body.ecosystem];
     if (!parser) {
       throw new BadRequestError(`Unsupported ecosystem: ${body.ecosystem}`);

@@ -25,6 +25,8 @@ const envSchema = t.Object({
   EMAIL_FROM_NAME: t.Optional(t.String({ default: "DepVault" })),
   EMAIL_FROM_ADDRESS: t.Optional(t.String({ default: "noreply@depvault.com" })),
   FRONTEND_URL: t.Optional(t.String({ default: "http://localhost:4001" })),
+  STRIPE_SECRET_KEY: t.Optional(t.String()),
+  STRIPE_WEBHOOK_SECRET: t.Optional(t.String()),
 });
 
 export type Env = Static<typeof envSchema>;

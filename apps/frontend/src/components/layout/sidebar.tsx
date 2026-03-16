@@ -4,6 +4,7 @@ import { type ReactElement } from "react";
 import { DEFAULT_ROLES } from "@depvault/shared/constants";
 import {
   ChevronLeft as ChevronLeftIcon,
+  CreditCard as CreditCardIcon,
   Dashboard as DashboardIcon,
   Folder as FolderIcon,
   History as HistoryIcon,
@@ -31,6 +32,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { NotificationBell } from "@/components/features/notifications";
 import { UserAvatar } from "@/components/ui/data-display";
 import { useAuth } from "@/hooks/use-auth";
+import { useSubscription } from "@/hooks/use-subscription";
 import { ROUTES } from "@/lib/constants";
 import { SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH } from "./constants";
 import { FeedbackMenu } from "./feedback-menu";
@@ -49,8 +51,25 @@ const navItems = [
   { label: "Activity", icon: <HistoryIcon />, href: ROUTES.activity },
   { label: "Security", icon: <SecurityNavIcon />, href: ROUTES.security },
   { label: "Converter", icon: <SwapHorizIcon />, href: ROUTES.converter },
+  { label: "Billing", icon: <CreditCardIcon />, href: ROUTES.billing },
   { label: "Settings", icon: <SettingsIcon />, href: ROUTES.settings },
 ];
+
+const allHrefs = navItems.map((item) => item.href);
+
+function isNavItemActive(href: string, pathname: string): boolean {
+  const matchesPath = pathname === href || pathname.startsWith(href + "/");
+  if (!matchesPath) {
+    return false;
+  }
+
+  return !allHrefs.some(
+    (other) =>
+      other !== href &&
+      other.startsWith(href) &&
+      (pathname === other || pathname.startsWith(other + "/")),
+  );
+}
 
 export function Sidebar(props: SidebarProps): ReactElement {
   const { open, mobileOpen, onToggle, onMobileClose } = props;
@@ -58,7 +77,10 @@ export function Sidebar(props: SidebarProps): ReactElement {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
+  const { plan } = useSubscription();
   const showRoleBadge = user?.role && !DEFAULT_ROLES.has(user.role);
+
+  const planBadgeColor = plan === "TEAM" ? "secondary" : plan === "PRO" ? "primary" : "default";
 
   const drawerContent = (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -87,7 +109,7 @@ export function Sidebar(props: SidebarProps): ReactElement {
       <Divider />
       <List sx={{ px: open ? 1 : 0.5, flex: 1 }}>
         {navItems.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+          const isActive = isNavItemActive(item.href, pathname);
           return (
             <ListItemButton
               key={item.href}
@@ -161,13 +183,26 @@ export function Sidebar(props: SidebarProps): ReactElement {
                       <Typography variant="body2" noWrap fontWeight={600}>
                         {[user.firstName, user.lastName].filter(Boolean).join(" ") || user.email}
                       </Typography>
-                      <Stack direction="row" alignItems="center" spacing={1}>
-                        <Typography variant="caption" color="text.secondary" noWrap>
+                      <Stack direction="row" alignItems="center" spacing={0.5}>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          noWrap
+                          sx={{ flex: 1 }}
+                        >
                           {user.email}
                         </Typography>
                         {showRoleBadge && (
                           <Chip label={user.role} size="small" color="primary" variant="outlined" />
                         )}
+                        <Chip
+                          label={plan}
+                          size="small"
+                          color={planBadgeColor as "default" | "primary" | "secondary"}
+                          variant="filled"
+                          onClick={() => router.push(ROUTES.billing as Route)}
+                          sx={{ fontSize: "0.65rem", height: 20, cursor: "pointer" }}
+                        />
                       </Stack>
                     </Box>
                   )}

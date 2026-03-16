@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
+import { UserRole } from "@depvault/shared/constants";
 import { GitHub as GitHubIcon } from "@mui/icons-material";
 import { Alert, Button, Divider, Stack, Typography } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
@@ -20,12 +21,19 @@ export function LoginForm(): ReactElement {
     validators: { onSubmit: loginSchema },
     onSubmit: async ({ value }) => {
       setServerError(null);
-      const { error } = await client.api.auth.login.post(value);
+      const { data, error } = await client.api.auth.login.post(value);
+      const role = data?.user?.role;
+
       if (error) {
         setServerError(error.value.message ?? "Login failed");
         return;
       }
-      router.push(ROUTES.dashboard);
+
+      if (role === UserRole.ADMIN || role === UserRole.SUPER_ADMIN) {
+        router.push(ROUTES.admin);
+      } else {
+        router.push(ROUTES.dashboard);
+      }
     },
   });
 

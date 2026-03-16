@@ -1,6 +1,7 @@
 import { singleton } from "tsyringe";
 import { ForbiddenError, NotFoundError } from "@/common/errors";
 import { PrismaClient } from "@/generated/prisma";
+import { PlanEnforcementService } from "@/modules/subscription/plan-enforcement.service";
 import type { PaginatedResponse } from "@/types/response";
 import type {
   CreateProjectBody,
@@ -11,9 +12,14 @@ import type {
 
 @singleton()
 export class ProjectService {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly planEnforcement: PlanEnforcementService,
+  ) {}
 
   async create(body: CreateProjectBody, userId: string): Promise<ProjectResponse> {
+    await this.planEnforcement.enforceProjectLimit(userId);
+
     const project = await this.prisma.project.create({
       data: {
         name: body.name,

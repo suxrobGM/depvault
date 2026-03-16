@@ -4,6 +4,7 @@ import { decryptBinary, deriveProjectKey, encryptBinary } from "@/common/utils/e
 import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import { NotificationService } from "@/modules/notification/notification.service";
+import { PlanEnforcementService } from "@/modules/subscription/plan-enforcement.service";
 import type { PaginatedResponse } from "@/types/response";
 import { toSecretFileResponse } from "./secret-file.mapper";
 import type { SecretFileResponse, UpdateSecretFileBody } from "./secret-file.schema";
@@ -15,6 +16,7 @@ export class SecretFileService {
     private readonly prisma: PrismaClient,
     private readonly auditLogService: AuditLogService,
     private readonly notificationService: NotificationService,
+    private readonly planEnforcement: PlanEnforcementService,
   ) {}
 
   async notifyGitSecretDetected(
@@ -39,6 +41,8 @@ export class SecretFileService {
     description?: string,
     ipAddress = "unknown",
   ): Promise<SecretFileResponse> {
+    await this.planEnforcement.enforceForProject(projectId, "secretFile");
+
     validateFile(file);
 
     const environment = await this.findOrCreateEnvironment(

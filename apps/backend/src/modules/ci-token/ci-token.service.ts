@@ -5,6 +5,7 @@ import { isIpInAllowlist, validateIpAllowlist } from "@/common/utils/ip";
 import { createRandomToken, hashToken } from "@/common/utils/password";
 import { PrismaClient, type CiToken } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
+import { PlanEnforcementService } from "@/modules/subscription/plan-enforcement.service";
 import type { PaginatedResponse } from "@/types/response";
 import type {
   CiSecretsResponse,
@@ -21,6 +22,7 @@ export class CiTokenService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly auditLogService: AuditLogService,
+    private readonly planEnforcement: PlanEnforcementService,
   ) {}
 
   async create(
@@ -29,6 +31,8 @@ export class CiTokenService {
     body: CreateCiTokenBody,
     ipAddress: string,
   ): Promise<CiTokenCreatedResponse> {
+    await this.planEnforcement.enforceForProject(projectId, "ciToken");
+
     const environment = await this.prisma.environment.findFirst({
       where: { id: body.environmentId, projectId },
     });

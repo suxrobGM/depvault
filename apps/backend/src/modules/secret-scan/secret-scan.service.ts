@@ -9,6 +9,7 @@ import {
 } from "@/generated/prisma";
 import { GitHubApiService } from "@/modules/github/github-api.service";
 import { NotificationService } from "@/modules/notification/notification.service";
+import { PlanEnforcementService } from "@/modules/subscription/plan-enforcement.service";
 import type { PaginatedResponse } from "@/types/response";
 import { parseGitHubUrl } from "./parse-github-url";
 import { executeScan } from "./secret-scan.executor";
@@ -29,9 +30,12 @@ export class SecretScanService {
     private readonly prisma: PrismaClient,
     private readonly githubApi: GitHubApiService,
     private readonly notificationService: NotificationService,
+    private readonly planEnforcement: PlanEnforcementService,
   ) {}
 
   async triggerScan(projectId: string, userId: string): Promise<ScanResponse> {
+    await this.planEnforcement.enforceFeatureForProject(projectId, "gitSecretScanning");
+
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },
       select: { repositoryUrl: true },

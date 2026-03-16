@@ -86,7 +86,11 @@ let service: CiTokenService;
 beforeEach(() => {
   mockPrisma = createMockPrisma();
   mockAudit = createMockAuditLogService();
-  service = new CiTokenService(mockPrisma, mockAudit);
+  const mockPlanEnforcement = {
+    enforceForProject: mock(() => Promise.resolve()),
+    enforceFeatureForProject: mock(() => Promise.resolve()),
+  } as any;
+  service = new CiTokenService(mockPrisma, mockAudit, mockPlanEnforcement);
 });
 
 describe("CiTokenService", () => {

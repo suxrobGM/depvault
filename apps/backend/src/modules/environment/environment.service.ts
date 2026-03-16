@@ -5,6 +5,7 @@ import { deriveProjectKey, encrypt } from "@/common/utils/encryption";
 import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import { NotificationService } from "@/modules/notification/notification.service";
+import { PlanEnforcementService } from "@/modules/subscription/plan-enforcement.service";
 import type { PaginatedResponse } from "@/types/response";
 import type {
   CreateEnvVariableBody,
@@ -24,6 +25,7 @@ export class EnvironmentService {
     private readonly auditLogService: AuditLogService,
     private readonly envHelper: EnvironmentRepository,
     private readonly notificationService: NotificationService,
+    private readonly planEnforcement: PlanEnforcementService,
   ) {}
 
   async listEnvironments(projectId: string, vaultGroupId?: string): Promise<EnvironmentResponse[]> {
@@ -55,6 +57,8 @@ export class EnvironmentService {
     userId: string,
     ipAddress: string,
   ): Promise<EnvVariableWithValueResponse> {
+    await this.planEnforcement.enforceForProject(projectId, "envVar");
+
     const groupName = await this.envHelper.getVaultGroupName(body.vaultGroupId);
 
     const environment = await this.envHelper.findOrCreateEnvironment(

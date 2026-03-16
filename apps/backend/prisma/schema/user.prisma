@@ -42,6 +42,7 @@ model User {
   ciTokens            CiToken[]
   invitationsSent     ProjectInvitation[] @relation("invitationsSent")
   invitationsReceived ProjectInvitation[] @relation("invitationsReceived")
+  subscription        Subscription?
 
   @@map("users")
 }

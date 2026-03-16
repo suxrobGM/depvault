@@ -35,13 +35,24 @@ function createMockPrisma() {
   } as any;
 }
 
+const mockPlanEnforcement = {
+  enforceProjectLimit: mock(() => Promise.resolve()),
+  enforceSecretLimit: mock(() => Promise.resolve()),
+  enforceAnalysisLimit: mock(() => Promise.resolve()),
+  enforceMemberLimit: mock(() => Promise.resolve()),
+  enforceCiTokenLimit: mock(() => Promise.resolve()),
+  enforceFeatureAccess: mock(() => Promise.resolve()),
+  enforceForProject: mock(() => Promise.resolve()),
+  enforceFeatureForProject: mock(() => Promise.resolve()),
+} as any;
+
 describe("ProjectService", () => {
   let service: ProjectService;
   let mockPrisma: ReturnType<typeof createMockPrisma>;
 
   beforeEach(() => {
     mockPrisma = createMockPrisma();
-    service = new ProjectService(mockPrisma);
+    service = new ProjectService(mockPrisma, mockPlanEnforcement);
   });
 
   describe("create", () => {

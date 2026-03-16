@@ -3,6 +3,7 @@ import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from "@
 import { logger } from "@/common/logger";
 import { PrismaClient } from "@/generated/prisma";
 import { NotificationService } from "@/modules/notification/notification.service";
+import { PlanEnforcementService } from "@/modules/subscription/plan-enforcement.service";
 import type { PaginatedResponse } from "@/types/response";
 import { InvitationEmailService } from "./invitation-email.service";
 import { INVITATION_INCLUDE, toInvitationResponse } from "./invitation.mapper";
@@ -16,6 +17,7 @@ export class InvitationService {
     private readonly prisma: PrismaClient,
     private readonly invitationEmail: InvitationEmailService,
     private readonly notificationService: NotificationService,
+    private readonly planEnforcement: PlanEnforcementService,
   ) {}
 
   async create(
@@ -23,6 +25,8 @@ export class InvitationService {
     body: CreateInvitationBody,
     actorId: string,
   ): Promise<InvitationResponse> {
+    await this.planEnforcement.enforceForProject(projectId, "member");
+
     const email = body.email.toLowerCase();
     const inviter = await this.getInviterName(actorId);
 

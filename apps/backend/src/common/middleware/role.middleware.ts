@@ -1,25 +1,30 @@
 import { Elysia } from "elysia";
 import { ForbiddenError } from "@/common/errors";
 import { UserRole } from "@/generated/prisma";
-import { authGuard } from "./auth.middleware";
 
 /**
- * Role-based access control middleware factory.
- * Chains authGuard for type inference (Elysia deduplicates by plugin name at runtime).
+ * Role-based access control guard.
+ * Must be used AFTER authGuard on the same Elysia instance so `user` is in context.
  *
  * Usage:
- *   someRoutes.use(authGuard).use(requireRole("ADMIN")).get(...)
+ *   controller.use(authGuard).use(requireRole("ADMIN")).get(...)
  */
 export const requireRole = (...roles: UserRole[]) =>
-  new Elysia({ name: `role-${roles.join("-")}` })
-    .use(authGuard)
-    .onBeforeHandle({ as: "scoped" }, ({ user }) => {
-      const userRole = user?.role as UserRole;
+  new Elysia({ name: `role-${roles.join("-")}` }).onBeforeHandle({ as: "scoped" }, (context) => {
+    const user = (context as unknown as { user?: { role?: string } }).user;
+    const userRole = user?.role as UserRole | null;
 
-      if (userRole === UserRole.SUPER_ADMIN) {
-        return;
-      }
-      if (!roles.includes(userRole)) {
-        throw new ForbiddenError("Insufficient permissions");
-      }
-    });
+    if (!userRole) {
+      throw new ForbiddenError("Authentication required");
+    }
+
+    if (userRole === UserRole.SUPER_ADMIN) {
+      return;
+    }
+
+    if (!roles.includes(userRole)) {
+      throw new ForbiddenError(
+        `Insufficient permissions (have: ${userRole}, need: ${roles.join(" | ")})`,
+      );
+    }
+  });

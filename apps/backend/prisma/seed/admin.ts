@@ -1,5 +1,5 @@
 import { prisma } from "@/common/database";
-import { hashPassword } from "@/common/utils/password";
+import { hashPassword, verifyPassword } from "@/common/utils/password";
 import { UserRole } from "@/generated/prisma";
 
 export async function seedAdmin(): Promise<void> {
@@ -11,17 +11,40 @@ export async function seedAdmin(): Promise<void> {
     return;
   }
 
-  const existing = await prisma.user.findUnique({ where: { email } });
+  const existing = await prisma.user.findFirst({
+    where: { role: UserRole.SUPER_ADMIN },
+  });
 
   if (existing) {
-    if (existing.role !== UserRole.SUPER_ADMIN) {
-      await prisma.user.update({
-        where: { id: existing.id },
-        data: { role: UserRole.SUPER_ADMIN },
-      });
-      console.log("  ✓ Existing user promoted to SUPER_ADMIN (%s)", email);
+    const updates: Record<string, unknown> = {};
+
+    if (existing.email !== email) {
+      updates.email = email;
+    }
+
+    if (existing.passwordHash) {
+      const passwordMatches = await verifyPassword(password, existing.passwordHash);
+      if (!passwordMatches) {
+        updates.passwordHash = await hashPassword(password);
+      }
     } else {
-      console.log("  ✓ Super admin already exists, skipping (%s)", email);
+      updates.passwordHash = await hashPassword(password);
+    }
+
+    if (Object.keys(updates).length > 0) {
+      await prisma.user.update({ where: { id: existing.id }, data: updates });
+
+      if (updates.email) {
+        await prisma.account.updateMany({
+          where: { userId: existing.id, provider: "EMAIL" },
+          data: { providerAccountId: email },
+        });
+      }
+
+      const changed = Object.keys(updates).join(", ");
+      console.log("  ✓ Super admin updated (%s) — changed: %s", email, changed);
+    } else {
+      console.log("  ✓ Super admin already up to date (%s)", email);
     }
     return;
   }

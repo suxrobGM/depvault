@@ -1,15 +1,8 @@
 "use client";
 
 import type { ReactElement } from "react";
-import {
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  ToggleButton,
-  ToggleButtonGroup,
-} from "@mui/material";
+import { Stack, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { SelectField } from "@/components/ui/inputs";
 import type { NotificationType } from "@/types/api/notification";
 
 interface NotificationFiltersProps {
@@ -46,20 +39,13 @@ export function NotificationFilters(props: NotificationFiltersProps): ReactEleme
         <ToggleButton value="unread">Unread</ToggleButton>
         <ToggleButton value="read">Read</ToggleButton>
       </ToggleButtonGroup>
-      <FormControl size="small" sx={{ minWidth: 180 }}>
-        <InputLabel>Type</InputLabel>
-        <Select
-          value={typeFilter ?? ""}
-          label="Type"
-          onChange={(e) => onTypeFilterChange((e.target.value || null) as NotificationType | null)}
-        >
-          {NOTIFICATION_TYPES.map((t) => (
-            <MenuItem key={t.value} value={t.value}>
-              {t.label}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <SelectField
+        value={typeFilter ?? ""}
+        onChange={(v) => onTypeFilterChange((v || null) as NotificationType | null)}
+        options={NOTIFICATION_TYPES}
+        label="Type"
+        minWidth={180}
+      />
     </Stack>
   );
 }
