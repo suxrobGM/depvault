@@ -98,8 +98,8 @@ export function PlanComparison(): ReactElement {
     (variables) =>
       client.api.subscription.checkout.post({
         ...variables,
-        successUrl: `${window.location.origin}${ROUTES.billing}?success=true`,
-        cancelUrl: `${window.location.origin}${ROUTES.billing}?canceled=true`,
+        successUrl: `${ROUTES.billing}?success=true`,
+        cancelUrl: `${ROUTES.billing}?canceled=true`,
       }),
     {
       errorMessage: "Failed to start checkout",

@@ -3,6 +3,7 @@
 import { useState, type ReactElement } from "react";
 import { History as HistoryIcon } from "@mui/icons-material";
 import { Box } from "@mui/material";
+import { ActivityUpgradeGate } from "@/components/features/activity";
 import { ListSkeleton, PaginationBar } from "@/components/ui/data-display";
 import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
@@ -58,35 +59,37 @@ export function ActivityLogView(props: ActivityLogViewProps): ReactElement {
   const totalPages = data ? Math.ceil(data.pagination.total / PAGE_SIZE) : 0;
 
   return (
-    <Box>
-      <ActivityFilterBar filters={filters} onFiltersChange={handleFiltersChange} />
+    <ActivityUpgradeGate>
+      <Box>
+        <ActivityFilterBar filters={filters} onFiltersChange={handleFiltersChange} />
 
-      {isLoading ? (
-        <ListSkeleton />
-      ) : !data || data.items.length === 0 ? (
-        <EmptyState
-          icon={<HistoryIcon />}
-          title="No activity found"
-          description={
-            hasActiveFilters
-              ? "Try adjusting your filters to find what you're looking for."
-              : "Activity will appear here as team members interact with the project vault."
-          }
-        />
-      ) : (
-        <Box sx={{ pl: { xs: 0, sm: 1 } }}>
-          {data.items.map((entry, index) => (
-            <ActivityLogEntry
-              key={entry.id}
-              entry={entry}
-              index={index}
-              isLast={index === data.items.length - 1}
-            />
-          ))}
+        {isLoading ? (
+          <ListSkeleton />
+        ) : !data || data.items.length === 0 ? (
+          <EmptyState
+            icon={<HistoryIcon />}
+            title="No activity found"
+            description={
+              hasActiveFilters
+                ? "Try adjusting your filters to find what you're looking for."
+                : "Activity will appear here as team members interact with the project vault."
+            }
+          />
+        ) : (
+          <Box sx={{ pl: { xs: 0, sm: 1 } }}>
+            {data.items.map((entry, index) => (
+              <ActivityLogEntry
+                key={entry.id}
+                entry={entry}
+                index={index}
+                isLast={index === data.items.length - 1}
+              />
+            ))}
 
-          {totalPages > 1 && <PaginationBar count={totalPages} page={page} onChange={setPage} />}
-        </Box>
-      )}
-    </Box>
+            {totalPages > 1 && <PaginationBar count={totalPages} page={page} onChange={setPage} />}
+          </Box>
+        )}
+      </Box>
+    </ActivityUpgradeGate>
   );
 }

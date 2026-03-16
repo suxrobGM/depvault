@@ -68,7 +68,7 @@ export function BillingOverview(): ReactElement {
   const portalMutation = useApiMutation<PortalSessionResponse>(
     () =>
       client.api.subscription.portal.post({
-        returnUrl: `${window.location.origin}${ROUTES.billing}`,
+        returnUrl: ROUTES.billing,
       }),
     {
       errorMessage: "Failed to open billing portal",

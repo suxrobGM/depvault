@@ -17,10 +17,11 @@ interface ActivityLogEntryProps {
   entry: AuditLogEntry;
   index: number;
   isLast: boolean;
+  projectName?: string;
 }
 
 export function ActivityLogEntry(props: ActivityLogEntryProps): ReactElement {
-  const { entry, index, isLast } = props;
+  const { entry, index, isLast, projectName } = props;
 
   const config = ACTIVITY_ACTION_CONFIG[entry.action] ?? ACTIVITY_ACTION_CONFIG.READ!;
   const resourceLabel = RESOURCE_LABELS[entry.resourceType] ?? entry.resourceType;
@@ -121,6 +122,15 @@ export function ActivityLogEntry(props: ActivityLogEntryProps): ReactElement {
             variant="outlined"
             sx={{ height: 20, fontSize: "0.675rem" }}
           />
+          {projectName && (
+            <Chip
+              label={projectName}
+              size="small"
+              color="primary"
+              variant="outlined"
+              sx={{ height: 20, fontSize: "0.675rem" }}
+            />
+          )}
         </Stack>
 
         <Stack direction="row" spacing={0.5} alignItems="center" sx={{ mt: 0.25 }}>

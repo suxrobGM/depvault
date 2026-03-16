@@ -11,6 +11,7 @@ import { SubscriptionService } from "./subscription.service";
 @singleton()
 export class StripeBillingService {
   private stripe: Stripe | null = null;
+  private readonly frontendUrl = process.env.FRONTEND_URL!.replace(/\/$/, ""); // Ensure no trailing slash
 
   constructor(
     private readonly prisma: PrismaClient,
@@ -29,10 +30,8 @@ export class StripeBillingService {
   }
 
   async createCheckoutSession(userId: string, email: string, body: CreateCheckoutBody) {
-    const frontendUrl = process.env.FRONTEND_URL!;
-    if (!body.successUrl.startsWith(frontendUrl) || !body.cancelUrl.startsWith(frontendUrl)) {
-      throw new BadRequestError("Redirect URLs must belong to the application domain");
-    }
+    const successUrl = `${this.frontendUrl}${body.successUrl}`;
+    const cancelUrl = `${this.frontendUrl}${body.cancelUrl}`;
 
     const stripe = this.getStripe();
     const subscription = await this.subscriptionService.getOrCreateSubscription(userId);
@@ -54,8 +53,8 @@ export class StripeBillingService {
       mode: "subscription",
       customer: customerId,
       line_items: [{ price: stripePlan.priceId, quantity: body.quantity ?? 1 }],
-      success_url: body.successUrl,
-      cancel_url: body.cancelUrl,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
       subscription_data: { metadata: { userId } },
     };
 
@@ -81,7 +80,7 @@ export class StripeBillingService {
     return { url: session.url };
   }
 
-  async createPortalSession(userId: string, returnUrl: string) {
+  async createPortalSession(userId: string, returnPath: string) {
     const stripe = this.getStripe();
     const subscription = await this.prisma.subscription.findUnique({ where: { userId } });
 
@@ -91,7 +90,7 @@ export class StripeBillingService {
 
     const session = await stripe.billingPortal.sessions.create({
       customer: subscription.stripeCustomerId,
-      return_url: returnUrl,
+      return_url: `${this.frontendUrl}${returnPath}`,
     });
 
     return { url: session.url };
