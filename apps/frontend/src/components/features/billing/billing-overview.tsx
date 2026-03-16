@@ -32,7 +32,8 @@ function UsageMeter(props: UsageMeterProps): ReactElement {
   const { label, current, limit } = props;
   const unlimited = isUnlimited(limit);
   const percentage = unlimited ? 0 : Math.min((current / limit) * 100, 100);
-  const isNearLimit = !unlimited && percentage >= 80;
+  const isOverLimit = !unlimited && current >= limit;
+  const isNearLimit = !unlimited && !isOverLimit && percentage >= 80;
 
   return (
     <Box>
@@ -40,14 +41,14 @@ function UsageMeter(props: UsageMeterProps): ReactElement {
         <Typography variant="body2" color="text.secondary">
           {label}
         </Typography>
-        <Typography variant="body2" fontWeight={600}>
+        <Typography variant="body2" fontWeight={600} color={isOverLimit ? "error.main" : undefined}>
           {current} / {unlimited ? "Unlimited" : limit}
         </Typography>
       </Stack>
       <LinearProgress
         variant="determinate"
         value={unlimited ? 0 : percentage}
-        color={isNearLimit ? "warning" : "primary"}
+        color={isOverLimit ? "error" : isNearLimit ? "warning" : "primary"}
         sx={{ height: 8, borderRadius: 4 }}
       />
     </Box>

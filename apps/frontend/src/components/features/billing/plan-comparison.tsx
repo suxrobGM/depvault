@@ -62,7 +62,7 @@ const PLANS: PlanDef[] = [
       "20 projects",
       "Up to 10 users",
       "1,000 env variables",
-      "100 secret files",
+      "200 secret files",
       "200 analyses / month",
       "50 active CI/CD tokens",
       "Audit logs (30 days)",
@@ -89,6 +89,7 @@ export function PlanComparison(): ReactElement {
   const { plan: currentPlan } = useSubscription();
   const confirm = useConfirm();
   const [promoCode, setPromoCode] = useState("");
+  const [checkoutTarget, setCheckoutTarget] = useState<SubscriptionPlanValue | null>(null);
 
   const checkoutMutation = useApiMutation<
     CheckoutSessionResponse,
@@ -118,6 +119,7 @@ export function PlanComparison(): ReactElement {
   );
 
   const handleUpgrade = (targetPlan: CreateCheckoutBody["plan"]) => {
+    setCheckoutTarget(targetPlan as SubscriptionPlanValue);
     checkoutMutation.mutate({
       plan: targetPlan,
       ...(promoCode && { promoCode }),
@@ -151,16 +153,18 @@ export function PlanComparison(): ReactElement {
         Plans
       </Typography>
 
-      <Box sx={{ mb: 3, maxWidth: 320 }}>
-        <TextField
-          label="Promo Code"
-          size="small"
-          fullWidth
-          value={promoCode}
-          onChange={(e) => setPromoCode(e.target.value)}
-          placeholder="Enter promo code (optional)"
-        />
-      </Box>
+      {currentPlan !== SubscriptionPlanName.TEAM && (
+        <Box sx={{ mb: 3, maxWidth: 320 }}>
+          <TextField
+            label="Promo Code"
+            size="small"
+            fullWidth
+            value={promoCode}
+            onChange={(e) => setPromoCode(e.target.value)}
+            placeholder="Enter promo code (optional)"
+          />
+        </Box>
+      )}
 
       <Grid container spacing={3} alignItems="stretch">
         {PLANS.map((planDef) => {
@@ -233,7 +237,9 @@ export function PlanComparison(): ReactElement {
                       disabled={isCurrent || checkoutMutation.isPending}
                       onClick={() => handleUpgrade(planDef.key as CreateCheckoutBody["plan"])}
                     >
-                      {checkoutMutation.isPending ? "Loading..." : getButtonLabel(planDef.key)}
+                      {checkoutMutation.isPending && checkoutTarget === planDef.key
+                        ? "Loading..."
+                        : getButtonLabel(planDef.key)}
                     </Button>
                   )}
                 </CardContent>
