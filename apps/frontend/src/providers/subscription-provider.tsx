@@ -1,60 +1,40 @@
 "use client";
 
-import { createContext, useState, type PropsWithChildren, type ReactElement } from "react";
+import { createContext, use, useState, type PropsWithChildren, type ReactElement } from "react";
 import { UpgradePrompt } from "@/components/features/billing";
-import { useSubscription } from "@/hooks/use-subscription";
 
-interface UpgradeDialogState {
-  resource: string;
-  limit: number;
-  current: number;
+interface PlanLimitContextValue {
+  showUpgradePrompt: (message: string) => void;
 }
 
-interface SubscriptionContextValue {
-  plan: "FREE" | "PRO" | "TEAM";
-  isFreePlan: boolean;
-  isProPlan: boolean;
-  isTeamPlan: boolean;
-  showUpgradePrompt: (resource: string, limit: number, current: number) => void;
-}
+const PlanLimitContext = createContext<PlanLimitContextValue | null>(null);
 
-export const SubscriptionContext = createContext<SubscriptionContextValue | null>(null);
-
-/** Provides subscription state and an upgrade dialog to the component tree. */
-export function SubscriptionProvider(props: PropsWithChildren): ReactElement {
+/** Provides a global upgrade dialog that can be triggered from anywhere via `usePlanLimitHandler`. */
+export function PlanLimitProvider(props: PropsWithChildren): ReactElement {
   const { children } = props;
-  const { plan, isFreePlan, isProPlan, isTeamPlan } = useSubscription();
-  const [upgradeDialog, setUpgradeDialog] = useState<UpgradeDialogState | null>(null);
-  const currentPlan = plan as "FREE" | "PRO" | "TEAM";
+  const [message, setMessage] = useState<string | null>(null);
 
-  const showUpgradePrompt = (resource: string, limit: number, current: number) => {
-    setUpgradeDialog({ resource, limit, current });
-  };
-
-  const handleClose = () => {
-    setUpgradeDialog(null);
-  };
-
-  const value: SubscriptionContextValue = {
-    plan: currentPlan,
-    isFreePlan,
-    isProPlan,
-    isTeamPlan,
-    showUpgradePrompt,
+  const value: PlanLimitContextValue = {
+    showUpgradePrompt: setMessage,
   };
 
   return (
-    <SubscriptionContext value={value}>
+    <PlanLimitContext value={value}>
       {children}
-      {upgradeDialog && (
-        <UpgradePrompt
-          open
-          onClose={handleClose}
-          resource={upgradeDialog.resource}
-          limit={upgradeDialog.limit}
-          current={upgradeDialog.current}
-        />
-      )}
-    </SubscriptionContext>
+      <UpgradePrompt
+        open={message !== null}
+        onClose={() => setMessage(null)}
+        message={message ?? ""}
+      />
+    </PlanLimitContext>
   );
+}
+
+/** Returns a function to show the upgrade prompt dialog. */
+export function useSubscriptionPlanLimit(): PlanLimitContextValue {
+  const context = use(PlanLimitContext);
+  if (!context) {
+    throw new Error("useSubscriptionPlanLimit must be used within PlanLimitProvider");
+  }
+  return context;
 }

@@ -197,7 +197,7 @@ export class SubscriptionService {
     return { url: session.url };
   }
 
-  async handleWebhookEvent(rawBody: string, signature: string) {
+  async handleWebhookEvent(rawBody: string, signature: string): Promise<void> {
     const stripe = this.getStripe();
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -272,7 +272,7 @@ export class SubscriptionService {
     }
   }
 
-  private async syncSubscription(stripeSubscription: Stripe.Subscription) {
+  private async syncSubscription(stripeSubscription: Stripe.Subscription): Promise<void> {
     const userId = stripeSubscription.metadata?.userId;
     if (!userId) {
       logger.warn({ subscriptionId: stripeSubscription.id }, "No userId in subscription metadata");

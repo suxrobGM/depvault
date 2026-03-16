@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSubscriptionPlanLimit } from "@/providers/subscription-provider";
 import { useToast } from "./use-toast";
 
 type MutationFn<TData, TVariables> = (variables: TVariables) => Promise<{
@@ -20,9 +21,15 @@ interface UseApiMutationOptions<TData, TVariables> {
   onError?: (error: EdenError) => void;
 }
 
+const PLAN_LIMIT_PATTERN = /limit reached.*upgrade/i;
+
+function isPlanLimitError(message: string): boolean {
+  return PLAN_LIMIT_PATTERN.test(message);
+}
+
 /**
  * Wraps `useMutation` with Eden Treaty response unwrapping, query invalidation, and toast notifications.
- * Use `successMessage`/`errorMessage` for notification-only cases; `onSuccess`/`onError` for side effects.
+ * Automatically detects plan limit errors (403) and shows the upgrade dialog instead of a generic error toast.
  */
 export function useApiMutation<TData, TVariables = void>(
   mutationFn: MutationFn<TData, TVariables>,
@@ -30,6 +37,7 @@ export function useApiMutation<TData, TVariables = void>(
 ) {
   const queryClient = useQueryClient();
   const notification = useToast();
+  const { showUpgradePrompt } = useSubscriptionPlanLimit();
 
   return useMutation<TData, EdenError, TVariables>({
     mutationFn: async (variables) => {
@@ -53,6 +61,11 @@ export function useApiMutation<TData, TVariables = void>(
       options?.onSuccess?.(data, variables);
     },
     onError: (error) => {
+      if (isPlanLimitError(error.message)) {
+        showUpgradePrompt(error.message);
+        return;
+      }
+
       if (options?.onError) {
         options.onError(error);
       } else if (options?.errorMessage) {

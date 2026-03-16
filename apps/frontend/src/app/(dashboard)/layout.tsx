@@ -4,6 +4,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { getServerClient } from "@/lib/api-server";
 import { ROUTES } from "@/lib/constants";
 import { AuthProvider, ConfirmProvider, NotificationProvider, QueryProvider } from "@/providers";
+import { PlanLimitProvider } from "@/providers/subscription-provider";
 
 async function getUser() {
   const client = await getServerClient();
@@ -33,9 +34,11 @@ export default function DashboardLayout(props: PropsWithChildren): ReactElement 
     <QueryProvider>
       <NotificationProvider>
         <ConfirmProvider>
-          <Suspense>
-            <AuthenticatedShell>{children}</AuthenticatedShell>
-          </Suspense>
+          <PlanLimitProvider>
+            <Suspense>
+              <AuthenticatedShell>{children}</AuthenticatedShell>
+            </Suspense>
+          </PlanLimitProvider>
         </ConfirmProvider>
       </NotificationProvider>
     </QueryProvider>

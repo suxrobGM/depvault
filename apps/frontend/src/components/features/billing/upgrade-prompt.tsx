@@ -15,21 +15,19 @@ import { ROUTES } from "@/lib/constants";
 interface UpgradePromptProps {
   open: boolean;
   onClose: () => void;
-  resource: string;
-  limit: number;
-  current: number;
+  message: string;
 }
 
 /** A dialog shown when a user hits a plan limit, prompting them to upgrade. */
 export function UpgradePrompt(props: UpgradePromptProps): ReactElement {
-  const { open, onClose, resource, limit, current } = props;
+  const { open, onClose, message } = props;
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle>Upgrade Required</DialogTitle>
+      <DialogTitle>Plan Limit Reached</DialogTitle>
       <DialogContent>
         <Typography variant="body1" sx={{ mb: 1 }}>
-          You&apos;ve reached the {resource} limit ({current}/{limit}).
+          {message}
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Upgrade your plan to increase your limits and unlock additional features.
