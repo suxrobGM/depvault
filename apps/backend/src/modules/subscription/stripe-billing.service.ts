@@ -3,6 +3,7 @@ import { singleton } from "tsyringe";
 import { BadRequestError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { PrismaClient, type SubscriptionPlan } from "@/generated/prisma";
+import { extractPeriodDates } from "./stripe-utils";
 import type { CreateCheckoutBody } from "./subscription.schema";
 import { SubscriptionService } from "./subscription.service";
 
@@ -106,12 +107,16 @@ export class StripeBillingService {
       throw new BadRequestError("Admin-granted subscriptions cannot be canceled this way");
     }
 
-    await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+    const updated = await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
       cancel_at_period_end: true,
     });
+
     await this.prisma.subscription.update({
       where: { userId },
-      data: { cancelAtPeriodEnd: true },
+      data: {
+        cancelAtPeriodEnd: true,
+        ...extractPeriodDates(updated),
+      },
     });
 
     logger.info({ userId }, "Subscription scheduled for cancellation");
@@ -129,12 +134,16 @@ export class StripeBillingService {
       throw new BadRequestError("Subscription is not scheduled for cancellation");
     }
 
-    await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+    const updated = await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
       cancel_at_period_end: false,
     });
+
     await this.prisma.subscription.update({
       where: { userId },
-      data: { cancelAtPeriodEnd: false },
+      data: {
+        cancelAtPeriodEnd: false,
+        ...extractPeriodDates(updated),
+      },
     });
 
     logger.info({ userId }, "Subscription cancellation reversed");

@@ -159,48 +159,73 @@ export function BillingOverview(): ReactElement {
           </Stack>
         )}
 
-        {plan !== SubscriptionPlanName.FREE && !subscription?.isComp && (
+        {plan !== SubscriptionPlanName.FREE && (
           <>
             <Divider sx={{ my: 2 }} />
             <Stack spacing={1.5}>
-              {subscription?.cancelAtPeriodEnd && subscription.currentPeriodEnd && (
-                <Typography variant="body2" color="warning.main">
-                  Your subscription will cancel on{" "}
-                  {new Date(subscription.currentPeriodEnd).toLocaleDateString()}.
-                </Typography>
-              )}
-              {!subscription?.cancelAtPeriodEnd && subscription?.currentPeriodEnd && (
-                <Typography variant="body2" color="text.secondary">
-                  Next billing date: {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
-                </Typography>
-              )}
-              <Stack direction="row" spacing={1.5}>
-                <Button
-                  variant="outlined"
-                  onClick={() => portalMutation.mutate(undefined)}
-                  disabled={portalMutation.isPending}
-                >
-                  {portalMutation.isPending ? "Loading..." : "Manage Billing"}
-                </Button>
-                {subscription?.cancelAtPeriodEnd ? (
-                  <Button
-                    variant="contained"
-                    onClick={() => resumeMutation.mutate(undefined)}
-                    disabled={resumeMutation.isPending}
-                  >
-                    {resumeMutation.isPending ? "Resuming..." : "Resume Subscription"}
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    onClick={handleCancel}
-                    disabled={cancelMutation.isPending}
-                  >
-                    {cancelMutation.isPending ? "Canceling..." : "Cancel Subscription"}
-                  </Button>
+              <Stack spacing={0.5}>
+                {subscription?.cancelAtPeriodEnd && (
+                  <Typography variant="body2" color="warning.main" fontWeight={600}>
+                    {subscription.currentPeriodEnd
+                      ? `Cancels on ${new Date(subscription.currentPeriodEnd).toLocaleDateString()}`
+                      : "Scheduled for cancellation"}
+                    {" - you\u2019ll be downgraded to Free after this date"}
+                  </Typography>
+                )}
+
+                {!subscription?.cancelAtPeriodEnd && subscription?.currentPeriodEnd && (
+                  <Typography variant="body2" color="text.secondary">
+                    Next billing date:{" "}
+                    {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                  </Typography>
+                )}
+                {subscription?.currentPeriodStart && (
+                  <Typography variant="caption" color="text.disabled">
+                    Current period started:{" "}
+                    {new Date(subscription.currentPeriodStart).toLocaleDateString()}
+                  </Typography>
+                )}
+                {subscription?.isComp && (
+                  <Typography variant="body2" color="text.secondary">
+                    This subscription was granted by an administrator — no billing applies
+                  </Typography>
+                )}
+                {subscription?.quantity && subscription.quantity > 1 && (
+                  <Typography variant="body2" color="text.secondary">
+                    Seats: {subscription.quantity}
+                  </Typography>
                 )}
               </Stack>
+
+              {!subscription?.isComp && (
+                <Stack direction="row" spacing={1.5}>
+                  <Button
+                    variant="outlined"
+                    onClick={() => portalMutation.mutate(undefined)}
+                    disabled={portalMutation.isPending}
+                  >
+                    {portalMutation.isPending ? "Loading..." : "Manage Billing"}
+                  </Button>
+                  {subscription?.cancelAtPeriodEnd ? (
+                    <Button
+                      variant="contained"
+                      onClick={() => resumeMutation.mutate(undefined)}
+                      disabled={resumeMutation.isPending}
+                    >
+                      {resumeMutation.isPending ? "Resuming..." : "Resume Subscription"}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={handleCancel}
+                      disabled={cancelMutation.isPending}
+                    >
+                      {cancelMutation.isPending ? "Canceling..." : "Cancel Subscription"}
+                    </Button>
+                  )}
+                </Stack>
+              )}
             </Stack>
           </>
         )}

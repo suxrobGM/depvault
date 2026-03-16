@@ -4,6 +4,7 @@ import { BadRequestError } from "@/common/errors";
 import { logger } from "@/common/logger";
 import { PrismaClient, SubscriptionPlan, SubscriptionStatus } from "@/generated/prisma";
 import { StripeBillingService } from "./stripe-billing.service";
+import { extractPeriodDates } from "./stripe-utils";
 
 /** Handles Stripe webhook event verification, dispatching, and subscription sync. */
 @singleton()
@@ -110,39 +111,31 @@ export class StripeWebhookService {
     const plan = await this.resolvePlanFromPriceId(priceId);
     const status = mapStripeStatus(stripeSubscription.status);
 
-    const sub = stripeSubscription as Stripe.Subscription & {
-      current_period_start?: number;
-      current_period_end?: number;
+    const periodDates = extractPeriodDates(stripeSubscription);
+
+    // Common fields for both update and create
+    const shared = {
+      plan,
+      status,
+      stripeSubscriptionId: stripeSubscription.id,
+      stripePriceId: priceId ?? null,
+      quantity: stripeSubscription.items.data[0]?.quantity ?? 1,
+      cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
+      ...periodDates,
     };
-    const periodStart = sub.current_period_start ? new Date(sub.current_period_start * 1000) : null;
-    const periodEnd = sub.current_period_end ? new Date(sub.current_period_end * 1000) : null;
 
     await this.prisma.subscription.upsert({
       where: { userId },
       update: {
-        plan,
-        status,
-        stripeSubscriptionId: stripeSubscription.id,
-        stripePriceId: priceId ?? null,
-        quantity: stripeSubscription.items.data[0]?.quantity ?? 1,
-        currentPeriodStart: periodStart,
-        currentPeriodEnd: periodEnd,
-        cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
+        ...shared,
         canceledAt: stripeSubscription.canceled_at
           ? new Date(stripeSubscription.canceled_at * 1000)
           : null,
       },
       create: {
         userId,
-        plan,
-        status,
         stripeCustomerId: stripeSubscription.customer as string,
-        stripeSubscriptionId: stripeSubscription.id,
-        stripePriceId: priceId ?? null,
-        quantity: stripeSubscription.items.data[0]?.quantity ?? 1,
-        currentPeriodStart: periodStart,
-        currentPeriodEnd: periodEnd,
-        cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
+        ...shared,
       },
     });
 
