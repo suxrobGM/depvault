@@ -98,7 +98,11 @@ export function LandingFooter(): ReactElement {
                     href={link.href as Route}
                     underline="none"
                     variant="body2"
-                    onClick={(e: MouseEvent<HTMLAnchorElement>) => handleClick(e, link.href)}
+                    onClick={
+                      link.label !== "Documentation"
+                        ? (e: MouseEvent<HTMLAnchorElement>) => handleClick(e, link.href)
+                        : undefined
+                    }
                     sx={{
                       color: "text.secondary",
                       transition: "color 0.2s",
