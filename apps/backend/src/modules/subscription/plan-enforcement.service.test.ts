@@ -1,4 +1,5 @@
 import "reflect-metadata";
+import { INFINITE_LIMIT } from "@depvault/shared/constants";
 import { describe, expect, it, mock } from "bun:test";
 import { ForbiddenError } from "@/common/errors";
 import { PlanEnforcementService } from "./plan-enforcement.service";
@@ -25,12 +26,12 @@ function createMockSubscriptionService(plan = "FREE") {
                 prioritySupport: false,
               }
             : {
-                maxUsers: Number.POSITIVE_INFINITY,
-                maxProjects: Number.POSITIVE_INFINITY,
-                maxEnvVars: Number.POSITIVE_INFINITY,
-                maxSecretFiles: Number.POSITIVE_INFINITY,
-                maxAnalysesPerMonth: Number.POSITIVE_INFINITY,
-                maxCiTokens: Number.POSITIVE_INFINITY,
+                maxUsers: INFINITE_LIMIT,
+                maxProjects: INFINITE_LIMIT,
+                maxEnvVars: INFINITE_LIMIT,
+                maxSecretFiles: INFINITE_LIMIT,
+                maxAnalysesPerMonth: INFINITE_LIMIT,
+                maxCiTokens: INFINITE_LIMIT,
                 auditLogRetentionDays: 365,
                 gitSecretScanning: true,
                 ipAllowlists: true,

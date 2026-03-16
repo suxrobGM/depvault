@@ -2,9 +2,9 @@ import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
 import { BadRequestError } from "@/common/errors";
 import { MessageResponseSchema } from "@/types/response";
-import { SubscriptionService } from "./subscription.service";
+import { StripeWebhookService } from "./stripe-webhook.service";
 
-const subscriptionService = container.resolve(SubscriptionService);
+const webhookService = container.resolve(StripeWebhookService);
 
 export const subscriptionWebhookController = new Elysia({
   prefix: "/subscription",
@@ -19,7 +19,7 @@ export const subscriptionWebhookController = new Elysia({
     }
 
     const rawBody = await request.text();
-    await subscriptionService.handleWebhookEvent(rawBody, signature);
+    await webhookService.handleEvent(rawBody, signature);
     return { message: "Webhook processed" };
   },
   {

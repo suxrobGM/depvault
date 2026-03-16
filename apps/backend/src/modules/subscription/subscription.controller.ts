@@ -1,6 +1,8 @@
 import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
 import { authGuard } from "@/common/middleware";
+import { MessageResponseSchema } from "@/types/response";
+import { StripeBillingService } from "./stripe-billing.service";
 import {
   CheckoutSessionResponseSchema,
   CreateCheckoutBodySchema,
@@ -12,6 +14,7 @@ import {
 import { SubscriptionService } from "./subscription.service";
 
 const subscriptionService = container.resolve(SubscriptionService);
+const billingService = container.resolve(StripeBillingService);
 
 export const subscriptionController = new Elysia({
   prefix: "/subscription",
@@ -39,7 +42,7 @@ export const subscriptionController = new Elysia({
   })
   .post(
     "/checkout",
-    ({ body, user }) => subscriptionService.createCheckoutSession(user.id, user.email, body),
+    ({ body, user }) => billingService.createCheckoutSession(user.id, user.email, body),
     {
       body: CreateCheckoutBodySchema,
       response: CheckoutSessionResponseSchema,
@@ -54,7 +57,7 @@ export const subscriptionController = new Elysia({
   )
   .post(
     "/portal",
-    ({ body, user }) => subscriptionService.createPortalSession(user.id, body.returnUrl),
+    ({ body, user }) => billingService.createPortalSession(user.id, body.returnUrl),
     {
       body: CreatePortalSessionBodySchema,
       response: PortalSessionResponseSchema,
@@ -66,4 +69,23 @@ export const subscriptionController = new Elysia({
         security: [{ bearerAuth: [] }],
       },
     },
-  );
+  )
+  .post("/cancel", ({ user }) => billingService.cancelSubscription(user.id), {
+    response: MessageResponseSchema,
+    detail: {
+      operationId: "cancelSubscription",
+      summary: "Cancel subscription",
+      description:
+        "Schedule the current subscription to cancel at the end of the billing period. Access continues until then.",
+      security: [{ bearerAuth: [] }],
+    },
+  })
+  .post("/resume", ({ user }) => billingService.resumeSubscription(user.id), {
+    response: MessageResponseSchema,
+    detail: {
+      operationId: "resumeSubscription",
+      summary: "Resume canceled subscription",
+      description: "Reverse a pending cancellation so the subscription renews normally.",
+      security: [{ bearerAuth: [] }],
+    },
+  });

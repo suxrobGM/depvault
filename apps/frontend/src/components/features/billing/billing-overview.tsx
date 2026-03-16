@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactElement } from "react";
+import { isUnlimited, SubscriptionPlanName } from "@depvault/shared/constants";
 import {
   Box,
   Button,
@@ -15,6 +16,7 @@ import {
 import { ListSkeleton } from "@/components/ui/data-display/list-skeleton";
 import { StatusBadge } from "@/components/ui/data-display/status-badge";
 import { useApiMutation } from "@/hooks/use-api-mutation";
+import { useConfirm } from "@/hooks/use-confirm";
 import { useSubscription } from "@/hooks/use-subscription";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
@@ -28,9 +30,9 @@ interface UsageMeterProps {
 
 function UsageMeter(props: UsageMeterProps): ReactElement {
   const { label, current, limit } = props;
-  const isUnlimited = limit === 0;
-  const percentage = isUnlimited ? 0 : Math.min((current / limit) * 100, 100);
-  const isNearLimit = !isUnlimited && percentage >= 80;
+  const unlimited = isUnlimited(limit);
+  const percentage = unlimited ? 0 : Math.min((current / limit) * 100, 100);
+  const isNearLimit = !unlimited && percentage >= 80;
 
   return (
     <Box>
@@ -39,12 +41,12 @@ function UsageMeter(props: UsageMeterProps): ReactElement {
           {label}
         </Typography>
         <Typography variant="body2" fontWeight={600}>
-          {current} / {isUnlimited ? "Unlimited" : limit}
+          {current} / {unlimited ? "Unlimited" : limit}
         </Typography>
       </Stack>
       <LinearProgress
         variant="determinate"
-        value={isUnlimited ? 0 : percentage}
+        value={unlimited ? 0 : percentage}
         color={isNearLimit ? "warning" : "primary"}
         sx={{ height: 8, borderRadius: 4 }}
       />
@@ -60,6 +62,7 @@ const PLAN_VARIANT: Record<string, "default" | "info" | "success"> = {
 
 export function BillingOverview(): ReactElement {
   const { subscription, plan, limits, usage, isLoading } = useSubscription();
+  const confirm = useConfirm();
 
   const portalMutation = useApiMutation<PortalSessionResponse>(
     () =>
@@ -73,6 +76,38 @@ export function BillingOverview(): ReactElement {
       },
     },
   );
+
+  const cancelMutation = useApiMutation<{ message: string }>(
+    () => client.api.subscription.cancel.post(),
+    {
+      successMessage: "Subscription will cancel at the end of the billing period",
+      errorMessage: "Failed to cancel subscription",
+      invalidateKeys: [["subscription"]],
+    },
+  );
+
+  const resumeMutation = useApiMutation<{ message: string }>(
+    () => client.api.subscription.resume.post(),
+    {
+      successMessage: "Subscription cancellation reversed",
+      errorMessage: "Failed to resume subscription",
+      invalidateKeys: [["subscription"]],
+    },
+  );
+
+  const handleCancel = async () => {
+    const confirmed = await confirm({
+      title: "Cancel Subscription",
+      description:
+        "Your subscription will remain active until the end of the current billing period. After that, you'll be downgraded to the Free plan.",
+      confirmLabel: "Cancel Subscription",
+      destructive: true,
+    });
+
+    if (confirmed) {
+      cancelMutation.mutate();
+    }
+  };
 
   if (isLoading) {
     return (
@@ -124,22 +159,48 @@ export function BillingOverview(): ReactElement {
           </Stack>
         )}
 
-        {plan !== "FREE" && !subscription?.isComp && (
+        {plan !== SubscriptionPlanName.FREE && !subscription?.isComp && (
           <>
             <Divider sx={{ my: 2 }} />
-            <Stack direction="row" alignItems="center" justifyContent="space-between">
-              {subscription?.currentPeriodEnd && (
+            <Stack spacing={1.5}>
+              {subscription?.cancelAtPeriodEnd && subscription.currentPeriodEnd && (
+                <Typography variant="body2" color="warning.main">
+                  Your subscription will cancel on{" "}
+                  {new Date(subscription.currentPeriodEnd).toLocaleDateString()}.
+                </Typography>
+              )}
+              {!subscription?.cancelAtPeriodEnd && subscription?.currentPeriodEnd && (
                 <Typography variant="body2" color="text.secondary">
                   Next billing date: {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
                 </Typography>
               )}
-              <Button
-                variant="outlined"
-                onClick={() => portalMutation.mutate(undefined)}
-                disabled={portalMutation.isPending}
-              >
-                {portalMutation.isPending ? "Loading..." : "Manage Subscription"}
-              </Button>
+              <Stack direction="row" spacing={1.5}>
+                <Button
+                  variant="outlined"
+                  onClick={() => portalMutation.mutate(undefined)}
+                  disabled={portalMutation.isPending}
+                >
+                  {portalMutation.isPending ? "Loading..." : "Manage Billing"}
+                </Button>
+                {subscription?.cancelAtPeriodEnd ? (
+                  <Button
+                    variant="contained"
+                    onClick={() => resumeMutation.mutate(undefined)}
+                    disabled={resumeMutation.isPending}
+                  >
+                    {resumeMutation.isPending ? "Resuming..." : "Resume Subscription"}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={handleCancel}
+                    disabled={cancelMutation.isPending}
+                  >
+                    {cancelMutation.isPending ? "Canceling..." : "Cancel Subscription"}
+                  </Button>
+                )}
+              </Stack>
             </Stack>
           </>
         )}

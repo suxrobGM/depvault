@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  isUnlimited,
+  SubscriptionPlanName,
+  type SubscriptionPlanValue,
+} from "@depvault/shared/constants";
 import { useSubscription } from "./use-subscription";
 
 type ResourceType = "projects" | "envVars" | "secretFiles" | "analyses" | "members" | "ciTokens";
@@ -8,7 +13,7 @@ interface PlanGateResult {
   allowed: boolean;
   limit: number;
   current: number;
-  upgradeRequired: "PRO" | "TEAM" | null;
+  upgradeRequired: SubscriptionPlanValue | null;
 }
 
 const LIMIT_MAP: Record<ResourceType, string> = {
@@ -31,11 +36,12 @@ export function usePlanGate(resource: ResourceType): PlanGateResult {
   const limitKey = LIMIT_MAP[resource] as keyof typeof limits;
   const limit = limits[limitKey] as number;
   const current = usage[resource] as number;
-  const allowed = limit === 0 || current < limit;
+  const allowed = isUnlimited(limit) || current < limit;
 
-  let upgradeRequired: "PRO" | "TEAM" | null = null;
+  let upgradeRequired: SubscriptionPlanValue | null = null;
   if (!allowed) {
-    upgradeRequired = plan === "FREE" ? "PRO" : "TEAM";
+    upgradeRequired =
+      plan === SubscriptionPlanName.FREE ? SubscriptionPlanName.PRO : SubscriptionPlanName.TEAM;
   }
 
   return { allowed, limit, current, upgradeRequired };

@@ -1,6 +1,11 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
+import {
+  PLAN_ORDER,
+  SubscriptionPlanName,
+  type SubscriptionPlanValue,
+} from "@depvault/shared/constants";
 import { CheckCircleOutline as CheckIcon } from "@mui/icons-material";
 import {
   Box,
@@ -18,6 +23,7 @@ import {
 } from "@mui/material";
 import { StatusBadge } from "@/components/ui/data-display/status-badge";
 import { useApiMutation } from "@/hooks/use-api-mutation";
+import { useConfirm } from "@/hooks/use-confirm";
 import { useSubscription } from "@/hooks/use-subscription";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
@@ -25,7 +31,7 @@ import type { CheckoutSessionResponse, CreateCheckoutBody } from "@/types/api";
 
 interface PlanDef {
   name: string;
-  key: "FREE" | "PRO" | "TEAM";
+  key: SubscriptionPlanValue;
   price: string;
   description: string;
   features: string[];
@@ -34,7 +40,7 @@ interface PlanDef {
 const PLANS: PlanDef[] = [
   {
     name: "Free",
-    key: "FREE",
+    key: SubscriptionPlanName.FREE,
     price: "$0",
     description: "For individual developers",
     features: [
@@ -49,7 +55,7 @@ const PLANS: PlanDef[] = [
   },
   {
     name: "Pro",
-    key: "PRO",
+    key: SubscriptionPlanName.PRO,
     price: "$10",
     description: "Per user / month",
     features: [
@@ -66,7 +72,7 @@ const PLANS: PlanDef[] = [
   },
   {
     name: "Team",
-    key: "TEAM",
+    key: SubscriptionPlanName.TEAM,
     price: "$15",
     description: "Per user / month",
     features: [
@@ -81,6 +87,7 @@ const PLANS: PlanDef[] = [
 
 export function PlanComparison(): ReactElement {
   const { plan: currentPlan } = useSubscription();
+  const confirm = useConfirm();
   const [promoCode, setPromoCode] = useState("");
 
   const checkoutMutation = useApiMutation<
@@ -91,7 +98,7 @@ export function PlanComparison(): ReactElement {
       client.api.subscription.checkout.post({
         ...variables,
         successUrl: `${window.location.origin}${ROUTES.billing}?success=true`,
-        cancelUrl: `${window.location.origin}${ROUTES.billing}`,
+        cancelUrl: `${window.location.origin}${ROUTES.billing}?canceled=true`,
       }),
     {
       errorMessage: "Failed to start checkout",
@@ -101,20 +108,40 @@ export function PlanComparison(): ReactElement {
     },
   );
 
-  const handleUpgrade = (targetPlan: "PRO" | "TEAM") => {
+  const cancelMutation = useApiMutation<{ message: string }>(
+    () => client.api.subscription.cancel.post(),
+    {
+      successMessage: "Subscription will cancel at the end of the billing period",
+      errorMessage: "Failed to cancel subscription",
+      invalidateKeys: [["subscription"]],
+    },
+  );
+
+  const handleUpgrade = (targetPlan: CreateCheckoutBody["plan"]) => {
     checkoutMutation.mutate({
       plan: targetPlan,
       ...(promoCode && { promoCode }),
     });
   };
 
-  const getButtonLabel = (planKey: string): string => {
-    if (planKey === currentPlan) {
-      return "Current Plan";
+  const handleDowngradeToFree = async () => {
+    const confirmed = await confirm({
+      title: "Downgrade to Free",
+      description:
+        "Your subscription will remain active until the end of the current billing period. After that, you'll be downgraded to the Free plan with reduced limits.",
+      confirmLabel: "Downgrade",
+      destructive: true,
+    });
+    if (confirmed) {
+      cancelMutation.mutate();
     }
-    const planOrder = { FREE: 0, PRO: 1, TEAM: 2 };
-    const currentOrder = planOrder[currentPlan as keyof typeof planOrder] ?? 0;
-    const targetOrder = planOrder[planKey as keyof typeof planOrder] ?? 0;
+  };
+
+  const currentOrder = PLAN_ORDER[currentPlan as SubscriptionPlanValue] ?? 0;
+
+  const getButtonLabel = (planKey: SubscriptionPlanValue): string => {
+    if (planKey === currentPlan) return "Current Plan";
+    const targetOrder = PLAN_ORDER[planKey] ?? 0;
     return targetOrder > currentOrder ? "Upgrade" : "Downgrade";
   };
 
@@ -181,14 +208,34 @@ export function PlanComparison(): ReactElement {
                     ))}
                   </List>
 
-                  <Button
-                    variant={isCurrent ? "outlined" : "contained"}
-                    fullWidth
-                    disabled={isCurrent || planDef.key === "FREE" || checkoutMutation.isPending}
-                    onClick={() => handleUpgrade(planDef.key as "PRO" | "TEAM")}
-                  >
-                    {checkoutMutation.isPending ? "Loading..." : getButtonLabel(planDef.key)}
-                  </Button>
+                  {planDef.key === SubscriptionPlanName.FREE ? (
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      fullWidth
+                      disabled={
+                        isCurrent ||
+                        currentPlan === SubscriptionPlanName.FREE ||
+                        cancelMutation.isPending
+                      }
+                      onClick={handleDowngradeToFree}
+                    >
+                      {cancelMutation.isPending
+                        ? "Downgrading..."
+                        : isCurrent
+                          ? "Current Plan"
+                          : "Downgrade"}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant={isCurrent ? "outlined" : "contained"}
+                      fullWidth
+                      disabled={isCurrent || checkoutMutation.isPending}
+                      onClick={() => handleUpgrade(planDef.key as CreateCheckoutBody["plan"])}
+                    >
+                      {checkoutMutation.isPending ? "Loading..." : getButtonLabel(planDef.key)}
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             </Grid>

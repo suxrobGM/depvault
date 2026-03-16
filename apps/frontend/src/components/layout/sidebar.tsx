@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactElement } from "react";
-import { DEFAULT_ROLES } from "@depvault/shared/constants";
+import { DEFAULT_ROLES, SubscriptionPlanName } from "@depvault/shared/constants";
 import {
   ChevronLeft as ChevronLeftIcon,
   CreditCard as CreditCardIcon,
@@ -80,7 +80,12 @@ export function Sidebar(props: SidebarProps): ReactElement {
   const { plan } = useSubscription();
   const showRoleBadge = user?.role && !DEFAULT_ROLES.has(user.role);
 
-  const planBadgeColor = plan === "TEAM" ? "secondary" : plan === "PRO" ? "primary" : "default";
+  const planBadgeColor =
+    plan === SubscriptionPlanName.TEAM
+      ? "secondary"
+      : plan === SubscriptionPlanName.PRO
+        ? "primary"
+        : "default";
 
   const drawerContent = (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>

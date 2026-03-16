@@ -1,7 +1,5 @@
+import { INFINITE_LIMIT } from "@depvault/shared/constants";
 import type { SubscriptionPlan } from "@/generated/prisma";
-
-/** Infinite limit constant for plans that have no limits on a feature */
-export const INFINITE_LIMIT = Number.POSITIVE_INFINITY;
 
 export interface PlanLimits {
   maxUsers: number;

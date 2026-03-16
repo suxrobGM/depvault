@@ -1,7 +1,8 @@
+import { INFINITE_LIMIT } from "@depvault/shared/constants";
 import { singleton } from "tsyringe";
 import { ForbiddenError } from "@/common/errors";
 import { PrismaClient } from "@/generated/prisma";
-import { INFINITE_LIMIT, type PlanLimits } from "./plan-limits";
+import { type PlanLimits } from "./plan-limits";
 import { SubscriptionService } from "./subscription.service";
 
 type BooleanFeature = keyof {

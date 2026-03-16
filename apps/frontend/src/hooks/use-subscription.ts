@@ -1,5 +1,6 @@
 "use client";
 
+import { SubscriptionPlanName } from "@depvault/shared/constants";
 import { client } from "@/lib/api";
 import type { SubscriptionResponse } from "@/types/api";
 import { useApiQuery } from "./use-api-query";
@@ -12,7 +13,7 @@ export function useSubscription() {
     { errorMessage: "Failed to load subscription" },
   );
 
-  const plan = query.data?.plan ?? "FREE";
+  const plan = query.data?.plan ?? SubscriptionPlanName.FREE;
 
   return {
     ...query,
@@ -20,8 +21,8 @@ export function useSubscription() {
     plan,
     limits: query.data?.limits ?? null,
     usage: query.data?.usage ?? null,
-    isFreePlan: plan === "FREE",
-    isProPlan: plan === "PRO",
-    isTeamPlan: plan === "TEAM",
+    isFreePlan: plan === SubscriptionPlanName.FREE,
+    isProPlan: plan === SubscriptionPlanName.PRO,
+    isTeamPlan: plan === SubscriptionPlanName.TEAM,
   };
 }
