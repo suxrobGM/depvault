@@ -3,24 +3,10 @@ services:
     image: ghcr.io/suxrobgm/depvault/backend:latest
     ports:
       - "127.0.0.1:${BACKEND_PORT:-4000}:4000"
+    env_file: .env
     environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - JWT_SECRET=${JWT_SECRET}
-      - MASTER_ENCRYPTION_KEY=${MASTER_ENCRYPTION_KEY}
-      - JWT_EXPIRY=${JWT_EXPIRY:-1d}
-      - REFRESH_TOKEN_EXPIRY=${REFRESH_TOKEN_EXPIRY:-7d}
       - PORT=4000
       - NODE_ENV=production
-      - CORS_ORIGINS=${CORS_ORIGINS}
-      - LOG_LEVEL=${LOG_LEVEL:-info}
-      - UPLOAD_DIR=${UPLOAD_DIR:-./uploads}
-      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
-      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
-      - GITHUB_CALLBACK_URL=${GITHUB_CALLBACK_URL}
-      - RESEND_API_KEY=${RESEND_API_KEY}
-      - EMAIL_FROM_NAME=${EMAIL_FROM_NAME:-DepVault}
-      - EMAIL_FROM_ADDRESS=${EMAIL_FROM_ADDRESS:-noreply@depvault.com}
-      - FRONTEND_URL=${FRONTEND_URL}
     volumes:
       - backend-uploads:/app/apps/backend/uploads
     restart: unless-stopped

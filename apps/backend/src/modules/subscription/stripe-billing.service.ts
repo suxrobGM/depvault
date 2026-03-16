@@ -20,7 +20,9 @@ export class StripeBillingService {
   getStripe(): Stripe {
     if (!this.stripe) {
       const key = process.env.STRIPE_SECRET_KEY;
-      if (!key) throw new BadRequestError("Stripe is not configured");
+      if (!key) {
+        throw new BadRequestError("Stripe is not configured");
+      }
       this.stripe = new Stripe(key);
     }
     return this.stripe;
