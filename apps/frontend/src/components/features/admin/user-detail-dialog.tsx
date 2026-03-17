@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
+import { SubscriptionPlanName } from "@depvault/shared/constants";
 import {
   Box,
   Button,
@@ -87,7 +88,11 @@ export function UserDetailDialog(props: UserDetailDialogProps): ReactElement {
               </Typography>
               <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
                 <Chip label={user.role} size="small" color="primary" variant="outlined" />
-                <Chip label={sub?.plan ?? "FREE"} size="small" variant="outlined" />
+                <Chip
+                  label={sub?.plan ?? SubscriptionPlanName.FREE}
+                  size="small"
+                  variant="outlined"
+                />
                 <Chip
                   label={sub?.status ?? "—"}
                   size="small"
@@ -171,8 +176,8 @@ export function UserDetailDialog(props: UserDetailDialogProps): ReactElement {
                   value={compPlan}
                   onChange={(v) => setCompPlan(v as CompSubscriptionBody["plan"])}
                   options={[
-                    { value: "PRO", label: "Pro" },
-                    { value: "TEAM", label: "Team" },
+                    { value: SubscriptionPlanName.PRO, label: "Pro" },
+                    { value: SubscriptionPlanName.TEAM, label: "Team" },
                   ]}
                   minWidth={120}
                 />

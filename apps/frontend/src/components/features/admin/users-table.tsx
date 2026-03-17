@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
+import { SubscriptionPlanName } from "@depvault/shared/constants";
 import { Group as GroupIcon, Search as SearchIcon } from "@mui/icons-material";
 import {
   Box,
@@ -88,9 +89,9 @@ export function UsersTable(): ReactElement {
           }}
           options={[
             { value: "ALL", label: "All Plans" },
-            { value: "FREE", label: "Free" },
-            { value: "PRO", label: "Pro" },
-            { value: "TEAM", label: "Team" },
+            { value: SubscriptionPlanName.FREE, label: "Free" },
+            { value: SubscriptionPlanName.PRO, label: "Pro" },
+            { value: SubscriptionPlanName.TEAM, label: "Team" },
           ]}
         />
       </Stack>
@@ -115,7 +116,7 @@ export function UsersTable(): ReactElement {
               </TableHead>
               <TableBody>
                 {users.map((user) => {
-                  const plan = user.subscription?.plan ?? "FREE";
+                  const plan = user.subscription?.plan ?? SubscriptionPlanName.FREE;
                   const status = user.subscription?.status ?? "—";
                   const isComp = user.subscription?.isComp ?? false;
 
@@ -127,7 +128,7 @@ export function UsersTable(): ReactElement {
                       onClick={() => setSelectedUserId(user.id)}
                     >
                       <TableCell>
-                        {[user.firstName, user.lastName].filter(Boolean).join(" ") || "—"}
+                        {[user.firstName, user.lastName].filter(Boolean).join(" ") ?? "—"}
                       </TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>
