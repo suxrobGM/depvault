@@ -3,6 +3,7 @@ using System.Diagnostics;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
+using DepVault.Cli.Utils;
 using Spectre.Console;
 using TokenNs = DepVault.Cli.ApiClient.Api.Auth.Device.Token;
 
@@ -10,11 +11,8 @@ namespace DepVault.Cli.Commands;
 
 public sealed class AuthCommands(
     IApiClientFactory clientFactory,
-    IAuthContext authContext,
-    IConfigService configService,
-    ICredentialStore credentialStore,
-    IOutputFormatter output,
-    IConsolePrompter prompter)
+    CommandContext ctx,
+    ICredentialStore credentialStore)
 {
     private static readonly TimeSpan pollInterval = TimeSpan.FromSeconds(5);
 
@@ -29,24 +27,24 @@ public sealed class AuthCommands(
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
-            if (authContext.IsCiMode())
+            if (ctx.IsCiMode())
             {
-                output.PrintError("Cannot login in CI mode. Unset DEPVAULT_TOKEN to use interactive login.");
+                ctx.Output.PrintError("Cannot login in CI mode. Unset DEPVAULT_TOKEN to use interactive login.");
                 return;
             }
 
-            if (!prompter.IsInteractive)
+            if (!ctx.Prompter.IsInteractive)
             {
-                output.PrintError("Browser login requires interactive mode. Use DEPVAULT_TOKEN for CI/CD.");
+                ctx.Output.PrintError("Browser login requires interactive mode. Use DEPVAULT_TOKEN for CI/CD.");
                 return;
             }
 
             var server = parseResult.GetValue(serverOpt);
             if (!string.IsNullOrEmpty(server))
             {
-                var config = configService.Load();
+                var config = ctx.Config.Load();
                 config.Server = server;
-                configService.Save(config);
+                ctx.Config.Save(config);
             }
 
             try
@@ -56,7 +54,7 @@ public sealed class AuthCommands(
                 var device = await client.Api.Auth.Device.PostAsync(cancellationToken: cancellationToken);
                 if (device?.DeviceCode is null || device.UserCode is null || device.VerificationUrl is null)
                 {
-                    output.PrintError("Failed to request device code.");
+                    ctx.Output.PrintError("Failed to request device code.");
                     return;
                 }
 
@@ -87,7 +85,7 @@ public sealed class AuthCommands(
 
                 if (tokens is null)
                 {
-                    output.PrintError("Authorization timed out or was denied. Run 'depvault login' to try again.");
+                    ctx.Output.PrintError("Authorization timed out or was denied. Run 'depvault login' to try again.");
                     return;
                 }
 
@@ -100,11 +98,11 @@ public sealed class AuthCommands(
                 });
 
                 AnsiConsole.WriteLine();
-                output.PrintSuccess($"Logged in as {tokens.User?.Email ?? "unknown"}");
+                ctx.Output.PrintSuccess($"Logged in as {tokens.User?.Email ?? "unknown"}");
             }
             catch (Exception ex)
             {
-                output.PrintError($"Login failed: {ex.Message}");
+                ctx.Output.PrintError($"Login failed: {ex.Message}");
             }
         });
 
@@ -117,7 +115,7 @@ public sealed class AuthCommands(
         cmd.SetAction(parseResult =>
         {
             credentialStore.Delete();
-            output.PrintSuccess("Logged out.");
+            ctx.Output.PrintSuccess("Logged out.");
         });
         return cmd;
     }
@@ -127,16 +125,16 @@ public sealed class AuthCommands(
         var cmd = new Command("whoami", "Show current user and auth method");
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
-            var mode = authContext.GetMode();
+            var mode = ctx.GetAuthMode();
             if (mode == AuthMode.None)
             {
-                output.PrintError("Not authenticated. Run 'depvault login' first.");
+                ctx.Output.PrintError("Not authenticated. Run 'depvault login' first.");
                 return;
             }
 
             if (mode == AuthMode.CiToken)
             {
-                output.PrintKeyValue("Auth", "CI Token (DEPVAULT_TOKEN)");
+                ctx.Output.PrintKeyValue("Auth", "CI Token (DEPVAULT_TOKEN)");
                 return;
             }
 
@@ -144,13 +142,13 @@ public sealed class AuthCommands(
             {
                 var client = clientFactory.Create();
                 var user = await client.Api.Users.Me.GetAsync(cancellationToken: cancellationToken);
-                output.PrintKeyValue("Email", user?.Email);
-                output.PrintKeyValue("Name", $"{user?.FirstName} {user?.LastName}".Trim());
-                output.PrintKeyValue("Auth", "JWT (stored credentials)");
+                ctx.Output.PrintKeyValue("Email", user?.Email);
+                ctx.Output.PrintKeyValue("Name", $"{user?.FirstName} {user?.LastName}".Trim());
+                ctx.Output.PrintKeyValue("Auth", "JWT (stored credentials)");
             }
             catch (Exception ex)
             {
-                output.PrintError($"Failed to fetch user info: {ex.Message}");
+                ctx.Output.PrintError($"Failed to fetch user info: {ex.Message}");
             }
         });
         return cmd;

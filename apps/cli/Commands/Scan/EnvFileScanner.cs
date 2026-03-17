@@ -1,21 +1,19 @@
-using DepVault.Cli.Auth;
 using DepVault.Cli.Commands.Pull;
 using DepVault.Cli.Commands.Push;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
-using ImportNs = DepVault.Cli.ApiClient.Api.Projects.Item.Environments.Import;
 
 namespace DepVault.Cli.Commands.Scan;
 
 internal sealed class EnvFileScanner(
-    IApiClientFactory clientFactory,
     IOutputFormatter output,
     IConsolePrompter prompter,
     IFileScanner fileScanner,
     DirectoryVaultGroupMapper dirMapper,
-    FileEnvironmentAssigner envAssigner)
+    FileEnvironmentAssigner envAssigner,
+    EnvImporter envImporter)
 {
     public async Task RunAsync(string projectId, string repoPath, ScanResults results, CancellationToken ct)
     {
@@ -55,8 +53,6 @@ internal sealed class EnvFileScanner(
         string projectId, List<(DiscoveredFile File, string Environment)> assignments,
         Dictionary<string, string> dirVaultGroupMap, ScanResults results, CancellationToken ct)
     {
-        var client = clientFactory.Create();
-
         foreach (var (file, envType) in assignments)
         {
             var dir = Path.GetDirectoryName(file.RelativePath)?.Replace('\\', '/') ?? ".";
@@ -66,28 +62,11 @@ internal sealed class EnvFileScanner(
                 continue;
             }
 
-            var format = DetectEnvFormat(file.FileName);
-
             try
             {
-                var content = await File.ReadAllTextAsync(file.FullPath, ct);
-
-                var result = await AnsiConsole.Status()
-                    .Spinner(Spinner.Known.Dots)
-                    .StartAsync($"Pushing {file.RelativePath}...", async _ =>
-                        await client.Api.Projects[projectId].Environments.Import.PostAsync(
-                            new ImportNs.ImportPostRequestBody
-                            {
-                                Content = content,
-                                VaultGroupId = vaultGroupId,
-                                EnvironmentType = CommandUtils.ParseEnum(envType,
-                                    ImportNs.ImportPostRequestBody_environmentType.DEVELOPMENT),
-                                Format = CommandUtils.ParseEnum(format, ImportNs.ImportPostRequestBody_format.Env)
-                            }, cancellationToken: ct));
-
-                results.EnvVariablesPushed += (int)(result?.Imported ?? 0);
-                output.PrintSuccess(
-                    $"Imported {(int)(result?.Imported ?? 0)} variables from {file.RelativePath} ({envType})");
+                var count = await envImporter.ImportAsync(projectId, file, vaultGroupId, envType, ct);
+                results.EnvVariablesPushed += count;
+                output.PrintSuccess($"Imported {count} variables from {file.RelativePath} ({envType})");
             }
             catch (Exception ex)
             {

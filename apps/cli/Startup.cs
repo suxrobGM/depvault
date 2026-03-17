@@ -8,6 +8,7 @@ using DepVault.Cli.Commands.Scan;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
+using DepVault.Cli.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Kiota.Abstractions.Authentication;
 
@@ -21,7 +22,6 @@ internal static class Startup
             // Core
             .AddSingleton<IConfigService, ConfigService>()
             .AddSingleton<ICredentialStore, CredentialStore>()
-            .AddSingleton<IAuthContext, AuthContext>()
             .AddSingleton<IAuthenticationProvider, TokenAuthProvider>()
             .AddSingleton<IApiClientFactory, ApiClientFactory>()
             .AddSingleton<IOutputFormatter, OutputFormatter>()
@@ -31,6 +31,7 @@ internal static class Startup
             .AddSingleton<IGitHubReleaseClient, GitHubReleaseClient>()
             .AddSingleton<IVersionChecker, VersionChecker>()
             .AddSingleton<IUpdateService, UpdateService>()
+            .AddSingleton<CommandContext>()
             .AddSingleton<AnalysisClient>()
             // Scan steps
             .AddSingleton<ProjectResolver>()
@@ -45,6 +46,7 @@ internal static class Startup
             .AddSingleton<EnvPuller>()
             .AddSingleton<SecretsPuller>()
             .AddSingleton<FileEnvironmentAssigner>()
+            .AddSingleton<EnvImporter>()
             // Commands
             .AddSingleton<AuthCommands>()
             .AddSingleton<ConfigCommands>()

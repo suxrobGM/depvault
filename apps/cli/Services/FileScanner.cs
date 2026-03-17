@@ -79,7 +79,7 @@ public sealed class FileScanner : IFileScanner
             return FileCategory.SecretFile;
         }
 
-        return FileCategory.Environment; // default for unknown files
+        return FileCategory.SecretFile;
     }
 
     private static List<DiscoveredFile> ScanFiles(string rootPath, FileCategory category, Func<string, bool> predicate)
@@ -156,8 +156,14 @@ public sealed class FileScanner : IFileScanner
             return true;
         }
 
-        if (fileName.StartsWith("appsettings", StringComparison.OrdinalIgnoreCase) &&
-            fileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+        if (fileName.Equals("appsettings.json", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (fileName.StartsWith("appsettings.", StringComparison.OrdinalIgnoreCase) &&
+            fileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase) &&
+            fileName.Count(c => c == '.') == 2)
         {
             return true;
         }

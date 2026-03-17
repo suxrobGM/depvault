@@ -1,7 +1,5 @@
 using System.CommandLine;
 using DepVault.Cli.Auth;
-using DepVault.Cli.Config;
-using DepVault.Cli.Output;
 using DepVault.Cli.Utils;
 using Spectre.Console;
 using SecretListNs = DepVault.Cli.ApiClient.Api.Projects.Item.Secrets;
@@ -10,9 +8,7 @@ namespace DepVault.Cli.Commands;
 
 public sealed class SecretsCommands(
     IApiClientFactory clientFactory,
-    IAuthContext authContext,
-    IConfigService configService,
-    IOutputFormatter output)
+    CommandContext ctx)
 {
     public Command CreateSecretsCommand()
     {
@@ -34,12 +30,12 @@ public sealed class SecretsCommands(
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
-            if (!authContext.RequireAuth())
+            if (!ctx.RequireAuth())
             {
                 return;
             }
 
-            var projectId = CommandUtils.RequireProjectId(parseResult, projectOpt, configService, output);
+            var projectId = ctx.RequireProjectId(parseResult, projectOpt);
             if (projectId is null)
             {
                 return;
@@ -70,7 +66,7 @@ public sealed class SecretsCommands(
 
                 if (parseResult.GetValue(outputOpt) == "json")
                 {
-                    output.PrintJson(items.Select(f => new
+                    ctx.Output.PrintJson(items.Select(f => new
                     {
                         id = f.Id,
                         name = f.Name,
@@ -81,7 +77,7 @@ public sealed class SecretsCommands(
                     return;
                 }
 
-                output.PrintTable(
+                ctx.Output.PrintTable(
                     ["NAME", "VAULT GROUP", "TYPE", "SIZE", "UPDATED"],
                     items.Select(f => new[]
                     {
@@ -94,7 +90,7 @@ public sealed class SecretsCommands(
             }
             catch (Exception ex)
             {
-                output.PrintError($"Failed to list secret files: {ex.Message}");
+                ctx.Output.PrintError($"Failed to list secret files: {ex.Message}");
             }
         });
 

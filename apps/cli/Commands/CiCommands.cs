@@ -1,13 +1,10 @@
 using System.CommandLine;
 using DepVault.Cli.Auth;
-using DepVault.Cli.Output;
+using DepVault.Cli.Utils;
 
 namespace DepVault.Cli.Commands;
 
-public sealed class CiCommands(
-    IApiClientFactory clientFactory,
-    IAuthContext authContext,
-    IOutputFormatter output)
+public sealed class CiCommands(IApiClientFactory clientFactory, CommandContext ctx)
 {
     public Command CreateCiCommand()
     {
@@ -32,9 +29,9 @@ public sealed class CiCommands(
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
-            if (!authContext.IsCiMode())
+            if (!ctx.IsCiMode())
             {
-                output.PrintError($"CI pull requires {Constants.CiTokenEnvVar} environment variable.");
+                ctx.Output.PrintError($"CI pull requires {Constants.CiTokenEnvVar} environment variable.");
                 return;
             }
 
@@ -45,7 +42,7 @@ public sealed class CiCommands(
 
                 if (result is null)
                 {
-                    output.PrintError("No secrets returned.");
+                    ctx.Output.PrintError("No secrets returned.");
                     return;
                 }
 
@@ -53,7 +50,7 @@ public sealed class CiCommands(
 
                 if (format == "json")
                 {
-                    output.PrintJson(new
+                    ctx.Output.PrintJson(new
                     {
                         variables = result.Variables?.Select(v => new { key = v.Key, value = v.Value }),
                         files = result.Files?.Select(f => new { id = f.Id, name = f.Name, downloadUrl = f.DownloadUrl })
@@ -63,11 +60,11 @@ public sealed class CiCommands(
 
                 var lines = result.Variables?.Select(v => $"{v.Key}={v.Value}") ?? [];
                 var content = string.Join(Environment.NewLine, lines);
-                output.WriteContent(content, parseResult.GetValue(outputOpt));
+                ctx.Output.WriteContent(content, parseResult.GetValue(outputOpt));
             }
             catch (Exception ex)
             {
-                output.PrintError($"Failed to fetch secrets: {ex.Message}");
+                ctx.Output.PrintError($"Failed to fetch secrets: {ex.Message}");
             }
         });
 

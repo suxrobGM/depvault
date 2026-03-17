@@ -1,17 +1,12 @@
 using System.CommandLine;
 using DepVault.Cli.Auth;
-using DepVault.Cli.Config;
-using DepVault.Cli.Output;
 using DepVault.Cli.Utils;
 
 namespace DepVault.Cli.Commands;
 
 public sealed class ProjectCommands(
     IApiClientFactory clientFactory,
-    IAuthContext authContext,
-    IConfigService configService,
-    IOutputFormatter output,
-    IConsolePrompter prompter)
+    CommandContext ctx)
 {
     public Command CreateProjectCommand()
     {
@@ -24,14 +19,14 @@ public sealed class ProjectCommands(
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
-            if (!authContext.RequireAuth())
+            if (!ctx.RequireAuth())
             {
                 return;
             }
 
-            if (!prompter.IsInteractive)
+            if (!ctx.Prompter.IsInteractive)
             {
-                output.PrintError("Interactive mode required. Use 'depvault project list' or 'depvault project select <id>' instead.");
+                ctx.Output.PrintError("Interactive mode required. Use 'depvault project list' or 'depvault project select <id>' instead.");
                 return;
             }
 
@@ -47,12 +42,12 @@ public sealed class ProjectCommands(
                 var items = result?.Items;
                 if (items is null || items.Count == 0)
                 {
-                    output.PrintError("No projects found. Create a project on the web dashboard first.");
+                    ctx.Output.PrintError("No projects found. Create a project on the web dashboard first.");
                     return;
                 }
 
-                var appConfig = configService.Load();
-                var selected = prompter.Select(
+                var appConfig = ctx.Config.Load();
+                var selected = ctx.Prompter.Select(
                     "Select active project",
                     items,
                     p =>
@@ -63,12 +58,12 @@ public sealed class ProjectCommands(
 
                 appConfig.ActiveProjectId = selected.Id;
                 appConfig.ActiveProjectName = selected.Name;
-                configService.Save(appConfig);
-                output.PrintSuccess($"Active project set to {selected.Name} ({selected.Id})");
+                ctx.Config.Save(appConfig);
+                ctx.Output.PrintSuccess($"Active project set to {selected.Name} ({selected.Id})");
             }
             catch (Exception ex)
             {
-                output.PrintError($"Failed to load projects: {ex.Message}");
+                ctx.Output.PrintError($"Failed to load projects: {ex.Message}");
             }
         });
 
@@ -86,7 +81,7 @@ public sealed class ProjectCommands(
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
-            if (!authContext.RequireAuth())
+            if (!ctx.RequireAuth())
             {
                 return;
             }
@@ -111,11 +106,11 @@ public sealed class ProjectCommands(
 
                 if (outputFmt == "json")
                 {
-                    output.PrintJson(items.Select(p => new { id = p.Id, name = p.Name }));
+                    ctx.Output.PrintJson(items.Select(p => new { id = p.Id, name = p.Name }));
                     return;
                 }
 
-                var config = configService.Load();
+                var config = ctx.Config.Load();
                 var headers = new[] { "ID", "NAME", "ACTIVE" };
                 var rows = items.Select(p => new[]
                 {
@@ -124,11 +119,11 @@ public sealed class ProjectCommands(
                     p.Id == config.ActiveProjectId ? "*" : ""
                 }).ToList();
 
-                output.PrintTable(headers, rows);
+                ctx.Output.PrintTable(headers, rows);
             }
             catch (Exception ex)
             {
-                output.PrintError($"Failed to list projects: {ex.Message}");
+                ctx.Output.PrintError($"Failed to list projects: {ex.Message}");
             }
         });
 
@@ -146,11 +141,11 @@ public sealed class ProjectCommands(
         cmd.SetAction(parseResult =>
         {
             var id = parseResult.GetValue(idArg);
-            var config = configService.Load();
+            var config = ctx.Config.Load();
             config.ActiveProjectId = id;
             config.ActiveProjectName = null;
-            configService.Save(config);
-            output.PrintSuccess($"Active project set to {id}");
+            ctx.Config.Save(config);
+            ctx.Output.PrintSuccess($"Active project set to {id}");
         });
 
         return cmd;
@@ -167,12 +162,12 @@ public sealed class ProjectCommands(
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
-            if (!authContext.RequireAuth())
+            if (!ctx.RequireAuth())
             {
                 return;
             }
 
-            var id = CommandUtils.RequireProjectId(parseResult, projectOpt, configService, output);
+            var id = ctx.RequireProjectId(parseResult, projectOpt);
             if (id is null)
             {
                 return;
@@ -183,13 +178,13 @@ public sealed class ProjectCommands(
                 var client = clientFactory.Create();
                 var project = await client.Api.Projects[id].GetAsync(cancellationToken: cancellationToken);
 
-                output.PrintKeyValue("ID", project?.Id);
-                output.PrintKeyValue("Name", project?.Name);
-                output.PrintKeyValue("Created", project?.CreatedAt?.ToString("o"));
+                ctx.Output.PrintKeyValue("ID", project?.Id);
+                ctx.Output.PrintKeyValue("Name", project?.Name);
+                ctx.Output.PrintKeyValue("Created", project?.CreatedAt?.ToString("o"));
             }
             catch (Exception ex)
             {
-                output.PrintError($"Failed to get project info: {ex.Message}");
+                ctx.Output.PrintError($"Failed to get project info: {ex.Message}");
             }
         });
 

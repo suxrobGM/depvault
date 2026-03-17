@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using DepVault.Cli.Commands.Pull;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
@@ -12,8 +13,11 @@ internal sealed class SecretFileScanner(
     IConsolePrompter prompter,
     IFileScanner fileScanner,
     IConfigService configService,
-    ICredentialStore credentialStore)
+    ICredentialStore credentialStore,
+    DirectoryVaultGroupMapper dirMapper)
 {
+    private HttpClient? httpClient;
+
     public async Task RunAsync(string projectId, string repoPath, ScanResults results, CancellationToken ct)
     {
         var files = fileScanner.FindSecretFiles(repoPath);
@@ -34,13 +38,28 @@ internal sealed class SecretFileScanner(
             return;
         }
 
-        var envType = CommandUtils.ResolveEnvironmentType(null, null, prompter);
+        var dirMap = await dirMapper.MapAsync(projectId, selected, ct);
+        if (dirMap is null)
+        {
+            return;
+        }
+
+        var envType = prompter.IsInteractive
+            ? prompter.Select("Select environment type", CommandUtils.EnvironmentTypes, e => e)
+            : "DEVELOPMENT";
 
         foreach (var file in selected)
         {
+            var dir = Path.GetDirectoryName(file.RelativePath)?.Replace('\\', '/') ?? ".";
+            if (!dirMap.TryGetValue(dir, out var vaultGroupId))
+            {
+                AnsiConsole.MarkupLine($"[grey]Skipped {Markup.Escape(file.RelativePath)} (no vault group)[/]");
+                continue;
+            }
+
             try
             {
-                await UploadAsync(projectId, file, envType, null, ct);
+                await UploadAsync(projectId, file, envType, vaultGroupId, ct);
                 results.SecretFilesUploaded++;
                 output.PrintSuccess($"Uploaded {file.RelativePath}");
             }
@@ -54,28 +73,20 @@ internal sealed class SecretFileScanner(
     /// <summary>Uploads a single secret file via multipart/form-data.</summary>
     public async Task UploadAsync(
         string projectId, DiscoveredFile file, string envType,
-        string? vaultGroupId, CancellationToken ct)
+        string vaultGroupId, CancellationToken ct)
     {
         var fileBytes = await File.ReadAllBytesAsync(file.FullPath, ct);
         var baseUrl = configService.Load().Server.TrimEnd('/');
 
         using var content = new MultipartFormDataContent();
-        content.Add(new ByteArrayContent(fileBytes), "file", file.FileName);
+        var fileContent = new ByteArrayContent(fileBytes);
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+        content.Add(fileContent, "file", file.FileName);
         content.Add(new StringContent(envType), "environmentType");
+        content.Add(new StringContent(vaultGroupId), "vaultGroupId");
         content.Add(new StringContent(file.FileName), "description");
 
-        if (vaultGroupId is not null)
-        {
-            content.Add(new StringContent(vaultGroupId), "vaultGroupId");
-        }
-
-        using var http = new HttpClient();
-        var creds = credentialStore.Load();
-
-        if (creds?.AccessToken is not null)
-        {
-            http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", creds.AccessToken);
-        }
+        var http = GetHttpClient();
 
         await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
@@ -85,6 +96,25 @@ internal sealed class SecretFileScanner(
                     $"{baseUrl}/api/projects/{projectId}/secrets", content, ct);
                 response.EnsureSuccessStatusCode();
             });
+    }
+
+    private HttpClient GetHttpClient()
+    {
+        if (httpClient is not null)
+        {
+            return httpClient;
+        }
+
+        httpClient = new HttpClient();
+        var creds = credentialStore.Load();
+
+        if (creds?.AccessToken is not null)
+        {
+            httpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", creds.AccessToken);
+        }
+
+        return httpClient;
     }
 
     private static void PrintFileTree(List<DiscoveredFile> files)

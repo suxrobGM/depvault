@@ -17,7 +17,7 @@ internal static partial class PlaceholderFilter
         if (trimmed.Contains("<PLACEHOLDER>", StringComparison.OrdinalIgnoreCase)
             || trimmed.Contains("<YOUR_", StringComparison.OrdinalIgnoreCase)
             || trimmed.Contains("your_", StringComparison.OrdinalIgnoreCase)
-            || trimmed.Contains("xxx", StringComparison.OrdinalIgnoreCase)
+            || trimmed.Contains("xxxxxxxx", StringComparison.OrdinalIgnoreCase)
             || trimmed.Contains("changeme", StringComparison.OrdinalIgnoreCase)
             || trimmed.Contains("replace_me", StringComparison.OrdinalIgnoreCase))
         {

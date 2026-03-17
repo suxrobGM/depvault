@@ -1,8 +1,5 @@
 using System.CommandLine;
 using DepVault.Cli.ApiClient.Api.Projects.Item.Analyses;
-using DepVault.Cli.Auth;
-using DepVault.Cli.Config;
-using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
@@ -10,10 +7,7 @@ using Spectre.Console;
 namespace DepVault.Cli.Commands;
 
 public sealed class AnalysisCommands(
-    IAuthContext authContext,
-    IConfigService configService,
-    IOutputFormatter output,
-    IConsolePrompter prompter,
+    CommandContext ctx,
     IFileScanner fileScanner,
     AnalysisClient analysisClient)
 {
@@ -32,19 +26,19 @@ public sealed class AnalysisCommands(
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
-            if (!authContext.RequireAuth())
+            if (!ctx.RequireAuth())
             {
                 return;
             }
 
-            var projectId = CommandUtils.RequireProjectId(parseResult, projectOpt, configService, output);
+            var projectId = ctx.RequireProjectId(parseResult, projectOpt);
             if (projectId is null)
             {
                 return;
             }
 
-            var filePath = CommandUtils.ResolveFileInteractive(
-                parseResult, fileOpt, prompter, output,
+            var filePath = ctx.ResolveFileInteractive(
+                parseResult, fileOpt,
                 () => fileScanner.FindDependencyFiles(Directory.GetCurrentDirectory()),
                 "dependency");
 
@@ -72,11 +66,11 @@ public sealed class AnalysisCommands(
 
                 if (result is null)
                 {
-                    output.PrintError("Analysis returned no results.");
+                    ctx.Output.PrintError("Analysis returned no results.");
                     return;
                 }
 
-                output.PrintSuccess($"Analysis complete. Health score: {result.HealthScore:F0}");
+                ctx.Output.PrintSuccess($"Analysis complete. Health score: {result.HealthScore:F0}");
                 PrintDependencies(result.Dependencies, parseResult.GetValue(outputOpt));
             }
             catch (Exception ex)
@@ -99,7 +93,7 @@ public sealed class AnalysisCommands(
                 return parsed;
             }
 
-            output.PrintError(
+            ctx.Output.PrintError(
                 $"Unknown ecosystem: '{explicitEcosystem}'. Valid: NODEJS, PYTHON, DOTNET, RUST, GO, KOTLIN, JAVA, RUBY, PHP");
             return null;
         }
@@ -107,7 +101,7 @@ public sealed class AnalysisCommands(
         var ecosystem = EcosystemResolver.Resolve(fileName);
         if (ecosystem is null)
         {
-            output.PrintError($"Cannot detect ecosystem for '{fileName}'. Use --ecosystem.");
+            ctx.Output.PrintError($"Cannot detect ecosystem for '{fileName}'. Use --ecosystem.");
         }
 
         return ecosystem;
@@ -123,7 +117,7 @@ public sealed class AnalysisCommands(
 
         if (outputFmt == "json")
         {
-            output.PrintJson(deps.Select(d => new
+            ctx.Output.PrintJson(deps.Select(d => new
             {
                 name = d.Name,
                 version = d.CurrentVersion,
@@ -135,7 +129,7 @@ public sealed class AnalysisCommands(
             return;
         }
 
-        output.PrintTable(
+        ctx.Output.PrintTable(
             ["PACKAGE", "VERSION", "LATEST", "STATUS", "LICENSE", "VULNS"],
             deps.Select(d => new[]
             {

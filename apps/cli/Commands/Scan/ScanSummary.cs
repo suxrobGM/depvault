@@ -28,23 +28,9 @@ internal static class ScanSummary
 
         AnsiConsole.Write(table);
 
-        var dashboardUrl = BuildDashboardUrl(serverUrl, projectId);
+        var dashboardUrl = $"{serverUrl}/projects/{projectId}";
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine($"[cyan1]View results:[/] {Markup.Escape(dashboardUrl)}");
-    }
-
-    private static string BuildDashboardUrl(string serverUrl, string projectId)
-    {
-        // Server URL is like "https://depvault.com/api" or "http://localhost:4000/api"
-        // Dashboard URL is like "https://depvault.com/projects/{id}" or "http://localhost:4001/projects/{id}"
-        var baseUrl = serverUrl.Replace("/api", "");
-
-        if (baseUrl.Contains("localhost:4000"))
-        {
-            baseUrl = baseUrl.Replace(":4000", ":4001");
-        }
-
-        return $"{baseUrl}/projects/{projectId}";
     }
 
     private static string ColorCount(int count, bool positive)

@@ -88,7 +88,7 @@ internal sealed class ProjectResolver(
     {
         var defaultName = new DirectoryInfo(repoPath).Name;
         var name = prompter.Ask("Project name", defaultName);
-        var repoUrl = DetectGitRemoteUrl(repoPath);
+        var repoUrl = await DetectGitRemoteUrl(repoPath);
 
         ProjectsPostResponse? created;
         try
@@ -125,10 +125,12 @@ internal sealed class ProjectResolver(
         return created.Id;
     }
 
-    private static string? DetectGitRemoteUrl(string repoPath)
+    private static async Task<string?> DetectGitRemoteUrl(string repoPath)
     {
         try
         {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+
             var process = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -144,8 +146,8 @@ internal sealed class ProjectResolver(
             };
 
             process.Start();
-            var url = process.StandardOutput.ReadToEnd().Trim();
-            process.WaitForExit(3000);
+            var url = (await process.StandardOutput.ReadToEndAsync(cts.Token)).Trim();
+            await process.WaitForExitAsync(cts.Token);
 
             return process.ExitCode == 0 && !string.IsNullOrEmpty(url) ? url : null;
         }

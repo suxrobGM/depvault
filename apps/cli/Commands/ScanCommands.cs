@@ -1,17 +1,13 @@
 using System.CommandLine;
-using DepVault.Cli.Auth;
 using DepVault.Cli.Commands.Scan;
-using DepVault.Cli.Config;
 using DepVault.Cli.Output;
+using DepVault.Cli.Utils;
 using Spectre.Console;
 
 namespace DepVault.Cli.Commands;
 
 internal sealed class ScanCommands(
-    IAuthContext authContext,
-    IConfigService configService,
-    IConsolePrompter prompter,
-    IOutputFormatter output,
+    CommandContext ctx,
     ProjectResolver projectResolver,
     DependencyScanner dependencyScanner,
     EnvFileScanner envFileScanner,
@@ -32,14 +28,14 @@ internal sealed class ScanCommands(
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
-            if (!authContext.RequireAuth())
+            if (!ctx.RequireAuth())
             {
                 return;
             }
 
-            if (!prompter.IsInteractive)
+            if (!ctx.Prompter.IsInteractive)
             {
-                output.PrintError(
+                ctx.Output.PrintError(
                     "The scan command requires interactive mode. Use individual commands (analyze, env push) for non-interactive usage.");
                 return;
             }
@@ -49,7 +45,7 @@ internal sealed class ScanCommands(
 
             if (!Directory.Exists(repoPath))
             {
-                output.PrintError($"Directory not found: {repoPath}");
+                ctx.Output.PrintError($"Directory not found: {repoPath}");
                 return;
             }
 
@@ -81,7 +77,7 @@ internal sealed class ScanCommands(
             await secretFileScanner.RunAsync(projectId, repoPath, results, cancellationToken);
 
             AnsiConsole.WriteLine();
-            ScanSummary.Print(results, projectId, configService.Load().Server);
+            ScanSummary.Print(results, projectId, ctx.Config.Load().Server);
         });
 
         return cmd;

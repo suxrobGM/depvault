@@ -1,18 +1,12 @@
 using System.CommandLine;
-using DepVault.Cli.Auth;
 using DepVault.Cli.Commands.Pull;
-using DepVault.Cli.Config;
-using DepVault.Cli.Output;
 using DepVault.Cli.Utils;
 using Spectre.Console;
 
 namespace DepVault.Cli.Commands;
 
 public sealed class PullCommands(
-    IAuthContext authContext,
-    IConfigService configService,
-    IOutputFormatter output,
-    IConsolePrompter prompter,
+    CommandContext ctx,
     VaultGroupSelector vaultGroupSelector,
     EnvPuller envPuller,
     SecretsPuller secretsPuller)
@@ -40,12 +34,12 @@ public sealed class PullCommands(
 
         cmd.SetAction(async (parseResult, ct) =>
         {
-            if (!authContext.RequireAuth())
+            if (!ctx.RequireAuth())
             {
                 return;
             }
 
-            var projectId = CommandUtils.RequireProjectId(parseResult, projectOpt, configService, output);
+            var projectId = ctx.RequireProjectId(parseResult, projectOpt);
             if (projectId is null)
             {
                 return;
@@ -57,7 +51,7 @@ public sealed class PullCommands(
                 return;
             }
 
-            var envType = CommandUtils.ResolveEnvironmentType(parseResult.GetValue(envOpt), null, prompter);
+            var envType = ctx.ResolveEnvironmentType(parseResult.GetValue(envOpt), null);
             var format = parseResult.GetValue(formatOpt) ?? "env";
             var outputDir = Path.GetFullPath(parseResult.GetValue(outputDirOpt) ?? ".");
             var includeSecrets = parseResult.GetValue(includeSecretsOpt);
@@ -79,7 +73,7 @@ public sealed class PullCommands(
             }
 
             AnsiConsole.WriteLine();
-            output.PrintSuccess($"Pulled {envCount} env file(s) and {secretCount} secret file(s).");
+            ctx.Output.PrintSuccess($"Pulled {envCount} env file(s) and {secretCount} secret file(s).");
         });
 
         return cmd;
@@ -87,7 +81,7 @@ public sealed class PullCommands(
 
     private bool ConfirmOverwrite(string outputDir)
     {
-        if (!prompter.IsInteractive)
+        if (!ctx.Prompter.IsInteractive)
         {
             return true;
         }
@@ -102,7 +96,7 @@ public sealed class PullCommands(
 
         if (hasExisting)
         {
-            return prompter.Confirm("Existing files may be overwritten. Continue?");
+            return ctx.Prompter.Confirm("Existing files may be overwritten. Continue?");
         }
 
         return true;

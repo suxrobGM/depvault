@@ -43,9 +43,4 @@ internal static class ExcludedDirectories
         // Misc
         "coverage", "generated", "logs", "temp", "tmp"
     };
-
-    public static bool IsExcluded(string directoryName)
-    {
-        return Names.Contains(directoryName);
-    }
 }

@@ -79,7 +79,10 @@ internal sealed class SecretLeakScanner(
             ? new HashSet<string>(File.ReadAllLines(gitignorePath))
             : [];
 
-        var newEntries = leakedFiles.Where(f => !existingLines.Contains(f)).ToList();
+        var newEntries = leakedFiles
+            .Where(f => !existingLines.Contains(f) && !existingLines.Contains(Path.GetFileName(f)))
+            .ToList();
+
         if (newEntries.Count > 0)
         {
             File.AppendAllLines(gitignorePath, ["", "# Secret files detected by depvault scan", .. newEntries]);

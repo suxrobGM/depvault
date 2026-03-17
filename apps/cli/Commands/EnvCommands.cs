@@ -1,7 +1,5 @@
 using System.CommandLine;
 using DepVault.Cli.Auth;
-using DepVault.Cli.Config;
-using DepVault.Cli.Output;
 using DepVault.Cli.Utils;
 using Spectre.Console;
 using VarNs = DepVault.Cli.ApiClient.Api.Projects.Item.Environments.Variables;
@@ -10,9 +8,7 @@ namespace DepVault.Cli.Commands;
 
 public sealed class EnvCommands(
     IApiClientFactory clientFactory,
-    IAuthContext authContext,
-    IConfigService configService,
-    IOutputFormatter output)
+    CommandContext ctx)
 {
     public Command CreateEnvCommand()
     {
@@ -36,12 +32,12 @@ public sealed class EnvCommands(
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
-            if (!authContext.RequireAuth())
+            if (!ctx.RequireAuth())
             {
                 return;
             }
 
-            var projectId = CommandUtils.RequireProjectId(parseResult, projectOpt, configService, output);
+            var projectId = ctx.RequireProjectId(parseResult, projectOpt);
             if (projectId is null)
             {
                 return;
@@ -75,18 +71,18 @@ public sealed class EnvCommands(
 
                 if (parseResult.GetValue(outputOpt) == "json")
                 {
-                    output.PrintJson(items.Select(v => new
+                    ctx.Output.PrintJson(items.Select(v => new
                         { key = v.Key, value = v.Value, environmentId = v.EnvironmentId }));
                     return;
                 }
 
-                output.PrintTable(
+                ctx.Output.PrintTable(
                     ["KEY", "VALUE", "ENVIRONMENT"],
                     items.Select(v => new[] { v.Key ?? "", v.Value ?? "(masked)", v.EnvironmentId ?? "" }).ToList());
             }
             catch (Exception ex)
             {
-                output.PrintError($"Failed to list env vars: {ex.Message}");
+                ctx.Output.PrintError($"Failed to list env vars: {ex.Message}");
             }
         });
 
@@ -107,12 +103,12 @@ public sealed class EnvCommands(
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
-            if (!authContext.RequireAuth())
+            if (!ctx.RequireAuth())
             {
                 return;
             }
 
-            var projectId = CommandUtils.RequireProjectId(parseResult, projectOpt, configService, output);
+            var projectId = ctx.RequireProjectId(parseResult, projectOpt);
             if (projectId is null)
             {
                 return;
@@ -138,17 +134,17 @@ public sealed class EnvCommands(
 
                 if (parseResult.GetValue(outputOpt) == "json")
                 {
-                    output.PrintJson(rows.Select(r => new { key = r.Key, status = r.Status?.ToString() }));
+                    ctx.Output.PrintJson(rows.Select(r => new { key = r.Key, status = r.Status?.ToString() }));
                     return;
                 }
 
-                output.PrintTable(
+                ctx.Output.PrintTable(
                     ["KEY", "STATUS"],
                     rows.Select(r => new[] { r.Key ?? "", r.Status?.ToString() ?? "" }).ToList());
             }
             catch (Exception ex)
             {
-                output.PrintError($"Failed to diff environments: {ex.Message}");
+                ctx.Output.PrintError($"Failed to diff environments: {ex.Message}");
             }
         });
 
