@@ -6,6 +6,7 @@ import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { getServerClient } from "@/lib/api-server";
 import { ROUTES } from "@/lib/constants";
 import { AuthProvider, ConfirmProvider, NotificationProvider, QueryProvider } from "@/providers";
+import { PlanLimitProvider } from "@/providers/subscription-provider";
 
 async function getUser() {
   const client = await getServerClient();
@@ -24,12 +25,14 @@ async function AuthenticatedAdminShell(props: PropsWithChildren): Promise<ReactE
 
   return (
     <AuthProvider initialUser={user}>
-      <Box sx={{ display: "flex", minHeight: "100vh" }}>
-        <AdminSidebar />
-        <Box component="main" sx={{ flex: 1, p: 3, ml: "260px" }}>
-          {children}
+      <PlanLimitProvider>
+        <Box sx={{ display: "flex", minHeight: "100vh" }}>
+          <AdminSidebar />
+          <Box component="main" sx={{ flex: 1, p: 3, ml: "260px" }}>
+            {children}
+          </Box>
         </Box>
-      </Box>
+      </PlanLimitProvider>
     </AuthProvider>
   );
 }

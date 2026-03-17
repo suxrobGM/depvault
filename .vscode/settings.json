@@ -14,5 +14,10 @@
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
   },
-  "VSCodeCounter.exclude": ["bun.lock", "apps/cli/openapi.json"]
+  "VSCodeCounter.exclude": [
+    "bun.lock",
+    "apps/cli/openapi.json",
+    ".agents/skills/remotion-best-practices",
+    ".claude/skills/remotion-best-practices"
+  ]
 }
