@@ -1,5 +1,5 @@
 using System.CommandLine;
-using DepVault.Cli.ApiClient.Projects.Item.Analyses;
+using DepVault.Cli.ApiClient.Api.Projects.Item.Analyses;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;

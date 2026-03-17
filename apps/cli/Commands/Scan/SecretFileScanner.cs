@@ -3,7 +3,7 @@ using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
-using SecretNs = DepVault.Cli.ApiClient.Projects.Item.Secrets;
+using SecretNs = DepVault.Cli.ApiClient.Api.Projects.Item.Secrets;
 
 namespace DepVault.Cli.Commands.Scan;
 
@@ -45,7 +45,7 @@ internal sealed class SecretFileScanner(
                 await AnsiConsole.Status()
                     .Spinner(Spinner.Known.Dots)
                     .StartAsync($"Uploading {file.RelativePath}...", async _ =>
-                        await client.Projects[projectId].Secrets.PostAsync(new SecretNs.SecretsPostRequestBody
+                        await client.Api.Projects[projectId].Secrets.PostAsync(new SecretNs.SecretsPostRequestBody
                         {
                             File = fileBytes,
                             Description = file.FileName,

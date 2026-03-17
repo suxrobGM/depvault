@@ -46,7 +46,16 @@ export const resetPasswordSchema = z
     path: ["confirmPassword"],
   });
 
+export const deviceVerifySchema = z.object({
+  userCode: z
+    .string()
+    .min(1, "Verification code is required")
+    .transform((v) => v.replace(/[^A-Za-z0-9]/g, "").toUpperCase())
+    .refine((v) => v.length === 8, "Code must be 8 characters"),
+});
+
 export type LoginValues = z.infer<typeof loginSchema>;
 export type RegisterValues = z.infer<typeof registerSchema>;
 export type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
+export type DeviceVerifyValues = z.infer<typeof deviceVerifySchema>;

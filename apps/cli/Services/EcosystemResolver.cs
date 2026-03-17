@@ -1,4 +1,4 @@
-using DepVault.Cli.ApiClient.Projects.Item.Analyses;
+using DepVault.Cli.ApiClient.Api.Projects.Item.Analyses;
 
 namespace DepVault.Cli.Services;
 

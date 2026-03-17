@@ -1,4 +1,4 @@
-using DepVault.Cli.ApiClient.Projects.Item.Analyses;
+using DepVault.Cli.ApiClient.Api.Projects.Item.Analyses;
 using DepVault.Cli.Auth;
 
 namespace DepVault.Cli.Services;
@@ -20,7 +20,7 @@ public sealed class AnalysisClient(IApiClientFactory clientFactory)
     {
         var client = clientFactory.Create();
 
-        var response = await client.Projects[projectId].Analyses.PostAsync(new AnalysesPostRequestBody
+        var response = await client.Api.Projects[projectId].Analyses.PostAsync(new AnalysesPostRequestBody
         {
             FileName = fileName,
             Content = content,

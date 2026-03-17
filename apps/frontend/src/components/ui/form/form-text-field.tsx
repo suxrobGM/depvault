@@ -10,10 +10,11 @@ type AnyReactForm = ReactFormExtendedApi<any, any, any, any, any, any, any, any,
 type FormTextFieldProps = {
   form: AnyReactForm;
   name: string;
+  transform?: (value: string) => string;
 } & Omit<TextFieldProps, "value" | "onChange" | "onBlur" | "error" | "helperText" | "name">;
 
 export function FormTextField(props: FormTextFieldProps): ReactElement {
-  const { form, name, ...textFieldProps } = props;
+  const { form, name, transform, ...textFieldProps } = props;
 
   return (
     <form.Field name={name}>
@@ -21,7 +22,10 @@ export function FormTextField(props: FormTextFieldProps): ReactElement {
         <TextField
           fullWidth
           value={field.state.value}
-          onChange={(e) => field.handleChange(e.target.value)}
+          onChange={(e) => {
+            const value = transform ? transform(e.target.value) : e.target.value;
+            field.handleChange(value);
+          }}
           onBlur={field.handleBlur}
           error={field.state.meta.errors.length > 0}
           helperText={

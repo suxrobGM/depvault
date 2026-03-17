@@ -4,7 +4,7 @@ using DepVault.Cli.Config;
 using DepVault.Cli.Output;
 using DepVault.Cli.Utils;
 using Spectre.Console;
-using VarNs = DepVault.Cli.ApiClient.Projects.Item.Environments.Variables;
+using VarNs = DepVault.Cli.ApiClient.Api.Projects.Item.Environments.Variables;
 
 namespace DepVault.Cli.Commands;
 
@@ -50,7 +50,7 @@ public sealed class EnvCommands(
             try
             {
                 var client = clientFactory.Create();
-                var result = await client.Projects[projectId].Environments.Variables.GetAsync(config =>
+                var result = await client.Api.Projects[projectId].Environments.Variables.GetAsync(config =>
                 {
                     var vgId = parseResult.GetValue(vaultGroupOpt);
                     if (!string.IsNullOrEmpty(vgId))
@@ -123,7 +123,7 @@ public sealed class EnvCommands(
                 var envList = parseResult.GetValue(envsOpt)!
                     .Split(',').Select(e => e.Trim().ToUpperInvariant()).ToArray();
                 var client = clientFactory.Create();
-                var result = await client.Projects[projectId].Environments.Diff.GetAsync(config =>
+                var result = await client.Api.Projects[projectId].Environments.Diff.GetAsync(config =>
                 {
                     config.QueryParameters.VaultGroupId = parseResult.GetValue(vaultGroupOpt);
                     config.QueryParameters.Environments = string.Join(",", envList);

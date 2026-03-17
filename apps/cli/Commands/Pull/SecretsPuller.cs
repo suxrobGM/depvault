@@ -2,8 +2,8 @@ using DepVault.Cli.Auth;
 using DepVault.Cli.Output;
 using DepVault.Cli.Utils;
 using Spectre.Console;
-using SecretListNs = DepVault.Cli.ApiClient.Projects.Item.Secrets;
-using VaultGroupsModel = DepVault.Cli.ApiClient.Projects.Item.VaultGroups.VaultGroups;
+using SecretListNs = DepVault.Cli.ApiClient.Api.Projects.Item.Secrets;
+using VaultGroupsModel = DepVault.Cli.ApiClient.Api.Projects.Item.VaultGroups.VaultGroups;
 
 namespace DepVault.Cli.Commands.Pull;
 
@@ -27,7 +27,7 @@ public sealed class SecretsPuller(
             files = await AnsiConsole.Status()
                 .Spinner(Spinner.Known.Dots)
                 .StartAsync("Fetching secret files...", async _ =>
-                    await client.Projects[projectId].Secrets.GetAsync(config =>
+                    await client.Api.Projects[projectId].Secrets.GetAsync(config =>
                     {
                         config.QueryParameters.EnvironmentType =
                             CommandUtils.ParseEnum(envType,
@@ -64,7 +64,7 @@ public sealed class SecretsPuller(
 
                 var filePath = Path.Combine(secretsDir, file.Name ?? $"secret-{file.Id}");
 
-                await using var stream = await client.Projects[projectId].Secrets[file.Id!].Download
+                await using var stream = await client.Api.Projects[projectId].Secrets[file.Id!].Download
                     .GetAsync(cancellationToken: ct);
                 if (stream is null)
                 {

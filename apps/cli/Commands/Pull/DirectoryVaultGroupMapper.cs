@@ -1,9 +1,9 @@
-using DepVault.Cli.ApiClient.Projects.Item.VaultGroups;
+using DepVault.Cli.ApiClient.Api.Projects.Item.VaultGroups;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using Spectre.Console;
-using VaultGroupsModel = DepVault.Cli.ApiClient.Projects.Item.VaultGroups.VaultGroups;
+using VaultGroupsModel = DepVault.Cli.ApiClient.Api.Projects.Item.VaultGroups.VaultGroups;
 
 namespace DepVault.Cli.Commands.Pull;
 
@@ -28,7 +28,7 @@ public sealed class DirectoryVaultGroupMapper(
         var existingGroups = await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .StartAsync("Fetching vault groups...", async _ =>
-                await client.Projects[projectId].VaultGroups.GetAsync(cancellationToken: ct)) ?? [];
+                await client.Api.Projects[projectId].VaultGroups.GetAsync(cancellationToken: ct)) ?? [];
 
         var map = new Dictionary<string, string>();
 
@@ -68,7 +68,7 @@ public sealed class DirectoryVaultGroupMapper(
             var created = await AnsiConsole.Status()
                 .Spinner(Spinner.Known.Dots)
                 .StartAsync($"Creating vault group '{name}'...", async _ =>
-                    await client.Projects[projectId].VaultGroups.PostAsync(
+                    await client.Api.Projects[projectId].VaultGroups.PostAsync(
                         new VaultGroupsPostRequestBody { Name = name, DirectoryPath = dir },
                         cancellationToken: ct));
 

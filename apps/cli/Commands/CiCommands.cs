@@ -41,7 +41,7 @@ public sealed class CiCommands(
             try
             {
                 var client = clientFactory.Create();
-                var result = await client.Ci.Secrets.GetAsync(cancellationToken: cancellationToken);
+                var result = await client.Api.Ci.Secrets.GetAsync(cancellationToken: cancellationToken);
 
                 if (result is null)
                 {

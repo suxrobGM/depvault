@@ -5,6 +5,10 @@ import { rateLimiter } from "@/common/middleware/rate-limiter";
 import { TooManyRequestsErrorSchema } from "@/types/response";
 import {
   AuthResponseSchema,
+  DeviceCodeResponseSchema,
+  DeviceTokenBodySchema,
+  DeviceTokenResponseSchema,
+  DeviceVerifyBodySchema,
   ForgotPasswordBodySchema,
   GitHubCallbackQuerySchema,
   LinkGitHubBodySchema,
@@ -16,10 +20,12 @@ import {
 } from "./auth.schema";
 import { AuthService } from "./auth.service";
 import { clearAuthCookies, setAuthCookies } from "./auth.utils";
+import { DeviceCodeService } from "./device-code.service";
 import { GitHubService } from "./github.service";
 
 const authService = container.resolve(AuthService);
 const githubService = container.resolve(GitHubService);
+const deviceCodeService = container.resolve(DeviceCodeService);
 
 export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Auth"] } })
   // Register — 5 requests per hour
@@ -180,8 +186,51 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
     },
   )
 
+  // Device code flow — CLI login
+  .use(
+    new Elysia()
+      .use(rateLimiter({ max: 5, windowMs: 60 * 60 * 1000 }))
+      .post("/device", () => deviceCodeService.createDeviceCode(), {
+        response: { 200: DeviceCodeResponseSchema, ...TooManyRequestsErrorSchema },
+        detail: {
+          operationId: "createDeviceCode",
+          summary: "Request a device verification code for CLI login",
+          description:
+            "Generate a device code pair for the CLI device authorization flow. The CLI displays the user code and polls for completion.",
+        },
+      }),
+  )
+  .use(
+    new Elysia()
+      .use(rateLimiter({ max: 12, windowMs: 60 * 1000 }))
+      .post("/device/token", ({ body }) => deviceCodeService.pollDeviceCode(body.deviceCode), {
+        body: DeviceTokenBodySchema,
+        response: { 200: DeviceTokenResponseSchema, ...TooManyRequestsErrorSchema },
+        detail: {
+          operationId: "pollDeviceToken",
+          summary: "Poll for device code authorization status",
+          description:
+            "Check whether the user has verified the device code. Returns tokens once verified, or pending/expired status.",
+        },
+      }),
+  )
+
   // Authenticated routes
   .use(authGuard)
+  .post(
+    "/device/verify",
+    ({ body, user }) => deviceCodeService.verifyDeviceCode(body.userCode, user.id),
+    {
+      body: DeviceVerifyBodySchema,
+      response: MessageResponseSchema,
+      detail: {
+        operationId: "verifyDeviceCode",
+        summary: "Verify a device code",
+        description: "Authorize a CLI device by confirming the user code. Requires authentication.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
   .post("/link-github", ({ body, user }) => githubService.linkAccount(body, user.id), {
     body: LinkGitHubBodySchema,
     response: MessageResponseSchema,

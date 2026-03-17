@@ -53,6 +53,38 @@ export const LinkGitHubBodySchema = t.Object({
   code: t.String(),
 });
 
+export const DeviceCodeResponseSchema = t.Object({
+  deviceCode: t.String(),
+  userCode: t.String(),
+  verificationUrl: t.String(),
+  expiresIn: t.Number(),
+});
+
+export const DeviceTokenBodySchema = t.Object({
+  deviceCode: t.String(),
+});
+
+export const DeviceTokenResponseSchema = t.Object({
+  status: t.Union([t.Literal("pending"), t.Literal("verified"), t.Literal("expired")]),
+  accessToken: t.Optional(t.String()),
+  refreshToken: t.Optional(t.String()),
+  user: t.Optional(
+    t.Object({
+      id: t.String(),
+      email: t.String(),
+      firstName: t.String(),
+      lastName: t.String(),
+      role: t.String(),
+      emailVerified: t.Boolean(),
+      avatarUrl: t.Nullable(t.String()),
+    }),
+  ),
+});
+
+export const DeviceVerifyBodySchema = t.Object({
+  userCode: t.String({ minLength: 1 }),
+});
+
 export type RegisterBody = Static<typeof RegisterBodySchema>;
 export type LoginBody = Static<typeof LoginBodySchema>;
 export type ForgotPasswordBody = Static<typeof ForgotPasswordBodySchema>;
@@ -61,3 +93,5 @@ export type VerifyEmailBody = Static<typeof VerifyEmailBodySchema>;
 export type AuthResponse = Static<typeof AuthResponseSchema>;
 export type GitHubCallbackQuery = Static<typeof GitHubCallbackQuerySchema>;
 export type LinkGitHubBody = Static<typeof LinkGitHubBodySchema>;
+export type DeviceTokenBody = Static<typeof DeviceTokenBodySchema>;
+export type DeviceVerifyBody = Static<typeof DeviceVerifyBodySchema>;

@@ -1,7 +1,7 @@
 import { swagger } from "@elysiajs/swagger";
 import { Elysia } from "elysia";
 
-export const swaggerPlugin = new Elysia({ name: "swagger" }).use(
+export const swaggerPlugin = new Elysia({ name: "swagger", prefix: "/api" }).use(
   swagger({
     documentation: {
       info: {

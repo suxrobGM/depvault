@@ -1,10 +1,11 @@
 using DepVault.Cli.Auth;
 using DepVault.Cli.Commands.Pull;
+using DepVault.Cli.Commands.Push;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
-using ImportNs = DepVault.Cli.ApiClient.Projects.Item.Environments.Import;
+using ImportNs = DepVault.Cli.ApiClient.Api.Projects.Item.Environments.Import;
 
 namespace DepVault.Cli.Commands.Scan;
 
@@ -13,7 +14,8 @@ internal sealed class EnvFileScanner(
     IOutputFormatter output,
     IConsolePrompter prompter,
     IFileScanner fileScanner,
-    DirectoryVaultGroupMapper dirMapper)
+    DirectoryVaultGroupMapper dirMapper,
+    FileEnvironmentAssigner envAssigner)
 {
     public async Task RunAsync(string projectId, string repoPath, ScanResults results, CancellationToken ct)
     {
@@ -45,24 +47,17 @@ internal sealed class EnvFileScanner(
         }
 
         AnsiConsole.WriteLine();
-        await PushFilesAsync(projectId, selected, dirVaultGroupMap, results, ct);
+        var assignments = envAssigner.AssignEnvironments(selected, null);
+        await PushFilesAsync(projectId, assignments, dirVaultGroupMap, results, ct);
     }
 
     private async Task PushFilesAsync(
-        string projectId, List<DiscoveredFile> files,
+        string projectId, List<(DiscoveredFile File, string Environment)> assignments,
         Dictionary<string, string> dirVaultGroupMap, ScanResults results, CancellationToken ct)
     {
         var client = clientFactory.Create();
 
-        // Prompt once for ambiguous files instead of per-file
-        var hasAmbiguous = files.Any(f => DetectEnvironmentType(f.FileName) is null);
-        string? defaultEnvType = null;
-        if (hasAmbiguous)
-        {
-            defaultEnvType = CommandUtils.ResolveEnvironmentType(null, null, prompter);
-        }
-
-        foreach (var file in files)
+        foreach (var (file, envType) in assignments)
         {
             var dir = Path.GetDirectoryName(file.RelativePath)?.Replace('\\', '/') ?? ".";
             if (!dirVaultGroupMap.TryGetValue(dir, out var vaultGroupId))
@@ -71,7 +66,6 @@ internal sealed class EnvFileScanner(
                 continue;
             }
 
-            var envType = DetectEnvironmentType(file.FileName) ?? defaultEnvType ?? "DEVELOPMENT";
             var format = DetectEnvFormat(file.FileName);
 
             try
@@ -81,7 +75,7 @@ internal sealed class EnvFileScanner(
                 var result = await AnsiConsole.Status()
                     .Spinner(Spinner.Known.Dots)
                     .StartAsync($"Pushing {file.RelativePath}...", async _ =>
-                        await client.Projects[projectId].Environments.Import.PostAsync(
+                        await client.Api.Projects[projectId].Environments.Import.PostAsync(
                             new ImportNs.ImportPostRequestBody
                             {
                                 Content = content,
@@ -92,7 +86,8 @@ internal sealed class EnvFileScanner(
                             }, cancellationToken: ct));
 
                 results.EnvVariablesPushed += (int)(result?.Imported ?? 0);
-                output.PrintSuccess($"Imported {(int)(result?.Imported ?? 0)} variables from {file.RelativePath}");
+                output.PrintSuccess(
+                    $"Imported {(int)(result?.Imported ?? 0)} variables from {file.RelativePath} ({envType})");
             }
             catch (Exception ex)
             {

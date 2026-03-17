@@ -1,5 +1,5 @@
 using System.CommandLine;
-using DepVault.Cli.ApiClient.Projects.Item.Secrets;
+using DepVault.Cli.ApiClient.Api.Projects.Item.Secrets;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Commands.Pull;
 using DepVault.Cli.Commands.Push;
@@ -9,7 +9,7 @@ using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
-using ImportNs = DepVault.Cli.ApiClient.Projects.Item.Environments.Import;
+using ImportNs = DepVault.Cli.ApiClient.Api.Projects.Item.Environments.Import;
 
 namespace DepVault.Cli.Commands;
 
@@ -117,7 +117,7 @@ public sealed class PushCommands(
         var result = await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .StartAsync($"Pushing {file.RelativePath}...", async _ =>
-                await client.Projects[projectId].Environments.Import.PostAsync(
+                await client.Api.Projects[projectId].Environments.Import.PostAsync(
                     new ImportNs.ImportPostRequestBody
                     {
                         Content = content,
@@ -142,7 +142,7 @@ public sealed class PushCommands(
         await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .StartAsync($"Uploading {file.RelativePath}...", async _ =>
-                await client.Projects[projectId].Secrets.PostAsync(
+                await client.Api.Projects[projectId].Secrets.PostAsync(
                     new SecretsPostRequestBody
                     {
                         File = fileBytes,

@@ -43,6 +43,7 @@ model User {
   invitationsSent     ProjectInvitation[] @relation("invitationsSent")
   invitationsReceived ProjectInvitation[] @relation("invitationsReceived")
   subscription        Subscription?
+  deviceCodes         DeviceCode[]
 
   @@map("users")
 }
@@ -61,4 +62,24 @@ model Account {
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
+}
+
+enum DeviceCodeStatus {
+  PENDING
+  VERIFIED
+  EXPIRED
+}
+
+model DeviceCode {
+  id         String           @id @default(uuid()) @db.Uuid
+  deviceCode String           @unique @map("device_code")
+  userCode   String           @unique @map("user_code")
+  status     DeviceCodeStatus @default(PENDING)
+  userId     String?          @map("user_id") @db.Uuid
+  expiresAt  DateTime         @map("expires_at")
+  createdAt  DateTime         @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("device_codes")
 }

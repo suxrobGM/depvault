@@ -44,13 +44,13 @@ const app = new Elysia()
   .use(corsPlugin)
   .use(uploadsStaticPlugin)
   .use(secretScanCron)
+  .use(swaggerPlugin)
   .onStop(async () => {
     await prisma.$disconnect();
   })
   .get("/health", () => ({ status: "ok", timestamp: new Date().toISOString() }))
   .group("/api", (api) =>
     api
-      .use(swaggerPlugin)
       .guard({
         response: HttpErrorResponses,
       })

@@ -54,7 +54,7 @@ public sealed class RootHandler(
         try
         {
             var apiClient = clientFactory.Create();
-            var project = await apiClient.Projects[config.ActiveProjectId]
+            var project = await apiClient.Api.Projects[config.ActiveProjectId]
                 .GetAsync(cancellationToken: cancellationToken);
 
             if (project?.Name is not null)

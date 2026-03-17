@@ -1,4 +1,4 @@
-using DepVault.Cli.ApiClient.Projects.Item.VaultGroups;
+using DepVault.Cli.ApiClient.Api.Projects.Item.VaultGroups;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Output;
 using Spectre.Console;
@@ -17,7 +17,7 @@ public sealed class VaultGroupResolver(
         var groups = await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .StartAsync("Fetching vault groups...", async _ =>
-                await client.Projects[projectId].VaultGroups.GetAsync(cancellationToken: ct));
+                await client.Api.Projects[projectId].VaultGroups.GetAsync(cancellationToken: ct));
 
         const string createLabel = "+ Create new vault group";
 
@@ -42,7 +42,7 @@ public sealed class VaultGroupResolver(
         var created = await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .StartAsync("Creating vault group...", async _ =>
-                await client.Projects[projectId].VaultGroups.PostAsync(
+                await client.Api.Projects[projectId].VaultGroups.PostAsync(
                     new VaultGroupsPostRequestBody { Name = name }, cancellationToken: ct));
 
         if (created?.Id is null)

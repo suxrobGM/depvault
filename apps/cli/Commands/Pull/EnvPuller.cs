@@ -2,8 +2,8 @@ using DepVault.Cli.Auth;
 using DepVault.Cli.Output;
 using DepVault.Cli.Utils;
 using Spectre.Console;
-using ExportNs = DepVault.Cli.ApiClient.Projects.Item.Environments.Export;
-using VaultGroupsModel = DepVault.Cli.ApiClient.Projects.Item.VaultGroups.VaultGroups;
+using ExportNs = DepVault.Cli.ApiClient.Api.Projects.Item.Environments.Export;
+using VaultGroupsModel = DepVault.Cli.ApiClient.Api.Projects.Item.VaultGroups.VaultGroups;
 
 namespace DepVault.Cli.Commands.Pull;
 
@@ -27,7 +27,7 @@ public sealed class EnvPuller(
                 var result = await AnsiConsole.Status()
                     .Spinner(Spinner.Known.Dots)
                     .StartAsync($"Pulling env vars for {group.Name}...", async _ =>
-                        await client.Projects[projectId].Environments.Export.GetAsync(config =>
+                        await client.Api.Projects[projectId].Environments.Export.GetAsync(config =>
                         {
                             config.QueryParameters.VaultGroupId = group.Id;
                             config.QueryParameters.EnvironmentType =

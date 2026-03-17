@@ -4,7 +4,7 @@ using DepVault.Cli.Config;
 using DepVault.Cli.Output;
 using DepVault.Cli.Utils;
 using Spectre.Console;
-using SecretListNs = DepVault.Cli.ApiClient.Projects.Item.Secrets;
+using SecretListNs = DepVault.Cli.ApiClient.Api.Projects.Item.Secrets;
 
 namespace DepVault.Cli.Commands;
 
@@ -48,7 +48,7 @@ public sealed class SecretsCommands(
             try
             {
                 var client = clientFactory.Create();
-                var result = await client.Projects[projectId].Secrets.GetAsync(config =>
+                var result = await client.Api.Projects[projectId].Secrets.GetAsync(config =>
                 {
                     var env = parseResult.GetValue(envOpt);
                     if (!string.IsNullOrEmpty(env))

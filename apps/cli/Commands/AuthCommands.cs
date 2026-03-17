@@ -1,7 +1,10 @@
 using System.CommandLine;
+using System.Diagnostics;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
+using Spectre.Console;
+using TokenNs = DepVault.Cli.ApiClient.Api.Auth.Device.Token;
 
 namespace DepVault.Cli.Commands;
 
@@ -13,16 +16,14 @@ public sealed class AuthCommands(
     IOutputFormatter output,
     IConsolePrompter prompter)
 {
+    private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(5);
+
     public Command CreateLoginCommand()
     {
-        var emailOpt = new Option<string?>("--email") { Description = "Account email" };
-        var passwordOpt = new Option<string?>("--password") { Description = "Account password" };
         var serverOpt = new Option<string?>("--server") { Description = "API server URL" };
 
-        var cmd = new Command("login", "Authenticate with the DepVault API")
+        var cmd = new Command("login", "Authenticate via browser")
         {
-            emailOpt,
-            passwordOpt,
             serverOpt
         };
 
@@ -34,6 +35,12 @@ public sealed class AuthCommands(
                 return;
             }
 
+            if (!prompter.IsInteractive)
+            {
+                output.PrintError("Browser login requires interactive mode. Use DEPVAULT_TOKEN for CI/CD.");
+                return;
+            }
+
             var server = parseResult.GetValue(serverOpt);
             if (!string.IsNullOrEmpty(server))
             {
@@ -42,39 +49,58 @@ public sealed class AuthCommands(
                 configService.Save(config);
             }
 
-            var email = parseResult.GetValue(emailOpt) ?? prompter.Ask("Email");
-            var password = parseResult.GetValue(passwordOpt) ?? prompter.AskSecret("Password");
-
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
-            {
-                output.PrintError("Email and password are required.");
-                return;
-            }
-
             try
             {
                 var client = clientFactory.Create();
-                var result = await client.Auth.Login.PostAsync(new()
-                {
-                    Email = email,
-                    Password = password
-                }, cancellationToken: cancellationToken);
 
-                if (result?.AccessToken is null)
+                var device = await client.Api.Auth.Device.PostAsync(cancellationToken: cancellationToken);
+                if (device?.DeviceCode is null || device.UserCode is null || device.VerificationUrl is null)
                 {
-                    output.PrintError("Login failed. Check your credentials.");
+                    output.PrintError("Failed to request device code.");
+                    return;
+                }
+
+                AnsiConsole.WriteLine();
+                AnsiConsole.Write(new Panel(
+                        new Rows(
+                            new Markup($"[bold cyan1]{Markup.Escape(device.UserCode)}[/]"),
+                            new Markup(""),
+                            new Markup("[grey]Enter this code in your browser to sign in.[/]")))
+                    .Header("[cyan1]Verification Code[/]")
+                    .Border(BoxBorder.Rounded)
+                    .BorderStyle(new Style(ConsoleTheme.Highlight))
+                    .Padding(2, 1)
+                    .Expand());
+                AnsiConsole.WriteLine();
+
+                OpenBrowser(device.VerificationUrl);
+                AnsiConsole.MarkupLine("[grey]Opening browser...[/]");
+                AnsiConsole.MarkupLine(
+                    $"[grey]If it doesn't open, visit:[/] [cyan1 underline]{Markup.Escape(device.VerificationUrl)}[/]");
+                AnsiConsole.WriteLine();
+
+                var expiresIn = (int)(device.ExpiresIn ?? 900);
+                var tokens = await AnsiConsole.Status()
+                    .Spinner(Spinner.Known.Dots)
+                    .StartAsync("Waiting for authorization...", async _ =>
+                        await PollForTokensAsync(client, device.DeviceCode, expiresIn, cancellationToken));
+
+                if (tokens is null)
+                {
+                    output.PrintError("Authorization timed out or was denied. Run 'depvault login' to try again.");
                     return;
                 }
 
                 credentialStore.Save(new StoredCredentials
                 {
-                    AccessToken = result.AccessToken,
-                    RefreshToken = result.RefreshToken ?? "",
-                    UserId = result.User?.Id,
-                    Email = result.User?.Email
+                    AccessToken = tokens.AccessToken ?? "",
+                    RefreshToken = tokens.RefreshToken ?? "",
+                    UserId = tokens.User?.Id,
+                    Email = tokens.User?.Email
                 });
 
-                output.PrintSuccess($"Logged in as {result.User?.Email ?? email}");
+                AnsiConsole.WriteLine();
+                output.PrintSuccess($"Logged in as {tokens.User?.Email ?? "unknown"}");
             }
             catch (Exception ex)
             {
@@ -88,7 +114,7 @@ public sealed class AuthCommands(
     public Command CreateLogoutCommand()
     {
         var cmd = new Command("logout", "Clear stored credentials");
-        cmd.SetAction((parseResult) =>
+        cmd.SetAction(parseResult =>
         {
             credentialStore.Delete();
             output.PrintSuccess("Logged out.");
@@ -117,7 +143,7 @@ public sealed class AuthCommands(
             try
             {
                 var client = clientFactory.Create();
-                var user = await client.Users.Me.GetAsync(cancellationToken: cancellationToken);
+                var user = await client.Api.Users.Me.GetAsync(cancellationToken: cancellationToken);
                 output.PrintKeyValue("Email", user?.Email);
                 output.PrintKeyValue("Name", $"{user?.FirstName} {user?.LastName}".Trim());
                 output.PrintKeyValue("Auth", "JWT (stored credentials)");
@@ -128,5 +154,63 @@ public sealed class AuthCommands(
             }
         });
         return cmd;
+    }
+
+    private static async Task<TokenNs.TokenPostResponse?> PollForTokensAsync(
+        ApiClient.ApiClient client, string deviceCode, int expiresIn, CancellationToken ct)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(expiresIn);
+
+        while (DateTime.UtcNow < deadline)
+        {
+            ct.ThrowIfCancellationRequested();
+            await Task.Delay(PollInterval, ct);
+
+            try
+            {
+                var result = await client.Api.Auth.Device.Token.PostAsync(
+                    new TokenNs.TokenPostRequestBody { DeviceCode = deviceCode },
+                    cancellationToken: ct);
+
+                if (result?.Status == TokenNs.TokenPostResponse_status.Verified && result.AccessToken is not null)
+                {
+                    return result;
+                }
+
+                if (result?.Status == TokenNs.TokenPostResponse_status.Expired)
+                {
+                    return null;
+                }
+            }
+            catch
+            {
+                // Network error during poll — retry silently
+            }
+        }
+
+        return null;
+    }
+
+    private static void OpenBrowser(string url)
+    {
+        try
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                Process.Start("open", url);
+            }
+            else
+            {
+                Process.Start("xdg-open", url);
+            }
+        }
+        catch
+        {
+            // Browser open is best-effort; URL is printed as fallback
+        }
     }
 }

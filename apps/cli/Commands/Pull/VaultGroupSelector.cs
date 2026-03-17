@@ -1,7 +1,7 @@
 using DepVault.Cli.Auth;
 using DepVault.Cli.Output;
 using Spectre.Console;
-using VaultGroupsModel = DepVault.Cli.ApiClient.Projects.Item.VaultGroups.VaultGroups;
+using VaultGroupsModel = DepVault.Cli.ApiClient.Api.Projects.Item.VaultGroups.VaultGroups;
 
 namespace DepVault.Cli.Commands.Pull;
 
@@ -23,7 +23,7 @@ public sealed class VaultGroupSelector(
         var allGroups = await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .StartAsync("Fetching vault groups...", async _ =>
-                await client.Projects[projectId].VaultGroups.GetAsync(cancellationToken: ct));
+                await client.Api.Projects[projectId].VaultGroups.GetAsync(cancellationToken: ct));
 
         if (allGroups is null || allGroups.Count == 0)
         {

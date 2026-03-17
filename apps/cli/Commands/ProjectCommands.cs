@@ -38,7 +38,7 @@ public sealed class ProjectCommands(
             try
             {
                 var apiClient = clientFactory.Create();
-                var result = await apiClient.Projects.GetAsync(config =>
+                var result = await apiClient.Api.Projects.GetAsync(config =>
                 {
                     config.QueryParameters.Page = 1;
                     config.QueryParameters.Limit = 100;
@@ -96,7 +96,7 @@ public sealed class ProjectCommands(
             try
             {
                 var client = clientFactory.Create();
-                var result = await client.Projects.GetAsync(config =>
+                var result = await client.Api.Projects.GetAsync(config =>
                 {
                     config.QueryParameters.Page = 1;
                     config.QueryParameters.Limit = 100;
@@ -181,7 +181,7 @@ public sealed class ProjectCommands(
             try
             {
                 var client = clientFactory.Create();
-                var project = await client.Projects[id].GetAsync(cancellationToken: cancellationToken);
+                var project = await client.Api.Projects[id].GetAsync(cancellationToken: cancellationToken);
 
                 output.PrintKeyValue("ID", project?.Id);
                 output.PrintKeyValue("Name", project?.Name);

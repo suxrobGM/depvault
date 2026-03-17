@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using DepVault.Cli.ApiClient.Projects;
+using DepVault.Cli.ApiClient.Api.Projects;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
@@ -31,7 +31,7 @@ internal sealed class ProjectResolver(
                 var existing = await AnsiConsole.Status()
                     .Spinner(Spinner.Known.Dots)
                     .StartAsync("Fetching project info...", async _ =>
-                        await client.Projects[config.ActiveProjectId].GetAsync(cancellationToken: ct));
+                        await client.Api.Projects[config.ActiveProjectId].GetAsync(cancellationToken: ct));
 
                 if (existing is not null &&
                     prompter.Confirm(
@@ -49,7 +49,7 @@ internal sealed class ProjectResolver(
         var projects = await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .StartAsync("Fetching projects...", async _ =>
-                await client.Projects.GetAsync(c =>
+                await client.Api.Projects.GetAsync(c =>
                 {
                     c.QueryParameters.Page = 1;
                     c.QueryParameters.Limit = 100;
@@ -96,7 +96,7 @@ internal sealed class ProjectResolver(
             created = await AnsiConsole.Status()
                 .Spinner(Spinner.Known.Dots)
                 .StartAsync("Creating project...", async _ =>
-                    await client.Projects.PostAsync(
+                    await client.Api.Projects.PostAsync(
                         new ProjectsPostRequestBody { Name = name, RepositoryUrl = repoUrl },
                         cancellationToken: ct));
         }
