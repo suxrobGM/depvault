@@ -52,22 +52,52 @@ export class SecretFileService {
     );
     const projectKey = deriveProjectKey(projectId);
 
+    const existing = await this.prisma.secretFile.findUnique({
+      where: { environmentId_name: { environmentId: environment.id, name: file.name } },
+    });
+
     const fileBuffer = Buffer.from(await file.arrayBuffer());
     const { ciphertext, iv, authTag } = encryptBinary(fileBuffer, projectKey);
 
-    const secretFile = await this.prisma.secretFile.create({
-      data: {
-        environmentId: environment.id,
-        name: file.name,
-        description,
-        encryptedContent: new Uint8Array(ciphertext),
-        iv,
-        authTag,
-        mimeType: file.type || "application/octet-stream",
-        fileSize: file.size,
-        uploadedBy: userId,
-      },
-    });
+    let secretFile;
+    if (existing) {
+      await this.prisma.secretFileVersion.create({
+        data: {
+          secretFileId: existing.id,
+          encryptedContent: existing.encryptedContent,
+          iv: existing.iv,
+          authTag: existing.authTag,
+          fileSize: existing.fileSize,
+          changedBy: userId,
+        },
+      });
+
+      secretFile = await this.prisma.secretFile.update({
+        where: { id: existing.id },
+        data: {
+          description,
+          encryptedContent: new Uint8Array(ciphertext),
+          iv,
+          authTag,
+          mimeType: file.type || "application/octet-stream",
+          fileSize: file.size,
+        },
+      });
+    } else {
+      secretFile = await this.prisma.secretFile.create({
+        data: {
+          environmentId: environment.id,
+          name: file.name,
+          description,
+          encryptedContent: new Uint8Array(ciphertext),
+          iv,
+          authTag,
+          mimeType: file.type || "application/octet-stream",
+          fileSize: file.size,
+          uploadedBy: userId,
+        },
+      });
+    }
 
     await this.auditLogService.log({
       userId,

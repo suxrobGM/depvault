@@ -63,22 +63,59 @@ public sealed class ConsolePrompter : IConsolePrompter
     public List<T> MultiSelect<T>(string title, IEnumerable<T> choices, Func<T, string> displaySelector,
         bool allSelected = true) where T : notnull
     {
+        var choiceList = choices.ToList();
+
+        if (!allSelected && choiceList.Count > 1)
+        {
+            return MultiSelectWithSelectAll(title, choiceList, displaySelector);
+        }
+
         var prompt = new MultiSelectionPrompt<T>()
             .Title(title)
             .UseConverter(displaySelector)
             .Required(false)
             .HighlightStyle(new Style(ConsoleTheme.Highlight))
             .InstructionsText("[grey](Press [cyan1]<space>[/] to toggle, [cyan1]<enter>[/] to confirm)[/]")
-            .AddChoices(choices);
+            .AddChoices(choiceList);
 
         if (allSelected)
         {
-            foreach (var choice in choices)
+            foreach (var choice in choiceList)
             {
                 prompt.Select(choice);
             }
         }
 
         return AnsiConsole.Prompt(prompt);
+    }
+
+    private static List<T> MultiSelectWithSelectAll<T>(
+        string title, List<T> choices, Func<T, string> displaySelector) where T : notnull
+    {
+        var selectAll = new SelectAllItem<T>();
+        var items = new List<SelectAllItem<T>> { selectAll };
+        items.AddRange(choices.Select(c => new SelectAllItem<T>(c)));
+
+        var selected = AnsiConsole.Prompt(
+            new MultiSelectionPrompt<SelectAllItem<T>>()
+                .Title(title)
+                .UseConverter(item => item.IsSelectAll ? "[cyan1]* Select all[/]" : displaySelector(item.Value!))
+                .Required(false)
+                .HighlightStyle(new Style(ConsoleTheme.Highlight))
+                .InstructionsText("[grey](Press [cyan1]<space>[/] to toggle, [cyan1]<enter>[/] to confirm)[/]")
+                .AddChoices(items));
+
+        if (selected.Any(s => s.IsSelectAll))
+        {
+            return choices;
+        }
+
+        return selected.Where(s => !s.IsSelectAll).Select(s => s.Value!).ToList();
+    }
+
+    private sealed class SelectAllItem<T>(T? value = default)
+    {
+        public T? Value => value;
+        public bool IsSelectAll => value is null;
     }
 }

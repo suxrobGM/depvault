@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using System.Text;
 using DepVault.Cli.Commands.Pull;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
@@ -78,14 +79,7 @@ internal sealed class SecretFileScanner(
         var fileBytes = await File.ReadAllBytesAsync(file.FullPath, ct);
         var baseUrl = configService.Load().Server.TrimEnd('/');
 
-        using var content = new MultipartFormDataContent();
-        var fileContent = new ByteArrayContent(fileBytes);
-        fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-        content.Add(fileContent, "file", file.FileName);
-        content.Add(new StringContent(envType), "environmentType");
-        content.Add(new StringContent(vaultGroupId), "vaultGroupId");
-        content.Add(new StringContent(file.FileName), "description");
-
+        using var body = BuildMultipartBody(fileBytes, file.FileName, envType, vaultGroupId);
         var http = GetHttpClient();
 
         await AnsiConsole.Status()
@@ -93,10 +87,54 @@ internal sealed class SecretFileScanner(
             .StartAsync($"Uploading {file.RelativePath}...", async _ =>
             {
                 var response = await http.PostAsync(
-                    $"{baseUrl}/api/projects/{projectId}/secrets", content, ct);
+                    $"{baseUrl}/api/projects/{projectId}/secrets", body, ct);
                 response.EnsureSuccessStatusCode();
             });
     }
+
+    /// <summary>
+    /// Builds multipart/form-data manually to match browser format.
+    /// .NET's MultipartFormDataContent serializes headers in an order
+    /// that Bun's parser doesn't recognize as a file upload.
+    /// </summary>
+    private static ByteArrayContent BuildMultipartBody(
+        byte[] fileBytes, string fileName, string envType, string vaultGroupId)
+    {
+        var boundary = "----FormBoundary" + Guid.NewGuid().ToString("N")[..16];
+        using var ms = new MemoryStream();
+
+        // File part — Content-Disposition must come before Content-Type
+        WritePart(ms, boundary);
+        WriteUtf8(ms, $"Content-Disposition: form-data; name=\"file\"; filename=\"{fileName}\"\r\n");
+        WriteUtf8(ms, $"Content-Type: {GetMimeType(fileName)}\r\n");
+        WriteUtf8(ms, "\r\n");
+        ms.Write(fileBytes);
+        WriteUtf8(ms, "\r\n");
+
+        WriteTextField(ms, boundary, "environmentType", envType);
+        WriteTextField(ms, boundary, "vaultGroupId", vaultGroupId);
+        WriteTextField(ms, boundary, "description", fileName);
+
+        WriteUtf8(ms, $"--{boundary}--\r\n");
+
+        var content = new ByteArrayContent(ms.ToArray());
+        content.Headers.ContentType = MediaTypeHeaderValue.Parse($"multipart/form-data; boundary={boundary}");
+        return content;
+    }
+
+    private static void WritePart(MemoryStream ms, string boundary)
+        => WriteUtf8(ms, $"--{boundary}\r\n");
+
+    private static void WriteTextField(MemoryStream ms, string boundary, string name, string value)
+    {
+        WritePart(ms, boundary);
+        WriteUtf8(ms, $"Content-Disposition: form-data; name=\"{name}\"\r\n");
+        WriteUtf8(ms, "\r\n");
+        WriteUtf8(ms, $"{value}\r\n");
+    }
+
+    private static void WriteUtf8(MemoryStream ms, string value)
+        => ms.Write(Encoding.UTF8.GetBytes(value));
 
     private HttpClient GetHttpClient()
     {
@@ -115,6 +153,21 @@ internal sealed class SecretFileScanner(
         }
 
         return httpClient;
+    }
+
+    private static string GetMimeType(string fileName)
+    {
+        var ext = Path.GetExtension(fileName).ToLowerInvariant();
+        return ext switch
+        {
+            ".json" => "application/json",
+            ".plist" => "application/xml",
+            ".yaml" or ".yml" => "application/x-yaml",
+            ".pem" or ".key" => "application/x-pem-file",
+            ".p12" or ".pfx" => "application/x-pkcs12",
+            ".jks" or ".keystore" => "application/x-java-keystore",
+            _ => "application/octet-stream"
+        };
     }
 
     private static void PrintFileTree(List<DiscoveredFile> files)
