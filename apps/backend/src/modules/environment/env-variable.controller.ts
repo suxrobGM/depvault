@@ -10,6 +10,8 @@ import {
 } from "./env-variable-version.schema";
 import { EnvVariableVersionService } from "./env-variable-version.service";
 import {
+  BatchDeleteEnvVariablesBodySchema,
+  BatchDeleteEnvVariablesResponseSchema,
   CreateEnvVariableBodySchema,
   EnvVariableListQuerySchema,
   EnvVariableListResponseSchema,
@@ -132,6 +134,28 @@ export const envVariableController = new Elysia({
         summary: "Delete an environment variable",
         description:
           "Permanently delete an environment variable and all its version history. Only owners and editors can delete.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .delete(
+    "/variables/batch",
+    ({ params, body, projectMember, request, server }) =>
+      environmentService.batchDelete(
+        params.id,
+        body.variableIds,
+        projectMember.userId,
+        getClientIp(request, server),
+      ),
+    {
+      params: StringIdParamSchema,
+      body: BatchDeleteEnvVariablesBodySchema,
+      response: BatchDeleteEnvVariablesResponseSchema,
+      detail: {
+        operationId: "batchDeleteEnvVariables",
+        summary: "Batch delete environment variables",
+        description:
+          "Permanently delete multiple environment variables and their version history. Only owners and editors can delete.",
         security: [{ bearerAuth: [] }],
       },
     },

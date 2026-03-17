@@ -54,10 +54,10 @@ const TIERS: PricingTier[] = [
     features: [
       "20 projects",
       "1,000 env variables",
-      "200 secret files",
+      "100 secret files",
       "200 analyses / month",
       "Up to 10 users",
-      "50 active CI/CD tokens",
+      "20 active CI/CD tokens",
       "Audit logs (30 days)",
       "Git secret scanning",
       "Env diff",

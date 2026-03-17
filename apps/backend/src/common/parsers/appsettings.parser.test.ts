@@ -56,6 +56,45 @@ describe("appsettingsParser", () => {
   it("should throw on non-object JSON", () => {
     expect(() => appsettingsParser.parse("[]")).toThrow("must be a JSON object");
   });
+
+  it("should flatten arrays with numeric indices", () => {
+    const content = JSON.stringify({
+      Serilog: {
+        Using: ["Serilog.Sinks.File"],
+        Enrich: ["FromLogContext", "WithThreadId", "WithExceptionDetails"],
+      },
+    });
+    const result = appsettingsParser.parse(content);
+
+    expect(result).toContainEqual({ key: "Serilog__Using__0", value: "Serilog.Sinks.File" });
+    expect(result).toContainEqual({ key: "Serilog__Enrich__0", value: "FromLogContext" });
+    expect(result).toContainEqual({ key: "Serilog__Enrich__1", value: "WithThreadId" });
+    expect(result).toContainEqual({ key: "Serilog__Enrich__2", value: "WithExceptionDetails" });
+  });
+
+  it("should flatten arrays of objects with nested keys", () => {
+    const content = JSON.stringify({
+      Serilog: {
+        WriteTo: [
+          {
+            Name: "File",
+            Args: { path: "Logs/webapi-.log", rollingInterval: "Month" },
+          },
+        ],
+      },
+    });
+    const result = appsettingsParser.parse(content);
+
+    expect(result).toContainEqual({ key: "Serilog__WriteTo__0__Name", value: "File" });
+    expect(result).toContainEqual({
+      key: "Serilog__WriteTo__0__Args__path",
+      value: "Logs/webapi-.log",
+    });
+    expect(result).toContainEqual({
+      key: "Serilog__WriteTo__0__Args__rollingInterval",
+      value: "Month",
+    });
+  });
 });
 
 describe("appsettingsSerializer", () => {
@@ -86,5 +125,28 @@ describe("appsettingsSerializer", () => {
     const serialized = appsettingsSerializer.serialize(entries);
 
     expect(() => JSON.parse(serialized)).not.toThrow();
+  });
+
+  it("should reconstruct arrays from numeric keys", () => {
+    const entries = [
+      { key: "Serilog__Using__0", value: "Serilog.Sinks.File" },
+      { key: "Serilog__Enrich__0", value: "FromLogContext" },
+      { key: "Serilog__Enrich__1", value: "WithThreadId" },
+    ];
+    const result = JSON.parse(appsettingsSerializer.serialize(entries));
+
+    expect(result.Serilog.Using).toEqual(["Serilog.Sinks.File"]);
+    expect(result.Serilog.Enrich).toEqual(["FromLogContext", "WithThreadId"]);
+  });
+
+  it("should reconstruct arrays of objects", () => {
+    const entries = [
+      { key: "WriteTo__0__Name", value: "File" },
+      { key: "WriteTo__0__Args__path", value: "Logs/app.log" },
+    ];
+    const result = JSON.parse(appsettingsSerializer.serialize(entries));
+
+    expect(result.WriteTo[0].Name).toBe("File");
+    expect(result.WriteTo[0].Args.path).toBe("Logs/app.log");
   });
 });

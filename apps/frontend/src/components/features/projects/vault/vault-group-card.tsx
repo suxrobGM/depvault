@@ -39,6 +39,7 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
 
   const [view, setView] = useState<VaultView>("variables");
   const [selectedEnv, setSelectedEnv] = useState<string | null>(null);
+  const [selectedVarIds, setSelectedVarIds] = useState<Set<string>>(new Set());
   const [createOpen, setCreateOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<EnvVariable | null>(null);
   const [importOpen, setImportOpen] = useState(false);
@@ -92,6 +93,29 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
       onSuccess: () => setSelectedEnv(null),
     },
   );
+
+  const batchDeleteMutation = useApiMutation(
+    (variableIds: string[]) =>
+      client.api.projects({ id: projectId }).environments.variables.batch.delete({ variableIds }),
+    {
+      invalidateKeys: [["env-variables", projectId]],
+      successMessage: (data) => `${(data as { deleted: number }).deleted} variable(s) deleted`,
+      onSuccess: () => setSelectedVarIds(new Set()),
+    },
+  );
+
+  const handleBatchDelete = async () => {
+    const count = selectedVarIds.size;
+    const confirmed = await confirm({
+      title: "Delete variables",
+      description: `Are you sure you want to delete ${count} variable${count !== 1 ? "s" : ""}? This action cannot be undone.`,
+      confirmLabel: "Delete",
+      destructive: true,
+    });
+    if (confirmed) {
+      batchDeleteMutation.mutate([...selectedVarIds]);
+    }
+  };
 
   const handleDelete = async () => {
     const confirmed = await confirm({
@@ -200,7 +224,10 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
           <EnvironmentSelector
             environments={environments}
             selected={activeEnv}
-            onSelect={setSelectedEnv}
+            onSelect={(env) => {
+              setSelectedEnv(env);
+              setSelectedVarIds(new Set());
+            }}
             onDelete={canEdit ? handleDeleteEnvironment : undefined}
           />
           <VaultToolbar
@@ -232,7 +259,10 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
             variables={variablesData?.items ?? []}
             isLoading={variablesLoading}
             canEdit={canEdit}
+            selectedIds={selectedVarIds}
+            onSelectionChange={setSelectedVarIds}
             onEditVariable={setEditTarget}
+            onBatchDelete={handleBatchDelete}
           />
         )}
       </Stack>

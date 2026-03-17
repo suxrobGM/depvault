@@ -15,21 +15,23 @@ export const appsettingsParser: ConfigParser = {
     }
 
     const entries: ConfigEntry[] = [];
-    flattenObject(json as Record<string, unknown>, "", entries);
+    flattenValue("", json, entries);
     return entries;
   },
 };
 
-function flattenObject(obj: Record<string, unknown>, prefix: string, result: ConfigEntry[]): void {
-  for (const [key, value] of Object.entries(obj)) {
-    const fullKey = prefix ? `${prefix}__${key}` : key;
-
-    if (value === null || value === undefined) {
-      result.push({ key: fullKey, value: "" });
-    } else if (typeof value === "object" && !Array.isArray(value)) {
-      flattenObject(value as Record<string, unknown>, fullKey, result);
-    } else {
-      result.push({ key: fullKey, value: String(value) });
+function flattenValue(key: string, value: unknown, result: ConfigEntry[]): void {
+  if (value === null || value === undefined) {
+    result.push({ key, value: "" });
+  } else if (Array.isArray(value)) {
+    for (let i = 0; i < value.length; i++) {
+      flattenValue(`${key}__${i}`, value[i], result);
     }
+  } else if (typeof value === "object") {
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      flattenValue(key ? `${key}__${k}` : k, v, result);
+    }
+  } else {
+    result.push({ key, value: String(value) });
   }
 }

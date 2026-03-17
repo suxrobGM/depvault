@@ -11,6 +11,7 @@ import {
 } from "@mui/icons-material";
 import {
   Box,
+  Checkbox,
   Chip,
   Collapse,
   IconButton,
@@ -37,11 +38,13 @@ export interface VaultVariableRowProps {
   environmentType: string;
   variable: EnvVariable;
   canEdit: boolean;
-  onEdit: (variable: EnvVariable) => void;
+  selected: boolean;
+  onToggleSelect?: () => void;
+  onEdit?: (variable: EnvVariable) => void;
 }
 
 export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
-  const { projectId, environmentType, variable, canEdit, onEdit } = props;
+  const { projectId, environmentType, variable, canEdit, selected, onToggleSelect, onEdit } = props;
 
   const confirm = useConfirm();
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -100,7 +103,16 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
 
   return (
     <>
-      <TableRow hover sx={{ "& > *": { borderBottom: historyOpen ? "unset" : undefined } }}>
+      <TableRow
+        hover
+        selected={selected}
+        sx={{ "& > *": { borderBottom: historyOpen ? "unset" : undefined } }}
+      >
+        {canEdit && (
+          <TableCell padding="checkbox">
+            <Checkbox size="small" checked={selected} onChange={onToggleSelect} />
+          </TableCell>
+        )}
         <TableCell>
           <Typography variant="body2" fontFamily="monospace" fontWeight={600}>
             {variable.key}
@@ -111,7 +123,7 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
         </TableCell>
         <TableCell>
           <Typography variant="body2" color="text.secondary" noWrap sx={{ maxWidth: 200 }}>
-            {variable.description || "—"}
+            {variable.description ?? "—"}
           </Typography>
         </TableCell>
         <TableCell align="center">
@@ -125,7 +137,7 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
               {
                 label: "Edit",
                 icon: <EditIcon fontSize="small" />,
-                onClick: () => onEdit(variable),
+                onClick: () => onEdit?.(variable),
                 hidden: !canEdit,
               },
               {
@@ -159,7 +171,7 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
       />
 
       <TableRow>
-        <TableCell colSpan={5} sx={{ py: 0 }}>
+        <TableCell colSpan={canEdit ? 6 : 5} sx={{ py: 0 }}>
           <Collapse in={historyOpen} timeout="auto" unmountOnExit>
             <Box sx={{ py: 2, pl: 6, pr: 2 }}>
               <Typography

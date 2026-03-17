@@ -243,6 +243,42 @@ export class EnvironmentService {
     return { message: "Environment variable deleted successfully" };
   }
 
+  async batchDelete(
+    projectId: string,
+    variableIds: string[],
+    userId: string,
+    ipAddress: string,
+  ): Promise<{ deleted: number }> {
+    const variables = await this.prisma.envVariable.findMany({
+      where: { id: { in: variableIds }, environment: { projectId } },
+      include: { environment: { include: { vaultGroup: { select: { name: true } } } } },
+    });
+
+    if (variables.length === 0) {
+      throw new NotFoundError("No matching variables found");
+    }
+
+    await this.prisma.envVariable.deleteMany({
+      where: { id: { in: variables.map((v) => v.id) } },
+    });
+
+    await Promise.all(
+      variables.map((variable) =>
+        this.auditLogService.log({
+          userId,
+          projectId,
+          action: "DELETE",
+          resourceType: "ENV_VARIABLE",
+          resourceId: variable.id,
+          ipAddress,
+          metadata: { key: variable.key, vaultGroupName: variable.environment.vaultGroup.name },
+        }),
+      ),
+    );
+
+    return { deleted: variables.length };
+  }
+
   /** Delete an entire environment and all its variables. */
   async deleteEnvironment(
     projectId: string,

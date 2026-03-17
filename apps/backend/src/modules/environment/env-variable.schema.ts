@@ -94,6 +94,14 @@ export const EnvExampleResponseSchema = t.Object({
   environmentType: EnvironmentTypeSchema,
 });
 
+export const BatchDeleteEnvVariablesBodySchema = t.Object({
+  variableIds: t.Array(t.String(), { minItems: 1, maxItems: 100 }),
+});
+
+export const BatchDeleteEnvVariablesResponseSchema = t.Object({
+  deleted: t.Number(),
+});
+
 export type CreateEnvVariableBody = Static<typeof CreateEnvVariableBodySchema>;
 export type UpdateEnvVariableBody = Static<typeof UpdateEnvVariableBodySchema>;
 export type EnvVariableResponse = Static<typeof EnvVariableResponseSchema>;
@@ -101,3 +109,4 @@ export type EnvVariableWithValueResponse = Static<typeof EnvVariableWithValueRes
 export type EnvVariableListQuery = Static<typeof EnvVariableListQuerySchema>;
 export type ImportEnvVariablesBody = Static<typeof ImportEnvVariablesBodySchema>;
 export type ExportEnvVariablesQuery = Static<typeof ExportEnvVariablesQuerySchema>;
+export type BatchDeleteEnvVariablesBody = Static<typeof BatchDeleteEnvVariablesBodySchema>;

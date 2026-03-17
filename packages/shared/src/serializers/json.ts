@@ -13,14 +13,21 @@ export const jsonSerializer: ConfigSerializer = {
   },
 };
 
+function isNumeric(s: string): boolean {
+  return /^\d+$/.test(s);
+}
+
 function setNested(obj: Record<string, unknown>, parts: string[], value: string): void {
-  let current = obj;
+  let current: Record<string, unknown> = obj;
 
   for (let i = 0; i < parts.length - 1; i++) {
     const part = parts[i]!;
-    if (typeof current[part] !== "object" || current[part] === null) {
-      current[part] = {};
+    const nextPart = parts[i + 1]!;
+
+    if (current[part] === undefined || current[part] === null) {
+      current[part] = isNumeric(nextPart) ? [] : {};
     }
+
     current = current[part] as Record<string, unknown>;
   }
 
