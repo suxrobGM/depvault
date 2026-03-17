@@ -27,7 +27,7 @@ public sealed class FileScanner : IFileScanner
     private static readonly HashSet<string> envFileNames = new(StringComparer.OrdinalIgnoreCase)
     {
         ".env", ".env.local", ".env.development", ".env.staging", ".env.production",
-        ".env.test", ".env.example"
+        ".env.test"
     };
 
     private static readonly HashSet<string> secretFileExtensions = new(StringComparer.OrdinalIgnoreCase)
@@ -38,8 +38,11 @@ public sealed class FileScanner : IFileScanner
     private static readonly HashSet<string> secretFileNames = new(StringComparer.OrdinalIgnoreCase)
     {
         "firebase-config.json", "service-account.json", "service-account-key.json",
-        "credentials.json", "gcp-key.json"
+        "credentials.json", "gcp-key.json", "google-services.json",
+        "GoogleService-Info.plist"
     };
+
+    private static readonly string[] secretFileNamePatterns = ["firebase-adminsdk"];
 
     public List<DiscoveredFile> FindDependencyFiles(string rootPath)
     {
@@ -147,7 +150,8 @@ public sealed class FileScanner : IFileScanner
         }
 
         if (fileName.StartsWith(".env.", StringComparison.OrdinalIgnoreCase) &&
-            !fileName.EndsWith(".bak", StringComparison.OrdinalIgnoreCase))
+            !fileName.EndsWith(".bak", StringComparison.OrdinalIgnoreCase) &&
+            !fileName.EndsWith(".example", StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }
@@ -171,6 +175,11 @@ public sealed class FileScanner : IFileScanner
             return true;
         }
 
-        return secretFileNames.Contains(fileName);
+        if (secretFileNames.Contains(fileName))
+        {
+            return true;
+        }
+
+        return secretFileNamePatterns.Any(p => fileName.Contains(p, StringComparison.OrdinalIgnoreCase));
     }
 }

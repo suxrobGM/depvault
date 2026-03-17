@@ -1,17 +1,18 @@
-using DepVault.Cli.Auth;
+using System.Net.Http.Headers;
+using DepVault.Cli.Config;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
-using SecretNs = DepVault.Cli.ApiClient.Api.Projects.Item.Secrets;
 
 namespace DepVault.Cli.Commands.Scan;
 
 internal sealed class SecretFileScanner(
-    IApiClientFactory clientFactory,
     IOutputFormatter output,
     IConsolePrompter prompter,
-    IFileScanner fileScanner)
+    IFileScanner fileScanner,
+    IConfigService configService,
+    ICredentialStore credentialStore)
 {
     public async Task RunAsync(string projectId, string repoPath, ScanResults results, CancellationToken ct)
     {
@@ -34,25 +35,12 @@ internal sealed class SecretFileScanner(
         }
 
         var envType = CommandUtils.ResolveEnvironmentType(null, null, prompter);
-        var client = clientFactory.Create();
 
         foreach (var file in selected)
         {
             try
             {
-                var fileBytes = await File.ReadAllBytesAsync(file.FullPath, ct);
-
-                await AnsiConsole.Status()
-                    .Spinner(Spinner.Known.Dots)
-                    .StartAsync($"Uploading {file.RelativePath}...", async _ =>
-                        await client.Api.Projects[projectId].Secrets.PostAsync(new SecretNs.SecretsPostRequestBody
-                        {
-                            File = fileBytes,
-                            Description = file.FileName,
-                            EnvironmentType = CommandUtils.ParseEnum(envType,
-                                SecretNs.SecretsPostRequestBody_environmentType.DEVELOPMENT)
-                        }, cancellationToken: ct));
-
+                await UploadAsync(projectId, file, envType, null, ct);
                 results.SecretFilesUploaded++;
                 output.PrintSuccess($"Uploaded {file.RelativePath}");
             }
@@ -61,6 +49,42 @@ internal sealed class SecretFileScanner(
                 ApiErrorHandler.HandleError(ex, $"Failed to upload {file.RelativePath}");
             }
         }
+    }
+
+    /// <summary>Uploads a single secret file via multipart/form-data.</summary>
+    public async Task UploadAsync(
+        string projectId, DiscoveredFile file, string envType,
+        string? vaultGroupId, CancellationToken ct)
+    {
+        var fileBytes = await File.ReadAllBytesAsync(file.FullPath, ct);
+        var baseUrl = configService.Load().Server.TrimEnd('/');
+
+        using var content = new MultipartFormDataContent();
+        content.Add(new ByteArrayContent(fileBytes), "file", file.FileName);
+        content.Add(new StringContent(envType), "environmentType");
+        content.Add(new StringContent(file.FileName), "description");
+
+        if (vaultGroupId is not null)
+        {
+            content.Add(new StringContent(vaultGroupId), "vaultGroupId");
+        }
+
+        using var http = new HttpClient();
+        var creds = credentialStore.Load();
+
+        if (creds?.AccessToken is not null)
+        {
+            http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", creds.AccessToken);
+        }
+
+        await AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .StartAsync($"Uploading {file.RelativePath}...", async _ =>
+            {
+                var response = await http.PostAsync(
+                    $"{baseUrl}/api/projects/{projectId}/secrets", content, ct);
+                response.EnsureSuccessStatusCode();
+            });
     }
 
     private static void PrintFileTree(List<DiscoveredFile> files)

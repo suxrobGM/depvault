@@ -1,5 +1,4 @@
 using System.CommandLine;
-using DepVault.Cli.ApiClient.Api.Projects.Item.Secrets;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Commands.Pull;
 using DepVault.Cli.Commands.Push;
@@ -13,7 +12,7 @@ using ImportNs = DepVault.Cli.ApiClient.Api.Projects.Item.Environments.Import;
 
 namespace DepVault.Cli.Commands;
 
-public sealed class PushCommands(
+internal sealed class PushCommands(
     IApiClientFactory clientFactory,
     IAuthContext authContext,
     IConfigService configService,
@@ -21,7 +20,8 @@ public sealed class PushCommands(
     IConsolePrompter prompter,
     IFileScanner fileScanner,
     DirectoryVaultGroupMapper dirMapper,
-    FileEnvironmentAssigner envAssigner)
+    FileEnvironmentAssigner envAssigner,
+    SecretFileScanner secretFileScanner)
 {
     public Command CreatePushCommand()
     {
@@ -89,7 +89,7 @@ public sealed class PushCommands(
                     else
                     {
                         await PushSecretFileAsync(
-                            client, projectId, file, vaultGroupId, envType, ct);
+                            projectId, file, vaultGroupId, envType, ct);
                         secretsUploaded++;
                     }
                 }
@@ -134,24 +134,10 @@ public sealed class PushCommands(
     }
 
     private async Task PushSecretFileAsync(
-        ApiClient.ApiClient client, string projectId, DiscoveredFile file,
+        string projectId, DiscoveredFile file,
         string vaultGroupId, string envType, CancellationToken ct)
     {
-        var fileBytes = await File.ReadAllBytesAsync(file.FullPath, ct);
-
-        await AnsiConsole.Status()
-            .Spinner(Spinner.Known.Dots)
-            .StartAsync($"Uploading {file.RelativePath}...", async _ =>
-                await client.Api.Projects[projectId].Secrets.PostAsync(
-                    new SecretsPostRequestBody
-                    {
-                        File = fileBytes,
-                        Description = file.FileName,
-                        VaultGroupId = vaultGroupId,
-                        EnvironmentType = CommandUtils.ParseEnum(envType,
-                            SecretsPostRequestBody_environmentType.DEVELOPMENT)
-                    }, cancellationToken: ct));
-
+        await secretFileScanner.UploadAsync(projectId, file, envType, vaultGroupId, ct);
         output.PrintSuccess($"  {file.RelativePath} ({envType})");
     }
 

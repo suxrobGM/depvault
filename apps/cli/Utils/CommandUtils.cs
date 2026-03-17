@@ -1,4 +1,6 @@
 using System.CommandLine;
+using System.Reflection;
+using System.Runtime.Serialization;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
@@ -47,10 +49,29 @@ internal static class CommandUtils
         return false;
     }
 
-    /// <summary>Parses a Kiota-generated enum by member name, returning fallback on mismatch.</summary>
+    /// <summary>
+    /// Parses a Kiota-generated enum by member name or [EnumMember] value attribute.
+    /// Handles values like "appsettings.json" that don't match the C# member name.
+    /// </summary>
     public static T ParseEnum<T>(string value, T fallback) where T : struct, Enum
     {
-        return Enum.TryParse<T>(value, true, out var result) ? result : fallback;
+        if (Enum.TryParse<T>(value, true, out var result))
+        {
+            return result;
+        }
+
+        var enumFields = typeof(T).GetFields(BindingFlags.Public | BindingFlags.Static);
+
+        foreach (var field in enumFields)
+        {
+            var attr = field.GetCustomAttributes(typeof(EnumMemberAttribute), false);
+            if (attr.Length > 0 && ((EnumMemberAttribute)attr[0]).Value == value)
+            {
+                return (T)field.GetValue(null)!;
+            }
+        }
+
+        return fallback;
     }
 
     /// <summary>
