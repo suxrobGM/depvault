@@ -43,14 +43,15 @@ get_latest_version() {
   local version
   version=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases" \
     | grep -o '"tag_name": *"cli/v[^"]*"' \
-    | head -1 \
-    | sed 's/.*"cli\/\(v[^"]*\)".*/\1/')
+    | sed 's/.*"cli\/v\([^"]*\)".*/\1/' \
+    | sort -t. -k1,1n -k2,2n -k3,3n \
+    | tail -1)
 
   if [ -z "$version" ]; then
     error "Could not determine the latest CLI version. Check https://github.com/${REPO}/releases"
   fi
 
-  echo "$version"
+  echo "v${version}"
 }
 
 download_and_install() {

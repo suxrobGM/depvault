@@ -15,14 +15,18 @@ function Write-Info($Message) {
 function Get-LatestVersion {
     $releases = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases" -Headers @{ "User-Agent" = "depvault-installer" }
 
-    $cliRelease = $releases | Where-Object { $_.tag_name -like "cli/v*" } | Select-Object -First 1
+    $cliReleases = $releases | Where-Object { $_.tag_name -like "cli/v*" }
 
-    if (-not $cliRelease) {
+    if (-not $cliReleases) {
         throw "Could not find a CLI release. Check https://github.com/$Repo/releases"
     }
 
-    $version = $cliRelease.tag_name -replace "^cli/", ""
-    return $version
+    $highest = $cliReleases |
+        ForEach-Object { [PSCustomObject]@{ Tag = $_.tag_name; Version = [Version]($_.tag_name -replace "^cli/v", "") } } |
+        Sort-Object Version |
+        Select-Object -Last 1
+
+    return $highest.Tag -replace "^cli/", ""
 }
 
 function Install-DepVault {
