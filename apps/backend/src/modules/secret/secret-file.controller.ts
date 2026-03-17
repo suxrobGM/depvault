@@ -28,23 +28,18 @@ export const secretFileController = new Elysia({
 })
   .use(projectGuard("VIEWER"))
   .use(rateLimiter({ max: 20, windowMs: 60 * 1000 }))
-  .get(
-    "/",
-    ({ params, query }) =>
-      secretFileService.list(params.id, query.environmentType, query.page, query.limit),
-    {
-      params: StringIdParamSchema,
-      query: SecretFileListQuerySchema,
-      response: SecretFileListResponseSchema,
-      detail: {
-        operationId: "listSecretFiles",
-        summary: "List secret files",
-        description:
-          "List secret file metadata for a project, optionally filtered by environment. File contents are not included — use the download endpoint to retrieve decrypted content.",
-        security: [{ bearerAuth: [] }],
-      },
+  .get("/", ({ params, query }) => secretFileService.list(params.id, query.page, query.limit), {
+    params: StringIdParamSchema,
+    query: SecretFileListQuerySchema,
+    response: SecretFileListResponseSchema,
+    detail: {
+      operationId: "listSecretFiles",
+      summary: "List secret files",
+      description:
+        "List secret file metadata for a project. File contents are not included — use the download endpoint to retrieve decrypted content.",
+      security: [{ bearerAuth: [] }],
     },
-  )
+  })
   .get(
     "/:fileId/versions",
     ({ params }) => secretFileVersionService.listVersions(params.id, params.fileId),
@@ -69,7 +64,6 @@ export const secretFileController = new Elysia({
         projectMember.userId,
         body.file,
         body.vaultGroupId,
-        body.environmentType,
         body.description,
         getClientIp(request, server),
       );
@@ -122,7 +116,7 @@ export const secretFileController = new Elysia({
         operationId: "updateSecretFile",
         summary: "Update secret file metadata",
         description:
-          "Update the name, description, or environment of a secret file. Only owners and editors can update.",
+          "Update the name, description, or vault group of a secret file. Only owners and editors can update.",
         security: [{ bearerAuth: [] }],
       },
     },

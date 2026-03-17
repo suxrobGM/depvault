@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import type { SecretFileEnvironmentTypeValue } from "@depvault/shared/constants";
-import type { SelectOption } from "@depvault/shared/types";
 import { FilePresent as FileIcon, Upload as UploadIcon } from "@mui/icons-material";
-import { Button, Chip, Skeleton, Stack } from "@mui/material";
+import { Button, Skeleton, Stack } from "@mui/material";
 import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useAuth } from "@/hooks/use-auth";
@@ -20,18 +18,10 @@ interface SecretFilesTabProps {
   projectId: string;
 }
 
-const ENV_FILTERS: SelectOption<SecretFileEnvironmentTypeValue>[] = [
-  { label: "Global", value: "GLOBAL" },
-  { label: "Development", value: "DEVELOPMENT" },
-  { label: "Staging", value: "STAGING" },
-  { label: "Production", value: "PRODUCTION" },
-];
-
 export function SecretFilesTab(props: SecretFilesTabProps): ReactElement {
   const { projectId } = props;
   const { user } = useAuth();
 
-  const [activeEnv, setActiveEnv] = useState<SecretFileEnvironmentTypeValue>("GLOBAL");
   const [editFile, setEditFile] = useState<SecretFile | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
 
@@ -45,10 +35,10 @@ export function SecretFilesTab(props: SecretFilesTabProps): ReactElement {
   );
 
   const { data: filesData, isLoading } = useApiQuery<SecretFileListResponse>(
-    ["secret-files", projectId, activeEnv],
+    ["secret-files", projectId],
     () =>
       client.api.projects({ id: projectId }).secrets.get({
-        query: { environmentType: activeEnv, page: 1, limit: 100 },
+        query: { page: 1, limit: 100 },
       }),
   );
 
@@ -59,19 +49,7 @@ export function SecretFilesTab(props: SecretFilesTabProps): ReactElement {
 
   return (
     <>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
-        <Stack direction="row" spacing={1}>
-          {ENV_FILTERS.map((f) => (
-            <Chip
-              key={f.label}
-              label={f.label}
-              variant={activeEnv === f.value ? "filled" : "outlined"}
-              color={activeEnv === f.value ? "primary" : "default"}
-              onClick={() => setActiveEnv(f.value)}
-              size="small"
-            />
-          ))}
-        </Stack>
+      <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ mb: 3 }}>
         {canEdit && (
           <Button
             variant="contained"
@@ -88,7 +66,7 @@ export function SecretFilesTab(props: SecretFilesTabProps): ReactElement {
       ) : files.length === 0 ? (
         <EmptyState
           icon={<FileIcon />}
-          title={activeEnv ? `No files in ${activeEnv.toLowerCase()}` : "No secret files yet"}
+          title="No secret files yet"
           description={
             canEdit
               ? "Upload an encrypted file to store it securely. Only owners and editors can upload and download files."
@@ -101,7 +79,6 @@ export function SecretFilesTab(props: SecretFilesTabProps): ReactElement {
         <SecretFileTable
           projectId={projectId}
           files={files}
-          activeEnv={activeEnv}
           canEdit={canEdit}
           onEdit={setEditFile}
         />

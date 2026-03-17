@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactElement } from "react";
-import type { SecretFileEnvironmentTypeValue } from "@depvault/shared/constants";
 import {
   Paper,
   Table,
@@ -17,13 +16,12 @@ import { SecretFileRow } from "./secret-file-row";
 interface SecretFileTableProps {
   projectId: string;
   files: SecretFile[];
-  activeEnv: SecretFileEnvironmentTypeValue;
   canEdit: boolean;
   onEdit: (file: SecretFile) => void;
 }
 
 export function SecretFileTable(props: SecretFileTableProps): ReactElement {
-  const { projectId, files, activeEnv, canEdit, onEdit } = props;
+  const { projectId, files, canEdit, onEdit } = props;
 
   return (
     <TableContainer component={Paper} variant="outlined">
@@ -33,7 +31,6 @@ export function SecretFileTable(props: SecretFileTableProps): ReactElement {
             <TableCell width={48} />
             <TableCell>File</TableCell>
             <TableCell>Vault Group</TableCell>
-            {activeEnv && <TableCell>Environment</TableCell>}
             <TableCell>Size</TableCell>
             <TableCell>Uploaded</TableCell>
             <TableCell width={64} />
@@ -45,7 +42,6 @@ export function SecretFileTable(props: SecretFileTableProps): ReactElement {
               key={file.id}
               projectId={projectId}
               file={file}
-              activeEnv={activeEnv}
               canEdit={canEdit}
               onEdit={onEdit}
             />

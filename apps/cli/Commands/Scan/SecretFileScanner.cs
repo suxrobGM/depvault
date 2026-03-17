@@ -45,10 +45,6 @@ internal sealed class SecretFileScanner(
             return;
         }
 
-        var envType = prompter.IsInteractive
-            ? prompter.Select("Select environment type", CommandUtils.EnvironmentTypes, e => e)
-            : "DEVELOPMENT";
-
         foreach (var file in selected)
         {
             var dir = Path.GetDirectoryName(file.RelativePath)?.Replace('\\', '/') ?? ".";
@@ -60,7 +56,7 @@ internal sealed class SecretFileScanner(
 
             try
             {
-                await UploadAsync(projectId, file, envType, vaultGroupId, ct);
+                await UploadAsync(projectId, file, vaultGroupId, ct);
                 results.SecretFilesUploaded++;
                 output.PrintSuccess($"Uploaded {file.RelativePath}");
             }
@@ -73,13 +69,13 @@ internal sealed class SecretFileScanner(
 
     /// <summary>Uploads a single secret file via multipart/form-data.</summary>
     public async Task UploadAsync(
-        string projectId, DiscoveredFile file, string envType,
+        string projectId, DiscoveredFile file,
         string vaultGroupId, CancellationToken ct)
     {
         var fileBytes = await File.ReadAllBytesAsync(file.FullPath, ct);
         var baseUrl = configService.Load().Server.TrimEnd('/');
 
-        using var body = BuildMultipartBody(fileBytes, file.FileName, envType, vaultGroupId);
+        using var body = BuildMultipartBody(fileBytes, file.FileName, vaultGroupId);
         var http = GetHttpClient();
 
         await AnsiConsole.Status()
@@ -98,7 +94,7 @@ internal sealed class SecretFileScanner(
     /// that Bun's parser doesn't recognize as a file upload.
     /// </summary>
     private static ByteArrayContent BuildMultipartBody(
-        byte[] fileBytes, string fileName, string envType, string vaultGroupId)
+        byte[] fileBytes, string fileName, string vaultGroupId)
     {
         var boundary = "----FormBoundary" + Guid.NewGuid().ToString("N")[..16];
         using var ms = new MemoryStream();
@@ -111,7 +107,6 @@ internal sealed class SecretFileScanner(
         ms.Write(fileBytes);
         WriteUtf8(ms, "\r\n");
 
-        WriteTextField(ms, boundary, "environmentType", envType);
         WriteTextField(ms, boundary, "vaultGroupId", vaultGroupId);
         WriteTextField(ms, boundary, "description", fileName);
 

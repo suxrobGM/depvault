@@ -82,7 +82,7 @@ export class SharedSecretService {
     ipAddress = "unknown",
   ): Promise<{ token: string; shareUrl: string }> {
     const file = await this.prisma.secretFile.findFirst({
-      where: { id: fileId, environment: { projectId } },
+      where: { id: fileId, vaultGroup: { projectId } },
     });
 
     if (!file) {

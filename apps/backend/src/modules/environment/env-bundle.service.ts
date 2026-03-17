@@ -57,7 +57,7 @@ export class EnvBundleService {
 
     if (body.secretFileIds.length > 0) {
       const files = await this.prisma.secretFile.findMany({
-        where: { id: { in: body.secretFileIds }, environmentId: env.id },
+        where: { id: { in: body.secretFileIds }, vaultGroupId: body.vaultGroupId },
       });
 
       if (files.length !== body.secretFileIds.length) {

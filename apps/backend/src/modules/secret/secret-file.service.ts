@@ -1,7 +1,7 @@
 import { singleton } from "tsyringe";
 import { NotFoundError } from "@/common/errors";
 import { decryptBinary, deriveProjectKey, encryptBinary } from "@/common/utils/encryption";
-import { EnvironmentType, PrismaClient } from "@/generated/prisma";
+import { PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import { NotificationService } from "@/modules/notification/notification.service";
 import { PlanEnforcementService } from "@/modules/subscription/plan-enforcement.service";
@@ -37,7 +37,6 @@ export class SecretFileService {
     userId: string,
     file: File,
     vaultGroupId: string,
-    environmentType: EnvironmentType,
     description?: string,
     ipAddress = "unknown",
   ): Promise<SecretFileResponse> {
@@ -45,15 +44,17 @@ export class SecretFileService {
 
     validateFile(file);
 
-    const environment = await this.findOrCreateEnvironment(
-      projectId,
-      vaultGroupId,
-      environmentType,
-    );
+    const vaultGroup = await this.prisma.vaultGroup.findFirst({
+      where: { id: vaultGroupId, projectId },
+    });
+    if (!vaultGroup) {
+      throw new NotFoundError("Vault group not found");
+    }
+
     const projectKey = deriveProjectKey(projectId);
 
     const existing = await this.prisma.secretFile.findUnique({
-      where: { environmentId_name: { environmentId: environment.id, name: file.name } },
+      where: { vaultGroupId_name: { vaultGroupId, name: file.name } },
     });
 
     const fileBuffer = Buffer.from(await file.arrayBuffer());
@@ -86,7 +87,7 @@ export class SecretFileService {
     } else {
       secretFile = await this.prisma.secretFile.create({
         data: {
-          environmentId: environment.id,
+          vaultGroupId,
           name: file.name,
           description,
           encryptedContent: new Uint8Array(ciphertext),
@@ -106,23 +107,18 @@ export class SecretFileService {
       resourceType: "SECRET_FILE",
       resourceId: secretFile.id,
       ipAddress,
-      metadata: { fileName: file.name, vaultGroupName: environment.vaultGroup.name },
+      metadata: { fileName: file.name, vaultGroupName: vaultGroup.name },
     });
 
-    return toSecretFileResponse(secretFile, environment.vaultGroup);
+    return toSecretFileResponse(secretFile, vaultGroup);
   }
 
   async list(
     projectId: string,
-    environmentType?: EnvironmentType,
     page = 1,
     limit = 20,
   ): Promise<PaginatedResponse<SecretFileResponse>> {
-    const environmentFilter = environmentType
-      ? { environment: { projectId, type: environmentType } }
-      : { environment: { projectId } };
-
-    const where = { ...environmentFilter };
+    const where = { vaultGroup: { projectId } };
 
     const [files, total] = await Promise.all([
       this.prisma.secretFile.findMany({
@@ -130,13 +126,13 @@ export class SecretFileService {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: "desc" },
-        include: { environment: { include: { vaultGroup: true } } },
+        include: { vaultGroup: true },
       }),
       this.prisma.secretFile.count({ where }),
     ]);
 
     return {
-      items: files.map((f) => toSecretFileResponse(f, f.environment.vaultGroup)),
+      items: files.map((f) => toSecretFileResponse(f, f.vaultGroup)),
       pagination: {
         page,
         limit,
@@ -169,7 +165,7 @@ export class SecretFileService {
       resourceType: "SECRET_FILE",
       resourceId: fileId,
       ipAddress,
-      metadata: { fileName: file.name, vaultGroupName: file.environment.vaultGroup.name },
+      metadata: { fileName: file.name, vaultGroupName: file.vaultGroup.name },
     });
 
     return { buffer: decrypted, name: file.name, mimeType: file.mimeType };
@@ -210,7 +206,7 @@ export class SecretFileService {
         mimeType: file.type ?? "application/octet-stream",
         fileSize: file.size,
       },
-      include: { environment: { include: { vaultGroup: true } } },
+      include: { vaultGroup: true },
     });
 
     await this.auditLogService.log({
@@ -223,11 +219,11 @@ export class SecretFileService {
       metadata: {
         fileName: file.name,
         action: "new_version",
-        vaultGroupName: existing.environment.vaultGroup.name,
+        vaultGroupName: existing.vaultGroup.name,
       },
     });
 
-    return toSecretFileResponse(updated, updated.environment.vaultGroup);
+    return toSecretFileResponse(updated, updated.vaultGroup);
   }
 
   async update(
@@ -241,27 +237,17 @@ export class SecretFileService {
       validateFileName(data.name);
     }
 
-    let environmentId = file.environmentId;
-    if (data.environmentType && data.vaultGroupId) {
-      const environment = await this.findOrCreateEnvironment(
-        projectId,
-        data.vaultGroupId,
-        data.environmentType,
-      );
-      environmentId = environment.id;
-    }
-
     const updated = await this.prisma.secretFile.update({
       where: { id: fileId },
       data: {
         ...(data.name && { name: data.name }),
         ...(data.description !== undefined && { description: data.description }),
-        ...(data.environmentType && { environmentId }),
+        ...(data.vaultGroupId && { vaultGroupId: data.vaultGroupId }),
       },
-      include: { environment: { include: { vaultGroup: true } } },
+      include: { vaultGroup: true },
     });
 
-    return toSecretFileResponse(updated, updated.environment.vaultGroup);
+    return toSecretFileResponse(updated, updated.vaultGroup);
   }
 
   async delete(
@@ -280,7 +266,7 @@ export class SecretFileService {
       resourceType: "SECRET_FILE",
       resourceId: fileId,
       ipAddress,
-      metadata: { fileName: file.name, vaultGroupName: file.environment.vaultGroup.name },
+      metadata: { fileName: file.name, vaultGroupName: file.vaultGroup.name },
     });
 
     return { message: "Secret file deleted successfully" };
@@ -288,8 +274,8 @@ export class SecretFileService {
 
   private async findFileOrThrow(projectId: string, fileId: string) {
     const file = await this.prisma.secretFile.findFirst({
-      where: { id: fileId, environment: { projectId } },
-      include: { environment: { include: { vaultGroup: { select: { name: true } } } } },
+      where: { id: fileId, vaultGroup: { projectId } },
+      include: { vaultGroup: { select: { id: true, name: true } } },
     });
 
     if (!file) {
@@ -297,23 +283,5 @@ export class SecretFileService {
     }
 
     return file;
-  }
-
-  private async findOrCreateEnvironment(
-    projectId: string,
-    vaultGroupId: string,
-    type: EnvironmentType,
-  ) {
-    const existing = await this.prisma.environment.findUnique({
-      where: { vaultGroupId_type: { vaultGroupId, type } },
-      include: { vaultGroup: true },
-    });
-
-    if (existing) return existing;
-
-    return this.prisma.environment.create({
-      data: { projectId, vaultGroupId, type },
-      include: { vaultGroup: true },
-    });
   }
 }

@@ -81,8 +81,8 @@ internal sealed class PushCommands(
                     }
                     else
                     {
-                        await secretFileScanner.UploadAsync(projectId, file, envType, vaultGroupId, ct);
-                        ctx.Output.PrintSuccess($"  {file.RelativePath} ({envType})");
+                        await secretFileScanner.UploadAsync(projectId, file, vaultGroupId, ct);
+                        ctx.Output.PrintSuccess($"  {file.RelativePath}");
                         secretsUploaded++;
                     }
                 }

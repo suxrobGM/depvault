@@ -1,5 +1,4 @@
 using System.Net.Http.Json;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace DepVault.Cli.Services;
@@ -26,6 +25,10 @@ public sealed class GitHubReleaseClient : IGitHubReleaseClient
         Timeout = TimeSpan.FromSeconds(5)
     };
 
+    /// <summary>
+    /// Fetches up to 20 recent GitHub releases, filters by the CLI tag prefix,
+    /// and returns the highest version by semver comparison (not release order).
+    /// </summary>
     public async Task<string?> GetLatestCliVersionAsync(CancellationToken ct = default)
     {
         try
@@ -38,12 +41,24 @@ public sealed class GitHubReleaseClient : IGitHubReleaseClient
                 return null;
             }
 
+            Version? highest = null;
             foreach (var release in releases)
             {
-                if (release.TagName?.StartsWith(Constants.GitHubReleaseTagPrefix, StringComparison.Ordinal) == true)
+                if (release.TagName?.StartsWith(Constants.GitHubReleaseTagPrefix, StringComparison.Ordinal) != true)
                 {
-                    return release.TagName[Constants.GitHubReleaseTagPrefix.Length..];
+                    continue;
                 }
+
+                var versionStr = release.TagName[Constants.GitHubReleaseTagPrefix.Length..];
+                if (Version.TryParse(versionStr, out var v) && (highest is null || v > highest))
+                {
+                    highest = v;
+                }
+            }
+
+            if (highest is not null)
+            {
+                return highest.ToString(3);
             }
         }
         catch

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import type { SecretFileEnvironmentTypeValue } from "@depvault/shared/constants";
 import {
   KeyboardArrowDown as ArrowDownIcon,
   KeyboardArrowUp as ArrowUpIcon,
@@ -14,7 +13,6 @@ import {
 } from "@mui/icons-material";
 import {
   Box,
-  Chip,
   Collapse,
   IconButton,
   Skeleton,
@@ -40,23 +38,15 @@ import type {
 import { downloadFile } from "@/utils/download-file";
 import { formatBytes, formatDate } from "@/utils/formatters";
 
-const ENV_COLORS: Record<string, "default" | "success" | "warning" | "error"> = {
-  GLOBAL: "default",
-  DEVELOPMENT: "success",
-  STAGING: "warning",
-  PRODUCTION: "error",
-};
-
 export interface SecretFileRowProps {
   projectId: string;
   file: SecretFile;
-  activeEnv: SecretFileEnvironmentTypeValue;
   canEdit: boolean;
   onEdit: (file: SecretFile) => void;
 }
 
 export function SecretFileRow(props: SecretFileRowProps): ReactElement {
-  const { projectId, file, activeEnv, canEdit, onEdit } = props;
+  const { projectId, file, canEdit, onEdit } = props;
 
   const confirm = useConfirm();
   const toast = useToast();
@@ -173,16 +163,6 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
             {file.vaultGroupName}
           </Typography>
         </TableCell>
-        {activeEnv && (
-          <TableCell>
-            <Chip
-              label={activeEnv}
-              size="small"
-              color={ENV_COLORS[activeEnv] ?? "default"}
-              variant="outlined"
-            />
-          </TableCell>
-        )}
         <TableCell>
           <Typography variant="body2" color="text.secondary">
             {formatBytes(file.fileSize)}
@@ -241,7 +221,7 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
       />
 
       <TableRow>
-        <TableCell colSpan={activeEnv ? 7 : 6} sx={{ py: 0 }}>
+        <TableCell colSpan={6} sx={{ py: 0 }}>
           <Collapse in={historyOpen} timeout="auto" unmountOnExit>
             <Box sx={{ py: 2, pl: 6, pr: 2 }}>
               <Typography

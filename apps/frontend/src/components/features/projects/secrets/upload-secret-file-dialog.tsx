@@ -1,10 +1,6 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import {
-  SECRET_FILE_ENV_TYPES,
-  type SecretFileEnvironmentTypeValue,
-} from "@depvault/shared/constants";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import { FormSelectField, FormTextField } from "@/components/ui/form";
@@ -29,12 +25,8 @@ export function UploadSecretFileDialog(props: UploadSecretFileDialogProps): Reac
   const toast = useToast();
 
   const mutation = useApiMutation(
-    (values: {
-      file: File;
-      vaultGroupId: string;
-      environmentType: SecretFileEnvironmentTypeValue;
-      description?: string;
-    }) => client.api.projects({ id: projectId }).secrets.post(values),
+    (values: { file: File; vaultGroupId: string; description?: string }) =>
+      client.api.projects({ id: projectId }).secrets.post(values),
     {
       invalidateKeys: [["secret-files", projectId]],
       successMessage: "File uploaded successfully",
@@ -47,7 +39,6 @@ export function UploadSecretFileDialog(props: UploadSecretFileDialogProps): Reac
   const form = useForm({
     defaultValues: {
       vaultGroupId: "",
-      environmentType: "GLOBAL" as SecretFileEnvironmentTypeValue,
       description: "",
     },
     validators: { onSubmit: uploadSecretFileSchema },
@@ -59,7 +50,6 @@ export function UploadSecretFileDialog(props: UploadSecretFileDialogProps): Reac
       await mutation.mutateAsync({
         file,
         vaultGroupId: value.vaultGroupId,
-        environmentType: value.environmentType,
         description: value.description?.trim() ?? "",
       });
     },
@@ -95,13 +85,6 @@ export function UploadSecretFileDialog(props: UploadSecretFileDialogProps): Reac
               items={groupItems}
               emptyLabel="Select a vault group"
               emptyMessage="No vault groups found. Create a group in the Variables tab first."
-            />
-
-            <FormSelectField
-              form={form}
-              name="environmentType"
-              label="Environment"
-              items={SECRET_FILE_ENV_TYPES}
             />
 
             <FormTextField

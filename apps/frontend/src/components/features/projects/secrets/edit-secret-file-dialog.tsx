@@ -2,10 +2,6 @@
 
 import { useState, type ReactElement } from "react";
 import {
-  SECRET_FILE_ENV_TYPES,
-  type SecretFileEnvironmentTypeValue,
-} from "@depvault/shared/constants";
-import {
   Button,
   Dialog,
   DialogActions,
@@ -40,12 +36,8 @@ export function EditSecretFileDialog(props: EditSecretFileDialogProps): ReactEle
   const groupItems = vaultGroups.map((g) => ({ value: g.id, label: g.name }));
 
   const metadataMutation = useApiMutation(
-    (values: {
-      name?: string;
-      description?: string;
-      vaultGroupId?: string;
-      environmentType?: SecretFileEnvironmentTypeValue;
-    }) => client.api.projects({ id: projectId }).secrets({ fileId: file.id }).put(values),
+    (values: { name?: string; description?: string; vaultGroupId?: string }) =>
+      client.api.projects({ id: projectId }).secrets({ fileId: file.id }).put(values),
     { invalidateKeys: [["secret-files", projectId]], successMessage: "File updated" },
   );
 
@@ -66,7 +58,6 @@ export function EditSecretFileDialog(props: EditSecretFileDialogProps): ReactEle
       name: file.name,
       description: file.description ?? "",
       vaultGroupId: "",
-      environmentType: "GLOBAL" as SecretFileEnvironmentTypeValue,
     },
     validators: { onSubmit: editSecretFileSchema },
     onSubmit: async ({ value }) => {
@@ -74,7 +65,6 @@ export function EditSecretFileDialog(props: EditSecretFileDialogProps): ReactEle
         name: value.name,
         description: value.description,
         vaultGroupId: value.vaultGroupId || undefined,
-        environmentType: value.environmentType || undefined,
       });
       if (newFile) {
         await contentMutation.mutateAsync({ file: newFile });
@@ -114,14 +104,6 @@ export function EditSecretFileDialog(props: EditSecretFileDialogProps): ReactEle
               name="vaultGroupId"
               label="Move to Vault Group"
               items={groupItems}
-              optional
-              emptyLabel="Keep current"
-            />
-            <FormSelectField
-              form={form}
-              name="environmentType"
-              label="Change Environment"
-              items={SECRET_FILE_ENV_TYPES}
               optional
               emptyLabel="Keep current"
             />

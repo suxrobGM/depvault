@@ -2,31 +2,23 @@ import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 import { BadRequestError, NotFoundError } from "@/common/errors";
 import * as encryption from "@/common/utils/encryption";
-import { EnvironmentType, ProjectRole } from "@/generated/prisma";
+import { ProjectRole } from "@/generated/prisma";
 import { SecretFileService } from "./secret-file.service";
 
 const now = new Date();
 const projectId = "project-uuid";
 const userId = "user-uuid";
-const envId = "env-uuid";
 const fileId = "file-uuid";
 const fakeProjectKey = Buffer.alloc(32, 1);
 const fakeEncryptedContent = Buffer.from("encrypted-content");
 
 const vaultGroupId = "vault-group-uuid";
 
-const mockEnvironment = {
-  id: envId,
-  projectId,
-  type: "DEVELOPMENT",
-  createdAt: now,
-  updatedAt: now,
-  vaultGroup: { id: vaultGroupId, name: "Default" },
-};
+const mockVaultGroup = { id: vaultGroupId, name: "Default", projectId };
 
 const mockSecretFile = {
   id: fileId,
-  environmentId: envId,
+  vaultGroupId,
   name: "config.json",
   description: "Config file",
   encryptedContent: fakeEncryptedContent,
@@ -37,7 +29,7 @@ const mockSecretFile = {
   uploadedBy: userId,
   createdAt: now,
   updatedAt: now,
-  environment: { vaultGroup: { id: vaultGroupId, name: "Default" } },
+  vaultGroup: { id: vaultGroupId, name: "Default" },
 };
 
 function createMockPrisma() {
@@ -45,23 +37,23 @@ function createMockPrisma() {
     projectMember: {
       findUnique: mock(() => Promise.resolve(null)),
     },
-    environment: {
-      findUnique: mock(() => Promise.resolve(null)),
-      create: mock(() => Promise.resolve(mockEnvironment)),
-    },
     secretFile: {
       create: mock(() => Promise.resolve(mockSecretFile)),
       findMany: mock(() => Promise.resolve([mockSecretFile])),
       findFirst: mock(() => Promise.resolve(null)),
+      findUnique: mock(() => Promise.resolve(null)),
       count: mock(() => Promise.resolve(1)),
       update: mock(() => Promise.resolve(mockSecretFile)),
       delete: mock(() => Promise.resolve(mockSecretFile)),
+    },
+    secretFileVersion: {
+      create: mock(() => Promise.resolve({})),
     },
     secretFileAuditLog: {
       create: mock(() => Promise.resolve({})),
     },
     vaultGroup: {
-      findUnique: mock(() => Promise.resolve({ name: "Default" })),
+      findFirst: mock(() => Promise.resolve(mockVaultGroup)),
     },
   } as any;
 }
@@ -104,18 +96,8 @@ describe("SecretFileService", () => {
 
   describe("upload", () => {
     it("should upload and encrypt a file", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
-      mockPrisma.environment.findUnique.mockResolvedValueOnce(mockEnvironment);
-
       const file = createMockFile("config.json");
-      const result = await service.upload(
-        projectId,
-        userId,
-        file,
-        "vault-group-uuid",
-        EnvironmentType.DEVELOPMENT,
-        "Config file",
-      );
+      const result = await service.upload(projectId, userId, file, vaultGroupId, "Config file");
 
       expect(result.id).toBe(fileId);
       expect(result.name).toBe("config.json");
@@ -125,52 +107,37 @@ describe("SecretFileService", () => {
 
     it("should reject executable file types", async () => {
       for (const ext of [".exe", ".sh", ".bat", ".cmd", ".ps1"]) {
-        mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
         const file = createMockFile(`script${ext}`);
-        expect(
-          service.upload(projectId, userId, file, "vault-group-uuid", EnvironmentType.DEVELOPMENT),
-        ).rejects.toBeInstanceOf(BadRequestError);
+        expect(service.upload(projectId, userId, file, vaultGroupId)).rejects.toBeInstanceOf(
+          BadRequestError,
+        );
       }
     });
 
     it("should reject files with path traversal patterns", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
-
       const file = createMockFile("../etc/passwd");
-      expect(
-        service.upload(projectId, userId, file, "vault-group-uuid", EnvironmentType.DEVELOPMENT),
-      ).rejects.toBeInstanceOf(BadRequestError);
+      expect(service.upload(projectId, userId, file, vaultGroupId)).rejects.toBeInstanceOf(
+        BadRequestError,
+      );
     });
 
     it("should reject files exceeding 25 MB", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
-
       const file = createMockFile("big.json", 26 * 1024 * 1024);
-      expect(
-        service.upload(projectId, userId, file, "vault-group-uuid", EnvironmentType.DEVELOPMENT),
-      ).rejects.toBeInstanceOf(BadRequestError);
+      expect(service.upload(projectId, userId, file, vaultGroupId)).rejects.toBeInstanceOf(
+        BadRequestError,
+      );
     });
   });
 
   describe("list", () => {
     it("should return file metadata without content", async () => {
-      const result = await service.list(projectId, EnvironmentType.DEVELOPMENT);
+      const result = await service.list(projectId);
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0]!.name).toBe("config.json");
       expect(mockPrisma.secretFile.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          include: { environment: { include: { vaultGroup: true } } },
-        }),
-      );
-    });
-
-    it("should filter by environment type", async () => {
-      await service.list(projectId, EnvironmentType.STAGING, 1, 10);
-
-      expect(mockPrisma.secretFile.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { environment: { projectId, type: EnvironmentType.STAGING } },
+          include: { vaultGroup: true },
         }),
       );
     });
@@ -184,7 +151,6 @@ describe("SecretFileService", () => {
 
   describe("download", () => {
     it("should download and decrypt file for OWNER", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
 
       const result = await service.download(projectId, fileId, userId);
@@ -195,7 +161,6 @@ describe("SecretFileService", () => {
     });
 
     it("should throw NotFoundError when file doesn't exist", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(null);
 
       expect(service.download(projectId, fileId, userId)).rejects.toBeInstanceOf(NotFoundError);
@@ -204,7 +169,6 @@ describe("SecretFileService", () => {
 
   describe("delete", () => {
     it("should delete file and log audit", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
 
       const result = await service.delete(projectId, fileId, userId);
@@ -214,7 +178,6 @@ describe("SecretFileService", () => {
     });
 
     it("should throw NotFoundError when file doesn't exist", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(null);
 
       expect(service.delete(projectId, fileId, userId)).rejects.toBeInstanceOf(NotFoundError);
@@ -223,7 +186,6 @@ describe("SecretFileService", () => {
 
   describe("update", () => {
     it("should update file name and description", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
       mockPrisma.secretFile.update.mockResolvedValueOnce({
         ...mockSecretFile,
@@ -241,37 +203,28 @@ describe("SecretFileService", () => {
       expect(mockPrisma.secretFile.update).toHaveBeenCalledWith({
         where: { id: fileId },
         data: { name: "updated.json", description: "Updated desc" },
-        include: { environment: { include: { vaultGroup: true } } },
+        include: { vaultGroup: true },
       });
     });
 
-    it("should move file to a different environment", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.EDITOR });
+    it("should move file to a different vault group", async () => {
+      const newVaultGroupId = "new-vault-group-id";
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
-      mockPrisma.environment.findUnique.mockResolvedValueOnce({
-        ...mockEnvironment,
-        id: "new-env-id",
-        type: "STAGING",
-      });
       mockPrisma.secretFile.update.mockResolvedValueOnce({
         ...mockSecretFile,
-        environmentId: "new-env-id",
+        vaultGroupId: newVaultGroupId,
       });
 
-      await service.update(projectId, fileId, {
-        environmentType: EnvironmentType.STAGING,
-        vaultGroupId,
-      });
+      await service.update(projectId, fileId, { vaultGroupId: newVaultGroupId });
 
       expect(mockPrisma.secretFile.update).toHaveBeenCalledWith({
         where: { id: fileId },
-        data: { environmentId: "new-env-id" },
-        include: { environment: { include: { vaultGroup: true } } },
+        data: { vaultGroupId: newVaultGroupId },
+        include: { vaultGroup: true },
       });
     });
 
     it("should reject path traversal in new name", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
 
       expect(service.update(projectId, fileId, { name: "../etc/passwd" })).rejects.toBeInstanceOf(
@@ -280,7 +233,6 @@ describe("SecretFileService", () => {
     });
 
     it("should reject executable extension in new name", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
 
       expect(service.update(projectId, fileId, { name: "script.exe" })).rejects.toBeInstanceOf(
@@ -289,7 +241,6 @@ describe("SecretFileService", () => {
     });
 
     it("should throw NotFoundError when file doesn't exist", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: ProjectRole.OWNER });
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(null);
 
       expect(service.update(projectId, fileId, { name: "new.json" })).rejects.toBeInstanceOf(

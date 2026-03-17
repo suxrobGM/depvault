@@ -1,5 +1,4 @@
 import { t, type Static } from "elysia";
-import { EnvironmentType } from "@/generated/prisma";
 import { PaginationQuerySchema } from "@/types/pagination";
 import { PaginatedResponseSchema } from "@/types/response";
 
@@ -10,7 +9,6 @@ export { FORBIDDEN_EXTENSIONS, MAX_FILE_SIZE };
 
 export const SecretFileResponseSchema = t.Object({
   id: t.String(),
-  environmentId: t.String(),
   vaultGroupId: t.String(),
   vaultGroupName: t.String(),
   name: t.String(),
@@ -22,11 +20,7 @@ export const SecretFileResponseSchema = t.Object({
   updatedAt: t.Date(),
 });
 
-const EnvironmentTypeSchema = t.Enum(EnvironmentType);
-
-export const SecretFileListQuerySchema = PaginationQuerySchema(
-  t.Object({ environmentType: t.Optional(EnvironmentTypeSchema) }),
-);
+export const SecretFileListQuerySchema = PaginationQuerySchema(t.Object({}));
 
 export const SecretFileListResponseSchema = PaginatedResponseSchema(SecretFileResponseSchema);
 
@@ -50,7 +44,6 @@ export const SecretFileVersionListResponseSchema = t.Object({
 export const UploadSecretFileBodySchema = t.Object({
   file: t.File({ maxSize: "25m" }),
   vaultGroupId: t.String(),
-  environmentType: EnvironmentTypeSchema,
   description: t.Optional(t.String({ maxLength: 500 })),
 });
 
@@ -68,7 +61,6 @@ export const UpdateSecretFileBodySchema = t.Object({
   name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
   description: t.Optional(t.String({ maxLength: 500 })),
   vaultGroupId: t.Optional(t.String()),
-  environmentType: t.Optional(EnvironmentTypeSchema),
 });
 
 export type SecretFileResponse = Static<typeof SecretFileResponseSchema>;

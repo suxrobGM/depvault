@@ -204,7 +204,7 @@ export class CiTokenService {
         where: { environmentId: ciToken.environmentId },
       }),
       this.prisma.secretFile.findMany({
-        where: { environmentId: ciToken.environmentId },
+        where: { vaultGroup: { environments: { some: { id: ciToken.environmentId } } } },
         select: { id: true, name: true, mimeType: true, fileSize: true },
       }),
     ]);
@@ -243,7 +243,7 @@ export class CiTokenService {
     fileId: string,
   ): Promise<{ buffer: Buffer; name: string; mimeType: string }> {
     const file = await this.prisma.secretFile.findFirst({
-      where: { id: fileId, environmentId: ciToken.environmentId },
+      where: { id: fileId, vaultGroup: { environments: { some: { id: ciToken.environmentId } } } },
     });
 
     if (!file) {

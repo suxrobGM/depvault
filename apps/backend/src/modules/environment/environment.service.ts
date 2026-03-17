@@ -35,7 +35,7 @@ export class EnvironmentService {
       where,
       include: {
         vaultGroup: true,
-        _count: { select: { variables: true, secretFiles: true } },
+        _count: { select: { variables: true } },
       },
       orderBy: { createdAt: "asc" },
     });
@@ -44,9 +44,9 @@ export class EnvironmentService {
       id: env.id,
       type: env.type,
       vaultGroupId: env.vaultGroupId,
-      vaultGroupName: env.vaultGroup.name,
+      vaultGroupName: env.vaultGroup?.name ?? "",
       variableCount: env._count.variables,
-      secretFileCount: env._count.secretFiles,
+      secretFileCount: 0,
       createdAt: env.createdAt,
     }));
   }
