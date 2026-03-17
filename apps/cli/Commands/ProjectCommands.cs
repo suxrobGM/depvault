@@ -62,6 +62,7 @@ public sealed class ProjectCommands(
                     });
 
                 appConfig.ActiveProjectId = selected.Id;
+                appConfig.ActiveProjectName = selected.Name;
                 configService.Save(appConfig);
                 output.PrintSuccess($"Active project set to {selected.Name} ({selected.Id})");
             }
@@ -147,6 +148,7 @@ public sealed class ProjectCommands(
             var id = parseResult.GetValue(idArg);
             var config = configService.Load();
             config.ActiveProjectId = id;
+            config.ActiveProjectName = null;
             configService.Save(config);
             output.PrintSuccess($"Active project set to {id}");
         });

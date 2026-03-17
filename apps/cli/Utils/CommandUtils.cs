@@ -11,7 +11,7 @@ namespace DepVault.Cli.Utils;
 /// </summary>
 internal static class CommandUtils
 {
-    private static readonly string[] environmentTypes = ["DEVELOPMENT", "STAGING", "PRODUCTION", "GLOBAL"];
+    internal static readonly string[] EnvironmentTypes = ["DEVELOPMENT", "STAGING", "PRODUCTION", "GLOBAL"];
 
     /// <summary>Resolves project ID from the CLI option or active config.</summary>
     public static string? RequireProjectId(
@@ -75,7 +75,7 @@ internal static class CommandUtils
         // Interactive prompt when we can't determine from filename
         if (prompter.IsInteractive)
         {
-            return prompter.Select("Select environment type", environmentTypes, e => e);
+            return prompter.Select("Select environment type", EnvironmentTypes, e => e);
         }
 
         return "DEVELOPMENT";

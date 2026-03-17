@@ -15,6 +15,7 @@ public interface IConsolePrompter
 
     List<T> MultiSelect<T>(string title, IEnumerable<T> choices, Func<T, string> displaySelector,
         bool allSelected = true) where T : notnull;
+
 }
 
 public sealed class ConsolePrompter : IConsolePrompter

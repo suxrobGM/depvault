@@ -142,7 +142,7 @@ export class EnvironmentService {
         },
       });
 
-      void this.checkDrift(projectId, userId);
+      void this.checkDrift(projectId, vaultGroupId, userId);
     }
 
     return {
@@ -278,10 +278,10 @@ export class EnvironmentService {
     return { message: "Environment deleted successfully" };
   }
 
-  private async checkDrift(projectId: string, userId: string): Promise<void> {
+  private async checkDrift(projectId: string, vaultGroupId: string, userId: string): Promise<void> {
     try {
       const environments = await this.prisma.environment.findMany({
-        where: { projectId, type: { not: "GLOBAL" } },
+        where: { projectId, vaultGroupId, type: { not: "GLOBAL" } },
         include: { variables: { select: { key: true } } },
       });
 
@@ -305,7 +305,10 @@ export class EnvironmentService {
         where: {
           userId,
           type: "ENV_DRIFT",
-          metadata: { path: ["projectId"], equals: projectId },
+          AND: [
+            { metadata: { path: ["projectId"], equals: projectId } },
+            { metadata: { path: ["vaultGroupId"], equals: vaultGroupId } },
+          ],
           createdAt: {
             gte: new Date(Date.now() - EnvironmentService.NOTIFICATION_COOLDOWN_HOURS * 3600_000),
           },
@@ -318,6 +321,7 @@ export class EnvironmentService {
         type: "ENV_DRIFT",
         userId,
         projectId,
+        vaultGroupId,
         missingVars,
       });
     } catch (error) {

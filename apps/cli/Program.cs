@@ -3,11 +3,14 @@ using DepVault.Cli.Auth;
 using DepVault.Cli.Commands;
 using DepVault.Cli.Commands.Env;
 using DepVault.Cli.Commands.Pull;
+using DepVault.Cli.Commands.Push;
 using DepVault.Cli.Commands.Scan;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
+using DepVault.Cli.Utils;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Abstractions.Authentication;
 
 var services = new ServiceCollection()
@@ -37,6 +40,7 @@ var services = new ServiceCollection()
     .AddSingleton<DirectoryVaultGroupMapper>()
     .AddSingleton<EnvPuller>()
     .AddSingleton<SecretsPuller>()
+    .AddSingleton<FileEnvironmentAssigner>()
     // Commands
     .AddSingleton<AuthCommands>()
     .AddSingleton<ConfigCommands>()
@@ -89,7 +93,24 @@ var versionCmd = new Command("version", "Show CLI version");
 versionCmd.SetAction(_ => ConsoleTheme.PrintBanner());
 rootCommand.Add(versionCmd);
 
-var exitCode = await rootCommand.Parse(args).InvokeAsync();
+var parseResult = rootCommand.Parse(args);
+parseResult.InvocationConfiguration.EnableDefaultExceptionHandler = false;
+
+int exitCode;
+try
+{
+    exitCode = await parseResult.InvokeAsync();
+}
+catch (Exception ex) when (ApiErrorHandler.IsAuthError(ex))
+{
+    ApiErrorHandler.PrintAuthError();
+    return 1;
+}
+catch (ApiException ex)
+{
+    ApiErrorHandler.HandleError(ex, "API request failed");
+    return 1;
+}
 
 // Print update hint after command execution (skip for update/version commands)
 var firstArg = args.Length > 0 ? args[0] : null;

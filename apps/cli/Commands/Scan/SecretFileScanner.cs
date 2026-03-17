@@ -33,6 +33,7 @@ internal sealed class SecretFileScanner(
             return;
         }
 
+        var envType = CommandUtils.ResolveEnvironmentType(null, null, prompter);
         var client = clientFactory.Create();
 
         foreach (var file in selected)
@@ -48,7 +49,8 @@ internal sealed class SecretFileScanner(
                         {
                             File = fileBytes,
                             Description = file.FileName,
-                            EnvironmentType = SecretNs.SecretsPostRequestBody_environmentType.DEVELOPMENT
+                            EnvironmentType = CommandUtils.ParseEnum(envType,
+                                SecretNs.SecretsPostRequestBody_environmentType.DEVELOPMENT)
                         }, cancellationToken: ct));
 
                 results.SecretFilesUploaded++;

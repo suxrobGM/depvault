@@ -20,44 +20,12 @@ public sealed class PullCommands(
     public Command CreatePullCommand()
     {
         var projectOpt = new Option<string?>("--project") { Description = "Project ID (defaults to active)" };
-        var envOpt = new Option<string>("--environment")
-            { Description = "Environment type", DefaultValueFactory = _ => "DEVELOPMENT" };
+        var envOpt = new Option<string?>("--environment")
+            { Description = "Environment type (prompts if not set)" };
         var vaultGroupsOpt = new Option<string?>("--vault-groups")
             { Description = "Comma-separated vault group names" };
         var includeSecretsOpt = new Option<bool>("--include-secrets")
             { Description = "Also download secret files", DefaultValueFactory = _ => true };
-        var outputDirOpt = new Option<string>("--output-dir")
-            { Description = "Base output directory", DefaultValueFactory = _ => "." };
-        var forceOpt = new Option<bool>("--force") { Description = "Overwrite without prompting" };
-
-        var cmd = new Command("pull", "Pull environment variables and secret files")
-            { projectOpt, envOpt, vaultGroupsOpt, includeSecretsOpt, outputDirOpt, forceOpt };
-
-        cmd.SetAction(async (parseResult, ct) =>
-        {
-            await ExecutePullAsync(
-                parseResult.GetValue(projectOpt),
-                parseResult.GetValue(envOpt) ?? "DEVELOPMENT",
-                parseResult.GetValue(vaultGroupsOpt),
-                "env",
-                parseResult.GetValue(includeSecretsOpt),
-                parseResult.GetValue(outputDirOpt) ?? ".",
-                parseResult.GetValue(forceOpt),
-                ct);
-        });
-
-        cmd.Add(CreatePullEnvCommand());
-        cmd.Add(CreatePullSecretsCommand());
-        return cmd;
-    }
-
-    private Command CreatePullEnvCommand()
-    {
-        var projectOpt = new Option<string?>("--project") { Description = "Project ID (defaults to active)" };
-        var envOpt = new Option<string>("--environment")
-            { Description = "Environment type", DefaultValueFactory = _ => "DEVELOPMENT" };
-        var vaultGroupsOpt = new Option<string?>("--vault-groups")
-            { Description = "Comma-separated vault group names" };
         var formatOpt = new Option<string>("--format")
         {
             Description = "Export format (env, appsettings.json, secrets.yaml, config.toml)",
@@ -67,38 +35,8 @@ public sealed class PullCommands(
             { Description = "Base output directory", DefaultValueFactory = _ => "." };
         var forceOpt = new Option<bool>("--force") { Description = "Overwrite without prompting" };
 
-        var cmd = new Command("env", "Pull only environment variables")
-            { projectOpt, envOpt, vaultGroupsOpt, formatOpt, outputDirOpt, forceOpt };
-
-        cmd.SetAction(async (parseResult, ct) =>
-        {
-            await ExecutePullAsync(
-                parseResult.GetValue(projectOpt),
-                parseResult.GetValue(envOpt) ?? "DEVELOPMENT",
-                parseResult.GetValue(vaultGroupsOpt),
-                parseResult.GetValue(formatOpt) ?? "env",
-                false,
-                parseResult.GetValue(outputDirOpt) ?? ".",
-                parseResult.GetValue(forceOpt),
-                ct);
-        });
-
-        return cmd;
-    }
-
-    private Command CreatePullSecretsCommand()
-    {
-        var projectOpt = new Option<string?>("--project") { Description = "Project ID (defaults to active)" };
-        var envOpt = new Option<string>("--environment")
-            { Description = "Environment type", DefaultValueFactory = _ => "DEVELOPMENT" };
-        var vaultGroupsOpt = new Option<string?>("--vault-groups")
-            { Description = "Comma-separated vault group names" };
-        var outputDirOpt = new Option<string>("--output-dir")
-            { Description = "Base output directory", DefaultValueFactory = _ => "." };
-        var forceOpt = new Option<bool>("--force") { Description = "Overwrite without prompting" };
-
-        var cmd = new Command("secrets", "Pull only secret files")
-            { projectOpt, envOpt, vaultGroupsOpt, outputDirOpt, forceOpt };
+        var cmd = new Command("pull", "Pull environment variables and secret files")
+            { projectOpt, envOpt, vaultGroupsOpt, includeSecretsOpt, formatOpt, outputDirOpt, forceOpt };
 
         cmd.SetAction(async (parseResult, ct) =>
         {
@@ -119,65 +57,32 @@ public sealed class PullCommands(
                 return;
             }
 
+            var envType = CommandUtils.ResolveEnvironmentType(parseResult.GetValue(envOpt), null, prompter);
+            var format = parseResult.GetValue(formatOpt) ?? "env";
             var outputDir = Path.GetFullPath(parseResult.GetValue(outputDirOpt) ?? ".");
+            var includeSecrets = parseResult.GetValue(includeSecretsOpt);
+            var force = parseResult.GetValue(forceOpt);
 
-            if (!parseResult.GetValue(forceOpt) && !ConfirmOverwrite(outputDir))
+            if (!force && !ConfirmOverwrite(outputDir))
             {
                 return;
             }
 
-            AnsiConsole.MarkupLine(
-                $"[cyan1]Pulling secret files ({parseResult.GetValue(envOpt) ?? "DEVELOPMENT"})...[/]");
-            var count = await secretsPuller.PullAsync(
-                projectId, groups, parseResult.GetValue(envOpt) ?? "DEVELOPMENT", outputDir, ct);
+            AnsiConsole.MarkupLine($"[cyan1]Pulling ({envType})...[/]");
+
+            var envCount = await envPuller.PullAsync(projectId, groups, envType, format, outputDir, ct);
+
+            var secretCount = 0;
+            if (includeSecrets)
+            {
+                secretCount = await secretsPuller.PullAsync(projectId, groups, envType, outputDir, ct);
+            }
 
             AnsiConsole.WriteLine();
-            output.PrintSuccess($"Pulled {count} secret file(s).");
+            output.PrintSuccess($"Pulled {envCount} env file(s) and {secretCount} secret file(s).");
         });
 
         return cmd;
-    }
-
-    private async Task ExecutePullAsync(
-        string? projectArg, string envType, string? vaultGroupNames, string format,
-        bool includeSecrets, string outputDirArg, bool force, CancellationToken ct)
-    {
-        if (!authContext.RequireAuth())
-        {
-            return;
-        }
-
-        var projectId = CommandUtils.RequireProjectId(projectArg, configService, output);
-        if (projectId is null)
-        {
-            return;
-        }
-
-        var groups = await vaultGroupSelector.SelectAsync(projectId, vaultGroupNames, ct);
-        if (groups is null)
-        {
-            return;
-        }
-
-        var outputDir = Path.GetFullPath(outputDirArg);
-
-        if (!force && !ConfirmOverwrite(outputDir))
-        {
-            return;
-        }
-
-        AnsiConsole.MarkupLine($"[cyan1]Pulling ({envType})...[/]");
-
-        var envCount = await envPuller.PullAsync(projectId, groups, envType, format, outputDir, ct);
-
-        var secretCount = 0;
-        if (includeSecrets)
-        {
-            secretCount = await secretsPuller.PullAsync(projectId, groups, envType, outputDir, ct);
-        }
-
-        AnsiConsole.WriteLine();
-        output.PrintSuccess($"Pulled {envCount} env file(s) and {secretCount} secret file(s).");
     }
 
     private bool ConfirmOverwrite(string outputDir)
@@ -188,7 +93,12 @@ public sealed class PullCommands(
         }
 
         var hasExisting = Directory.Exists(outputDir) &&
-                          Directory.EnumerateFiles(outputDir, ".env*", SearchOption.AllDirectories).Any();
+                          Directory.EnumerateFiles(outputDir, "*", SearchOption.AllDirectories)
+                              .Any(f => f.Contains(".env", StringComparison.OrdinalIgnoreCase)
+                                        || f.EndsWith(".json", StringComparison.OrdinalIgnoreCase)
+                                        || f.EndsWith(".yaml", StringComparison.OrdinalIgnoreCase)
+                                        || f.EndsWith(".yml", StringComparison.OrdinalIgnoreCase)
+                                        || f.EndsWith(".toml", StringComparison.OrdinalIgnoreCase));
 
         if (hasExisting)
         {

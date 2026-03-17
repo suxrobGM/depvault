@@ -2,6 +2,7 @@ using System.CommandLine;
 using DepVault.Cli.ApiClient.Projects.Item.Secrets;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Commands.Pull;
+using DepVault.Cli.Commands.Push;
 using DepVault.Cli.Commands.Scan;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
@@ -19,30 +20,23 @@ public sealed class PushCommands(
     IOutputFormatter output,
     IConsolePrompter prompter,
     IFileScanner fileScanner,
-    DirectoryVaultGroupMapper dirMapper)
+    DirectoryVaultGroupMapper dirMapper,
+    FileEnvironmentAssigner envAssigner)
 {
     public Command CreatePushCommand()
     {
-        return new Command("push", "Push environment variables or secret files")
-        {
-            CreatePushEnvCommand(),
-            CreatePushSecretsCommand()
-        };
-    }
-
-    private Command CreatePushEnvCommand()
-    {
         var projectOpt = new Option<string?>("--project") { Description = "Project ID (defaults to active)" };
         var envOpt = new Option<string?>("--environment")
-            { Description = "Environment type (prompts if not set and filename is ambiguous)" };
-        var formatOpt = new Option<string>("--format")
-            { Description = "Import format", DefaultValueFactory = _ => "env" };
+            { Description = "Environment type (prompts per file if not set)" };
         var fileOpt = new Option<string?>("--file")
-            { Description = "Single file to import (auto-discovers if omitted)" };
-        var cmd = new Command("env", "Push environment variables from local files")
-            { projectOpt, envOpt, formatOpt, fileOpt };
+            { Description = "Single file to push (auto-discovers if omitted)" };
+        var formatOpt = new Option<string>("--format")
+            { Description = "Import format for env files", DefaultValueFactory = _ => "env" };
 
-        cmd.SetAction(async (parseResult, cancellationToken) =>
+        var cmd = new Command("push", "Push environment variables and secret files")
+            { projectOpt, envOpt, fileOpt, formatOpt };
+
+        cmd.SetAction(async (parseResult, ct) =>
         {
             if (!authContext.RequireAuth())
             {
@@ -55,30 +49,28 @@ public sealed class PushCommands(
                 return;
             }
 
-            var selected = ResolveFiles(parseResult.GetValue(fileOpt),
-                () => fileScanner.FindEnvFiles(Directory.GetCurrentDirectory()), "environment");
+            var explicitEnv = parseResult.GetValue(envOpt);
+            var selected = ResolveFiles(parseResult.GetValue(fileOpt));
             if (selected.Count == 0)
             {
                 return;
             }
 
-            var dirMap = await dirMapper.MapAsync(projectId, selected, cancellationToken);
+            var dirMap = await dirMapper.MapAsync(projectId, selected, ct);
             if (dirMap is null)
             {
                 return;
             }
 
             AnsiConsole.WriteLine();
-            var explicitEnv = parseResult.GetValue(envOpt);
-            var hasAmbiguous = selected.Any(f => EnvFileScanner.DetectEnvironmentType(f.FileName) is null);
-            var defaultEnvType = hasAmbiguous
-                ? CommandUtils.ResolveEnvironmentType(explicitEnv, null, prompter)
-                : null;
+            var assignments = envAssigner.AssignEnvironments(selected, explicitEnv);
 
             var client = clientFactory.Create();
-            var totalImported = 0;
+            var envImported = 0;
+            var secretsUploaded = 0;
+            var format = parseResult.GetValue(formatOpt) ?? "env";
 
-            foreach (var file in selected)
+            foreach (var (file, envType) in assignments)
             {
                 var dir = Path.GetDirectoryName(file.RelativePath)?.Replace('\\', '/') ?? ".";
                 if (!dirMap.TryGetValue(dir, out var vaultGroupId))
@@ -89,28 +81,17 @@ public sealed class PushCommands(
 
                 try
                 {
-                    var content = await File.ReadAllTextAsync(file.FullPath, cancellationToken);
-                    var envType = EnvFileScanner.DetectEnvironmentType(file.FileName)
-                                  ?? defaultEnvType ?? "DEVELOPMENT";
-                    var detectedFormat = EnvFileScanner.DetectEnvFormat(file.FileName);
-
-                    var result = await AnsiConsole.Status()
-                        .Spinner(Spinner.Known.Dots)
-                        .StartAsync($"Pushing {file.RelativePath}...", async _ =>
-                            await client.Projects[projectId].Environments.Import.PostAsync(
-                                new ImportNs.ImportPostRequestBody
-                                {
-                                    Content = content,
-                                    VaultGroupId = vaultGroupId,
-                                    EnvironmentType = CommandUtils.ParseEnum(envType,
-                                        ImportNs.ImportPostRequestBody_environmentType.DEVELOPMENT),
-                                    Format = CommandUtils.ParseEnum(detectedFormat,
-                                        ImportNs.ImportPostRequestBody_format.Env)
-                                }, cancellationToken: cancellationToken));
-
-                    var count = (int)(result?.Imported ?? 0);
-                    totalImported += count;
-                    output.PrintSuccess($"  {file.RelativePath}: {count} variables");
+                    if (file.Category == FileCategory.Environment)
+                    {
+                        envImported += await PushEnvFileAsync(
+                            client, projectId, file, vaultGroupId, envType, format, ct);
+                    }
+                    else
+                    {
+                        await PushSecretFileAsync(
+                            client, projectId, file, vaultGroupId, envType, ct);
+                        secretsUploaded++;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -119,91 +100,62 @@ public sealed class PushCommands(
             }
 
             AnsiConsole.WriteLine();
-            output.PrintSuccess($"Imported {totalImported} variables from {selected.Count} file(s).");
+            output.PrintSuccess(
+                $"Imported {envImported} variables from env files, uploaded {secretsUploaded} secret file(s).");
         });
 
         return cmd;
     }
 
-    private Command CreatePushSecretsCommand()
+    private async Task<int> PushEnvFileAsync(
+        ApiClient.ApiClient client, string projectId, DiscoveredFile file,
+        string vaultGroupId, string envType, string format, CancellationToken ct)
     {
-        var projectOpt = new Option<string?>("--project") { Description = "Project ID (defaults to active)" };
-        var envOpt = new Option<string?>("--environment") { Description = "Environment type (prompts if not set)" };
-        var fileOpt = new Option<string?>("--file") { Description = "Single file to upload (discovers if omitted)" };
-        var cmd = new Command("secrets", "Upload secret files") { projectOpt, envOpt, fileOpt };
+        var content = await File.ReadAllTextAsync(file.FullPath, ct);
+        var detectedFormat = EnvFileScanner.DetectEnvFormat(file.FileName);
 
-        cmd.SetAction(async (parseResult, cancellationToken) =>
-        {
-            if (!authContext.RequireAuth())
-            {
-                return;
-            }
+        var result = await AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .StartAsync($"Pushing {file.RelativePath}...", async _ =>
+                await client.Projects[projectId].Environments.Import.PostAsync(
+                    new ImportNs.ImportPostRequestBody
+                    {
+                        Content = content,
+                        VaultGroupId = vaultGroupId,
+                        EnvironmentType = CommandUtils.ParseEnum(envType,
+                            ImportNs.ImportPostRequestBody_environmentType.DEVELOPMENT),
+                        Format = CommandUtils.ParseEnum(detectedFormat,
+                            ImportNs.ImportPostRequestBody_format.Env)
+                    }, cancellationToken: ct));
 
-            var projectId = CommandUtils.RequireProjectId(parseResult, projectOpt, configService, output);
-            if (projectId is null)
-            {
-                return;
-            }
-
-            var selected = ResolveFiles(parseResult.GetValue(fileOpt),
-                () => fileScanner.FindSecretFiles(Directory.GetCurrentDirectory()), "secret");
-            if (selected.Count == 0)
-            {
-                return;
-            }
-
-            var dirMap = await dirMapper.MapAsync(projectId, selected, cancellationToken);
-            if (dirMap is null)
-            {
-                return;
-            }
-
-            AnsiConsole.WriteLine();
-            var envValue = CommandUtils.ResolveEnvironmentType(
-                parseResult.GetValue(envOpt), null, prompter);
-            var client = clientFactory.Create();
-            var uploaded = 0;
-
-            foreach (var file in selected)
-            {
-                var dir = Path.GetDirectoryName(file.RelativePath)?.Replace('\\', '/') ?? ".";
-                if (!dirMap.TryGetValue(dir, out var vaultGroupId))
-                {
-                    AnsiConsole.MarkupLine($"[grey]Skipped {Markup.Escape(file.RelativePath)} (no vault group)[/]");
-                    continue;
-                }
-
-                try
-                {
-                    await AnsiConsole.Status()
-                        .Spinner(Spinner.Known.Dots)
-                        .StartAsync($"Uploading {file.RelativePath}...", async _ =>
-                            await client.Projects[projectId].Secrets.PostAsync(
-                                new SecretsPostRequestBody
-                                {
-                                    VaultGroupId = vaultGroupId,
-                                    EnvironmentType = CommandUtils.ParseEnum(envValue,
-                                        SecretsPostRequestBody_environmentType.DEVELOPMENT)
-                                }, cancellationToken: cancellationToken));
-
-                    output.PrintSuccess($"  {file.RelativePath}");
-                    uploaded++;
-                }
-                catch (Exception ex)
-                {
-                    ApiErrorHandler.HandleError(ex, $"Failed to upload {file.RelativePath}");
-                }
-            }
-
-            AnsiConsole.WriteLine();
-            output.PrintSuccess($"Uploaded {uploaded} secret file(s).");
-        });
-
-        return cmd;
+        var count = (int)(result?.Imported ?? 0);
+        output.PrintSuccess($"  {file.RelativePath}: {count} variables ({envType})");
+        return count;
     }
 
-    private List<DiscoveredFile> ResolveFiles(
-        string? explicitFile, Func<List<DiscoveredFile>> discover, string fileTypeLabel)
+    private async Task PushSecretFileAsync(
+        ApiClient.ApiClient client, string projectId, DiscoveredFile file,
+        string vaultGroupId, string envType, CancellationToken ct)
+    {
+        var fileBytes = await File.ReadAllBytesAsync(file.FullPath, ct);
+
+        await AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .StartAsync($"Uploading {file.RelativePath}...", async _ =>
+                await client.Projects[projectId].Secrets.PostAsync(
+                    new SecretsPostRequestBody
+                    {
+                        File = fileBytes,
+                        Description = file.FileName,
+                        VaultGroupId = vaultGroupId,
+                        EnvironmentType = CommandUtils.ParseEnum(envType,
+                            SecretsPostRequestBody_environmentType.DEVELOPMENT)
+                    }, cancellationToken: ct));
+
+        output.PrintSuccess($"  {file.RelativePath} ({envType})");
+    }
+
+    private List<DiscoveredFile> ResolveFiles(string? explicitFile)
     {
         if (!string.IsNullOrEmpty(explicitFile))
         {
@@ -212,11 +164,11 @@ public sealed class PushCommands(
                 return [];
             }
 
-            var relativePath = Path.GetRelativePath(Directory.GetCurrentDirectory(), explicitFile);
-            return
-            [
-                new DiscoveredFile(explicitFile, relativePath, Path.GetFileName(explicitFile), FileCategory.Environment)
-            ];
+            var fullPath = Path.GetFullPath(explicitFile);
+            var relativePath = Path.GetRelativePath(Directory.GetCurrentDirectory(), fullPath);
+            var fileName = Path.GetFileName(fullPath);
+            var category = fileScanner.ClassifyFile(fileName);
+            return [new DiscoveredFile(fullPath, relativePath, fileName, category)];
         }
 
         if (!prompter.IsInteractive)
@@ -225,13 +177,16 @@ public sealed class PushCommands(
             return [];
         }
 
-        var discovered = discover();
+        var discovered = fileScanner.FindAllPushableFiles(Directory.GetCurrentDirectory());
         if (discovered.Count == 0)
         {
-            output.PrintError($"No {fileTypeLabel} files found in current directory.");
+            output.PrintError("No environment or secret files found in current directory.");
             return [];
         }
 
-        return prompter.MultiSelect($"Select {fileTypeLabel} files to push", discovered, f => f.RelativePath, false);
+        return prompter.MultiSelect("Select files to push", discovered,
+            f => $"[grey]{(f.Category == FileCategory.Environment ? "env" : "secret")}[/] {Markup.Escape(f.RelativePath)}",
+            false);
     }
+
 }

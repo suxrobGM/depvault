@@ -15,6 +15,9 @@ public sealed class AppConfigData
     [JsonPropertyName("activeProjectId")]
     public string? ActiveProjectId { get; set; }
 
+    [JsonPropertyName("activeProjectName")]
+    public string? ActiveProjectName { get; set; }
+
     [JsonPropertyName("outputFormat")]
     public string OutputFormat { get; set; } = "table";
 }

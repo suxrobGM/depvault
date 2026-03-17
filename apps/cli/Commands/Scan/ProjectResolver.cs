@@ -78,6 +78,7 @@ internal sealed class ProjectResolver(
         }
 
         config.ActiveProjectId = match.Id;
+        config.ActiveProjectName = match.Name;
         configService.Save(config);
         return match.Id;
     }
@@ -112,6 +113,7 @@ internal sealed class ProjectResolver(
         }
 
         config.ActiveProjectId = created.Id;
+        config.ActiveProjectName = name;
         configService.Save(config);
         output.PrintSuccess($"Created project '{name}'");
 

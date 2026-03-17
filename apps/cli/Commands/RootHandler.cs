@@ -17,9 +17,10 @@ public sealed class RootHandler(
     {
         rootCommand.SetAction(async (parseResult, cancellationToken) =>
         {
-            var projectName = await ResolveActiveProjectNameAsync(cancellationToken);
+            var config = configService.Load();
+            var projectName = await ResolveActiveProjectNameAsync(config, cancellationToken);
 
-            ConsoleTheme.PrintBanner(projectName);
+            ConsoleTheme.PrintBanner(projectName, config.ActiveProjectId);
             Console.WriteLine(rootCommand.Description);
             Console.WriteLine();
             Console.WriteLine("Usage: depvault [command] [options]");
@@ -32,17 +33,22 @@ public sealed class RootHandler(
         });
     }
 
-    private async Task<string?> ResolveActiveProjectNameAsync(CancellationToken cancellationToken)
+    private async Task<string?> ResolveActiveProjectNameAsync(
+        AppConfigData config, CancellationToken cancellationToken)
     {
-        var config = configService.Load();
         if (config.ActiveProjectId is null)
         {
             return null;
         }
 
+        if (config.ActiveProjectName is not null)
+        {
+            return config.ActiveProjectName;
+        }
+
         if (authContext.GetMode() == AuthMode.None)
         {
-            return config.ActiveProjectId;
+            return null;
         }
 
         try
@@ -50,11 +56,18 @@ public sealed class RootHandler(
             var apiClient = clientFactory.Create();
             var project = await apiClient.Projects[config.ActiveProjectId]
                 .GetAsync(cancellationToken: cancellationToken);
-            return project?.Name ?? config.ActiveProjectId;
+
+            if (project?.Name is not null)
+            {
+                config.ActiveProjectName = project.Name;
+                configService.Save(config);
+            }
+
+            return project?.Name;
         }
         catch
         {
-            return config.ActiveProjectId;
+            return null;
         }
     }
 }

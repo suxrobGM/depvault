@@ -119,20 +119,19 @@ internal sealed class EnvFileScanner(
     /// </summary>
     internal static string? DetectEnvironmentType(string fileName)
     {
-        var lower = fileName.ToLowerInvariant();
-        if (lower.Contains("production") || lower.Contains("prod"))
-        {
-            return "PRODUCTION";
-        }
+        var segments = fileName.ToLowerInvariant().Split(['.', '-', '_']);
 
-        if (lower.Contains("staging") || lower.Contains("stage"))
+        foreach (var segment in segments)
         {
-            return "STAGING";
-        }
-
-        if (lower.Contains("development") || lower.Contains("dev"))
-        {
-            return "DEVELOPMENT";
+            switch (segment)
+            {
+                case "production" or "prod":
+                    return "PRODUCTION";
+                case "staging" or "stage":
+                    return "STAGING";
+                case "development" or "dev":
+                    return "DEVELOPMENT";
+            }
         }
 
         return null;

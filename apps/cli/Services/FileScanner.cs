@@ -16,6 +16,8 @@ public interface IFileScanner
     List<DiscoveredFile> FindDependencyFiles(string rootPath);
     List<DiscoveredFile> FindEnvFiles(string rootPath);
     List<DiscoveredFile> FindSecretFiles(string rootPath);
+    List<DiscoveredFile> FindAllPushableFiles(string rootPath);
+    FileCategory ClassifyFile(string fileName);
 }
 
 public sealed class FileScanner : IFileScanner
@@ -52,6 +54,29 @@ public sealed class FileScanner : IFileScanner
     public List<DiscoveredFile> FindSecretFiles(string rootPath)
     {
         return ScanFiles(rootPath, FileCategory.SecretFile, IsSecretFile);
+    }
+
+    public List<DiscoveredFile> FindAllPushableFiles(string rootPath)
+    {
+        return FindEnvFiles(rootPath)
+            .Concat(FindSecretFiles(rootPath))
+            .OrderBy(f => f.RelativePath)
+            .ToList();
+    }
+
+    public FileCategory ClassifyFile(string fileName)
+    {
+        if (IsEnvFile(fileName))
+        {
+            return FileCategory.Environment;
+        }
+
+        if (IsSecretFile(fileName))
+        {
+            return FileCategory.SecretFile;
+        }
+
+        return FileCategory.Environment; // default for unknown files
     }
 
     private static List<DiscoveredFile> ScanFiles(string rootPath, FileCategory category, Func<string, bool> predicate)

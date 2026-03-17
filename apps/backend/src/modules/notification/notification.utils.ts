@@ -5,6 +5,7 @@ export type NotifyPayload =
       type: "ENV_DRIFT";
       userId: string;
       projectId: string;
+      vaultGroupId: string;
       missingVars: { env: string; variable: string }[];
     }
   | {
@@ -58,7 +59,7 @@ export function createNotificationContent(
       return {
         title: "Environment Drift Detected",
         message: `${payload.missingVars.length} variable${payload.missingVars.length === 1 ? "" : "s"} missing across environments in ${projectName}`,
-        metadata: { ...base, missingVars: payload.missingVars },
+        metadata: { ...base, vaultGroupId: payload.vaultGroupId, missingVars: payload.missingVars },
       };
     case "GIT_SECRET_DETECTION": {
       const count = payload.count ?? 1;
