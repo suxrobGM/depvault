@@ -48,7 +48,7 @@ const TIERS: PricingTier[] = [
   },
   {
     name: "Pro",
-    price: "$10",
+    price: "$5",
     period: "/user/mo",
     description: "For developers and small teams shipping fast",
     features: [
@@ -68,7 +68,7 @@ const TIERS: PricingTier[] = [
   },
   {
     name: "Team",
-    price: "$15",
+    price: "$10",
     period: "/user/mo",
     description: "For organizations that need control and compliance",
     features: [

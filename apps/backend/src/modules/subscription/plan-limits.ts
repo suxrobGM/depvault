@@ -64,8 +64,8 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
 /** Plan pricing in cents for display and MRR calculation */
 export const PLAN_PRICING: Record<SubscriptionPlan, number> = {
   FREE: 0,
-  PRO: 1000,
-  TEAM: 1500,
+  PRO: 500, // $5.00 per user per month
+  TEAM: 1000, // $10.00 per user per month
 };
 
 /** Returns the plan limits for a given plan */

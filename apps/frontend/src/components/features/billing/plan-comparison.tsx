@@ -56,7 +56,7 @@ const PLANS: PlanDef[] = [
   {
     name: "Pro",
     key: SubscriptionPlanName.PRO,
-    price: "$10",
+    price: "$5",
     description: "Per user / month",
     features: [
       "20 projects",
@@ -73,7 +73,7 @@ const PLANS: PlanDef[] = [
   {
     name: "Team",
     key: SubscriptionPlanName.TEAM,
-    price: "$15",
+    price: "$10",
     description: "Per user / month",
     features: [
       "Everything in Pro, unlimited",
