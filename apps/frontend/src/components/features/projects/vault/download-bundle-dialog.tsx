@@ -50,10 +50,10 @@ export function DownloadBundleDialog(props: DownloadBundleDialogProps): ReactEle
   });
 
   const { data: secretFilesData } = useApiQuery<SecretFileListResponse>(
-    ["secret-files", projectId, environmentType, "bundle"],
+    ["secret-files", projectId, "bundle"],
     () =>
       client.api.projects({ id: projectId }).secrets.get({
-        query: { environmentType, page: 1, limit: 100 },
+        query: { page: 1, limit: 100 },
       }),
     { enabled: open },
   );
