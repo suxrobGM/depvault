@@ -1,9 +1,9 @@
 import type { ReactElement } from "react";
 import {
-  GitHub as ConnectIcon,
+  CloudDownload as PullIcon,
+  CloudUpload as PushIcon,
   BugReport as ScanIcon,
-  Share as ShareIcon,
-  Lock as StoreIcon,
+  Terminal as TerminalIcon,
 } from "@mui/icons-material";
 import { Box, Grid, Stack, Typography } from "@mui/material";
 import { GlassCard, GradientText } from "@/components/ui/cards";
@@ -12,31 +12,31 @@ import { SectionContainer } from "@/components/ui/containers";
 const steps = [
   {
     number: "01",
-    icon: <ConnectIcon sx={{ fontSize: 28 }} />,
-    title: "Connect",
+    icon: <TerminalIcon sx={{ fontSize: 28 }} />,
+    title: "Install",
     description:
-      "Link your GitHub repo or upload dependency files from any ecosystem — package.json, requirements.txt, Cargo.toml, go.mod, and more.",
+      "Install the CLI with a single command. Works on macOS, Linux, and Windows — Native AOT binary, no runtime needed.",
   },
   {
     number: "02",
     icon: <ScanIcon sx={{ fontSize: 28 }} />,
     title: "Scan",
     description:
-      "Detect outdated packages, known CVEs, license conflicts, and secrets accidentally committed to your git history.",
+      "Run depvault scan in your repo to analyze dependencies, detect vulnerabilities, find leaked secrets, and discover env files — all at once.",
   },
   {
     number: "03",
-    icon: <StoreIcon sx={{ fontSize: 28 }} />,
-    title: "Store",
+    icon: <PushIcon sx={{ fontSize: 28 }} />,
+    title: "Push",
     description:
-      "Encrypt env variables and secret files — SSL certs, private keys, keystores, credentials — with AES-256-GCM in a zero-plaintext vault.",
+      "Push .env files and secret keys to the encrypted vault. Pick environments per file — development, staging, production — in one interactive flow.",
   },
   {
     number: "04",
-    icon: <ShareIcon sx={{ fontSize: 28 }} />,
-    title: "Share",
+    icon: <PullIcon sx={{ fontSize: 28 }} />,
+    title: "Pull",
     description:
-      "Onboard teammates with setup checklists, share secrets via one-time encrypted links, and inject credentials into CI/CD pipelines.",
+      "Teammates pull secrets with depvault pull. CI/CD pipelines use scoped tokens. No .env files in Slack, no secrets in git.",
   },
 ];
 
@@ -53,7 +53,7 @@ export function HowItWorksSection(): ReactElement {
           textAlign="center"
           sx={{ mb: 6, maxWidth: 500, mx: "auto" }}
         >
-          From repo to secure in four simple steps
+          From install to secure in four CLI commands
         </Typography>
         <Grid container spacing={4}>
           {steps.map((step, i) => (

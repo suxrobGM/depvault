@@ -7,9 +7,9 @@ public sealed class AppConfigData
 {
     [JsonPropertyName("server")]
 #if DEBUG
-    public string Server { get; set; } = "http://localhost:4000/api";
+    public string Server { get; set; } = "http://localhost:4000";
 #else
-    public string Server { get; set; } = "https://depvault.com/api";
+    public string Server { get; set; } = "https://depvault.com";
 #endif
 
     [JsonPropertyName("activeProjectId")]

@@ -2,11 +2,11 @@ import type { ReactElement, ReactNode } from "react";
 import {
   FolderZip as BundlerIcon,
   Rocket as CiCdIcon,
+  Terminal as CliIcon,
   SwapHoriz as ConverterIcon,
+  CompareArrows as DiffIcon,
   GitHub as GitIcon,
   Description as LicenseIcon,
-  Checklist as OnboardingIcon,
-  Autorenew as RotationIcon,
   ContentCopy as TemplateIcon,
 } from "@mui/icons-material";
 import { Box, CardContent, Grid, Stack, Typography } from "@mui/material";
@@ -25,10 +25,10 @@ interface MoreFeature {
 
 const moreFeatures: MoreFeature[] = [
   {
-    icon: <LicenseIcon />,
-    title: "License Compliance",
+    icon: <CliIcon />,
+    title: "CLI-First Workflow",
     description:
-      "Detect license types per dependency, configure allow/warn/block policies, and export audit reports.",
+      "Native AOT binary — no runtime needed. Scan, push, and pull from your terminal. Browser-based login, interactive prompts, and CI/CD token mode.",
     color: "var(--mui-palette-primary-main)",
   },
   {
@@ -46,10 +46,10 @@ const moreFeatures: MoreFeature[] = [
     color: "var(--mui-palette-info-light)",
   },
   {
-    icon: <RotationIcon />,
-    title: "Secret Rotation & Alerts",
+    icon: <DiffIcon />,
+    title: "Environment Diff",
     description:
-      "Set rotation policies per variable, track age with visual indicators, and receive alerts when rotation is due.",
+      "Compare variables across development, staging, and production. Spot missing keys and drift before they cause outages.",
     color: "var(--mui-palette-secondary-main)",
   },
   {
@@ -67,10 +67,10 @@ const moreFeatures: MoreFeature[] = [
     color: "#fb923c",
   },
   {
-    icon: <OnboardingIcon />,
-    title: "Onboarding Checklist",
+    icon: <LicenseIcon />,
+    title: "License Compliance",
     description:
-      "Mark variables as required for local setup. New team members see a guided checklist and download .env.example in one click.",
+      "Detect license types per dependency, configure allow/warn/block policies, and export audit reports.",
     color: "#38bdf8",
   },
   {

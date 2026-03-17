@@ -5,9 +5,9 @@ import { SectionContainer } from "@/components/ui/containers";
 
 const stats = [
   { value: "8+", label: "Ecosystems supported" },
-  { value: "500+", label: "Packages per analysis" },
+  { value: "1 cmd", label: "To scan your entire repo" },
   { value: "AES-256", label: "Encryption standard" },
-  { value: "<2s", label: "Dashboard load time" },
+  { value: "3 OS", label: "macOS, Linux, Windows" },
 ];
 
 export function StatsSection(): ReactElement {
