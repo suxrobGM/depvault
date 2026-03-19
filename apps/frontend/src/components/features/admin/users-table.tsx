@@ -61,7 +61,7 @@ export function UsersTable(): ReactElement {
 
   return (
     <Box>
-      <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+      <Stack direction="row" spacing={2} sx={{ mb: 3, flexWrap: "wrap", gap: 2 }}>
         <TextField
           placeholder="Search by name or email..."
           size="small"
@@ -79,7 +79,7 @@ export function UsersTable(): ReactElement {
               ),
             },
           }}
-          sx={{ minWidth: 300 }}
+          sx={{ minWidth: { xs: "100%", sm: 300 } }}
         />
         <SelectField
           value={planFilter}

@@ -1,6 +1,5 @@
 import { Suspense, type PropsWithChildren, type ReactElement } from "react";
 import { UserRole } from "@depvault/shared/constants";
-import { Box } from "@mui/material";
 import { redirect } from "next/navigation";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { getServerClient } from "@/lib/api-server";
@@ -15,7 +14,7 @@ async function getUser() {
   return data;
 }
 
-async function AuthenticatedAdminShell(props: PropsWithChildren): Promise<ReactElement> {
+async function AuthenticatedAdminSidebar(props: PropsWithChildren): Promise<ReactElement> {
   const { children } = props;
   const user = await getUser();
 
@@ -26,12 +25,7 @@ async function AuthenticatedAdminShell(props: PropsWithChildren): Promise<ReactE
   return (
     <AuthProvider initialUser={user}>
       <PlanLimitProvider>
-        <Box sx={{ display: "flex", minHeight: "100vh" }}>
-          <AdminSidebar />
-          <Box component="main" sx={{ flex: 1, p: 3, ml: "260px" }}>
-            {children}
-          </Box>
-        </Box>
+        <AdminSidebar>{children}</AdminSidebar>
       </PlanLimitProvider>
     </AuthProvider>
   );
@@ -44,7 +38,7 @@ export default function AdminLayout(props: PropsWithChildren): ReactElement {
       <NotificationProvider>
         <ConfirmProvider>
           <Suspense>
-            <AuthenticatedAdminShell>{children}</AuthenticatedAdminShell>
+            <AuthenticatedAdminSidebar>{children}</AuthenticatedAdminSidebar>
           </Suspense>
         </ConfirmProvider>
       </NotificationProvider>

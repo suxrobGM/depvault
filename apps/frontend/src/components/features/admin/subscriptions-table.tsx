@@ -63,7 +63,7 @@ export function SubscriptionsTable(): ReactElement {
 
   return (
     <Box>
-      <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+      <Stack direction="row" spacing={2} sx={{ mb: 3, flexWrap: "wrap", gap: 2 }}>
         <SelectField
           value={planFilter}
           onChange={(v) => {

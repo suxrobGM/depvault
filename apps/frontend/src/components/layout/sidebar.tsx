@@ -1,8 +1,9 @@
 "use client";
 
 import { type ReactElement } from "react";
-import { DEFAULT_ROLES, SubscriptionPlanName } from "@depvault/shared/constants";
+import { DEFAULT_ROLES, SubscriptionPlanName, UserRole } from "@depvault/shared/constants";
 import {
+  AdminPanelSettings as AdminPanelSettingsIcon,
   ChevronLeft as ChevronLeftIcon,
   CreditCard as CreditCardIcon,
   Dashboard as DashboardIcon,
@@ -79,6 +80,7 @@ export function Sidebar(props: SidebarProps): ReactElement {
   const { user } = useAuth();
   const { plan } = useSubscription();
   const showRoleBadge = user?.role && !DEFAULT_ROLES.has(user.role);
+  const isAdmin = user?.role === UserRole.ADMIN || user?.role === UserRole.SUPER_ADMIN;
 
   const planBadgeColor =
     plan === SubscriptionPlanName.TEAM
@@ -143,6 +145,35 @@ export function Sidebar(props: SidebarProps): ReactElement {
           );
         })}
       </List>
+      {isAdmin && (
+        <>
+          <Divider />
+          <List sx={{ px: open ? 1 : 0.5 }}>
+            <ListItemButton
+              selected={pathname.startsWith(ROUTES.admin)}
+              onClick={() => {
+                router.push(ROUTES.admin as Route);
+                onMobileClose();
+              }}
+              sx={{
+                justifyContent: open ? "initial" : "center",
+                px: open ? 2 : 1.5,
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  minWidth: open ? 40 : "auto",
+                  justifyContent: "center",
+                  color: pathname.startsWith(ROUTES.admin) ? "primary.main" : "text.secondary",
+                }}
+              >
+                <AdminPanelSettingsIcon />
+              </ListItemIcon>
+              {open && <ListItemText primary="Admin" />}
+            </ListItemButton>
+          </List>
+        </>
+      )}
       <FeedbackMenu open={open} />
       <Divider />
       {user && (
