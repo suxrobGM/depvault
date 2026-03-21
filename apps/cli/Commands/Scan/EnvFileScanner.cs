@@ -64,9 +64,9 @@ internal sealed class EnvFileScanner(
 
             try
             {
-                var count = await envImporter.ImportAsync(projectId, file, vaultGroupId, envType, ct);
-                results.EnvVariablesPushed += count;
-                output.PrintSuccess($"Imported {count} variables from {file.RelativePath} ({envType})");
+                var result = await envImporter.ImportAsync(projectId, file, vaultGroupId, envType, ct);
+                results.EnvVariablesPushed += result.Imported;
+                output.PrintSuccess($"Imported {result.Imported} variables from {file.RelativePath} ({envType})");
             }
             catch (Exception ex)
             {

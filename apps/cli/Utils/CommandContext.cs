@@ -1,4 +1,5 @@
 using System.CommandLine;
+using DepVault.Cli.Auth;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
@@ -13,16 +14,42 @@ public enum AuthMode
     Jwt
 }
 
+/// <summary>Auth + project ID + API client resolved in one step.</summary>
+public sealed record ProjectContext(string ProjectId, ApiClient.ApiClient Client);
+
 /// <summary>Bundles the shared deps that every command needs (auth, config, output, prompter).</summary>
 public sealed class CommandContext(
     ICredentialStore credentialStore,
     IConfigService configService,
     IOutputFormatter output,
-    IConsolePrompter prompter)
+    IConsolePrompter prompter,
+    IApiClientFactory clientFactory)
 {
     public IOutputFormatter Output => output;
     public IConsolePrompter Prompter => prompter;
     public IConfigService Config => configService;
+
+    /// <summary>
+    /// One-call guard: checks auth, resolves project ID (with folder auto-detection), prints
+    /// the project banner, and creates the API client. Returns null when any step fails.
+    /// </summary>
+    public async Task<ProjectContext?> RequireProjectContextAsync(
+        ParseResult parseResult, Option<string?> projectOpt, CancellationToken ct = default)
+    {
+        if (!RequireAuth())
+        {
+            return null;
+        }
+
+        var projectId = await RequireProjectIdAsync(parseResult, projectOpt, ct);
+        if (projectId is null)
+        {
+            return null;
+        }
+
+        PrintProjectBanner();
+        return new ProjectContext(projectId, clientFactory.Create());
+    }
 
     public AuthMode GetAuthMode()
     {
@@ -47,21 +74,127 @@ public sealed class CommandContext(
 
     public bool IsCiMode() => GetAuthMode() == AuthMode.CiToken;
 
-    /// <summary>Resolves project ID from the CLI option or active config.</summary>
-    public string? RequireProjectId(ParseResult parseResult, Option<string?> projectOpt)
-        => RequireProjectId(parseResult.GetValue(projectOpt));
-
-    /// <summary>Resolves project ID from explicit value or active config.</summary>
-    public string? RequireProjectId(string? projectId)
+    /// <summary>Resolves project ID from the CLI option, active config, or folder-name auto-detection.</summary>
+    public Task<string?> RequireProjectIdAsync(
+        ParseResult parseResult, Option<string?> projectOpt, CancellationToken ct = default)
     {
-        projectId ??= configService.Load().ActiveProjectId;
-        if (string.IsNullOrEmpty(projectId))
+        var explicit_ = parseResult.GetValue(projectOpt);
+        if (!string.IsNullOrEmpty(explicit_))
         {
-            output.PrintError("No project specified. Use --project or 'depvault project select <id>'.");
-            return null;
+            return Task.FromResult<string?>(explicit_);
         }
 
-        return projectId;
+        return RequireProjectIdAsync(ct);
+    }
+
+    /// <summary>Resolves project ID from active config or folder-name auto-detection.</summary>
+    public async Task<string?> RequireProjectIdAsync(CancellationToken ct = default)
+    {
+        var config = configService.Load();
+        if (!string.IsNullOrEmpty(config.ActiveProjectId))
+        {
+            return config.ActiveProjectId;
+        }
+
+        // Auto-detect from folder name
+        if (GetAuthMode() != AuthMode.None)
+        {
+            var resolved = await ResolveProjectFromDirectoryAsync(ct);
+            if (resolved is not null)
+            {
+                return resolved;
+            }
+        }
+
+        output.PrintError("No project specified. Use --project or 'depvault project select <id>'.");
+        return null;
+    }
+
+    /// <summary>Prints a compact one-liner showing the active project name and ID.</summary>
+    public void PrintProjectBanner()
+    {
+        var config = configService.Load();
+        if (config.ActiveProjectId is null)
+        {
+            return;
+        }
+
+        if (config.ActiveProjectName is not null)
+        {
+            AnsiConsole.MarkupLine(
+                $"[cyan1]Project:[/] {Markup.Escape(config.ActiveProjectName)} [grey]({Markup.Escape(config.ActiveProjectId)})[/]");
+        }
+        else
+        {
+            AnsiConsole.MarkupLine($"[cyan1]Project:[/] {Markup.Escape(config.ActiveProjectId)}");
+        }
+    }
+
+    private async Task<string?> ResolveProjectFromDirectoryAsync(CancellationToken ct)
+    {
+        try
+        {
+            var candidateNames = GetDirectoryCandidates();
+            if (candidateNames.Count == 0)
+            {
+                return null;
+            }
+
+            var apiClient = clientFactory.Create();
+            var result = await apiClient.Api.Projects.GetAsync(config =>
+            {
+                config.QueryParameters.Page = 1;
+                config.QueryParameters.Limit = 100;
+            }, ct);
+
+            var items = result?.Items;
+            if (items is null || items.Count == 0)
+            {
+                return null;
+            }
+
+            foreach (var candidate in candidateNames)
+            {
+                var match = items.FirstOrDefault(p =>
+                    string.Equals(p.Name, candidate, StringComparison.OrdinalIgnoreCase));
+
+                if (match?.Id is not null)
+                {
+                    var config = configService.Load();
+                    config.ActiveProjectId = match.Id;
+                    config.ActiveProjectName = match.Name;
+                    configService.Save(config);
+
+                    AnsiConsole.MarkupLine(
+                        $"[green]Auto-detected project:[/] {Markup.Escape(match.Name ?? match.Id)} [grey](matched folder \"{Markup.Escape(candidate)}\")[/]");
+                    return match.Id;
+                }
+            }
+
+            return null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static List<string> GetDirectoryCandidates()
+    {
+        var candidates = new List<string>();
+        var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
+
+        for (var i = 0; i < 3 && dir is not null; i++)
+        {
+            if (!string.IsNullOrEmpty(dir.Name))
+            {
+                candidates.Add(dir.Name);
+            }
+
+            dir = dir.Parent;
+        }
+
+        return candidates;
     }
 
     /// <summary>Checks file exists and prints error if not.</summary>

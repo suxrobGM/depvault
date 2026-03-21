@@ -7,12 +7,15 @@ using ImportNs = DepVault.Cli.ApiClient.Api.Projects.Item.Environments.Import;
 
 namespace DepVault.Cli.Commands.Push;
 
+/// <summary>Result of an environment file import containing count and imported variable keys.</summary>
+internal sealed record ImportResult(int Imported, HashSet<string> ImportedKeys);
+
 /// <summary>
-/// Pushes an environment file to the DepVault API and returns the imported variable count.
+/// Pushes an environment file to the DepVault API and returns the imported variable count and keys.
 /// </summary>
 internal sealed class EnvImporter(IApiClientFactory clientFactory)
 {
-    public async Task<int> ImportAsync(
+    public async Task<ImportResult> ImportAsync(
         string projectId, DiscoveredFile file, string vaultGroupId,
         string envType, CancellationToken ct)
     {
@@ -32,6 +35,18 @@ internal sealed class EnvImporter(IApiClientFactory clientFactory)
                         Format = CommandUtils.ParseEnum(format, ImportNs.ImportPostRequestBody_format.Env)
                     }, cancellationToken: ct));
 
-        return (int)(result?.Imported ?? 0);
+        var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (result?.Variables is not null)
+        {
+            foreach (var v in result.Variables)
+            {
+                if (v.Key is not null)
+                {
+                    keys.Add(v.Key);
+                }
+            }
+        }
+
+        return new ImportResult((int)(result?.Imported ?? 0), keys);
     }
 }

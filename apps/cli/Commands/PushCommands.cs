@@ -14,42 +14,41 @@ internal sealed class PushCommands(
     DirectoryVaultGroupMapper dirMapper,
     FileEnvironmentAssigner envAssigner,
     EnvImporter envImporter,
-    SecretFileScanner secretFileScanner)
+    SecretFileScanner secretFileScanner,
+    StaleVariableCleaner staleVariableCleaner)
 {
     public Command CreatePushCommand()
     {
         var projectOpt = new Option<string?>("--project") { Description = "Project ID (defaults to active)" };
         var envOpt = new Option<string?>("--environment")
-            { Description = "Environment type (prompts per file if not set)" };
+        { Description = "Environment type (prompts per file if not set)" };
         var fileOpt = new Option<string?>("--file")
-            { Description = "Single file to push (auto-discovers if omitted)" };
+        { Description = "Single file to push (auto-discovers if omitted)" };
         var formatOpt = new Option<string>("--format")
-            { Description = "Import format for env files", DefaultValueFactory = _ => "env" };
+        { Description = "Import format for env files", DefaultValueFactory = _ => "env" };
+        var noSyncOpt = new Option<bool>("--no-sync")
+        { Description = "Skip removing stale variables that are no longer in the pushed file" };
 
         var cmd = new Command("push", "Push environment variables and secret files")
-            { projectOpt, envOpt, fileOpt, formatOpt };
+            { projectOpt, envOpt, fileOpt, formatOpt, noSyncOpt };
 
         cmd.SetAction(async (parseResult, ct) =>
         {
-            if (!ctx.RequireAuth())
-            {
-                return;
-            }
-
-            var projectId = ctx.RequireProjectId(parseResult, projectOpt);
-            if (projectId is null)
+            var pc = await ctx.RequireProjectContextAsync(parseResult, projectOpt, ct);
+            if (pc is null)
             {
                 return;
             }
 
             var explicitEnv = parseResult.GetValue(envOpt);
+            var noSync = parseResult.GetValue(noSyncOpt);
             var selected = ResolveFiles(parseResult.GetValue(fileOpt));
             if (selected.Count == 0)
             {
                 return;
             }
 
-            var dirMap = await dirMapper.MapAsync(projectId, selected, ct);
+            var dirMap = await dirMapper.MapAsync(pc.ProjectId, selected, ct);
             if (dirMap is null)
             {
                 return;
@@ -60,6 +59,7 @@ internal sealed class PushCommands(
 
             var envImported = 0;
             var secretsUploaded = 0;
+            var importedGroups = new List<(string VaultGroupId, string EnvType, HashSet<string> Keys)>();
 
             foreach (var (file, envType) in assignments)
             {
@@ -74,14 +74,15 @@ internal sealed class PushCommands(
                 {
                     if (file.Category == FileCategory.Environment)
                     {
-                        var count = await envImporter.ImportAsync(
-                            projectId, file, vaultGroupId, envType, ct);
-                        ctx.Output.PrintSuccess($"  {file.RelativePath}: {count} variables ({envType})");
-                        envImported += count;
+                        var result = await envImporter.ImportAsync(
+                            pc.ProjectId, file, vaultGroupId, envType, ct);
+                        ctx.Output.PrintSuccess($"  {file.RelativePath}: {result.Imported} variables ({envType})");
+                        envImported += result.Imported;
+                        importedGroups.Add((vaultGroupId, envType, result.ImportedKeys));
                     }
                     else
                     {
-                        await secretFileScanner.UploadAsync(projectId, file, vaultGroupId, ct);
+                        await secretFileScanner.UploadAsync(pc.ProjectId, file, vaultGroupId, ct);
                         ctx.Output.PrintSuccess($"  {file.RelativePath}");
                         secretsUploaded++;
                     }
@@ -92,9 +93,34 @@ internal sealed class PushCommands(
                 }
             }
 
+            // Sync: remove stale variables not present in pushed files
+            var totalDeleted = 0;
+            if (!noSync && importedGroups.Count > 0)
+            {
+                AnsiConsole.WriteLine();
+                foreach (var (vaultGroupId, envType, keys) in importedGroups)
+                {
+                    try
+                    {
+                        var deleted = await staleVariableCleaner.CleanAsync(
+                            pc.ProjectId, vaultGroupId, envType, keys, ct);
+                        totalDeleted += deleted;
+                    }
+                    catch (Exception ex)
+                    {
+                        ApiErrorHandler.HandleError(ex, $"Failed to clean stale variables for {envType}");
+                    }
+                }
+            }
+
             AnsiConsole.WriteLine();
-            ctx.Output.PrintSuccess(
-                $"Imported {envImported} variables from env files, uploaded {secretsUploaded} secret file(s).");
+            var summary = $"Imported {envImported} variables from env files, uploaded {secretsUploaded} secret file(s).";
+            if (totalDeleted > 0)
+            {
+                summary += $" Removed {totalDeleted} stale variable(s).";
+            }
+
+            ctx.Output.PrintSuccess(summary);
         });
 
         return cmd;

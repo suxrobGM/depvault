@@ -162,21 +162,16 @@ public sealed class ProjectCommands(
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
-            if (!ctx.RequireAuth())
-            {
-                return;
-            }
-
-            var id = ctx.RequireProjectId(parseResult, projectOpt);
-            if (id is null)
+            var pc = await ctx.RequireProjectContextAsync(parseResult, projectOpt, cancellationToken);
+            if (pc is null)
             {
                 return;
             }
 
             try
             {
-                var client = clientFactory.Create();
-                var project = await client.Api.Projects[id].GetAsync(cancellationToken: cancellationToken);
+                var project = await pc.Client.Api.Projects[pc.ProjectId]
+                    .GetAsync(cancellationToken: cancellationToken);
 
                 ctx.Output.PrintKeyValue("ID", project?.Id);
                 ctx.Output.PrintKeyValue("Name", project?.Name);

@@ -47,6 +47,7 @@ internal static class Startup
             .AddSingleton<SecretsPuller>()
             .AddSingleton<FileEnvironmentAssigner>()
             .AddSingleton<EnvImporter>()
+            .AddSingleton<StaleVariableCleaner>()
             // Commands
             .AddSingleton<AuthCommands>()
             .AddSingleton<ConfigCommands>()

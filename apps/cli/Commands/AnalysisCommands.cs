@@ -26,13 +26,8 @@ public sealed class AnalysisCommands(
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
-            if (!ctx.RequireAuth())
-            {
-                return;
-            }
-
-            var projectId = ctx.RequireProjectId(parseResult, projectOpt);
-            if (projectId is null)
+            var pc = await ctx.RequireProjectContextAsync(parseResult, projectOpt, cancellationToken);
+            if (pc is null)
             {
                 return;
             }
@@ -61,7 +56,7 @@ public sealed class AnalysisCommands(
                 var result = await AnsiConsole.Status()
                     .Spinner(Spinner.Known.Dots)
                     .StartAsync($"Analyzing {fileName} ({ecosystem})...", async _ =>
-                        await analysisClient.AnalyzeFileAsync(projectId, fileName, content, ecosystem,
+                        await analysisClient.AnalyzeFileAsync(pc.ProjectId, fileName, content, ecosystem,
                             cancellationToken));
 
                 if (result is null)

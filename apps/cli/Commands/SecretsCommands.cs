@@ -1,14 +1,11 @@
 using System.CommandLine;
-using DepVault.Cli.Auth;
 using DepVault.Cli.Utils;
 using Spectre.Console;
 using SecretListNs = DepVault.Cli.ApiClient.Api.Projects.Item.Secrets;
 
 namespace DepVault.Cli.Commands;
 
-public sealed class SecretsCommands(
-    IApiClientFactory clientFactory,
-    CommandContext ctx)
+public sealed class SecretsCommands(CommandContext ctx)
 {
     public Command CreateSecretsCommand()
     {
@@ -23,28 +20,22 @@ public sealed class SecretsCommands(
         var projectOpt = new Option<string?>("--project") { Description = "Project ID" };
         var envOpt = new Option<string?>("--environment") { Description = "Environment type filter" };
         var outputOpt = new Option<string>("--output")
-            { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
+        { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
 
         var cmd = new Command("list", "List secret file metadata")
             { projectOpt, envOpt, outputOpt };
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
-            if (!ctx.RequireAuth())
-            {
-                return;
-            }
-
-            var projectId = ctx.RequireProjectId(parseResult, projectOpt);
-            if (projectId is null)
+            var pc = await ctx.RequireProjectContextAsync(parseResult, projectOpt, cancellationToken);
+            if (pc is null)
             {
                 return;
             }
 
             try
             {
-                var client = clientFactory.Create();
-                var result = await client.Api.Projects[projectId].Secrets.GetAsync(config =>
+                var result = await pc.Client.Api.Projects[pc.ProjectId].Secrets.GetAsync(config =>
                 {
                     var env = parseResult.GetValue(envOpt);
                     if (!string.IsNullOrEmpty(env))
