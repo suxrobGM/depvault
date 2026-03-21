@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using DepVault.Cli.Utils;
 
 namespace DepVault.Cli.Services;
@@ -51,7 +52,8 @@ public sealed class FileScanner : IFileScanner
 
     public List<DiscoveredFile> FindEnvFiles(string rootPath)
     {
-        return ScanFiles(rootPath, FileCategory.Environment, IsEnvFile);
+        var files = ScanFiles(rootPath, FileCategory.Environment, IsEnvFile);
+        return FilterGitTrackedConfigFiles(rootPath, files);
     }
 
     public List<DiscoveredFile> FindSecretFiles(string rootPath)
@@ -121,6 +123,10 @@ public sealed class FileScanner : IFileScanner
         return results.OrderBy(f => f.RelativePath).ToList();
     }
 
+    /// <summary>
+    /// Filters out files in excluded directories like node_modules, vendor, .git, etc.
+    /// This is important to avoid suggesting irrelevant files for push/pull and to prevent accidental large uploads.
+    /// </summary>
     private static bool IsInExcludedDirectory(string filePath, string rootPath)
     {
         var relativePath = Path.GetRelativePath(rootPath, filePath);
@@ -187,5 +193,79 @@ public sealed class FileScanner : IFileScanner
         }
 
         return secretFileNamePatterns.Any(p => fileName.Contains(p, StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// Filters out config files (appsettings.json, secrets.yaml, config.toml) that are tracked
+    /// by git. Tracked config files typically contain placeholders, not real secrets.
+    /// Only gitignored/untracked config files are suggested for push/pull.
+    /// Plain .env files are always included regardless of git status.
+    /// </summary>
+    private static List<DiscoveredFile> FilterGitTrackedConfigFiles(string rootPath, List<DiscoveredFile> files)
+    {
+        var configFiles = files.Where(f => IsConfigStyleFile(f.FileName)).ToList();
+        if (configFiles.Count == 0)
+        {
+            return files;
+        }
+
+        var gitIgnored = GetGitIgnoredPaths(rootPath, configFiles);
+
+        return files
+            .Where(f => !IsConfigStyleFile(f.FileName) || gitIgnored.Contains(f.RelativePath))
+            .ToList();
+    }
+
+    private static bool IsConfigStyleFile(string fileName)
+    {
+        return fileName.StartsWith("appsettings", StringComparison.OrdinalIgnoreCase)
+               || fileName.Equals("secrets.yaml", StringComparison.OrdinalIgnoreCase)
+               || fileName.Equals("secrets.yml", StringComparison.OrdinalIgnoreCase)
+               || fileName.Equals("config.toml", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static HashSet<string> GetGitIgnoredPaths(string rootPath, List<DiscoveredFile> files)
+    {
+        var ignored = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        try
+        {
+            var paths = string.Join('\n', files.Select(f => f.RelativePath));
+            var psi = new ProcessStartInfo("git", "check-ignore --stdin")
+            {
+                WorkingDirectory = rootPath,
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(psi);
+            if (process is null)
+            {
+                return ignored;
+            }
+
+            process.StandardInput.Write(paths);
+            process.StandardInput.Close();
+
+            var output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit(5000);
+
+            foreach (var line in output.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+            {
+                ignored.Add(line.Trim().Replace('\\', '/'));
+            }
+        }
+        catch
+        {
+            // Not a git repo or git not available — include all files
+            foreach (var f in files)
+            {
+                ignored.Add(f.RelativePath);
+            }
+        }
+
+        return ignored;
     }
 }
