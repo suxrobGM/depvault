@@ -94,49 +94,25 @@ public sealed class EnvPuller(
 
     private static string DecryptAndSerialize(List<ExportEntries> entries, byte[] dek, string format)
     {
-        var pairs = new List<KeyValuePair<string, string>>();
+        var pairs = new List<ParsedEnvEntry>();
 
         foreach (var entry in entries)
         {
             var value = VaultCrypto.Decrypt(
                 entry.EncryptedValue ?? "", entry.Iv ?? "", entry.AuthTag ?? "", dek);
-            pairs.Add(new KeyValuePair<string, string>(entry.Key ?? "", value));
+
+            string? comment = null;
+            if (!string.IsNullOrEmpty(entry.EncryptedComment) &&
+                !string.IsNullOrEmpty(entry.CommentIv) &&
+                !string.IsNullOrEmpty(entry.CommentAuthTag))
+            {
+                comment = VaultCrypto.Decrypt(entry.EncryptedComment, entry.CommentIv, entry.CommentAuthTag, dek);
+            }
+
+            pairs.Add(new ParsedEnvEntry(entry.Key ?? "", value, comment));
         }
 
-        if (pairs.Count == 0)
-        {
-            return "";
-        }
-
-        return SerializeToFormat(pairs, format);
-    }
-
-    private static string SerializeToFormat(List<KeyValuePair<string, string>> pairs, string format)
-    {
-        if (format.Equals("env", StringComparison.OrdinalIgnoreCase))
-        {
-            return string.Join('\n', pairs.Select(p => $"{p.Key}={EscapeEnvValue(p.Value)}")) + "\n";
-        }
-
-        if (format.Contains("json", StringComparison.OrdinalIgnoreCase))
-        {
-            var obj = new Dictionary<string, string>();
-            foreach (var p in pairs) obj[p.Key] = p.Value;
-            return System.Text.Json.JsonSerializer.Serialize(obj,
-                CryptoJsonContext.Default.DictionaryStringString) + "\n";
-        }
-
-        return string.Join('\n', pairs.Select(p => $"{p.Key}={EscapeEnvValue(p.Value)}")) + "\n";
-    }
-
-    private static string EscapeEnvValue(string value)
-    {
-        if (value.Contains('"') || value.Contains('\n') || value.Contains(' ') || value.Contains('#'))
-        {
-            return $"\"{value.Replace("\\", "\\\\").Replace("\"", "\\\"")}\"";
-        }
-
-        return value;
+        return EnvFormatUtils.Serialize(pairs, format);
     }
 
     internal static string ResolveEnvFilePath(VaultGroupsModel group, int totalGroups, string outputDir)

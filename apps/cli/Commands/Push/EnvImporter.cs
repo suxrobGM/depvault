@@ -1,4 +1,3 @@
-using System.Text.Json;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Commands.Scan;
 using DepVault.Cli.Crypto;
@@ -55,22 +54,35 @@ internal sealed class EnvImporter(
 
         var content = await File.ReadAllTextAsync(file.FullPath, ct);
         var format = EnvFileScanner.DetectEnvFormat(file.FileName);
-        var pairs = ParseKeyValuePairs(content, format);
+        var pairs = EnvFormatUtils.Parse(content, format);
 
         var entries = new List<ImportEntry>();
         var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var index = 0;
 
-        foreach (var (key, value) in pairs)
+        foreach (var entry in pairs)
         {
-            var (ciphertext, iv, authTag) = VaultCrypto.Encrypt(value, cachedDek!);
-            entries.Add(new ImportEntry
+            var (ciphertext, iv, authTag) = VaultCrypto.Encrypt(entry.Value, cachedDek!);
+            var importEntry = new ImportEntry
             {
-                Key = key,
+                Key = entry.Key,
                 EncryptedValue = ciphertext,
                 Iv = iv,
-                AuthTag = authTag
-            });
-            keys.Add(key);
+                AuthTag = authTag,
+                SortOrder = index
+            };
+
+            if (entry.Comment is not null)
+            {
+                var (commentCt, commentIv, commentTag) = VaultCrypto.Encrypt(entry.Comment, cachedDek!);
+                importEntry.EncryptedComment = commentCt;
+                importEntry.CommentIv = commentIv;
+                importEntry.CommentAuthTag = commentTag;
+            }
+
+            entries.Add(importEntry);
+            keys.Add(entry.Key);
+            index++;
         }
 
         var result = await AnsiConsole.Status()
@@ -97,99 +109,5 @@ internal sealed class EnvImporter(
             .PostAsync(body, cancellationToken: ct);
 
         return (int?)response?.Imported;
-    }
-
-    internal static List<KeyValuePair<string, string>> ParseKeyValuePairs(string content, string format)
-    {
-        if (format.Contains("json", StringComparison.OrdinalIgnoreCase))
-        {
-            return ParseJsonPairs(content);
-        }
-
-        return ParseEnvPairs(content);
-    }
-
-    private static List<KeyValuePair<string, string>> ParseEnvPairs(string content)
-    {
-        var pairs = new List<KeyValuePair<string, string>>();
-
-        foreach (var rawLine in content.Split('\n'))
-        {
-            var line = rawLine.Trim();
-            if (line.Length == 0 || line[0] == '#')
-            {
-                continue;
-            }
-
-            var eqIndex = line.IndexOf('=');
-            if (eqIndex <= 0)
-            {
-                continue;
-            }
-
-            var key = line[..eqIndex].Trim();
-            var value = line[(eqIndex + 1)..].Trim();
-
-            // Strip surrounding quotes
-            if (value.Length >= 2 &&
-                ((value[0] == '"' && value[^1] == '"') ||
-                 (value[0] == '\'' && value[^1] == '\'')))
-            {
-                value = value[1..^1];
-            }
-
-            pairs.Add(new KeyValuePair<string, string>(key, value));
-        }
-
-        return pairs;
-    }
-
-    private static List<KeyValuePair<string, string>> ParseJsonPairs(string content)
-    {
-        var pairs = new List<KeyValuePair<string, string>>();
-
-        try
-        {
-            using var doc = JsonDocument.Parse(content);
-            FlattenJsonElement(doc.RootElement, "", pairs);
-        }
-        catch (JsonException)
-        {
-            // Fall back to env parsing if JSON is invalid
-            return ParseEnvPairs(content);
-        }
-
-        return pairs;
-    }
-
-    private static void FlattenJsonElement(
-        JsonElement element, string prefix, List<KeyValuePair<string, string>> pairs)
-    {
-        switch (element.ValueKind)
-        {
-            case JsonValueKind.Object:
-                foreach (var prop in element.EnumerateObject())
-                {
-                    var key = string.IsNullOrEmpty(prefix) ? prop.Name : $"{prefix}__{prop.Name}";
-                    FlattenJsonElement(prop.Value, key, pairs);
-                }
-                break;
-
-            case JsonValueKind.Array:
-                var index = 0;
-                foreach (var item in element.EnumerateArray())
-                {
-                    FlattenJsonElement(item, $"{prefix}__{index}", pairs);
-                    index++;
-                }
-                break;
-
-            default:
-                var value = element.ValueKind == JsonValueKind.String
-                    ? element.GetString() ?? ""
-                    : element.GetRawText();
-                pairs.Add(new KeyValuePair<string, string>(prefix, value));
-                break;
-        }
     }
 }

@@ -75,6 +75,10 @@ export class EnvironmentService {
         authTag: body.authTag,
         description: body.description,
         isRequired: body.isRequired ?? false,
+        sortOrder: body.sortOrder ?? null,
+        encryptedComment: body.encryptedComment ?? null,
+        commentIv: body.commentIv ?? null,
+        commentAuthTag: body.commentAuthTag ?? null,
       },
     });
 
@@ -190,6 +194,10 @@ export class EnvironmentService {
         ...encryptionFields,
         ...(body.description !== undefined && { description: body.description }),
         ...(body.isRequired !== undefined && { isRequired: body.isRequired }),
+        ...(body.sortOrder !== undefined && { sortOrder: body.sortOrder }),
+        ...(body.encryptedComment !== undefined && { encryptedComment: body.encryptedComment }),
+        ...(body.commentIv !== undefined && { commentIv: body.commentIv }),
+        ...(body.commentAuthTag !== undefined && { commentAuthTag: body.commentAuthTag }),
       },
     });
 

@@ -7,7 +7,7 @@ import {
   type ConfigFormat,
   type EnvironmentTypeValue,
 } from "@depvault/shared/constants";
-import { serializeConfig } from "@depvault/shared/serializers";
+import { serializeConfig, type ConfigEntry } from "@depvault/shared/serializers";
 import {
   Box,
   Button,
@@ -68,11 +68,22 @@ export function ExportVariablesDialog(props: ExportVariablesDialogProps): ReactE
     let cancelled = false;
 
     getProjectDEK(projectId).then(async (dek) => {
-      const decryptedEntries = await Promise.all(
-        data.entries.map(async (entry) => ({
-          key: entry.key,
-          value: await decrypt(entry.encryptedValue, entry.iv, entry.authTag, dek),
-        })),
+      const decryptedEntries: ConfigEntry[] = await Promise.all(
+        data.entries.map(async (entry) => {
+          const result: ConfigEntry = {
+            key: entry.key,
+            value: await decrypt(entry.encryptedValue, entry.iv, entry.authTag, dek),
+          };
+          if (entry.encryptedComment && entry.commentIv && entry.commentAuthTag) {
+            result.comment = await decrypt(
+              entry.encryptedComment,
+              entry.commentIv,
+              entry.commentAuthTag,
+              dek,
+            );
+          }
+          return result;
+        }),
       );
       if (!cancelled) {
         setDecryptResult({ content: serializeConfig(format, decryptedEntries), key });

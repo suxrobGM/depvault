@@ -53,6 +53,10 @@ const SyncEntrySchema = t.Object({
   authTag: t.String({ minLength: 1 }),
   description: t.Optional(t.Nullable(t.String({ maxLength: 500 }))),
   isRequired: t.Optional(t.Boolean()),
+  sortOrder: t.Optional(t.Number()),
+  encryptedComment: t.Optional(t.String()),
+  commentIv: t.Optional(t.String()),
+  commentAuthTag: t.Optional(t.String()),
 });
 
 export const SyncEnvironmentBodySchema = t.Object({

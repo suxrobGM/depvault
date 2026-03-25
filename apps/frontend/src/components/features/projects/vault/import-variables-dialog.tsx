@@ -7,6 +7,7 @@ import {
   type ConfigFormat,
   type EnvironmentTypeValue,
 } from "@depvault/shared/constants";
+import { parseConfig } from "@depvault/shared/parsers";
 import {
   Button,
   Dialog,
@@ -20,7 +21,9 @@ import { useForm } from "@tanstack/react-form";
 import { FormSelectField, FormTextField } from "@/components/ui/form";
 import { FileUploadButton, type FileUploadResult } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
+import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
+import { encrypt } from "@/lib/crypto";
 import { importVariablesSchema } from "./vault-schemas";
 
 interface ImportVariablesDialogProps {
@@ -35,13 +38,48 @@ interface ImportVariablesDialogProps {
 export function ImportVariablesDialog(props: ImportVariablesDialogProps): ReactElement {
   const { open, onClose, projectId, vaultGroupId, environmentType } = props;
   const isNewEnvironment = !environmentType;
+  const { getProjectDEK } = useVault();
 
   const mutation = useApiMutation(
-    (values: { environmentType: EnvironmentTypeValue; format: ConfigFormat; content: string }) =>
-      client.api
-        .projects({ id: projectId })
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .environments.import.post({ ...values, vaultGroupId } as any),
+    async (values: {
+      environmentType: EnvironmentTypeValue;
+      format: ConfigFormat;
+      content: string;
+    }) => {
+      const dek = await getProjectDEK(projectId);
+      const parsed = parseConfig(values.format, values.content);
+
+      const entries = await Promise.all(
+        parsed.map(async (entry, index) => {
+          const encrypted = await encrypt(entry.value, dek);
+          let commentFields = {};
+
+          if (entry.comment) {
+            const encComment = await encrypt(entry.comment, dek);
+            commentFields = {
+              encryptedComment: encComment.ciphertext,
+              commentIv: encComment.iv,
+              commentAuthTag: encComment.authTag,
+            };
+          }
+
+          return {
+            key: entry.key,
+            encryptedValue: encrypted.ciphertext,
+            iv: encrypted.iv,
+            authTag: encrypted.authTag,
+            sortOrder: index,
+            ...commentFields,
+          };
+        }),
+      );
+
+      return client.api.projects({ id: projectId }).environments.import.post({
+        vaultGroupId,
+        environmentType: values.environmentType,
+        entries,
+      });
+    },
     {
       invalidateKeys: [
         ["env-variables", projectId],

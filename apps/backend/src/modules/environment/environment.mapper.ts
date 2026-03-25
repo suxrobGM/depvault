@@ -7,6 +7,10 @@ interface EnvVariableRecord {
   encryptedValue: string;
   iv: string;
   authTag: string;
+  sortOrder: number | null;
+  encryptedComment: string | null;
+  commentIv: string | null;
+  commentAuthTag: string | null;
   description: string | null;
   isRequired: boolean;
   createdAt: Date;
@@ -22,6 +26,10 @@ export function toEncryptedResponse(variable: EnvVariableRecord): EnvVariableWit
     encryptedValue: variable.encryptedValue,
     iv: variable.iv,
     authTag: variable.authTag,
+    sortOrder: variable.sortOrder,
+    encryptedComment: variable.encryptedComment,
+    commentIv: variable.commentIv,
+    commentAuthTag: variable.commentAuthTag,
     description: variable.description,
     isRequired: variable.isRequired,
     createdAt: variable.createdAt,

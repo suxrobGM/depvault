@@ -43,6 +43,10 @@ export class EnvironmentIOService {
         authTag: entry.authTag,
         description: entry.description ?? null,
         isRequired: entry.isRequired ?? false,
+        sortOrder: entry.sortOrder ?? null,
+        encryptedComment: entry.encryptedComment ?? null,
+        commentIv: entry.commentIv ?? null,
+        commentAuthTag: entry.commentAuthTag ?? null,
       };
 
       const variable = await this.prisma.envVariable.upsert({
@@ -87,7 +91,7 @@ export class EnvironmentIOService {
 
     const variables = await this.prisma.envVariable.findMany({
       where: { environmentId: env.id },
-      orderBy: { key: "asc" },
+      orderBy: [{ sortOrder: { sort: "asc", nulls: "last" } }, { key: "asc" }],
     });
 
     const entries = variables.map((v) => ({
@@ -95,6 +99,10 @@ export class EnvironmentIOService {
       encryptedValue: v.encryptedValue,
       iv: v.iv,
       authTag: v.authTag,
+      sortOrder: v.sortOrder,
+      encryptedComment: v.encryptedComment,
+      commentIv: v.commentIv,
+      commentAuthTag: v.commentAuthTag,
     }));
 
     await this.auditLogService.log({

@@ -5784,6 +5784,10 @@
                           "encryptedValue",
                           "iv",
                           "authTag",
+                          "sortOrder",
+                          "encryptedComment",
+                          "commentIv",
+                          "commentAuthTag",
                           "description",
                           "isRequired",
                           "createdAt",
@@ -5806,6 +5810,22 @@
                             "type": "string"
                           },
                           "authTag": {
+                            "type": "string"
+                          },
+                          "sortOrder": {
+                            "nullable": true,
+                            "type": "number"
+                          },
+                          "encryptedComment": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "commentIv": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "commentAuthTag": {
+                            "nullable": true,
                             "type": "string"
                           },
                           "description": {
@@ -5998,6 +6018,22 @@
                     "authTag": {
                       "type": "string"
                     },
+                    "sortOrder": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "encryptedComment": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "commentIv": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "commentAuthTag": {
+                      "nullable": true,
+                      "type": "string"
+                    },
                     "description": {
                       "nullable": true,
                       "type": "string"
@@ -6021,6 +6057,10 @@
                     "encryptedValue",
                     "iv",
                     "authTag",
+                    "sortOrder",
+                    "encryptedComment",
+                    "commentIv",
+                    "commentAuthTag",
                     "description",
                     "isRequired",
                     "createdAt",
@@ -6186,6 +6226,18 @@
                   },
                   "isRequired": {
                     "type": "boolean"
+                  },
+                  "sortOrder": {
+                    "type": "number"
+                  },
+                  "encryptedComment": {
+                    "type": "string"
+                  },
+                  "commentIv": {
+                    "type": "string"
+                  },
+                  "commentAuthTag": {
+                    "type": "string"
                   }
                 }
               }
@@ -6424,6 +6476,22 @@
                     "authTag": {
                       "type": "string"
                     },
+                    "sortOrder": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "encryptedComment": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "commentIv": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "commentAuthTag": {
+                      "nullable": true,
+                      "type": "string"
+                    },
                     "description": {
                       "nullable": true,
                       "type": "string"
@@ -6447,6 +6515,10 @@
                     "encryptedValue",
                     "iv",
                     "authTag",
+                    "sortOrder",
+                    "encryptedComment",
+                    "commentIv",
+                    "commentAuthTag",
                     "description",
                     "isRequired",
                     "createdAt",
@@ -6597,6 +6669,21 @@
                   },
                   "isRequired": {
                     "type": "boolean"
+                  },
+                  "sortOrder": {
+                    "type": "number"
+                  },
+                  "encryptedComment": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "commentIv": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "commentAuthTag": {
+                    "nullable": true,
+                    "type": "string"
                   }
                 }
               }
@@ -6967,6 +7054,22 @@
                     "authTag": {
                       "type": "string"
                     },
+                    "sortOrder": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "encryptedComment": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "commentIv": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "commentAuthTag": {
+                      "nullable": true,
+                      "type": "string"
+                    },
                     "description": {
                       "nullable": true,
                       "type": "string"
@@ -6990,6 +7093,10 @@
                     "encryptedValue",
                     "iv",
                     "authTag",
+                    "sortOrder",
+                    "encryptedComment",
+                    "commentIv",
+                    "commentAuthTag",
                     "description",
                     "isRequired",
                     "createdAt",
@@ -7172,7 +7279,7 @@
                           },
                           "status": {
                             "type": "string",
-                            "enum": ["match", "mismatch", "missing"]
+                            "enum": ["match", "missing"]
                           },
                           "values": {
                             "type": "object"
@@ -7291,7 +7398,7 @@
         "operationId": "diffEnvironments",
         "tags": ["Environment Diff & Clone"],
         "summary": "Diff environments",
-        "description": "Compare variables across 2-3 environments. Returns rows with match/mismatch/missing status.",
+        "description": "Compare variable keys across 2-3 environments. Returns rows with match/missing status.",
         "security": [
           {
             "bearerAuth": []
@@ -7500,6 +7607,18 @@
                         },
                         "isRequired": {
                           "type": "boolean"
+                        },
+                        "sortOrder": {
+                          "type": "number"
+                        },
+                        "encryptedComment": {
+                          "type": "string"
+                        },
+                        "commentIv": {
+                          "type": "string"
+                        },
+                        "commentAuthTag": {
+                          "type": "string"
                         }
                       }
                     }
@@ -7709,6 +7828,10 @@
                           "encryptedValue",
                           "iv",
                           "authTag",
+                          "sortOrder",
+                          "encryptedComment",
+                          "commentIv",
+                          "commentAuthTag",
                           "description",
                           "isRequired",
                           "createdAt",
@@ -7731,6 +7854,22 @@
                             "type": "string"
                           },
                           "authTag": {
+                            "type": "string"
+                          },
+                          "sortOrder": {
+                            "nullable": true,
+                            "type": "number"
+                          },
+                          "encryptedComment": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "commentIv": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "commentAuthTag": {
+                            "nullable": true,
                             "type": "string"
                           },
                           "description": {
@@ -7913,6 +8052,18 @@
                         },
                         "isRequired": {
                           "type": "boolean"
+                        },
+                        "sortOrder": {
+                          "type": "number"
+                        },
+                        "encryptedComment": {
+                          "type": "string"
+                        },
+                        "commentIv": {
+                          "type": "string"
+                        },
+                        "commentAuthTag": {
+                          "type": "string"
                         }
                       }
                     }
@@ -7964,7 +8115,16 @@
                       "type": "array",
                       "items": {
                         "type": "object",
-                        "required": ["key", "encryptedValue", "iv", "authTag"],
+                        "required": [
+                          "key",
+                          "encryptedValue",
+                          "iv",
+                          "authTag",
+                          "sortOrder",
+                          "encryptedComment",
+                          "commentIv",
+                          "commentAuthTag"
+                        ],
                         "properties": {
                           "key": {
                             "type": "string"
@@ -7976,6 +8136,22 @@
                             "type": "string"
                           },
                           "authTag": {
+                            "type": "string"
+                          },
+                          "sortOrder": {
+                            "nullable": true,
+                            "type": "number"
+                          },
+                          "encryptedComment": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "commentIv": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "commentAuthTag": {
+                            "nullable": true,
                             "type": "string"
                           }
                         }

@@ -35,6 +35,10 @@ export class EnvironmentSyncService {
           authTag: entry.authTag,
           description: entry.description ?? null,
           isRequired: entry.isRequired ?? false,
+          sortOrder: entry.sortOrder ?? null,
+          encryptedComment: entry.encryptedComment ?? null,
+          commentIv: entry.commentIv ?? null,
+          commentAuthTag: entry.commentAuthTag ?? null,
         };
 
         return this.prisma.envVariable.upsert({

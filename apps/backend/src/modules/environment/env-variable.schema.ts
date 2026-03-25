@@ -12,6 +12,10 @@ export const CreateEnvVariableBodySchema = t.Object({
   authTag: t.String({ minLength: 1 }),
   description: t.Optional(t.String({ maxLength: 500 })),
   isRequired: t.Optional(t.Boolean()),
+  sortOrder: t.Optional(t.Number()),
+  encryptedComment: t.Optional(t.String()),
+  commentIv: t.Optional(t.String()),
+  commentAuthTag: t.Optional(t.String()),
 });
 
 export const UpdateEnvVariableBodySchema = t.Object({
@@ -21,6 +25,10 @@ export const UpdateEnvVariableBodySchema = t.Object({
   authTag: t.Optional(t.String({ minLength: 1 })),
   description: t.Optional(t.String({ maxLength: 500 })),
   isRequired: t.Optional(t.Boolean()),
+  sortOrder: t.Optional(t.Number()),
+  encryptedComment: t.Optional(t.Nullable(t.String())),
+  commentIv: t.Optional(t.Nullable(t.String())),
+  commentAuthTag: t.Optional(t.Nullable(t.String())),
 });
 
 export const EnvVariableResponseSchema = t.Object({
@@ -30,6 +38,10 @@ export const EnvVariableResponseSchema = t.Object({
   encryptedValue: t.String(),
   iv: t.String(),
   authTag: t.String(),
+  sortOrder: t.Nullable(t.Number()),
+  encryptedComment: t.Nullable(t.String()),
+  commentIv: t.Nullable(t.String()),
+  commentAuthTag: t.Nullable(t.String()),
   description: t.Nullable(t.String()),
   isRequired: t.Boolean(),
   createdAt: t.Date(),
@@ -43,6 +55,10 @@ export const EnvVariableWithValueResponseSchema = t.Object({
   encryptedValue: t.String(),
   iv: t.String(),
   authTag: t.String(),
+  sortOrder: t.Nullable(t.Number()),
+  encryptedComment: t.Nullable(t.String()),
+  commentIv: t.Nullable(t.String()),
+  commentAuthTag: t.Nullable(t.String()),
   description: t.Nullable(t.String()),
   isRequired: t.Boolean(),
   createdAt: t.Date(),
@@ -72,6 +88,10 @@ const ImportEntrySchema = t.Object({
   authTag: t.String({ minLength: 1 }),
   description: t.Optional(t.String({ maxLength: 500 })),
   isRequired: t.Optional(t.Boolean()),
+  sortOrder: t.Optional(t.Number()),
+  encryptedComment: t.Optional(t.String()),
+  commentIv: t.Optional(t.String()),
+  commentAuthTag: t.Optional(t.String()),
 });
 
 export const ImportEnvVariablesBodySchema = t.Object({
@@ -96,6 +116,10 @@ const ExportEntrySchema = t.Object({
   encryptedValue: t.String(),
   iv: t.String(),
   authTag: t.String(),
+  sortOrder: t.Nullable(t.Number()),
+  encryptedComment: t.Nullable(t.String()),
+  commentIv: t.Nullable(t.String()),
+  commentAuthTag: t.Nullable(t.String()),
 });
 
 export const ExportEnvVariablesResponseSchema = t.Object({
