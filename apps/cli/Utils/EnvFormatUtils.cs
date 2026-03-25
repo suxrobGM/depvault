@@ -62,36 +62,65 @@ internal static class EnvFormatUtils
         {
             var comment = entry.Comment ?? "";
 
-            if (comment.StartsWith('\n'))
+            // Split leading from trailing comment (separated by \0)
+            string trailing = "";
+            var nulIdx = comment.IndexOf('\0');
+            if (nulIdx >= 0)
             {
-                if (!isFirst)
-                {
-                    lines.Add("");
-                }
-
-                comment = comment[1..];
+                trailing = comment[(nulIdx + 1)..];
+                comment = comment[..nulIdx];
             }
 
-            if (comment.Length > 0)
-            {
-                foreach (var commentLine in comment.Split('\n'))
-                {
-                    lines.Add($"# {commentLine}");
-                }
-            }
-
+            EmitCommentBlock(lines, comment, !isFirst);
             lines.Add($"{entry.Key}={EscapeEnvValue(entry.Value)}");
+
+            if (trailing.Length > 0)
+            {
+                EmitCommentBlock(lines, trailing, true);
+            }
+
             isFirst = false;
         }
 
         return string.Join('\n', lines) + "\n";
     }
 
+    private static void EmitCommentBlock(List<string> lines, string block, bool allowBlankLine)
+    {
+        if (block.Length == 0) return;
+
+        var text = block;
+        if (text.StartsWith('\n'))
+        {
+            if (allowBlankLine) lines.Add("");
+            text = text[1..];
+        }
+
+        var hasTrailingBlank = text.EndsWith('\n');
+        if (hasTrailingBlank)
+        {
+            text = text[..^1];
+        }
+
+        if (text.Length > 0)
+        {
+            foreach (var commentLine in text.Split('\n'))
+            {
+                lines.Add($"# {commentLine}");
+            }
+        }
+
+        if (hasTrailingBlank)
+        {
+            lines.Add("");
+        }
+    }
+
     private static List<ParsedEnvEntry> ParseEnvPairs(string content)
     {
         var entries = new List<ParsedEnvEntry>();
-        var pendingComment = new List<string>();
-        var sawBlankLine = false;
+        // Raw inter-variable lines: comment text (without #) or "" for blank lines.
+        var pending = new List<string>();
 
         foreach (var rawLine in content.Split('\n'))
         {
@@ -99,23 +128,21 @@ internal static class EnvFormatUtils
 
             if (line.Length == 0)
             {
-                sawBlankLine = entries.Count > 0 || pendingComment.Count > 0;
-                pendingComment.Clear();
+                if (entries.Count > 0 || pending.Count > 0)
+                    pending.Add("");
                 continue;
             }
 
             if (line[0] == '#')
             {
-                var commentText = line.Length > 1 ? line[1..].TrimStart() : "";
-                pendingComment.Add(commentText);
+                pending.Add(line.Length > 1 ? line[1..].TrimStart() : "");
                 continue;
             }
 
             var eqIndex = line.IndexOf('=');
             if (eqIndex <= 0)
             {
-                pendingComment.Clear();
-                sawBlankLine = false;
+                pending.Clear();
                 continue;
             }
 
@@ -129,17 +156,61 @@ internal static class EnvFormatUtils
                 value = value[1..^1];
             }
 
-            var commentBlock = pendingComment.Count > 0 ? string.Join("\n", pendingComment) : "";
-            string? comment = (sawBlankLine || commentBlock.Length > 0)
-                ? (sawBlankLine ? $"\n{commentBlock}" : commentBlock)
-                : null;
+            entries.Add(new ParsedEnvEntry(key, value, EncodePending(pending)));
+            pending.Clear();
+        }
 
-            entries.Add(new ParsedEnvEntry(key, value, comment));
-            pendingComment.Clear();
-            sawBlankLine = false;
+        // Trailing lines after the last variable
+        if (pending.Count > 0 && entries.Count > 0)
+        {
+            var trailing = EncodePending(pending);
+            if (trailing is not null)
+            {
+                var last = entries[^1];
+                entries[^1] = last with
+                {
+                    Comment = last.Comment is not null ? $"{last.Comment}\0{trailing}" : $"\0{trailing}"
+                };
+            }
+            pending.Clear();
         }
 
         return entries;
+    }
+
+    private static string? EncodePending(List<string> pending)
+    {
+        if (pending.Count == 0) return null;
+
+        var end = pending.Count;
+        while (end > 0 && pending[end - 1] == "")
+        {
+            end--;
+        }
+
+        if (end == 0) return "\n"; // All blank lines → spacing only
+
+        var hasTrailingBlank = end < pending.Count;
+
+        var start = 0;
+        while (start < end && pending[start] == "")
+        {
+            start++;
+        }
+
+        var result = start > 0 ? "\n" : "";
+        for (var i = start; i < end; i++)
+        {
+            if (i > start) result += "\n";
+            result += pending[i];
+        }
+
+        if (hasTrailingBlank)
+        {
+            result += "\n";
+        }
+
+        return result.Length > 0 ? result : null;
     }
 
     private static List<KeyValuePair<string, string>> ParseJsonPairs(string content)

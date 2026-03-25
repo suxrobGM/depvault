@@ -30,12 +30,12 @@ describe("envParser", () => {
     expect(result[0]!.comment).toBe("Database config\nPrimary postgres instance");
   });
 
-  it("should reset comment buffer on blank lines", () => {
+  it("should preserve comments across blank lines", () => {
     const content = "# Orphaned comment\n\nDB_HOST=localhost";
     const result = envParser.parse(content);
 
     expect(result).toHaveLength(1);
-    expect(result[0]!.comment).toBe("\n");
+    expect(result[0]!.comment).toBe("Orphaned comment\n");
   });
 
   it("should encode blank line separator as leading newline in comment", () => {
@@ -193,6 +193,37 @@ describe("envSerializer", () => {
   it("should round-trip parse and serialize with comments and spacing", () => {
     const original =
       "# Database\nDB_HOST=localhost\n\n# App settings\nAPP_PORT=3000\nAPP_DEBUG=true";
+    const parsed = envParser.parse(original);
+    const serialized = envSerializer.serialize(parsed);
+
+    expect(serialized).toBe(original);
+  });
+
+  it("should round-trip standalone comment blocks between variables", () => {
+    const original = [
+      "CORS_ORIGINS=http://localhost:4001",
+      "",
+      "# Dev database URL",
+      "DATABASE_URL=postgresql://postgres:test@localhost:5432/depvault",
+      "",
+      "# Prod database URL (uncomment and fill in for production)",
+      "# DATABASE_URL=postgresql://<username>:<password>@<host>:<port>/<database>",
+      "",
+      "EMAIL_FROM_ADDRESS=noreply@depvault.com",
+    ].join("\n");
+    const parsed = envParser.parse(original);
+    const serialized = envSerializer.serialize(parsed);
+
+    expect(serialized).toBe(original);
+  });
+
+  it("should round-trip trailing comments after last variable", () => {
+    const original = [
+      "EMAIL_FROM_ADDRESS=noreply@depvault.com",
+      "",
+      "# Prod database URL",
+      "# DATABASE_URL",
+    ].join("\n");
     const parsed = envParser.parse(original);
     const serialized = envSerializer.serialize(parsed);
 

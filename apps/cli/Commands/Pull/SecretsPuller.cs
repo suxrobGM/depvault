@@ -1,7 +1,6 @@
 using DepVault.Cli.Auth;
 using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
-using DepVault.Cli.Utils;
 using Spectre.Console;
 using VaultGroupsModel = DepVault.Cli.ApiClient.Api.Projects.Item.VaultGroups.VaultGroups;
 
@@ -10,28 +9,15 @@ namespace DepVault.Cli.Commands.Pull;
 /// <summary>Lists and downloads secret files for selected vault groups.</summary>
 public sealed class SecretsPuller(
     IApiClientFactory clientFactory,
-    DekResolver dekResolver,
     IOutputFormatter output)
 {
     /// <summary>Downloads secret files for the selected groups. Returns number of files written.</summary>
     public async Task<int> PullAsync(
         string projectId, List<VaultGroupsModel> groups,
-        string envType, string outputDir, CancellationToken ct)
+        string outputDir, byte[] dek, CancellationToken ct)
     {
         var client = clientFactory.Create();
         var selectedGroupIds = groups.Select(g => g.Id).ToHashSet();
-
-        var password = dekResolver.CollectVaultPassword();
-        var dek = await AnsiConsole.Status()
-            .Spinner(Spinner.Known.Dots)
-            .StartAsync("Resolving encryption key...", async _ =>
-                await dekResolver.ResolveAsync(projectId, password, ct));
-
-        if (dek is null)
-        {
-            output.PrintError("Failed to resolve encryption key.");
-            return 0;
-        }
 
         ApiClient.Api.Projects.Item.Secrets.SecretsGetResponse? files;
 

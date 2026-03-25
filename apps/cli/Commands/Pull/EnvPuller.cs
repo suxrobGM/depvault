@@ -2,6 +2,7 @@ using DepVault.Cli.Auth;
 using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
 using DepVault.Cli.Utils;
+using Microsoft.Kiota.Abstractions;
 using Spectre.Console;
 using ExportEntries = DepVault.Cli.ApiClient.Api.Projects.Item.Environments.Export.ExportGetResponse_entries;
 using ExportEnvType = DepVault.Cli.ApiClient.Api.Projects.Item.Environments.Export.GetEnvironmentTypeQueryParameterType;
@@ -12,26 +13,13 @@ namespace DepVault.Cli.Commands.Pull;
 /// <summary>Exports env vars per vault group, decrypts client-side, and writes .env files to disk.</summary>
 public sealed class EnvPuller(
     IApiClientFactory clientFactory,
-    DekResolver dekResolver,
     IOutputFormatter output)
 {
     /// <summary>Pulls env vars for each group, decrypts, and writes files. Returns number of files written.</summary>
     public async Task<int> PullAsync(
         string projectId, List<VaultGroupsModel> groups,
-        string envType, string format, string outputDir, CancellationToken ct)
+        string envType, string format, string outputDir, byte[] dek, CancellationToken ct)
     {
-        var password = dekResolver.CollectVaultPassword();
-        var dek = await AnsiConsole.Status()
-            .Spinner(Spinner.Known.Dots)
-            .StartAsync("Resolving encryption key...", async _ =>
-                await dekResolver.ResolveAsync(projectId, password, ct));
-
-        if (dek is null)
-        {
-            output.PrintError("Failed to resolve encryption key.");
-            return 0;
-        }
-
         var client = clientFactory.Create();
         var filesWritten = 0;
 
@@ -67,6 +55,12 @@ public sealed class EnvPuller(
                 await File.WriteAllTextAsync(filePath, content, ct);
                 output.PrintSuccess($"  {Path.GetRelativePath(outputDir, filePath)}");
                 filesWritten++;
+            }
+            catch (ApiException ex)
+                when (ex.ResponseStatusCode == 404)
+            {
+                AnsiConsole.MarkupLine(
+                    $"[grey]Skipping {Markup.Escape(group.Name ?? "Unknown")} (no {envType} environment)[/]");
             }
             catch (Exception ex)
             {

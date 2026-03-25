@@ -1,5 +1,6 @@
 using System.CommandLine;
 using DepVault.Cli.Commands.Pull;
+using DepVault.Cli.Crypto;
 using DepVault.Cli.Utils;
 using Spectre.Console;
 
@@ -8,6 +9,7 @@ namespace DepVault.Cli.Commands;
 public sealed class PullCommands(
     CommandContext ctx,
     VaultGroupSelector vaultGroupSelector,
+    DekResolver dekResolver,
     EnvPuller envPuller,
     SecretsPuller secretsPuller)
 {
@@ -59,12 +61,24 @@ public sealed class PullCommands(
 
             AnsiConsole.MarkupLine($"[cyan1]Pulling ({envType})...[/]");
 
-            var envCount = await envPuller.PullAsync(pc.ProjectId, groups, envType, format, outputDir, ct);
+            var password = dekResolver.CollectVaultPassword();
+            var dek = await AnsiConsole.Status()
+                .Spinner(Spinner.Known.Dots)
+                .StartAsync("Resolving encryption key...", async _ =>
+                    await dekResolver.ResolveAsync(pc.ProjectId, password, ct));
+
+            if (dek is null)
+            {
+                ctx.Output.PrintError("Failed to resolve encryption key.");
+                return;
+            }
+
+            var envCount = await envPuller.PullAsync(pc.ProjectId, groups, envType, format, outputDir, dek, ct);
 
             var secretCount = 0;
             if (includeSecrets)
             {
-                secretCount = await secretsPuller.PullAsync(pc.ProjectId, groups, envType, outputDir, ct);
+                secretCount = await secretsPuller.PullAsync(pc.ProjectId, groups, outputDir, dek, ct);
             }
 
             AnsiConsole.WriteLine();
