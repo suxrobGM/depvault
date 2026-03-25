@@ -1,6 +1,7 @@
 import { Elysia, t } from "elysia";
 import { container } from "@/common/di/container";
 import { authGuard } from "@/common/middleware/auth.middleware";
+import { KeyGrantType } from "@/generated/prisma";
 import { KeyGrantService } from "./key-grant.service";
 import {
   ChangeVaultPasswordBodySchema,
@@ -61,7 +62,7 @@ export const vaultController = new Elysia({ prefix: "/vault", detail: { tags: ["
       security: [{ bearerAuth: [] }],
     },
   })
-  .put("/recovery-key", ({ user, body }) => vaultService.regenerateRecoveryKey(user.id, body), {
+  .put("/recoverykey", ({ user, body }) => vaultService.regenerateRecoveryKey(user.id, body), {
     body: RegenerateRecoveryKeyBodySchema,
     response: MessageResponseSchema,
     detail: {
@@ -72,16 +73,33 @@ export const vaultController = new Elysia({ prefix: "/vault", detail: { tags: ["
       security: [{ bearerAuth: [] }],
     },
   })
-  .get("/recovery-grants", ({ user }) => keyGrantService.getAllRecoveryGrantsForUser(user.id), {
-    response: t.Array(RecoveryGrantListItemSchema),
-    detail: {
-      operationId: "getMyRecoveryGrants",
-      summary: "Get all recovery grants",
-      description: "Fetch all RECOVERY-type key grants for the current user across all projects.",
-      security: [{ bearerAuth: [] }],
+  .get(
+    "/keygrants/recovery",
+    ({ user }) => keyGrantService.getAllGrantsForUserByType(user.id, KeyGrantType.RECOVERY),
+    {
+      response: t.Array(RecoveryGrantListItemSchema),
+      detail: {
+        operationId: "getMyRecoveryGrants",
+        summary: "Get all recovery grants",
+        description: "Fetch all RECOVERY-type key grants for the current user across all projects.",
+        security: [{ bearerAuth: [] }],
+      },
     },
-  })
-  .get("/public-key/:userId", ({ params }) => vaultService.getPublicKey(params.userId), {
+  )
+  .get(
+    "/keygrants/self",
+    ({ user }) => keyGrantService.getAllGrantsForUserByType(user.id, KeyGrantType.SELF),
+    {
+      response: t.Array(RecoveryGrantListItemSchema),
+      detail: {
+        operationId: "getMySelfGrants",
+        summary: "Get all self grants",
+        description: "Fetch all SELF-type key grants for the current user across all projects.",
+        security: [{ bearerAuth: [] }],
+      },
+    },
+  )
+  .get("/publickey/:userId", ({ params }) => vaultService.getPublicKey(params.userId), {
     params: t.Object({ userId: t.String({ format: "uuid" }) }),
     response: PublicKeyResponseSchema,
     detail: {

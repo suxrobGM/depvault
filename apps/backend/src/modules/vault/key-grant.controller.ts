@@ -13,12 +13,12 @@ import {
 const keyGrantService = container.resolve(KeyGrantService);
 
 export const keyGrantController = new Elysia({
-  prefix: "/projects/:id/key-grants",
+  prefix: "/projects/:id/keygrants",
   detail: { tags: ["Key Grants"] },
 })
   .use(projectGuard("VIEWER"))
   .get(
-    "/mine",
+    "/my",
     ({ user, projectMember }) => keyGrantService.getForUser(projectMember.projectId, user.id),
     {
       response: KeyGrantResponseSchema,

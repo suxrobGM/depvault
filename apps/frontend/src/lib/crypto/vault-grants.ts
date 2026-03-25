@@ -9,9 +9,7 @@ export async function resolveProjectDEK(
   kek: CryptoKey,
   privateKey: CryptoKey | null,
 ): Promise<CryptoKey | null> {
-  const { data: grant, error } = await client.api
-    .projects({ id: projectId })
-    ["key-grants"].mine.get();
+  const { data: grant, error } = await client.api.projects({ id: projectId }).keygrants.my.get();
 
   if (!grant || error) return null;
 
@@ -40,7 +38,7 @@ export async function createProjectSelfGrant(
   const dekRaw = await exportDEK(dek);
   const wrapped = await wrapKey(dekRaw, kek);
 
-  await client.api.projects({ id: projectId })["key-grants"].post({
+  await client.api.projects({ id: projectId }).keygrants.post({
     userId,
     wrappedDek: wrapped.wrapped,
     wrappedDekIv: wrapped.iv,
@@ -61,7 +59,7 @@ export async function createProjectRecoveryGrant(
   const dekRaw = await exportDEK(dek);
   const wrapped = await wrapKey(dekRaw, recoveryKey);
 
-  await client.api.projects({ id: projectId })["key-grants"].post({
+  await client.api.projects({ id: projectId }).keygrants.post({
     userId,
     wrappedDek: wrapped.wrapped,
     wrappedDekIv: wrapped.iv,
@@ -83,7 +81,7 @@ export async function createProjectECDHGrant(
   const sharedKey = await deriveSharedKey(privateKey, recipientPublicKey);
   const wrapped = await wrapKey(dekRaw, sharedKey);
 
-  await client.api.projects({ id: projectId })["key-grants"].post({
+  await client.api.projects({ id: projectId }).keygrants.post({
     userId: recipientUserId,
     wrappedDek: wrapped.wrapped,
     wrappedDekIv: wrapped.iv,

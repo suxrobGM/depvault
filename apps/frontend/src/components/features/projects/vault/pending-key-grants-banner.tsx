@@ -29,8 +29,8 @@ export function PendingKeyGrantsBanner(props: PendingKeyGrantsBannerProps): Reac
   const [granting, setGranting] = useState(false);
 
   const { data: pendingMembers, refetch } = useApiQuery<PendingMember[]>(
-    ["projects", projectId, "key-grants", "pending"],
-    () => client.api.projects({ id: projectId })["key-grants"].pending.get(),
+    ["projects", projectId, "keygrants", "pending"],
+    () => client.api.projects({ id: projectId }).keygrants.pending.get(),
     { enabled: canEdit && isVaultUnlocked },
   );
 

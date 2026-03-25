@@ -115,9 +115,9 @@ export class KeyGrantService {
     return { message: "Key grants updated" };
   }
 
-  async getAllRecoveryGrantsForUser(userId: string) {
+  async getAllGrantsForUserByType(userId: string, grantType: KeyGrantType) {
     const grants = await this.prisma.projectKeyGrant.findMany({
-      where: { userId, grantType: KeyGrantType.RECOVERY },
+      where: { userId, grantType },
       select: {
         projectId: true,
         wrappedDek: true,

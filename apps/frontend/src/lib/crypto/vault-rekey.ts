@@ -21,15 +21,10 @@ import type {
   RegenerateRecoveryKeyResult,
 } from "./vault-types";
 
-/**
- * Re-wraps the private key, recovery key, and project DEKs with a new KEK.
- *
- * TODO: Fetch ALL SELF grants from the backend instead of relying on the in-memory cache.
- * Currently only re-wraps DEKs that were accessed this session — projects not visited
- * remain wrapped under the old KEK and become inaccessible after the password change.
- */
+/** Re-wraps the private key, recovery key, and all project DEKs with a new KEK. */
 export async function changeVaultPasswordOps(
   newPassword: string,
+  oldKek: CryptoKey,
   privateKey: CryptoKey,
   recoveryKey: CryptoKey,
   cachedDeks: ReadonlyMap<string, CryptoKey>,
@@ -43,6 +38,24 @@ export async function changeVaultPasswordOps(
   const recoveryRaw = new Uint8Array(await crypto.subtle.exportKey("raw", recoveryKey));
   const wrappedRecovery = await wrapKey(recoveryRaw, newKek);
 
+  // Collect all project DEKs: from cache + from SELF grants not yet cached
+  const projectDeks = new Map<string, CryptoKey>(cachedDeks);
+
+  const { data: selfGrants } = await client.api.vault.keygrants.self.get();
+  if (selfGrants) {
+    for (const grant of selfGrants) {
+      if (!projectDeks.has(grant.projectId)) {
+        const dekRaw = await unwrapKey(
+          grant.wrappedDek,
+          grant.wrappedDekIv,
+          grant.wrappedDekTag,
+          oldKek,
+        );
+        projectDeks.set(grant.projectId, await importDEK(dekRaw));
+      }
+    }
+  }
+
   const updatedGrants: Array<{
     projectId: string;
     wrappedDek: string;
@@ -50,7 +63,7 @@ export async function changeVaultPasswordOps(
     wrappedDekTag: string;
   }> = [];
 
-  for (const [projectId, dek] of cachedDeks.entries()) {
+  for (const [projectId, dek] of projectDeks.entries()) {
     const dekRaw = await exportDEK(dek);
     const wrapped = await wrapKey(dekRaw, newKek);
     updatedGrants.push({
@@ -99,7 +112,7 @@ export async function recoverVaultOps(
     await crypto.subtle.digest("SHA-256", recoveryBytes.buffer as ArrayBuffer),
   );
 
-  const { data: recoveryGrants } = await client.api.vault["recovery-grants"].get();
+  const { data: recoveryGrants } = await client.api.vault.keygrants.recovery.get();
   if (!recoveryGrants || recoveryGrants.length === 0) {
     throw new Error("No recovery grants found. Cannot recover vault.");
   }
@@ -207,7 +220,7 @@ export async function regenerateRecoveryKeyOps(
     projectDeks.set(projectId, dek);
   }
 
-  const { data: existingGrants } = await client.api.vault["recovery-grants"].get();
+  const { data: existingGrants } = await client.api.vault.keygrants.recovery.get();
   if (existingGrants) {
     for (const grant of existingGrants) {
       if (!projectDeks.has(grant.projectId)) {
@@ -240,7 +253,7 @@ export async function regenerateRecoveryKeyOps(
     });
   }
 
-  await client.api.vault["recovery-key"].put({
+  await client.api.vault.recoverykey.put({
     newRecoveryKeyHash: newRecoveryHash,
     newWrappedRecoveryKey: newWrappedRecovery.wrapped,
     newWrappedRecoveryKeyIv: newWrappedRecovery.iv,

@@ -1,25 +1,20 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import { ContentCopy as CopyIcon, Key as KeyIcon } from "@mui/icons-material";
 import {
   Alert,
-  Box,
   Button,
-  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControlLabel,
-  IconButton,
   Stack,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import { FormTextField } from "@/components/ui/form";
 import { useVault } from "@/hooks/use-vault";
+import { RecoveryKeyDisplay } from "./recovery-key-display";
 import { vaultSetupSchema } from "./schema";
 
 interface VaultSetupDialogProps {
@@ -29,12 +24,10 @@ interface VaultSetupDialogProps {
 
 export function VaultSetupDialog(props: VaultSetupDialogProps): ReactElement {
   const { open, onClose } = props;
-  const { setupVault } = useVault();
+  const { setupVault, activateVault } = useVault();
 
   const [recoveryKey, setRecoveryKey] = useState<string | null>(null);
-  const [savedConfirmed, setSavedConfirmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -53,71 +46,23 @@ export function VaultSetupDialog(props: VaultSetupDialogProps): ReactElement {
     },
   });
 
-  const handleCopy = () => {
-    if (recoveryKey) {
-      navigator.clipboard.writeText(recoveryKey);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
   const handleFinish = () => {
+    activateVault();
     form.reset();
     setRecoveryKey(null);
-    setSavedConfirmed(false);
     onClose();
   };
 
   if (recoveryKey) {
     return (
-      <Dialog open={open} maxWidth="sm" fullWidth>
-        <DialogTitle>Save Your Recovery Key</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2.5}>
-            <Alert severity="warning">
-              This is the only time your recovery key will be shown. If you lose your vault password
-              and this key, your encrypted data will be permanently unrecoverable.
-            </Alert>
-
-            <Box
-              sx={{
-                p: 2,
-                bgcolor: "action.hover",
-                borderRadius: 1,
-                fontFamily: "monospace",
-                fontSize: "0.95rem",
-                letterSpacing: "0.05em",
-                textAlign: "center",
-                wordBreak: "break-all",
-                position: "relative",
-              }}
-            >
-              <KeyIcon sx={{ mr: 1, verticalAlign: "middle", opacity: 0.6 }} />
-              {recoveryKey}
-              <Tooltip title={copied ? "Copied!" : "Copy"}>
-                <IconButton onClick={handleCopy} size="small" sx={{ ml: 1 }}>
-                  <CopyIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Box>
-
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={savedConfirmed}
-                  onChange={(_, checked) => setSavedConfirmed(checked)}
-                />
-              }
-              label="I have saved my recovery key in a secure location"
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleFinish} variant="contained" disabled={!savedConfirmed}>
-            Done
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <RecoveryKeyDisplay
+        open={open}
+        title="Save Your Recovery Key"
+        warning="This is the only time your recovery key will be shown. If you lose your vault password and this key, your encrypted data will be permanently unrecoverable."
+        confirmLabel="I have saved my recovery key in a secure location"
+        recoveryKey={recoveryKey}
+        onDone={handleFinish}
+      />
     );
   }
 

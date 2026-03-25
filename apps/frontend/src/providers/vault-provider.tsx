@@ -37,8 +37,10 @@ export interface VaultContextValue {
   unlockVault: (password: string) => Promise<void>;
   /** Clear all in-memory keys and revert to locked state. */
   lockVault: () => void;
-  /** Create a new vault with keypair, KEK, and recovery key. */
+  /** Create a new vault with keypair, KEK, and recovery key. Does not transition to unlocked. */
   setupVault: (password: string) => Promise<{ recoveryKey: string }>;
+  /** Transition vault to unlocked after setup is complete (recovery key has been saved). */
+  activateVault: () => void;
   /** Retrieve (and cache) the project's data encryption key via the user's key grant. */
   getProjectDEK: (projectId: string) => Promise<CryptoKey>;
   /** Generate a DEK for a new project and create SELF + RECOVERY key grants. */
@@ -120,8 +122,11 @@ export function VaultProvider(props: PropsWithChildren): ReactElement {
     privateKeyRef.current = result.keys.privateKey;
     recoveryKeyRef.current = result.keys.recoveryKey;
     vaultInfoRef.current = result.vaultInfo;
-    setVaultStatus("unlocked");
     return { recoveryKey: result.recoveryKey };
+  };
+
+  const activateVault = () => {
+    setVaultStatus("unlocked");
   };
 
   const getProjectDEK = async (projectId: string): Promise<CryptoKey> => {
@@ -171,13 +176,14 @@ export function VaultProvider(props: PropsWithChildren): ReactElement {
   };
 
   const changeVaultPassword = async (_oldPassword: string, newPassword: string) => {
-    if (!privateKeyRef.current || !recoveryKeyRef.current) {
+    if (!kekRef.current || !privateKeyRef.current || !recoveryKeyRef.current) {
       throw new Error("Vault must be unlocked to change password");
     }
     if (!vaultInfoRef.current) throw new Error("Vault info not loaded");
 
     const result = await changeVaultPasswordOps(
       newPassword,
+      kekRef.current,
       privateKeyRef.current,
       recoveryKeyRef.current,
       dekCacheRef.current,
@@ -229,6 +235,7 @@ export function VaultProvider(props: PropsWithChildren): ReactElement {
     unlockVault,
     lockVault,
     setupVault,
+    activateVault,
     getProjectDEK,
     initializeProjectKeys,
     grantProjectKeyToMember,

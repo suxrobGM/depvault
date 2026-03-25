@@ -1,23 +1,18 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import { ContentCopy as CopyIcon, Key as KeyIcon } from "@mui/icons-material";
 import {
   Alert,
-  Box,
   Button,
-  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControlLabel,
-  IconButton,
   Stack,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import { useVault } from "@/hooks/use-vault";
+import { RecoveryKeyDisplay } from "./recovery-key-display";
 
 interface DialogProps {
   open: boolean;
@@ -29,10 +24,8 @@ export function VaultRegenerateRecoveryDialog(props: DialogProps): ReactElement 
   const { regenerateRecoveryKey } = useVault();
 
   const [recoveryKey, setRecoveryKey] = useState<string | null>(null);
-  const [savedConfirmed, setSavedConfirmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isRegenerating, setIsRegenerating] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const handleRegenerate = async () => {
     setError(null);
@@ -47,71 +40,22 @@ export function VaultRegenerateRecoveryDialog(props: DialogProps): ReactElement 
     }
   };
 
-  const handleCopy = () => {
-    if (recoveryKey) {
-      navigator.clipboard.writeText(recoveryKey);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
   const handleFinish = () => {
     setRecoveryKey(null);
-    setSavedConfirmed(false);
     setError(null);
     onClose();
   };
 
   if (recoveryKey) {
     return (
-      <Dialog open={open} maxWidth="sm" fullWidth>
-        <DialogTitle>New Recovery Key</DialogTitle>
-        <DialogContent>
-          <Stack spacing={2.5}>
-            <Alert severity="warning">
-              Your previous recovery key has been invalidated. This is the only time your new
-              recovery key will be shown. Save it in a secure location.
-            </Alert>
-
-            <Box
-              sx={{
-                p: 2,
-                bgcolor: "action.hover",
-                borderRadius: 1,
-                fontFamily: "monospace",
-                fontSize: "0.95rem",
-                letterSpacing: "0.05em",
-                textAlign: "center",
-                wordBreak: "break-all",
-                position: "relative",
-              }}
-            >
-              <KeyIcon sx={{ mr: 1, verticalAlign: "middle", opacity: 0.6 }} />
-              {recoveryKey}
-              <Tooltip title={copied ? "Copied!" : "Copy"}>
-                <IconButton onClick={handleCopy} size="small" sx={{ ml: 1 }}>
-                  <CopyIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Box>
-
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={savedConfirmed}
-                  onChange={(_, checked) => setSavedConfirmed(checked)}
-                />
-              }
-              label="I have saved my new recovery key in a secure location"
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleFinish} variant="contained" disabled={!savedConfirmed}>
-            Done
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <RecoveryKeyDisplay
+        open={open}
+        title="New Recovery Key"
+        warning="Your previous recovery key has been invalidated. This is the only time your new recovery key will be shown. Save it in a secure location."
+        confirmLabel="I have saved my new recovery key in a secure location"
+        recoveryKey={recoveryKey}
+        onDone={handleFinish}
+      />
     );
   }
 

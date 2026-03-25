@@ -340,17 +340,18 @@ describe("Recovery Key", () => {
   it("generateRecoveryKey returns formatted string with dashes", () => {
     const key = generateRecoveryKey();
     const parts = key.split("-");
-    expect(parts.length).toBe(8);
+    expect(parts.length).toBeGreaterThanOrEqual(11);
     for (const part of parts) {
-      expect(part.length).toBe(4);
+      expect(part.length).toBeGreaterThan(0);
+      expect(part.length).toBeLessThanOrEqual(4);
     }
   });
 
-  it("recoveryKeyToBytes returns 24 bytes (8 groups x 4 base64 chars = 32 base64 chars = 24 raw bytes)", () => {
+  it("recoveryKeyToBytes returns 32 bytes (256-bit key)", () => {
     const key = generateRecoveryKey();
     const bytes = recoveryKeyToBytes(key);
     expect(bytes).toBeInstanceOf(Uint8Array);
-    expect(bytes.length).toBe(24);
+    expect(bytes.length).toBe(32);
   });
 
   it("recovery key can wrap and unwrap a DEK", async () => {
