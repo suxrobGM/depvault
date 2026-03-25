@@ -31,10 +31,11 @@ internal sealed class EnvImporter(
             return true;
         }
 
+        var password = dekResolver.CollectVaultPassword();
         cachedDek = await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .StartAsync("Resolving encryption key...", async _ =>
-                await dekResolver.ResolveAsync(projectId, ct));
+                await dekResolver.ResolveAsync(projectId, password, ct));
 
         return cachedDek is not null;
     }

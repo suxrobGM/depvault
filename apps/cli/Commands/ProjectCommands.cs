@@ -1,6 +1,7 @@
 using System.CommandLine;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Utils;
+using CreateProjectBody = DepVault.Cli.ApiClient.Api.Projects.ProjectsPostRequestBody;
 
 namespace DepVault.Cli.Commands;
 
@@ -12,6 +13,7 @@ public sealed class ProjectCommands(
     {
         var cmd = new Command("project", "Manage projects")
         {
+            CreateNewCommand(),
             CreateListCommand(),
             CreateSelectCommand(),
             CreateInfoCommand()
@@ -39,22 +41,32 @@ public sealed class ProjectCommands(
                     config.QueryParameters.Limit = 100;
                 }, cancellationToken);
 
-                var items = result?.Items;
-                if (items is null || items.Count == 0)
-                {
-                    ctx.Output.PrintError("No projects found. Create a project on the web dashboard first.");
-                    return;
-                }
-
+                var items = result?.Items ?? [];
                 var appConfig = ctx.Config.Load();
+
+                var choices = new List<ProjectChoice> { ProjectChoice.CreateNew() };
+                choices.AddRange(items.Select(p => new ProjectChoice(p.Id, p.Name)));
+
                 var selected = ctx.Prompter.Select(
                     "Select active project",
-                    items,
+                    choices,
                     p =>
                     {
+                        if (p.IsCreateNew)
+                        {
+                            return "[cyan1]+ Create new project[/]";
+                        }
+
                         var marker = p.Id == appConfig.ActiveProjectId ? " [green]*[/]" : "";
                         return $"{p.Name}{marker}";
                     });
+
+                if (selected.IsCreateNew)
+                {
+                    var name = ctx.Prompter.Ask("Project name");
+                    await CreateProjectAsync(apiClient, name, null, null, true, cancellationToken);
+                    return;
+                }
 
                 appConfig.ActiveProjectId = selected.Id;
                 appConfig.ActiveProjectName = selected.Name;
@@ -65,6 +77,38 @@ public sealed class ProjectCommands(
             {
                 ctx.Output.PrintError($"Failed to load projects: {ex.Message}");
             }
+        });
+
+        return cmd;
+    }
+
+    private Command CreateNewCommand()
+    {
+        var nameArg = new Argument<string>("name") { Description = "Project name" };
+        var descOpt = new Option<string?>("--description", "-d") { Description = "Project description" };
+        var repoOpt = new Option<string?>("--repo") { Description = "Repository URL" };
+        var setActiveOpt = new Option<bool>("--set-active") { Description = "Set as active project after creation", DefaultValueFactory = _ => true };
+
+        var cmd = new Command("create", "Create a new project")
+        {
+            nameArg, descOpt, repoOpt, setActiveOpt
+        };
+
+        cmd.SetAction(async (parseResult, cancellationToken) =>
+        {
+            if (!ctx.RequireAuth())
+            {
+                return;
+            }
+
+            var client = clientFactory.Create();
+            await CreateProjectAsync(
+                client,
+                parseResult.GetValue(nameArg),
+                parseResult.GetValue(descOpt),
+                parseResult.GetValue(repoOpt),
+                parseResult.GetValue(setActiveOpt),
+                cancellationToken);
         });
 
         return cmd;
@@ -184,5 +228,53 @@ public sealed class ProjectCommands(
         });
 
         return cmd;
+    }
+
+    private async Task CreateProjectAsync(
+        ApiClient.ApiClient apiClient, string? name, string? description,
+        string? repoUrl, bool setActive, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            ctx.Output.PrintError("Project name is required.");
+            return;
+        }
+
+        try
+        {
+            var result = await apiClient.Api.Projects.PostAsync(new CreateProjectBody
+            {
+                Name = name,
+                Description = description,
+                RepositoryUrl = repoUrl
+            }, cancellationToken: ct);
+
+            if (result?.Id is null)
+            {
+                ctx.Output.PrintError("Failed to create project.");
+                return;
+            }
+
+            ctx.Output.PrintSuccess($"Created project '{result.Name}' ({result.Id})");
+
+            if (setActive)
+            {
+                var config = ctx.Config.Load();
+                config.ActiveProjectId = result.Id;
+                config.ActiveProjectName = result.Name;
+                ctx.Config.Save(config);
+                ctx.Output.PrintSuccess("Set as active project.");
+            }
+        }
+        catch (Exception ex)
+        {
+            ctx.Output.PrintError($"Failed to create project: {ex.Message}");
+        }
+    }
+
+    private sealed record ProjectChoice(string? Id, string? Name)
+    {
+        public bool IsCreateNew => Id is null;
+        public static ProjectChoice CreateNew() => new(null, null);
     }
 }

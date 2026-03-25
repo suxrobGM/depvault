@@ -13,12 +13,38 @@ public sealed class DekResolver(
     IConsolePrompter prompter,
     CommandContext commandContext)
 {
+    /// <summary>
+    /// Collects the vault password interactively if needed. Must be called outside of any
+    /// Spectre dynamic display (Status/Progress) to avoid concurrent interactive operations.
+    /// </summary>
+    public string? CollectVaultPassword()
+    {
+        if (commandContext.IsCiMode())
+        {
+            return null;
+        }
+
+        var password = Environment.GetEnvironmentVariable("DEPVAULT_VAULT_PASSWORD");
+        if (!string.IsNullOrEmpty(password))
+        {
+            return password;
+        }
+
+        if (!prompter.IsInteractive)
+        {
+            AnsiConsole.MarkupLine("[red]DEPVAULT_VAULT_PASSWORD is required in non-interactive mode.[/]");
+            return null;
+        }
+
+        return prompter.AskSecret("Enter vault password");
+    }
+
     /// <summary>Resolves the DEK bytes by unwrapping from CI token or vault password.</summary>
-    public async Task<byte[]?> ResolveAsync(string projectId, CancellationToken ct)
+    public async Task<byte[]?> ResolveAsync(string projectId, string? vaultPassword, CancellationToken ct)
     {
         return commandContext.IsCiMode()
             ? await ResolveCiDekAsync(ct)
-            : await ResolveJwtDekAsync(projectId, ct);
+            : await ResolveJwtDekAsync(projectId, vaultPassword, ct);
     }
 
     private async Task<byte[]?> ResolveCiDekAsync(CancellationToken ct)
@@ -40,20 +66,8 @@ public sealed class DekResolver(
             ciSecrets.WrappedDekTag ?? "", ciWrapKey);
     }
 
-    private async Task<byte[]?> ResolveJwtDekAsync(string projectId, CancellationToken ct)
+    private async Task<byte[]?> ResolveJwtDekAsync(string projectId, string? password, CancellationToken ct)
     {
-        var password = Environment.GetEnvironmentVariable("DEPVAULT_VAULT_PASSWORD");
-        if (string.IsNullOrEmpty(password))
-        {
-            if (!prompter.IsInteractive)
-            {
-                AnsiConsole.MarkupLine("[red]DEPVAULT_VAULT_PASSWORD is required in non-interactive mode.[/]");
-                return null;
-            }
-
-            password = prompter.AskSecret("Enter vault password");
-        }
-
         if (string.IsNullOrEmpty(password))
         {
             AnsiConsole.MarkupLine("[red]Vault password is required.[/]");

@@ -21,10 +21,11 @@ public sealed class SecretsPuller(
         var client = clientFactory.Create();
         var selectedGroupIds = groups.Select(g => g.Id).ToHashSet();
 
+        var password = dekResolver.CollectVaultPassword();
         var dek = await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .StartAsync("Resolving encryption key...", async _ =>
-                await dekResolver.ResolveAsync(projectId, ct));
+                await dekResolver.ResolveAsync(projectId, password, ct));
 
         if (dek is null)
         {
