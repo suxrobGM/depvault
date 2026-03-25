@@ -57,6 +57,17 @@ export const EnvTemplateListResponseSchema = t.Array(EnvTemplateResponseSchema);
 export const ApplyTemplateBodySchema = t.Object({
   vaultGroupId: t.String(),
   environmentType: EnvironmentTypeSchema,
+  encryptedVariables: t.Array(
+    t.Object({
+      key: t.String({ minLength: 1, maxLength: 255 }),
+      encryptedValue: t.String(),
+      iv: t.String(),
+      authTag: t.String(),
+      description: t.Optional(t.Nullable(t.String({ maxLength: 500 }))),
+      isRequired: t.Optional(t.Boolean()),
+    }),
+    { description: "Pre-encrypted variable entries from the client" },
+  ),
 });
 
 export const ApplyTemplateResponseSchema = t.Object({

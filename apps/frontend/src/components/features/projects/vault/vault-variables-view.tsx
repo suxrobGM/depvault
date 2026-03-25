@@ -14,6 +14,7 @@ import { client } from "@/lib/api";
 import type { MemberListResponse } from "@/types/api/project";
 import type { VaultGroup, VaultGroupListResponse } from "@/types/api/vault-group";
 import { CreateGroupDialog } from "./create-group-dialog";
+import { PendingKeyGrantsBanner } from "./pending-key-grants-banner";
 import { ProjectTemplatesSection } from "./templates/project-templates-section";
 import { VaultGroupList } from "./vault-group-list";
 
@@ -44,6 +45,8 @@ export function VaultVariablesView(props: VaultVariablesViewProps): ReactElement
 
   return (
     <>
+      <PendingKeyGrantsBanner projectId={projectId} canEdit={canEdit} />
+
       <Stack direction="row" spacing={1} sx={{ mb: 3 }}>
         <Button
           variant={showTemplates ? "contained" : "outlined"}

@@ -30,6 +30,7 @@ import { useForm } from "@tanstack/react-form";
 import { FormSelectField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
+import { decryptBinary, decrypt as decryptText, shareKeyFromFragment } from "@/lib/crypto";
 import type { SharedSecretInfoResponse } from "@/types/api/shared-secret";
 import { downloadFile } from "@/utils/download-file";
 
@@ -41,6 +42,15 @@ interface SecretAccessViewProps {
 interface EnvVariable {
   key: string;
   value: string;
+}
+
+interface EncryptedAccessResult {
+  payloadType: "ENV_VARIABLES" | "SECRET_FILE";
+  encryptedPayload: string;
+  iv: string;
+  authTag: string;
+  fileName: string | null;
+  mimeType: string | null;
 }
 
 type AccessResult =
@@ -61,15 +71,38 @@ export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
   const mutation = useApiMutation(
     (body: { password?: string }) => client.api.secrets.shared({ token }).post(body),
     {
-      onSuccess: (data) => {
-        const accessResult = data as AccessResult;
-        setResult(accessResult);
-        setConsumed(true);
+      onSuccess: async (data) => {
+        const encrypted = data as unknown as EncryptedAccessResult;
 
-        if (accessResult.payloadType === "SECRET_FILE") {
-          const bytes = Uint8Array.from(atob(accessResult.content), (c) => c.charCodeAt(0));
-          downloadFile(bytes.buffer, accessResult.fileName);
+        // Derive the share key from the URL fragment
+        const fragment = window.location.hash.slice(1);
+        const shareKey = await shareKeyFromFragment(fragment);
+
+        if (encrypted.payloadType === "ENV_VARIABLES") {
+          const json = await decryptText(
+            encrypted.encryptedPayload,
+            encrypted.iv,
+            encrypted.authTag,
+            shareKey,
+          );
+          const variables: EnvVariable[] = JSON.parse(json);
+          setResult({ payloadType: "ENV_VARIABLES", variables });
+        } else {
+          const fileBuffer = await decryptBinary(
+            encrypted.encryptedPayload,
+            encrypted.iv,
+            encrypted.authTag,
+            shareKey,
+          );
+          downloadFile(fileBuffer, encrypted.fileName ?? "secret-file");
+          setResult({
+            payloadType: "SECRET_FILE",
+            fileName: encrypted.fileName ?? "secret-file",
+            mimeType: encrypted.mimeType ?? "application/octet-stream",
+            content: "",
+          });
         }
+        setConsumed(true);
       },
       errorMessage: (err) => err.message ?? "Failed to access secret",
     },

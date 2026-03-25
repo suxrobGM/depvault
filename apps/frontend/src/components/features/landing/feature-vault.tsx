@@ -41,12 +41,12 @@ export function FeatureVault(): ReactElement {
           </GradientText>
         </Box>
         <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8, mb: 2 }}>
-          Encrypt environment variables and secret files — SSL certificates, private keys,
-          keystores, cloud credentials — with AES-256-GCM in a zero-plaintext vault. Role-based
-          access (owner, editor, viewer) controls who can read or modify secrets, and every action
-          is recorded in an append-only audit trail.
+          End-to-end encrypt environment variables and secret files — SSL certificates, private
+          keys, keystores, cloud credentials — with AES-256-GCM. Secrets are encrypted in your
+          browser before they reach the server. Even we can&apos;t read them.
         </Typography>
         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+          <Chip label="Zero-Knowledge" size="small" variant="outlined" color="secondary" />
           <Chip label="AES-256-GCM" size="small" variant="outlined" color="secondary" />
           <Chip label="Env Diff" size="small" variant="outlined" color="secondary" />
           <Chip label="Secret Files" size="small" variant="outlined" color="secondary" />

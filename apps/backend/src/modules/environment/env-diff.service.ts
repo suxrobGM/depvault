@@ -1,6 +1,5 @@
 import { singleton } from "tsyringe";
 import { BadRequestError, NotFoundError } from "@/common/errors";
-import { decrypt, deriveProjectKey } from "@/common/utils/encryption";
 import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import { EnvironmentRepository } from "./environment.repository";
@@ -14,13 +13,12 @@ export class EnvironmentDiffService {
     private readonly envRepository: EnvironmentRepository,
   ) {}
 
-  /** Compare variables across 2-3 environments, highlighting missing and differing values. */
+  /** Compare variables across 2-3 environments, highlighting missing keys. */
   async diff(
     projectId: string,
     vaultGroupId: string,
     environmentTypesCsv: string,
     userId: string,
-    memberRole: string,
     ipAddress: string,
   ): Promise<EnvDiffResponse> {
     const envTypes = environmentTypesCsv
@@ -32,7 +30,6 @@ export class EnvironmentDiffService {
       throw new BadRequestError("Provide 2 or 3 comma-separated environment types");
     }
 
-    const canReadValues = memberRole === "OWNER" || memberRole === "EDITOR";
     const groupName = await this.envRepository.getVaultGroupName(vaultGroupId);
 
     const environments = await this.prisma.environment.findMany({
@@ -46,8 +43,7 @@ export class EnvironmentDiffService {
       throw new NotFoundError(`Environment(s) not found: ${missing.join(", ")}`);
     }
 
-    const projectKey = canReadValues ? deriveProjectKey(projectId) : null;
-    const rows = this.buildDiffRows(environments, envTypes, projectKey, canReadValues);
+    const rows = this.buildDiffRows(environments, envTypes);
 
     await this.auditLogService.log({
       userId,
@@ -77,8 +73,6 @@ export class EnvironmentDiffService {
       }[];
     }[],
     envTypes: EnvironmentType[],
-    projectKey: Buffer | null,
-    canReadValues: boolean,
   ): EnvDiffRow[] {
     const allKeys = new Map<string, { description: string | null; isRequired: boolean }>();
     const envVarMaps = new Map<string, Map<string, (typeof environments)[0]["variables"][0]>>();
@@ -98,21 +92,25 @@ export class EnvironmentDiffService {
     for (const [key, meta] of allKeys) {
       const values: Record<
         string,
-        { value: string; exists: boolean; environmentId: string; updatedAt: Date } | null
+        {
+          encryptedValue: string;
+          iv: string;
+          authTag: string;
+          exists: boolean;
+          environmentId: string;
+          updatedAt: Date;
+        } | null
       > = {};
       let allExist = true;
-      const decryptedValues: string[] = [];
 
       for (const envType of envTypes) {
         const varMap = envVarMaps.get(envType)!;
         const variable = varMap.get(key);
         if (variable) {
-          const value = projectKey
-            ? decrypt(variable.encryptedValue, variable.iv, variable.authTag, projectKey)
-            : "********";
-          decryptedValues.push(value);
           values[envType] = {
-            value,
+            encryptedValue: variable.encryptedValue,
+            iv: variable.iv,
+            authTag: variable.authTag,
             exists: true,
             environmentId: variable.environmentId,
             updatedAt: variable.updatedAt,
@@ -123,14 +121,7 @@ export class EnvironmentDiffService {
         }
       }
 
-      let status: "match" | "mismatch" | "missing";
-      if (!allExist) {
-        status = "missing";
-      } else if (canReadValues && new Set(decryptedValues).size > 1) {
-        status = "mismatch";
-      } else {
-        status = "match";
-      }
+      const status: "match" | "missing" = allExist ? "match" : "missing";
 
       rows.push({
         key,
@@ -141,7 +132,7 @@ export class EnvironmentDiffService {
       });
     }
 
-    const statusOrder = { missing: 0, mismatch: 1, match: 2 };
+    const statusOrder = { missing: 0, match: 1 };
     rows.sort(
       (a, b) => statusOrder[a.status] - statusOrder[b.status] || a.key.localeCompare(b.key),
     );

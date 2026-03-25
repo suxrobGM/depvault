@@ -1,14 +1,19 @@
 import { singleton } from "tsyringe";
 import { NotFoundError } from "@/common/errors";
-import { decryptBinary, deriveProjectKey, encryptBinary } from "@/common/utils/encryption";
 import { PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import { NotificationService } from "@/modules/notification/notification.service";
 import { PlanEnforcementService } from "@/modules/subscription/plan-enforcement.service";
 import type { PaginatedResponse } from "@/types/response";
 import { toSecretFileResponse } from "./secret-file.mapper";
-import type { SecretFileResponse, UpdateSecretFileBody } from "./secret-file.schema";
-import { validateFile, validateFileName } from "./secret-file.validator";
+import type {
+  SecretFileDownloadResponse,
+  SecretFileResponse,
+  UpdateSecretFileBody,
+  UploadNewVersionBody,
+  UploadSecretFileBody,
+} from "./secret-file.schema";
+import { validateFileName } from "./secret-file.validator";
 
 @singleton()
 export class SecretFileService {
@@ -35,30 +40,25 @@ export class SecretFileService {
   async upload(
     projectId: string,
     userId: string,
-    file: File,
-    vaultGroupId: string,
-    description?: string,
+    body: UploadSecretFileBody,
     ipAddress = "unknown",
   ): Promise<SecretFileResponse> {
     await this.planEnforcement.enforceForProject(projectId, "secretFile");
 
-    validateFile(file);
+    validateFileName(body.name);
 
     const vaultGroup = await this.prisma.vaultGroup.findFirst({
-      where: { id: vaultGroupId, projectId },
+      where: { id: body.vaultGroupId, projectId },
     });
     if (!vaultGroup) {
       throw new NotFoundError("Vault group not found");
     }
 
-    const projectKey = deriveProjectKey(projectId);
+    const encryptedContent = Buffer.from(body.encryptedContent, "base64");
 
     const existing = await this.prisma.secretFile.findUnique({
-      where: { vaultGroupId_name: { vaultGroupId, name: file.name } },
+      where: { vaultGroupId_name: { vaultGroupId: body.vaultGroupId, name: body.name } },
     });
-
-    const fileBuffer = Buffer.from(await file.arrayBuffer());
-    const { ciphertext, iv, authTag } = encryptBinary(fileBuffer, projectKey);
 
     let secretFile;
     if (existing) {
@@ -76,25 +76,25 @@ export class SecretFileService {
       secretFile = await this.prisma.secretFile.update({
         where: { id: existing.id },
         data: {
-          description,
-          encryptedContent: new Uint8Array(ciphertext),
-          iv,
-          authTag,
-          mimeType: file.type || "application/octet-stream",
-          fileSize: file.size,
+          description: body.description,
+          encryptedContent: new Uint8Array(encryptedContent),
+          iv: body.iv,
+          authTag: body.authTag,
+          mimeType: body.mimeType,
+          fileSize: body.fileSize,
         },
       });
     } else {
       secretFile = await this.prisma.secretFile.create({
         data: {
-          vaultGroupId,
-          name: file.name,
-          description,
-          encryptedContent: new Uint8Array(ciphertext),
-          iv,
-          authTag,
-          mimeType: file.type || "application/octet-stream",
-          fileSize: file.size,
+          vaultGroupId: body.vaultGroupId,
+          name: body.name,
+          description: body.description,
+          encryptedContent: new Uint8Array(encryptedContent),
+          iv: body.iv,
+          authTag: body.authTag,
+          mimeType: body.mimeType,
+          fileSize: body.fileSize,
           uploadedBy: userId,
         },
       });
@@ -107,7 +107,7 @@ export class SecretFileService {
       resourceType: "SECRET_FILE",
       resourceId: secretFile.id,
       ipAddress,
-      metadata: { fileName: file.name, vaultGroupName: vaultGroup.name },
+      metadata: { fileName: body.name, vaultGroupName: vaultGroup.name },
     });
 
     return toSecretFileResponse(secretFile, vaultGroup);
@@ -147,16 +147,8 @@ export class SecretFileService {
     fileId: string,
     userId: string,
     ipAddress = "unknown",
-  ): Promise<{ buffer: Buffer; name: string; mimeType: string }> {
+  ): Promise<SecretFileDownloadResponse> {
     const file = await this.findFileOrThrow(projectId, fileId);
-
-    const projectKey = deriveProjectKey(projectId);
-    const decrypted = decryptBinary(
-      Buffer.from(file.encryptedContent),
-      file.iv,
-      file.authTag,
-      projectKey,
-    );
 
     await this.auditLogService.log({
       userId,
@@ -168,17 +160,23 @@ export class SecretFileService {
       metadata: { fileName: file.name, vaultGroupName: file.vaultGroup.name },
     });
 
-    return { buffer: decrypted, name: file.name, mimeType: file.mimeType };
+    return {
+      encryptedContent: Buffer.from(file.encryptedContent).toString("base64"),
+      iv: file.iv,
+      authTag: file.authTag,
+      name: file.name,
+      mimeType: file.mimeType,
+    };
   }
 
   async uploadNewVersion(
     projectId: string,
     fileId: string,
     userId: string,
-    file: File,
+    body: UploadNewVersionBody,
     ipAddress = "unknown",
   ): Promise<SecretFileResponse> {
-    validateFile(file);
+    validateFileName(body.name);
 
     const existing = await this.findFileOrThrow(projectId, fileId);
 
@@ -193,18 +191,16 @@ export class SecretFileService {
       },
     });
 
-    const projectKey = deriveProjectKey(projectId);
-    const fileBuffer = Buffer.from(await file.arrayBuffer());
-    const { ciphertext, iv, authTag } = encryptBinary(fileBuffer, projectKey);
+    const encryptedContent = Buffer.from(body.encryptedContent, "base64");
 
     const updated = await this.prisma.secretFile.update({
       where: { id: fileId },
       data: {
-        encryptedContent: new Uint8Array(ciphertext),
-        iv,
-        authTag,
-        mimeType: file.type ?? "application/octet-stream",
-        fileSize: file.size,
+        encryptedContent: new Uint8Array(encryptedContent),
+        iv: body.iv,
+        authTag: body.authTag,
+        mimeType: body.mimeType,
+        fileSize: body.fileSize,
       },
       include: { vaultGroup: true },
     });
@@ -217,7 +213,7 @@ export class SecretFileService {
       resourceId: fileId,
       ipAddress,
       metadata: {
-        fileName: file.name,
+        fileName: body.name,
         action: "new_version",
         vaultGroupName: existing.vaultGroup.name,
       },

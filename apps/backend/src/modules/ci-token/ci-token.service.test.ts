@@ -3,12 +3,6 @@ import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from "@/common/errors";
 import { CiTokenService } from "./ci-token.service";
 
-mock.module("@/common/utils/encryption", () => ({
-  deriveProjectKey: () => Buffer.alloc(32),
-  decrypt: (_c: string, _iv: string, _a: string, _k: Buffer) => "decrypted-value",
-  decryptBinary: (_c: Buffer, _iv: string, _a: string, _k: Buffer) => Buffer.from("file-data"),
-}));
-
 mock.module("@/common/logger/logger", () => ({
   logger: { info: () => {}, warn: () => {}, error: () => {} },
 }));
@@ -98,6 +92,9 @@ describe("CiTokenService", () => {
     const body = {
       name: "GitHub Actions Prod",
       environmentId: "env-uuid",
+      wrappedDek: "wrapped-dek",
+      wrappedDekIv: "wrapped-iv",
+      wrappedDekTag: "wrapped-tag",
       expiresIn: 86400,
     };
 
@@ -263,7 +260,13 @@ describe("CiTokenService", () => {
         },
       ]);
       mockPrisma.secretFile.findMany.mockResolvedValueOnce([
-        { id: "file-1", name: ".env", mimeType: "text/plain", fileSize: 100 },
+        {
+          id: "file-1",
+          name: ".env",
+          encryptedContent: Buffer.from("enc"),
+          iv: "fiv",
+          authTag: "ftag",
+        },
       ]);
 
       const result = await service.fetchSecrets(
@@ -276,9 +279,12 @@ describe("CiTokenService", () => {
 
       expect(result.variables).toHaveLength(1);
       expect(result.variables[0]!.key).toBe("DB_HOST");
-      expect(result.variables[0]!.value).toBe("decrypted-value");
+      expect(result.variables[0]!.encryptedValue).toBe("enc");
       expect(result.files).toHaveLength(1);
-      expect(result.files[0]!.downloadUrl).toContain("dvci_raw");
+      expect(result.files[0]!.name).toBe(".env");
+      expect(result.files[0]!.encryptedContent).toBeDefined();
+      expect(result.files[0]!.iv).toBe("fiv");
+      expect(result.files[0]!.authTag).toBe("ftag");
       expect(mockAudit.log).toHaveBeenCalled();
     });
   });
@@ -299,7 +305,7 @@ describe("CiTokenService", () => {
 
       expect(result.name).toBe("config.json");
       expect(result.mimeType).toBe("application/json");
-      expect(result.buffer).toBeInstanceOf(Buffer);
+      expect(result.encryptedContent).toBeDefined();
     });
 
     it("should throw NotFoundError when file not in environment", async () => {

@@ -6,6 +6,7 @@ import { StringIdParamSchema } from "@/types/request";
 import { MessageResponseSchema } from "@/types/response";
 import { ciTokenGuard } from "./ci-token.middleware";
 import {
+  CiFileDownloadResponseSchema,
   CiFileParamsSchema,
   CiFileQuerySchema,
   CiSecretsResponseSchema,
@@ -110,19 +111,16 @@ export const ciAccessController = new Elysia({
   )
   .get(
     "/files/:fileId",
-    async ({ ciToken, params, set }) => {
-      const { buffer, name, mimeType } = await ciTokenService.downloadFile(ciToken, params.fileId);
-      set.headers["Content-Type"] = mimeType;
-      set.headers["Content-Disposition"] = `attachment; filename="${name}"`;
-      return buffer;
-    },
+    ({ ciToken, params }) => ciTokenService.downloadFile(ciToken, params.fileId),
     {
       params: CiFileParamsSchema,
       query: CiFileQuerySchema,
+      response: CiFileDownloadResponseSchema,
       detail: {
         operationId: "downloadCiSecretFile",
-        summary: "Download secret file",
-        description: "Download a specific secret file using a CI token.",
+        summary: "Download encrypted secret file",
+        description:
+          "Download an encrypted secret file using a CI token. Decryption happens client-side using the wrapped DEK.",
       },
     },
   );

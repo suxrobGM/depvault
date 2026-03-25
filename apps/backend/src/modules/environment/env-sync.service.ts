@@ -1,10 +1,8 @@
 import { singleton } from "tsyringe";
-import { NotFoundError } from "@/common/errors";
-import { decrypt, deriveProjectKey, encrypt } from "@/common/utils/encryption";
 import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import { EnvironmentRepository } from "./environment.repository";
-import type { SyncEnvironmentBody } from "./environment.schema";
+import type { SyncEnvironmentBody, SyncEnvironmentResponse } from "./environment.schema";
 
 @singleton()
 export class EnvironmentSyncService {
@@ -14,60 +12,41 @@ export class EnvironmentSyncService {
     private readonly envHelper: EnvironmentRepository,
   ) {}
 
-  /** Sync an environment's variables into another environment (upserts matching keys). */
+  /** Sync pre-encrypted entries from the client into a target environment (bulk upsert). */
   async syncEnvironment(
     projectId: string,
     body: SyncEnvironmentBody,
     userId: string,
     ipAddress: string,
-  ) {
+  ): Promise<SyncEnvironmentResponse> {
     const groupName = await this.envHelper.getVaultGroupName(body.vaultGroupId);
-
-    const sourceEnv = await this.prisma.environment.findUnique({
-      where: {
-        vaultGroupId_type: {
-          vaultGroupId: body.vaultGroupId,
-          type: body.sourceType as EnvironmentType,
-        },
-      },
-      include: { variables: true },
-    });
-
-    if (!sourceEnv) {
-      throw new NotFoundError(`Source environment "${body.sourceType}" not found`);
-    }
 
     const targetEnv = await this.envHelper.findOrCreateEnvironment(
       projectId,
       body.vaultGroupId,
-      body.targetType as EnvironmentType,
+      body.targetEnvironmentType as EnvironmentType,
     );
 
-    const projectKey = deriveProjectKey(projectId);
-
     const synced = await Promise.all(
-      sourceEnv.variables.map((v) => {
-        const plaintext = decrypt(v.encryptedValue, v.iv, v.authTag, projectKey);
-        const { ciphertext, iv, authTag } = encrypt(plaintext, projectKey);
-
+      body.entries.map((entry) => {
         const data = {
-          encryptedValue: ciphertext,
-          iv,
-          authTag,
-          description: v.description,
-          isRequired: v.isRequired,
+          encryptedValue: entry.encryptedValue,
+          iv: entry.iv,
+          authTag: entry.authTag,
+          description: entry.description ?? null,
+          isRequired: entry.isRequired ?? false,
         };
 
         return this.prisma.envVariable.upsert({
           where: {
             environmentId_key: {
               environmentId: targetEnv.id,
-              key: v.key,
+              key: entry.key,
             },
           },
           create: {
             environmentId: targetEnv.id,
-            key: v.key,
+            key: entry.key,
             ...data,
           },
           update: data,
@@ -83,8 +62,8 @@ export class EnvironmentSyncService {
       resourceId: targetEnv.id,
       ipAddress,
       metadata: {
-        source: body.sourceType,
-        target: body.targetType,
+        source: body.sourceEnvironmentType,
+        target: body.targetEnvironmentType,
         variableCount: synced.length,
         vaultGroupName: groupName,
       },

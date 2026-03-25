@@ -1,20 +1,18 @@
 import { singleton } from "tsyringe";
 import { NotFoundError } from "@/common/errors";
-import { decrypt, deriveProjectKey, encrypt } from "@/common/utils/encryption";
 import { PrismaClient } from "@/generated/prisma";
 import type { EnvVariableVersionListResponse } from "./env-variable-version.schema";
 import type { EnvVariableWithValueResponse } from "./env-variable.schema";
-import { toDecryptedResponse } from "./environment.mapper";
+import { toEncryptedResponse } from "./environment.mapper";
 
 @singleton()
 export class EnvVariableVersionService {
   constructor(private readonly prisma: PrismaClient) {}
 
-  /** List version history for an environment variable. Editors/owners see decrypted values; viewers see masked values. */
   async listVersions(
     projectId: string,
     varId: string,
-    memberRole: string,
+    _memberRole: string,
   ): Promise<EnvVariableVersionListResponse> {
     const variable = await this.prisma.envVariable.findFirst({
       where: { id: varId, environment: { projectId } },
@@ -23,9 +21,6 @@ export class EnvVariableVersionService {
     if (!variable) {
       throw new NotFoundError("Environment variable not found");
     }
-
-    const canReadValues = memberRole === "OWNER" || memberRole === "EDITOR";
-    const projectKey = canReadValues ? deriveProjectKey(projectId) : null;
 
     const versions = await this.prisma.envVariableVersion.findMany({
       where: { variableId: varId },
@@ -49,7 +44,9 @@ export class EnvVariableVersionService {
     const items = versions.map((v) => ({
       id: v.id,
       variableId: v.variableId,
-      value: projectKey ? decrypt(v.encryptedValue, v.iv, v.authTag, projectKey) : "********",
+      encryptedValue: v.encryptedValue,
+      iv: v.iv,
+      authTag: v.authTag,
       changedByName: userNameMap.get(v.changedBy) ?? "Unknown user",
       createdAt: v.createdAt,
     }));
@@ -57,7 +54,7 @@ export class EnvVariableVersionService {
     return { items };
   }
 
-  /** Rollback a variable to a previous version. Saves the current value as a new version snapshot before restoring. */
+  /** Rollback: restores encrypted value from a version. Client sends pre-encrypted data, but for rollback we use the version's encrypted triple directly. */
   async rollback(
     projectId: string,
     varId: string,
@@ -80,12 +77,6 @@ export class EnvVariableVersionService {
       throw new NotFoundError("Version not found");
     }
 
-    const projectKey = deriveProjectKey(projectId);
-    const plaintext = decrypt(version.encryptedValue, version.iv, version.authTag, projectKey);
-
-    // Re-encrypt with a fresh IV — GCM IVs must never be reused
-    const { ciphertext, iv, authTag } = encrypt(plaintext, projectKey);
-
     // Snapshot the current value before overwriting
     await this.prisma.envVariableVersion.create({
       data: {
@@ -97,11 +88,16 @@ export class EnvVariableVersionService {
       },
     });
 
+    // Restore the version's encrypted triple directly (same DEK, same ciphertext)
     const updated = await this.prisma.envVariable.update({
       where: { id: varId },
-      data: { encryptedValue: ciphertext, iv, authTag },
+      data: {
+        encryptedValue: version.encryptedValue,
+        iv: version.iv,
+        authTag: version.authTag,
+      },
     });
 
-    return toDecryptedResponse(updated, projectKey);
+    return toEncryptedResponse(updated);
   }
 }

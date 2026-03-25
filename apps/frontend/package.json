@@ -8,7 +8,8 @@
     "start": "bun --bun next start -p 4001",
     "typegen": "bun --bun next typegen",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@depvault/shared": "workspace:*",
@@ -38,7 +39,8 @@
     "elysia": "^1.4.25",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.1"
   },
   "ignoreScripts": [
     "sharp",

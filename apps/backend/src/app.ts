@@ -33,6 +33,7 @@ import { secretScanController } from "@/modules/secret-scan";
 import { securityController } from "@/modules/security/security.controller";
 import { subscriptionController, subscriptionWebhookController } from "@/modules/subscription";
 import { userController } from "@/modules/user";
+import { keyGrantController, vaultController } from "@/modules/vault";
 import { vaultGroupController } from "@/modules/vault-group";
 import { HttpErrorResponses } from "@/types/response";
 
@@ -83,6 +84,8 @@ const app = new Elysia()
       .use(activityController)
       .use(securityController)
       .use(subscriptionController)
+      .use(vaultController)
+      .use(keyGrantController)
       .use(adminController),
   )
   .listen(process.env.PORT!);

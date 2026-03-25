@@ -25,7 +25,9 @@ export const EnvDiffQuerySchema = t.Object({
 });
 
 const EnvDiffValueSchema = t.Object({
-  value: t.String(),
+  encryptedValue: t.String(),
+  iv: t.String(),
+  authTag: t.String(),
   exists: t.Boolean(),
   environmentId: t.String(),
   updatedAt: t.Date(),
@@ -35,7 +37,7 @@ const EnvDiffRowSchema = t.Object({
   key: t.String(),
   description: t.Nullable(t.String()),
   isRequired: t.Boolean(),
-  status: t.UnionEnum(["match", "mismatch", "missing"]),
+  status: t.UnionEnum(["match", "missing"]),
   values: t.Record(t.String(), t.Nullable(EnvDiffValueSchema)),
 });
 
@@ -44,10 +46,20 @@ export const EnvDiffResponseSchema = t.Object({
   rows: t.Array(EnvDiffRowSchema),
 });
 
+const SyncEntrySchema = t.Object({
+  key: t.String({ minLength: 1, maxLength: 255 }),
+  encryptedValue: t.String({ minLength: 1 }),
+  iv: t.String({ minLength: 1 }),
+  authTag: t.String({ minLength: 1 }),
+  description: t.Optional(t.Nullable(t.String({ maxLength: 500 }))),
+  isRequired: t.Optional(t.Boolean()),
+});
+
 export const SyncEnvironmentBodySchema = t.Object({
   vaultGroupId: t.String(),
-  sourceType: EnvironmentTypeSchema,
-  targetType: EnvironmentTypeSchema,
+  sourceEnvironmentType: EnvironmentTypeSchema,
+  targetEnvironmentType: EnvironmentTypeSchema,
+  entries: t.Array(SyncEntrySchema, { minItems: 1 }),
 });
 
 export const SyncEnvironmentResponseSchema = t.Object({
@@ -65,3 +77,4 @@ export type EnvironmentResponse = Static<typeof EnvironmentResponseSchema>;
 export type EnvDiffResponse = Static<typeof EnvDiffResponseSchema>;
 export type EnvDiffRow = Static<typeof EnvDiffRowSchema>;
 export type SyncEnvironmentBody = Static<typeof SyncEnvironmentBodySchema>;
+export type SyncEnvironmentResponse = Static<typeof SyncEnvironmentResponseSchema>;

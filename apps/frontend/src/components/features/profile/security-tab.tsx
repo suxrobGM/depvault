@@ -4,6 +4,7 @@ import type { ReactElement } from "react";
 import { GitHub as GitHubIcon } from "@mui/icons-material";
 import { Alert, Box, Button, CardContent, Chip, Stack, Typography } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
+import { VaultSecurityPanel } from "@/components/features/vault";
 import { GlassCard } from "@/components/ui/cards";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
@@ -275,7 +276,9 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
         </CardContent>
       </GlassCard>
 
-      <GlassCard glowColor="var(--mui-palette-error-main)" className="vault-fade-up vault-delay-4">
+      <VaultSecurityPanel />
+
+      <GlassCard glowColor="var(--mui-palette-error-main)" className="vault-fade-up vault-delay-5">
         <CardContent sx={{ p: 3 }}>
           <Typography variant="subtitle1" fontWeight={600} color="error" sx={{ mb: 1 }}>
             Danger Zone

@@ -28,7 +28,6 @@ export const envDiffController = new Elysia({
         query.vaultGroupId,
         query.environments,
         projectMember.userId,
-        projectMember.role,
         getClientIp(request, server),
       ),
     {
@@ -39,7 +38,7 @@ export const envDiffController = new Elysia({
         operationId: "diffEnvironments",
         summary: "Diff environments",
         description:
-          "Compare variables across 2-3 environments. Returns rows with match/mismatch/missing status.",
+          "Compare variable keys across 2-3 environments. Returns rows with match/missing status.",
         security: [{ bearerAuth: [] }],
       },
     },

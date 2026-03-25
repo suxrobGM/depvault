@@ -11,7 +11,10 @@ import { useForm } from "@tanstack/react-form";
 import { z } from "zod/v4";
 import { FormSelectField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
+import { useApiQuery } from "@/hooks/use-api-query";
+import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
+import { encrypt } from "@/lib/crypto";
 
 const applyTemplateSchema = z.object({
   vaultGroupId: z.string().min(1, "Select a vault group"),
@@ -29,9 +32,31 @@ interface TemplateApplyDialogProps {
 
 export function TemplateApplyDialog(props: TemplateApplyDialogProps): ReactElement {
   const { open, onClose, projectId, vaultGroups, templateId, onSuccess } = props;
+  const { getProjectDEK } = useVault();
+
+  const { data: templateDetail } = useApiQuery(
+    ["env-template-detail", projectId, templateId],
+    () =>
+      client.api
+        .projects({ id: projectId })
+        ["env-templates"]({ templateId: templateId ?? "" })
+        .get(),
+    { enabled: open && !!templateId },
+  );
 
   const mutation = useApiMutation(
-    (values: { vaultGroupId: string; environmentType: EnvironmentTypeValue }) =>
+    (values: {
+      vaultGroupId: string;
+      environmentType: EnvironmentTypeValue;
+      encryptedVariables: Array<{
+        key: string;
+        encryptedValue: string;
+        iv: string;
+        authTag: string;
+        description?: string | null;
+        isRequired?: boolean;
+      }>;
+    }) =>
       client.api
         .projects({ id: projectId })
         ["env-templates"]({ templateId: templateId ?? "" })
@@ -58,7 +83,30 @@ export function TemplateApplyDialog(props: TemplateApplyDialogProps): ReactEleme
     },
     validators: { onSubmit: applyTemplateSchema },
     onSubmit: async ({ value }) => {
-      await mutation.mutateAsync(value);
+      const dek = await getProjectDEK(projectId);
+      const templateVars =
+        (
+          templateDetail as {
+            variables?: Array<{ key: string; description: string | null; isRequired: boolean }>;
+          }
+        )?.variables ?? [];
+      const encryptedVariables = await Promise.all(
+        templateVars.map(async (v) => {
+          const encrypted = await encrypt("", dek);
+          return {
+            key: v.key,
+            encryptedValue: encrypted.ciphertext,
+            iv: encrypted.iv,
+            authTag: encrypted.authTag,
+            description: v.description,
+            isRequired: v.isRequired,
+          };
+        }),
+      );
+      await mutation.mutateAsync({
+        ...value,
+        encryptedVariables,
+      });
     },
   });
 

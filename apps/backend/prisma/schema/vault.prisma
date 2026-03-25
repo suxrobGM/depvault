@@ -1,0 +1,45 @@
+model UserVault {
+  id                    String   @id @default(uuid()) @db.Uuid
+  userId                String   @unique @map("user_id") @db.Uuid
+  kekSalt               String   @map("kek_salt")
+  kekIterations         Int      @default(600000) @map("kek_iterations")
+  publicKey             String   @map("public_key")
+  wrappedPrivateKey     String   @map("wrapped_private_key")
+  wrappedPrivateKeyIv   String   @map("wrapped_private_key_iv")
+  wrappedPrivateKeyTag  String   @map("wrapped_private_key_tag")
+  recoveryKeyHash       String   @map("recovery_key_hash")
+  wrappedRecoveryKey    String   @map("wrapped_recovery_key")
+  wrappedRecoveryKeyIv  String   @map("wrapped_recovery_key_iv")
+  wrappedRecoveryKeyTag String   @map("wrapped_recovery_key_tag")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_vaults")
+}
+
+enum KeyGrantType {
+  SELF
+  ECDH
+  RECOVERY
+}
+
+model ProjectKeyGrant {
+  id               String       @id @default(uuid()) @db.Uuid
+  projectId        String       @map("project_id") @db.Uuid
+  userId           String       @map("user_id") @db.Uuid
+  wrappedDek       String       @map("wrapped_dek")
+  wrappedDekIv     String       @map("wrapped_dek_iv")
+  wrappedDekTag    String       @map("wrapped_dek_tag")
+  granterPublicKey String?      @map("granter_public_key")
+  grantType        KeyGrantType @default(ECDH) @map("grant_type")
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId, grantType])
+  @@map("project_key_grants")
+}

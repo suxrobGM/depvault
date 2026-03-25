@@ -27,6 +27,7 @@ model Project {
   secretDetections SecretDetection[]
   ciTokens         CiToken[]
   licenseRules     LicenseRule[]
+  keyGrants        ProjectKeyGrant[]
 
   @@map("projects")
 }

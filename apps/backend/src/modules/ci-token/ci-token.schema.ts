@@ -12,6 +12,9 @@ export const CreateCiTokenBodySchema = t.Object({
   ipAllowlist: t.Optional(
     t.Array(t.String({ minLength: 1 }), { description: "IP addresses or CIDR ranges" }),
   ),
+  wrappedDek: t.String({ description: "Client-wrapped data encryption key" }),
+  wrappedDekIv: t.String(),
+  wrappedDekTag: t.String(),
 });
 
 export const CiTokenResponseSchema = t.Object({
@@ -50,18 +53,23 @@ export const CiTokenParamsSchema = t.Object({
 
 export const CiSecretVariableSchema = t.Object({
   key: t.String(),
-  value: t.String(),
+  encryptedValue: t.String(),
+  iv: t.String(),
+  authTag: t.String(),
 });
 
 export const CiSecretFileSchema = t.Object({
   id: t.String(),
   name: t.String(),
-  mimeType: t.String(),
-  fileSize: t.Number(),
-  downloadUrl: t.String(),
+  encryptedContent: t.String({ description: "Base64-encoded encrypted content" }),
+  iv: t.String(),
+  authTag: t.String(),
 });
 
 export const CiSecretsResponseSchema = t.Object({
+  wrappedDek: t.Nullable(t.String()),
+  wrappedDekIv: t.Nullable(t.String()),
+  wrappedDekTag: t.Nullable(t.String()),
   variables: t.Array(CiSecretVariableSchema),
   files: t.Array(CiSecretFileSchema),
 });
@@ -74,7 +82,16 @@ export const CiFileQuerySchema = t.Object({
   token: t.String(),
 });
 
+export const CiFileDownloadResponseSchema = t.Object({
+  encryptedContent: t.String({ description: "Base64-encoded encrypted file content" }),
+  iv: t.String(),
+  authTag: t.String(),
+  name: t.String(),
+  mimeType: t.String(),
+});
+
 export type CreateCiTokenBody = Static<typeof CreateCiTokenBodySchema>;
 export type CiTokenResponse = Static<typeof CiTokenResponseSchema>;
 export type CiTokenCreatedResponse = Static<typeof CiTokenCreatedResponseSchema>;
 export type CiSecretsResponse = Static<typeof CiSecretsResponseSchema>;
+export type CiFileDownloadResponse = Static<typeof CiFileDownloadResponseSchema>;

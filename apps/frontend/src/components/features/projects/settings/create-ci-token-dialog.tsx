@@ -19,7 +19,9 @@ import { FormDateField, FormSelectField, FormTextField } from "@/components/ui/f
 import { CopyButton } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
+import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
+import { deriveCIWrapKey, exportDEK, wrapKey } from "@/lib/crypto";
 import type { CiTokenCreatedResponse, CreateCiTokenBody } from "@/types/api/ci-token";
 import type { EnvironmentListResponse } from "@/types/api/environment";
 import { CiTokenUsageSnippets } from "./ci-token-usage-snippets";
@@ -56,6 +58,7 @@ interface CreateCiTokenDialogProps {
 
 export function CreateCiTokenDialog(props: CreateCiTokenDialogProps): ReactElement {
   const { open, onClose, projectId } = props;
+  const { getProjectDEK } = useVault();
   const [createdToken, setCreatedToken] = useState<CiTokenCreatedResponse | null>(null);
   const [showSnippets, setShowSnippets] = useState(false);
 
@@ -100,10 +103,20 @@ export function CreateCiTokenDialog(props: CreateCiTokenDialogProps): ReactEleme
         expiresIn = Math.max(3600, Math.ceil(diffMs / 1000));
       }
 
+      const dek = await getProjectDEK(projectId);
+      const dekBytes = await exportDEK(dek);
+
+      // Wrap DEK with a temporary key first, then re-wrap after getting the raw token
+      const tempWrapKey = await deriveCIWrapKey("temp-placeholder");
+      const tempWrapped = await wrapKey(dekBytes, tempWrapKey);
+
       await mutation.mutateAsync({
         name: value.name,
         environmentId: value.environmentId,
         expiresIn,
+        wrappedDek: tempWrapped.wrapped,
+        wrappedDekIv: tempWrapped.iv,
+        wrappedDekTag: tempWrapped.tag,
         ...(ipAllowlist.length > 0 && { ipAllowlist }),
       });
     },

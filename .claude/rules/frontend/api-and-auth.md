@@ -26,6 +26,15 @@ Located at `src/lib/api-server.ts`. Reads cookies from `next/headers` and forwar
 - Dashboard layout fetches user server-side and passes to AuthProvider
 - `useAuth()` hook in `src/hooks/use-auth.ts` uses React 19 `use(AuthContext)`
 
+## Vault Provider
+
+- `src/providers/vault-provider.tsx` manages vault state: unlock/lock/setup, KEK + ECDH private key in memory refs, DEK cache per project
+- Dashboard layout wraps content with `<VaultProvider>` (inside `<AuthProvider>`)
+- `useVault()` hook in `src/hooks/use-vault.ts` — use for all encryption operations
+- Key methods: `unlockVault`, `setupVault`, `getProjectDEK`, `initializeProjectKeys`, `grantProjectKeyToMember`
+- KEK/DEK/private key held in `useRef` (not state) to avoid serialization — cleared on lock/logout
+- Auto-locks after 30 min idle
+
 ## Backend Type Inference
 
 - Run `bun run build:types` in `apps/backend/` to generate declaration files in `dist/`

@@ -1,7 +1,6 @@
 import { singleton } from "tsyringe";
 import { NotFoundError } from "@/common/errors";
 import { logger } from "@/common/logger";
-import { deriveProjectKey, encrypt } from "@/common/utils/encryption";
 import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import { NotificationService } from "@/modules/notification/notification.service";
@@ -12,7 +11,7 @@ import type {
   EnvVariableWithValueResponse,
   UpdateEnvVariableBody,
 } from "./env-variable.schema";
-import { toDecryptedResponse, toMaskedResponse, toResponseWithValue } from "./environment.mapper";
+import { toEncryptedResponse } from "./environment.mapper";
 import { EnvironmentRepository } from "./environment.repository";
 import type { EnvironmentResponse } from "./environment.schema";
 
@@ -67,16 +66,13 @@ export class EnvironmentService {
       body.environmentType as EnvironmentType,
     );
 
-    const projectKey = deriveProjectKey(projectId);
-    const { ciphertext, iv, authTag } = encrypt(body.value, projectKey);
-
     const variable = await this.prisma.envVariable.create({
       data: {
         environmentId: environment.id,
         key: body.key,
-        encryptedValue: ciphertext,
-        iv,
-        authTag,
+        encryptedValue: body.encryptedValue,
+        iv: body.iv,
+        authTag: body.authTag,
         description: body.description,
         isRequired: body.isRequired ?? false,
       },
@@ -92,20 +88,19 @@ export class EnvironmentService {
       metadata: { key: body.key, vaultGroupName: groupName },
     });
 
-    return toResponseWithValue(variable, body.value);
+    return toEncryptedResponse(variable);
   }
 
   async list(
     projectId: string,
     userId: string,
-    memberRole: string,
+    _memberRole: string,
     vaultGroupId: string,
     environmentType?: string,
     page = 1,
     limit = 20,
     ipAddress = "unknown",
   ): Promise<PaginatedResponse<EnvVariableWithValueResponse>> {
-    const canReadValues = memberRole === "OWNER" || memberRole === "EDITOR";
     const groupName = await this.envHelper.getVaultGroupName(vaultGroupId);
 
     const where = environmentType
@@ -122,12 +117,9 @@ export class EnvironmentService {
       this.prisma.envVariable.count({ where }),
     ]);
 
-    const projectKey = canReadValues ? deriveProjectKey(projectId) : null;
-    const items = variables.map((v) =>
-      projectKey ? toDecryptedResponse(v, projectKey) : toMaskedResponse(v),
-    );
+    const items = variables.map(toEncryptedResponse);
 
-    if (canReadValues && variables.length > 0) {
+    if (variables.length > 0) {
       await this.auditLogService.log({
         userId,
         projectId,
@@ -172,12 +164,13 @@ export class EnvironmentService {
       throw new NotFoundError("Environment variable not found");
     }
 
-    const projectKey = deriveProjectKey(projectId);
-
     let encryptionFields = {};
-    if (body.value !== undefined) {
-      const { ciphertext, iv, authTag } = encrypt(body.value, projectKey);
-      encryptionFields = { encryptedValue: ciphertext, iv, authTag };
+    if (body.encryptedValue !== undefined && body.iv !== undefined && body.authTag !== undefined) {
+      encryptionFields = {
+        encryptedValue: body.encryptedValue,
+        iv: body.iv,
+        authTag: body.authTag,
+      };
 
       await this.prisma.envVariableVersion.create({
         data: {
@@ -210,7 +203,7 @@ export class EnvironmentService {
       metadata: { key: updated.key, vaultGroupName: variable.environment.vaultGroup.name },
     });
 
-    return toDecryptedResponse(updated, projectKey);
+    return toEncryptedResponse(updated);
   }
 
   async delete(
@@ -279,7 +272,6 @@ export class EnvironmentService {
     return { deleted: variables.length };
   }
 
-  /** Delete an entire environment and all its variables. */
   async deleteEnvironment(
     projectId: string,
     envId: string,

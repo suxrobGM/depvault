@@ -1,7 +1,6 @@
 import "reflect-metadata";
-import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
-import { ForbiddenError, NotFoundError } from "@/common/errors";
-import * as encryption from "@/common/utils/encryption";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { NotFoundError } from "@/common/errors";
 import { EnvVariableVersionService } from "./env-variable-version.service";
 
 const now = new Date();
@@ -9,14 +8,6 @@ const projectId = "project-uuid";
 const userId = "user-uuid";
 const varId = "var-uuid";
 const versionId = "version-uuid";
-
-const fakeProjectKey = Buffer.alloc(32, 1);
-
-const mockEncrypted = {
-  ciphertext: "new-encrypted",
-  iv: "new-iv",
-  authTag: "new-tag",
-};
 
 const mockVariable = {
   id: varId,
@@ -76,41 +67,19 @@ describe("EnvVariableVersionService", () => {
     mock.restore();
     mockPrisma = createMockPrisma();
     service = new EnvVariableVersionService(mockPrisma);
-
-    spyOn(encryption, "deriveProjectKey").mockReturnValue(fakeProjectKey);
-    spyOn(encryption, "encrypt").mockReturnValue(mockEncrypted);
-    spyOn(encryption, "decrypt").mockReturnValue("postgres://localhost/db");
   });
 
   describe("listVersions", () => {
-    it("should return masked values for VIEWER", async () => {
+    it("should return encrypted values for any role", async () => {
       mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
       mockPrisma.envVariableVersion.findMany.mockResolvedValueOnce([mockVersion]);
 
       const result = await service.listVersions(projectId, varId, "VIEWER");
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0]!.value).toBe("********");
-      expect(encryption.decrypt).not.toHaveBeenCalled();
-    });
-
-    it("should return decrypted values for OWNER", async () => {
-      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
-      mockPrisma.envVariableVersion.findMany.mockResolvedValueOnce([mockVersion]);
-
-      const result = await service.listVersions(projectId, varId, "OWNER");
-
-      expect(result.items[0]!.value).toBe("postgres://localhost/db");
-      expect(encryption.decrypt).toHaveBeenCalled();
-    });
-
-    it("should return decrypted values for EDITOR", async () => {
-      mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
-      mockPrisma.envVariableVersion.findMany.mockResolvedValueOnce([mockVersion]);
-
-      const result = await service.listVersions(projectId, varId, "EDITOR");
-
-      expect(result.items[0]!.value).toBe("postgres://localhost/db");
+      expect(result.items[0]!.encryptedValue).toBe(mockVersion.encryptedValue);
+      expect(result.items[0]!.iv).toBe(mockVersion.iv);
+      expect(result.items[0]!.authTag).toBe(mockVersion.authTag);
     });
 
     it("should include changedByName from user lookup", async () => {
@@ -179,26 +148,19 @@ describe("EnvVariableVersionService", () => {
       });
     });
 
-    it("should decrypt old version and re-encrypt with fresh IV before updating", async () => {
+    it("should copy encrypted triple from version directly without decrypt/re-encrypt", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
       mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
       mockPrisma.envVariableVersion.findFirst.mockResolvedValueOnce(mockVersion);
 
       await service.rollback(projectId, varId, versionId, userId);
 
-      expect(encryption.decrypt).toHaveBeenCalledWith(
-        mockVersion.encryptedValue,
-        mockVersion.iv,
-        mockVersion.authTag,
-        fakeProjectKey,
-      );
-      expect(encryption.encrypt).toHaveBeenCalledWith("postgres://localhost/db", fakeProjectKey);
       expect(mockPrisma.envVariable.update).toHaveBeenCalledWith({
         where: { id: varId },
         data: {
-          encryptedValue: mockEncrypted.ciphertext,
-          iv: mockEncrypted.iv,
-          authTag: mockEncrypted.authTag,
+          encryptedValue: mockVersion.encryptedValue,
+          iv: mockVersion.iv,
+          authTag: mockVersion.authTag,
         },
       });
     });
@@ -211,7 +173,7 @@ describe("EnvVariableVersionService", () => {
       const result = await service.rollback(projectId, varId, versionId, userId);
 
       expect(result.id).toBe(varId);
-      expect(result.value).toBe("postgres://localhost/db");
+      expect(result.encryptedValue).toBeDefined();
     });
 
     it("should throw NotFoundError when variable not found", async () => {

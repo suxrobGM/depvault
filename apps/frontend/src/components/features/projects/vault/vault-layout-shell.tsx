@@ -2,6 +2,7 @@
 
 import type { ReactElement, ReactNode } from "react";
 import { Box } from "@mui/material";
+import { VaultGate } from "@/components/features/vault";
 import { PageHeader } from "@/components/ui/containers";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
@@ -34,7 +35,7 @@ export function VaultLayoutShell(props: VaultLayoutShellProps): ReactElement {
         ]}
       />
       <VaultTabs projectId={projectId} />
-      {children}
+      <VaultGate>{children}</VaultGate>
     </Box>
   );
 }

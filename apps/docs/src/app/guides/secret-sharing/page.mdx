@@ -7,7 +7,7 @@ Generate secure one-time links to share secrets with team members or external co
 ## How It Works
 
 1. Select vault variables or upload a secret file and generate a link.
-2. The content is encrypted and stored with a cryptographically random token.
+2. Your browser encrypts the content with a one-time key. The encryption key is embedded in the URL fragment — it never reaches the server.
 3. Share the link URL with the recipient.
 4. The recipient visits the link, enters the password (if set), and views the secrets.
 5. Content is **permanently deleted** after the first access.

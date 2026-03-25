@@ -1,0 +1,97 @@
+# Encryption & Security
+
+DepVault uses end-to-end encryption — secrets are encrypted in your browser before they leave your device. The server stores only ciphertext and cannot read your data.
+
+---
+
+## How Your Data Is Protected
+
+1. You set a **vault password**, separate from your login password. This password is never sent to the server.
+2. A cryptographic key is derived from your vault password using PBKDF2 with 600,000 iterations. This derived key is your Key Encryption Key (KEK).
+3. Each project has its own randomly generated Data Encryption Key (DEK).
+4. Your secrets are encrypted with the project's DEK using AES-256-GCM before leaving your browser.
+5. The server stores only encrypted ciphertext. Decryption happens exclusively on your device.
+
+---
+
+## Terminology
+
+| Term | Description |
+| --- | --- |
+| **Vault Password** | A password you set separately from your login credentials. Used to derive your KEK. Never sent to the server. |
+| **KEK (Key Encryption Key)** | Derived from your vault password via PBKDF2. Used to wrap and unwrap project DEKs on your device. |
+| **DEK (Data Encryption Key)** | A random symmetric key unique to each project. Encrypts and decrypts your secrets. |
+| **AES-256-GCM** | The authenticated encryption algorithm used for all secret data. Provides both confidentiality and integrity. |
+| **PBKDF2** | Password-Based Key Derivation Function 2. Converts your vault password into a cryptographic key using 600,000 iterations to resist brute-force attacks. |
+| **ECDH (P-256)** | Elliptic Curve Diffie-Hellman key exchange on the P-256 curve. Used to securely share project keys between team members. |
+| **Recovery Key** | A one-time-generated key that can restore access to your vault if you forget your vault password. Store it offline. |
+| **Wrapped Key** | A project DEK encrypted with a user's KEK (or a CI token-derived key). The server stores wrapped keys — never raw DEKs. |
+
+---
+
+## Team Sharing
+
+When you add a member to a project, DepVault uses ECDH (P-256) key exchange to share the project's encryption key:
+
+1. Each user has an ECDH key pair generated in their browser when they set their vault password.
+2. Your browser computes a shared secret between your private key and the new member's public key.
+3. The project DEK is encrypted with this shared secret and stored on the server as a wrapped key for the new member.
+4. The new member's browser reverses the process — computing the same shared secret to unwrap the DEK.
+
+The server facilitates the exchange of public keys and wrapped keys but never has access to the plaintext DEK.
+
+---
+
+## One-Time Share Links
+
+When you generate a one-time share link:
+
+1. Your browser generates a random encryption key and encrypts the selected secrets.
+2. The encrypted payload is sent to the server.
+3. The encryption key is embedded in the URL fragment (`#key=...`), which is never sent to the server — browsers strip the fragment from HTTP requests.
+4. The recipient opens the link, and their browser uses the fragment key to decrypt the content locally.
+5. After the first access, the encrypted content is permanently deleted from the server.
+
+If the link expires before being accessed, the encrypted content is also deleted.
+
+---
+
+## CI/CD Pipelines
+
+When you create a CI token for a project:
+
+1. Your browser derives a wrapping key from the token value.
+2. The project DEK is wrapped with this key and stored on the server alongside the token metadata.
+3. In the pipeline, the CLI uses the token to derive the same wrapping key, unwraps the DEK, and decrypts secrets locally.
+
+The server delivers only ciphertext and wrapped keys — plaintext secrets never appear on the server side.
+
+---
+
+## Recovery
+
+When you first set your vault password, DepVault generates a **recovery key** — a random 256-bit secret displayed once. This key works independently of your vault password:
+
+1. The recovery key is wrapped with your KEK and stored in your vault (encrypted — the server cannot read it).
+2. Each time a project DEK is created, a **RECOVERY grant** is also created — the DEK wrapped with your recovery key.
+3. If you forget your vault password, you enter the recovery key. DepVault unwraps all RECOVERY grants to recover your project DEKs, then re-wraps everything under a new password.
+
+You can regenerate the recovery key at any time from **Profile > Security**. This invalidates the previous key and re-wraps all RECOVERY grants with the new one.
+
+Store your recovery key in a secure offline location (password manager, printed copy in a safe). DepVault displays it once and does not store a plaintext copy.
+
+**If you lose both your vault password and your recovery key, your encrypted data is permanently inaccessible.** DepVault cannot reset your encryption keys or decrypt your data on your behalf.
+
+---
+
+## What DepVault Cannot Access
+
+Even with full server access, DepVault cannot read:
+
+- Plaintext variable values or file contents
+- Your vault password
+- Your recovery key
+- Decrypted project keys (DEKs)
+- The key fragment in one-time share links
+
+Even if our servers were fully compromised, your secrets remain encrypted.

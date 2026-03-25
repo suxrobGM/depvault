@@ -42,7 +42,7 @@ const moreFeatures: MoreFeature[] = [
     icon: <CiCdIcon />,
     title: "CI/CD Secret Injection",
     description:
-      "Generate scoped, short-lived tokens for pipelines to pull secrets at build time — no .env files in CI.",
+      "Generate scoped, short-lived tokens for pipelines to pull end-to-end encrypted secrets at build time — no .env files in CI.",
     color: "var(--mui-palette-info-light)",
   },
   {

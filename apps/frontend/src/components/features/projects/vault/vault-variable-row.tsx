@@ -8,6 +8,8 @@ import {
   History as HistoryIcon,
   Replay as ReplayIcon,
   Share as ShareIcon,
+  Visibility,
+  VisibilityOff,
 } from "@mui/icons-material";
 import {
   Box,
@@ -16,6 +18,7 @@ import {
   Collapse,
   IconButton,
   Skeleton,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -24,12 +27,13 @@ import {
   Typography,
 } from "@mui/material";
 import { CreateShareLinkDialog } from "@/components/features/shared-secret/create-share-link-dialog";
-import { MaskedValue } from "@/components/ui/data-display";
 import { ActionMenu } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useConfirm } from "@/hooks/use-confirm";
+import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
+import { decrypt } from "@/lib/crypto";
 import type { EnvVariable, EnvVariableVersionListResponse } from "@/types/api/env-variable";
 import { formatDate } from "@/utils/formatters";
 
@@ -41,6 +45,61 @@ export interface VaultVariableRowProps {
   selected: boolean;
   onToggleSelect?: () => void;
   onEdit?: (variable: EnvVariable) => void;
+}
+
+interface EncryptedValueProps {
+  projectId: string;
+  encryptedValue: string;
+  iv: string;
+  authTag: string;
+}
+
+/** Decrypts a value on-demand when the user clicks the reveal toggle. */
+function EncryptedValue(props: EncryptedValueProps): ReactElement {
+  const { projectId, encryptedValue, iv, authTag } = props;
+  const { getProjectDEK } = useVault();
+  const [decrypted, setDecrypted] = useState<string | null>(null);
+  const [visible, setVisible] = useState(false);
+  const [error, setError] = useState(false);
+
+  const handleToggle = async () => {
+    if (visible) {
+      setVisible(false);
+      return;
+    }
+
+    if (decrypted !== null) {
+      setVisible(true);
+      return;
+    }
+
+    try {
+      const dek = await getProjectDEK(projectId);
+      const plaintext = await decrypt(encryptedValue, iv, authTag, dek);
+      setDecrypted(plaintext);
+      setVisible(true);
+    } catch {
+      setError(true);
+    }
+  };
+
+  return (
+    <Stack direction="row" alignItems="center" spacing={0.5}>
+      <Typography
+        variant="body2"
+        fontFamily="monospace"
+        color={error ? "error" : undefined}
+        sx={{ userSelect: visible ? "text" : "none" }}
+      >
+        {error ? "Decryption failed" : visible ? decrypted : "\u2022".repeat(12)}
+      </Typography>
+      {!error && (
+        <IconButton size="small" onClick={handleToggle} aria-label="Toggle visibility">
+          {visible ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+        </IconButton>
+      )}
+    </Stack>
+  );
 }
 
 export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
@@ -119,7 +178,12 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
           </Typography>
         </TableCell>
         <TableCell>
-          <MaskedValue value={variable.value} />
+          <EncryptedValue
+            projectId={projectId}
+            encryptedValue={variable.encryptedValue}
+            iv={variable.iv}
+            authTag={variable.authTag}
+          />
         </TableCell>
         <TableCell>
           <Typography variant="body2" color="text.secondary" noWrap sx={{ maxWidth: 200 }}>
@@ -222,7 +286,12 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <MaskedValue value={v.value} />
+                          <EncryptedValue
+                            projectId={projectId}
+                            encryptedValue={v.encryptedValue}
+                            iv={v.iv}
+                            authTag={v.authTag}
+                          />
                         </TableCell>
                         {canEdit && (
                           <TableCell align="right">

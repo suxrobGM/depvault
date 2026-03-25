@@ -1,16 +1,15 @@
-import { randomBytes } from "node:crypto";
 import { singleton } from "tsyringe";
 import { BadRequestError, GoneError, NotFoundError } from "@/common/errors";
-import { decrypt, decryptBinary, deriveProjectKey, encrypt } from "@/common/utils/encryption";
 import { createRandomToken, hashPassword } from "@/common/utils/password";
 import { PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import type {
-  AccessEnvSecretResponse,
-  AccessFileSecretResponse,
+  AccessSecretResponse,
   CreateEnvShareBody,
   CreateFileShareBody,
+  CreateShareResponse,
   SharedSecretAuditItem,
+  SharedSecretInfoResponse,
 } from "./shared-secret.schema";
 
 const SHARE_URL_BASE = process.env.FRONTEND_URL!;
@@ -27,22 +26,7 @@ export class SharedSecretService {
     userId: string,
     body: CreateEnvShareBody,
     ipAddress = "unknown",
-  ): Promise<{ token: string; shareUrl: string }> {
-    const variables = await this.prisma.envVariable.findMany({
-      where: { id: { in: body.variableIds }, environment: { projectId } },
-    });
-
-    if (variables.length === 0) {
-      throw new NotFoundError("No matching variables found in this project");
-    }
-
-    const projectKey = deriveProjectKey(projectId);
-    const decrypted = variables.map((v) => ({
-      key: v.key,
-      value: decrypt(v.encryptedValue, v.iv, v.authTag, projectKey),
-    }));
-
-    const { ciphertext, iv, authTag } = encrypt(JSON.stringify(decrypted), projectKey);
+  ): Promise<CreateShareResponse> {
     const token = createRandomToken();
     const passwordHash = body.password ? await hashPassword(body.password) : null;
     const expiresAt = new Date(Date.now() + body.expiresIn * 1000);
@@ -52,9 +36,9 @@ export class SharedSecretService {
         creatorId: userId,
         projectId,
         token,
-        encryptedPayload: ciphertext,
-        iv,
-        authTag,
+        encryptedPayload: body.encryptedPayload,
+        iv: body.iv,
+        authTag: body.authTag,
         passwordHash,
         payloadType: "ENV_VARIABLES",
         expiresAt,
@@ -68,7 +52,10 @@ export class SharedSecretService {
       resourceType: "SHARE_LINK",
       resourceId: secret.id,
       ipAddress,
-      metadata: { payloadType: "ENV_VARIABLES", variableCount: variables.length },
+      metadata: {
+        payloadType: "ENV_VARIABLES",
+        variableCount: body.variableIds?.length ?? 0,
+      },
     });
 
     return { token, shareUrl: `${SHARE_URL_BASE}/s/${token}` };
@@ -77,28 +64,9 @@ export class SharedSecretService {
   async createForFile(
     projectId: string,
     userId: string,
-    fileId: string,
     body: CreateFileShareBody,
     ipAddress = "unknown",
-  ): Promise<{ token: string; shareUrl: string }> {
-    const file = await this.prisma.secretFile.findFirst({
-      where: { id: fileId, vaultGroup: { projectId } },
-    });
-
-    if (!file) {
-      throw new NotFoundError("Secret file not found");
-    }
-
-    const projectKey = deriveProjectKey(projectId);
-    const decryptedBuffer = decryptBinary(
-      Buffer.from(file.encryptedContent),
-      file.iv,
-      file.authTag,
-      projectKey,
-    );
-
-    const { ciphertext, iv, authTag } = encrypt(decryptedBuffer.toString("base64"), projectKey);
-
+  ): Promise<CreateShareResponse> {
     const token = createRandomToken();
     const passwordHash = body.password ? await hashPassword(body.password) : null;
     const expiresAt = new Date(Date.now() + body.expiresIn * 1000);
@@ -108,13 +76,13 @@ export class SharedSecretService {
         creatorId: userId,
         projectId,
         token,
-        encryptedPayload: ciphertext,
-        iv,
-        authTag,
+        encryptedPayload: body.encryptedPayload,
+        iv: body.iv,
+        authTag: body.authTag,
         passwordHash,
         payloadType: "SECRET_FILE",
-        fileName: file.name,
-        mimeType: file.mimeType,
+        fileName: body.fileName,
+        mimeType: body.mimeType,
         expiresAt,
       },
     });
@@ -126,19 +94,13 @@ export class SharedSecretService {
       resourceType: "SHARE_LINK",
       resourceId: secret.id,
       ipAddress,
-      metadata: { payloadType: "SECRET_FILE", fileName: file.name },
+      metadata: { payloadType: "SECRET_FILE", fileName: body.fileName },
     });
 
     return { token, shareUrl: `${SHARE_URL_BASE}/s/${token}` };
   }
 
-  async getInfo(token: string): Promise<{
-    payloadType: "ENV_VARIABLES" | "SECRET_FILE";
-    hasPassword: boolean;
-    fileName: string | null;
-    mimeType: string | null;
-    expiresAt: Date;
-  }> {
+  async getInfo(token: string): Promise<SharedSecretInfoResponse> {
     const secret = await this.prisma.sharedSecret.findUnique({ where: { token } });
 
     if (!secret) throw new NotFoundError("Secret link not found or already consumed");
@@ -170,17 +132,18 @@ export class SharedSecretService {
     token: string,
     password?: string,
     ipAddress = "unknown",
-  ): Promise<AccessEnvSecretResponse | AccessFileSecretResponse> {
+  ): Promise<AccessSecretResponse> {
     const secret = await this.findConsumableSecret(token);
     await this.verifyPassword(secret, password);
 
-    const projectKey = deriveProjectKey(secret.projectId);
-    const decryptedPayload = decrypt(
-      secret.encryptedPayload,
-      secret.iv,
-      secret.authTag,
-      projectKey,
-    );
+    const response: AccessSecretResponse = {
+      encryptedPayload: secret.encryptedPayload,
+      iv: secret.iv,
+      authTag: secret.authTag,
+      payloadType: secret.payloadType as "ENV_VARIABLES" | "SECRET_FILE",
+      fileName: secret.fileName,
+      mimeType: secret.mimeType,
+    };
 
     await this.consumeSecret(secret.id);
 
@@ -193,16 +156,7 @@ export class SharedSecretService {
       metadata: { payloadType: secret.payloadType },
     });
 
-    if (secret.payloadType === "ENV_VARIABLES") {
-      return { payloadType: "ENV_VARIABLES", variables: JSON.parse(decryptedPayload) };
-    }
-
-    return {
-      payloadType: "SECRET_FILE",
-      fileName: secret.fileName!,
-      mimeType: secret.mimeType!,
-      content: decryptedPayload, // already base64
-    };
+    return response;
   }
 
   async list(projectId: string): Promise<{ items: SharedSecretAuditItem[] }> {

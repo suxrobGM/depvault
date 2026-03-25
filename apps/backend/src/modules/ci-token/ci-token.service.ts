@@ -1,6 +1,5 @@
 import { singleton } from "tsyringe";
 import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from "@/common/errors";
-import { decrypt, decryptBinary, deriveProjectKey } from "@/common/utils/encryption";
 import { isIpInAllowlist, validateIpAllowlist } from "@/common/utils/ip";
 import { createRandomToken, hashToken } from "@/common/utils/password";
 import { PrismaClient, type CiToken } from "@/generated/prisma";
@@ -8,6 +7,7 @@ import { AuditLogService } from "@/modules/audit-log";
 import { PlanEnforcementService } from "@/modules/subscription/plan-enforcement.service";
 import type { PaginatedResponse } from "@/types/response";
 import type {
+  CiFileDownloadResponse,
   CiSecretsResponse,
   CiTokenCreatedResponse,
   CiTokenResponse,
@@ -66,6 +66,9 @@ export class CiTokenService {
         tokenPrefix,
         ipAllowlist,
         expiresAt,
+        wrappedDek: body.wrappedDek,
+        wrappedDekIv: body.wrappedDekIv,
+        wrappedDekTag: body.wrappedDekTag,
       },
     });
 
@@ -197,29 +200,29 @@ export class CiTokenService {
     clientIp: string,
     baseUrl: string,
   ): Promise<CiSecretsResponse> {
-    const projectKey = deriveProjectKey(ciToken.projectId);
-
     const [variables, files] = await Promise.all([
       this.prisma.envVariable.findMany({
         where: { environmentId: ciToken.environmentId },
       }),
       this.prisma.secretFile.findMany({
         where: { vaultGroup: { environments: { some: { id: ciToken.environmentId } } } },
-        select: { id: true, name: true, mimeType: true, fileSize: true },
+        select: { id: true, name: true, encryptedContent: true, iv: true, authTag: true },
       }),
     ]);
 
-    const decryptedVariables = variables.map((v) => ({
+    const encryptedVariables = variables.map((v) => ({
       key: v.key,
-      value: decrypt(v.encryptedValue, v.iv, v.authTag, projectKey),
+      encryptedValue: v.encryptedValue,
+      iv: v.iv,
+      authTag: v.authTag,
     }));
 
     const fileList = files.map((f) => ({
       id: f.id,
       name: f.name,
-      mimeType: f.mimeType,
-      fileSize: f.fileSize,
-      downloadUrl: `${baseUrl}/api/ci/secrets/files/${f.id}?token=${rawToken}`,
+      encryptedContent: Buffer.from(f.encryptedContent).toString("base64"),
+      iv: f.iv,
+      authTag: f.authTag,
     }));
 
     await this.auditLogService.log({
@@ -230,18 +233,21 @@ export class CiTokenService {
       ipAddress: clientIp,
       metadata: {
         pipelineRunId: pipelineRunId ?? null,
-        variableCount: decryptedVariables.length,
+        variableCount: encryptedVariables.length,
         fileCount: fileList.length,
       },
     });
 
-    return { variables: decryptedVariables, files: fileList };
+    return {
+      wrappedDek: ciToken.wrappedDek,
+      wrappedDekIv: ciToken.wrappedDekIv,
+      wrappedDekTag: ciToken.wrappedDekTag,
+      variables: encryptedVariables,
+      files: fileList,
+    };
   }
 
-  async downloadFile(
-    ciToken: CiToken,
-    fileId: string,
-  ): Promise<{ buffer: Buffer; name: string; mimeType: string }> {
+  async downloadFile(ciToken: CiToken, fileId: string): Promise<CiFileDownloadResponse> {
     const file = await this.prisma.secretFile.findFirst({
       where: { id: fileId, vaultGroup: { environments: { some: { id: ciToken.environmentId } } } },
     });
@@ -250,14 +256,12 @@ export class CiTokenService {
       throw new NotFoundError("Secret file not found");
     }
 
-    const projectKey = deriveProjectKey(ciToken.projectId);
-    const buffer = decryptBinary(
-      Buffer.from(file.encryptedContent),
-      file.iv,
-      file.authTag,
-      projectKey,
-    );
-
-    return { buffer, name: file.name, mimeType: file.mimeType };
+    return {
+      encryptedContent: Buffer.from(file.encryptedContent).toString("base64"),
+      iv: file.iv,
+      authTag: file.authTag,
+      name: file.name,
+      mimeType: file.mimeType,
+    };
   }
 }

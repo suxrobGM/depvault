@@ -6,6 +6,8 @@ Automate environment variable injection in your build and deployment pipelines u
 
 ## CI Tokens
 
+Secrets are end-to-end encrypted. When you create a CI token, the project encryption key is securely wrapped with the token. The CLI uses the token to decrypt secrets locally — the server never sees plaintext.
+
 CI tokens are long-lived, non-interactive API tokens scoped to a specific project, environment, and vault group.
 
 ### Generating a Token

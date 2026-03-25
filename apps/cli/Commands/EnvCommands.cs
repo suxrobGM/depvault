@@ -37,21 +37,22 @@ public sealed class EnvCommands(CommandContext ctx)
 
             try
             {
-                var result = await pc.Client.Api.Projects[pc.ProjectId].Environments.Variables.GetAsync(config =>
-                {
-                    var vgId = parseResult.GetValue(vaultGroupOpt);
-                    if (!string.IsNullOrEmpty(vgId))
+                var result = await pc.Client.Api.Projects[pc.ProjectId].Environments.Variables
+                    .GetAsync(config =>
                     {
-                        config.QueryParameters.VaultGroupId = vgId;
-                    }
+                        var vgId = parseResult.GetValue(vaultGroupOpt);
+                        if (!string.IsNullOrEmpty(vgId))
+                        {
+                            config.QueryParameters.VaultGroupId = vgId;
+                        }
 
-                    var env = parseResult.GetValue(envOpt);
-                    if (!string.IsNullOrEmpty(env))
-                    {
-                        config.QueryParameters.EnvironmentType =
-                            CommandUtils.ParseEnum(env, VarNs.GetEnvironmentTypeQueryParameterType.DEVELOPMENT);
-                    }
-                }, cancellationToken);
+                        var env = parseResult.GetValue(envOpt);
+                        if (!string.IsNullOrEmpty(env))
+                        {
+                            config.QueryParameters.EnvironmentType =
+                                CommandUtils.ParseEnum(env, VarNs.GetEnvironmentTypeQueryParameterType.DEVELOPMENT);
+                        }
+                    }, cancellationToken);
 
                 var items = result?.Items;
                 if (items is null || items.Count == 0)
@@ -63,13 +64,18 @@ public sealed class EnvCommands(CommandContext ctx)
                 if (parseResult.GetValue(outputOpt) == "json")
                 {
                     ctx.Output.PrintJson(items.Select(v => new
-                        { key = v.Key, value = v.Value, environmentId = v.EnvironmentId }));
+                        { key = v.Key, environmentId = v.EnvironmentId, isRequired = v.IsRequired }));
                     return;
                 }
 
                 ctx.Output.PrintTable(
-                    ["KEY", "VALUE", "ENVIRONMENT"],
-                    items.Select(v => new[] { v.Key ?? "", v.Value ?? "(masked)", v.EnvironmentId ?? "" }).ToList());
+                    ["KEY", "ENVIRONMENT", "UPDATED"],
+                    items.Select(v => new[]
+                    {
+                        v.Key ?? "",
+                        v.EnvironmentId ?? "",
+                        v.UpdatedAt?.ToString("yyyy-MM-dd") ?? ""
+                    }).ToList());
             }
             catch (Exception ex)
             {

@@ -1,12 +1,20 @@
 import { t, type Static } from "elysia";
 
 export const CreateEnvShareBodySchema = t.Object({
-  variableIds: t.Array(t.String(), { minItems: 1, maxItems: 100 }),
-  expiresIn: t.Integer({ minimum: 3600, maximum: 2592000 }), // 1 hour to 30 days in seconds
+  encryptedPayload: t.String({ description: "Client-encrypted payload" }),
+  iv: t.String(),
+  authTag: t.String(),
+  variableIds: t.Optional(t.Array(t.String(), { maxItems: 100, description: "For audit trail" })),
+  expiresIn: t.Integer({ minimum: 3600, maximum: 2592000 }),
   password: t.Optional(t.String({ minLength: 1, maxLength: 128 })),
 });
 
 export const CreateFileShareBodySchema = t.Object({
+  encryptedPayload: t.String({ description: "Client-encrypted payload" }),
+  iv: t.String(),
+  authTag: t.String(),
+  fileName: t.String(),
+  mimeType: t.String(),
   expiresIn: t.Integer({ minimum: 3600, maximum: 2592000 }),
   password: t.Optional(t.String({ minLength: 1, maxLength: 128 })),
 });
@@ -23,21 +31,13 @@ export const SharedSecretInfoResponseSchema = t.Object({
   expiresAt: t.Date(),
 });
 
-export const SharedSecretVariableSchema = t.Object({
-  key: t.String(),
-  value: t.String(),
-});
-
-export const AccessEnvSecretResponseSchema = t.Object({
-  payloadType: t.UnionEnum(["ENV_VARIABLES"] as const),
-  variables: t.Array(SharedSecretVariableSchema),
-});
-
-export const AccessFileSecretResponseSchema = t.Object({
-  payloadType: t.UnionEnum(["SECRET_FILE"] as const),
-  fileName: t.String(),
-  mimeType: t.String(),
-  content: t.String(), // base64-encoded file content
+export const AccessSecretResponseSchema = t.Object({
+  encryptedPayload: t.String(),
+  iv: t.String(),
+  authTag: t.String(),
+  payloadType: t.UnionEnum(["ENV_VARIABLES", "SECRET_FILE"] as const),
+  fileName: t.Nullable(t.String()),
+  mimeType: t.Nullable(t.String()),
 });
 
 export const CreateShareResponseSchema = t.Object({
@@ -76,6 +76,7 @@ export const TokenParamSchema = t.Object({ token: t.String() });
 export type CreateEnvShareBody = Static<typeof CreateEnvShareBodySchema>;
 export type CreateFileShareBody = Static<typeof CreateFileShareBodySchema>;
 export type AccessSecretBody = Static<typeof AccessSecretBodySchema>;
+export type SharedSecretInfoResponse = Static<typeof SharedSecretInfoResponseSchema>;
+export type CreateShareResponse = Static<typeof CreateShareResponseSchema>;
 export type SharedSecretAuditItem = Static<typeof SharedSecretAuditItemSchema>;
-export type AccessEnvSecretResponse = Static<typeof AccessEnvSecretResponseSchema>;
-export type AccessFileSecretResponse = Static<typeof AccessFileSecretResponseSchema>;
+export type AccessSecretResponse = Static<typeof AccessSecretResponseSchema>;

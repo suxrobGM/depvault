@@ -44,6 +44,8 @@ model User {
   invitationsReceived ProjectInvitation[] @relation("invitationsReceived")
   subscription        Subscription?
   deviceCodes         DeviceCode[]
+  vault               UserVault?
+  projectKeyGrants    ProjectKeyGrant[]
 
   @@map("users")
 }

@@ -20,12 +20,13 @@ public sealed class AnalysisClient(IApiClientFactory clientFactory)
     {
         var client = clientFactory.Create();
 
-        var response = await client.Api.Projects[projectId].Analyses.PostAsync(new AnalysesPostRequestBody
-        {
-            FileName = fileName,
-            Content = content,
-            Ecosystem = ecosystem
-        }, cancellationToken: ct);
+        var response = await client.Api.Projects[projectId].Analyses.PostAsync(
+            new AnalysesPostRequestBody
+            {
+                FileName = fileName,
+                Content = content,
+                Ecosystem = ecosystem
+            }, cancellationToken: ct);
 
         if (response is null)
         {

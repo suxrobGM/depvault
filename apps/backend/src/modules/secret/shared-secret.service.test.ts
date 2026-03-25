@@ -1,7 +1,6 @@
 import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
-import { BadRequestError, ForbiddenError, GoneError, NotFoundError } from "@/common/errors";
-import * as encryption from "@/common/utils/encryption";
+import { BadRequestError, GoneError, NotFoundError } from "@/common/errors";
 import * as password from "@/common/utils/password";
 import { SharedSecretService } from "./shared-secret.service";
 
@@ -11,31 +10,8 @@ const pastDate = new Date(Date.now() - 1000);
 
 const projectId = "project-uuid";
 const userId = "user-uuid";
-const fileId = "file-uuid";
 const secretId = "secret-uuid";
 const token = "abc123token";
-
-const fakeProjectKey = Buffer.alloc(32, 1);
-const fakeEncrypted = { ciphertext: "cipher", iv: "iv-val", authTag: "tag-val" };
-
-const mockEnvVariable = {
-  id: "var-uuid",
-  key: "API_KEY",
-  encryptedValue: "enc-val",
-  iv: "iv-val",
-  authTag: "tag-val",
-  environmentId: "env-uuid",
-};
-
-const mockSecretFile = {
-  id: fileId,
-  name: "config.json",
-  mimeType: "application/json",
-  encryptedContent: Buffer.from("encrypted"),
-  iv: "iv-val",
-  authTag: "tag-val",
-  environmentId: "env-uuid",
-};
 
 function makeSharedSecret(overrides: Record<string, unknown> = {}) {
   return {
@@ -97,12 +73,7 @@ describe("SharedSecretService", () => {
     mockAuditLog = createMockAuditLogService();
     service = new SharedSecretService(mockPrisma, mockAuditLog);
 
-    spyOn(encryption, "deriveProjectKey").mockReturnValue(fakeProjectKey);
-    spyOn(encryption, "encrypt").mockReturnValue(fakeEncrypted);
-    spyOn(encryption, "decrypt").mockReturnValue(
-      JSON.stringify([{ key: "API_KEY", value: "secret" }]),
-    );
-    spyOn(encryption, "decryptBinary").mockReturnValue(Buffer.from("file-content"));
+    // No encryption mocks needed — server no longer encrypts/decrypts
     spyOn(password, "createRandomToken").mockReturnValue(token);
     spyOn(password, "hashPassword").mockResolvedValue("hashed-password");
   });
@@ -110,18 +81,22 @@ describe("SharedSecretService", () => {
   describe("createForEnvVariables", () => {
     it("should create a share link for env variables", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
-      mockPrisma.envVariable.findMany.mockResolvedValueOnce([mockEnvVariable]);
 
       const result = await service.createForEnvVariables(
         projectId,
         userId,
-        { variableIds: ["var-uuid"], expiresIn: 86400 },
+        {
+          encryptedPayload: "encrypted",
+          iv: "iv",
+          authTag: "tag",
+          variableIds: ["var-uuid"],
+          expiresIn: 86400,
+        },
         "127.0.0.1",
       );
 
       expect(result.token).toBe(token);
       expect(result.shareUrl).toContain(`/s/${token}`);
-      expect(encryption.encrypt).toHaveBeenCalled();
       expect(mockPrisma.sharedSecret.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({ payloadType: "ENV_VARIABLES", token }),
@@ -134,12 +109,18 @@ describe("SharedSecretService", () => {
 
     it("should hash password when provided", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
-      mockPrisma.envVariable.findMany.mockResolvedValueOnce([mockEnvVariable]);
 
       await service.createForEnvVariables(
         projectId,
         userId,
-        { variableIds: ["var-uuid"], expiresIn: 86400, password: "s3cr3t" },
+        {
+          encryptedPayload: "encrypted",
+          iv: "iv",
+          authTag: "tag",
+          variableIds: ["var-uuid"],
+          expiresIn: 86400,
+          password: "s3cr3t",
+        },
         "127.0.0.1",
       );
 
@@ -151,23 +132,30 @@ describe("SharedSecretService", () => {
       );
     });
 
-    it("should throw NotFoundError when no variables match", async () => {
+    it("should create share link even when variableIds reference is empty", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
-      mockPrisma.envVariable.findMany.mockResolvedValueOnce([]);
 
-      expect(
-        service.createForEnvVariables(projectId, userId, {
-          variableIds: ["bad-id"],
+      const result = await service.createForEnvVariables(
+        projectId,
+        userId,
+        {
+          encryptedPayload: "encrypted",
+          iv: "iv",
+          authTag: "tag",
+          variableIds: [],
           expiresIn: 86400,
-        }),
-      ).rejects.toBeInstanceOf(NotFoundError);
+        },
+        "127.0.0.1",
+      );
+
+      expect(result.token).toBe(token);
+      expect(mockPrisma.sharedSecret.create).toHaveBeenCalled();
     });
   });
 
   describe("createForFile", () => {
     it("should create a share link for a secret file", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "EDITOR" });
-      mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
       mockPrisma.sharedSecret.create.mockResolvedValueOnce(
         makeSharedSecret({
           payloadType: "SECRET_FILE",
@@ -179,14 +167,18 @@ describe("SharedSecretService", () => {
       const result = await service.createForFile(
         projectId,
         userId,
-        fileId,
-        { expiresIn: 3600 },
+        {
+          encryptedPayload: "encrypted",
+          iv: "iv",
+          authTag: "tag",
+          fileName: "config.json",
+          mimeType: "application/json",
+          expiresIn: 3600,
+        },
         "127.0.0.1",
       );
 
       expect(result.shareUrl).toContain(`/s/${token}`);
-      expect(encryption.decryptBinary).toHaveBeenCalled();
-      expect(encryption.encrypt).toHaveBeenCalled();
       expect(mockPrisma.sharedSecret.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -198,13 +190,32 @@ describe("SharedSecretService", () => {
       );
     });
 
-    it("should throw NotFoundError when file does not exist", async () => {
+    it("should create share link for file with pre-encrypted payload", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
-      mockPrisma.secretFile.findFirst.mockResolvedValueOnce(null);
+      mockPrisma.sharedSecret.create.mockResolvedValueOnce(
+        makeSharedSecret({
+          payloadType: "SECRET_FILE",
+          fileName: "report.pdf",
+          mimeType: "application/pdf",
+        }),
+      );
 
-      expect(
-        service.createForFile(projectId, userId, fileId, { expiresIn: 3600 }),
-      ).rejects.toBeInstanceOf(NotFoundError);
+      const result = await service.createForFile(
+        projectId,
+        userId,
+        {
+          encryptedPayload: "enc",
+          iv: "iv",
+          authTag: "tag",
+          fileName: "report.pdf",
+          mimeType: "application/pdf",
+          expiresIn: 3600,
+        },
+        "127.0.0.1",
+      );
+
+      expect(result.token).toBe(token);
+      expect(mockPrisma.sharedSecret.create).toHaveBeenCalled();
     });
   });
 
@@ -265,13 +276,15 @@ describe("SharedSecretService", () => {
   });
 
   describe("access", () => {
-    it("should decrypt and return env variables, then consume the secret", async () => {
+    it("should return encrypted payload and consume the secret", async () => {
       mockPrisma.sharedSecret.findUnique.mockResolvedValueOnce(makeSharedSecret());
 
       const result = await service.access(token, undefined, "1.2.3.4");
 
       expect(result.payloadType).toBe("ENV_VARIABLES");
-      expect((result as any).variables).toEqual([{ key: "API_KEY", value: "secret" }]);
+      expect(result.encryptedPayload).toBe("cipher");
+      expect(result.iv).toBe("iv-val");
+      expect(result.authTag).toBe("tag-val");
       expect(mockPrisma.sharedSecret.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -287,8 +300,7 @@ describe("SharedSecretService", () => {
       );
     });
 
-    it("should return file content for SECRET_FILE payload", async () => {
-      spyOn(encryption, "decrypt").mockReturnValueOnce("base64-file-content");
+    it("should return encrypted payload with file metadata for SECRET_FILE payload", async () => {
       mockPrisma.sharedSecret.findUnique.mockResolvedValueOnce(
         makeSharedSecret({
           payloadType: "SECRET_FILE",
@@ -300,8 +312,9 @@ describe("SharedSecretService", () => {
       const result = await service.access(token, undefined, "1.2.3.4");
 
       expect(result.payloadType).toBe("SECRET_FILE");
-      expect((result as any).fileName).toBe("config.json");
-      expect((result as any).content).toBe("base64-file-content");
+      expect(result.fileName).toBe("config.json");
+      expect(result.mimeType).toBe("application/json");
+      expect(result.encryptedPayload).toBe("cipher");
     });
 
     it("should verify correct password", async () => {

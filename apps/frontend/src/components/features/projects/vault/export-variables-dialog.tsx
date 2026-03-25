@@ -1,15 +1,17 @@
 "use client";
 
-import { useState, type ReactElement } from "react";
+import { useEffect, useRef, useState, type ReactElement } from "react";
 import {
   CONFIG_FORMATS,
   getEnvironmentLabel,
   type ConfigFormat,
   type EnvironmentTypeValue,
 } from "@depvault/shared/constants";
+import { serializeConfig } from "@depvault/shared/serializers";
 import {
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -21,7 +23,9 @@ import {
 } from "@mui/material";
 import { CopyButton } from "@/components/ui/inputs";
 import { useApiQuery } from "@/hooks/use-api-query";
+import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
+import { decrypt } from "@/lib/crypto";
 import type { ExportResult } from "@/types/api/env-variable";
 import { downloadFile } from "@/utils/download-file";
 
@@ -35,20 +39,54 @@ interface ExportVariablesDialogProps {
 
 export function ExportVariablesDialog(props: ExportVariablesDialogProps): ReactElement {
   const { open, onClose, projectId, vaultGroupId, environmentType } = props;
+  const { getProjectDEK } = useVault();
   const [format, setFormat] = useState<ConfigFormat>("env");
+  const [decryptResult, setDecryptResult] = useState<{ content: string; key: string } | null>(null);
+  const effectKeyRef = useRef("");
+
   const { data } = useApiQuery<ExportResult>(
-    ["env-export", projectId, environmentType, format],
+    ["env-export", projectId, environmentType],
     () =>
       client.api
         .projects({ id: projectId })
-        .environments.export.get({ query: { environmentType, format, vaultGroupId } }),
+        .environments.export.get({ query: { environmentType, vaultGroupId } }),
     { enabled: open && !!environmentType },
   );
 
+  const hasEntries = !!data?.entries?.length;
+  const currentKey = `${projectId}:${data?.entries?.length ?? 0}:${format}`;
+  const decrypting = hasEntries && decryptResult?.key !== currentKey;
+  const displayContent =
+    hasEntries && decryptResult?.key === currentKey ? decryptResult.content : null;
+
+  useEffect(() => {
+    if (!data?.entries?.length) return;
+    const key = `${projectId}:${data.entries.length}:${format}`;
+    if (effectKeyRef.current === key) return;
+
+    effectKeyRef.current = key;
+    let cancelled = false;
+
+    getProjectDEK(projectId).then(async (dek) => {
+      const decryptedEntries = await Promise.all(
+        data.entries.map(async (entry) => ({
+          key: entry.key,
+          value: await decrypt(entry.encryptedValue, entry.iv, entry.authTag, dek),
+        })),
+      );
+      if (!cancelled) {
+        setDecryptResult({ content: serializeConfig(format, decryptedEntries), key });
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [data, format, projectId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleDownload = () => {
-    if (!data?.content) return;
+    if (!displayContent) return;
     const ext = format === "env" ? ".env" : `.${format}`;
-    downloadFile(data.content, `${getEnvironmentLabel(environmentType).toLowerCase()}${ext}`);
+    downloadFile(displayContent, `${getEnvironmentLabel(environmentType).toLowerCase()}${ext}`);
   };
 
   return (
@@ -69,7 +107,12 @@ export function ExportVariablesDialog(props: ExportVariablesDialogProps): ReactE
               </MenuItem>
             ))}
           </TextField>
-          {data?.content && (
+          {decrypting && (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+              <CircularProgress size={24} />
+            </Box>
+          )}
+          {displayContent && !decrypting && (
             <Box sx={{ position: "relative" }}>
               <Typography
                 variant="body2"
@@ -86,10 +129,10 @@ export function ExportVariablesDialog(props: ExportVariablesDialogProps): ReactE
                   wordBreak: "break-all",
                 }}
               >
-                {data.content}
+                {displayContent}
               </Typography>
               <Box sx={{ position: "absolute", top: 4, right: 4 }}>
-                <CopyButton value={data.content} notification="Copied to clipboard" />
+                <CopyButton value={displayContent} notification="Copied to clipboard" />
               </Box>
             </Box>
           )}
@@ -97,7 +140,7 @@ export function ExportVariablesDialog(props: ExportVariablesDialogProps): ReactE
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onClose}>Close</Button>
-        <Button variant="contained" onClick={handleDownload} disabled={!data?.content}>
+        <Button variant="contained" onClick={handleDownload} disabled={!displayContent}>
           Download
         </Button>
       </DialogActions>

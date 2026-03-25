@@ -35,18 +35,12 @@ public sealed class SecretsCommands(CommandContext ctx)
 
             try
             {
-                var result = await pc.Client.Api.Projects[pc.ProjectId].Secrets.GetAsync(config =>
-                {
-                    var env = parseResult.GetValue(envOpt);
-                    if (!string.IsNullOrEmpty(env))
+                var result = await pc.Client.Api.Projects[pc.ProjectId].Secrets
+                    .GetAsync(config =>
                     {
-                        config.QueryParameters.EnvironmentType =
-                            CommandUtils.ParseEnum(env, SecretListNs.GetEnvironmentTypeQueryParameterType.DEVELOPMENT);
-                    }
-
-                    config.QueryParameters.Page = 1;
-                    config.QueryParameters.Limit = 100;
-                }, cancellationToken);
+                        config.QueryParameters.Page = 1;
+                        config.QueryParameters.Limit = 100;
+                    }, cancellationToken);
 
                 var items = result?.Items;
                 if (items is null || items.Count == 0)

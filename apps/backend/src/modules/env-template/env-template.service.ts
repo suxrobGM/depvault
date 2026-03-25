@@ -1,6 +1,5 @@
 import { singleton } from "tsyringe";
 import { ConflictError, NotFoundError } from "@/common/errors";
-import { deriveProjectKey, encrypt } from "@/common/utils/encryption";
 import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import { EnvironmentRepository } from "@/modules/environment/environment.repository";
@@ -209,7 +208,7 @@ export class EnvTemplateService {
     return { message: "Template deleted successfully" };
   }
 
-  /** Apply a template to create a new environment with empty-valued variables. */
+  /** Apply a template to create a new environment with pre-encrypted variables from the client. */
   async apply(
     projectId: string,
     templateId: string,
@@ -234,23 +233,20 @@ export class EnvTemplateService {
       body.environmentType as EnvironmentType,
     );
 
-    const projectKey = deriveProjectKey(projectId);
-
     const created = await Promise.all(
-      template.variables.map((v) => {
-        const { ciphertext, iv, authTag } = encrypt("", projectKey);
-        return this.prisma.envVariable.create({
+      body.encryptedVariables.map((entry) =>
+        this.prisma.envVariable.create({
           data: {
             environmentId: env.id,
-            key: v.key,
-            encryptedValue: ciphertext,
-            iv,
-            authTag,
-            description: v.description,
-            isRequired: v.isRequired,
+            key: entry.key,
+            encryptedValue: entry.encryptedValue,
+            iv: entry.iv,
+            authTag: entry.authTag,
+            description: entry.description,
+            isRequired: entry.isRequired ?? false,
           },
-        });
-      }),
+        }),
+      ),
     );
 
     await this.auditLogService.log({

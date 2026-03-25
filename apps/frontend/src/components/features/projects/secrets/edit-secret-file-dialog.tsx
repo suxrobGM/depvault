@@ -15,7 +15,9 @@ import { useForm } from "@tanstack/react-form";
 import { FormSelectField, FormTextField } from "@/components/ui/form";
 import { FileDropZone } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
+import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
+import { encryptBinary } from "@/lib/crypto";
 import type { SecretFile } from "@/types/api/secret-file";
 import type { VaultGroup } from "@/types/api/vault-group";
 import { editSecretFileSchema } from "./secret-file-schemas";
@@ -30,6 +32,7 @@ interface EditSecretFileDialogProps {
 
 export function EditSecretFileDialog(props: EditSecretFileDialogProps): ReactElement {
   const { open, onClose, projectId, file, vaultGroups } = props;
+  const { getProjectDEK } = useVault();
 
   const [newFile, setNewFile] = useState<File | null>(null);
 
@@ -42,8 +45,14 @@ export function EditSecretFileDialog(props: EditSecretFileDialogProps): ReactEle
   );
 
   const contentMutation = useApiMutation(
-    (values: { file: File }) =>
-      client.api.projects({ id: projectId }).secrets({ fileId: file.id }).content.post(values),
+    (values: {
+      name: string;
+      encryptedContent: string;
+      iv: string;
+      authTag: string;
+      mimeType: string;
+      fileSize: number;
+    }) => client.api.projects({ id: projectId }).secrets({ fileId: file.id }).content.post(values),
     {
       invalidateKeys: [
         ["secret-files", projectId],
@@ -67,7 +76,17 @@ export function EditSecretFileDialog(props: EditSecretFileDialogProps): ReactEle
         vaultGroupId: value.vaultGroupId || undefined,
       });
       if (newFile) {
-        await contentMutation.mutateAsync({ file: newFile });
+        const dek = await getProjectDEK(projectId);
+        const fileBuffer = await newFile.arrayBuffer();
+        const encrypted = await encryptBinary(fileBuffer, dek);
+        await contentMutation.mutateAsync({
+          name: newFile.name,
+          encryptedContent: encrypted.ciphertext,
+          iv: encrypted.iv,
+          authTag: encrypted.authTag,
+          mimeType: newFile.type || "application/octet-stream",
+          fileSize: newFile.size,
+        });
       }
       handleClose();
     },
