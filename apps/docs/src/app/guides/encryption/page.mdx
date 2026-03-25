@@ -70,7 +70,13 @@ The server delivers only ciphertext and wrapped keys — plaintext secrets never
 
 ## Recovery
 
-When you first set your vault password, DepVault generates a **recovery key**. This key is an independent copy of your KEK, encrypted differently, that allows you to regain access if you forget your vault password.
+When you first set your vault password, DepVault generates a **recovery key** — a random 256-bit secret displayed once. This key works independently of your vault password:
+
+1. The recovery key is wrapped with your KEK and stored in your vault (encrypted — the server cannot read it).
+2. Each time a project DEK is created, a **RECOVERY grant** is also created — the DEK wrapped with your recovery key.
+3. If you forget your vault password, you enter the recovery key. DepVault unwraps all RECOVERY grants to recover your project DEKs, then re-wraps everything under a new password.
+
+You can regenerate the recovery key at any time from **Profile > Security**. This invalidates the previous key and re-wraps all RECOVERY grants with the new one.
 
 Store your recovery key in a secure offline location (password manager, printed copy in a safe). DepVault displays it once and does not store a plaintext copy.
 

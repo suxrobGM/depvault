@@ -17,7 +17,7 @@ export const secretController = new Elysia({
   prefix: "/secrets/shared",
   detail: { tags: ["Shared Secrets"] },
 })
-  .use(rateLimiter({ max: 10, windowMs: 60 * 1000 }))
+  .use(rateLimiter({ max: 60, windowMs: 60 * 1000 }))
   .get("/:token/info", ({ params }) => sharedSecretService.getInfo(params.token), {
     params: TokenParamSchema,
     response: {

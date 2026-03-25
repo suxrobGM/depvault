@@ -12,18 +12,22 @@ All secrets (env variables, secret files) are encrypted client-side. The server 
 Vault Password (user-memorized, never sent to server)
   → PBKDF2-SHA256 (600k iterations) → KEK (Key Encryption Key)
     → wraps ECDH P-256 private key (team sharing)
-    → wraps per-project DEKs (Data Encryption Keys)
+    → wraps recovery key (stored in UserVault)
+    → wraps per-project DEKs via SELF grants
       → AES-256-GCM encrypt/decrypt of secrets
 
 Recovery Key (random 256-bit, shown once at vault setup)
-  → independently wraps each project DEK
+  → wrapped by KEK, stored in UserVault
+  → independently wraps each project DEK via RECOVERY grants
+  → used to restore vault access when password is forgotten
 ```
 
 ## Key Files
 
 | Layer    | File                                             | Purpose                                                  |
 | -------- | ------------------------------------------------ | -------------------------------------------------------- |
-| Frontend | `apps/frontend/src/lib/crypto.ts`                | WebCrypto: encrypt, decrypt, key wrapping, ECDH, HKDF    |
+| Frontend | `apps/frontend/src/lib/crypto/`                  | WebCrypto modules: encoding, keys, AES-GCM, ECDH, etc.   |
+| Frontend | `apps/frontend/src/lib/crypto/vault-*.ts`        | Vault operations: lifecycle, grants, re-keying           |
 | Frontend | `apps/frontend/src/providers/vault-provider.tsx` | Vault state, DEK caching, key distribution               |
 | Frontend | `apps/frontend/src/hooks/use-vault.ts`           | `useVault()` hook for components                         |
 | Backend  | `apps/backend/src/modules/vault/`                | Vault API: setup, status, password, recovery, key grants |
@@ -38,11 +42,14 @@ Recovery Key (random 256-bit, shown once at vault setup)
 - **Share links**: Client encrypts with ephemeral key → key in URL fragment (`#key=`) never reaches server
 - **CI tokens**: Client wraps DEK with HKDF-derived key from token → CLI/CI unwraps and decrypts locally
 - **Team sharing**: ECDH P-256 key agreement → granter wraps DEK with shared secret → recipient unwraps
+- **Recovery**: User provides recovery key → unwraps all RECOVERY grants → re-wraps DEKs under new KEK
+- **Password change**: Fetches all SELF grants → re-wraps DEKs + private key + recovery key under new KEK
 
 ## Security Rules
 
 - Backend must **never** encrypt or decrypt user secrets
 - Vault password never leaves the client; KEK derived locally via PBKDF2
-- Project DEKs wrapped per-user (SELF grant) or per-member (ECDH grant) — never stored in plaintext
+- Project DEKs wrapped per-user: SELF grant (KEK), RECOVERY grant (recovery key), or ECDH grant (shared secret)
+- Recovery key is wrapped with KEK and stored in UserVault — never stored in plaintext
 - One-time share links use ephemeral keys in URL fragments; the server never sees the decryption key
 - Never log decrypted secret values
