@@ -121,7 +121,7 @@ export class EnvironmentDiffService {
         }
       }
 
-      const status: "match" | "mismatch" | "missing" = allExist ? "match" : "missing";
+      const status: "match" | "missing" = allExist ? "match" : "missing";
 
       rows.push({
         key,
@@ -132,7 +132,7 @@ export class EnvironmentDiffService {
       });
     }
 
-    const statusOrder = { missing: 0, mismatch: 1, match: 2 };
+    const statusOrder = { missing: 0, match: 1 };
     rows.sort(
       (a, b) => statusOrder[a.status] - statusOrder[b.status] || a.key.localeCompare(b.key),
     );

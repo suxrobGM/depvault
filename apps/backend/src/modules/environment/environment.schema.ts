@@ -37,7 +37,7 @@ const EnvDiffRowSchema = t.Object({
   key: t.String(),
   description: t.Nullable(t.String()),
   isRequired: t.Boolean(),
-  status: t.UnionEnum(["match", "mismatch", "missing"]),
+  status: t.UnionEnum(["match", "missing"]),
   values: t.Record(t.String(), t.Nullable(EnvDiffValueSchema)),
 });
 

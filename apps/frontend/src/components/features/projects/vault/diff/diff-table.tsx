@@ -6,7 +6,6 @@ import {
   ErrorOutline as MissingIcon,
   Visibility,
   VisibilityOff,
-  Warning as WarningIcon,
 } from "@mui/icons-material";
 import {
   Box,
@@ -33,7 +32,6 @@ interface DiffTableProps {
 
 const STATUS_CONFIG = {
   missing: { icon: MissingIcon, color: "error.main", label: "Missing" },
-  mismatch: { icon: WarningIcon, color: "warning.main", label: "Differs" },
   match: { icon: CheckIcon, color: "success.main", label: "Match" },
 } as const;
 
@@ -60,13 +58,6 @@ export function DiffTable(props: DiffTableProps): ReactElement {
             label={`${rows.filter((r) => r.status === "missing").length} missing`}
             size="small"
             color="error"
-            variant="outlined"
-          />
-          <Chip
-            icon={<WarningIcon />}
-            label={`${rows.filter((r) => r.status === "mismatch").length} differ`}
-            size="small"
-            color="warning"
             variant="outlined"
           />
           <Chip
@@ -138,13 +129,7 @@ export function DiffTable(props: DiffTableProps): ReactElement {
                         );
                       }
                       return (
-                        <TableCell
-                          key={env}
-                          sx={{
-                            bgcolor:
-                              row.status === "mismatch" ? "rgba(237, 108, 2, 0.06)" : undefined,
-                          }}
-                        >
+                        <TableCell key={env}>
                           <DiffCellValue value="[encrypted]" revealAll={revealAll} />
                           <Typography variant="caption" color="text.secondary" display="block">
                             {new Date(cell.updatedAt).toLocaleDateString()}
