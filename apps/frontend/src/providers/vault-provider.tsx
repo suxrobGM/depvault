@@ -13,13 +13,16 @@ import { useIdleLock } from "@/hooks/use-idle-lock";
 import {
   changeVaultPasswordOps,
   createProjectECDHGrant,
+  createProjectRecoveryGrant,
   createProjectSelfGrant,
   createVault,
   fetchVaultInfo,
+  recoverVaultOps,
+  regenerateRecoveryKeyOps,
   resolveProjectDEK,
   unlockVaultKeys,
   type VaultInfo,
-} from "@/lib/crypto/vault-operations";
+} from "@/lib/crypto";
 
 const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
 
@@ -38,7 +41,7 @@ export interface VaultContextValue {
   setupVault: (password: string) => Promise<{ recoveryKey: string }>;
   /** Retrieve (and cache) the project's data encryption key via the user's key grant. */
   getProjectDEK: (projectId: string) => Promise<CryptoKey>;
-  /** Generate a DEK for a new project and create a SELF key grant. */
+  /** Generate a DEK for a new project and create SELF + RECOVERY key grants. */
   initializeProjectKeys: (projectId: string) => Promise<void>;
   /** Wrap the project DEK with an ECDH shared key and create a grant for a team member. */
   grantProjectKeyToMember: (
@@ -50,6 +53,8 @@ export interface VaultContextValue {
   changeVaultPassword: (oldPassword: string, newPassword: string) => Promise<void>;
   /** Restore vault access using a recovery key and set a new password. */
   recoverVault: (recoveryKey: string, newPassword: string) => Promise<void>;
+  /** Generate a new recovery key and re-wrap all RECOVERY grants. */
+  regenerateRecoveryKey: () => Promise<{ recoveryKey: string }>;
 }
 
 export const VaultContext = createContext<VaultContextValue | null>(null);
@@ -62,6 +67,7 @@ export function VaultProvider(props: PropsWithChildren): ReactElement {
   const [vaultStatus, setVaultStatus] = useState<VaultStatus>(user ? "loading" : "no-vault");
   const kekRef = useRef<CryptoKey | null>(null);
   const privateKeyRef = useRef<CryptoKey | null>(null);
+  const recoveryKeyRef = useRef<CryptoKey | null>(null);
   const dekCacheRef = useRef<Map<string, CryptoKey>>(new Map());
   const vaultInfoRef = useRef<VaultInfo | null>(null);
 
@@ -91,6 +97,7 @@ export function VaultProvider(props: PropsWithChildren): ReactElement {
   const lockVault = () => {
     kekRef.current = null;
     privateKeyRef.current = null;
+    recoveryKeyRef.current = null;
     dekCacheRef.current.clear();
     setVaultStatus("locked");
   };
@@ -103,6 +110,7 @@ export function VaultProvider(props: PropsWithChildren): ReactElement {
     const keys = await unlockVaultKeys(password, vaultInfoRef.current);
     kekRef.current = keys.kek;
     privateKeyRef.current = keys.privateKey;
+    recoveryKeyRef.current = keys.recoveryKey;
     setVaultStatus("unlocked");
   };
 
@@ -110,6 +118,7 @@ export function VaultProvider(props: PropsWithChildren): ReactElement {
     const result = await createVault(password);
     kekRef.current = result.keys.kek;
     privateKeyRef.current = result.keys.privateKey;
+    recoveryKeyRef.current = result.keys.recoveryKey;
     vaultInfoRef.current = result.vaultInfo;
     setVaultStatus("unlocked");
     return { recoveryKey: result.recoveryKey };
@@ -124,10 +133,8 @@ export function VaultProvider(props: PropsWithChildren): ReactElement {
     const dek = await resolveProjectDEK(projectId, kekRef.current, privateKeyRef.current);
 
     if (!dek) {
-      // No key grant exists — auto-initialize for pre-existing projects
-      const newDek = await createProjectSelfGrant(projectId, user!.id, kekRef.current);
-      dekCacheRef.current.set(projectId, newDek);
-      return newDek;
+      await initializeProjectKeys(projectId);
+      return dekCacheRef.current.get(projectId)!;
     }
 
     dekCacheRef.current.set(projectId, dek);
@@ -135,9 +142,12 @@ export function VaultProvider(props: PropsWithChildren): ReactElement {
   };
 
   const initializeProjectKeys = async (projectId: string) => {
-    if (!kekRef.current) throw new Error("Vault must be unlocked to initialize project keys");
+    if (!kekRef.current || !recoveryKeyRef.current) {
+      throw new Error("Vault must be unlocked to initialize project keys");
+    }
 
     const dek = await createProjectSelfGrant(projectId, user!.id, kekRef.current);
+    await createProjectRecoveryGrant(projectId, user!.id, dek, recoveryKeyRef.current);
     dekCacheRef.current.set(projectId, dek);
   };
 
@@ -161,12 +171,15 @@ export function VaultProvider(props: PropsWithChildren): ReactElement {
   };
 
   const changeVaultPassword = async (_oldPassword: string, newPassword: string) => {
-    if (!privateKeyRef.current) throw new Error("Vault must be unlocked to change password");
+    if (!privateKeyRef.current || !recoveryKeyRef.current) {
+      throw new Error("Vault must be unlocked to change password");
+    }
     if (!vaultInfoRef.current) throw new Error("Vault info not loaded");
 
     const result = await changeVaultPasswordOps(
       newPassword,
       privateKeyRef.current,
+      recoveryKeyRef.current,
       dekCacheRef.current,
     );
 
@@ -178,12 +191,35 @@ export function VaultProvider(props: PropsWithChildren): ReactElement {
       wrappedPrivateKey: result.wrappedPrivateKey,
       wrappedPrivateKeyIv: result.wrappedPrivateKeyIv,
       wrappedPrivateKeyTag: result.wrappedPrivateKeyTag,
+      wrappedRecoveryKey: result.wrappedRecoveryKey,
+      wrappedRecoveryKeyIv: result.wrappedRecoveryKeyIv,
+      wrappedRecoveryKeyTag: result.wrappedRecoveryKeyTag,
     };
   };
 
-  const recoverVault = async (_recoveryKey: string, _newPassword: string) => {
-    // TODO: implement recovery flow
-    throw new Error("Recovery not yet implemented");
+  const recoverVault = async (recoveryKey: string, newPassword: string) => {
+    const result = await recoverVaultOps(recoveryKey, newPassword);
+    kekRef.current = result.keys.kek;
+    privateKeyRef.current = result.keys.privateKey;
+    recoveryKeyRef.current = result.keys.recoveryKey;
+    vaultInfoRef.current = result.vaultInfo;
+    dekCacheRef.current.clear();
+    setVaultStatus("unlocked");
+  };
+
+  const regenerateRecoveryKey = async (): Promise<{ recoveryKey: string }> => {
+    if (!kekRef.current || !recoveryKeyRef.current) {
+      throw new Error("Vault must be unlocked to regenerate recovery key");
+    }
+
+    const result = await regenerateRecoveryKeyOps(
+      kekRef.current,
+      recoveryKeyRef.current,
+      dekCacheRef.current,
+    );
+
+    recoveryKeyRef.current = result.recoveryKeyCryptoKey;
+    return { recoveryKey: result.recoveryKey };
   };
 
   const value: VaultContextValue = {
@@ -198,6 +234,7 @@ export function VaultProvider(props: PropsWithChildren): ReactElement {
     grantProjectKeyToMember,
     changeVaultPassword,
     recoverVault,
+    regenerateRecoveryKey,
   };
 
   return <VaultContext.Provider value={value}>{children}</VaultContext.Provider>;

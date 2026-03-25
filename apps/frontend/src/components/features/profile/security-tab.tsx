@@ -1,14 +1,16 @@
 "use client";
 
-import type { ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import { GitHub as GitHubIcon } from "@mui/icons-material";
 import { Alert, Box, Button, CardContent, Chip, Stack, Typography } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
+import { VaultRegenerateRecoveryDialog } from "@/components/features/vault";
 import { GlassCard } from "@/components/ui/cards";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useAuth } from "@/hooks/use-auth";
 import { useConfirm } from "@/hooks/use-confirm";
+import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
 import { API_BASE_URL } from "@/lib/constants";
 import type { AuthUser } from "@/providers/auth-provider";
@@ -22,7 +24,9 @@ interface SecurityTabProps {
 export function SecurityTab(props: SecurityTabProps): ReactElement {
   const { user } = props;
   const { logout } = useAuth();
+  const { vaultStatus } = useVault();
   const confirm = useConfirm();
+  const [showRegenerateDialog, setShowRegenerateDialog] = useState(false);
 
   const emailMutation = useApiMutation(
     (values: { newEmail: string; password: string }) => client.api.users.me.email.patch(values),
@@ -275,7 +279,43 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
         </CardContent>
       </GlassCard>
 
-      <GlassCard glowColor="var(--mui-palette-error-main)" className="vault-fade-up vault-delay-4">
+      <GlassCard className="vault-fade-up vault-delay-4">
+        <CardContent sx={{ p: 3 }}>
+          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+            Vault Recovery Key
+          </Typography>
+          {vaultStatus === "unlocked" ? (
+            <Stack spacing={2}>
+              <Typography variant="body2" color="text.secondary">
+                Generate a new recovery key if you suspect your current one has been compromised.
+                This will invalidate the previous key.
+              </Typography>
+              <Box>
+                <Button
+                  variant="outlined"
+                  color="warning"
+                  onClick={() => setShowRegenerateDialog(true)}
+                >
+                  Regenerate Recovery Key
+                </Button>
+              </Box>
+            </Stack>
+          ) : (
+            <Alert severity="info">
+              {vaultStatus === "no-vault"
+                ? "Set up your vault first to manage recovery keys."
+                : "Unlock your vault to manage your recovery key."}
+            </Alert>
+          )}
+        </CardContent>
+      </GlassCard>
+
+      <VaultRegenerateRecoveryDialog
+        open={showRegenerateDialog}
+        onClose={() => setShowRegenerateDialog(false)}
+      />
+
+      <GlassCard glowColor="var(--mui-palette-error-main)" className="vault-fade-up vault-delay-5">
         <CardContent sx={{ p: 3 }}>
           <Typography variant="subtitle1" fontWeight={600} color="error" sx={{ mb: 1 }}>
             Danger Zone

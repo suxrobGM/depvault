@@ -11,6 +11,9 @@ export const SetupVaultBodySchema = t.Object({
   wrappedPrivateKeyIv: t.String({ minLength: 1 }),
   wrappedPrivateKeyTag: t.String({ minLength: 1 }),
   recoveryKeyHash: t.String({ minLength: 1 }),
+  wrappedRecoveryKey: t.String({ minLength: 1 }),
+  wrappedRecoveryKeyIv: t.String({ minLength: 1 }),
+  wrappedRecoveryKeyTag: t.String({ minLength: 1 }),
 });
 
 export const ChangeVaultPasswordBodySchema = t.Object({
@@ -19,6 +22,9 @@ export const ChangeVaultPasswordBodySchema = t.Object({
   newWrappedPrivateKey: t.String({ minLength: 1 }),
   newWrappedPrivateKeyIv: t.String({ minLength: 1 }),
   newWrappedPrivateKeyTag: t.String({ minLength: 1 }),
+  newWrappedRecoveryKey: t.String({ minLength: 1 }),
+  newWrappedRecoveryKeyIv: t.String({ minLength: 1 }),
+  newWrappedRecoveryKeyTag: t.String({ minLength: 1 }),
   updatedGrants: t.Array(
     t.Object({
       projectId: t.String({ format: "uuid" }),
@@ -37,6 +43,25 @@ export const RecoverVaultBodySchema = t.Object({
   newWrappedPrivateKeyIv: t.String({ minLength: 1 }),
   newWrappedPrivateKeyTag: t.String({ minLength: 1 }),
   newRecoveryKeyHash: t.String({ minLength: 1 }),
+  newWrappedRecoveryKey: t.String({ minLength: 1 }),
+  newWrappedRecoveryKeyIv: t.String({ minLength: 1 }),
+  newWrappedRecoveryKeyTag: t.String({ minLength: 1 }),
+  updatedGrants: t.Array(
+    t.Object({
+      projectId: t.String({ format: "uuid" }),
+      grantType: t.Enum(KeyGrantType),
+      wrappedDek: t.String({ minLength: 1 }),
+      wrappedDekIv: t.String({ minLength: 1 }),
+      wrappedDekTag: t.String({ minLength: 1 }),
+    }),
+  ),
+});
+
+export const RegenerateRecoveryKeyBodySchema = t.Object({
+  newRecoveryKeyHash: t.String({ minLength: 1 }),
+  newWrappedRecoveryKey: t.String({ minLength: 1 }),
+  newWrappedRecoveryKeyIv: t.String({ minLength: 1 }),
+  newWrappedRecoveryKeyTag: t.String({ minLength: 1 }),
   updatedGrants: t.Array(
     t.Object({
       projectId: t.String({ format: "uuid" }),
@@ -57,6 +82,10 @@ export const VaultStatusResponseSchema = t.Object({
   wrappedPrivateKey: t.Optional(t.Nullable(t.String())),
   wrappedPrivateKeyIv: t.Optional(t.Nullable(t.String())),
   wrappedPrivateKeyTag: t.Optional(t.Nullable(t.String())),
+  recoveryKeyHash: t.Optional(t.Nullable(t.String())),
+  wrappedRecoveryKey: t.Optional(t.Nullable(t.String())),
+  wrappedRecoveryKeyIv: t.Optional(t.Nullable(t.String())),
+  wrappedRecoveryKeyTag: t.Optional(t.Nullable(t.String())),
 });
 
 export const PublicKeyResponseSchema = t.Object({
@@ -100,6 +129,13 @@ export const PendingGrantMemberSchema = t.Object({
   publicKey: t.Nullable(t.String()),
 });
 
+export const RecoveryGrantListItemSchema = t.Object({
+  projectId: t.String(),
+  wrappedDek: t.String(),
+  wrappedDekIv: t.String(),
+  wrappedDekTag: t.String(),
+});
+
 export const BatchUpdateGrantsBodySchema = t.Array(
   t.Object({
     projectId: t.String({ format: "uuid" }),
@@ -114,4 +150,5 @@ export const BatchUpdateGrantsBodySchema = t.Array(
 export type SetupVaultBody = Static<typeof SetupVaultBodySchema>;
 export type ChangeVaultPasswordBody = Static<typeof ChangeVaultPasswordBodySchema>;
 export type RecoverVaultBody = Static<typeof RecoverVaultBodySchema>;
+export type RegenerateRecoveryKeyBody = Static<typeof RegenerateRecoveryKeyBodySchema>;
 export type CreateKeyGrantBody = Static<typeof CreateKeyGrantBodySchema>;

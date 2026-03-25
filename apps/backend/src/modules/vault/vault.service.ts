@@ -1,7 +1,12 @@
 import { singleton } from "tsyringe";
 import { ConflictError, NotFoundError } from "@/common/errors";
 import { KeyGrantType, PrismaClient } from "@/generated/prisma";
-import type { ChangeVaultPasswordBody, RecoverVaultBody, SetupVaultBody } from "./vault.schema";
+import type {
+  ChangeVaultPasswordBody,
+  RecoverVaultBody,
+  RegenerateRecoveryKeyBody,
+  SetupVaultBody,
+} from "./vault.schema";
 
 @singleton()
 export class VaultService {
@@ -17,6 +22,10 @@ export class VaultService {
         wrappedPrivateKey: true,
         wrappedPrivateKeyIv: true,
         wrappedPrivateKeyTag: true,
+        recoveryKeyHash: true,
+        wrappedRecoveryKey: true,
+        wrappedRecoveryKeyIv: true,
+        wrappedRecoveryKeyTag: true,
       },
     });
 
@@ -29,6 +38,10 @@ export class VaultService {
         wrappedPrivateKey: null,
         wrappedPrivateKeyIv: null,
         wrappedPrivateKeyTag: null,
+        recoveryKeyHash: null,
+        wrappedRecoveryKey: null,
+        wrappedRecoveryKeyIv: null,
+        wrappedRecoveryKeyTag: null,
       };
     }
 
@@ -40,6 +53,10 @@ export class VaultService {
       wrappedPrivateKey: vault.wrappedPrivateKey,
       wrappedPrivateKeyIv: vault.wrappedPrivateKeyIv,
       wrappedPrivateKeyTag: vault.wrappedPrivateKeyTag,
+      recoveryKeyHash: vault.recoveryKeyHash,
+      wrappedRecoveryKey: vault.wrappedRecoveryKey,
+      wrappedRecoveryKeyIv: vault.wrappedRecoveryKeyIv,
+      wrappedRecoveryKeyTag: vault.wrappedRecoveryKeyTag,
     };
   }
 
@@ -60,6 +77,9 @@ export class VaultService {
         wrappedPrivateKeyIv: body.wrappedPrivateKeyIv,
         wrappedPrivateKeyTag: body.wrappedPrivateKeyTag,
         recoveryKeyHash: body.recoveryKeyHash,
+        wrappedRecoveryKey: body.wrappedRecoveryKey,
+        wrappedRecoveryKeyIv: body.wrappedRecoveryKeyIv,
+        wrappedRecoveryKeyTag: body.wrappedRecoveryKeyTag,
       },
     });
 
@@ -82,6 +102,9 @@ export class VaultService {
           wrappedPrivateKey: body.newWrappedPrivateKey,
           wrappedPrivateKeyIv: body.newWrappedPrivateKeyIv,
           wrappedPrivateKeyTag: body.newWrappedPrivateKeyTag,
+          wrappedRecoveryKey: body.newWrappedRecoveryKey,
+          wrappedRecoveryKeyIv: body.newWrappedRecoveryKeyIv,
+          wrappedRecoveryKeyTag: body.newWrappedRecoveryKeyTag,
         },
       });
 
@@ -118,12 +141,15 @@ export class VaultService {
           wrappedPrivateKeyIv: body.newWrappedPrivateKeyIv,
           wrappedPrivateKeyTag: body.newWrappedPrivateKeyTag,
           recoveryKeyHash: body.newRecoveryKeyHash,
+          wrappedRecoveryKey: body.newWrappedRecoveryKey,
+          wrappedRecoveryKeyIv: body.newWrappedRecoveryKeyIv,
+          wrappedRecoveryKeyTag: body.newWrappedRecoveryKeyTag,
         },
       });
 
       for (const grant of body.updatedGrants) {
         await tx.projectKeyGrant.updateMany({
-          where: { projectId: grant.projectId, userId, grantType: KeyGrantType.SELF },
+          where: { projectId: grant.projectId, userId, grantType: grant.grantType as KeyGrantType },
           data: {
             wrappedDek: grant.wrappedDek,
             wrappedDekIv: grant.wrappedDekIv,
@@ -134,6 +160,39 @@ export class VaultService {
     });
 
     return { message: "Vault recovered successfully" };
+  }
+
+  async regenerateRecoveryKey(userId: string, body: RegenerateRecoveryKeyBody) {
+    const vault = await this.prisma.userVault.findUnique({ where: { userId } });
+
+    if (!vault) {
+      throw new NotFoundError("Vault not found");
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.userVault.update({
+        where: { userId },
+        data: {
+          recoveryKeyHash: body.newRecoveryKeyHash,
+          wrappedRecoveryKey: body.newWrappedRecoveryKey,
+          wrappedRecoveryKeyIv: body.newWrappedRecoveryKeyIv,
+          wrappedRecoveryKeyTag: body.newWrappedRecoveryKeyTag,
+        },
+      });
+
+      for (const grant of body.updatedGrants) {
+        await tx.projectKeyGrant.updateMany({
+          where: { projectId: grant.projectId, userId, grantType: KeyGrantType.RECOVERY },
+          data: {
+            wrappedDek: grant.wrappedDek,
+            wrappedDekIv: grant.wrappedDekIv,
+            wrappedDekTag: grant.wrappedDekTag,
+          },
+        });
+      }
+    });
+
+    return { message: "Recovery key regenerated successfully" };
   }
 
   async getPublicKey(targetUserId: string) {

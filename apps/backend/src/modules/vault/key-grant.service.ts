@@ -115,6 +115,25 @@ export class KeyGrantService {
     return { message: "Key grants updated" };
   }
 
+  async getAllRecoveryGrantsForUser(userId: string) {
+    const grants = await this.prisma.projectKeyGrant.findMany({
+      where: { userId, grantType: KeyGrantType.RECOVERY },
+      select: {
+        projectId: true,
+        wrappedDek: true,
+        wrappedDekIv: true,
+        wrappedDekTag: true,
+      },
+    });
+
+    return grants.map((g) => ({
+      projectId: g.projectId,
+      wrappedDek: g.wrappedDek,
+      wrappedDekIv: g.wrappedDekIv,
+      wrappedDekTag: g.wrappedDekTag,
+    }));
+  }
+
   private toResponse(grant: {
     id: string;
     projectId: string;

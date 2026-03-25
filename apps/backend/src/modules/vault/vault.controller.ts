@@ -1,17 +1,21 @@
 import { Elysia, t } from "elysia";
 import { container } from "@/common/di/container";
 import { authGuard } from "@/common/middleware/auth.middleware";
+import { KeyGrantService } from "./key-grant.service";
 import {
   ChangeVaultPasswordBodySchema,
   MessageResponseSchema,
   PublicKeyResponseSchema,
   RecoverVaultBodySchema,
+  RecoveryGrantListItemSchema,
+  RegenerateRecoveryKeyBodySchema,
   SetupVaultBodySchema,
   VaultStatusResponseSchema,
 } from "./vault.schema";
 import { VaultService } from "./vault.service";
 
 const vaultService = container.resolve(VaultService);
+const keyGrantService = container.resolve(KeyGrantService);
 
 export const vaultController = new Elysia({ prefix: "/vault", detail: { tags: ["Vault"] } })
   .use(authGuard)
@@ -54,6 +58,26 @@ export const vaultController = new Elysia({ prefix: "/vault", detail: { tags: ["
       summary: "Recover vault",
       description:
         "Recover vault access using the recovery key. Sets a new vault password and re-wraps all keys.",
+      security: [{ bearerAuth: [] }],
+    },
+  })
+  .put("/recovery-key", ({ user, body }) => vaultService.regenerateRecoveryKey(user.id, body), {
+    body: RegenerateRecoveryKeyBodySchema,
+    response: MessageResponseSchema,
+    detail: {
+      operationId: "regenerateRecoveryKey",
+      summary: "Regenerate recovery key",
+      description:
+        "Generate a new recovery key while the vault is unlocked. Re-wraps all RECOVERY grants.",
+      security: [{ bearerAuth: [] }],
+    },
+  })
+  .get("/recovery-grants", ({ user }) => keyGrantService.getAllRecoveryGrantsForUser(user.id), {
+    response: t.Array(RecoveryGrantListItemSchema),
+    detail: {
+      operationId: "getMyRecoveryGrants",
+      summary: "Get all recovery grants",
+      description: "Fetch all RECOVERY-type key grants for the current user across all projects.",
       security: [{ bearerAuth: [] }],
     },
   })
