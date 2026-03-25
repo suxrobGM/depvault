@@ -119,7 +119,7 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
           </Typography>
         </TableCell>
         <TableCell>
-          <MaskedValue value={variable.value} />
+          <MaskedValue value="[encrypted]" />
         </TableCell>
         <TableCell>
           <Typography variant="body2" color="text.secondary" noWrap sx={{ maxWidth: 200 }}>
@@ -222,7 +222,7 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <MaskedValue value={v.value} />
+                          <MaskedValue value="[encrypted]" />
                         </TableCell>
                         {canEdit && (
                           <TableCell align="right">

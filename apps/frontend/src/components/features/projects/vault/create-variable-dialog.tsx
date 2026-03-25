@@ -15,7 +15,9 @@ import {
 import { useForm } from "@tanstack/react-form";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
+import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
+import { encrypt } from "@/lib/crypto";
 import { createVariableSchema } from "./vault-schemas";
 
 interface CreateVariableDialogProps {
@@ -28,12 +30,15 @@ interface CreateVariableDialogProps {
 
 export function CreateVariableDialog(props: CreateVariableDialogProps): ReactElement {
   const { open, onClose, projectId, vaultGroupId, environmentType } = props;
+  const { getProjectDEK } = useVault();
 
   const mutation = useApiMutation(
     (values: {
       environmentType: EnvironmentTypeValue;
       key: string;
-      value: string;
+      encryptedValue: string;
+      iv: string;
+      authTag: string;
       description?: string;
       isRequired?: boolean;
     }) =>
@@ -60,10 +65,14 @@ export function CreateVariableDialog(props: CreateVariableDialogProps): ReactEle
     },
     validators: { onSubmit: createVariableSchema },
     onSubmit: async ({ value }) => {
+      const dek = await getProjectDEK(projectId);
+      const encrypted = await encrypt(value.value, dek);
       await mutation.mutateAsync({
         environmentType: value.environmentType,
         key: value.key,
-        value: value.value,
+        encryptedValue: encrypted.ciphertext,
+        iv: encrypted.iv,
+        authTag: encrypted.authTag,
         description: value.description,
         isRequired: value.isRequired,
       });

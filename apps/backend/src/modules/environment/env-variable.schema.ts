@@ -1,4 +1,3 @@
-import { CONFIG_FORMAT_VALUES } from "@depvault/shared/constants";
 import { t, type Static } from "elysia";
 import { PaginationQuerySchema } from "@/types/pagination";
 import { PaginatedResponseSchema } from "@/types/response";
@@ -8,14 +7,18 @@ export const CreateEnvVariableBodySchema = t.Object({
   vaultGroupId: t.String(),
   environmentType: EnvironmentTypeSchema,
   key: t.String({ minLength: 1, maxLength: 255 }),
-  value: t.String(),
+  encryptedValue: t.String({ minLength: 1 }),
+  iv: t.String({ minLength: 1 }),
+  authTag: t.String({ minLength: 1 }),
   description: t.Optional(t.String({ maxLength: 500 })),
   isRequired: t.Optional(t.Boolean()),
 });
 
 export const UpdateEnvVariableBodySchema = t.Object({
   key: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
-  value: t.Optional(t.String()),
+  encryptedValue: t.Optional(t.String({ minLength: 1 })),
+  iv: t.Optional(t.String({ minLength: 1 })),
+  authTag: t.Optional(t.String({ minLength: 1 })),
   description: t.Optional(t.String({ maxLength: 500 })),
   isRequired: t.Optional(t.Boolean()),
 });
@@ -24,6 +27,9 @@ export const EnvVariableResponseSchema = t.Object({
   id: t.String(),
   environmentId: t.String(),
   key: t.String(),
+  encryptedValue: t.String(),
+  iv: t.String(),
+  authTag: t.String(),
   description: t.Nullable(t.String()),
   isRequired: t.Boolean(),
   createdAt: t.Date(),
@@ -34,7 +40,9 @@ export const EnvVariableWithValueResponseSchema = t.Object({
   id: t.String(),
   environmentId: t.String(),
   key: t.String(),
-  value: t.String(),
+  encryptedValue: t.String(),
+  iv: t.String(),
+  authTag: t.String(),
   description: t.Nullable(t.String()),
   isRequired: t.Boolean(),
   createdAt: t.Date(),
@@ -57,13 +65,19 @@ export const EnvVariableParamsSchema = t.Object({
   varId: t.String(),
 });
 
-const ConfigFormatSchema = t.UnionEnum(CONFIG_FORMAT_VALUES);
+const ImportEntrySchema = t.Object({
+  key: t.String({ minLength: 1, maxLength: 255 }),
+  encryptedValue: t.String({ minLength: 1 }),
+  iv: t.String({ minLength: 1 }),
+  authTag: t.String({ minLength: 1 }),
+  description: t.Optional(t.String({ maxLength: 500 })),
+  isRequired: t.Optional(t.Boolean()),
+});
 
 export const ImportEnvVariablesBodySchema = t.Object({
   vaultGroupId: t.String(),
   environmentType: EnvironmentTypeSchema,
-  format: ConfigFormatSchema,
-  content: t.String({ minLength: 1 }),
+  entries: t.Array(ImportEntrySchema, { minItems: 1 }),
 });
 
 export const ImportEnvVariablesResponseSchema = t.Object({
@@ -75,12 +89,17 @@ export const ImportEnvVariablesResponseSchema = t.Object({
 export const ExportEnvVariablesQuerySchema = t.Object({
   vaultGroupId: t.String(),
   environmentType: EnvironmentTypeSchema,
-  format: ConfigFormatSchema,
+});
+
+const ExportEntrySchema = t.Object({
+  key: t.String(),
+  encryptedValue: t.String(),
+  iv: t.String(),
+  authTag: t.String(),
 });
 
 export const ExportEnvVariablesResponseSchema = t.Object({
-  content: t.String(),
-  format: t.String(),
+  entries: t.Array(ExportEntrySchema),
   environmentType: EnvironmentTypeSchema,
 });
 
@@ -108,5 +127,8 @@ export type EnvVariableResponse = Static<typeof EnvVariableResponseSchema>;
 export type EnvVariableWithValueResponse = Static<typeof EnvVariableWithValueResponseSchema>;
 export type EnvVariableListQuery = Static<typeof EnvVariableListQuerySchema>;
 export type ImportEnvVariablesBody = Static<typeof ImportEnvVariablesBodySchema>;
+export type ImportEnvVariablesResponse = Static<typeof ImportEnvVariablesResponseSchema>;
 export type ExportEnvVariablesQuery = Static<typeof ExportEnvVariablesQuerySchema>;
+export type ExportEnvVariablesResponse = Static<typeof ExportEnvVariablesResponseSchema>;
+export type EnvExampleResponse = Static<typeof EnvExampleResponseSchema>;
 export type BatchDeleteEnvVariablesBody = Static<typeof BatchDeleteEnvVariablesBodySchema>;

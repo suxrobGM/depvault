@@ -7,6 +7,7 @@ import { StringIdParamSchema } from "@/types/request";
 import { MessageResponseSchema } from "@/types/response";
 import { SecretFileVersionService } from "./secret-file-version.service";
 import {
+  SecretFileDownloadResponseSchema,
   SecretFileListQuerySchema,
   SecretFileListResponseSchema,
   SecretFileParamsSchema,
@@ -62,9 +63,7 @@ export const secretFileController = new Elysia({
       return secretFileService.upload(
         params.id,
         projectMember.userId,
-        body.file,
-        body.vaultGroupId,
-        body.description,
+        body,
         getClientIp(request, server),
       );
     },
@@ -76,31 +75,28 @@ export const secretFileController = new Elysia({
         operationId: "uploadSecretFile",
         summary: "Upload a secret file",
         description:
-          "Upload and encrypt a secret file for the project. Executable file types (.exe, .sh, .bat, .cmd, .ps1) are rejected. Max file size is 25 MB. Only owners and editors can upload.",
+          "Upload a client-encrypted secret file for the project. Executable file types (.exe, .sh, .bat, .cmd, .ps1) are rejected. Max file size is 25 MB. Only owners and editors can upload.",
         security: [{ bearerAuth: [] }],
       },
     },
   )
   .get(
     "/:fileId/download",
-    async ({ params, projectMember, set, request, server }) => {
-      const { buffer, name, mimeType } = await secretFileService.download(
+    ({ params, projectMember, request, server }) =>
+      secretFileService.download(
         params.id,
         params.fileId,
         projectMember.userId,
         getClientIp(request, server),
-      );
-      set.headers["content-type"] = mimeType;
-      set.headers["content-disposition"] = `attachment; filename="${name}"`;
-      return buffer;
-    },
+      ),
     {
       params: SecretFileParamsSchema,
+      response: SecretFileDownloadResponseSchema,
       detail: {
         operationId: "downloadSecretFile",
         summary: "Download a secret file",
         description:
-          "Download and decrypt a secret file. Only owners and editors can download file contents. Viewers can only see metadata via the list endpoint.",
+          "Download an encrypted secret file. Decryption happens client-side. Only owners and editors can download file contents. Viewers can only see metadata via the list endpoint.",
         security: [{ bearerAuth: [] }],
       },
     },
@@ -149,7 +145,7 @@ export const secretFileController = new Elysia({
         params.id,
         params.fileId,
         projectMember.userId,
-        body.file,
+        body,
         getClientIp(request, server),
       ),
     {
@@ -160,30 +156,23 @@ export const secretFileController = new Elysia({
         operationId: "uploadSecretFileVersion",
         summary: "Upload a new version of a secret file",
         description:
-          "Replace a secret file's content with a new upload. The current content is saved as a version before being replaced. Only owners and editors can upload new versions.",
+          "Replace a secret file's content with a new client-encrypted upload. The current content is saved as a version before being replaced. Only owners and editors can upload new versions.",
         security: [{ bearerAuth: [] }],
       },
     },
   )
   .get(
     "/:fileId/versions/:versionId/download",
-    async ({ params, set }) => {
-      const { buffer, name, mimeType } = await secretFileVersionService.downloadVersion(
-        params.id,
-        params.fileId,
-        params.versionId,
-      );
-      set.headers["content-type"] = mimeType;
-      set.headers["content-disposition"] = `attachment; filename="${name}"`;
-      return buffer;
-    },
+    ({ params }) =>
+      secretFileVersionService.downloadVersion(params.id, params.fileId, params.versionId),
     {
       params: SecretFileRollbackParamsSchema,
+      response: SecretFileDownloadResponseSchema,
       detail: {
         operationId: "downloadSecretFileVersion",
         summary: "Download a specific version of a secret file",
         description:
-          "Download and decrypt a previous version of a secret file. Only owners and editors can download.",
+          "Download an encrypted previous version of a secret file. Decryption happens client-side. Only owners and editors can download.",
         security: [{ bearerAuth: [] }],
       },
     },

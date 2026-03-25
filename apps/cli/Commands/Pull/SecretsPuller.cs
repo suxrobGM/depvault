@@ -1,8 +1,8 @@
 using DepVault.Cli.Auth;
+using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
 using DepVault.Cli.Utils;
 using Spectre.Console;
-using SecretListNs = DepVault.Cli.ApiClient.Api.Projects.Item.Secrets;
 using VaultGroupsModel = DepVault.Cli.ApiClient.Api.Projects.Item.VaultGroups.VaultGroups;
 
 namespace DepVault.Cli.Commands.Pull;
@@ -10,6 +10,7 @@ namespace DepVault.Cli.Commands.Pull;
 /// <summary>Lists and downloads secret files for selected vault groups.</summary>
 public sealed class SecretsPuller(
     IApiClientFactory clientFactory,
+    DekResolver dekResolver,
     IOutputFormatter output)
 {
     /// <summary>Downloads secret files for the selected groups. Returns number of files written.</summary>
@@ -20,18 +21,26 @@ public sealed class SecretsPuller(
         var client = clientFactory.Create();
         var selectedGroupIds = groups.Select(g => g.Id).ToHashSet();
 
-        SecretListNs.SecretsGetResponse? files;
+        var dek = await AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .StartAsync("Resolving encryption key...", async _ =>
+                await dekResolver.ResolveAsync(projectId, ct));
+
+        if (dek is null)
+        {
+            output.PrintError("Failed to resolve encryption key.");
+            return 0;
+        }
+
+        ApiClient.Api.Projects.Item.Secrets.SecretsGetResponse? files;
 
         try
         {
             files = await AnsiConsole.Status()
                 .Spinner(Spinner.Known.Dots)
                 .StartAsync("Fetching secret files...", async _ =>
-                    await client.Api.Projects[projectId].Secrets.GetAsync(config =>
+                    await client.Api.Projects[projectId].Secrets.GetAsSecretsGetResponseAsync(config =>
                     {
-                        config.QueryParameters.EnvironmentType =
-                            CommandUtils.ParseEnum(envType,
-                                SecretListNs.GetEnvironmentTypeQueryParameterType.DEVELOPMENT);
                         config.QueryParameters.Page = 1;
                         config.QueryParameters.Limit = 100;
                     }, ct));
@@ -64,16 +73,19 @@ public sealed class SecretsPuller(
 
                 var filePath = Path.Combine(secretsDir, file.Name ?? $"secret-{file.Id}");
 
-                await using var stream = await client.Api.Projects[projectId].Secrets[file.Id!].Download
-                    .GetAsync(cancellationToken: ct);
-                if (stream is null)
+                var downloadResult = await client.Api.Projects[projectId].Secrets[file.Id!].Download
+                    .GetAsDownloadGetResponseAsync(cancellationToken: ct);
+
+                if (downloadResult is null || string.IsNullOrEmpty(downloadResult.EncryptedContent))
                 {
                     output.PrintError($"Failed to download {file.Name}: empty response");
                     continue;
                 }
 
-                await using var fileStream = File.Create(filePath);
-                await stream.CopyToAsync(fileStream, ct);
+                var decryptedBytes = VaultCrypto.DecryptBytes(
+                    downloadResult.EncryptedContent, downloadResult.Iv ?? "",
+                    downloadResult.AuthTag ?? "", dek);
+                await File.WriteAllBytesAsync(filePath, decryptedBytes, ct);
 
                 output.PrintSuccess($"  {Path.GetRelativePath(outputDir, filePath)}");
                 filesWritten++;

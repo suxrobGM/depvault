@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 import { ForbiddenError, NotFoundError } from "@/common/errors";
-import * as encryption from "@/common/utils/encryption";
 import { EnvironmentService } from "./environment.service";
 
 const now = new Date();
@@ -9,14 +8,6 @@ const userId = "user-uuid";
 const envId = "env-uuid";
 const varId = "var-uuid";
 const ipAddress = "127.0.0.1";
-
-const fakeProjectKey = Buffer.alloc(32, 1);
-
-const mockEncrypted = {
-  ciphertext: "encrypted-base64",
-  iv: "iv-base64",
-  authTag: "tag-base64",
-};
 
 const vaultGroupId = "vault-group-uuid";
 
@@ -98,10 +89,6 @@ describe("EnvironmentService", () => {
       mockNotificationService,
       mockPlanEnforcement,
     );
-
-    spyOn(encryption, "deriveProjectKey").mockReturnValue(fakeProjectKey);
-    spyOn(encryption, "encrypt").mockReturnValue(mockEncrypted);
-    spyOn(encryption, "decrypt").mockReturnValue("postgres://localhost/db");
   });
 
   describe("create", () => {
@@ -115,7 +102,9 @@ describe("EnvironmentService", () => {
           vaultGroupId,
           environmentType: "DEVELOPMENT",
           key: "DATABASE_URL",
-          value: "postgres://localhost/db",
+          encryptedValue: "encrypted",
+          iv: "iv123",
+          authTag: "tag123",
           description: "The database URL",
           isRequired: true,
         },
@@ -125,15 +114,14 @@ describe("EnvironmentService", () => {
 
       expect(result.id).toBe(varId);
       expect(result.key).toBe("DATABASE_URL");
-      expect(result.value).toBe("postgres://localhost/db");
-      expect(encryption.encrypt).toHaveBeenCalledWith("postgres://localhost/db", fakeProjectKey);
+      expect(result.encryptedValue).toBe("encrypted-base64");
       expect(mockPrisma.envVariable.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           environmentId: envId,
           key: "DATABASE_URL",
-          encryptedValue: "encrypted-base64",
-          iv: "iv-base64",
-          authTag: "tag-base64",
+          encryptedValue: "encrypted",
+          iv: "iv123",
+          authTag: "tag123",
         }),
       });
     });
@@ -144,7 +132,14 @@ describe("EnvironmentService", () => {
 
       await service.create(
         projectId,
-        { vaultGroupId, environmentType: "DEVELOPMENT", key: "API_KEY", value: "secret" },
+        {
+          vaultGroupId,
+          environmentType: "DEVELOPMENT",
+          key: "API_KEY",
+          encryptedValue: "encrypted",
+          iv: "iv123",
+          authTag: "tag123",
+        },
         userId,
         ipAddress,
       );
@@ -166,7 +161,14 @@ describe("EnvironmentService", () => {
 
       await service.create(
         projectId,
-        { vaultGroupId, environmentType: "STAGING", key: "API_KEY", value: "secret" },
+        {
+          vaultGroupId,
+          environmentType: "STAGING",
+          key: "API_KEY",
+          encryptedValue: "encrypted",
+          iv: "iv123",
+          authTag: "tag123",
+        },
         userId,
         ipAddress,
       );
@@ -178,12 +180,11 @@ describe("EnvironmentService", () => {
   });
 
   describe("list", () => {
-    it("should return decrypted values for OWNER", async () => {
+    it("should return encrypted values for OWNER", async () => {
       const result = await service.list(projectId, userId, "OWNER", vaultGroupId, "DEVELOPMENT");
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0]!.value).toBe("postgres://localhost/db");
-      expect(encryption.decrypt).toHaveBeenCalled();
+      expect(result.items[0]!.encryptedValue).toBe("encrypted-base64");
     });
 
     it("should write audit log when reading decrypted values", async () => {
@@ -199,14 +200,10 @@ describe("EnvironmentService", () => {
       );
     });
 
-    it("should return masked values for VIEWER", async () => {
-      const decryptSpy = spyOn(encryption, "decrypt");
-      decryptSpy.mockClear();
-
+    it("should return encrypted values for VIEWER", async () => {
       const result = await service.list(projectId, userId, "VIEWER", vaultGroupId, "DEVELOPMENT");
 
-      expect(result.items[0]!.value).toBe("********");
-      expect(decryptSpy).not.toHaveBeenCalled();
+      expect(result.items[0]!.encryptedValue).toBe("encrypted-base64");
     });
 
     it("should filter by environment type when provided", async () => {
@@ -251,7 +248,7 @@ describe("EnvironmentService", () => {
       await service.update(
         projectId,
         varId,
-        { key: "NEW_KEY", value: "new-value" },
+        { key: "NEW_KEY", encryptedValue: "new-encrypted", iv: "new-iv", authTag: "new-tag" },
         userId,
         ipAddress,
       );

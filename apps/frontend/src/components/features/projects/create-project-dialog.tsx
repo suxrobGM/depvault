@@ -7,6 +7,7 @@ import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
+import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 import { createProjectSchema } from "./schemas";
@@ -19,6 +20,7 @@ interface CreateProjectDialogProps {
 export function CreateProjectDialog(props: CreateProjectDialogProps): ReactElement {
   const { open, onClose } = props;
   const router = useRouter();
+  const { isVaultUnlocked, initializeProjectKeys } = useVault();
 
   const mutation = useApiMutation(
     (values: { name: string; description?: string; repositoryUrl?: string }) =>
@@ -27,7 +29,14 @@ export function CreateProjectDialog(props: CreateProjectDialogProps): ReactEleme
       invalidateKeys: [["projects"]],
       successMessage: "Project created",
       errorMessage: "Failed to create project",
-      onSuccess: (data) => {
+      onSuccess: async (data) => {
+        if (data && isVaultUnlocked) {
+          try {
+            await initializeProjectKeys(data.id);
+          } catch {
+            // Key initialization is non-blocking; the owner can grant keys later
+          }
+        }
         onClose();
         if (data) {
           router.push(ROUTES.project(data.id) as Route);

@@ -145,7 +145,7 @@ export function DiffTable(props: DiffTableProps): ReactElement {
                               row.status === "mismatch" ? "rgba(237, 108, 2, 0.06)" : undefined,
                           }}
                         >
-                          <DiffCellValue value={cell.value} revealAll={revealAll} />
+                          <DiffCellValue value="[encrypted]" revealAll={revealAll} />
                           <Typography variant="caption" color="text.secondary" display="block">
                             {new Date(cell.updatedAt).toLocaleDateString()}
                           </Typography>

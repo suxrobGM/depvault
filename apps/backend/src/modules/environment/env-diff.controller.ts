@@ -28,7 +28,6 @@ export const envDiffController = new Elysia({
         query.vaultGroupId,
         query.environments,
         projectMember.userId,
-        projectMember.role,
         getClientIp(request, server),
       ),
     {

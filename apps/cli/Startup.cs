@@ -6,6 +6,7 @@ using DepVault.Cli.Commands.Pull;
 using DepVault.Cli.Commands.Push;
 using DepVault.Cli.Commands.Scan;
 using DepVault.Cli.Config;
+using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
@@ -32,6 +33,7 @@ internal static class Startup
             .AddSingleton<IVersionChecker, VersionChecker>()
             .AddSingleton<IUpdateService, UpdateService>()
             .AddSingleton<CommandContext>()
+            .AddSingleton<DekResolver>()
             .AddSingleton<AnalysisClient>()
             // Scan steps
             .AddSingleton<ProjectResolver>()

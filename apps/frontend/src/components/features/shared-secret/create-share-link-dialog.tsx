@@ -18,7 +18,14 @@ import { useForm } from "@tanstack/react-form";
 import { FormCheckboxField, FormSelectField, FormTextField } from "@/components/ui/form";
 import { CopyButton } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
+import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
+import {
+  decrypt,
+  encrypt as encryptText,
+  generateShareKey,
+  shareKeyToFragment,
+} from "@/lib/crypto";
 import type { EnvVariable } from "@/types/api/env-variable";
 
 const EXPIRY_OPTIONS = [
@@ -36,16 +43,20 @@ interface CreateShareLinkDialogProps {
 
 export function CreateShareLinkDialog(props: CreateShareLinkDialogProps): ReactElement {
   const { open, onClose, projectId, variables } = props;
+  const { getProjectDEK } = useVault();
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
   const mutation = useApiMutation(
-    (values: { variableIds: string[]; expiresIn: number; password?: string }) =>
-      client.api.projects({ id: projectId })["secrets"]["shared"]["env"].post(values),
+    (values: {
+      encryptedPayload: string;
+      iv: string;
+      authTag: string;
+      expiresIn: number;
+      password?: string;
+      variableIds?: string[];
+    }) => client.api.projects({ id: projectId })["secrets"]["shared"]["env"].post(values),
     {
-      onSuccess: (data) => {
-        setShareUrl(data.shareUrl);
-      },
       errorMessage: "Failed to create share link",
     },
   );
@@ -57,11 +68,32 @@ export function CreateShareLinkDialog(props: CreateShareLinkDialogProps): ReactE
       usePassword: false,
     },
     onSubmit: async ({ value }) => {
-      await mutation.mutateAsync({
-        variableIds: variables.map((v) => v.id),
+      const dek = await getProjectDEK(projectId);
+
+      // Decrypt all variables, then re-encrypt with an ephemeral share key
+      const decryptedEntries = await Promise.all(
+        variables.map(async (v) => ({
+          key: v.key,
+          value: await decrypt(v.encryptedValue, v.iv, v.authTag, dek),
+        })),
+      );
+
+      const shareKey = await generateShareKey();
+      const payload = JSON.stringify(decryptedEntries);
+      const encrypted = await encryptText(payload, shareKey.key);
+
+      const result = await mutation.mutateAsync({
+        encryptedPayload: encrypted.ciphertext,
+        iv: encrypted.iv,
+        authTag: encrypted.authTag,
         expiresIn: value.expiresIn,
         password: value.usePassword && value.password ? value.password : undefined,
+        variableIds: variables.map((v) => v.id),
       });
+
+      const data = result as { shareUrl: string; token: string };
+      const fragment = shareKeyToFragment(shareKey.raw);
+      setShareUrl(`${data.shareUrl}#${fragment}`);
     },
   });
 

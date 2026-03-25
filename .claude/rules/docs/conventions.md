@@ -30,7 +30,7 @@ paths: [apps/docs/**]
 - No "Overview" sections that repeat the page heading
 - No "What's Next" / "Next Steps" sections — the sidebar handles navigation
 - No "Best Practices" sections unless advice is specific and non-obvious
-- Encryption details (AES-256-GCM) belong on the Environment Vault page only — other pages say "encrypted at rest"
+- E2E encryption details belong on the Encryption & Security guide (`/guides/encryption`) — other pages link to it and say "end-to-end encrypted"
 - Step-by-step UI instructions: 3–4 steps max
 - Include CLI examples with flags tables for relevant features
 - Keep pages focused — one feature per page

@@ -18,7 +18,9 @@ import { useForm } from "@tanstack/react-form";
 import { FormCheckboxField, FormSelectField, FormTextField } from "@/components/ui/form";
 import { CopyButton } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
+import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
+import { decryptBinary, encryptBinary, generateShareKey, shareKeyToFragment } from "@/lib/crypto";
 import type { SecretFile } from "@/types/api/secret-file";
 
 const EXPIRY_OPTIONS = [
@@ -36,19 +38,21 @@ interface CreateFileShareDialogProps {
 
 export function CreateFileShareDialog(props: CreateFileShareDialogProps): ReactElement {
   const { open, onClose, projectId, file } = props;
+  const { getProjectDEK } = useVault();
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
   const mutation = useApiMutation(
-    (values: { expiresIn: number; password?: string }) =>
-      client.api
-        .projects({ id: projectId })
-        ["secrets"]["shared"]["file"]({ fileId: file.id })
-        .post(values),
+    (values: {
+      fileName: string;
+      encryptedPayload: string;
+      iv: string;
+      authTag: string;
+      mimeType: string;
+      expiresIn: number;
+      password?: string;
+    }) => client.api.projects({ id: projectId })["secrets"]["shared"]["file"].post(values),
     {
-      onSuccess: (data) => {
-        setShareUrl(data.shareUrl);
-      },
       errorMessage: "Failed to create share link",
     },
   );
@@ -60,10 +64,39 @@ export function CreateFileShareDialog(props: CreateFileShareDialogProps): ReactE
       usePassword: false,
     },
     onSubmit: async ({ value }) => {
-      await mutation.mutateAsync({
+      const dek = await getProjectDEK(projectId);
+
+      // Download the encrypted file content, decrypt with project DEK,
+      // then re-encrypt with an ephemeral share key
+      const downloadResult = await client.api
+        .projects({ id: projectId })
+        .secrets({ fileId: file.id })
+        .download.get();
+      const downloaded = downloadResult.data!;
+
+      const fileData = await decryptBinary(
+        downloaded.encryptedContent,
+        downloaded.iv,
+        downloaded.authTag,
+        dek,
+      );
+
+      const shareKey = await generateShareKey();
+      const encrypted = await encryptBinary(fileData, shareKey.key);
+
+      const result = await mutation.mutateAsync({
+        fileName: file.name,
+        encryptedPayload: encrypted.ciphertext,
+        iv: encrypted.iv,
+        authTag: encrypted.authTag,
+        mimeType: file.mimeType,
         expiresIn: value.expiresIn,
         password: value.usePassword && value.password ? value.password : undefined,
       });
+
+      const data = result as { shareUrl: string; token: string };
+      const fragment = shareKeyToFragment(shareKey.raw);
+      setShareUrl(`${data.shareUrl}#${fragment}`);
     },
   });
 

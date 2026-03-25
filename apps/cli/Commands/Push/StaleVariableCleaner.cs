@@ -69,10 +69,10 @@ internal sealed class StaleVariableCleaner(IApiClientFactory clientFactory, ICon
         {
             var currentPage = page;
             var result = await client.Api.Projects[projectId].Environments.Variables
-                .GetAsync(config =>
+                .GetAsVariablesGetResponseAsync(config =>
                 {
                     config.QueryParameters.VaultGroupId = vaultGroupId;
-                    config.QueryParameters.EnvironmentType = envType;
+                    config.QueryParameters.EnvironmentTypeAsGetEnvironmentTypeQueryParameterType = envType;
                     config.QueryParameters.Page = currentPage;
                     config.QueryParameters.Limit = limit;
                 }, ct);

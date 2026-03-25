@@ -42,7 +42,12 @@ export const SecretFileVersionListResponseSchema = t.Object({
 });
 
 export const UploadSecretFileBodySchema = t.Object({
-  file: t.File({ maxSize: "25m" }),
+  encryptedContent: t.String({ description: "Base64-encoded encrypted file content" }),
+  iv: t.String(),
+  authTag: t.String(),
+  name: t.String({ minLength: 1, maxLength: 255 }),
+  mimeType: t.String(),
+  fileSize: t.Number({ minimum: 1, maximum: MAX_FILE_SIZE }),
   vaultGroupId: t.String(),
   description: t.Optional(t.String({ maxLength: 500 })),
 });
@@ -54,7 +59,12 @@ export const SecretFileRollbackParamsSchema = t.Object({
 });
 
 export const UploadNewVersionBodySchema = t.Object({
-  file: t.File({ maxSize: "25m" }),
+  encryptedContent: t.String({ description: "Base64-encoded encrypted file content" }),
+  iv: t.String(),
+  authTag: t.String(),
+  name: t.String({ minLength: 1, maxLength: 255 }),
+  mimeType: t.String(),
+  fileSize: t.Number({ minimum: 1, maximum: MAX_FILE_SIZE }),
 });
 
 export const UpdateSecretFileBodySchema = t.Object({
@@ -63,7 +73,18 @@ export const UpdateSecretFileBodySchema = t.Object({
   vaultGroupId: t.Optional(t.String()),
 });
 
+export const SecretFileDownloadResponseSchema = t.Object({
+  encryptedContent: t.String({ description: "Base64-encoded encrypted file content" }),
+  iv: t.String(),
+  authTag: t.String(),
+  name: t.String(),
+  mimeType: t.String(),
+});
+
 export type SecretFileResponse = Static<typeof SecretFileResponseSchema>;
 export type SecretFileListQuery = Static<typeof SecretFileListQuerySchema>;
 export type SecretFileVersionResponse = Static<typeof SecretFileVersionResponseSchema>;
+export type SecretFileDownloadResponse = Static<typeof SecretFileDownloadResponseSchema>;
 export type UpdateSecretFileBody = Static<typeof UpdateSecretFileBodySchema>;
+export type UploadSecretFileBody = Static<typeof UploadSecretFileBodySchema>;
+export type UploadNewVersionBody = Static<typeof UploadNewVersionBodySchema>;

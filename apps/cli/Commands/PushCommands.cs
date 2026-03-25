@@ -57,6 +57,14 @@ internal sealed class PushCommands(
             AnsiConsole.WriteLine();
             var assignments = envAssigner.AssignEnvironments(selected, explicitEnv);
 
+            // Resolve encryption key once before processing any env files
+            var hasEnvFiles = assignments.Any(a => a.File.Category == FileCategory.Environment);
+            if (hasEnvFiles && !await envImporter.EnsureDekAsync(pc.ProjectId, ct))
+            {
+                ctx.Output.PrintError("Failed to resolve encryption key. Aborting push.");
+                return;
+            }
+
             var envImported = 0;
             var secretsUploaded = 0;
             var importedGroups = new List<(string VaultGroupId, string EnvType, HashSet<string> Keys)>();

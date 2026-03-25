@@ -7,7 +7,9 @@ import { FormSelectField, FormTextField } from "@/components/ui/form";
 import { FileDropZone } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useToast } from "@/hooks/use-toast";
+import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
+import { encryptBinary } from "@/lib/crypto";
 import type { VaultGroup } from "@/types/api/vault-group";
 import { uploadSecretFileSchema } from "./secret-file-schemas";
 
@@ -23,10 +25,19 @@ export function UploadSecretFileDialog(props: UploadSecretFileDialogProps): Reac
 
   const [file, setFile] = useState<File | null>(null);
   const toast = useToast();
+  const { getProjectDEK } = useVault();
 
   const mutation = useApiMutation(
-    (values: { file: File; vaultGroupId: string; description?: string }) =>
-      client.api.projects({ id: projectId }).secrets.post(values),
+    (values: {
+      name: string;
+      encryptedContent: string;
+      iv: string;
+      authTag: string;
+      mimeType: string;
+      fileSize: number;
+      vaultGroupId: string;
+      description?: string;
+    }) => client.api.projects({ id: projectId }).secrets.post(values),
     {
       invalidateKeys: [["secret-files", projectId]],
       successMessage: "File uploaded successfully",
@@ -47,8 +58,16 @@ export function UploadSecretFileDialog(props: UploadSecretFileDialogProps): Reac
         toast.error("Please select a file");
         return;
       }
+      const dek = await getProjectDEK(projectId);
+      const fileBuffer = await file.arrayBuffer();
+      const encrypted = await encryptBinary(fileBuffer, dek);
       await mutation.mutateAsync({
-        file,
+        name: file.name,
+        encryptedContent: encrypted.ciphertext,
+        iv: encrypted.iv,
+        authTag: encrypted.authTag,
+        mimeType: file.type || "application/octet-stream",
+        fileSize: file.size,
         vaultGroupId: value.vaultGroupId,
         description: value.description?.trim() ?? "",
       });

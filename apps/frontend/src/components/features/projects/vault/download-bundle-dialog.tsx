@@ -6,6 +6,7 @@ import {
   type ConfigFormat,
   type EnvironmentTypeValue,
 } from "@depvault/shared/constants";
+import { getConfigFileName, serializeConfig } from "@depvault/shared/serializers";
 import { FolderZip as FolderZipIcon } from "@mui/icons-material";
 import {
   Box,
@@ -24,7 +25,9 @@ import { useForm } from "@tanstack/react-form";
 import { FormSelectField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
+import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
+import { decrypt, decryptBinary } from "@/lib/crypto";
 import type { EnvVariable } from "@/types/api/env-variable";
 import type { EnvironmentBundleBody } from "@/types/api/environment";
 import type { SecretFileListResponse } from "@/types/api/secret-file";
@@ -41,6 +44,7 @@ interface DownloadBundleDialogProps {
 
 export function DownloadBundleDialog(props: DownloadBundleDialogProps): ReactElement {
   const { open, onClose, projectId, vaultGroupId, environmentType, variables } = props;
+  const { getProjectDEK } = useVault();
 
   const [selectedVarIds, setSelectedVarIds] = useState<Set<string>>(new Set());
   const [selectedFileIds, setSelectedFileIds] = useState<Set<string>>(new Set());
@@ -65,9 +69,26 @@ export function DownloadBundleDialog(props: DownloadBundleDialogProps): ReactEle
       client.api.projects({ id: projectId }).environments.bundle.post(body),
     {
       errorMessage: "Failed to download bundle",
-      onSuccess: (result) => {
-        const bytes = Uint8Array.from(atob(result.data), (c) => c.charCodeAt(0));
-        downloadFile(bytes.buffer, result.fileName, "application/zip");
+      onSuccess: async (result) => {
+        const dek = await getProjectDEK(projectId);
+        const format = formatForm.getFieldValue("format") as ConfigFormat;
+
+        const decryptedVars = await Promise.all(
+          result.variables.map(async (v) => ({
+            key: v.key,
+            value: await decrypt(v.encryptedValue, v.iv, v.authTag, dek),
+          })),
+        );
+
+        const configContent = serializeConfig(format, decryptedVars);
+        const configFileName = getConfigFileName(format);
+        downloadFile(configContent, configFileName, "text/plain");
+
+        for (const f of result.files) {
+          const fileData = await decryptBinary(f.encryptedContent, f.iv, f.authTag, dek);
+          downloadFile(fileData, f.name, f.mimeType);
+        }
+
         handleClose();
       },
     },
@@ -108,13 +129,11 @@ export function DownloadBundleDialog(props: DownloadBundleDialogProps): ReactEle
   };
 
   const handleDownload = () => {
-    const format = formatForm.getFieldValue("format") as ConfigFormat;
     mutation.mutate({
       vaultGroupId,
       environmentType,
       variableIds: Array.from(selectedVarIds),
       secretFileIds: Array.from(selectedFileIds),
-      format: format as EnvironmentBundleBody["format"],
     });
   };
 

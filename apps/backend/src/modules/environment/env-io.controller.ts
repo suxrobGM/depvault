@@ -22,8 +22,7 @@ export const envIOController = new Elysia({
   .use(projectGuard("VIEWER"))
   .get(
     "/example",
-    ({ params, query }) =>
-      environmentIOService.generateExample(params.id, query.vaultGroupId, query.environmentType),
+    ({ query }) => environmentIOService.generateExample(query.vaultGroupId, query.environmentType),
     {
       params: StringIdParamSchema,
       query: EnvExampleQuerySchema,
@@ -55,7 +54,7 @@ export const envIOController = new Elysia({
         operationId: "importEnvVariables",
         summary: "Bulk import environment variables",
         description:
-          "Import environment variables from a config file (.env, appsettings.json, secrets.yaml, config.toml). Existing keys are updated with new values. Only owners and editors can import.",
+          "Bulk import pre-encrypted environment variables. The client encrypts values before sending. Existing keys are updated. Only owners and editors can import.",
         security: [{ bearerAuth: [] }],
       },
     },
@@ -67,7 +66,6 @@ export const envIOController = new Elysia({
         params.id,
         query.vaultGroupId,
         query.environmentType,
-        query.format,
         projectMember.userId,
         getClientIp(request, server),
       ),
@@ -79,7 +77,7 @@ export const envIOController = new Elysia({
         operationId: "exportEnvVariables",
         summary: "Export environment variables",
         description:
-          "Export all environment variables for a given environment in the specified format (.env, appsettings.json, secrets.yaml, config.toml). Only owners and editors can export.",
+          "Export all encrypted environment variables for a given environment. The client is responsible for decryption and formatting. Only owners and editors can export.",
         security: [{ bearerAuth: [] }],
       },
     },

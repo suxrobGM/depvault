@@ -1,20 +1,33 @@
-import { CONFIG_FORMAT_VALUES } from "@depvault/shared/constants";
 import { t, type Static } from "elysia";
 import { EnvironmentTypeSchema } from "./environment.schema";
-
-const ConfigFormatSchema = t.UnionEnum(CONFIG_FORMAT_VALUES);
 
 export const EnvBundleBodySchema = t.Object({
   vaultGroupId: t.String(),
   environmentType: EnvironmentTypeSchema,
   variableIds: t.Array(t.String(), { minItems: 0 }),
   secretFileIds: t.Array(t.String(), { minItems: 0 }),
-  format: ConfigFormatSchema,
+});
+
+const BundleVariableSchema = t.Object({
+  key: t.String(),
+  encryptedValue: t.String(),
+  iv: t.String(),
+  authTag: t.String(),
+});
+
+const BundleFileSchema = t.Object({
+  id: t.String(),
+  name: t.String(),
+  encryptedContent: t.String(),
+  iv: t.String(),
+  authTag: t.String(),
+  mimeType: t.String(),
 });
 
 export const EnvBundleResponseSchema = t.Object({
-  data: t.String(),
-  fileName: t.String(),
+  variables: t.Array(BundleVariableSchema),
+  files: t.Array(BundleFileSchema),
 });
 
 export type EnvBundleBody = Static<typeof EnvBundleBodySchema>;
+export type EnvBundleResponse = Static<typeof EnvBundleResponseSchema>;

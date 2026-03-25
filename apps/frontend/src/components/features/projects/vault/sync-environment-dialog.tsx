@@ -19,7 +19,9 @@ import { useForm } from "@tanstack/react-form";
 import { z } from "zod/v4";
 import { FormSelectField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
+import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
+import type { EnvVariableListResponse } from "@/types/api/env-variable";
 
 const syncSchema = z.object({
   sourceType: z.enum(ENVIRONMENT_TYPE_VALUES),
@@ -38,9 +40,34 @@ interface SyncEnvironmentDialogProps {
 export function SyncEnvironmentDialog(props: SyncEnvironmentDialogProps): ReactElement {
   const { open, onClose, projectId, vaultGroupId, sourceType, onSuccess } = props;
 
+  const { data: sourceVarsData } = useApiQuery<EnvVariableListResponse>(
+    ["env-variables", projectId, sourceType, vaultGroupId, "sync-source"],
+    () =>
+      client.api.projects({ id: projectId }).environments.variables.get({
+        query: {
+          environmentType: sourceType as EnvironmentTypeValue,
+          vaultGroupId,
+          page: 1,
+          limit: 500,
+        },
+      }),
+    { enabled: open },
+  );
+
   const mutation = useApiMutation(
-    (values: { sourceType: EnvironmentTypeValue; targetType: EnvironmentTypeValue }) =>
-      client.api.projects({ id: projectId }).environments.sync.post({ ...values, vaultGroupId }),
+    (values: {
+      entries: Array<{
+        key: string;
+        encryptedValue: string;
+        iv: string;
+        authTag: string;
+        description?: string | null;
+        isRequired?: boolean;
+      }>;
+      vaultGroupId: string;
+      sourceEnvironmentType: EnvironmentTypeValue;
+      targetEnvironmentType: EnvironmentTypeValue;
+    }) => client.api.projects({ id: projectId }).environments.sync.post(values),
     {
       invalidateKeys: [["environments", projectId]],
       successMessage: (data: { type: string; variableCount: number }) =>
@@ -59,7 +86,21 @@ export function SyncEnvironmentDialog(props: SyncEnvironmentDialogProps): ReactE
     },
     validators: { onSubmit: syncSchema },
     onSubmit: async ({ value }) => {
-      await mutation.mutateAsync(value);
+      const sourceVars = sourceVarsData?.items ?? [];
+      const entries = sourceVars.map((v) => ({
+        key: v.key,
+        encryptedValue: v.encryptedValue,
+        iv: v.iv,
+        authTag: v.authTag,
+        description: v.description,
+        isRequired: v.isRequired,
+      }));
+      await mutation.mutateAsync({
+        entries,
+        vaultGroupId,
+        sourceEnvironmentType: value.sourceType,
+        targetEnvironmentType: value.targetType,
+      });
     },
   });
 

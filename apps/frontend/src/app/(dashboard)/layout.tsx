@@ -5,6 +5,7 @@ import { getServerClient } from "@/lib/api-server";
 import { ROUTES } from "@/lib/constants";
 import { AuthProvider, ConfirmProvider, NotificationProvider, QueryProvider } from "@/providers";
 import { PlanLimitProvider } from "@/providers/subscription-provider";
+import { VaultProvider } from "@/providers/vault-provider";
 
 async function getUser() {
   const client = await getServerClient();
@@ -23,7 +24,9 @@ async function AuthenticatedShell(props: PropsWithChildren): Promise<ReactElemen
 
   return (
     <AuthProvider initialUser={user}>
-      <AppShell>{children}</AppShell>
+      <VaultProvider>
+        <AppShell>{children}</AppShell>
+      </VaultProvider>
     </AuthProvider>
   );
 }

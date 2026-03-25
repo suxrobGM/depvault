@@ -1,10 +1,14 @@
 import { singleton } from "tsyringe";
-import { PARSERS, SERIALIZERS, type ConfigFormat } from "@/common/parsers";
-import { decrypt, deriveProjectKey, encrypt } from "@/common/utils/encryption";
 import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
-import type { EnvVariableWithValueResponse, ImportEnvVariablesBody } from "./env-variable.schema";
-import { toExampleLine, toResponseWithValue } from "./environment.mapper";
+import type {
+  EnvExampleResponse,
+  EnvVariableWithValueResponse,
+  ExportEnvVariablesResponse,
+  ImportEnvVariablesBody,
+  ImportEnvVariablesResponse,
+} from "./env-variable.schema";
+import { toEncryptedResponse, toExampleLine } from "./environment.mapper";
 import { EnvironmentRepository } from "./environment.repository";
 
 @singleton()
@@ -20,10 +24,8 @@ export class EnvironmentIOService {
     body: ImportEnvVariablesBody,
     userId: string,
     ipAddress: string,
-  ) {
+  ): Promise<ImportEnvVariablesResponse> {
     const groupName = await this.envRepository.getVaultGroupName(body.vaultGroupId);
-    const parser = PARSERS[body.format as ConfigFormat];
-    const entries = parser.parse(body.content);
 
     const environment = await this.envRepository.findOrCreateEnvironment(
       projectId,
@@ -31,17 +33,16 @@ export class EnvironmentIOService {
       body.environmentType as EnvironmentType,
     );
 
-    const projectKey = deriveProjectKey(projectId);
     const variables: EnvVariableWithValueResponse[] = [];
     let updated = 0;
 
-    for (const entry of entries) {
-      const { ciphertext, iv, authTag } = encrypt(entry.value, projectKey);
-
+    for (const entry of body.entries) {
       const data = {
-        encryptedValue: ciphertext,
-        iv,
-        authTag,
+        encryptedValue: entry.encryptedValue,
+        iv: entry.iv,
+        authTag: entry.authTag,
+        description: entry.description ?? null,
+        isRequired: entry.isRequired ?? false,
       };
 
       const variable = await this.prisma.envVariable.upsert({
@@ -54,7 +55,7 @@ export class EnvironmentIOService {
         updated++;
       }
 
-      variables.push(toResponseWithValue(variable, entry.value));
+      variables.push(toEncryptedResponse(variable));
     }
 
     await this.auditLogService.log({
@@ -67,7 +68,6 @@ export class EnvironmentIOService {
       metadata: {
         imported: variables.length,
         updated,
-        format: body.format,
         vaultGroupName: groupName,
       },
     });
@@ -79,10 +79,9 @@ export class EnvironmentIOService {
     projectId: string,
     vaultGroupId: string,
     environmentType: EnvironmentType,
-    format: ConfigFormat,
     userId: string,
     ipAddress: string,
-  ) {
+  ): Promise<ExportEnvVariablesResponse> {
     const groupName = await this.envRepository.getVaultGroupName(vaultGroupId);
     const env = await this.envRepository.requireEnvironment(vaultGroupId, environmentType);
 
@@ -91,14 +90,12 @@ export class EnvironmentIOService {
       orderBy: { key: "asc" },
     });
 
-    const projectKey = deriveProjectKey(projectId);
     const entries = variables.map((v) => ({
       key: v.key,
-      value: decrypt(v.encryptedValue, v.iv, v.authTag, projectKey),
+      encryptedValue: v.encryptedValue,
+      iv: v.iv,
+      authTag: v.authTag,
     }));
-
-    const serializer = SERIALIZERS[format];
-    const content = serializer.serialize(entries);
 
     await this.auditLogService.log({
       userId,
@@ -107,13 +104,16 @@ export class EnvironmentIOService {
       resourceType: "ENV_VARIABLE",
       resourceId: projectId,
       ipAddress,
-      metadata: { format, environmentType, count: variables.length, vaultGroupName: groupName },
+      metadata: { environmentType, count: variables.length, vaultGroupName: groupName },
     });
 
-    return { content, format, environmentType };
+    return { entries, environmentType };
   }
 
-  async generateExample(projectId: string, vaultGroupId: string, environmentType: EnvironmentType) {
+  async generateExample(
+    vaultGroupId: string,
+    environmentType: EnvironmentType,
+  ): Promise<EnvExampleResponse> {
     const env = await this.envRepository.requireEnvironment(vaultGroupId, environmentType);
 
     const variables = await this.prisma.envVariable.findMany({

@@ -9,7 +9,9 @@ export const EnvVariableVersionParamsSchema = t.Object({
 export const EnvVariableVersionResponseSchema = t.Object({
   id: t.String(),
   variableId: t.String(),
-  value: t.String(),
+  encryptedValue: t.String(),
+  iv: t.String(),
+  authTag: t.String(),
   changedByName: t.String(),
   createdAt: t.Date(),
 });

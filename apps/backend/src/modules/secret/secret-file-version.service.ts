@@ -1,9 +1,8 @@
 import { singleton } from "tsyringe";
 import { NotFoundError } from "@/common/errors";
-import { decryptBinary, deriveProjectKey } from "@/common/utils/encryption";
 import { PrismaClient } from "@/generated/prisma";
 import { toSecretFileResponse } from "./secret-file.mapper";
-import type { SecretFileResponse } from "./secret-file.schema";
+import type { SecretFileDownloadResponse, SecretFileResponse } from "./secret-file.schema";
 
 @singleton()
 export class SecretFileVersionService {
@@ -72,7 +71,7 @@ export class SecretFileVersionService {
     projectId: string,
     fileId: string,
     versionId: string,
-  ): Promise<{ buffer: Buffer; name: string; mimeType: string }> {
+  ): Promise<SecretFileDownloadResponse> {
     const file = await this.findFileOrThrow(projectId, fileId);
 
     const version = await this.prisma.secretFileVersion.findFirst({
@@ -83,15 +82,13 @@ export class SecretFileVersionService {
       throw new NotFoundError("Version not found");
     }
 
-    const projectKey = deriveProjectKey(projectId);
-    const buffer = decryptBinary(
-      Buffer.from(version.encryptedContent),
-      version.iv,
-      version.authTag,
-      projectKey,
-    );
-
-    return { buffer, name: file.name, mimeType: file.mimeType };
+    return {
+      encryptedContent: Buffer.from(version.encryptedContent).toString("base64"),
+      iv: version.iv,
+      authTag: version.authTag,
+      name: file.name,
+      mimeType: file.mimeType,
+    };
   }
 
   private async findFileOrThrow(projectId: string, fileId: string) {

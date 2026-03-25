@@ -4,6 +4,7 @@ const meta: MetaRecord = {
   dashboard: "Dashboard",
   "dependency-analysis": "Dependency Analysis",
   "dependency-tree": "Dependency Tree",
+  encryption: "Encryption & Security",
   "environment-vault": "Environment Vault",
   "environment-diff": "Environment Diff",
   "env-templates": "Environment Templates",

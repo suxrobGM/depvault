@@ -30,7 +30,7 @@ export const envBundleController = new Elysia({
         operationId: "downloadEnvBundle",
         summary: "Download environment bundle",
         description:
-          "Download selected environment variables and secret files as a base64-encoded zip archive. Only owners and editors can download bundles.",
+          "Return encrypted environment variables and secret files for client-side decryption and bundling. Only owners and editors can download bundles.",
         security: [{ bearerAuth: [] }],
       },
     },

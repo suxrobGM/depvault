@@ -10,7 +10,6 @@ import {
   CreateFileShareBodySchema,
   CreateShareResponseSchema,
   SharedSecretAuditListResponseSchema,
-  SharedSecretFileParamsSchema,
   SharedSecretParamsSchema,
 } from "./shared-secret.schema";
 import { SharedSecretService } from "./shared-secret.service";
@@ -46,24 +45,23 @@ export const sharedSecretController = new Elysia({
     },
   )
   .post(
-    "/file/:fileId",
+    "/file",
     ({ params, body, projectMember, request, server }) =>
       sharedSecretService.createForFile(
         params.id,
         projectMember.userId,
-        params.fileId,
         body,
         getClientIp(request, server),
       ),
     {
-      params: SharedSecretFileParamsSchema,
+      params: StringIdParamSchema,
       body: CreateFileShareBodySchema,
       response: CreateShareResponseSchema,
       detail: {
         operationId: "shareSecretFile",
         summary: "Create a share link for a secret file",
         description:
-          "Generate a one-time shareable download link for a secret file. Optional password and expiry supported.",
+          "Generate a one-time shareable link for a client-encrypted secret file. Optional password and expiry supported.",
         security: [{ bearerAuth: [] }],
       },
     },

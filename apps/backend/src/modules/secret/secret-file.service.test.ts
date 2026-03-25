@@ -1,17 +1,12 @@
 import "reflect-metadata";
-import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { BadRequestError, NotFoundError } from "@/common/errors";
-import * as encryption from "@/common/utils/encryption";
-import { ProjectRole } from "@/generated/prisma";
 import { SecretFileService } from "./secret-file.service";
 
 const now = new Date();
 const projectId = "project-uuid";
 const userId = "user-uuid";
 const fileId = "file-uuid";
-const fakeProjectKey = Buffer.alloc(32, 1);
-const fakeEncryptedContent = Buffer.from("encrypted-content");
-
 const vaultGroupId = "vault-group-uuid";
 
 const mockVaultGroup = { id: vaultGroupId, name: "Default", projectId };
@@ -21,7 +16,7 @@ const mockSecretFile = {
   vaultGroupId,
   name: "config.json",
   description: "Config file",
-  encryptedContent: fakeEncryptedContent,
+  encryptedContent: Buffer.from("encrypted-content"),
   iv: "iv-base64",
   authTag: "tag-base64",
   mimeType: "application/json",
@@ -64,11 +59,6 @@ function createMockAuditLogService() {
   } as any;
 }
 
-function createMockFile(name: string, size = 1024, type = "application/json"): File {
-  const content = new Uint8Array(size);
-  return new File([content], name, { type });
-}
-
 describe("SecretFileService", () => {
   let service: SecretFileService;
   let mockPrisma: ReturnType<typeof createMockPrisma>;
@@ -85,46 +75,72 @@ describe("SecretFileService", () => {
       mockPlanEnforcement,
     );
 
-    spyOn(encryption, "deriveProjectKey").mockReturnValue(fakeProjectKey);
-    spyOn(encryption, "encryptBinary").mockReturnValue({
-      ciphertext: fakeEncryptedContent,
-      iv: "iv-base64",
-      authTag: "tag-base64",
-    });
-    spyOn(encryption, "decryptBinary").mockReturnValue(Buffer.from("decrypted-content"));
+    // No encryption mocks needed — server no longer encrypts/decrypts
   });
 
   describe("upload", () => {
-    it("should upload and encrypt a file", async () => {
-      const file = createMockFile("config.json");
-      const result = await service.upload(projectId, userId, file, vaultGroupId, "Config file");
+    it("should upload a pre-encrypted file", async () => {
+      const body = {
+        name: "config.json",
+        encryptedContent: Buffer.from("encrypted-data").toString("base64"),
+        iv: "iv-base64",
+        authTag: "tag-base64",
+        mimeType: "application/json",
+        fileSize: 100,
+        vaultGroupId,
+        description: "Config file",
+      };
+      const result = await service.upload(projectId, userId, body);
 
       expect(result.id).toBe(fileId);
       expect(result.name).toBe("config.json");
-      expect(encryption.encryptBinary).toHaveBeenCalled();
       expect(mockPrisma.secretFile.create).toHaveBeenCalled();
     });
 
     it("should reject executable file types", async () => {
       for (const ext of [".exe", ".sh", ".bat", ".cmd", ".ps1"]) {
-        const file = createMockFile(`script${ext}`);
-        expect(service.upload(projectId, userId, file, vaultGroupId)).rejects.toBeInstanceOf(
-          BadRequestError,
-        );
+        const body = {
+          name: `script${ext}`,
+          encryptedContent: "base64data",
+          iv: "iv",
+          authTag: "tag",
+          mimeType: "application/octet-stream",
+          fileSize: 100,
+          vaultGroupId,
+        };
+        expect(service.upload(projectId, userId, body)).rejects.toBeInstanceOf(BadRequestError);
       }
     });
 
     it("should reject files with path traversal patterns", async () => {
-      const file = createMockFile("../etc/passwd");
-      expect(service.upload(projectId, userId, file, vaultGroupId)).rejects.toBeInstanceOf(
-        BadRequestError,
-      );
+      const body = {
+        name: "../etc/passwd",
+        encryptedContent: "base64data",
+        iv: "iv",
+        authTag: "tag",
+        mimeType: "text/plain",
+        fileSize: 100,
+        vaultGroupId,
+      };
+      expect(service.upload(projectId, userId, body)).rejects.toBeInstanceOf(BadRequestError);
     });
 
-    it("should reject files exceeding 25 MB", async () => {
-      const file = createMockFile("big.json", 26 * 1024 * 1024);
-      expect(service.upload(projectId, userId, file, vaultGroupId)).rejects.toBeInstanceOf(
-        BadRequestError,
+    it("should store fileSize from body in the created record", async () => {
+      const body = {
+        name: "small.json",
+        encryptedContent: Buffer.from("data").toString("base64"),
+        iv: "iv",
+        authTag: "tag",
+        mimeType: "application/json",
+        fileSize: 512,
+        vaultGroupId,
+      };
+      await service.upload(projectId, userId, body);
+
+      expect(mockPrisma.secretFile.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ fileSize: 512 }),
+        }),
       );
     });
   });
@@ -150,14 +166,19 @@ describe("SecretFileService", () => {
   });
 
   describe("download", () => {
-    it("should download and decrypt file for OWNER", async () => {
-      mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
+    it("should return encrypted content and metadata for OWNER", async () => {
+      mockPrisma.secretFile.findFirst.mockResolvedValueOnce({
+        ...mockSecretFile,
+        vaultGroup: { id: vaultGroupId, name: "Default" },
+      });
 
       const result = await service.download(projectId, fileId, userId);
 
       expect(result.name).toBe("config.json");
       expect(result.mimeType).toBe("application/json");
-      expect(encryption.decryptBinary).toHaveBeenCalled();
+      expect(result.encryptedContent).toBeDefined();
+      expect(result.iv).toBe("iv-base64");
+      expect(result.authTag).toBe("tag-base64");
     });
 
     it("should throw NotFoundError when file doesn't exist", async () => {

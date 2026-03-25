@@ -1,12 +1,11 @@
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
 import { rateLimiter } from "@/common/middleware/rate-limiter";
 import { getClientIp } from "@/common/utils/ip";
 import { GoneErrorSchema, TooManyRequestsErrorSchema } from "@/types/response";
 import {
-  AccessEnvSecretResponseSchema,
-  AccessFileSecretResponseSchema,
   AccessSecretBodySchema,
+  AccessSecretResponseSchema,
   SharedSecretInfoResponseSchema,
   TokenParamSchema,
 } from "./shared-secret.schema";
@@ -41,7 +40,7 @@ export const secretController = new Elysia({
       params: TokenParamSchema,
       body: AccessSecretBodySchema,
       response: {
-        200: t.Union([AccessEnvSecretResponseSchema, AccessFileSecretResponseSchema]),
+        200: AccessSecretResponseSchema,
         ...GoneErrorSchema,
         ...TooManyRequestsErrorSchema,
       },
