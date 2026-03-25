@@ -28,7 +28,7 @@ paths: [apps/cli/**]
 - `VaultCrypto.cs` — static methods: `Encrypt`, `Decrypt`, `DeriveKek` (PBKDF2), `DeriveCiWrapKey` (HKDF), `UnwrapKey`, `DecryptBytes`
 - `DekResolver.cs` — DI-injectable service that resolves the project DEK:
   - **CI token mode**: fetches `/api/ci/secrets`, derives CI wrap key via HKDF, unwraps DEK
-  - **JWT mode**: prompts for vault password (or reads `DEPVAULT_VAULT_PASSWORD` env var), fetches KEK salt from `/api/vault/status`, derives KEK, fetches key grant from `/api/projects/:id/key-grants/mine`, unwraps DEK
+  - **JWT mode**: prompts for vault password (or reads `DEPVAULT_VAULT_PASSWORD` env var), fetches KEK salt from `/api/vault/status`, derives KEK, fetches key grant from `/api/projects/:id/keygrants/my`, unwraps DEK
 - All encryption/decryption happens locally — backend returns only ciphertext
 - Pull: fetch encrypted entries → unwrap DEK → decrypt each value → serialize → write to disk
 - Push: parse local file → encrypt each value → send encrypted entries to import endpoint
@@ -37,7 +37,17 @@ paths: [apps/cli/**]
 
 - Run `bun run export:openapi` in apps/backend to export spec
 - Copy to `apps/cli/openapi.json`
-- Run `dotnet tool run kiota generate` to regenerate C# client
+- Run
+
+```bash
+dotnet kiota generate -l CSharp \
+  -d apps/cli/openapi.json \
+  -o apps/cli/ApiClient \
+  -n DepVault.Cli.ApiClient \
+  --exclude-backward-compatible
+```
+
+to regenerate C# client
 
 ## Build
 

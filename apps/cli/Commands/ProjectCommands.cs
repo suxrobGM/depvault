@@ -33,7 +33,7 @@ public sealed class ProjectCommands(
             try
             {
                 var apiClient = clientFactory.Create();
-                var result = await apiClient.Api.Projects.GetAsProjectsGetResponseAsync(config =>
+                var result = await apiClient.Api.Projects.GetAsync(config =>
                 {
                     config.QueryParameters.Page = 1;
                     config.QueryParameters.Limit = 100;
@@ -91,7 +91,7 @@ public sealed class ProjectCommands(
             try
             {
                 var client = clientFactory.Create();
-                var result = await client.Api.Projects.GetAsProjectsGetResponseAsync(config =>
+                var result = await client.Api.Projects.GetAsync(config =>
                 {
                     config.QueryParameters.Page = 1;
                     config.QueryParameters.Limit = 100;

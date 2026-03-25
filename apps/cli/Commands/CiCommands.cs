@@ -40,7 +40,7 @@ public sealed class CiCommands(IApiClientFactory clientFactory, CommandContext c
             {
                 var client = clientFactory.Create();
                 var result = await client.Api.Ci.Secrets
-                    .GetAsSecretsGetResponseAsync(cancellationToken: cancellationToken);
+                    .GetAsync(cancellationToken: cancellationToken);
 
                 if (result is null)
                 {

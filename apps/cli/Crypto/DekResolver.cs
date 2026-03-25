@@ -26,7 +26,7 @@ public sealed class DekResolver(
         var rawToken = Environment.GetEnvironmentVariable(Constants.CiTokenEnvVar)!;
         var client = clientFactory.Create();
 
-        var ciSecrets = await client.Api.Ci.Secrets.GetAsSecretsGetResponseAsync(cancellationToken: ct);
+        var ciSecrets = await client.Api.Ci.Secrets.GetAsync(cancellationToken: ct);
 
         if (ciSecrets is null)
         {
@@ -69,7 +69,7 @@ public sealed class DekResolver(
 
         var client = clientFactory.Create();
 
-        var vaultStatus = await client.Api.Vault.Status.GetAsStatusGetResponseAsync(cancellationToken: ct);
+        var vaultStatus = await client.Api.Vault.Status.GetAsync(cancellationToken: ct);
 
         if (vaultStatus is null || string.IsNullOrEmpty(vaultStatus.KekSalt))
         {
@@ -81,8 +81,8 @@ public sealed class DekResolver(
         var iterations = vaultStatus.KekIterations > 0 ? vaultStatus.KekIterations.Value : 600_000;
         var kek = VaultCrypto.DeriveKek(password, salt, iterations);
 
-        var keyGrant = await client.Api.Projects[projectId].KeyGrants.Mine
-            .GetAsMineGetResponseAsync(cancellationToken: ct);
+        var keyGrant = await client.Api.Projects[projectId].Keygrants.My
+            .GetAsync(cancellationToken: ct);
 
         if (keyGrant is null || string.IsNullOrEmpty(keyGrant.WrappedDek))
         {

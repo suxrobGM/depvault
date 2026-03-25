@@ -93,7 +93,7 @@ internal sealed class EnvImporter(
 
         var client = clientFactory.Create();
         var response = await client.Api.Projects[projectId].Environments.Import
-            .PostAsImportPostResponseAsync(body, cancellationToken: ct);
+            .PostAsync(body, cancellationToken: ct);
 
         return (int?)response?.Imported;
     }

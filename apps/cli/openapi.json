@@ -16675,6 +16675,35 @@
           }
         ],
         "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "encryptedContent": {
+                      "description": "Base64-encoded encrypted file content",
+                      "type": "string"
+                    },
+                    "iv": {
+                      "type": "string"
+                    },
+                    "authTag": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "mimeType": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["encryptedContent", "iv", "authTag", "name", "mimeType"]
+                }
+              }
+            },
+            "description": "Success"
+          },
           "400": {
             "description": "Bad Request",
             "content": {
@@ -18453,6 +18482,22 @@
                     "wrappedPrivateKeyTag": {
                       "nullable": true,
                       "type": "string"
+                    },
+                    "recoveryKeyHash": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "wrappedRecoveryKey": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "wrappedRecoveryKeyIv": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "wrappedRecoveryKeyTag": {
+                      "nullable": true,
+                      "type": "string"
                     }
                   },
                   "required": ["hasVault"]
@@ -18716,7 +18761,10 @@
                   "wrappedPrivateKey",
                   "wrappedPrivateKeyIv",
                   "wrappedPrivateKeyTag",
-                  "recoveryKeyHash"
+                  "recoveryKeyHash",
+                  "wrappedRecoveryKey",
+                  "wrappedRecoveryKeyIv",
+                  "wrappedRecoveryKeyTag"
                 ],
                 "properties": {
                   "kekSalt": {
@@ -18744,6 +18792,18 @@
                     "type": "string"
                   },
                   "recoveryKeyHash": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "wrappedRecoveryKey": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "wrappedRecoveryKeyIv": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "wrappedRecoveryKeyTag": {
                     "minLength": 1,
                     "type": "string"
                   }
@@ -18896,6 +18956,9 @@
                   "newWrappedPrivateKey",
                   "newWrappedPrivateKeyIv",
                   "newWrappedPrivateKeyTag",
+                  "newWrappedRecoveryKey",
+                  "newWrappedRecoveryKeyIv",
+                  "newWrappedRecoveryKeyTag",
                   "updatedGrants"
                 ],
                 "properties": {
@@ -18916,6 +18979,18 @@
                     "type": "string"
                   },
                   "newWrappedPrivateKeyTag": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "newWrappedRecoveryKey": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "newWrappedRecoveryKeyIv": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "newWrappedRecoveryKeyTag": {
                     "minLength": 1,
                     "type": "string"
                   },
@@ -19095,6 +19170,9 @@
                   "newWrappedPrivateKeyIv",
                   "newWrappedPrivateKeyTag",
                   "newRecoveryKeyHash",
+                  "newWrappedRecoveryKey",
+                  "newWrappedRecoveryKeyIv",
+                  "newWrappedRecoveryKeyTag",
                   "updatedGrants"
                 ],
                 "properties": {
@@ -19123,6 +19201,220 @@
                     "type": "string"
                   },
                   "newRecoveryKeyHash": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "newWrappedRecoveryKey": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "newWrappedRecoveryKeyIv": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "newWrappedRecoveryKeyTag": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "updatedGrants": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "projectId",
+                        "grantType",
+                        "wrappedDek",
+                        "wrappedDekIv",
+                        "wrappedDekTag"
+                      ],
+                      "properties": {
+                        "projectId": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "grantType": {
+                          "type": "string",
+                          "enum": ["SELF", "ECDH", "RECOVERY"]
+                        },
+                        "wrappedDek": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "wrappedDekIv": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "wrappedDekTag": {
+                          "minLength": 1,
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/vault/recoverykey": {
+      "put": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": ["message"]
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": ["code", "message"]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": ["code", "message"]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": ["code", "message"]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": ["code", "message"]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": ["code", "message"]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "regenerateRecoveryKey",
+        "tags": ["Vault"],
+        "summary": "Regenerate recovery key",
+        "description": "Generate a new recovery key while the vault is unlocked. Re-wraps all RECOVERY grants.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "newRecoveryKeyHash",
+                  "newWrappedRecoveryKey",
+                  "newWrappedRecoveryKeyIv",
+                  "newWrappedRecoveryKeyTag",
+                  "updatedGrants"
+                ],
+                "properties": {
+                  "newRecoveryKeyHash": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "newWrappedRecoveryKey": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "newWrappedRecoveryKeyIv": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "newWrappedRecoveryKeyTag": {
                     "minLength": 1,
                     "type": "string"
                   },
@@ -19158,7 +19450,293 @@
         }
       }
     },
-    "/api/vault/public-key/{userId}": {
+    "/api/vault/keygrants/recovery": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["projectId", "wrappedDek", "wrappedDekIv", "wrappedDekTag"],
+                    "properties": {
+                      "projectId": {
+                        "type": "string"
+                      },
+                      "wrappedDek": {
+                        "type": "string"
+                      },
+                      "wrappedDekIv": {
+                        "type": "string"
+                      },
+                      "wrappedDekTag": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": ["code", "message"]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": ["code", "message"]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": ["code", "message"]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": ["code", "message"]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": ["code", "message"]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "getMyRecoveryGrants",
+        "tags": ["Vault"],
+        "summary": "Get all recovery grants",
+        "description": "Fetch all RECOVERY-type key grants for the current user across all projects.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/vault/keygrants/self": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["projectId", "wrappedDek", "wrappedDekIv", "wrappedDekTag"],
+                    "properties": {
+                      "projectId": {
+                        "type": "string"
+                      },
+                      "wrappedDek": {
+                        "type": "string"
+                      },
+                      "wrappedDekIv": {
+                        "type": "string"
+                      },
+                      "wrappedDekTag": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": ["code", "message"]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": ["code", "message"]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": ["code", "message"]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": ["code", "message"]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": ["code", "message"]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "getMySelfGrants",
+        "tags": ["Vault"],
+        "summary": "Get all self grants",
+        "description": "Fetch all SELF-type key grants for the current user across all projects.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/vault/publickey/{userId}": {
       "get": {
         "parameters": [
           {
@@ -19306,7 +19884,7 @@
         ]
       }
     },
-    "/api/projects/{id}/key-grants/mine": {
+    "/api/projects/{id}/keygrants/my": {
       "get": {
         "responses": {
           "200": {
@@ -19338,7 +19916,8 @@
                       "type": "string"
                     },
                     "grantType": {
-                      "type": "string"
+                      "type": "string",
+                      "enum": ["SELF", "ECDH", "RECOVERY"]
                     }
                   },
                   "required": [
@@ -19478,7 +20057,7 @@
         ]
       }
     },
-    "/api/projects/{id}/key-grants/pending": {
+    "/api/projects/{id}/keygrants/pending": {
       "get": {
         "responses": {
           "200": {
@@ -19645,7 +20224,7 @@
         ]
       }
     },
-    "/api/projects/{id}/key-grants/batch": {
+    "/api/projects/{id}/keygrants/batch": {
       "put": {
         "parameters": [
           {
@@ -26291,7 +26870,7 @@
         ]
       }
     },
-    "/api/projects/{id}/key-grants": {
+    "/api/projects/{id}/keygrants": {
       "post": {
         "parameters": [
           {
@@ -26333,7 +26912,8 @@
                       "type": "string"
                     },
                     "grantType": {
-                      "type": "string"
+                      "type": "string",
+                      "enum": ["SELF", "ECDH", "RECOVERY"]
                     }
                   },
                   "required": [
@@ -26490,7 +27070,7 @@
                   },
                   "grantType": {
                     "type": "string",
-                    "enum": ["ECDH", "RECOVERY", "SELF"]
+                    "enum": ["SELF", "ECDH", "RECOVERY"]
                   }
                 }
               }

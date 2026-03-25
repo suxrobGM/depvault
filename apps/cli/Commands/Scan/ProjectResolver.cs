@@ -49,7 +49,7 @@ internal sealed class ProjectResolver(
         var projects = await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .StartAsync("Fetching projects...", async _ =>
-                await client.Api.Projects.GetAsProjectsGetResponseAsync(c =>
+                await client.Api.Projects.GetAsync(c =>
                 {
                     c.QueryParameters.Page = 1;
                     c.QueryParameters.Limit = 100;

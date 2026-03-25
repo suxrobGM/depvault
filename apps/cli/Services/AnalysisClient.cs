@@ -20,7 +20,7 @@ public sealed class AnalysisClient(IApiClientFactory clientFactory)
     {
         var client = clientFactory.Create();
 
-        var response = await client.Api.Projects[projectId].Analyses.PostAsAnalysesPostResponseAsync(
+        var response = await client.Api.Projects[projectId].Analyses.PostAsync(
             new AnalysesPostRequestBody
             {
                 FileName = fileName,

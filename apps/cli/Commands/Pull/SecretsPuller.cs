@@ -39,7 +39,7 @@ public sealed class SecretsPuller(
             files = await AnsiConsole.Status()
                 .Spinner(Spinner.Known.Dots)
                 .StartAsync("Fetching secret files...", async _ =>
-                    await client.Api.Projects[projectId].Secrets.GetAsSecretsGetResponseAsync(config =>
+                    await client.Api.Projects[projectId].Secrets.GetAsync(config =>
                     {
                         config.QueryParameters.Page = 1;
                         config.QueryParameters.Limit = 100;
@@ -74,7 +74,7 @@ public sealed class SecretsPuller(
                 var filePath = Path.Combine(secretsDir, file.Name ?? $"secret-{file.Id}");
 
                 var downloadResult = await client.Api.Projects[projectId].Secrets[file.Id!].Download
-                    .GetAsDownloadGetResponseAsync(cancellationToken: ct);
+                    .GetAsync(cancellationToken: ct);
 
                 if (downloadResult is null || string.IsNullOrEmpty(downloadResult.EncryptedContent))
                 {

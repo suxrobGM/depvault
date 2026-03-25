@@ -141,7 +141,7 @@ public sealed class CommandContext(
             }
 
             var apiClient = clientFactory.Create();
-            var result = await apiClient.Api.Projects.GetAsProjectsGetResponseAsync(config =>
+            var result = await apiClient.Api.Projects.GetAsync(config =>
             {
                 config.QueryParameters.Page = 1;
                 config.QueryParameters.Limit = 100;

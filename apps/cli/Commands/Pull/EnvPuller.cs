@@ -81,10 +81,10 @@ public sealed class EnvPuller(
         string envType, CancellationToken ct)
     {
         var result = await client.Api.Projects[projectId].Environments.Export
-            .GetAsExportGetResponseAsync(config =>
+            .GetAsync(config =>
             {
                 config.QueryParameters.VaultGroupId = vaultGroupId;
-                config.QueryParameters.EnvironmentTypeAsGetEnvironmentTypeQueryParameterType =
+                config.QueryParameters.EnvironmentType =
                     CommandUtils.ParseEnum(envType, ExportEnvType.DEVELOPMENT);
             }, ct);
 

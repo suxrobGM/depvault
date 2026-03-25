@@ -38,7 +38,7 @@ public sealed class EnvCommands(CommandContext ctx)
             try
             {
                 var result = await pc.Client.Api.Projects[pc.ProjectId].Environments.Variables
-                    .GetAsVariablesGetResponseAsync(config =>
+                    .GetAsync(config =>
                     {
                         var vgId = parseResult.GetValue(vaultGroupOpt);
                         if (!string.IsNullOrEmpty(vgId))
@@ -49,7 +49,7 @@ public sealed class EnvCommands(CommandContext ctx)
                         var env = parseResult.GetValue(envOpt);
                         if (!string.IsNullOrEmpty(env))
                         {
-                            config.QueryParameters.EnvironmentTypeAsGetEnvironmentTypeQueryParameterType =
+                            config.QueryParameters.EnvironmentType =
                                 CommandUtils.ParseEnum(env, VarNs.GetEnvironmentTypeQueryParameterType.DEVELOPMENT);
                         }
                     }, cancellationToken);

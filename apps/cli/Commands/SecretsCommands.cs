@@ -36,7 +36,7 @@ public sealed class SecretsCommands(CommandContext ctx)
             try
             {
                 var result = await pc.Client.Api.Projects[pc.ProjectId].Secrets
-                    .GetAsSecretsGetResponseAsync(config =>
+                    .GetAsync(config =>
                     {
                         config.QueryParameters.Page = 1;
                         config.QueryParameters.Limit = 100;
