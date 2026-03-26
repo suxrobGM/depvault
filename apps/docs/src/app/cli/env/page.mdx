@@ -1,6 +1,6 @@
 # Environment Variables
 
-The `depvault env` command group lists and compares environment variables. For pulling and pushing, see [`depvault pull`](/cli/pull) and [`depvault push`](/cli/pull#push-env).
+The `depvault env` command group lists environment variables. For pulling and pushing, see [`depvault pull`](/cli/pull) and [`depvault push`](/cli/pull#push-env).
 
 All commands default to the active project (set with `depvault project select`). Override with `--project`.
 
@@ -35,33 +35,3 @@ List variables for a specific vault group as JSON:
 depvault env list --vault-group abc123 --output json
 ```
 
----
-
-## env diff
-
-Compare environment variables across two or more environments within a vault group. Shows keys that are added, removed, or changed between environments.
-
-```bash
-depvault env diff --vault-group <id> --environments DEVELOPMENT,PRODUCTION
-```
-
-| Flag | Description | Default |
-| --- | --- | --- |
-| `--project` | Project ID. | Active project |
-| `--vault-group` | Vault group ID. **Required.** | — |
-| `--environments` | Comma-separated environment types. **Required.** | — |
-| `--output` | Output format: `table`, `json`. | `table` |
-
-### Examples
-
-Compare development and production:
-
-```bash
-depvault env diff --vault-group abc123 --environments DEVELOPMENT,PRODUCTION
-```
-
-Compare all three environments with JSON output:
-
-```bash
-depvault env diff --vault-group abc123 --environments DEVELOPMENT,STAGING,PRODUCTION --output json
-```

@@ -32,6 +32,36 @@ export function CtaSection(): ReactElement {
               Install the CLI, scan your repo, and push secrets to the vault — all in under 2
               minutes. Free for individual developers, scalable for teams.
             </Typography>
+            <Box
+              sx={{
+                mx: "auto",
+                mb: 3,
+                px: 3,
+                py: 1,
+                borderRadius: 2,
+                bgcolor: "rgba(0,0,0,0.4)",
+                border: 1,
+                borderColor: "vault.glassBorder",
+                fontFamily: "var(--font-jetbrains), monospace",
+                fontSize: { xs: "0.8rem", md: "0.85rem" },
+                color: "text.secondary",
+                maxWidth: 420,
+                textAlign: "left",
+              }}
+            >
+              <Typography
+                component="span"
+                sx={{ color: "text.secondary", fontFamily: "inherit", fontSize: "inherit" }}
+              >
+                ${" "}
+              </Typography>
+              <Typography
+                component="span"
+                sx={{ color: "primary.main", fontFamily: "inherit", fontSize: "inherit" }}
+              >
+                curl -fsSL https://get.depvault.com | bash
+              </Typography>
+            </Box>
             <Typography variant="caption" color="text.secondary" sx={{ mb: 4, display: "block" }}>
               No credit card required. One command to get started.
             </Typography>
@@ -41,11 +71,9 @@ export function CtaSection(): ReactElement {
                   Get Started Free
                 </Button>
               </Link>
-              <Link href={ROUTES.login} style={{ textDecoration: "none" }}>
-                <Button variant="outlined" size="large" sx={{ px: 5 }}>
-                  Sign In
-                </Button>
-              </Link>
+              <Button variant="outlined" size="large" sx={{ px: 5 }} href="/docs" component="a">
+                View Documentation
+              </Button>
             </Stack>
           </Box>
         </GlassCard>

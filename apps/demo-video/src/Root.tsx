@@ -8,7 +8,7 @@ export function RemotionRoot(): ReactElement {
     <Composition
       id="DepVaultDemo"
       component={DepVaultDemo}
-      durationInFrames={1620}
+      durationInFrames={2700}
       fps={30}
       width={1920}
       height={1080}

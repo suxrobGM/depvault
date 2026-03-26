@@ -60,7 +60,7 @@ const TIERS: PricingTier[] = [
       "20 active CI/CD tokens",
       "Audit logs (30 days)",
       "Git secret scanning",
-      "Env diff",
+      "Version history",
     ],
     cta: "Upgrade to Pro",
     highlighted: true,

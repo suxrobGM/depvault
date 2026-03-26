@@ -18,24 +18,25 @@ interface FooterLink {
 const footerLinks: Record<string, FooterLink[]> = {
   Product: [
     { label: "Dashboard", href: ROUTES.dashboard },
-    { label: "Dependency Analysis", href: "#features" },
-    { label: "Environment Vault", href: "#features" },
+    { label: "Dependency Analysis", href: "/docs/guides/dependency-analysis" },
+    { label: "Environment Vault", href: "/docs/guides/environment-vault" },
+    { label: "Secret Sharing", href: "/docs/guides/secret-sharing" },
     { label: "Format Converter", href: ROUTES.converter },
   ],
+  Developers: [
+    { label: "CLI Reference", href: "/docs/cli" },
+    { label: "Getting Started", href: "/docs/getting-started" },
+    { label: "CI/CD Integration", href: "/docs/guides/ci-cd-integration" },
+    { label: "GitHub", href: "https://github.com/suxrobGM/depvault" },
+  ],
   Security: [
-    { label: "AES-256-GCM Encryption", href: "#features" },
-    { label: "Secret File Storage", href: "#features" },
-    { label: "One-Time Sharing", href: "#features" },
-    { label: "Git Secret Detection", href: "#features" },
+    { label: "Encryption & Security", href: "/docs/guides/encryption" },
+    { label: "Secret File Storage", href: "/docs/guides/secret-files" },
+    { label: "Secret Scanning", href: "/docs/guides/secret-scanning" },
   ],
-  Account: [
-    { label: "Sign In", href: ROUTES.login },
-    { label: "Register", href: ROUTES.register },
-    { label: "Profile", href: ROUTES.profileGeneral },
-  ],
-  Resources: [
-    { label: "Documentation", href: ROUTES.docs },
+  Company: [
     { label: "Pricing", href: ROUTES.pricing },
+    { label: "Documentation", href: ROUTES.docs },
     { label: "Terms of Service", href: ROUTES.terms },
     { label: "Privacy Policy", href: ROUTES.privacy },
     { label: "Support", href: "mailto:support@depvault.com" },
@@ -57,6 +58,9 @@ export function LandingFooter(): ReactElement {
       scrollTo(href.slice(1));
     }
   };
+
+  const isExternal = (href: string) =>
+    href.startsWith("/docs") || href.startsWith("mailto:") || href.startsWith("https://");
 
   return (
     <Box component="footer">
@@ -97,10 +101,8 @@ export function LandingFooter(): ReactElement {
                 {category}
               </Typography>
               <Stack spacing={1}>
-                {links.map((link) => {
-                  const isExternal = link.href === ROUTES.docs || link.href.startsWith("mailto:");
-
-                  return isExternal ? (
+                {links.map((link) =>
+                  isExternal(link.href) ? (
                     <MuiLink
                       key={link.label}
                       href={link.href}
@@ -122,8 +124,8 @@ export function LandingFooter(): ReactElement {
                     >
                       {link.label}
                     </MuiLink>
-                  );
-                })}
+                  ),
+                )}
               </Stack>
             </Grid>
           ))}

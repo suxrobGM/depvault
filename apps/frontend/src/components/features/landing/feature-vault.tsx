@@ -4,25 +4,15 @@ import { Box, Chip, Grid, Stack, Typography } from "@mui/material";
 import { GlassCard, GradientText, IconBox } from "@/components/ui/cards";
 import { BrowserWindow } from "@/components/ui/containers";
 
-const diffLines = [
-  { type: "header", text: "── .env (production vs staging) ──" },
-  { type: "same", text: "  DATABASE_URL=postgresql://..." },
-  { type: "same", text: "  REDIS_URL=redis://cache:6379" },
-  { type: "remove", text: "- API_KEY=sk_live_a8f2...9d1e" },
-  { type: "add", text: "+ API_KEY=sk_test_7b3c...4f2a" },
-  { type: "same", text: "  JWT_SECRET=••••••••••••" },
-  { type: "remove", text: "- STRIPE_WEBHOOK=whsec_live..." },
-  { type: "add", text: "+ STRIPE_WEBHOOK=whsec_test..." },
-  { type: "missing", text: "? SENTRY_DSN (missing in staging)" },
+const envVars = [
+  { key: "DATABASE_URL", value: "postgresql://••••••••" },
+  { key: "API_KEY", value: "sk_live_••••••••" },
+  { key: "JWT_SECRET", value: "••••••••••••" },
+  { key: "STRIPE_WEBHOOK", value: "whsec_••••••••" },
+  { key: "SENTRY_DSN", value: "https://••••••••" },
 ];
 
-const lineColors: Record<string, { color: string; bg: string }> = {
-  header: { color: "var(--mui-palette-text-secondary)", bg: "transparent" },
-  same: { color: "var(--mui-palette-text-secondary)", bg: "transparent" },
-  remove: { color: "var(--mui-palette-error-main)", bg: "rgba(248, 113, 113, 0.06)" },
-  add: { color: "var(--mui-palette-success-main)", bg: "rgba(52, 211, 153, 0.06)" },
-  missing: { color: "var(--mui-palette-warning-main)", bg: "rgba(251, 191, 36, 0.06)" },
-};
+const envTabs = ["DEV", "STAGING", "PROD"];
 
 export function FeatureVault(): ReactElement {
   return (
@@ -48,42 +38,77 @@ export function FeatureVault(): ReactElement {
         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
           <Chip label="Zero-Knowledge" size="small" variant="outlined" color="secondary" />
           <Chip label="AES-256-GCM" size="small" variant="outlined" color="secondary" />
-          <Chip label="Env Diff" size="small" variant="outlined" color="secondary" />
+          <Chip label="Version History" size="small" variant="outlined" color="secondary" />
           <Chip label="Secret Files" size="small" variant="outlined" color="secondary" />
           <Chip label="RBAC" size="small" variant="outlined" color="secondary" />
         </Stack>
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
         <GlassCard hoverGlow={false} sx={{ overflow: "hidden" }}>
-          <BrowserWindow title="env diff — production ↔ staging" />
-          <Box sx={{ p: 1.5 }}>
-            {diffLines.map((line, i) => {
-              const style = lineColors[line.type]!;
-              return (
+          <BrowserWindow title="vault — production" />
+          <Box sx={{ px: 2, pt: 1.5, pb: 0.5 }}>
+            <Stack direction="row" spacing={0.5} sx={{ mb: 1.5 }}>
+              {envTabs.map((tab) => (
                 <Box
-                  key={i}
+                  key={tab}
                   sx={{
                     px: 1.5,
-                    py: 0.25,
-                    borderRadius: 0.5,
-                    bgcolor: style.bg,
+                    py: 0.4,
+                    borderRadius: 1,
+                    fontSize: "0.65rem",
+                    fontWeight: tab === "PROD" ? 600 : 400,
+                    fontFamily: "var(--font-jetbrains), monospace",
+                    color: tab === "PROD" ? "primary.main" : "text.secondary",
+                    bgcolor: tab === "PROD" ? "rgba(16, 185, 129, 0.12)" : "transparent",
+                    border: 1,
+                    borderColor:
+                      tab === "PROD" ? "rgba(16, 185, 129, 0.3)" : "rgba(255, 255, 255, 0.06)",
                   }}
                 >
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      fontFamily: "var(--font-jetbrains), monospace",
-                      color: style.color,
-                      fontSize: "0.7rem",
-                      lineHeight: 1.8,
-                      ...(line.type === "header" && { fontWeight: 600, fontSize: "0.65rem" }),
-                    }}
-                  >
-                    {line.text}
-                  </Typography>
+                  {tab}
                 </Box>
-              );
-            })}
+              ))}
+            </Stack>
+          </Box>
+          <Box sx={{ px: 1.5, pb: 1.5 }}>
+            {envVars.map((v) => (
+              <Box
+                key={v.key}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  px: 1.5,
+                  py: 0.5,
+                  borderRadius: 0.5,
+                  "&:hover": { bgcolor: "rgba(255, 255, 255, 0.02)" },
+                }}
+              >
+                <LockIcon sx={{ fontSize: 11, color: "primary.main", opacity: 0.7 }} />
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontFamily: "var(--font-jetbrains), monospace",
+                    fontSize: "0.7rem",
+                    fontWeight: 500,
+                    color: "text.primary",
+                    minWidth: 130,
+                  }}
+                >
+                  {v.key}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontFamily: "var(--font-jetbrains), monospace",
+                    fontSize: "0.7rem",
+                    color: "text.secondary",
+                  }}
+                >
+                  {v.value}
+                </Typography>
+              </Box>
+            ))}
           </Box>
         </GlassCard>
       </Grid>

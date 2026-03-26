@@ -1,7 +1,8 @@
 "use client";
 
 import { type ReactElement } from "react";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Lock as LockIcon } from "@mui/icons-material";
+import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 import { GradientText } from "@/components/ui/cards";
 import { SectionContainer } from "@/components/ui/containers";
@@ -26,6 +27,22 @@ export function HeroSection(): ReactElement {
       <Box className="vault-dot-grid" />
       <SectionContainer sx={{ pt: { xs: 16, md: 20 }, pb: { xs: 4, md: 6 } }}>
         <Stack alignItems="center" textAlign="center" spacing={3}>
+          <Box className="vault-fade-up" sx={{ mb: 1 }}>
+            <Chip
+              icon={<LockIcon sx={{ fontSize: 14 }} />}
+              label="Zero-Knowledge Encryption · Open Source"
+              size="small"
+              variant="outlined"
+              sx={{
+                mb: 2,
+                borderColor: "rgba(16, 185, 129, 0.3)",
+                color: "primary.main",
+                fontSize: "0.75rem",
+                fontWeight: 500,
+                "& .MuiChip-icon": { color: "primary.main" },
+              }}
+            />
+          </Box>
           <Box className="vault-fade-up">
             <GradientText
               variant="h1"
@@ -56,9 +73,9 @@ export function HeroSection(): ReactElement {
             className="vault-fade-up vault-delay-1"
             sx={{ fontSize: { xs: "1rem", md: "1.25rem" } }}
           >
-            One CLI to scan dependencies across{" "}
-            <TypingEffect words={ECOSYSTEM_FILES} interval={2000} /> and 8+ ecosystems — detect
-            vulnerabilities, push encrypted secrets, and pull .env files across your team.
+            Scan dependencies for vulnerabilities across{" "}
+            <TypingEffect words={ECOSYSTEM_FILES} interval={2000} /> and 9+ ecosystems — store
+            secrets with end-to-end encryption, and share .env files securely across your team.
           </Typography>
 
           <Box

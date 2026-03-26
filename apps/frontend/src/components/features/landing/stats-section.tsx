@@ -4,10 +4,10 @@ import { GradientText } from "@/components/ui/cards";
 import { SectionContainer } from "@/components/ui/containers";
 
 const stats = [
-  { value: "8+", label: "Ecosystems supported" },
-  { value: "1 cmd", label: "To scan your entire repo" },
-  { value: "AES-256", label: "Encryption standard" },
-  { value: "3 OS", label: "macOS, Linux, Windows" },
+  { value: "9+", label: "Ecosystems supported" },
+  { value: "Zero-Knowledge", label: "Server never sees your secrets" },
+  { value: "AES-256-GCM", label: "End-to-end encryption" },
+  { value: "Open Source", label: "Fully auditable codebase" },
 ];
 
 export function StatsSection(): ReactElement {

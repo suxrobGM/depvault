@@ -5,6 +5,7 @@ import {
   HeroSection,
   HowItWorksSection,
   LandingFeatureCards,
+  SecuritySection,
   StatsSection,
 } from "@/components/features/landing";
 
@@ -15,6 +16,7 @@ export default function Home(): ReactElement {
       <HowItWorksSection />
       <LandingFeatureCards />
       <EcosystemsSection />
+      <SecuritySection />
       <StatsSection />
       <CtaSection />
     </>

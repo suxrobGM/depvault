@@ -8,4 +8,5 @@ export * from "./hero-section";
 export * from "./how-it-works-section";
 export * from "./navbar";
 export * from "./pricing-section";
+export * from "./security-section";
 export * from "./stats-section";
