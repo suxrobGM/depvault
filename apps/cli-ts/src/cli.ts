@@ -273,6 +273,34 @@ class CiPullCommand extends Command {
   }
 }
 
+class ScanCommand extends Command {
+  static override paths = [["scan"]];
+  static override usage = Command.Usage({
+    description: "Scan repository for dependencies, env files, and secrets",
+  });
+
+  scanPath = Option.String("--path", { required: false });
+  project = Option.String("--project", { required: false });
+
+  async execute(): Promise<void> {
+    const args: string[] = [];
+    if (this.scanPath) args.push(`--path=${this.scanPath}`);
+    if (this.project) args.push(`--project=${this.project}`);
+    const handler = (await import("@/commands/scan")).default;
+    await renderResult(this.context.stdout, handler, args);
+  }
+}
+
+class UpdateCommand extends Command {
+  static override paths = [["update"]];
+  static override usage = Command.Usage({ description: "Update CLI to the latest version" });
+
+  async execute(): Promise<void> {
+    const handler = (await import("@/commands/update")).default;
+    await renderResult(this.context.stdout, handler);
+  }
+}
+
 export function createCli(): Cli {
   const cli = new Cli({
     binaryLabel: "DepVault CLI",
@@ -297,6 +325,8 @@ export function createCli(): Cli {
   cli.register(SecretsListCommand);
   cli.register(AnalyzeCommand);
   cli.register(CiPullCommand);
+  cli.register(ScanCommand);
+  cli.register(UpdateCommand);
 
   return cli;
 }
