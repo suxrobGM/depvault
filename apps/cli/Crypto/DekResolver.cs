@@ -2,6 +2,7 @@ using DepVault.Cli.Auth;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
 using DepVault.Cli.Utils;
+using Microsoft.Kiota.Abstractions;
 using Spectre.Console;
 
 namespace DepVault.Cli.Crypto;
@@ -95,16 +96,48 @@ public sealed class DekResolver(
         var iterations = vaultStatus.KekIterations > 0 ? vaultStatus.KekIterations.Value : 600_000;
         var kek = VaultCrypto.DeriveKek(password, salt, iterations);
 
-        var keyGrant = await client.Api.Projects[projectId].Keygrants.My
-            .GetAsync(cancellationToken: ct);
-
-        if (keyGrant is null || string.IsNullOrEmpty(keyGrant.WrappedDek))
+        try
         {
-            AnsiConsole.MarkupLine("[red]No key grant found. Ask a project admin to grant you access.[/]");
+            var keyGrant = await client.Api.Projects[projectId].Keygrants.My
+                .GetAsync(cancellationToken: ct);
+
+            if (keyGrant is null || string.IsNullOrEmpty(keyGrant.WrappedDek))
+            {
+                PrintKeyGrantError();
+                return null;
+            }
+
+            return VaultCrypto.UnwrapKey(
+                keyGrant.WrappedDek, keyGrant.WrappedDekIv ?? "", keyGrant.WrappedDekTag ?? "", kek);
+        }
+        catch (ApiException ex) when (ex.ResponseStatusCode is 404)
+        {
+            PrintKeyGrantError();
             return null;
         }
+    }
 
-        return VaultCrypto.UnwrapKey(
-            keyGrant.WrappedDek, keyGrant.WrappedDekIv ?? "", keyGrant.WrappedDekTag ?? "", kek);
+    private static void PrintKeyGrantError()
+    {
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(new Panel(
+                new Rows(
+                    new Markup("[red]No encryption key grant found for this project.[/]"),
+                    new Markup(""),
+                    new Markup("[grey]Key grants are created when you first open a project's vault[/]"),
+                    new Markup("[grey]in the web dashboard. To fix this:[/]"),
+                    new Markup(""),
+                    new Markup("  [cyan1]1.[/] [grey]Open the DepVault web dashboard[/]"),
+                    new Markup("  [cyan1]2.[/] [grey]Navigate to this project → [bold]Vault[/] tab[/]"),
+                    new Markup("  [cyan1]3.[/] [grey]Unlock the vault with your password[/]"),
+                    new Markup("  [cyan1]4.[/] [grey]Run this CLI command again[/]"),
+                    new Markup(""),
+                    new Markup("[grey]If you are a team member, ask the project owner to grant[/]"),
+                    new Markup("[grey]you access from the [bold]Team[/] settings page.[/]")))
+            .Header("[red]Key Grant Missing[/]")
+            .Border(BoxBorder.Rounded)
+            .BorderStyle(new Style(Color.Red))
+            .Padding(1, 0));
+        AnsiConsole.WriteLine();
     }
 }

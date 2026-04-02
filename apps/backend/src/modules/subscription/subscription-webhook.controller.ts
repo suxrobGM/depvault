@@ -11,18 +11,18 @@ export const subscriptionWebhookController = new Elysia({
   detail: { tags: ["Subscription"] },
 }).post(
   "/webhook",
-  async ({ request }) => {
+  async ({ body, request }) => {
     const signature = request.headers.get("stripe-signature");
 
     if (!signature) {
       throw new BadRequestError("Missing stripe-signature header");
     }
 
-    const rawBody = await request.text();
-    await webhookService.handleEvent(rawBody, signature);
+    await webhookService.handleEvent(body as string, signature);
     return { message: "Webhook processed" };
   },
   {
+    parse: ({ request }) => request.text(),
     response: MessageResponseSchema,
     detail: {
       operationId: "handleStripeWebhook",
