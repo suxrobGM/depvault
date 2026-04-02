@@ -10,6 +10,18 @@ const handlers: Record<string, () => Promise<{ default: CommandHandler }>> = {
   logout: () => import("./logout"),
   "config set": () => import("./config/set"),
   "config get": () => import("./config/get"),
+  project: () => import("./project/index"),
+  "project create": () => import("./project/create"),
+  "project list": () => import("./project/list"),
+  "project select": () => import("./project/select"),
+  "project info": () => import("./project/info"),
+  unlock: () => import("./unlock"),
+  lock: () => import("./lock"),
+  pull: () => import("./pull"),
+  push: () => import("./push"),
+  "env list": () => import("./env/list"),
+  "env diff": () => import("./env/diff"),
+  "secrets list": () => import("./secrets/list"),
 };
 
 export async function executeCommand(command: string, args: string[]): Promise<ReactElement> {

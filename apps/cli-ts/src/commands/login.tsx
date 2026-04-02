@@ -8,13 +8,14 @@ import { ErrorBox } from "@/ui/error-box";
 import { Panel } from "@/ui/panel";
 import { Success } from "@/ui/success";
 import { colors } from "@/ui/theme";
+import { getFlag } from "@/utils/args";
 
 const POLL_INTERVAL_MS = 3000;
 const POLL_TIMEOUT_MS = 300_000; // 5 minutes
 
 export default async function handler(args: string[]): Promise<ReactElement> {
   const config = loadConfig();
-  const server = args.find((a) => a.startsWith("--server="))?.split("=")[1] ?? config.server;
+  const server = getFlag(args, "server") ?? config.server;
 
   const client = createApiClient(server);
 
