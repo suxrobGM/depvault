@@ -22,6 +22,8 @@ const handlers: Record<string, () => Promise<{ default: CommandHandler }>> = {
   "env list": () => import("./env/list"),
   "env diff": () => import("./env/diff"),
   "secrets list": () => import("./secrets/list"),
+  analyze: () => import("./analyze"),
+  "ci pull": () => import("./ci/pull"),
 };
 
 export async function executeCommand(command: string, args: string[]): Promise<ReactElement> {

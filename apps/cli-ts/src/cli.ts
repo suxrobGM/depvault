@@ -239,6 +239,40 @@ class SecretsListCommand extends Command {
   }
 }
 
+class AnalyzeCommand extends Command {
+  static override paths = [["analyze"]];
+  static override usage = Command.Usage({ description: "Analyze a dependency file" });
+
+  file = Option.String("--file", { required: false });
+  project = Option.String("--project", { required: false });
+  ecosystem = Option.String("--ecosystem", { required: false });
+
+  async execute(): Promise<void> {
+    const args: string[] = [];
+    if (this.file) args.push(this.file);
+    if (this.project) args.push(`--project=${this.project}`);
+    if (this.ecosystem) args.push(`--ecosystem=${this.ecosystem}`);
+    const handler = (await import("@/commands/analyze")).default;
+    await renderResult(this.context.stdout, handler, args);
+  }
+}
+
+class CiPullCommand extends Command {
+  static override paths = [["ci", "pull"]];
+  static override usage = Command.Usage({ description: "Fetch secrets using CI token" });
+
+  format = Option.String("--format", { required: false });
+  output = Option.String("--output", { required: false });
+
+  async execute(): Promise<void> {
+    const args: string[] = [];
+    if (this.format) args.push(`--format=${this.format}`);
+    if (this.output) args.push(`--output=${this.output}`);
+    const handler = (await import("@/commands/ci/pull")).default;
+    await renderResult(this.context.stdout, handler, args);
+  }
+}
+
 export function createCli(): Cli {
   const cli = new Cli({
     binaryLabel: "DepVault CLI",
@@ -261,6 +295,8 @@ export function createCli(): Cli {
   cli.register(EnvListCommand);
   cli.register(EnvDiffCommand);
   cli.register(SecretsListCommand);
+  cli.register(AnalyzeCommand);
+  cli.register(CiPullCommand);
 
   return cli;
 }
