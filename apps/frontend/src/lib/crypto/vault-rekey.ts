@@ -1,6 +1,5 @@
 /** Vault re-keying operations: password change, recovery, and recovery key regeneration. */
 
-import { client } from "@/lib/api";
 import {
   deriveKEK,
   exportDEK,
@@ -14,12 +13,11 @@ import {
   toBase64,
   unwrapKey,
   wrapKey,
-} from "./index";
-import type {
-  PasswordChangeResult,
-  RecoverVaultResult,
-  RegenerateRecoveryKeyResult,
-} from "./vault-types";
+  type PasswordChangeResult,
+  type RecoverVaultResult,
+  type RegenerateRecoveryKeyResult,
+} from "@depvault/crypto";
+import { client } from "@/lib/api";
 
 /** Re-wraps the private key, recovery key, and all project DEKs with a new KEK. */
 export async function changeVaultPasswordOps(

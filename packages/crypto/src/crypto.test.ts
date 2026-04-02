@@ -1,19 +1,32 @@
-import { describe, expect, it } from "vitest";
-import { decrypt, decryptBinary, encrypt, encryptBinary } from "./aes-gcm";
-import { deriveCIWrapKey } from "./ci";
-import { deriveSharedKey, generateKeyPair, importPrivateKey } from "./ecdh";
-import { CRYPTO_CONSTANTS, fromBase64, fromBase64Url, toBase64, toBase64Url } from "./encoding";
+import { describe, expect, it } from "bun:test";
 import {
+  CRYPTO_CONSTANTS,
+  decrypt,
+  decryptBinary,
+  deriveCIWrapKey,
   deriveKEK,
+  deriveSharedKey,
+  encrypt,
+  encryptBinary,
   exportDEK,
+  fromBase64,
+  fromBase64Url,
   generateDEK,
+  generateKeyPair,
+  generateRecoveryKey,
   generateSalt,
+  generateShareKey,
   importDEK,
+  importPrivateKey,
+  importRecoveryKey,
+  recoveryKeyToBytes,
+  shareKeyFromFragment,
+  shareKeyToFragment,
+  toBase64,
+  toBase64Url,
   unwrapKey,
   wrapKey,
-} from "./keys";
-import { generateRecoveryKey, importRecoveryKey, recoveryKeyToBytes } from "./recovery";
-import { generateShareKey, shareKeyFromFragment, shareKeyToFragment } from "./sharing";
+} from "./index";
 
 // Use reduced iterations for fast tests
 const FAST_ITERATIONS = 1000;

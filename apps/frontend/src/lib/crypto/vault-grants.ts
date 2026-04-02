@@ -1,7 +1,14 @@
 /** Project-level key grant operations: resolve, create SELF/RECOVERY/ECDH grants. */
 
+import {
+  deriveSharedKey,
+  exportDEK,
+  generateDEK,
+  importDEK,
+  unwrapKey,
+  wrapKey,
+} from "@depvault/crypto";
 import { client } from "@/lib/api";
-import { deriveSharedKey, exportDEK, generateDEK, importDEK, unwrapKey, wrapKey } from "./index";
 
 /** Fetches and unwraps a project's DEK from the user's key grant. Returns null if no grant exists. */
 export async function resolveProjectDEK(
