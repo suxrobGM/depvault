@@ -1,5 +1,6 @@
-import { useCallback, useState, type ReactElement, type ReactNode } from "react";
+import { useState, type ReactElement, type ReactNode } from "react";
 import { Box, Text, useApp } from "ink";
+import { executeCommand } from "@/commands/execute";
 import { loadConfig } from "@/services/config";
 import { loadCredentials } from "@/services/credentials";
 import { Banner } from "@/ui/banner";
@@ -19,70 +20,63 @@ function AppInner(): ReactElement {
   const creds = loadCredentials();
   const config = loadConfig();
 
-  const addOutput = useCallback(
-    (command: string, content: ReactNode) => {
-      setOutputs((prev) => [...prev, { id: nextId, command, content }]);
-      setNextId((n) => n + 1);
-    },
-    [nextId],
-  );
+  const addOutput = (command: string, content: ReactNode) => {
+    setOutputs((prev) => [...prev, { id: nextId, command, content }]);
+    setNextId((n) => n + 1);
+  };
 
-  const handleCommand = useCallback(
-    async (input: string) => {
-      vault.resetIdleTimer();
-      const parsed = parseCommand(input);
+  const handleCommand = async (input: string) => {
+    vault.resetIdleTimer();
+    const parsed = parseCommand(input);
 
-      if (!parsed) {
-        addOutput(input, <ErrorBox message="Commands must start with /" />);
-        return;
-      }
+    if (!parsed) {
+      addOutput(input, <ErrorBox message="Commands must start with /" />);
+      return;
+    }
 
-      const { command, args } = resolveCommand(parsed);
+    const { command, args } = resolveCommand(parsed);
 
-      if (!(command in COMMANDS)) {
-        addOutput(command, <ErrorBox message={`Unknown command: /${command}`} />);
-        return;
-      }
+    if (!(command in COMMANDS)) {
+      addOutput(command, <ErrorBox message={`Unknown command: /${command}`} />);
+      return;
+    }
 
-      if (command === "exit" || command === "quit" || command === "q") {
-        exit();
-        return;
-      }
+    if (command === "exit" || command === "quit" || command === "q") {
+      exit();
+      return;
+    }
 
-      if (command === "help") {
-        addOutput(
-          "help",
-          <Box flexDirection="column">
-            {Object.entries(COMMANDS).map(([name, meta]) => (
-              <Box key={name} gap={2}>
-                <Box width={20}>
-                  <Text color="#10B981">/{name}</Text>
-                </Box>
-                <Text color="#6b7280">{meta.description}</Text>
+    if (command === "help") {
+      addOutput(
+        "help",
+        <Box flexDirection="column">
+          {Object.entries(COMMANDS).map(([name, meta]) => (
+            <Box key={name} gap={2}>
+              <Box width={20}>
+                <Text color="#10B981">/{name}</Text>
               </Box>
-            ))}
-          </Box>,
-        );
-        return;
-      }
+              <Text color="#6b7280">{meta.description}</Text>
+            </Box>
+          ))}
+        </Box>,
+      );
+      return;
+    }
 
-      setRunning(true);
+    setRunning(true);
 
-      try {
-        const { executeCommand } = await import("@/commands/execute");
-        const result = await executeCommand(command, args);
-        if (result.kek) vault.unlock(result.kek);
-        if (result.lock) vault.lock();
-        addOutput(command, result.element);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        addOutput(command, <ErrorBox message={message} />);
-      } finally {
-        setRunning(false);
-      }
-    },
-    [addOutput, exit, vault],
-  );
+    try {
+      const result = await executeCommand(command, args);
+      if (result.kek) vault.unlock(result.kek);
+      if (result.lock) vault.lock();
+      addOutput(command, result.element);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      addOutput(command, <ErrorBox message={message} />);
+    } finally {
+      setRunning(false);
+    }
+  };
 
   return (
     <Box flexDirection="column">

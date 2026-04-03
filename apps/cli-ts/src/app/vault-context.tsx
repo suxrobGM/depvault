@@ -1,6 +1,5 @@
 import {
   createContext,
-  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -39,7 +38,7 @@ export function VaultProvider(props: VaultProviderProps): ReactElement {
   const dekCacheRef = useRef<Map<string, CryptoKey>>(new Map());
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const lock = useCallback(() => {
+  const lock = () => {
     kekRef.current = null;
     dekCacheRef.current.clear();
     setIsUnlocked(false);
@@ -47,32 +46,29 @@ export function VaultProvider(props: VaultProviderProps): ReactElement {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
-  }, []);
+  };
 
-  const resetIdleTimer = useCallback(() => {
+  const resetIdleTimer = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
     if (kekRef.current) {
       timerRef.current = setTimeout(lock, AUTO_LOCK_TIMEOUT_MS);
     }
-  }, [lock]);
+  };
 
-  const unlock = useCallback(
-    (kek: CryptoKey) => {
-      kekRef.current = kek;
-      dekCacheRef.current.clear();
-      setIsUnlocked(true);
-      resetIdleTimer();
-    },
-    [resetIdleTimer],
-  );
+  const unlock = (kek: CryptoKey) => {
+    kekRef.current = kek;
+    dekCacheRef.current.clear();
+    setIsUnlocked(true);
+    resetIdleTimer();
+  };
 
-  const cacheDek = useCallback((projectId: string, dek: CryptoKey) => {
+  const cacheDek = (projectId: string, dek: CryptoKey) => {
     dekCacheRef.current.set(projectId, dek);
-  }, []);
+  };
 
-  const getDek = useCallback((projectId: string) => {
+  const getDek = (projectId: string) => {
     return dekCacheRef.current.get(projectId);
-  }, []);
+  };
 
   useEffect(() => {
     return () => {
