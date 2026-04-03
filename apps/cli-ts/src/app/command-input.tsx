@@ -30,18 +30,6 @@ export function CommandInput(props: CommandInputProps): ReactElement {
 
   return (
     <Box flexDirection="column">
-      {filtered.length > 0 && (
-        <Box flexDirection="column" marginBottom={1}>
-          {filtered.slice(0, 10).map((cmd) => (
-            <Box key={cmd.name} gap={2}>
-              <Box width={22}>
-                <Text color={colors.brand}>{cmd.name}</Text>
-              </Box>
-              <Text color={colors.muted}>{cmd.description}</Text>
-            </Box>
-          ))}
-        </Box>
-      )}
       <Box>
         <Text color={colors.brand} bold>
           depvault{">"}{" "}
@@ -57,6 +45,18 @@ export function CommandInput(props: CommandInputProps): ReactElement {
           />
         )}
       </Box>
+      {filtered.length > 0 && (
+        <Box flexDirection="column" marginBottom={1}>
+          {filtered.slice(0, 10).map((cmd) => (
+            <Box key={cmd.name} gap={2}>
+              <Box width={22}>
+                <Text color={colors.brand}>{cmd.name}</Text>
+              </Box>
+              <Text color={colors.muted}>{cmd.description}</Text>
+            </Box>
+          ))}
+        </Box>
+      )}
     </Box>
   );
 }

@@ -9,28 +9,31 @@ function isCommandResult(value: ReactElement | CommandResult): value is CommandR
 }
 
 const handlers: Record<string, () => Promise<{ default: CommandHandler }>> = {
+  // Interactive REPL commands (single-word)
   version: () => import("./version"),
   whoami: () => import("./whoami"),
   login: () => import("./login"),
   logout: () => import("./logout"),
-  "config set": () => import("./config/set"),
-  "config get": () => import("./config/get"),
+  unlock: () => import("./unlock"),
+  lock: () => import("./lock"),
   project: () => import("./project/index"),
+  pull: () => import("./pull"),
+  push: () => import("./push"),
+  env: () => import("./env/index"),
+  secrets: () => import("./secrets/index"),
+  config: () => import("./config/index"),
+  analyze: () => import("./analyze"),
+  scan: () => import("./scan"),
+  update: () => import("./update"),
+
+  // Non-interactive subcommands (two-word, used with args)
   "project create": () => import("./project/create"),
   "project list": () => import("./project/list"),
   "project select": () => import("./project/select"),
   "project info": () => import("./project/info"),
-  unlock: () => import("./unlock"),
-  lock: () => import("./lock"),
-  pull: () => import("./pull"),
-  push: () => import("./push"),
-  "env list": () => import("./env/list"),
-  "env diff": () => import("./env/diff"),
-  "secrets list": () => import("./secrets/list"),
-  analyze: () => import("./analyze"),
+  "config set": () => import("./config/set"),
+  "config get": () => import("./config/get"),
   "ci pull": () => import("./ci/pull"),
-  scan: () => import("./scan"),
-  update: () => import("./update"),
 };
 
 export async function executeCommand(command: string, args: string[]): Promise<CommandResult> {

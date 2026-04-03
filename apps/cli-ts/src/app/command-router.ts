@@ -16,37 +16,46 @@ export function parseCommand(input: string): ParsedCommand | null {
   return { name, args, raw: trimmed };
 }
 
+/** REPL commands — single-word interactive commands shown in the suggestion dropdown. */
 export const COMMANDS: Record<string, { description: string; aliases?: string[] }> = {
   login: { description: "Authenticate via browser" },
   logout: { description: "Clear credentials" },
   whoami: { description: "Show current user" },
   version: { description: "Show CLI version" },
-  unlock: { description: "Unlock vault (derive KEK from password)" },
-  lock: { description: "Lock vault (clear KEK/DEK cache)" },
-  project: { description: "Interactive project selector" },
-  "project create": { description: "Create a new project" },
-  "project list": { description: "List your projects" },
-  "project info": { description: "Show project details" },
+  unlock: { description: "Unlock vault" },
+  lock: { description: "Lock vault" },
+  project: { description: "Manage projects" },
   pull: { description: "Pull env vars + secret files" },
   push: { description: "Push env vars + secret files" },
-  "env list": { description: "List environment variables" },
-  "env diff": { description: "Compare environments" },
-  "secrets list": { description: "List secret files" },
+  env: { description: "List environment variables" },
+  secrets: { description: "List secret files" },
+  config: { description: "Manage config" },
   analyze: { description: "Analyze dependency file" },
-  scan: { description: "Interactive repository scan" },
-  "config set": { description: "Set a config value" },
-  "config get": { description: "Get a config value" },
-  update: { description: "Update CLI to latest version" },
+  scan: { description: "Scan repository" },
+  update: { description: "Update CLI" },
   help: { description: "Show available commands" },
   exit: { description: "Exit the CLI", aliases: ["quit", "q"] },
 };
 
+/**
+ * Non-interactive subcommands — resolved when args are present.
+ * e.g. `/project create my-app` → command="project create", args=["my-app"]
+ */
+const SUBCOMMANDS = new Set([
+  "project create",
+  "project list",
+  "project select",
+  "project info",
+  "config set",
+  "config get",
+]);
+
 /** Resolve a parsed command to a canonical command name (handles subcommands). */
 export function resolveCommand(parsed: ParsedCommand): { command: string; args: string[] } {
-  // Try two-word commands first: "project list", "env diff", etc.
+  // Try two-word subcommands first: "project list", "config set", etc.
   if (parsed.args.length > 0) {
     const twoWord = `${parsed.name} ${parsed.args[0]}`;
-    if (twoWord in COMMANDS) {
+    if (SUBCOMMANDS.has(twoWord)) {
       return { command: twoWord, args: parsed.args.slice(1) };
     }
   }

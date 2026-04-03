@@ -3,7 +3,6 @@ import { AnalyzeCommand } from "@/commands/analyze";
 import { CiPullCommand } from "@/commands/ci/pull";
 import { ConfigGetCommand } from "@/commands/config/get";
 import { ConfigSetCommand } from "@/commands/config/set";
-import { EnvDiffCommand } from "@/commands/env/diff";
 import { EnvListCommand } from "@/commands/env/list";
 import { LoginCommand } from "@/commands/login";
 import { LogoutCommand } from "@/commands/logout";
@@ -40,7 +39,6 @@ export function createCli(): Cli {
   cli.register(PullCommand);
   cli.register(PushCommand);
   cli.register(EnvListCommand);
-  cli.register(EnvDiffCommand);
   cli.register(SecretsListCommand);
   cli.register(AnalyzeCommand);
   cli.register(CiPullCommand);
