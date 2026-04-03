@@ -22,26 +22,14 @@ export async function pullSecretFile(
     throw new Error(`Failed to download secret file ${fileId}.`);
   }
 
-  const file = data as any;
+  const file = data;
   const content = await decryptBinary(file.encryptedContent, file.iv, file.authTag, dek);
 
   return { name: file.name, content };
 }
 
 /** Lists all secret files for a project (metadata only). */
-export async function listSecretFiles(
-  projectId: string,
-  environmentType?: string,
-): Promise<
-  Array<{
-    id: string;
-    name: string;
-    vaultGroupName: string;
-    fileSize: number;
-    mimeType: string;
-    createdAt: string;
-  }>
-> {
+export async function listSecretFiles(projectId: string) {
   const client = getApiClient();
   const { data, error } = await client.api
     .projects({ id: projectId })
@@ -51,7 +39,7 @@ export async function listSecretFiles(
     throw new Error("Failed to list secret files.");
   }
 
-  return ((data as any).data ?? []).map((s: any) => ({
+  return (data.items ?? []).map((s) => ({
     id: s.id,
     name: s.name,
     vaultGroupName: s.vaultGroupName,

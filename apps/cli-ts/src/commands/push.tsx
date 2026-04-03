@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import type { ReactElement } from "react";
-import type { ConfigFormat } from "@depvault/shared";
+import type { ConfigFormat, EnvironmentTypeValue } from "@depvault/shared";
+import { Command, Option } from "clipanion";
 import { Box } from "ink";
 import { getApiClient } from "@/services/api-client";
 import { AuthMode, getAuthMode } from "@/services/auth";
@@ -10,6 +11,7 @@ import { pushEnvVars } from "@/services/env-importer";
 import { ErrorBox } from "@/ui/error-box";
 import { Success } from "@/ui/success";
 import { getFlag, getPositional } from "@/utils/args";
+import { renderResult } from "@/utils/render";
 
 export default async function handler(args: string[]): Promise<ReactElement> {
   if (getAuthMode() === AuthMode.None) {
@@ -55,7 +57,7 @@ export default async function handler(args: string[]): Promise<ReactElement> {
     const { imported, updated } = await pushEnvVars({
       projectId,
       vaultGroupId,
-      environmentType: environmentType as any,
+      environmentType: environmentType as EnvironmentTypeValue,
       dek,
       content,
       format,
@@ -69,5 +71,24 @@ export default async function handler(args: string[]): Promise<ReactElement> {
     );
   } catch (err) {
     return <ErrorBox message={err instanceof Error ? err.message : "Push failed."} />;
+  }
+}
+
+export class PushCommand extends Command {
+  static override paths = [["push"]];
+  static override usage = Command.Usage({ description: "Push env vars + secret files" });
+
+  file = Option.String("--file", { required: false });
+  project = Option.String("--project", { required: false });
+  environment = Option.String("--environment", { required: false });
+  format = Option.String("--format", { required: false });
+
+  async execute(): Promise<void> {
+    const args: string[] = [];
+    if (this.file) args.push(`--file=${this.file}`);
+    if (this.project) args.push(`--project=${this.project}`);
+    if (this.environment) args.push(`--environment=${this.environment}`);
+    if (this.format) args.push(`--format=${this.format}`);
+    await renderResult(this.context.stdout, handler, args);
   }
 }

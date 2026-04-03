@@ -1,12 +1,12 @@
 import { decrypt } from "@depvault/crypto";
-import { serializeConfig, type ConfigFormat } from "@depvault/shared";
+import { serializeConfig, type ConfigFormat, type EnvironmentTypeValue } from "@depvault/shared";
 import type { ConfigEntry } from "@depvault/shared/serializers";
 import { getApiClient } from "./api-client";
 
 interface PullOptions {
   projectId: string;
   vaultGroupId: string;
-  environmentType: string;
+  environmentType: EnvironmentTypeValue;
   dek: CryptoKey;
   format: ConfigFormat;
 }
@@ -23,14 +23,14 @@ export async function pullEnvVars(options: PullOptions): Promise<PullResult> {
 
   const client = getApiClient();
   const { data, error } = await client.api.projects({ id: projectId }).environments.export.get({
-    query: { vaultGroupId, environmentType } as any,
+    query: { vaultGroupId, environmentType },
   });
 
   if (error || !data) {
     throw new Error("Failed to export environment variables.");
   }
 
-  const rawEntries = (data as any).entries ?? [];
+  const rawEntries = data.entries ?? [];
   const entries: ConfigEntry[] = [];
 
   for (const entry of rawEntries) {

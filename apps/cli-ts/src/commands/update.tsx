@@ -3,12 +3,14 @@ import { chmodSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { ReactElement } from "react";
+import { Command } from "clipanion";
 import { Box, Text } from "ink";
 import { GITHUB_REPO, VERSION } from "@/constants";
 import { ErrorBox } from "@/ui/error-box";
 import { KeyValue } from "@/ui/key-value";
 import { Success } from "@/ui/success";
 import { colors } from "@/ui/theme";
+import { renderResult } from "@/utils/render";
 
 interface GitHubRelease {
   tag_name: string;
@@ -148,4 +150,13 @@ export default async function handler(_args: string[]): Promise<ReactElement> {
       <KeyValue label="To" value={`v${latestVersion}`} />
     </Box>
   );
+}
+
+export class UpdateCommand extends Command {
+  static override paths = [["update"]];
+  static override usage = Command.Usage({ description: "Update CLI to the latest version" });
+
+  async execute(): Promise<void> {
+    await renderResult(this.context.stdout, handler);
+  }
 }

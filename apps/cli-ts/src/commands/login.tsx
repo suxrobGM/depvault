@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 import { createApiClient } from "@depvault/shared/api";
+import { Command, Option } from "clipanion";
 import { Box, Text } from "ink";
 import { resetApiClient } from "@/services/api-client";
 import { loadConfig } from "@/services/config";
@@ -9,6 +10,7 @@ import { Panel } from "@/ui/panel";
 import { Success } from "@/ui/success";
 import { colors } from "@/ui/theme";
 import { getFlag } from "@/utils/args";
+import { renderResult } from "@/utils/render";
 
 const POLL_INTERVAL_MS = 3000;
 const POLL_TIMEOUT_MS = 300_000; // 5 minutes
@@ -80,4 +82,16 @@ export default async function handler(args: string[]): Promise<ReactElement> {
   }
 
   return <ErrorBox message="Authentication timed out. Please try again." />;
+}
+
+export class LoginCommand extends Command {
+  static override paths = [["login"]];
+  static override usage = Command.Usage({ description: "Authenticate via browser" });
+
+  server = Option.String("--server", { required: false });
+
+  async execute(): Promise<void> {
+    const args = this.server ? [`--server=${this.server}`] : [];
+    await renderResult(this.context.stdout, handler, args);
+  }
 }

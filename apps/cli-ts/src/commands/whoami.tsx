@@ -1,10 +1,12 @@
 import type { ReactElement } from "react";
+import { Command } from "clipanion";
 import { Box } from "ink";
 import { getApiClient } from "@/services/api-client";
 import { AuthMode, getAuthMode } from "@/services/auth";
 import { loadCredentials } from "@/services/credentials";
 import { ErrorBox } from "@/ui/error-box";
 import { KeyValue } from "@/ui/key-value";
+import { renderResult } from "@/utils/render";
 
 export default async function handler(_args: string[]): Promise<ReactElement> {
   const mode = getAuthMode();
@@ -42,5 +44,14 @@ export default async function handler(_args: string[]): Promise<ReactElement> {
         <KeyValue label="Auth" value="JWT (stored credentials)" />
       </Box>
     );
+  }
+}
+
+export class WhoamiCommand extends Command {
+  static override paths = [["whoami"]];
+  static override usage = Command.Usage({ description: "Show current user" });
+
+  async execute(): Promise<void> {
+    await renderResult(this.context.stdout, handler);
   }
 }

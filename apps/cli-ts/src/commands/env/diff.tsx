@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 import { decrypt } from "@depvault/crypto";
+import { Command, Option } from "clipanion";
 import { Text } from "ink";
 import { getApiClient } from "@/services/api-client";
 import { AuthMode, getAuthMode } from "@/services/auth";
@@ -8,6 +9,7 @@ import { resolveDek } from "@/services/dek-resolver";
 import { ErrorBox } from "@/ui/error-box";
 import { Table } from "@/ui/table";
 import { getFlag } from "@/utils/args";
+import { renderResult } from "@/utils/render";
 
 export default async function handler(args: string[]): Promise<ReactElement> {
   if (getAuthMode() === AuthMode.None) {
@@ -30,13 +32,13 @@ export default async function handler(args: string[]): Promise<ReactElement> {
   const client = getApiClient();
   const { data, error } = await client.api.projects({ id: projectId }).environments.diff.get({
     query: { vaultGroupId, environments },
-  } as any);
+  });
 
   if (error || !data) {
     return <ErrorBox message="Failed to get diff." />;
   }
 
-  const diffData = data as any;
+  const diffData = data;
   const envIds: string[] = diffData.environments ?? [];
   const rows = diffData.rows ?? [];
 
@@ -64,4 +66,24 @@ export default async function handler(args: string[]): Promise<ReactElement> {
   }
 
   return <Table headers={headers} rows={tableRows} />;
+}
+
+export class EnvDiffCommand extends Command {
+  static override paths = [["env", "diff"]];
+  static override usage = Command.Usage({ description: "Compare environments" });
+
+  project = Option.String("--project", { required: false });
+  vaultGroup = Option.String("--vault-group", { required: true });
+  environments = Option.String("--environments", { required: true });
+  output = Option.String("--output", { required: false });
+
+  async execute(): Promise<void> {
+    const args: string[] = [
+      `--vault-group=${this.vaultGroup}`,
+      `--environments=${this.environments}`,
+    ];
+    if (this.project) args.push(`--project=${this.project}`);
+    if (this.output) args.push(`--output=${this.output}`);
+    await renderResult(this.context.stdout, handler, args);
+  }
 }

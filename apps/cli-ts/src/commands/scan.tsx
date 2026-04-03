@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { basename, relative } from "node:path";
 import type { ReactElement } from "react";
 import { DEPENDENCY_FILE_MAP, type EcosystemValue } from "@depvault/shared";
+import { Command, Option } from "clipanion";
 import { Box, Text } from "ink";
 import { getApiClient } from "@/services/api-client";
 import { AuthMode, getAuthMode } from "@/services/auth";
@@ -14,6 +15,7 @@ import { Success } from "@/ui/success";
 import { Table } from "@/ui/table";
 import { colors } from "@/ui/theme";
 import { getFlag } from "@/utils/args";
+import { renderResult } from "@/utils/render";
 
 export default async function handler(args: string[]): Promise<ReactElement> {
   if (getAuthMode() === AuthMode.None) {
@@ -44,15 +46,18 @@ export default async function handler(args: string[]): Promise<ReactElement> {
 
     for (const filePath of depFiles) {
       const fileName = basename(filePath);
-      const ecosystem = (DEPENDENCY_FILE_MAP as Record<string, EcosystemValue>)[fileName];
-      if (!ecosystem) continue;
+      const ecosystem = DEPENDENCY_FILE_MAP[fileName];
+      if (!ecosystem) {
+        continue;
+      }
 
       try {
         const content = readFileSync(filePath, "utf-8");
         await client.api
           .projects({ id: projectId })
-          .analyses.post({ fileName, content, ecosystem } as any);
+          .analyses.post({ fileName, content, ecosystem });
         analyzed++;
+
         results.push(
           <Success key={`dep-${filePath}`} message={`Analyzed ${relative(scanPath, filePath)}`} />,
         );
@@ -182,4 +187,21 @@ export default async function handler(args: string[]): Promise<ReactElement> {
   );
 
   return <Box flexDirection="column">{results}</Box>;
+}
+
+export class ScanCommand extends Command {
+  static override paths = [["scan"]];
+  static override usage = Command.Usage({
+    description: "Scan repository for dependencies, env files, and secrets",
+  });
+
+  scanPath = Option.String("--path", { required: false });
+  project = Option.String("--project", { required: false });
+
+  async execute(): Promise<void> {
+    const args: string[] = [];
+    if (this.scanPath) args.push(`--path=${this.scanPath}`);
+    if (this.project) args.push(`--project=${this.project}`);
+    await renderResult(this.context.stdout, handler, args);
+  }
 }

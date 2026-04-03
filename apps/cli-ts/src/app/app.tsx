@@ -71,16 +71,9 @@ function AppInner(): ReactElement {
       try {
         const { executeCommand } = await import("@/commands/execute");
         const result = await executeCommand(command, args);
-        if (result) {
-          // Handle vault unlock/lock signals from command results
-          if ((result as any).__kek) {
-            vault.unlock((result as any).__kek);
-          }
-          if ((result as any).__lock) {
-            vault.lock();
-          }
-          addOutput(command, result);
-        }
+        if (result.kek) vault.unlock(result.kek);
+        if (result.lock) vault.lock();
+        addOutput(command, result.element);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         addOutput(command, <ErrorBox message={message} />);

@@ -1,10 +1,12 @@
 import type { ReactElement } from "react";
+import { Command, Option } from "clipanion";
 import { Box, Text } from "ink";
 import { getApiClient } from "@/services/api-client";
 import { AuthMode, getAuthMode } from "@/services/auth";
 import { ErrorBox } from "@/ui/error-box";
 import { Table } from "@/ui/table";
 import { getFlag } from "@/utils/args";
+import { renderResult } from "@/utils/render";
 
 export default async function handler(args: string[]): Promise<ReactElement> {
   if (getAuthMode() === AuthMode.None) {
@@ -40,4 +42,16 @@ export default async function handler(args: string[]): Promise<ReactElement> {
       ])}
     />
   );
+}
+
+export class ProjectListCommand extends Command {
+  static override paths = [["project", "list"]];
+  static override usage = Command.Usage({ description: "List your projects" });
+
+  output = Option.String("--output", { required: false });
+
+  async execute(): Promise<void> {
+    const args = this.output ? [`--output=${this.output}`] : [];
+    await renderResult(this.context.stdout, handler, args);
+  }
 }

@@ -62,6 +62,6 @@ export async function pushEnvVars(options: ImportOptions): Promise<ImportResult>
     throw new Error("Failed to import environment variables.");
   }
 
-  const result = data as any;
+  const result = data;
   return { imported: result.imported ?? 0, updated: result.updated ?? 0 };
 }

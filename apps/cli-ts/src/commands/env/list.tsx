@@ -1,5 +1,7 @@
 import type { ReactElement } from "react";
 import { decrypt } from "@depvault/crypto";
+import type { EnvironmentTypeValue } from "@depvault/shared";
+import { Command, Option } from "clipanion";
 import { Text } from "ink";
 import { getApiClient } from "@/services/api-client";
 import { AuthMode, getAuthMode } from "@/services/auth";
@@ -8,6 +10,7 @@ import { resolveDek } from "@/services/dek-resolver";
 import { ErrorBox } from "@/ui/error-box";
 import { Table } from "@/ui/table";
 import { getFlag } from "@/utils/args";
+import { renderResult } from "@/utils/render";
 
 export default async function handler(args: string[]): Promise<ReactElement> {
   if (getAuthMode() === AuthMode.None) {
@@ -41,18 +44,20 @@ export default async function handler(args: string[]): Promise<ReactElement> {
     resolvedVaultGroupId = vaultGroups[0]!.id;
   }
 
-  const query: Record<string, any> = { vaultGroupId: resolvedVaultGroupId, page: 1, limit: 100 };
-  if (environmentType) query.environmentType = environmentType;
-
-  const { data, error } = await client.api
-    .projects({ id: projectId })
-    .environments.variables.get({ query } as any);
+  const { data, error } = await client.api.projects({ id: projectId }).environments.variables.get({
+    query: {
+      vaultGroupId: resolvedVaultGroupId,
+      page: 1,
+      limit: 100,
+      ...(environmentType ? { environmentType: environmentType as EnvironmentTypeValue } : {}),
+    },
+  });
 
   if (error || !data) {
     return <ErrorBox message="Failed to list variables." />;
   }
 
-  const variables = (data as any).data ?? [];
+  const variables = data.items;
 
   if (variables.length === 0) {
     return <Text>No environment variables found.</Text>;
@@ -69,7 +74,7 @@ export default async function handler(args: string[]): Promise<ReactElement> {
 
   if (outputFormat === "json") {
     const jsonRows = await Promise.all(
-      variables.map(async (v: any) => ({
+      variables.map(async (v) => ({
         key: v.key,
         value: await decrypt(v.encryptedValue, v.iv, v.authTag, dek),
       })),
@@ -78,4 +83,23 @@ export default async function handler(args: string[]): Promise<ReactElement> {
   }
 
   return <Table headers={["Key", "Value"]} rows={rows} />;
+}
+
+export class EnvListCommand extends Command {
+  static override paths = [["env", "list"]];
+  static override usage = Command.Usage({ description: "List environment variables" });
+
+  project = Option.String("--project", { required: false });
+  vaultGroup = Option.String("--vault-group", { required: false });
+  environment = Option.String("--environment", { required: false });
+  output = Option.String("--output", { required: false });
+
+  async execute(): Promise<void> {
+    const args: string[] = [];
+    if (this.project) args.push(`--project=${this.project}`);
+    if (this.vaultGroup) args.push(`--vault-group=${this.vaultGroup}`);
+    if (this.environment) args.push(`--environment=${this.environment}`);
+    if (this.output) args.push(`--output=${this.output}`);
+    await renderResult(this.context.stdout, handler, args);
+  }
 }

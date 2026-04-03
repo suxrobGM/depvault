@@ -1,7 +1,12 @@
 import type { ReactElement } from "react";
+import { ok, type CommandResult } from "@/types/command";
 import { ErrorBox } from "@/ui/error-box";
 
-type CommandHandler = (args: string[]) => Promise<ReactElement>;
+type CommandHandler = (args: string[]) => Promise<ReactElement | CommandResult>;
+
+function isCommandResult(value: ReactElement | CommandResult): value is CommandResult {
+  return "element" in value;
+}
 
 const handlers: Record<string, () => Promise<{ default: CommandHandler }>> = {
   version: () => import("./version"),
@@ -28,13 +33,14 @@ const handlers: Record<string, () => Promise<{ default: CommandHandler }>> = {
   update: () => import("./update"),
 };
 
-export async function executeCommand(command: string, args: string[]): Promise<ReactElement> {
+export async function executeCommand(command: string, args: string[]): Promise<CommandResult> {
   const loader = handlers[command];
 
   if (!loader) {
-    return <ErrorBox message={`Command "/${command}" is not yet implemented.`} />;
+    return ok(<ErrorBox message={`Command "/${command}" is not yet implemented.`} />);
   }
 
   const mod = await loader();
-  return mod.default(args);
+  const result = await mod.default(args);
+  return isCommandResult(result) ? result : ok(result);
 }

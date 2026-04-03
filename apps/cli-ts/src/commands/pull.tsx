@@ -1,7 +1,8 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { ReactElement } from "react";
-import type { ConfigFormat } from "@depvault/shared";
+import type { ConfigFormat, EnvironmentTypeValue } from "@depvault/shared";
+import { Command, Option } from "clipanion";
 import { Box } from "ink";
 import { getApiClient } from "@/services/api-client";
 import { AuthMode, getAuthMode } from "@/services/auth";
@@ -12,6 +13,7 @@ import { listSecretFiles, pullSecretFile } from "@/services/secrets-puller";
 import { ErrorBox } from "@/ui/error-box";
 import { Success } from "@/ui/success";
 import { getFlag, hasFlag } from "@/utils/args";
+import { renderResult } from "@/utils/render";
 
 export default async function handler(args: string[]): Promise<ReactElement> {
   if (getAuthMode() === AuthMode.None) {
@@ -55,7 +57,7 @@ export default async function handler(args: string[]): Promise<ReactElement> {
       const { serialized, count } = await pullEnvVars({
         projectId,
         vaultGroupId,
-        environmentType,
+        environmentType: environmentType as EnvironmentTypeValue,
         dek,
         format,
       });
@@ -98,4 +100,25 @@ export default async function handler(args: string[]): Promise<ReactElement> {
   }
 
   return <Box flexDirection="column">{results}</Box>;
+}
+
+export class PullCommand extends Command {
+  static override paths = [["pull"]];
+  static override usage = Command.Usage({ description: "Pull env vars + secret files" });
+
+  project = Option.String("--project", { required: false });
+  environment = Option.String("--environment", { required: false });
+  format = Option.String("--format", { required: false });
+  outputDir = Option.String("--output-dir", { required: false });
+  noSecrets = Option.Boolean("--no-secrets", { required: false });
+
+  async execute(): Promise<void> {
+    const args: string[] = [];
+    if (this.project) args.push(`--project=${this.project}`);
+    if (this.environment) args.push(`--environment=${this.environment}`);
+    if (this.format) args.push(`--format=${this.format}`);
+    if (this.outputDir) args.push(`--output-dir=${this.outputDir}`);
+    if (this.noSecrets) args.push("--no-secrets");
+    await renderResult(this.context.stdout, handler, args);
+  }
 }

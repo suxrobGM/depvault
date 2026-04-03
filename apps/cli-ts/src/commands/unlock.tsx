@@ -2,6 +2,7 @@ import { createElement, type ReactElement } from "react";
 import { PasswordInput } from "@inkjs/ui";
 import { Box, render, Text } from "ink";
 import { deriveKekFromPassword } from "@/services/dek-resolver";
+import type { CommandResult } from "@/types/command";
 import { ErrorBox } from "@/ui/error-box";
 import { Success } from "@/ui/success";
 import { colors } from "@/ui/theme";
@@ -15,11 +16,7 @@ function PasswordPrompt(props: { onSubmit: (password: string) => void }): ReactE
   );
 }
 
-/**
- * Unlock command. In REPL mode, the caller (app.tsx) should store the resulting KEK
- * in VaultContext. This handler returns the derived KEK via a special property.
- */
-export default async function handler(args: string[]): Promise<ReactElement> {
+export default async function handler(_args: string[]): Promise<CommandResult> {
   const password = await new Promise<string>((resolve) => {
     const { unmount } = render(
       createElement(PasswordPrompt, {
@@ -32,16 +29,17 @@ export default async function handler(args: string[]): Promise<ReactElement> {
   });
 
   if (!password) {
-    return <ErrorBox message="No password provided." />;
+    return { element: <ErrorBox message="No password provided." /> };
   }
 
   try {
     const kek = await deriveKekFromPassword(password);
-    // Store the KEK on the result element so the REPL can extract it
-    const result = <Success message="Vault unlocked." />;
-    (result as any).__kek = kek;
-    return result;
+    return { element: <Success message="Vault unlocked." />, kek };
   } catch (err) {
-    return <ErrorBox message={err instanceof Error ? err.message : "Failed to unlock vault."} />;
+    return {
+      element: (
+        <ErrorBox message={err instanceof Error ? err.message : "Failed to unlock vault."} />
+      ),
+    };
   }
 }
