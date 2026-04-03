@@ -50,6 +50,10 @@ const SUBCOMMANDS = new Set([
   "config get",
 ]);
 
+export function isKnownSubcommand(command: string): boolean {
+  return SUBCOMMANDS.has(command);
+}
+
 /** Resolve a parsed command to a canonical command name (handles subcommands). */
 export function resolveCommand(parsed: ParsedCommand): { command: string; args: string[] } {
   // Try two-word subcommands first: "project list", "config set", etc.

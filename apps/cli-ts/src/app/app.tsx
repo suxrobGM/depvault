@@ -1,13 +1,12 @@
 import { useState, type ReactElement, type ReactNode } from "react";
 import { Box, Text, useApp } from "ink";
-import { executeCommand } from "@/commands/execute";
 import { loadConfig } from "@/services/config";
 import { loadCredentials } from "@/services/credentials";
 import { Banner } from "@/ui/banner";
 import { ErrorBox } from "@/ui/error-box";
 import { CommandArea, type CommandOutput } from "./command-area";
 import { CommandInput } from "./command-input";
-import { COMMANDS, parseCommand, resolveCommand } from "./command-router";
+import { COMMANDS, isKnownSubcommand, parseCommand, resolveCommand } from "./command-router";
 import { useVault, VaultProvider } from "./vault-context";
 
 function AppInner(): ReactElement {
@@ -36,7 +35,7 @@ function AppInner(): ReactElement {
 
     const { command, args } = resolveCommand(parsed);
 
-    if (!(command in COMMANDS)) {
+    if (!(command in COMMANDS) && !isKnownSubcommand(command)) {
       addOutput(command, <ErrorBox message={`Unknown command: /${command}`} />);
       return;
     }
@@ -66,6 +65,7 @@ function AppInner(): ReactElement {
     setRunning(true);
 
     try {
+      const { executeCommand } = await import("@/commands/execute");
       const result = await executeCommand(command, args);
       if (result.kek) vault.unlock(result.kek);
       if (result.lock) vault.lock();

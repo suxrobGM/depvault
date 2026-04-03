@@ -35,7 +35,17 @@ export async function deriveKekFromPassword(password: string): Promise<CryptoKey
   const client = getApiClient();
   const { data: status, error } = await client.api.vault.status.get();
 
-  if (error || !status?.hasVault || !status.kekSalt || !status.kekIterations) {
+  if (error) {
+    const errorValue = error.value as { message?: string; code?: number } | undefined;
+    if (errorValue?.code === 401 || errorValue?.code === 404) {
+      throw new Error(
+        "Authentication failed. Your session may have expired — run /login to re-authenticate.",
+      );
+    }
+    throw new Error(`Failed to fetch vault status: ${errorValue?.message ?? "Unknown error"}`);
+  }
+
+  if (!status?.hasVault || !status.kekSalt || !status.kekIterations) {
     throw new Error("Vault not set up. Set up your vault in the web dashboard first.");
   }
 
