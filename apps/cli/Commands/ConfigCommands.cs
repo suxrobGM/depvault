@@ -1,6 +1,7 @@
 using System.CommandLine;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
+using Spectre.Console;
 
 namespace DepVault.Cli.Commands;
 
@@ -9,6 +10,20 @@ public sealed class ConfigCommands(IConfigService configService, IOutputFormatte
     public Command CreateConfigCommand()
     {
         var cmd = new Command("config", "Manage CLI configuration");
+
+        cmd.SetAction(_ =>
+        {
+            var config = configService.Load();
+            output.PrintTable(
+                ["KEY", "VALUE"],
+                [
+                    ["server", config.Server],
+                    ["project", config.ActiveProjectName ?? config.ActiveProjectId ?? "(none)"],
+                    ["output", config.OutputFormat]
+                ]);
+            AnsiConsole.WriteLine();
+            AnsiConsole.MarkupLine("[grey]Use[/] [cyan1]depvault config set <key> <value>[/] [grey]to update.[/]");
+        });
 
         var keyArg = new Argument<string>("key") { Description = "Config key (server, project, output)" };
         var valueArg = new Argument<string>("value") { Description = "Config value" };
