@@ -5,9 +5,12 @@ WORKDIR /app
 FROM base AS build
 COPY bun.lock package.json ./
 
-COPY apps/*/package.json ./apps/
-COPY packages/*/package.json ./packages/
-RUN for f in apps/*.json packages/*.json; do dir="${f%.json}"; mkdir -p "$dir" && mv "$f" "$dir/package.json"; done
+COPY apps/backend/package.json apps/backend/package.json
+COPY apps/frontend/package.json apps/frontend/package.json
+COPY apps/docs/package.json apps/docs/package.json
+COPY apps/demo-video/package.json apps/demo-video/package.json
+COPY packages/shared/package.json packages/shared/package.json
+COPY packages/crypto/package.json packages/crypto/package.json
 
 RUN bun install --frozen-lockfile --ignore-scripts
 
@@ -28,9 +31,12 @@ COPY --from=build /app/packages/shared packages/shared
 COPY --from=build /app/packages/crypto packages/crypto
 COPY --from=build /app/apps/backend apps/backend
 
-COPY apps/*/package.json ./apps/
-COPY packages/*/package.json ./packages/
-RUN for f in apps/*.json packages/*.json; do dir="${f%.json}"; mkdir -p "$dir" && mv "$f" "$dir/package.json"; done
+COPY apps/backend/package.json apps/backend/package.json
+COPY apps/frontend/package.json apps/frontend/package.json
+COPY apps/docs/package.json apps/docs/package.json
+COPY apps/demo-video/package.json apps/demo-video/package.json
+COPY packages/shared/package.json packages/shared/package.json
+COPY packages/crypto/package.json packages/crypto/package.json
 
 RUN bun install --frozen-lockfile --production --ignore-scripts
 
