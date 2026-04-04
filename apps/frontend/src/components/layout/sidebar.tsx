@@ -5,6 +5,7 @@ import { DEFAULT_ROLES, SubscriptionPlanName, UserRole } from "@depvault/shared/
 import {
   AdminPanelSettings as AdminPanelSettingsIcon,
   ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
   CreditCard as CreditCardIcon,
   Dashboard as DashboardIcon,
   Folder as FolderIcon,
@@ -25,6 +26,7 @@ import {
   ListItemText,
   Stack,
   Toolbar,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import type { Route } from "next";
@@ -82,6 +84,7 @@ export function Sidebar(props: SidebarProps): ReactElement {
   const { plan } = useSubscription();
   const showRoleBadge = user?.role && !DEFAULT_ROLES.has(user.role);
   const isAdmin = user?.role === UserRole.ADMIN || user?.role === UserRole.SUPER_ADMIN;
+  const displayName = user && [user.firstName, user.lastName].filter(Boolean).join(" ");
 
   const planBadgeColor =
     plan === SubscriptionPlanName.TEAM
@@ -175,27 +178,24 @@ export function Sidebar(props: SidebarProps): ReactElement {
           </List>
         </>
       )}
-      <FeedbackMenu open={open} />
-      <Divider />
       {user && (
         <>
-          <List sx={{ px: open ? 1 : 0.5 }}>
-            <VaultLockButton open={open} />
-            <NotificationBell open={open} />
-          </List>
           <Divider />
-          <Box
-            sx={{
-              px: open ? 2 : 0,
-              py: 1.5,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: open ? "flex-start" : "center",
-              gap: 1.5,
-            }}
+          <Stack
+            direction="row"
+            justifyContent={open ? "space-around" : "center"}
+            alignItems="center"
+            spacing={open ? 1 : 0.5}
+            sx={{ px: 1, py: 0.75 }}
           >
-            <UserMenu
-              trigger={
+            <FeedbackMenu />
+            <VaultLockButton />
+            <NotificationBell />
+          </Stack>
+          <Divider />
+          <UserMenu
+            trigger={
+              <Tooltip title={open ? "" : displayName || user.email} placement="right">
                 <Box
                   sx={{
                     display: "flex",
@@ -204,50 +204,81 @@ export function Sidebar(props: SidebarProps): ReactElement {
                     gap: 1.5,
                     width: "100%",
                     cursor: "pointer",
-                    borderRadius: 1,
-                    "&:hover": { bgcolor: "action.hover" },
-                    p: 0.5,
+                    borderRadius: 1.5,
+                    mx: open ? 1 : 0.5,
+                    px: open ? 1 : 0.5,
+                    py: 1,
+                    transition: "background-color 150ms",
+                    "&:hover": {
+                      bgcolor: "action.hover",
+                    },
                   }}
                 >
-                  <UserAvatar
-                    firstName={user.firstName}
-                    lastName={user.lastName}
-                    email={user.email}
-                    avatarUrl={user.avatarUrl}
-                    size={32}
-                  />
+                  <Box sx={{ position: "relative", flexShrink: 0 }}>
+                    <UserAvatar
+                      firstName={user.firstName}
+                      lastName={user.lastName}
+                      email={user.email}
+                      avatarUrl={user.avatarUrl}
+                      size={34}
+                    />
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        bottom: 0,
+                        right: 0,
+                        width: 10,
+                        height: 10,
+                        bgcolor: "success.main",
+                        borderRadius: "50%",
+                        border: 2,
+                        borderColor: "background.paper",
+                      }}
+                    />
+                  </Box>
                   {open && (
                     <Box sx={{ minWidth: 0, flex: 1 }}>
-                      <Typography variant="body2" noWrap fontWeight={600}>
-                        {[user.firstName, user.lastName].filter(Boolean).join(" ") || user.email}
-                      </Typography>
                       <Stack direction="row" alignItems="center" spacing={0.5}>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          noWrap
-                          sx={{ flex: 1 }}
-                        >
-                          {user.email}
+                        <Typography variant="body2" noWrap fontWeight={600} sx={{ flex: 1 }}>
+                          {displayName || user.email}
                         </Typography>
                         {showRoleBadge && (
-                          <Chip label={user.role} size="small" color="primary" variant="outlined" />
+                          <Chip
+                            label={user.role}
+                            size="small"
+                            color="primary"
+                            variant="outlined"
+                            sx={{ fontSize: "0.6rem", height: 18 }}
+                          />
                         )}
                         <Chip
                           label={plan}
                           size="small"
                           color={planBadgeColor as "default" | "primary" | "secondary"}
                           variant="filled"
-                          onClick={() => router.push(ROUTES.billing as Route)}
-                          sx={{ fontSize: "0.65rem", height: 20, cursor: "pointer" }}
+                          sx={{ fontSize: "0.6rem", height: 18 }}
                         />
                       </Stack>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        noWrap
+                        component="div"
+                        sx={{ mt: 0.25 }}
+                      >
+                        {user.email}
+                      </Typography>
                     </Box>
                   )}
+                  {open && (
+                    <ChevronRightIcon
+                      sx={{ color: "text.disabled", fontSize: 16, flexShrink: 0 }}
+                    />
+                  )}
                 </Box>
-              }
-            />
-          </Box>
+              </Tooltip>
+            }
+          />
         </>
       )}
     </Box>

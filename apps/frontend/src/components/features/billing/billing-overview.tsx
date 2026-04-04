@@ -13,7 +13,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { ListSkeleton } from "@/components/ui/data-display/list-skeleton";
+import { SkeletonList } from "@/components/ui/data-display/skeleton-list";
 import { StatusBadge } from "@/components/ui/data-display/status-badge";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useConfirm } from "@/hooks/use-confirm";
@@ -114,7 +114,7 @@ export function BillingOverview(): ReactElement {
     return (
       <Card sx={{ mb: 3 }}>
         <CardContent>
-          <ListSkeleton count={4} height={24} spacing={1.5} />
+          <SkeletonList count={4} height={24} spacing={1.5} />
         </CardContent>
       </Card>
     );

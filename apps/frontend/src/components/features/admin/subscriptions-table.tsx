@@ -14,8 +14,8 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { ListSkeleton } from "@/components/ui/data-display/list-skeleton";
 import { PaginationBar } from "@/components/ui/data-display/pagination-bar";
+import { SkeletonList } from "@/components/ui/data-display/skeleton-list";
 import { StatusBadge } from "@/components/ui/data-display/status-badge";
 import { EmptyState } from "@/components/ui/feedback/empty-state";
 import { SelectField } from "@/components/ui/inputs";
@@ -94,7 +94,7 @@ export function SubscriptionsTable(): ReactElement {
       </Stack>
 
       {isLoading ? (
-        <ListSkeleton count={6} height={48} />
+        <SkeletonList count={6} height={48} />
       ) : subscriptions.length === 0 ? (
         <EmptyState icon={<SubIcon />} title="No subscriptions found" />
       ) : (

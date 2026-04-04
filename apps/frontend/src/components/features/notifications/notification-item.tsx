@@ -3,13 +3,14 @@
 import type { ReactElement } from "react";
 import {
   BugReport as BugReportIcon,
+  Circle as CircleIcon,
   CompareArrows as CompareArrowsIcon,
   GppBad as GppBadIcon,
   ManageAccounts as ManageAccountsIcon,
   PersonAdd as PersonAddIcon,
   RotateRight as RotateRightIcon,
 } from "@mui/icons-material";
-import { Box, ListItemButton, ListItemIcon, Typography } from "@mui/material";
+import { alpha, Box, ListItemButton, Stack, Typography } from "@mui/material";
 import type { Notification } from "@/types/api";
 import { formatRelativeTime } from "@/utils/formatters";
 
@@ -42,24 +43,47 @@ export function NotificationItem(props: NotificationItemProps): ReactElement {
         px: 2,
         gap: 1.5,
         alignItems: "flex-start",
-        borderLeft: notification.read ? "3px solid transparent" : "3px solid",
-        borderLeftColor: notification.read ? "transparent" : "primary.main",
-        bgcolor: notification.read ? "transparent" : "rgba(16, 185, 129, 0.04)",
+        transition: "background-color 150ms",
+        "&:hover": {
+          bgcolor: (theme) => alpha(theme.palette.primary.main, 0.06),
+        },
       }}
     >
-      <ListItemIcon
+      <Box
         sx={{
-          minWidth: "auto",
-          mt: 0.5,
+          width: 32,
+          height: 32,
+          borderRadius: "50%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+          mt: 0.25,
+          bgcolor: (theme) =>
+            alpha(
+              theme.palette[config.color.split(".")[0] as "error" | "warning" | "success" | "info"]
+                ?.main ?? theme.palette.text.secondary,
+              0.12,
+            ),
           color: config.color,
         }}
       >
         {config.icon}
-      </ListItemIcon>
+      </Box>
       <Box sx={{ minWidth: 0, flex: 1 }}>
-        <Typography variant="body2" fontWeight={notification.read ? 400 : 600} noWrap>
-          {notification.title}
-        </Typography>
+        <Stack direction="row" alignItems="center" spacing={0.75}>
+          <Typography
+            variant="body2"
+            fontWeight={notification.read ? 400 : 600}
+            noWrap
+            sx={{ flex: 1 }}
+          >
+            {notification.title}
+          </Typography>
+          {!notification.read && (
+            <CircleIcon sx={{ fontSize: 8, color: "primary.main", flexShrink: 0 }} />
+          )}
+        </Stack>
         <Typography
           variant="caption"
           color="text.secondary"
@@ -68,6 +92,8 @@ export function NotificationItem(props: NotificationItemProps): ReactElement {
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
             overflow: "hidden",
+            mt: 0.25,
+            lineHeight: 1.4,
           }}
         >
           {notification.message}

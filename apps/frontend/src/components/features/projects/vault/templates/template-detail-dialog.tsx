@@ -8,7 +8,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Skeleton,
   Stack,
   Table,
   TableBody,
@@ -18,6 +17,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { SkeletonList } from "@/components/ui/data-display";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import type { EnvTemplateDetailResponse } from "@/types/api/env-template";
@@ -43,13 +43,7 @@ export function TemplateDetailDialog(props: TemplateDetailDialogProps): ReactEle
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>{data?.name ?? "Template Detail"}</DialogTitle>
       <DialogContent>
-        {isLoading && (
-          <Stack spacing={1}>
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} variant="rounded" height={40} />
-            ))}
-          </Stack>
-        )}
+        {isLoading && <SkeletonList count={3} height={40} spacing={1} />}
 
         {data && (
           <Stack spacing={2}>

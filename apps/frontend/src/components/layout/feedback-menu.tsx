@@ -4,50 +4,31 @@ import {
   Feedback as FeedbackIcon,
   Lightbulb as LightbulbIcon,
 } from "@mui/icons-material";
-import { List, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
+import { IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip } from "@mui/material";
 
 const REPORT_BUG_URL = "https://github.com/suxrobGM/depvault/issues/new?template=bug_report.yml";
 const FEATURE_REQUEST_URL =
   "https://github.com/suxrobGM/depvault/issues/new?template=feature_request.yml";
 
-interface FeedbackMenuProps {
-  open: boolean;
-}
-
-export function FeedbackMenu(props: FeedbackMenuProps): ReactElement {
-  const { open } = props;
+export function FeedbackMenu(): ReactElement {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const handleOpen = (e: MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
   const handleClose = () => setAnchorEl(null);
 
   return (
-    <List sx={{ px: open ? 1 : 0.5 }}>
-      <ListItemButton
-        onClick={handleOpen}
-        sx={{
-          mb: 0.5,
-          justifyContent: open ? "initial" : "center",
-          px: open ? 2 : 1.5,
-        }}
-      >
-        <ListItemIcon
-          sx={{
-            minWidth: open ? 40 : "auto",
-            justifyContent: "center",
-            color: "text.secondary",
-          }}
-        >
-          <FeedbackIcon />
-        </ListItemIcon>
-        {open && <ListItemText primary="Feedback" />}
-      </ListItemButton>
+    <>
+      <Tooltip title="Feedback" placement="top">
+        <IconButton size="small" onClick={handleOpen} sx={{ color: "text.secondary" }}>
+          <FeedbackIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
       <Menu
         anchorEl={anchorEl}
         open={!!anchorEl}
         onClose={handleClose}
-        anchorOrigin={{ horizontal: "right", vertical: "center" }}
-        transformOrigin={{ horizontal: "left", vertical: "center" }}
+        anchorOrigin={{ horizontal: "center", vertical: "top" }}
+        transformOrigin={{ horizontal: "center", vertical: "bottom" }}
       >
         <MenuItem
           component="a"
@@ -74,6 +55,6 @@ export function FeedbackMenu(props: FeedbackMenuProps): ReactElement {
           <ListItemText>Feature Request</ListItemText>
         </MenuItem>
       </Menu>
-    </List>
+    </>
   );
 }

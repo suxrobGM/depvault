@@ -6,7 +6,6 @@ import {
   Box,
   Button,
   Checkbox,
-  Skeleton,
   Stack,
   Table,
   TableBody,
@@ -17,6 +16,7 @@ import {
   Typography,
 } from "@mui/material";
 import { GlassCard } from "@/components/ui/cards";
+import { SkeletonList } from "@/components/ui/data-display";
 import type { EnvVariable } from "@/types/api/env-variable";
 import { VaultVariableRow } from "./vault-variable-row";
 
@@ -46,13 +46,7 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
   } = props;
 
   if (isLoading) {
-    return (
-      <Stack spacing={1}>
-        {[1, 2, 3].map((i) => (
-          <Skeleton key={i} variant="rounded" height={48} />
-        ))}
-      </Stack>
-    );
+    return <SkeletonList count={3} height={48} spacing={1} />;
   }
 
   if (variables.length === 0) {

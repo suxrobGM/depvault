@@ -2,7 +2,8 @@
 
 import { useState, type ReactElement } from "react";
 import { ArrowBack as BackIcon } from "@mui/icons-material";
-import { Box, Button, Skeleton, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
+import { SkeletonList } from "@/components/ui/data-display";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import type { EnvDiffResponse, EnvironmentItem } from "@/types/api/environment";
@@ -49,13 +50,7 @@ export function EnvDiffView(props: EnvDiffViewProps): ReactElement {
           onChange={setSelected}
         />
 
-        {isLoading && canDiff && (
-          <Stack spacing={1}>
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} variant="rounded" height={48} />
-            ))}
-          </Stack>
-        )}
+        {isLoading && canDiff && <SkeletonList count={3} height={48} spacing={1} />}
 
         {data && <DiffTable environments={data.environments} rows={data.rows} />}
       </Stack>

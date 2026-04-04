@@ -1,9 +1,14 @@
 "use client";
 
 import { useEffect, useRef, type ReactElement } from "react";
-import { Box, Button, Divider, List, Popover, Skeleton, Stack, Typography } from "@mui/material";
+import {
+  DoneAll as DoneAllIcon,
+  NotificationsNone as NotificationsNoneIcon,
+} from "@mui/icons-material";
+import { Box, Button, Chip, Divider, List, Popover, Stack, Typography } from "@mui/material";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
+import { SkeletonList } from "@/components/ui/data-display";
 import {
   useMarkAllRead,
   useMarkRead,
@@ -42,7 +47,7 @@ export function NotificationDropdown(props: NotificationDropdownProps): ReactEle
   const markAllRead = useMarkAllRead();
 
   const notifications = data?.items ?? [];
-  const hasUnread = (countData?.count ?? 0) > 0;
+  const unreadCount = countData?.count ?? 0;
 
   return (
     <Popover
@@ -56,6 +61,7 @@ export function NotificationDropdown(props: NotificationDropdownProps): ReactEle
           sx: {
             width: 380,
             maxHeight: 500,
+            borderRadius: 2,
             bgcolor: "background.paper",
             border: 1,
             borderColor: "divider",
@@ -69,47 +75,74 @@ export function NotificationDropdown(props: NotificationDropdownProps): ReactEle
         justifyContent="space-between"
         sx={{ px: 2, py: 1.5 }}
       >
-        <Typography variant="subtitle1" fontWeight={600}>
-          Notifications
-        </Typography>
-        {hasUnread && (
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <Typography variant="subtitle1" fontWeight={700}>
+            Notifications
+          </Typography>
+          {unreadCount > 0 && (
+            <Chip
+              label={unreadCount}
+              size="small"
+              color="primary"
+              sx={{ height: 20, fontSize: "0.7rem", fontWeight: 600 }}
+            />
+          )}
+        </Stack>
+        {unreadCount > 0 && (
           <Button
             size="small"
+            startIcon={<DoneAllIcon sx={{ fontSize: 16 }} />}
             onClick={() => markAllRead.mutate()}
             disabled={markAllRead.isPending}
+            sx={{ textTransform: "none", fontSize: "0.75rem" }}
           >
             Mark all read
           </Button>
         )}
       </Stack>
       <Divider />
-      <List disablePadding sx={{ maxHeight: 360, overflowY: "auto" }}>
+      <List
+        disablePadding
+        sx={{
+          maxHeight: 360,
+          overflowY: "auto",
+          "&::-webkit-scrollbar": { width: 6 },
+          "&::-webkit-scrollbar-thumb": {
+            bgcolor: "action.hover",
+            borderRadius: 3,
+          },
+        }}
+      >
         {isLoading && (
           <Box sx={{ p: 2 }}>
-            {[0, 1, 2].map((i) => (
-              <Skeleton key={i} variant="rectangular" height={60} sx={{ mb: 1, borderRadius: 1 }} />
-            ))}
+            <SkeletonList count={3} variant="avatar" avatarSize={32} spacing={2} />
           </Box>
         )}
         {!isLoading && notifications.length === 0 && (
-          <Box sx={{ p: 4, textAlign: "center" }}>
-            <Typography variant="body2" color="text.secondary">
-              No notifications yet
+          <Box sx={{ py: 5, px: 3, textAlign: "center" }}>
+            <NotificationsNoneIcon sx={{ fontSize: 40, color: "text.disabled", mb: 1 }} />
+            <Typography variant="body2" color="text.secondary" fontWeight={500}>
+              You&apos;re all caught up
+            </Typography>
+            <Typography variant="caption" color="text.disabled">
+              No new notifications
             </Typography>
           </Box>
         )}
-        {notifications.map((notification) => (
-          <NotificationItem
-            key={notification.id}
-            notification={notification}
-            onClick={(n) => {
-              if (!n.read) {
-                markRead.mutate(n.id);
-              }
-              onClose();
-              router.push(ROUTES.notifications as Route);
-            }}
-          />
+        {notifications.map((notification, index) => (
+          <Box key={notification.id}>
+            {index > 0 && <Divider variant="inset" sx={{ ml: 6.5 }} />}
+            <NotificationItem
+              notification={notification}
+              onClick={(n) => {
+                if (!n.read) {
+                  markRead.mutate(n.id);
+                }
+                onClose();
+                router.push(ROUTES.notifications as Route);
+              }}
+            />
+          </Box>
         ))}
       </List>
       {notifications.length > 0 && (
@@ -122,6 +155,7 @@ export function NotificationDropdown(props: NotificationDropdownProps): ReactEle
                 onClose();
                 router.push(ROUTES.notifications as Route);
               }}
+              sx={{ textTransform: "none", fontWeight: 600 }}
             >
               See all notifications
             </Button>

@@ -13,7 +13,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { GlassCard } from "@/components/ui/cards";
 import { PageHeader } from "@/components/ui/containers";
-import { HealthArc, ListSkeleton, PaginationBar } from "@/components/ui/data-display";
+import { HealthArc, PaginationBar, SkeletonList } from "@/components/ui/data-display";
 import { EmptyState } from "@/components/ui/feedback";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
@@ -192,7 +192,7 @@ export function AnalysisListView(props: AnalysisListViewProps): ReactElement {
     return (
       <Box>
         <Skeleton variant="text" width={300} height={40} sx={{ mb: 1 }} />
-        <ListSkeleton height={68} />
+        <SkeletonList height={68} />
       </Box>
     );
   }

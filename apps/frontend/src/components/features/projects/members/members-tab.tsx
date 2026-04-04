@@ -10,9 +10,9 @@ import {
   Replay as ReplayIcon,
   SwapHoriz as SwapHorizIcon,
 } from "@mui/icons-material";
-import { Box, Button, Chip, Skeleton, Stack, Typography } from "@mui/material";
+import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import { GlassCard } from "@/components/ui/cards";
-import { UserAvatar } from "@/components/ui/data-display";
+import { SkeletonList, UserAvatar } from "@/components/ui/data-display";
 import { ActionMenu } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
@@ -128,13 +128,7 @@ export function MembersTab(props: MembersTabProps): ReactElement {
   };
 
   if (isLoading) {
-    return (
-      <Stack spacing={2}>
-        {Array.from({ length: 3 }).map((_, i) => (
-          <Skeleton key={i} variant="rounded" height={72} sx={{ borderRadius: 3 }} />
-        ))}
-      </Stack>
-    );
+    return <SkeletonList count={3} height={72} spacing={2} />;
   }
 
   const members = data?.items ?? [];

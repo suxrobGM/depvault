@@ -4,7 +4,7 @@ import { useState, type ReactElement } from "react";
 import { History as HistoryIcon } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import { ActivityLogEntry } from "@/components/features/projects/activity/activity-log-entry";
-import { ListSkeleton, PaginationBar } from "@/components/ui/data-display";
+import { PaginationBar, SkeletonList } from "@/components/ui/data-display";
 import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
@@ -60,7 +60,7 @@ export function GlobalActivityView(): ReactElement {
         <GlobalActivityFilterBar filters={filters} onFiltersChange={handleFiltersChange} />
 
         {isLoading ? (
-          <ListSkeleton />
+          <SkeletonList />
         ) : !data || data.items.length === 0 ? (
           <EmptyState
             icon={<HistoryIcon />}

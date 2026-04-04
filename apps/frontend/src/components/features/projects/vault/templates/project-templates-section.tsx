@@ -2,7 +2,8 @@
 
 import { useState, type ReactElement } from "react";
 import { Add as AddIcon } from "@mui/icons-material";
-import { Box, Button, Skeleton, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
+import { SkeletonList } from "@/components/ui/data-display";
 import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
@@ -51,13 +52,7 @@ export function ProjectTemplatesSection(props: ProjectTemplatesSectionProps): Re
         )}
       </Stack>
 
-      {isLoading && (
-        <Stack spacing={1}>
-          {[1, 2].map((i) => (
-            <Skeleton key={i} variant="rounded" height={80} />
-          ))}
-        </Stack>
-      )}
+      {isLoading && <SkeletonList count={2} height={80} spacing={1} />}
 
       {templates && templates.length === 0 && (
         <EmptyState

@@ -7,13 +7,13 @@ import {
   Button,
   IconButton,
   List,
-  Skeleton,
   Stack,
   TablePagination,
   Tooltip,
   Typography,
 } from "@mui/material";
 import { GlassCard } from "@/components/ui/cards";
+import { SkeletonList } from "@/components/ui/data-display";
 import {
   useDeleteNotification,
   useMarkAllRead,
@@ -79,12 +79,11 @@ export function NotificationsView(): ReactElement {
 
       <GlassCard hoverGlow={false}>
         <List disablePadding>
-          {isLoading &&
-            [0, 1, 2, 3, 4].map((i) => (
-              <Box key={i} sx={{ p: 2 }}>
-                <Skeleton variant="rectangular" height={52} sx={{ borderRadius: 1 }} />
-              </Box>
-            ))}
+          {isLoading && (
+            <Box sx={{ p: 2 }}>
+              <SkeletonList count={5} height={52} spacing={1} />
+            </Box>
+          )}
           {!isLoading && notifications.length === 0 && (
             <Box sx={{ p: 6, textAlign: "center" }}>
               <Typography variant="body1" color="text.secondary">

@@ -4,7 +4,7 @@ import { useState, type ReactElement } from "react";
 import { History as HistoryIcon } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import { ActivityUpgradeGate } from "@/components/features/activity";
-import { ListSkeleton, PaginationBar } from "@/components/ui/data-display";
+import { PaginationBar, SkeletonList } from "@/components/ui/data-display";
 import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
@@ -64,7 +64,7 @@ export function ActivityLogView(props: ActivityLogViewProps): ReactElement {
         <ActivityFilterBar filters={filters} onFiltersChange={handleFiltersChange} />
 
         {isLoading ? (
-          <ListSkeleton />
+          <SkeletonList />
         ) : !data || data.items.length === 0 ? (
           <EmptyState
             icon={<HistoryIcon />}
