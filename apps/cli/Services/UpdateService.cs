@@ -42,7 +42,7 @@ public sealed class UpdateService(IVersionChecker versionChecker, IGitHubRelease
             return true;
         }
 
-        AnsiConsole.MarkupLine($"[{ConsoleTheme.Info.ToMarkup()}]Updating v{current} → v{latest}...[/]");
+        AnsiConsole.MarkupLine($"[{ConsoleTheme.Info.ToMarkup()}]Updating v{current} -> v{latest}...[/]");
 
         var rid = DetectRid();
         if (rid is null)

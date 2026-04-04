@@ -7,6 +7,15 @@ mock.module("@/common/logger/logger", () => ({
   logger: { info: () => {}, warn: () => {}, error: () => {} },
 }));
 
+const mockDekBytes = new Uint8Array(32);
+mock.module("@depvault/crypto", () => ({
+  deriveCIWrapKey: mock(() => Promise.resolve({})),
+  unwrapKey: mock(() => Promise.resolve(mockDekBytes)),
+  wrapKey: mock(() =>
+    Promise.resolve({ wrapped: "rewrapped-dek", iv: "rewrapped-iv", tag: "rewrapped-tag" }),
+  ),
+}));
+
 const baseProjectMember = {
   id: "member-uuid",
   projectId: "project-uuid",
@@ -54,6 +63,7 @@ function createMockPrisma() {
       findFirst: mock(() => Promise.resolve({ ...baseCiToken })),
       findUnique: mock(() => Promise.resolve({ ...baseCiToken })),
       update: mock(() => Promise.resolve({ ...baseCiToken })),
+      delete: mock(() => Promise.resolve({ ...baseCiToken })),
       count: mock(() => Promise.resolve(0)),
     },
     envVariable: {
