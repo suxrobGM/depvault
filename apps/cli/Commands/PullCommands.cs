@@ -27,8 +27,8 @@ public sealed class PullCommands(
             Description = "Export format (env, appsettings.json, secrets.yaml, config.toml)",
             DefaultValueFactory = _ => "env"
         };
-        var outputDirOpt = new Option<string>("--output-dir")
-        { Description = "Base output directory", DefaultValueFactory = _ => "." };
+        var outputDirOpt = new Option<string?>("--output-dir")
+        { Description = "Base output directory (defaults to repo root)" };
         var forceOpt = new Option<bool>("--force") { Description = "Overwrite without prompting" };
 
         var cmd = new Command("pull", "Pull environment variables and secret files")
@@ -50,7 +50,7 @@ public sealed class PullCommands(
 
             var envType = ctx.ResolveEnvironmentType(parseResult.GetValue(envOpt), null);
             var format = parseResult.GetValue(formatOpt) ?? "env";
-            var outputDir = Path.GetFullPath(parseResult.GetValue(outputDirOpt) ?? ".");
+            var outputDir = Path.GetFullPath(parseResult.GetValue(outputDirOpt) ?? GitUtils.FindRepoRoot());
             var includeSecrets = parseResult.GetValue(includeSecretsOpt);
             var force = parseResult.GetValue(forceOpt);
 
