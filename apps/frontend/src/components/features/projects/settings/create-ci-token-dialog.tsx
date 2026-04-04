@@ -58,7 +58,7 @@ interface CreateCiTokenDialogProps {
 
 export function CreateCiTokenDialog(props: CreateCiTokenDialogProps): ReactElement {
   const { open, onClose, projectId } = props;
-  const { getProjectDEK } = useVault();
+  const { getProjectDEK, isVaultUnlocked } = useVault();
   const [createdToken, setCreatedToken] = useState<CiTokenCreatedResponse | null>(null);
   const [showSnippets, setShowSnippets] = useState(false);
 
@@ -137,7 +137,11 @@ export function CreateCiTokenDialog(props: CreateCiTokenDialogProps): ReactEleme
         Generate CI/CD Token
       </DialogTitle>
       <DialogContent>
-        {createdToken ? (
+        {!isVaultUnlocked ? (
+          <Alert severity="warning" sx={{ mt: 1 }}>
+            Unlock your vault before generating a CI token.
+          </Alert>
+        ) : createdToken ? (
           <Stack spacing={2} sx={{ mt: 1 }}>
             <Alert severity="warning">Copy this token now. It will not be shown again.</Alert>
             <Box
@@ -228,9 +232,9 @@ export function CreateCiTokenDialog(props: CreateCiTokenDialogProps): ReactEleme
           </form>
         )}
       </DialogContent>
-      {createdToken && (
+      {(createdToken || !isVaultUnlocked) && (
         <DialogActions>
-          <Button onClick={handleClose}>Done</Button>
+          <Button onClick={handleClose}>{createdToken ? "Done" : "Close"}</Button>
         </DialogActions>
       )}
     </Dialog>

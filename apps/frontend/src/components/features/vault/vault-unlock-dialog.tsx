@@ -19,11 +19,12 @@ import { vaultUnlockSchema } from "./schema";
 
 interface VaultUnlockDialogProps {
   open: boolean;
+  onClose?: () => void;
   onForgotPassword?: () => void;
 }
 
 export function VaultUnlockDialog(props: VaultUnlockDialogProps): ReactElement {
-  const { open, onForgotPassword } = props;
+  const { open, onClose, onForgotPassword } = props;
   const { unlockVault } = useVault();
 
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +37,7 @@ export function VaultUnlockDialog(props: VaultUnlockDialogProps): ReactElement {
       try {
         await unlockVault(value.password);
         form.reset();
+        onClose?.();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to unlock vault");
       }
@@ -43,7 +45,7 @@ export function VaultUnlockDialog(props: VaultUnlockDialogProps): ReactElement {
   });
 
   return (
-    <Dialog open={open} maxWidth="xs" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -80,6 +82,7 @@ export function VaultUnlockDialog(props: VaultUnlockDialogProps): ReactElement {
           </Stack>
         </DialogContent>
         <DialogActions>
+          {onClose && <Button onClick={onClose}>Cancel</Button>}
           <Button type="submit" variant="contained" disabled={form.state.isSubmitting}>
             {form.state.isSubmitting ? "Unlocking..." : "Unlock"}
           </Button>
