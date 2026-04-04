@@ -3,6 +3,7 @@ import { decrypt } from "@depvault/crypto";
 import type { EnvironmentTypeValue } from "@depvault/shared";
 import { Command, Option } from "clipanion";
 import { Text } from "ink";
+import { getCommandContext } from "@/app/command-context";
 import { getApiClient } from "@/services/api-client";
 import { AuthMode, getAuthMode } from "@/services/auth";
 import { loadConfig } from "@/services/config";
@@ -38,7 +39,7 @@ export default async function handler(args: string[]): Promise<ReactElement> {
       ["vault-groups"].get();
 
     if (!vaultGroups || vaultGroups.length === 0) {
-      return <ErrorBox message="No vault groups found." />;
+      return <ErrorBox message="No vault groups found for this project." />;
     }
 
     resolvedVaultGroupId = vaultGroups[0]!.id;
@@ -54,7 +55,7 @@ export default async function handler(args: string[]): Promise<ReactElement> {
   });
 
   if (error || !data) {
-    return <ErrorBox message="Failed to list variables." />;
+    return <ErrorBox message={error.value.message ?? "Failed to list variables."} />;
   }
 
   const variables = data.items;
@@ -63,7 +64,8 @@ export default async function handler(args: string[]): Promise<ReactElement> {
     return <Text>No environment variables found.</Text>;
   }
 
-  const dek = await resolveDek(projectId, null);
+  const ctx = getCommandContext();
+  const dek = await resolveDek(projectId, ctx?.kek ?? null);
 
   const rows: string[][] = [];
   for (const v of variables) {

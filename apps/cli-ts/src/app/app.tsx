@@ -66,7 +66,7 @@ function AppInner(): ReactElement {
 
     try {
       const { executeCommand } = await import("@/commands/execute");
-      const result = await executeCommand(command, args, ctx);
+      const result = await executeCommand(command, args);
 
       if (result.kek) ctx.unlock(result.kek);
       if (result.lock) ctx.lock();

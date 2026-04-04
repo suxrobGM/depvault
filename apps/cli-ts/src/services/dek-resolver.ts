@@ -1,6 +1,16 @@
-import { deriveCIWrapKey, deriveKEK, fromBase64, importDEK, unwrapKey } from "@depvault/crypto";
+import {
+  deriveCIWrapKey,
+  deriveKEK,
+  exportDEK,
+  fromBase64,
+  generateDEK,
+  importDEK,
+  unwrapKey,
+  wrapKey,
+} from "@depvault/crypto";
 import { CI_TOKEN_ENV_VAR, VAULT_PASSWORD_ENV_VAR } from "@/constants";
 import { getApiClient } from "./api-client";
+import { loadCredentials } from "./credentials";
 
 /**
  * Resolves the project DEK (Data Encryption Key).
@@ -21,7 +31,9 @@ export async function resolveDek(projectId: string, kek: CryptoKey | null): Prom
   // One-shot mode: derive KEK from vault password
   const password = process.env[VAULT_PASSWORD_ENV_VAR];
   if (!password) {
-    throw new Error("Vault is locked. Use /unlock in REPL mode, or set DEPVAULT_PASSWORD env var.");
+    throw new Error(
+      `Vault is locked. Use /unlock in REPL mode, or set ${VAULT_PASSWORD_ENV_VAR} env var.`,
+    );
   }
 
   const derivedKek = await deriveKekFromPassword(password);
@@ -55,14 +67,48 @@ async function resolveDekFromKek(projectId: string, kek: CryptoKey): Promise<Cry
   const client = getApiClient();
   const { data: grant, error } = await client.api.projects({ id: projectId }).keygrants.my.get();
 
-  if (error || !grant) {
-    throw new Error(
-      "No key grant found for this project. Unlock your vault in the web dashboard to generate a key grant.",
-    );
+  if (grant) {
+    const dekRaw = await unwrapKey(grant.wrappedDek, grant.wrappedDekIv, grant.wrappedDekTag, kek);
+    return importDEK(dekRaw);
   }
 
-  const dekRaw = await unwrapKey(grant.wrappedDek, grant.wrappedDekIv, grant.wrappedDekTag, kek);
-  return importDEK(dekRaw);
+  // Check if this is a 404 (no grant) vs a real error
+  const is404 = error && error.value.message?.includes("No key grant");
+
+  if (!is404) {
+    throw new Error(error.value.message ?? "Failed to fetch key grant.");
+  }
+
+  // Auto-create a SELF grant: generate DEK, wrap with KEK, store on server
+  return createSelfGrant(projectId, kek);
+}
+
+/** Generate a new DEK, wrap it with the user's KEK, and POST a SELF grant. */
+async function createSelfGrant(projectId: string, kek: CryptoKey): Promise<CryptoKey> {
+  const creds = loadCredentials();
+  if (!creds) {
+    throw new Error("Not authenticated. Run /login first.");
+  }
+
+  const dek = await generateDEK();
+  const dekRaw = await exportDEK(dek);
+  const wrapped = await wrapKey(dekRaw, kek);
+
+  const client = getApiClient();
+  const { error } = await client.api.projects({ id: projectId }).keygrants.post({
+    userId: creds.userId,
+    wrappedDek: wrapped.wrapped,
+    wrappedDekIv: wrapped.iv,
+    wrappedDekTag: wrapped.tag,
+    grantType: "SELF",
+  });
+
+  if (error) {
+    const errorValue = error.value as { message?: string } | undefined;
+    throw new Error(errorValue?.message ?? "Failed to create key grant for this project.");
+  }
+
+  return dek;
 }
 
 async function resolveDekFromCiToken(ciToken: string): Promise<CryptoKey> {

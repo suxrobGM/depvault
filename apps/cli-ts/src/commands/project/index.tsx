@@ -1,6 +1,7 @@
 import { createElement, type ReactElement } from "react";
 import { Select } from "@inkjs/ui";
 import { Box, render, Text } from "ink";
+import { getCommandContext } from "@/app/command-context";
 import { getApiClient } from "@/services/api-client";
 import { AuthMode, getAuthMode } from "@/services/auth";
 import { loadConfig, updateConfig } from "@/services/config";
@@ -48,6 +49,7 @@ export default async function handler(_args: string[]): Promise<ReactElement> {
   }
 
   const config = loadConfig();
+  const ctx = getCommandContext();
 
   const choices: ProjectChoice[] = items.map((p) => ({
     label: `${p.name}${p.id === config.activeProjectId ? " *" : ""}`,
@@ -55,23 +57,33 @@ export default async function handler(_args: string[]): Promise<ReactElement> {
     name: p.name,
   }));
 
-  return new Promise<ReactElement>((resolve) => {
-    const { unmount } = render(
-      createElement(ProjectSelector, {
-        choices,
-        onSelect: (value: string) => {
-          unmount();
-          const selected = items.find((p) => p.id === value);
-          if (selected) {
-            updateConfig({ activeProjectId: selected.id, activeProjectName: selected.name });
-            resolve(
-              <Success message={`Active project set to ${selected.name} (${selected.id})`} />,
-            );
-          } else {
-            resolve(<ErrorBox message="Selection failed." />);
-          }
-        },
-      }),
+  let selectedValue: string;
+
+  if (ctx) {
+    // REPL mode: use the shared prompt select
+    selectedValue = await ctx.requestSelect(
+      choices.map((c) => ({ label: c.label, value: c.value })),
     );
-  });
+  } else {
+    // One-shot CLI mode: spawn a standalone Ink instance
+    selectedValue = await new Promise<string>((resolve) => {
+      const { unmount } = render(
+        createElement(ProjectSelector, {
+          choices,
+          onSelect: (value: string) => {
+            unmount();
+            resolve(value);
+          },
+        }),
+      );
+    });
+  }
+
+  const selected = items.find((p) => p.id === selectedValue);
+  if (!selected) {
+    return <ErrorBox message="Selection failed." />;
+  }
+
+  updateConfig({ activeProjectId: selected.id, activeProjectName: selected.name });
+  return <Success message={`Active project set to ${selected.name} (${selected.id})`} />;
 }

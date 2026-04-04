@@ -1,5 +1,5 @@
 import { readdirSync, statSync } from "node:fs";
-import { basename, extname, join } from "node:path";
+import { basename, extname, join, relative } from "node:path";
 import { DEPENDENCY_FILE_MAP } from "@depvault/shared";
 
 const MAX_DEPTH = 10;
@@ -133,4 +133,49 @@ export function findSecretFiles(rootDir: string): string[] {
       name.includes("firebase-adminsdk")
     );
   });
+}
+
+export type FileCategory = "environment" | "secret";
+
+export interface DiscoveredFile {
+  fullPath: string;
+  relativePath: string;
+  fileName: string;
+  category: FileCategory;
+}
+
+/** Find all pushable files (env + secret) and return them with metadata. */
+export function findPushableFiles(rootDir: string): DiscoveredFile[] {
+  const envFiles = findEnvFiles(rootDir).map((f) => toDiscovered(rootDir, f, "environment"));
+  const secretFiles = findSecretFiles(rootDir).map((f) => toDiscovered(rootDir, f, "secret"));
+  return [...envFiles, ...secretFiles].sort((a, b) => a.relativePath.localeCompare(b.relativePath));
+}
+
+function toDiscovered(rootDir: string, fullPath: string, category: FileCategory): DiscoveredFile {
+  return {
+    fullPath,
+    relativePath: relative(rootDir, fullPath).replace(/\\/g, "/"),
+    fileName: basename(fullPath),
+    category,
+  };
+}
+
+/** Detect environment type from a filename (e.g. ".env.production" → "PRODUCTION"). */
+export function detectEnvironmentType(fileName: string): string | null {
+  const segments = fileName.toLowerCase().split(/[.\-_]/);
+  for (const seg of segments) {
+    if (seg === "production" || seg === "prod") return "PRODUCTION";
+    if (seg === "staging" || seg === "stage") return "STAGING";
+    if (seg === "development" || seg === "dev") return "DEVELOPMENT";
+  }
+  return null;
+}
+
+/** Detect config format from filename extension. */
+export function detectFormat(fileName: string): string {
+  const lower = fileName.toLowerCase();
+  if (lower.endsWith(".json")) return "appsettings.json";
+  if (lower.endsWith(".yaml") || lower.endsWith(".yml")) return "secrets.yaml";
+  if (lower.endsWith(".toml")) return "config.toml";
+  return "env";
 }

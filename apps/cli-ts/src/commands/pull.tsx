@@ -4,6 +4,7 @@ import type { ReactElement } from "react";
 import type { ConfigFormat, EnvironmentTypeValue } from "@depvault/shared";
 import { Command, Option } from "clipanion";
 import { Box } from "ink";
+import { getCommandContext } from "@/app/command-context";
 import { getApiClient } from "@/services/api-client";
 import { AuthMode, getAuthMode } from "@/services/auth";
 import { loadConfig } from "@/services/config";
@@ -38,13 +39,17 @@ export default async function handler(args: string[]): Promise<ReactElement> {
     .projects({ id: projectId })
     ["vault-groups"].get();
 
-  if (vgError || !vaultGroups || vaultGroups.length === 0) {
+  if (vgError || !vaultGroups) {
+    const msg = (vgError?.value as { message?: string })?.message ?? "Failed to load vault groups.";
+    return <ErrorBox message={msg} />;
+  }
+
+  if (vaultGroups.length === 0) {
     return <ErrorBox message="No vault groups found for this project." />;
   }
 
-  // Resolve DEK (uses cached KEK from REPL VaultContext, or env var in one-shot)
-  // In REPL mode, the __kek will be passed via the global; for now use null to trigger env var path
-  const dek = await resolveDek(projectId, null);
+  const ctx = getCommandContext();
+  const dek = await resolveDek(projectId, ctx?.kek ?? null);
 
   const results: ReactElement[] = [];
 
