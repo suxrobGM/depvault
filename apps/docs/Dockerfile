@@ -1,21 +1,16 @@
 FROM oven/bun:1 AS base
 WORKDIR /app
 
-# Install dependencies
-FROM base AS deps
+# Build stage — install deps, build Next.js
+FROM base AS build
 COPY bun.lock package.json ./
-COPY apps/backend/package.json apps/backend/package.json
-COPY apps/frontend/package.json apps/frontend/package.json
-COPY apps/docs/package.json apps/docs/package.json
-COPY apps/demo-video/package.json apps/demo-video/package.json
-COPY packages/shared/package.json packages/shared/package.json
+
+COPY apps/*/package.json ./apps/
+COPY packages/*/package.json ./packages/
+RUN for f in apps/*.json packages/*.json; do dir="${f%.json}"; mkdir -p "$dir" && mv "$f" "$dir/package.json"; done
+
 RUN bun install --frozen-lockfile --ignore-scripts
 
-# Build stage
-FROM base AS build
-COPY --from=deps /app/node_modules node_modules
-COPY --from=deps /app/apps/docs/node_modules apps/docs/node_modules
-COPY bun.lock package.json ./
 COPY apps/docs/ apps/docs/
 
 WORKDIR /app/apps/docs
