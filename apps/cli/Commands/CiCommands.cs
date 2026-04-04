@@ -33,54 +33,49 @@ public sealed class CiCommands(IApiClientFactory clientFactory, CommandContext c
             if (!ctx.IsCiMode())
             {
                 ctx.Output.PrintError($"CI pull requires {Constants.CiTokenEnvVar} environment variable.");
+                Environment.ExitCode = 1;
                 return;
             }
 
-            try
+            var client = clientFactory.Create();
+            var result = await client.Api.Ci.Secrets
+                .GetAsync(cancellationToken: cancellationToken);
+
+            if (result is null)
             {
-                var client = clientFactory.Create();
-                var result = await client.Api.Ci.Secrets
-                    .GetAsync(cancellationToken: cancellationToken);
+                ctx.Output.PrintError("No secrets returned.");
+                Environment.ExitCode = 1;
+                return;
+            }
 
-                if (result is null)
+            var rawToken = Environment.GetEnvironmentVariable(Constants.CiTokenEnvVar)!;
+            var ciWrapKey = VaultCrypto.DeriveCiWrapKey(rawToken);
+            var dek = VaultCrypto.UnwrapKey(
+                result.WrappedDek ?? "", result.WrappedDekIv ?? "",
+                result.WrappedDekTag ?? "", ciWrapKey);
+
+            var format = parseResult.GetValue(formatOpt);
+
+            if (format == "json")
+            {
+                ctx.Output.PrintJson(new
                 {
-                    ctx.Output.PrintError("No secrets returned.");
-                    return;
-                }
-
-                var rawToken = Environment.GetEnvironmentVariable(Constants.CiTokenEnvVar)!;
-                var ciWrapKey = VaultCrypto.DeriveCiWrapKey(rawToken);
-                var dek = VaultCrypto.UnwrapKey(
-                    result.WrappedDek ?? "", result.WrappedDekIv ?? "",
-                    result.WrappedDekTag ?? "", ciWrapKey);
-
-                var format = parseResult.GetValue(formatOpt);
-
-                if (format == "json")
-                {
-                    ctx.Output.PrintJson(new
+                    variables = result.Variables?.Select(v => new
                     {
-                        variables = result.Variables?.Select(v => new
-                        {
-                            key = v.Key,
-                            value = VaultCrypto.Decrypt(
-                                v.EncryptedValue ?? "", v.Iv ?? "", v.AuthTag ?? "", dek)
-                        }),
-                        files = result.Files?.Select(f => new { id = f.Id, name = f.Name })
-                    });
-                    return;
-                }
+                        key = v.Key,
+                        value = VaultCrypto.Decrypt(
+                            v.EncryptedValue ?? "", v.Iv ?? "", v.AuthTag ?? "", dek)
+                    }),
+                    files = result.Files?.Select(f => new { id = f.Id, name = f.Name })
+                });
+                return;
+            }
 
-                var lines = result.Variables?.Select(v =>
-                    $"{v.Key}={VaultCrypto.Decrypt(v.EncryptedValue ?? "", v.Iv ?? "", v.AuthTag ?? "", dek)}")
-                    ?? [];
-                var content = string.Join(Environment.NewLine, lines);
-                ctx.Output.WriteContent(content, parseResult.GetValue(outputOpt));
-            }
-            catch (Exception ex)
-            {
-                ctx.Output.PrintError($"Failed to fetch secrets: {ex.Message}");
-            }
+            var lines = result.Variables?.Select(v =>
+                $"{v.Key}={VaultCrypto.Decrypt(v.EncryptedValue ?? "", v.Iv ?? "", v.AuthTag ?? "", dek)}")
+                ?? [];
+            var content = string.Join(Environment.NewLine, lines);
+            ctx.Output.WriteContent(content, parseResult.GetValue(outputOpt));
         });
 
         return cmd;

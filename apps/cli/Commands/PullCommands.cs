@@ -39,12 +39,14 @@ public sealed class PullCommands(
             var pc = await ctx.RequireProjectContextAsync(parseResult, projectOpt, ct);
             if (pc is null)
             {
+                Environment.ExitCode = 1;
                 return;
             }
 
             var groups = await vaultGroupSelector.SelectAsync(pc.ProjectId, parseResult.GetValue(vaultGroupsOpt), ct);
             if (groups is null)
             {
+                Environment.ExitCode = 1;
                 return;
             }
 
@@ -70,6 +72,7 @@ public sealed class PullCommands(
             if (dek is null)
             {
                 ctx.Output.PrintError("Failed to resolve encryption key.");
+                Environment.ExitCode = 1;
                 return;
             }
 

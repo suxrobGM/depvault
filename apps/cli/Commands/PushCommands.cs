@@ -37,6 +37,7 @@ internal sealed class PushCommands(
             var pc = await ctx.RequireProjectContextAsync(parseResult, projectOpt, ct);
             if (pc is null)
             {
+                Environment.ExitCode = 1;
                 return;
             }
 
@@ -45,12 +46,14 @@ internal sealed class PushCommands(
             var selected = ResolveFiles(parseResult.GetValue(fileOpt));
             if (selected.Count == 0)
             {
+                Environment.ExitCode = 1;
                 return;
             }
 
             var dirMap = await dirMapper.MapAsync(pc.ProjectId, selected, ct);
             if (dirMap is null)
             {
+                Environment.ExitCode = 1;
                 return;
             }
 
@@ -62,6 +65,7 @@ internal sealed class PushCommands(
             if (hasEnvFiles && !await envImporter.EnsureDekAsync(pc.ProjectId, ct))
             {
                 ctx.Output.PrintError("Failed to resolve encryption key. Aborting push.");
+                Environment.ExitCode = 1;
                 return;
             }
 
