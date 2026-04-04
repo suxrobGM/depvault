@@ -70,18 +70,19 @@ public sealed class ReplHost(VaultState vaultState, ConsoleRenderer renderer)
             if (command is "help" or "?")
             {
                 PrintHelp(rootCommand);
-                continue;
             }
-
-            // Delegate to System.CommandLine
-            try
+            else
             {
-                var parseResult = rootCommand.Parse(parts);
-                await parseResult.InvokeAsync();
-            }
-            catch (Exception ex)
-            {
-                AnsiConsole.MarkupLine($"[red]Error: {Markup.Escape(ex.Message)}[/]");
+                // Delegate to System.CommandLine
+                try
+                {
+                    var parseResult = rootCommand.Parse(parts);
+                    await parseResult.InvokeAsync();
+                }
+                catch (Exception ex)
+                {
+                    AnsiConsole.MarkupLine($"[red]Error: {Markup.Escape(ex.Message)}[/]");
+                }
             }
 
             // Pause so user can read output before the screen clears
