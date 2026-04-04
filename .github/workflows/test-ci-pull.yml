@@ -1,0 +1,31 @@
+name: Test CI Pull
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-ci-pull:
+    name: Test depvault ci pull
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup DepVault CLI
+        uses: suxrobGM/depvault@v1
+        with:
+          token: ${{ secrets.DEPVAULT_TOKEN }}
+
+      - name: Pull secrets (env format)
+        run: depvault ci pull --format env --output .env
+
+      - name: Verify .env file exists
+        run: |
+          if [ ! -f .env ]; then
+            echo "::error::.env file was not created"
+            exit 1
+          fi
+          echo "Lines in .env: $(wc -l < .env)"
+
+      - name: Pull secrets (json format)
+        run: depvault ci pull --format json
