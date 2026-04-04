@@ -37,9 +37,6 @@ interface CiTokensSectionProps {
 }
 
 function getTokenStatus(token: CiToken): { label: string; color: "success" | "error" | "warning" } {
-  if (token.revokedAt) {
-    return { label: "Revoked", color: "error" };
-  }
   if (new Date(token.expiresAt) < new Date()) {
     return { label: "Expired", color: "warning" };
   }
@@ -166,7 +163,7 @@ export function CiTokensSection(props: CiTokensSectionProps): ReactElement {
                                 onClick: () => revokeToken(token),
                                 destructive: true,
                                 dividerBefore: true,
-                                hidden: !canEdit || !!token.revokedAt,
+                                hidden: !canEdit,
                               },
                             ]}
                           />
