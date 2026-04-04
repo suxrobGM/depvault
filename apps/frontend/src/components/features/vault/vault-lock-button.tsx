@@ -2,11 +2,24 @@
 
 import { useState, type ReactElement } from "react";
 import { Lock as LockIcon, LockOpen as LockOpenIcon } from "@mui/icons-material";
-import { IconButton, Tooltip } from "@mui/material";
+import {
+  Chip,
+  IconButton,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Stack,
+  Tooltip,
+} from "@mui/material";
 import { useVault } from "@/hooks/use-vault";
 import { VaultUnlockDialog } from "./vault-unlock-dialog";
 
-export function VaultLockButton(): ReactElement {
+interface VaultLockButtonProps {
+  open: boolean;
+}
+
+export function VaultLockButton(props: VaultLockButtonProps): ReactElement {
+  const { open } = props;
   const { isVaultSetup, isVaultUnlocked, lockVault } = useVault();
   const [unlockDialogOpen, setUnlockDialogOpen] = useState(false);
 
@@ -22,17 +35,42 @@ export function VaultLockButton(): ReactElement {
     }
   };
 
+  const iconColor = isVaultUnlocked ? "success.main" : "warning.main";
+  const icon = isVaultUnlocked ? <LockOpenIcon /> : <LockIcon />;
+  const label = isVaultUnlocked ? "Unlocked" : "Locked";
+  const chipColor = isVaultUnlocked ? "success" : "warning";
+
   return (
     <>
-      <Tooltip title={isVaultUnlocked ? "Lock Vault" : "Unlock Vault"} placement="top">
-        <IconButton
-          size="small"
-          onClick={handleClick}
-          sx={{ color: isVaultUnlocked ? "success.main" : "warning.main" }}
-        >
-          {isVaultUnlocked ? <LockOpenIcon fontSize="small" /> : <LockIcon fontSize="small" />}
-        </IconButton>
-      </Tooltip>
+      {open ? (
+        <ListItemButton onClick={handleClick} sx={{ mb: 0.5, px: 2 }}>
+          <ListItemIcon sx={{ minWidth: 40, color: iconColor }}>{icon}</ListItemIcon>
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ flex: 1 }}>
+            <ListItemText primary="Vault" />
+            <Chip
+              label={label}
+              size="small"
+              color={chipColor}
+              sx={{
+                height: 20,
+                fontSize: "0.65rem",
+                fontWeight: 600,
+                bgcolor: (theme) =>
+                  isVaultUnlocked
+                    ? `${theme.palette.success.main}1F`
+                    : `${theme.palette.warning.main}1F`,
+                color: iconColor,
+              }}
+            />
+          </Stack>
+        </ListItemButton>
+      ) : (
+        <Tooltip title={`Vault · ${label}`} placement="right">
+          <IconButton size="small" onClick={handleClick} sx={{ color: iconColor }}>
+            {icon}
+          </IconButton>
+        </Tooltip>
+      )}
       <VaultUnlockDialog
         open={unlockDialogOpen && !isVaultUnlocked}
         onClose={() => setUnlockDialogOpen(false)}

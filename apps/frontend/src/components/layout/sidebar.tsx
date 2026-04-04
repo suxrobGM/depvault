@@ -181,17 +181,19 @@ export function Sidebar(props: SidebarProps): ReactElement {
       {user && (
         <>
           <Divider />
-          <Stack
-            direction="row"
-            justifyContent={open ? "space-around" : "center"}
-            alignItems="center"
-            spacing={open ? 1 : 0.5}
-            sx={{ px: 1, py: 0.75 }}
-          >
-            <FeedbackMenu />
-            <VaultLockButton />
-            <NotificationBell />
-          </Stack>
+          {open ? (
+            <List sx={{ px: 1, py: 0.5 }}>
+              <FeedbackMenu open={open} />
+              <VaultLockButton open={open} />
+              <NotificationBell open={open} />
+            </List>
+          ) : (
+            <Stack alignItems="center" spacing={0.5} sx={{ py: 0.75 }}>
+              <FeedbackMenu open={open} />
+              <VaultLockButton open={open} />
+              <NotificationBell open={open} />
+            </Stack>
+          )}
           <Divider />
           <UserMenu
             trigger={
