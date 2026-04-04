@@ -5,13 +5,13 @@ import { loadCredentials } from "@/services/credentials";
 import { Banner } from "@/ui/banner";
 import { ErrorBox } from "@/ui/error-box";
 import { CommandArea, type CommandOutput } from "./command-area";
+import { CommandContextProvider, useCommandContext } from "./command-context";
 import { CommandInput } from "./command-input";
 import { COMMANDS, isKnownSubcommand, parseCommand, resolveCommand } from "./command-router";
-import { useVault, VaultProvider } from "./vault-context";
 
 function AppInner(): ReactElement {
   const { exit } = useApp();
-  const vault = useVault();
+  const ctx = useCommandContext();
   const [outputs, setOutputs] = useState<CommandOutput[]>([]);
   const [running, setRunning] = useState(false);
   const [nextId, setNextId] = useState(1);
@@ -25,7 +25,7 @@ function AppInner(): ReactElement {
   };
 
   const handleCommand = async (input: string) => {
-    vault.resetIdleTimer();
+    ctx.resetIdleTimer();
     const parsed = parseCommand(input);
 
     if (!parsed) {
@@ -66,9 +66,10 @@ function AppInner(): ReactElement {
 
     try {
       const { executeCommand } = await import("@/commands/execute");
-      const result = await executeCommand(command, args);
-      if (result.kek) vault.unlock(result.kek);
-      if (result.lock) vault.lock();
+      const result = await executeCommand(command, args, ctx);
+
+      if (result.kek) ctx.unlock(result.kek);
+      if (result.lock) ctx.lock();
       addOutput(command, result.element);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -82,7 +83,7 @@ function AppInner(): ReactElement {
     <Box flexDirection="column">
       <Banner
         email={creds?.email}
-        vaultLocked={!vault.isUnlocked}
+        vaultLocked={!ctx.isVaultUnlocked}
         projectName={config.activeProjectName}
       />
       <CommandArea outputs={outputs} />
@@ -95,8 +96,8 @@ function AppInner(): ReactElement {
 
 export function App(): ReactElement {
   return (
-    <VaultProvider>
+    <CommandContextProvider>
       <AppInner />
-    </VaultProvider>
+    </CommandContextProvider>
   );
 }

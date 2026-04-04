@@ -2,7 +2,7 @@ import { createElement, type ReactElement } from "react";
 import { PasswordInput } from "@inkjs/ui";
 import { Box, render, Text } from "ink";
 import { deriveKekFromPassword } from "@/services/dek-resolver";
-import type { CommandResult } from "@/types/command";
+import type { CommandContext, CommandResult } from "@/types/command";
 import { ErrorBox } from "@/ui/error-box";
 import { Success } from "@/ui/success";
 import { colors } from "@/ui/theme";
@@ -16,8 +16,11 @@ function PasswordPrompt(props: { onSubmit: (password: string) => void }): ReactE
   );
 }
 
-export default async function handler(_args: string[]): Promise<CommandResult> {
-  const password = await new Promise<string>((resolve) => {
+/** Prompt for password — REPL mode uses the shared prompt context, one-shot spawns a standalone UI. */
+async function getPassword(ctx?: CommandContext): Promise<string> {
+  if (ctx) return ctx.requestPassword();
+
+  return new Promise<string>((resolve) => {
     const { unmount } = render(
       createElement(PasswordPrompt, {
         onSubmit: (pw: string) => {
@@ -27,6 +30,17 @@ export default async function handler(_args: string[]): Promise<CommandResult> {
       }),
     );
   });
+}
+
+export default async function handler(
+  _args: string[],
+  ctx?: CommandContext,
+): Promise<CommandResult> {
+  if (ctx?.isVaultUnlocked) {
+    return { element: <ErrorBox message="Vault is already unlocked." /> };
+  }
+
+  const password = await getPassword(ctx);
 
   if (!password) {
     return { element: <ErrorBox message="No password provided." /> };

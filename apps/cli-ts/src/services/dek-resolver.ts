@@ -21,9 +21,7 @@ export async function resolveDek(projectId: string, kek: CryptoKey | null): Prom
   // One-shot mode: derive KEK from vault password
   const password = process.env[VAULT_PASSWORD_ENV_VAR];
   if (!password) {
-    throw new Error(
-      "Vault is locked. Use /unlock in REPL mode, or set DEPVAULT_VAULT_PASSWORD env var.",
-    );
+    throw new Error("Vault is locked. Use /unlock in REPL mode, or set DEPVAULT_PASSWORD env var.");
   }
 
   const derivedKek = await deriveKekFromPassword(password);

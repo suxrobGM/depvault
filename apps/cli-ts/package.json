@@ -8,10 +8,10 @@
   },
   "scripts": {
     "dev": "bun run src/index.ts",
-    "build": "bun build --compile --minify-whitespace --minify-syntax --outfile dist/depvault src/index.ts",
-    "build:linux": "bun build --compile --target bun-linux-x64 --outfile dist/depvault-linux src/index.ts",
-    "build:macos": "bun build --compile --target bun-darwin-arm64 --outfile dist/depvault-macos src/index.ts",
-    "build:windows": "bun build --compile --target bun-windows-x64 --outfile dist/depvault.exe src/index.ts",
+    "build": "bun build --compile --minify --sourcemap --outfile dist/depvault src/index.ts",
+    "build:linux": "bun build --compile --minify --sourcemap --target bun-linux-x64 --outfile dist/depvault-linux src/index.ts",
+    "build:macos": "bun build --compile --minify --sourcemap --target bun-darwin-arm64 --outfile dist/depvault-macos src/index.ts",
+    "build:windows": "bun build --compile --minify --sourcemap --target bun-windows-x64 --outfile dist/depvault.exe src/index.ts",
     "typecheck": "tsc --noEmit",
     "test": "bun test"
   },

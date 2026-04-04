@@ -1,8 +1,11 @@
 import type { ReactElement } from "react";
-import { ok, type CommandResult } from "@/types/command";
+import { ok, type CommandContext, type CommandResult } from "@/types/command";
 import { ErrorBox } from "@/ui/error-box";
 
-type CommandHandler = (args: string[]) => Promise<ReactElement | CommandResult>;
+type CommandHandler = (
+  args: string[],
+  ctx?: CommandContext,
+) => Promise<ReactElement | CommandResult>;
 
 function isCommandResult(value: ReactElement | CommandResult): value is CommandResult {
   return "element" in value;
@@ -36,7 +39,11 @@ const handlers: Record<string, () => Promise<{ default: CommandHandler }>> = {
   "ci pull": () => import("./ci/pull"),
 };
 
-export async function executeCommand(command: string, args: string[]): Promise<CommandResult> {
+export async function executeCommand(
+  command: string,
+  args: string[],
+  ctx?: CommandContext,
+): Promise<CommandResult> {
   const loader = handlers[command];
 
   if (!loader) {
@@ -44,6 +51,6 @@ export async function executeCommand(command: string, args: string[]): Promise<C
   }
 
   const mod = await loader();
-  const result = await mod.default(args);
+  const result = await mod.default(args, ctx);
   return isCommandResult(result) ? result : ok(result);
 }

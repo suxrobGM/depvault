@@ -11,7 +11,7 @@ export const VERSION_CHECK_FILE = join(CONFIG_DIR, "version-check.json");
 export const DEFAULT_SERVER = "https://depvault.com";
 
 export const CI_TOKEN_ENV_VAR = "DEPVAULT_TOKEN";
-export const VAULT_PASSWORD_ENV_VAR = "DEPVAULT_VAULT_PASSWORD";
+export const VAULT_PASSWORD_ENV_VAR = "DEPVAULT_PASSWORD";
 
 export const GITHUB_REPO = "suxrobGM/depvault";
 

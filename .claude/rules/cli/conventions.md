@@ -28,7 +28,7 @@ paths: [apps/cli/**]
 - `VaultCrypto.cs` — static methods: `Encrypt`, `Decrypt`, `DeriveKek` (PBKDF2), `DeriveCiWrapKey` (HKDF), `UnwrapKey`, `DecryptBytes`
 - `DekResolver.cs` — DI-injectable service that resolves the project DEK:
   - **CI token mode**: fetches `/api/ci/secrets`, derives CI wrap key via HKDF, unwraps DEK
-  - **JWT mode**: prompts for vault password (or reads `DEPVAULT_VAULT_PASSWORD` env var), fetches KEK salt from `/api/vault/status`, derives KEK, fetches key grant from `/api/projects/:id/keygrants/my`, unwraps DEK
+  - **JWT mode**: prompts for vault password (or reads `DEPVAULT_PASSWORD` env var), fetches KEK salt from `/api/vault/status`, derives KEK, fetches key grant from `/api/projects/:id/keygrants/my`, unwraps DEK
 - All encryption/decryption happens locally — backend returns only ciphertext
 - Pull: fetch encrypted entries → unwrap DEK → decrypt each value → serialize → write to disk
 - Push: parse local file → encrypt each value → send encrypted entries to import endpoint
