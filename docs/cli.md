@@ -38,6 +38,14 @@ dotnet publish -c Release -r osx-arm64  # macOS Apple Silicon
 
 The compiled binary is in `apps/cli/bin/Release/net10.0/<rid>/publish/depvault`.
 
+## Interactive Mode (REPL)
+
+Run `depvault` with no arguments to enter an interactive session with a persistent banner, vault status, and command prompt. The vault auto-locks after 30 minutes of idle time.
+
+```bash
+depvault
+```
+
 ## Configuration
 
 The CLI stores configuration in `~/.depvault/`:
@@ -68,7 +76,7 @@ depvault login --email user@example.com --password secret --server https://api.e
 Set the `DEPVAULT_TOKEN` environment variable with a CI token generated from the web dashboard. When set, the CLI operates in CI mode and uses the token for all requests.
 
 ```bash
-export DEPVAULT_TOKEN=dvt_abc123...
+export DEPVAULT_TOKEN=dvci_abc123...
 depvault ci pull --output .env
 ```
 
@@ -77,6 +85,17 @@ depvault ci pull --output .env
 ```bash
 depvault whoami
 ```
+
+## Vault Unlock / Lock
+
+Unlock the vault to cache the KEK derived from your vault password. Subsequent commands skip the password prompt.
+
+```bash
+depvault unlock
+depvault lock
+```
+
+In non-interactive mode, set `DEPVAULT_PASSWORD` to unlock automatically.
 
 ## Commands
 
@@ -88,20 +107,22 @@ depvault project select <id>            # Set active project
 depvault project info [id]              # Show project details
 ```
 
+The CLI auto-detects the active project from the git remote origin URL when run inside a repository.
+
 ### Environment Variables
 
 ```bash
 # Pull env vars to a local file
-depvault env pull --environment PRODUCTION --format env --output .env
+depvault pull --environment PRODUCTION --format env --output .env
 
 # Push a local file to the vault
-depvault env push --vault-group <id> --environment DEVELOPMENT --file .env
+depvault push --vault-group <id> --environment DEVELOPMENT --file .env
 
 # List variables
 depvault env list --environment STAGING
 
-# Compare environments
-depvault env diff --vault-group <id> --environments DEVELOPMENT,PRODUCTION
+# List secret file metadata
+depvault secrets list
 ```
 
 Supported formats: `env`, `appsettings.json`, `secrets.yaml`, `config.toml`
@@ -117,13 +138,6 @@ depvault analyze --file deps.txt --ecosystem PYTHON
 ```
 
 Supported ecosystems: `NODEJS`, `PYTHON`, `DOTNET`, `RUST`, `GO`, `KOTLIN`, `JAVA`, `RUBY`, `PHP`
-
-### Config Conversion
-
-```bash
-# Convert between formats
-depvault convert --file .env --from env --to appsettings.json --output appsettings.json
-```
 
 ### CI/CD Secrets
 

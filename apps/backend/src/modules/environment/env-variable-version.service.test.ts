@@ -74,7 +74,7 @@ describe("EnvVariableVersionService", () => {
       mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
       mockPrisma.envVariableVersion.findMany.mockResolvedValueOnce([mockVersion]);
 
-      const result = await service.listVersions(projectId, varId, "VIEWER");
+      const result = await service.listVersions(projectId, varId);
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0]!.encryptedValue).toBe(mockVersion.encryptedValue);
@@ -86,7 +86,7 @@ describe("EnvVariableVersionService", () => {
       mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
       mockPrisma.envVariableVersion.findMany.mockResolvedValueOnce([mockVersion]);
 
-      const result = await service.listVersions(projectId, varId, "OWNER");
+      const result = await service.listVersions(projectId, varId);
 
       expect(result.items[0]!.changedByName).toBe("Jane Doe");
     });
@@ -98,7 +98,7 @@ describe("EnvVariableVersionService", () => {
         { id: userId, firstName: "", lastName: "", email: "jane@example.com" },
       ]);
 
-      const result = await service.listVersions(projectId, varId, "OWNER");
+      const result = await service.listVersions(projectId, varId);
 
       expect(result.items[0]!.changedByName).toBe("jane@example.com");
     });
@@ -108,7 +108,7 @@ describe("EnvVariableVersionService", () => {
       mockPrisma.envVariableVersion.findMany.mockResolvedValueOnce([mockVersion]);
       mockPrisma.user.findMany.mockResolvedValueOnce([]);
 
-      const result = await service.listVersions(projectId, varId, "OWNER");
+      const result = await service.listVersions(projectId, varId);
 
       expect(result.items[0]!.changedByName).toBe("Unknown user");
     });
@@ -117,7 +117,7 @@ describe("EnvVariableVersionService", () => {
       mockPrisma.envVariable.findFirst.mockResolvedValueOnce(mockVariable);
       mockPrisma.envVariableVersion.findMany.mockResolvedValueOnce([]);
 
-      const result = await service.listVersions(projectId, varId, "OWNER");
+      const result = await service.listVersions(projectId, varId);
 
       expect(result.items).toHaveLength(0);
     });
@@ -125,7 +125,7 @@ describe("EnvVariableVersionService", () => {
     it("should throw NotFoundError when variable not in project", async () => {
       mockPrisma.envVariable.findFirst.mockResolvedValueOnce(null);
 
-      expect(service.listVersions(projectId, varId, "OWNER")).rejects.toBeInstanceOf(NotFoundError);
+      expect(service.listVersions(projectId, varId)).rejects.toBeInstanceOf(NotFoundError);
     });
   });
 

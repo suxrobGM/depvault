@@ -23,8 +23,7 @@ public sealed class ConsolePrompter : IConsolePrompter
     public bool IsInteractive =>
         !Console.IsInputRedirected
         && !Console.IsOutputRedirected
-        && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DEPVAULT_TOKEN"))
-        && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CI"));
+        && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DEPVAULT_TOKEN"));
 
     public string Ask(string prompt, string? defaultValue = null)
     {

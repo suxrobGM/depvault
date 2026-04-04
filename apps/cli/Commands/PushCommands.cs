@@ -144,7 +144,7 @@ internal sealed class PushCommands(
             }
 
             var fullPath = Path.GetFullPath(explicitFile);
-            var relativePath = Path.GetRelativePath(Directory.GetCurrentDirectory(), fullPath);
+            var relativePath = Path.GetRelativePath(GitUtils.FindRepoRoot(), fullPath);
             var fileName = Path.GetFileName(fullPath);
             var category = fileScanner.ClassifyFile(fileName);
             return [new DiscoveredFile(fullPath, relativePath, fileName, category)];
@@ -156,10 +156,10 @@ internal sealed class PushCommands(
             return [];
         }
 
-        var discovered = fileScanner.FindAllPushableFiles(Directory.GetCurrentDirectory());
+        var discovered = fileScanner.FindAllPushableFiles(GitUtils.FindRepoRoot());
         if (discovered.Count == 0)
         {
-            ctx.Output.PrintError("No environment or secret files found in current directory.");
+            ctx.Output.PrintError("No environment or secret files found in repository.");
             return [];
         }
 

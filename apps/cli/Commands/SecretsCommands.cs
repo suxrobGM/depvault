@@ -1,7 +1,6 @@
 using System.CommandLine;
 using DepVault.Cli.Utils;
 using Spectre.Console;
-using SecretListNs = DepVault.Cli.ApiClient.Api.Projects.Item.Secrets;
 
 namespace DepVault.Cli.Commands;
 
@@ -69,7 +68,7 @@ public sealed class SecretsCommands(CommandContext ctx)
                         f.Name ?? "",
                         f.VaultGroupName ?? "",
                         f.MimeType ?? "",
-                        FormatFileSize(f.FileSize),
+                        FormatUtils.FileSize(f.FileSize),
                         f.UpdatedAt?.ToString("yyyy-MM-dd") ?? ""
                     }).ToList());
             }
@@ -80,20 +79,5 @@ public sealed class SecretsCommands(CommandContext ctx)
         });
 
         return cmd;
-    }
-
-    private static string FormatFileSize(double? bytes)
-    {
-        if (bytes is null)
-        {
-            return "";
-        }
-
-        return bytes switch
-        {
-            < 1024 => $"{bytes:F0} B",
-            < 1024 * 1024 => $"{bytes / 1024:F1} KB",
-            _ => $"{bytes / (1024 * 1024):F1} MB"
-        };
     }
 }

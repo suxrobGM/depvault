@@ -8,6 +8,7 @@ using DepVault.Cli.Commands.Scan;
 using DepVault.Cli.Config;
 using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
+using DepVault.Cli.Repl;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,7 +33,9 @@ internal static class Startup
             .AddSingleton<IGitHubReleaseClient, GitHubReleaseClient>()
             .AddSingleton<IVersionChecker, VersionChecker>()
             .AddSingleton<IUpdateService, UpdateService>()
+            .AddSingleton<ConsoleRenderer>()
             .AddSingleton<CommandContext>()
+            .AddSingleton<VaultState>()
             .AddSingleton<DekResolver>()
             .AddSingleton<AnalysisClient>()
             // Scan steps
@@ -62,7 +65,10 @@ internal static class Startup
             .AddSingleton<SecretsCommands>()
             .AddSingleton<ScanCommands>()
             .AddSingleton<UpdateCommands>()
+            .AddSingleton<VaultCommands>()
             .AddSingleton<RootHandler>()
+            // REPL
+            .AddSingleton<ReplHost>()
             .BuildServiceProvider();
     }
 
@@ -79,6 +85,7 @@ internal static class Startup
         var secrets = services.GetRequiredService<SecretsCommands>();
         var scan = services.GetRequiredService<ScanCommands>();
         var update = services.GetRequiredService<UpdateCommands>();
+        var vault = services.GetRequiredService<VaultCommands>();
 
         var rootCommand = new RootCommand("DepVault CLI — dependency analysis, env vault, and secret management")
         {
@@ -94,13 +101,16 @@ internal static class Startup
             analysis.CreateAnalyzeCommand(),
             ci.CreateCiCommand(),
             scan.CreateScanCommand(),
-            update.CreateUpdateCommand()
+            update.CreateUpdateCommand(),
+            vault.CreateUnlockCommand(),
+            vault.CreateLockCommand()
         };
 
         services.GetRequiredService<RootHandler>().Configure(rootCommand);
 
+        var renderer = services.GetRequiredService<ConsoleRenderer>();
         var versionCmd = new Command("version", "Show CLI version");
-        versionCmd.SetAction(_ => ConsoleTheme.PrintBanner());
+        versionCmd.SetAction(_ => renderer.PrintBanner());
         rootCommand.Add(versionCmd);
 
         return rootCommand;

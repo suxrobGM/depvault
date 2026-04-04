@@ -134,8 +134,8 @@ public sealed class CommandContext(
     {
         try
         {
-            var candidateNames = GetDirectoryCandidates();
-            if (candidateNames.Count == 0)
+            var repoName = GitUtils.GetRepoName();
+            if (repoName is null)
             {
                 return null;
             }
@@ -147,54 +147,27 @@ public sealed class CommandContext(
                 config.QueryParameters.Limit = 100;
             }, ct);
 
-            var items = result?.Items;
-            if (items is null || items.Count == 0)
+            var match = result?.Items?.FirstOrDefault(p =>
+                string.Equals(p.Name, repoName, StringComparison.OrdinalIgnoreCase));
+
+            if (match?.Id is null)
             {
                 return null;
             }
 
-            foreach (var candidate in candidateNames)
-            {
-                var match = items.FirstOrDefault(p =>
-                    string.Equals(p.Name, candidate, StringComparison.OrdinalIgnoreCase));
+            var config = configService.Load();
+            config.ActiveProjectId = match.Id;
+            config.ActiveProjectName = match.Name;
+            configService.Save(config);
 
-                if (match?.Id is not null)
-                {
-                    var config = configService.Load();
-                    config.ActiveProjectId = match.Id;
-                    config.ActiveProjectName = match.Name;
-                    configService.Save(config);
-
-                    AnsiConsole.MarkupLine(
-                        $"[green]Auto-detected project:[/] {Markup.Escape(match.Name ?? match.Id)} [grey](matched folder \"{Markup.Escape(candidate)}\")[/]");
-                    return match.Id;
-                }
-            }
-
-            return null;
+            AnsiConsole.MarkupLine(
+                $"[green]Auto-detected project:[/] {Markup.Escape(match.Name ?? match.Id)} [grey](from git remote \"{Markup.Escape(repoName)}\")[/]");
+            return match.Id;
         }
         catch
         {
             return null;
         }
-    }
-
-    private static List<string> GetDirectoryCandidates()
-    {
-        var candidates = new List<string>();
-        var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
-
-        for (var i = 0; i < 3 && dir is not null; i++)
-        {
-            if (!string.IsNullOrEmpty(dir.Name))
-            {
-                candidates.Add(dir.Name);
-            }
-
-            dir = dir.Parent;
-        }
-
-        return candidates;
     }
 
     /// <summary>Checks file exists and prints error if not.</summary>

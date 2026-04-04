@@ -35,7 +35,6 @@ export const envVariableController = new Elysia({
       environmentService.list(
         params.id,
         projectMember.userId,
-        projectMember.role,
         query.vaultGroupId,
         query.environmentType,
         query.page,
@@ -57,8 +56,7 @@ export const envVariableController = new Elysia({
   )
   .get(
     "/variables/:varId/versions",
-    ({ params, projectMember }) =>
-      envVariableVersionService.listVersions(params.id, params.varId, projectMember.role),
+    ({ params }) => envVariableVersionService.listVersions(params.id, params.varId),
     {
       params: EnvVariableParamsSchema,
       response: EnvVariableVersionListResponseSchema,

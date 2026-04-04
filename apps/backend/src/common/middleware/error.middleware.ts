@@ -29,6 +29,15 @@ function getRouteInfo(request: Request): { method: string; path: string } {
   return { method: request.method, path: url.pathname };
 }
 
+/** Try to parse Elysia's validation error message as JSON for readable logging. */
+function parseValidationMessage(message: string): Record<string, unknown> | { raw: string } {
+  try {
+    return JSON.parse(message) as Record<string, unknown>;
+  } catch {
+    return { raw: sanitizeErrorMessage(message) };
+  }
+}
+
 /**
  * Global error handling plugin.
  * Catches unhandled errors and returns consistent JSON error responses.
@@ -48,17 +57,16 @@ export const errorMiddleware = new Elysia({ name: "error-handler" }).onError(
     }
 
     switch (code) {
-      case "VALIDATION":
+      case "VALIDATION": {
         set.status = 400;
-        logger.warn(
-          { statusCode: 400, ...route, message: sanitizeErrorMessage(error.message) },
-          "Validation error",
-        );
+        const validationDetail = parseValidationMessage(error.message);
+        logger.warn({ statusCode: 400, ...route, ...validationDetail }, "Validation error");
         return createErrorResponse(
           400,
           "Validation error",
-          isProduction ? undefined : sanitizeErrorMessage(error.message),
+          isProduction ? undefined : validationDetail,
         );
+      }
       case "PARSE":
         set.status = 400;
         logger.warn({ statusCode: 400, ...route }, "Malformed request body");

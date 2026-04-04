@@ -47,6 +47,27 @@ Replace `<rid>` with `linux-x64`, `osx-x64`, `osx-arm64`, or `win-x64`.
 
 ---
 
+## Interactive Mode (REPL)
+
+Run `depvault` with no arguments to enter an interactive session:
+
+```bash
+depvault
+```
+
+The REPL displays a banner with your authentication status, vault lock state, and active project. Type commands directly (with or without a leading `/`) and press Enter. The screen refreshes between commands to show updated status.
+
+Built-in REPL commands:
+
+| Command | Description |
+| --- | --- |
+| `help` | List available commands |
+| `exit` / `quit` / `q` | Exit the session |
+
+The vault auto-locks after 30 minutes of idle time.
+
+---
+
 ## Configuration
 
 The CLI stores configuration in `~/.depvault/`:
@@ -72,6 +93,32 @@ When `DEPVAULT_TOKEN` is set, the CLI uses it for all requests and blocks intera
 
 ---
 
+## Vault Unlock
+
+The vault must be unlocked before pulling or pushing encrypted data. Unlocking derives your Key Encryption Key (KEK) from your vault password and caches it in memory.
+
+```bash
+depvault unlock
+```
+
+In non-interactive mode, set the `DEPVAULT_PASSWORD` environment variable to unlock automatically.
+
+Lock the vault to clear the cached KEK and all DEK caches:
+
+```bash
+depvault lock
+```
+
+If you skip `unlock`, the CLI prompts for your vault password on the first command that requires decryption and caches it for subsequent commands.
+
+---
+
+## Project Auto-Detection
+
+The CLI automatically detects the active project by reading the remote origin URL from `.git/config` and matching the repository name against your DepVault projects. This works from any subdirectory within the repository.
+
+---
+
 ## Command Tree
 
 | Command | Description | Details |
@@ -89,6 +136,8 @@ When `DEPVAULT_TOKEN` is set, the CLI uses it for all requests and blocks intera
 | `depvault login` | Authenticate with email/password | [Auth](/cli/authentication) |
 | `depvault logout` | Clear stored credentials | [Auth](/cli/authentication) |
 | `depvault whoami` | Show current user | [Auth](/cli/authentication) |
+| `depvault unlock` | Unlock vault (cache KEK) | |
+| `depvault lock` | Lock vault (clear KEK/DEK cache) | |
 | `depvault project list` | List all projects | [Projects](/cli/projects) |
 | `depvault project select` | Set active project | [Projects](/cli/projects) |
 | `depvault project info` | Show project details | [Projects](/cli/projects) |

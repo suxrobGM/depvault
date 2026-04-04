@@ -1,2 +1,3 @@
 bun.lock
 apps/backend/src/generated/
+openapi.json

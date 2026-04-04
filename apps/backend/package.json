@@ -23,6 +23,7 @@
     "stripe:seed": "bun run src/modules/subscription/stripe-seed.ts"
   },
   "dependencies": {
+    "@depvault/crypto": "workspace:*",
     "@depvault/shared": "workspace:*",
     "@elysiajs/cors": "^1.4.1",
     "@elysiajs/cron": "^1.4.1",

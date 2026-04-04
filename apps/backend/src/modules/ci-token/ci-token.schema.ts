@@ -15,6 +15,7 @@ export const CreateCiTokenBodySchema = t.Object({
   wrappedDek: t.String({ description: "Client-wrapped data encryption key" }),
   wrappedDekIv: t.String(),
   wrappedDekTag: t.String(),
+  wrapPlaceholder: t.String({ description: "Placeholder token used to wrap DEK client-side" }),
 });
 
 export const CiTokenResponseSchema = t.Object({
@@ -27,7 +28,6 @@ export const CiTokenResponseSchema = t.Object({
   ipAllowlist: t.Array(t.String()),
   expiresAt: t.Date(),
   lastUsedAt: t.Nullable(t.Date()),
-  revokedAt: t.Nullable(t.Date()),
   createdAt: t.Date(),
   createdByEmail: t.String(),
 });

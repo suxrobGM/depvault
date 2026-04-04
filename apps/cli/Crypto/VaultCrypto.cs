@@ -70,6 +70,23 @@ public static class VaultCrypto
         return HKDF.DeriveKey(HashAlgorithmName.SHA256, ikm, KeyBytes, salt: [], info: HkdfInfo);
     }
 
+    /// <summary>Wrap (AES-GCM encrypt) a raw DEK with a wrapping key, returning base64-encoded values.</summary>
+    public static (string WrappedDek, string Iv, string Tag) WrapKey(byte[] dek, byte[] wrappingKey)
+    {
+        var iv = RandomNumberGenerator.GetBytes(IvBytes);
+        var ciphertext = new byte[dek.Length];
+        var tag = new byte[TagBytes];
+
+        using var aes = new AesGcm(wrappingKey, TagBytes);
+        aes.Encrypt(iv, dek, ciphertext, tag);
+
+        return (
+            Convert.ToBase64String(ciphertext),
+            Convert.ToBase64String(iv),
+            Convert.ToBase64String(tag)
+        );
+    }
+
     /// <summary>Unwrap (AES-GCM decrypt) a wrapped DEK, returning the raw key bytes.</summary>
     public static byte[] UnwrapKey(string wrappedDek, string iv, string tag, byte[] wrappingKey)
     {

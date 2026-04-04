@@ -15,6 +15,7 @@
       "name": "@depvault/backend",
       "version": "1.0.0",
       "dependencies": {
+        "@depvault/crypto": "workspace:*",
         "@depvault/shared": "workspace:*",
         "@elysiajs/cors": "^1.4.1",
         "@elysiajs/cron": "^1.4.1",

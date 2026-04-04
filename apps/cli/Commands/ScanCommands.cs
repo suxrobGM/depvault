@@ -8,6 +8,7 @@ namespace DepVault.Cli.Commands;
 
 internal sealed class ScanCommands(
     CommandContext ctx,
+    ConsoleRenderer renderer,
     ProjectResolver projectResolver,
     DependencyScanner dependencyScanner,
     EnvFileScanner envFileScanner,
@@ -40,8 +41,8 @@ internal sealed class ScanCommands(
                 return;
             }
 
-            ConsoleTheme.PrintBanner();
-            var repoPath = Path.GetFullPath(parseResult.GetValue(pathOpt) ?? Directory.GetCurrentDirectory());
+            renderer.PrintBanner();
+            var repoPath = Path.GetFullPath(parseResult.GetValue(pathOpt) ?? GitUtils.FindRepoRoot());
 
             if (!Directory.Exists(repoPath))
             {
@@ -61,19 +62,19 @@ internal sealed class ScanCommands(
 
             var results = new ScanResults();
 
-            ConsoleTheme.PrintRule("Dependency Analysis");
+            renderer.PrintRule("Dependency Analysis");
             await dependencyScanner.RunAsync(projectId, repoPath, results, cancellationToken);
 
             AnsiConsole.WriteLine();
-            ConsoleTheme.PrintRule("Environment Files");
+            renderer.PrintRule("Environment Files");
             await envFileScanner.RunAsync(projectId, repoPath, results, cancellationToken);
 
             AnsiConsole.WriteLine();
-            ConsoleTheme.PrintRule("Secret Leak Detection");
+            renderer.PrintRule("Secret Leak Detection");
             secretLeakScanner.Run(repoPath, results);
 
             AnsiConsole.WriteLine();
-            ConsoleTheme.PrintRule("Secret Files");
+            renderer.PrintRule("Secret Files");
             await secretFileScanner.RunAsync(projectId, repoPath, results, cancellationToken);
 
             AnsiConsole.WriteLine();

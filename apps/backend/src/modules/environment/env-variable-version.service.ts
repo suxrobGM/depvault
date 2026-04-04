@@ -9,11 +9,7 @@ import { toEncryptedResponse } from "./environment.mapper";
 export class EnvVariableVersionService {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async listVersions(
-    projectId: string,
-    varId: string,
-    _memberRole: string,
-  ): Promise<EnvVariableVersionListResponse> {
+  async listVersions(projectId: string, varId: string): Promise<EnvVariableVersionListResponse> {
     const variable = await this.prisma.envVariable.findFirst({
       where: { id: varId, environment: { projectId } },
     });

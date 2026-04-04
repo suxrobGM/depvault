@@ -1,3 +1,4 @@
+import { deriveCIWrapKey, unwrapKey, wrapKey } from "@depvault/crypto";
 import { singleton } from "tsyringe";
 import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from "@/common/errors";
 import { isIpInAllowlist, validateIpAllowlist } from "@/common/utils/ip";
@@ -56,6 +57,17 @@ export class CiTokenService {
     const tokenPrefix = rawToken.slice(TOKEN_PREFIX.length, TOKEN_PREFIX.length + 8);
     const expiresAt = new Date(Date.now() + body.expiresIn * 1000);
 
+    // Re-wrap the client-sent DEK from the placeholder key to the real token-derived key
+    const placeholderKey = await deriveCIWrapKey(body.wrapPlaceholder);
+    const dekBytes = await unwrapKey(
+      body.wrappedDek,
+      body.wrappedDekIv,
+      body.wrappedDekTag,
+      placeholderKey,
+    );
+    const realKey = await deriveCIWrapKey(rawToken);
+    const wrapped = await wrapKey(dekBytes, realKey);
+
     const ciToken = await this.prisma.ciToken.create({
       data: {
         projectId,
@@ -66,9 +78,9 @@ export class CiTokenService {
         tokenPrefix,
         ipAllowlist,
         expiresAt,
-        wrappedDek: body.wrappedDek,
-        wrappedDekIv: body.wrappedDekIv,
-        wrappedDekTag: body.wrappedDekTag,
+        wrappedDek: wrapped.wrapped,
+        wrappedDekIv: wrapped.iv,
+        wrappedDekTag: wrapped.tag,
       },
     });
 
@@ -118,7 +130,6 @@ export class CiTokenService {
       ipAllowlist: token.ipAllowlist,
       expiresAt: token.expiresAt,
       lastUsedAt: token.lastUsedAt,
-      revokedAt: token.revokedAt,
       createdAt: token.createdAt,
       createdByEmail: token.creator.email,
     }));
@@ -142,14 +153,8 @@ export class CiTokenService {
     if (!ciToken) {
       throw new NotFoundError("CI token not found");
     }
-    if (ciToken.revokedAt) {
-      throw new BadRequestError("Token is already revoked");
-    }
 
-    await this.prisma.ciToken.update({
-      where: { id: tokenId },
-      data: { revokedAt: new Date() },
-    });
+    await this.prisma.ciToken.delete({ where: { id: tokenId } });
 
     await this.auditLogService.log({
       userId,
@@ -161,7 +166,7 @@ export class CiTokenService {
       metadata: { name: ciToken.name },
     });
 
-    return { message: "CI token revoked" };
+    return { message: "CI token deleted" };
   }
 
   async validateToken(rawToken: string, clientIp: string): Promise<CiToken> {
@@ -173,9 +178,6 @@ export class CiTokenService {
 
     if (!ciToken) {
       throw new UnauthorizedError("Invalid CI token");
-    }
-    if (ciToken.revokedAt) {
-      throw new UnauthorizedError("CI token has been revoked");
     }
     if (ciToken.expiresAt < new Date()) {
       throw new UnauthorizedError("CI token has expired");

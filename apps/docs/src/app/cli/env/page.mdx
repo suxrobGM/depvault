@@ -8,7 +8,7 @@ All commands default to the active project (set with `depvault project select`).
 
 ## env list
 
-List environment variables for a project. Values are masked by default.
+List environment variables for a project.
 
 ```bash
 depvault env list --vault-group <id> --environment DEVELOPMENT
@@ -17,8 +17,8 @@ depvault env list --vault-group <id> --environment DEVELOPMENT
 | Flag | Description | Default |
 | --- | --- | --- |
 | `--project` | Project ID. | Active project |
-| `--vault-group` | Vault group ID. | — |
-| `--environment` | Environment type. | — |
+| `--vault-group` | Vault group ID. | All vault groups |
+| `--environment` | Environment type. | All |
 | `--output` | Output format: `table`, `json`. | `table` |
 
 ### Examples
@@ -34,4 +34,3 @@ List variables for a specific vault group as JSON:
 ```bash
 depvault env list --vault-group abc123 --output json
 ```
-

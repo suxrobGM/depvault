@@ -181,14 +181,14 @@ describe("EnvironmentService", () => {
 
   describe("list", () => {
     it("should return encrypted values for OWNER", async () => {
-      const result = await service.list(projectId, userId, "OWNER", vaultGroupId, "DEVELOPMENT");
+      const result = await service.list(projectId, userId, vaultGroupId, "DEVELOPMENT");
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0]!.encryptedValue).toBe("encrypted-base64");
     });
 
     it("should write audit log when reading decrypted values", async () => {
-      await service.list(projectId, userId, "OWNER", vaultGroupId, "DEVELOPMENT", 1, 20, ipAddress);
+      await service.list(projectId, userId, vaultGroupId, "DEVELOPMENT", 1, 20, ipAddress);
 
       expect(mockAuditLog.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -201,13 +201,13 @@ describe("EnvironmentService", () => {
     });
 
     it("should return encrypted values for VIEWER", async () => {
-      const result = await service.list(projectId, userId, "VIEWER", vaultGroupId, "DEVELOPMENT");
+      const result = await service.list(projectId, userId, vaultGroupId, "DEVELOPMENT");
 
       expect(result.items[0]!.encryptedValue).toBe("encrypted-base64");
     });
 
     it("should filter by environment type when provided", async () => {
-      await service.list(projectId, userId, "EDITOR", vaultGroupId, "STAGING", 1, 10);
+      await service.list(projectId, userId, vaultGroupId, "STAGING", 1, 10);
 
       expect(mockPrisma.envVariable.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -217,7 +217,7 @@ describe("EnvironmentService", () => {
     });
 
     it("should list all environments when no filter provided", async () => {
-      await service.list(projectId, userId, "OWNER", vaultGroupId, undefined, 1, 20);
+      await service.list(projectId, userId, vaultGroupId, undefined, 1, 20);
 
       expect(mockPrisma.envVariable.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -229,7 +229,7 @@ describe("EnvironmentService", () => {
     it("should return correct pagination", async () => {
       mockPrisma.envVariable.count.mockResolvedValueOnce(25);
 
-      const result = await service.list(projectId, userId, "OWNER", vaultGroupId, undefined, 2, 10);
+      const result = await service.list(projectId, userId, vaultGroupId, undefined, 2, 10);
 
       expect(result.pagination).toEqual({
         page: 2,

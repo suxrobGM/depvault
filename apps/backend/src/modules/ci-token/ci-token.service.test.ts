@@ -34,7 +34,6 @@ const baseCiToken = {
   tokenHash: "hash",
   tokenPrefix: "abcd1234",
   ipAllowlist: [],
-  revokedAt: null,
   lastUsedAt: null,
   expiresAt: new Date(Date.now() + 86400_000),
   createdAt: new Date(),
@@ -95,6 +94,7 @@ describe("CiTokenService", () => {
       wrappedDek: "wrapped-dek",
       wrappedDekIv: "wrapped-iv",
       wrappedDekTag: "wrapped-tag",
+      wrapPlaceholder: "placeholder",
       expiresIn: 86400,
     };
 
@@ -156,12 +156,12 @@ describe("CiTokenService", () => {
   });
 
   describe("revoke", () => {
-    it("should revoke an active token", async () => {
+    it("should delete the token", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ ...baseProjectMember });
       const result = await service.revoke("project-uuid", "token-uuid", "user-uuid", "127.0.0.1");
 
-      expect(result.message).toBe("CI token revoked");
-      expect(mockPrisma.ciToken.update).toHaveBeenCalled();
+      expect(result.message).toBe("CI token deleted");
+      expect(mockPrisma.ciToken.delete).toHaveBeenCalled();
       expect(mockAudit.log).toHaveBeenCalled();
     });
 
@@ -172,18 +172,6 @@ describe("CiTokenService", () => {
       expect(
         service.revoke("project-uuid", "token-uuid", "user-uuid", "127.0.0.1"),
       ).rejects.toBeInstanceOf(NotFoundError);
-    });
-
-    it("should throw BadRequestError when token already revoked", async () => {
-      mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ ...baseProjectMember });
-      mockPrisma.ciToken.findFirst.mockResolvedValueOnce({
-        ...baseCiToken,
-        revokedAt: new Date(),
-      });
-
-      expect(
-        service.revoke("project-uuid", "token-uuid", "user-uuid", "127.0.0.1"),
-      ).rejects.toBeInstanceOf(BadRequestError);
     });
   });
 
@@ -199,17 +187,6 @@ describe("CiTokenService", () => {
       mockPrisma.ciToken.findUnique.mockResolvedValueOnce(null);
 
       expect(service.validateToken("dvci_bad", "127.0.0.1")).rejects.toBeInstanceOf(
-        UnauthorizedError,
-      );
-    });
-
-    it("should throw UnauthorizedError when token is revoked", async () => {
-      mockPrisma.ciToken.findUnique.mockResolvedValueOnce({
-        ...baseCiToken,
-        revokedAt: new Date(),
-      });
-
-      expect(service.validateToken("dvci_revoked", "127.0.0.1")).rejects.toBeInstanceOf(
         UnauthorizedError,
       );
     });

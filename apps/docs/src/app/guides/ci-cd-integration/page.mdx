@@ -29,9 +29,9 @@ CI tokens are long-lived, non-interactive API tokens scoped to a specific projec
 
 Each token is bound to a single project, environment, and vault group. A compromised token has minimal blast radius. Generate separate tokens per pipeline/environment.
 
-### Revocation
+### Deletion
 
-Revoke tokens at any time from the CI Tokens settings page. Revoked tokens are rejected immediately. Token usage is logged for auditing (timestamp, IP, action, status).
+Delete tokens at any time from the CI Tokens settings page. Deleted tokens are permanently removed and rejected immediately. Token usage is logged for auditing (timestamp, IP, action, status).
 
 ---
 
@@ -185,7 +185,7 @@ CMD ["node", "dist/index.js"]
 | Error                       | Cause                                                     |
 | --------------------------- | --------------------------------------------------------- |
 | `DEPVAULT_TOKEN is not set` | Set the environment variable in your CI config.           |
-| `401 Unauthorized`          | Token is expired, revoked, or invalid.                    |
+| `401 Unauthorized`          | Token is expired, deleted, or invalid.                    |
 | `403 Forbidden`             | IP not in allowlist or scope mismatch.                    |
 | Empty output                | No variables in the scoped vault group/environment.       |
 | CLI not found               | Verify installation step completed and binary is on PATH. |

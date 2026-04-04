@@ -34,7 +34,7 @@ public sealed class AnalysisCommands(
 
             var filePath = ctx.ResolveFileInteractive(
                 parseResult, fileOpt,
-                () => fileScanner.FindDependencyFiles(Directory.GetCurrentDirectory()),
+                () => fileScanner.FindDependencyFiles(GitUtils.FindRepoRoot()),
                 "dependency");
 
             if (filePath is null)

@@ -76,9 +76,6 @@ export function CreateCiTokenDialog(props: CreateCiTokenDialogProps): ReactEleme
     (values: CreateCiTokenBody) => client.api.projects({ id: projectId })["ci-tokens"].post(values),
     {
       invalidateKeys: [["ci-tokens", projectId]],
-      onSuccess: (data) => {
-        setCreatedToken(data);
-      },
       errorMessage: "Failed to create CI token",
     },
   );
@@ -106,19 +103,23 @@ export function CreateCiTokenDialog(props: CreateCiTokenDialogProps): ReactEleme
       const dek = await getProjectDEK(projectId);
       const dekBytes = await exportDEK(dek);
 
-      // Wrap DEK with a temporary key first, then re-wrap after getting the raw token
-      const tempWrapKey = await deriveCIWrapKey("temp-placeholder");
-      const tempWrapped = await wrapKey(dekBytes, tempWrapKey);
+      // Wrap DEK with a placeholder key — backend re-wraps with the real token-derived key
+      const placeholder = "placeholder";
+      const placeholderKey = await deriveCIWrapKey(placeholder);
+      const wrapped = await wrapKey(dekBytes, placeholderKey);
 
-      await mutation.mutateAsync({
+      const created = await mutation.mutateAsync({
         name: value.name,
         environmentId: value.environmentId,
         expiresIn,
-        wrappedDek: tempWrapped.wrapped,
-        wrappedDekIv: tempWrapped.iv,
-        wrappedDekTag: tempWrapped.tag,
+        wrappedDek: wrapped.wrapped,
+        wrappedDekIv: wrapped.iv,
+        wrappedDekTag: wrapped.tag,
+        wrapPlaceholder: placeholder,
         ...(ipAllowlist.length > 0 && { ipAllowlist }),
       });
+
+      setCreatedToken(created);
     },
   });
 

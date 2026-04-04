@@ -1,4 +1,5 @@
 using DepVault.Cli;
+using DepVault.Cli.Repl;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +9,16 @@ Startup.CleanupStaleUpdate();
 
 var services = Startup.CreateServices();
 var rootCommand = Startup.CreateRootCommand(services);
+
+// No args + interactive terminal → REPL mode
+if (args.Length == 0
+    && !Console.IsInputRedirected
+    && !Console.IsOutputRedirected
+    && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DEPVAULT_TOKEN")))
+{
+    var repl = services.GetRequiredService<ReplHost>();
+    return await repl.RunAsync(rootCommand);
+}
 
 var parseResult = rootCommand.Parse(args);
 parseResult.InvocationConfiguration.EnableDefaultExceptionHandler = false;

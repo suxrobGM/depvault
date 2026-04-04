@@ -98,18 +98,22 @@ export class EnvironmentService {
   async list(
     projectId: string,
     userId: string,
-    _memberRole: string,
-    vaultGroupId: string,
+    vaultGroupId?: string,
     environmentType?: string,
     page = 1,
     limit = 20,
     ipAddress = "unknown",
   ): Promise<PaginatedResponse<EnvVariableWithValueResponse>> {
-    const groupName = await this.envHelper.getVaultGroupName(vaultGroupId);
+    const hasVaultGroup = !!vaultGroupId;
+    const groupName = hasVaultGroup
+      ? await this.envHelper.getVaultGroupName(vaultGroupId)
+      : undefined;
 
-    const where = environmentType
-      ? { environment: { projectId, vaultGroupId, type: environmentType as EnvironmentType } }
-      : { environment: { projectId, vaultGroupId } };
+    const envFilter: Record<string, unknown> = { projectId };
+    if (hasVaultGroup) envFilter.vaultGroupId = vaultGroupId;
+    if (environmentType) envFilter.type = environmentType as EnvironmentType;
+
+    const where = { environment: envFilter };
 
     const [variables, total] = await Promise.all([
       this.prisma.envVariable.findMany({
@@ -134,11 +138,13 @@ export class EnvironmentService {
         metadata: {
           count: variables.length,
           environmentType: environmentType ?? null,
-          vaultGroupName: groupName,
+          vaultGroupName: groupName ?? null,
         },
       });
 
-      void this.checkDrift(projectId, vaultGroupId, userId);
+      if (hasVaultGroup) {
+        void this.checkDrift(projectId, vaultGroupId, userId);
+      }
     }
 
     return {
