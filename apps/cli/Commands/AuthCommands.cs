@@ -14,7 +14,7 @@ public sealed class AuthCommands(
     CommandContext ctx,
     ICredentialStore credentialStore)
 {
-    private static readonly TimeSpan pollInterval = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(5);
 
     public Command CreateLoginCommand()
     {
@@ -162,7 +162,7 @@ public sealed class AuthCommands(
         while (DateTime.UtcNow < deadline)
         {
             ct.ThrowIfCancellationRequested();
-            await Task.Delay(pollInterval, ct);
+            await Task.Delay(PollInterval, ct);
 
             try
             {

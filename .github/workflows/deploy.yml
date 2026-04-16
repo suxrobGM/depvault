@@ -1,11 +1,12 @@
 # Docker-based deployment to VPS via GitHub Container Registry
 #
 # Required GitHub Secrets:
-# - VPS_HOST: VPS IP address or hostname
-# - VPS_USER: SSH username
-# - VPS_SSH_KEY: SSH private key for VPS access
+# - SSH_HOST: VPS IP address or hostname
+# - SSH_USER: SSH username
+# - SSH_KEY: SSH private key for VPS access
 # - GHCR_PAT: Personal Access Token with read:packages, write:packages scope
-# - DEPVAULT_TOKEN: CI token from DepVault platform (replaces ENV_DOCKER)
+# - ENV_DOCKER: Full contents of the production .env file (temporary, for VPS migration)
+# - DEPVAULT_TOKEN: CI token from DepVault platform (disabled during VPS migration)
 #
 # Required GitHub Variables (Settings → Secrets and variables → Actions → Variables tab):
 # - NEXT_PUBLIC_API_URL: Public backend API URL (e.g. https://api.depvault.example.com)
@@ -89,20 +90,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Setup DepVault CLI
-        uses: suxrobGM/depvault@v1
-        with:
-          token: ${{ secrets.DEPVAULT_TOKEN }}
+      # Temporary: write .env from ENV_DOCKER secret while migrating to new VPS.
+      # Restore the DepVault CLI steps below once the migration is complete.
+      - name: Write .env from ENV_DOCKER secret
+        run: |
+          mkdir -p deploy
+          printf '%s' "${{ secrets.ENV_DOCKER }}" > deploy/.env
 
-      - name: Pull secrets from DepVault
-        run: depvault ci pull --format env --output deploy/.env
+      # - name: Setup DepVault CLI
+      #   uses: suxrobGM/depvault@v1
+      #   with:
+      #     token: ${{ secrets.DEPVAULT_TOKEN }}
+      #
+      # - name: Pull secrets from DepVault
+      #   run: depvault ci pull --format env --output deploy/.env
 
       - name: Copy docker-compose to VPS
         uses: appleboy/scp-action@v1
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
           source: "deploy/docker-compose.yml,deploy/.env"
           target: ${{ env.APP_DIR }}
           strip_components: 1
@@ -113,9 +121,9 @@ jobs:
           GHCR_PAT: ${{ secrets.GHCR_PAT }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
           envs: GHCR_PAT,GITHUB_REPOSITORY
           script: |
             cd ${{ env.APP_DIR }}
@@ -142,9 +150,9 @@ jobs:
       - name: Health check
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
           script: |
             echo "Waiting for services to start..."
             sleep 15
