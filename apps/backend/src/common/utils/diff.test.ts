@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { parseUnifiedDiff, shouldIgnoreFile } from "./diff-parser";
+import { parseUnifiedDiff, shouldIgnoreFile } from "./diff";
 
 describe("parseUnifiedDiff", () => {
   it("should parse added lines with correct file paths and line numbers", () => {

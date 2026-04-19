@@ -1,7 +1,7 @@
 import { logger } from "@/common/logger";
+import { parseUnifiedDiff } from "@/common/utils/diff";
 import type { DetectionSeverity } from "@/generated/prisma";
 import type { GitHubApiService } from "@/modules/github/github-api.service";
-import { parseUnifiedDiff } from "./diff-parser";
 
 interface ScanPattern {
   id: string;

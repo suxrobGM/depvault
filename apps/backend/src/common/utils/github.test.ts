@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { parseGitHubUrl } from "./parse-github-url";
+import { parseGitHubUrl } from "./github";
 
 describe("parseGitHubUrl", () => {
   it("should parse HTTPS URL", () => {

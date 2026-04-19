@@ -27,7 +27,11 @@ import { licenseRuleController } from "@/modules/license-rule";
 import { notificationController } from "@/modules/notification";
 import { projectController } from "@/modules/project";
 import { scanPatternController } from "@/modules/scan-pattern";
-import { secretController, secretFileController, sharedSecretController } from "@/modules/secret";
+import {
+  secretFileController,
+  sharedSecretAccessController,
+  sharedSecretController,
+} from "@/modules/secret";
 import { secretScanController } from "@/modules/secret-scan";
 import { securityController } from "@/modules/security/security.controller";
 import { subscriptionController, subscriptionWebhookController } from "@/modules/subscription";
@@ -67,7 +71,7 @@ const app = new Elysia()
       .use(envBundleController)
       .use(envTemplateController)
       .use(secretFileController)
-      .use(secretController)
+      .use(sharedSecretAccessController)
       .use(sharedSecretController)
       .use(userController)
       .use(auditLogController)

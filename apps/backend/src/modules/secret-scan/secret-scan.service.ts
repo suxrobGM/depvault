@@ -1,5 +1,6 @@
 import { singleton } from "tsyringe";
 import { BadRequestError, NotFoundError } from "@/common/errors";
+import { parseGitHubUrl } from "@/common/utils/github";
 import {
   DetectionSeverity,
   DetectionStatus,
@@ -11,7 +12,6 @@ import { GitHubApiService } from "@/modules/github/github-api.service";
 import { NotificationService } from "@/modules/notification/notification.service";
 import { PlanEnforcementService } from "@/modules/subscription/plan-enforcement.service";
 import type { PaginatedResponse } from "@/types/response";
-import { parseGitHubUrl } from "./parse-github-url";
 import { executeScan } from "./secret-scan.executor";
 import { toDetectionResponse, toScanResponse } from "./secret-scan.mapper";
 import type {

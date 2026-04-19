@@ -13,7 +13,7 @@ import { SharedSecretService } from "./shared-secret.service";
 
 const sharedSecretService = container.resolve(SharedSecretService);
 
-export const secretController = new Elysia({
+export const sharedSecretAccessController = new Elysia({
   prefix: "/secrets/shared",
   detail: { tags: ["Shared Secrets"] },
 })
