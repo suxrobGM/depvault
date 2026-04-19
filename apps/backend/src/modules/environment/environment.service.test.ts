@@ -1,5 +1,6 @@
-import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
-import { ForbiddenError, NotFoundError } from "@/common/errors";
+import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { NotFoundError } from "@/common/errors";
+import { EnvironmentRepository } from "./environment.repository";
 import { EnvironmentService } from "./environment.service";
 
 const now = new Date();
@@ -78,7 +79,6 @@ describe("EnvironmentService", () => {
     mock.restore();
     mockPrisma = createMockPrisma();
     mockAuditLog = createMockAuditLogService();
-    const { EnvironmentRepository } = require("./environment.repository");
     const envHelper = new EnvironmentRepository(mockPrisma);
     const mockNotificationService = { notify: mock(() => Promise.resolve()) } as any;
     const mockPlanEnforcement = { enforceForProject: mock(() => Promise.resolve()) } as any;

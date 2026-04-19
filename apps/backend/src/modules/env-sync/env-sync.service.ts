@@ -1,8 +1,8 @@
 import { singleton } from "tsyringe";
 import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
-import { EnvironmentRepository } from "./environment.repository";
-import type { SyncEnvironmentBody, SyncEnvironmentResponse } from "./environment.schema";
+import { EnvironmentRepository } from "@/modules/environment";
+import type { SyncEnvironmentBody, SyncEnvironmentResponse } from "./env-sync.schema";
 
 @singleton()
 export class EnvironmentSyncService {

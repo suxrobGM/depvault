@@ -1,5 +1,5 @@
 import { t, type Static } from "elysia";
-import { EnvironmentTypeSchema } from "./environment.schema";
+import { EnvironmentTypeSchema } from "@/modules/environment";
 
 export const EnvBundleBodySchema = t.Object({
   vaultGroupId: t.String(),

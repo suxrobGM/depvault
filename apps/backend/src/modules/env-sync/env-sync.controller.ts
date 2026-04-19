@@ -3,45 +3,15 @@ import { container } from "@/common/di/container";
 import { projectGuard } from "@/common/middleware";
 import { getClientIp } from "@/common/utils/ip";
 import { StringIdParamSchema } from "@/types/request";
-import { EnvironmentDiffService } from "./env-diff.service";
+import { SyncEnvironmentBodySchema, SyncEnvironmentResponseSchema } from "./env-sync.schema";
 import { EnvironmentSyncService } from "./env-sync.service";
-import {
-  EnvDiffQuerySchema,
-  EnvDiffResponseSchema,
-  SyncEnvironmentBodySchema,
-  SyncEnvironmentResponseSchema,
-} from "./environment.schema";
 
-const environmentDiffService = container.resolve(EnvironmentDiffService);
 const environmentSyncService = container.resolve(EnvironmentSyncService);
 
-export const envDiffController = new Elysia({
+export const envSyncController = new Elysia({
   prefix: "/projects/:id/environments",
-  detail: { tags: ["Environment Diff & Clone"], security: [{ bearerAuth: [] }] },
+  detail: { tags: ["Environment Sync"], security: [{ bearerAuth: [] }] },
 })
-  .use(projectGuard("VIEWER"))
-  .get(
-    "/diff",
-    ({ params, query, projectMember, request, server }) =>
-      environmentDiffService.diff(
-        params.id,
-        query.vaultGroupId,
-        query.environments,
-        projectMember.userId,
-        getClientIp(request, server),
-      ),
-    {
-      params: StringIdParamSchema,
-      query: EnvDiffQuerySchema,
-      response: EnvDiffResponseSchema,
-      detail: {
-        operationId: "diffEnvironments",
-        summary: "Diff environments",
-        description:
-          "Compare variable keys across 2-3 environments. Returns rows with match/missing status.",
-      },
-    },
-  )
   .use(projectGuard("EDITOR"))
   .post(
     "/sync",

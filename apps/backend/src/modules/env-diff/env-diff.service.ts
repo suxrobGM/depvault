@@ -2,8 +2,8 @@ import { singleton } from "tsyringe";
 import { BadRequestError, NotFoundError } from "@/common/errors";
 import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
-import { EnvironmentRepository } from "./environment.repository";
-import type { EnvDiffResponse, EnvDiffRow } from "./environment.schema";
+import { EnvironmentRepository } from "@/modules/environment";
+import type { EnvDiffResponse, EnvDiffRow } from "./env-diff.schema";
 
 @singleton()
 export class EnvironmentDiffService {

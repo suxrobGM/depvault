@@ -2,8 +2,8 @@ import { singleton } from "tsyringe";
 import { BadRequestError } from "@/common/errors";
 import { PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
+import { EnvironmentRepository } from "@/modules/environment";
 import type { EnvBundleBody, EnvBundleResponse } from "./env-bundle.schema";
-import { EnvironmentRepository } from "./environment.repository";
 
 @singleton()
 export class EnvBundleService {

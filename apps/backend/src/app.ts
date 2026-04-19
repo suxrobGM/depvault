@@ -13,14 +13,12 @@ import { activityController, auditLogController } from "@/modules/audit-log";
 import { authController } from "@/modules/auth";
 import { ciAccessController, ciTokenController } from "@/modules/ci-token";
 import { convertController } from "@/modules/convert";
+import { envBundleController } from "@/modules/env-bundle";
+import { envDiffController } from "@/modules/env-diff";
+import { envIOController } from "@/modules/env-io";
+import { envSyncController } from "@/modules/env-sync";
 import { envTemplateController } from "@/modules/env-template";
-import {
-  envBundleController,
-  envDiffController,
-  envIOController,
-  environmentController,
-  envVariableController,
-} from "@/modules/environment";
+import { environmentController, envVariableController } from "@/modules/environment";
 import { githubApiController } from "@/modules/github";
 import { invitationController, projectInvitationController } from "@/modules/invitation";
 import { licenseRuleController } from "@/modules/license-rule";
@@ -67,6 +65,7 @@ const app = new Elysia()
       .use(environmentController)
       .use(envVariableController)
       .use(envDiffController)
+      .use(envSyncController)
       .use(envIOController)
       .use(envBundleController)
       .use(envTemplateController)

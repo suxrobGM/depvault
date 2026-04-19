@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { NotFoundError } from "@/common/errors";
 import { EnvironmentType } from "@/generated/prisma";
+import { EnvironmentRepository } from "@/modules/environment";
 import { EnvironmentIOService } from "./env-io.service";
 
 const now = new Date();
@@ -68,7 +69,6 @@ describe("EnvironmentIOService", () => {
     mock.restore();
     mockPrisma = createMockPrisma();
     mockAuditLog = createMockAuditLogService();
-    const { EnvironmentRepository } = require("./environment.repository");
     const envRepo = new EnvironmentRepository(mockPrisma);
     service = new EnvironmentIOService(mockPrisma, mockAuditLog, envRepo);
   });

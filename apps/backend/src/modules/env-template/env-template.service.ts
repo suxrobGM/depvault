@@ -2,7 +2,7 @@ import { singleton } from "tsyringe";
 import { ConflictError, NotFoundError } from "@/common/errors";
 import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
-import { EnvironmentRepository } from "@/modules/environment/environment.repository";
+import { EnvironmentRepository } from "@/modules/environment";
 import type {
   ApplyTemplateBody,
   CreateEnvTemplateBody,

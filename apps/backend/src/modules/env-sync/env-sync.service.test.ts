@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { EnvironmentRepository } from "@/modules/environment";
 import { EnvironmentSyncService } from "./env-sync.service";
 
 const now = new Date();
@@ -88,7 +89,6 @@ describe("EnvironmentSyncService", () => {
     mock.restore();
     mockPrisma = createMockPrisma();
     mockAuditLog = createMockAuditLogService();
-    const { EnvironmentRepository } = require("./environment.repository");
     const envHelper = new EnvironmentRepository(mockPrisma);
     service = new EnvironmentSyncService(mockPrisma, mockAuditLog, envHelper);
   });

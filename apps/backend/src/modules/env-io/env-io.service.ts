@@ -1,15 +1,18 @@
 import { singleton } from "tsyringe";
 import { EnvironmentType, PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
+import {
+  EnvironmentRepository,
+  toEncryptedResponse,
+  toExampleLine,
+  type EnvVariableWithValueResponse,
+} from "@/modules/environment";
 import type {
   EnvExampleResponse,
-  EnvVariableWithValueResponse,
   ExportEnvVariablesResponse,
   ImportEnvVariablesBody,
   ImportEnvVariablesResponse,
-} from "./env-variable.schema";
-import { toEncryptedResponse, toExampleLine } from "./environment.mapper";
-import { EnvironmentRepository } from "./environment.repository";
+} from "./env-io.schema";
 
 @singleton()
 export class EnvironmentIOService {
