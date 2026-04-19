@@ -37,7 +37,7 @@ Nginx sits in front of both services on a single domain. Requests matching `/api
 depvault/
 ├── apps/
 │   ├── backend/         Elysia REST API (Bun runtime, port 4000)
-│   ├── frontend/        Next.js 16 web app (MUI 7, port 4001)
+│   ├── frontend/        Next.js 16 web app (MUI 9, port 4001)
 │   └── cli/             .NET 10 Native AOT CLI
 ├── packages/
 │   └── shared/          Shared TypeScript types and utilities
@@ -51,7 +51,7 @@ depvault/
 
 **apps/backend** -- Elysia.js API server. Handles authentication, project management, dependency analysis, environment variable vault, secret file storage, secret sharing, CI token management, secret scanning, and notifications. Uses Prisma 7 with PostgreSQL and tsyringe for dependency injection.
 
-**apps/frontend** -- Next.js 16 App Router application. Uses React Server Components by default, MUI 7 for UI, TanStack Form + zod for form validation. TanStack Query for data fetching and caching. Auth state managed via React context with JWT stored in httpOnly cookies.
+**apps/frontend** -- Next.js 16 App Router application. Uses React Server Components by default, MUI 9 for UI, TanStack Form + zod for form validation. TanStack Query for data fetching and caching. Auth state managed via React context with JWT stored in httpOnly cookies.
 
 **apps/cli** -- .NET 10 command-line tool compiled with Native AOT and gzip compression. Provides terminal-based access to DepVault features including environment variable management, dependency scanning, and CI/CD integration. Produces a single self-contained native binary.
 

@@ -125,7 +125,7 @@ Sidebar items: Dashboard, Projects, Settings
 +-------------------------------------------------------------+
 
 Cards use MUI Card. Health bar is a LinearProgress.
-Grid2 layout: 3 columns on desktop, 2 on tablet, 1 on mobile.
+Grid layout: 3 columns on desktop, 2 on tablet, 1 on mobile.
 ```
 
 ---
@@ -565,6 +565,6 @@ Unread items have a colored left border.
 |                                                             |
 +-------------------------------------------------------------+
 
-Side-by-side layout using Grid2. Source is editable textarea,
+Side-by-side layout using Grid. Source is editable textarea,
 output is read-only with syntax highlighting.
 ```

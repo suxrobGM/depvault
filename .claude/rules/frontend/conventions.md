@@ -94,10 +94,10 @@ Use `FormTextField` and other reusable form components from `components/ui/form/
 
 ## UI Components
 
-- **Component library**: MUI 7 — prefer MUI components over custom HTML elements
-- **Styling**: MUI `sx` prop for all styling. Custom CSS utility classes in `globals.css` for animations
+- **Component library**: MUI 9 — prefer MUI components over custom HTML elements
+- **Styling**: MUI `sx` prop for all styling. System props (e.g. `mt`, `alignItems`) are removed in v9 — always pass layout/spacing through `sx`. Custom CSS utility classes in `globals.css` for animations
 - **Data tables**: Custom table components or MUI Table. MUI DataGrid for complex grids with sorting/filtering
-- **Layout**: MUI Box, Stack, Grid2. App shell uses persistent sidebar + top app bar
+- **Layout**: MUI Box, Stack, Grid (use `size={{ xs, sm, md }}`, not the v5-era `item` + `xs`/`sm` props). App shell uses persistent sidebar + top app bar
 - **Typography**: MUI Typography with semantic variants (h1–h6, body1, body2, caption)
 
 ## Testing

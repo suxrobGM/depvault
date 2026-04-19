@@ -18,7 +18,7 @@
   <img src="https://img.shields.io/badge/Elysia.js-latest-a855f7" alt="Elysia" />
   <img src="https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white" alt=".NET" />
   <img src="https://img.shields.io/badge/PostgreSQL-18-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL" />
-  <img src="https://img.shields.io/badge/MUI-7-007FFF?logo=mui&logoColor=white" alt="MUI" />
+  <img src="https://img.shields.io/badge/MUI-9-007FFF?logo=mui&logoColor=white" alt="MUI" />
 </p>
 
 <p align="center">
@@ -124,7 +124,7 @@ depvault/
 | Runtime    | Bun 1.3+                | Native TypeScript, fast package management         |
 | Backend    | Elysia.js               | End-to-end type safety with TypeBox + Eden Treaty  |
 | Frontend   | Next.js 16 + React 19   | Server components by default, React compiler       |
-| UI         | MUI 7                   | Comprehensive component library, dark theme        |
+| UI         | MUI 9                   | Comprehensive component library, dark theme        |
 | Database   | PostgreSQL + Prisma 7   | Multi-file schema, driver adapter for pg           |
 | DI         | tsyringe                | Decorator-based dependency injection               |
 | Auth       | JWT + GitHub OAuth      | httpOnly cookie storage, no localStorage           |

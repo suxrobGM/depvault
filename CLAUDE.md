@@ -5,7 +5,7 @@ DepVault is a web dashboard that analyzes dependencies, detects vulnerabilities,
 ## Tech Stack
 
 - **Runtime**: Bun — **Backend**: Elysia.js — **DB**: PostgreSQL + Prisma 7 — **DI**: tsyringe
-- **Web**: Next.js 16 + MUI 7 — **Forms**: `@tanstack/react-form` + `zod/v4`
+- **Web**: Next.js 16 + MUI 9 — **Forms**: `@tanstack/react-form` + `zod/v4`
 - **Docs**: Nextra 4
 - **CLI**: .NET 10 (Native AOT) + Kiota-generated HTTP client
 - **Shared**: `@depvault/shared` package in `packages/shared/`

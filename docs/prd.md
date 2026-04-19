@@ -4,7 +4,7 @@
 
 **Project Name:** DepVault
 **Description:** A unified developer dashboard to analyze packages, scan for vulnerabilities, and securely store and sync environment variables and secret files (SSL certificates, private keys, keystores, mobile provisioning profiles, and more) across every major language ecosystem and config format.
-**Tech Stack:** Next.js 16 (frontend), MUI 7 (UI components), Tailwind CSS v4 (optional utility styling), ElysiaJS (backend API), Prisma (ORM), PostgreSQL (database), TypeScript (end-to-end), GitHub Actions (CI/CD)
+**Tech Stack:** Next.js 16 (frontend), MUI 9 (UI components), Tailwind CSS v4 (optional utility styling), ElysiaJS (backend API), Prisma (ORM), PostgreSQL (database), TypeScript (end-to-end), GitHub Actions (CI/CD)
 
 ---
 
@@ -238,7 +238,7 @@ Developers working across multiple projects and tech stacks waste time switching
   - **Dependency security:** Lockfile pinned dependencies. Regular `bun audit` in CI. No secrets in source code — enforced via pre-commit hooks and CI secret scanning.
 - **Performance:** Dashboard loads in under 2 seconds. Dependency analysis completes within 10 seconds for files with up to 500 packages.
 - **Scalability:** Support up to 50 projects per user, 500 env variables per project, and 100 secret files per project (up to 25 MB each).
-- **Accessibility:** WCAG 2.1 AA compliance via MUI 7's built-in accessibility features.
+- **Accessibility:** WCAG 2.1 AA compliance via MUI 9's built-in accessibility features.
 - **Browser Support:** Latest versions of Chrome, Firefox, Safari, and Edge.
 
 ---
