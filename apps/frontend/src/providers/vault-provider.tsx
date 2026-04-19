@@ -136,12 +136,6 @@ export function VaultProvider(props: PropsWithChildren): ReactElement {
     if (!kekRef.current) throw new Error("Vault is locked");
 
     const dek = await resolveProjectDEK(projectId, kekRef.current, privateKeyRef.current);
-
-    if (!dek) {
-      await initializeProjectKeys(projectId);
-      return dekCacheRef.current.get(projectId)!;
-    }
-
     dekCacheRef.current.set(projectId, dek);
     return dek;
   };
@@ -184,8 +178,7 @@ export function VaultProvider(props: PropsWithChildren): ReactElement {
     const result = await changeVaultPasswordOps(
       newPassword,
       kekRef.current,
-      privateKeyRef.current,
-      recoveryKeyRef.current,
+      vaultInfoRef.current,
       dekCacheRef.current,
     );
 

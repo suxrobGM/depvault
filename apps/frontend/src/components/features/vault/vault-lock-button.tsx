@@ -12,6 +12,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import { useVault } from "@/hooks/use-vault";
+import { VaultRecoveryDialog } from "./vault-recovery-dialog";
 import { VaultUnlockDialog } from "./vault-unlock-dialog";
 
 interface VaultLockButtonProps {
@@ -22,6 +23,7 @@ export function VaultLockButton(props: VaultLockButtonProps): ReactElement {
   const { open } = props;
   const { isVaultSetup, isVaultUnlocked, lockVault } = useVault();
   const [unlockDialogOpen, setUnlockDialogOpen] = useState(false);
+  const [recoveryDialogOpen, setRecoveryDialogOpen] = useState(false);
 
   if (!isVaultSetup) {
     return <></>;
@@ -81,7 +83,12 @@ export function VaultLockButton(props: VaultLockButtonProps): ReactElement {
       <VaultUnlockDialog
         open={unlockDialogOpen && !isVaultUnlocked}
         onClose={() => setUnlockDialogOpen(false)}
+        onForgotPassword={() => {
+          setUnlockDialogOpen(false);
+          setRecoveryDialogOpen(true);
+        }}
       />
+      <VaultRecoveryDialog open={recoveryDialogOpen} onClose={() => setRecoveryDialogOpen(false)} />
     </>
   );
 }

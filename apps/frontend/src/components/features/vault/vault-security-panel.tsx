@@ -1,19 +1,21 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import { Lock as LockIcon } from "@mui/icons-material";
+import { Lock as LockIcon, RestartAlt as RestartAltIcon } from "@mui/icons-material";
 import { Alert, Box, Button, CardContent, Chip, Divider, Stack, Typography } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import { GlassCard } from "@/components/ui/cards";
 import { FormTextField } from "@/components/ui/form";
 import { useVault } from "@/hooks/use-vault";
 import { vaultChangePasswordSchema } from "./schema";
+import { VaultRecoveryDialog } from "./vault-recovery-dialog";
 import { VaultRegenerateRecoveryDialog } from "./vault-regenerate-recovery-dialog";
 
 /** Combined vault security panel: change vault password + regenerate recovery key. */
 export function VaultSecurityPanel(): ReactElement {
   const { vaultStatus, changeVaultPassword } = useVault();
   const [showRegenerateDialog, setShowRegenerateDialog] = useState(false);
+  const [showRecoveryDialog, setShowRecoveryDialog] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordSuccess, setPasswordSuccess] = useState(false);
 
@@ -65,32 +67,70 @@ export function VaultSecurityPanel(): ReactElement {
 
   if (vaultStatus !== "unlocked") {
     return (
-      <GlassCard className="vault-fade-up vault-delay-4">
-        <CardContent sx={{ p: 3 }}>
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{
-              alignItems: "center",
-              mb: 2,
-            }}
-          >
-            <LockIcon fontSize="small" />
-            <Typography
-              variant="subtitle1"
+      <>
+        <GlassCard className="vault-fade-up vault-delay-4">
+          <CardContent sx={{ p: 3 }}>
+            <Stack
+              direction="row"
+              spacing={1}
               sx={{
-                fontWeight: 600,
+                alignItems: "center",
+                mb: 2,
               }}
             >
-              Encryption Vault
-            </Typography>
-            <Chip label="Locked" size="small" color="warning" />
-          </Stack>
-          <Alert severity="info">
-            Unlock your vault from a project&apos;s vault page to manage vault settings.
-          </Alert>
-        </CardContent>
-      </GlassCard>
+              <LockIcon fontSize="small" />
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: 600,
+                }}
+              >
+                Encryption Vault
+              </Typography>
+              <Chip label="Locked" size="small" color="warning" />
+            </Stack>
+            <Stack spacing={2}>
+              <Alert severity="info">
+                Unlock your vault from a project&apos;s vault page to manage vault settings.
+              </Alert>
+
+              <Divider />
+
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 600,
+                }}
+              >
+                Forgot your vault password?
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
+                Use the recovery key you saved when setting up your vault to reset your vault
+                password and regain access to your encrypted secrets.
+              </Typography>
+              <Box>
+                <Button
+                  variant="outlined"
+                  color="warning"
+                  startIcon={<RestartAltIcon />}
+                  onClick={() => setShowRecoveryDialog(true)}
+                >
+                  Recover with Recovery Key
+                </Button>
+              </Box>
+            </Stack>
+          </CardContent>
+        </GlassCard>
+        <VaultRecoveryDialog
+          open={showRecoveryDialog}
+          onClose={() => setShowRecoveryDialog(false)}
+        />
+      </>
     );
   }
 

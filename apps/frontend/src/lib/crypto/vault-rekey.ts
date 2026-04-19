@@ -16,24 +16,44 @@ import {
   type PasswordChangeResult,
   type RecoverVaultResult,
   type RegenerateRecoveryKeyResult,
+  type VaultInfo,
 } from "@depvault/crypto";
 import { client } from "@/lib/api";
 
-/** Re-wraps the private key, recovery key, and all project DEKs with a new KEK. */
+/**
+ * Re-wraps the private key, recovery key, and all project DEKs with a new KEK.
+ *
+ * The private key and recovery key CryptoKey instances held in memory are intentionally
+ * non-extractable (see importPrivateKey/importRecoveryKey), so we cannot re-wrap them by
+ * exporting the in-memory keys. Instead, we unwrap the ciphertext blobs that are already
+ * stored on the server — those are the authoritative source of the raw key bytes — using
+ * the current (old) KEK, and then re-wrap the raw bytes under the new KEK.
+ */
 export async function changeVaultPasswordOps(
   newPassword: string,
   oldKek: CryptoKey,
-  privateKey: CryptoKey,
-  recoveryKey: CryptoKey,
+  vaultInfo: VaultInfo,
   cachedDeks: ReadonlyMap<string, CryptoKey>,
 ): Promise<PasswordChangeResult> {
   const newSalt = generateSalt();
   const newKek = await deriveKEK(newPassword, newSalt);
 
-  const privateKeyRaw = new Uint8Array(await crypto.subtle.exportKey("pkcs8", privateKey));
+  const privateKeyRaw = await unwrapKey(
+    vaultInfo.wrappedPrivateKey,
+    vaultInfo.wrappedPrivateKeyIv,
+    vaultInfo.wrappedPrivateKeyTag,
+    oldKek,
+  );
+
   const newWrappedPrivate = await wrapKey(privateKeyRaw, newKek);
 
-  const recoveryRaw = new Uint8Array(await crypto.subtle.exportKey("raw", recoveryKey));
+  const recoveryRaw = await unwrapKey(
+    vaultInfo.wrappedRecoveryKey,
+    vaultInfo.wrappedRecoveryKeyIv,
+    vaultInfo.wrappedRecoveryKeyTag,
+    oldKek,
+  );
+
   const wrappedRecovery = await wrapKey(recoveryRaw, newKek);
 
   // Collect all project DEKs: from cache + from SELF grants not yet cached

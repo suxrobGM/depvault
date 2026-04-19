@@ -6,6 +6,7 @@ namespace DepVault.Cli.Crypto;
 public sealed class VaultState
 {
     private byte[]? kek;
+    private string? kekSalt;
     private readonly Dictionary<string, byte[]> dekCache = [];
     private DateTime lastActivity = DateTime.UtcNow;
 
@@ -14,10 +15,18 @@ public sealed class VaultState
     /// <summary>Returns the cached KEK, or null if locked.</summary>
     public byte[]? Kek => kek;
 
-    /// <summary>Store the KEK and mark vault as unlocked.</summary>
-    public void Unlock(byte[] kek)
+    /// <summary>Base64 salt that was used to derive the currently cached KEK, or null if locked.</summary>
+    public string? KekSalt => kekSalt;
+
+    /// <summary>
+    /// Store the KEK alongside the salt used to derive it. The salt lets callers detect when the
+    /// server-side vault salt has rotated (password change on another client) and invalidate the
+    /// cached KEK before it is used to wrap new grants.
+    /// </summary>
+    public void Unlock(byte[] kek, string salt)
     {
         this.kek = kek;
+        kekSalt = salt;
         dekCache.Clear();
         lastActivity = DateTime.UtcNow;
     }
@@ -37,6 +46,7 @@ public sealed class VaultState
         }
 
         dekCache.Clear();
+        kekSalt = null;
     }
 
     /// <summary>Cache a resolved DEK for a project.</summary>
