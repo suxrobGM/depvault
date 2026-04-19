@@ -52,12 +52,13 @@ public sealed class AnalysisCommands(
             {
                 var content = await File.ReadAllTextAsync(filePath, cancellationToken);
                 var fileName = Path.GetFileName(filePath);
+                var relativePath = Path.GetRelativePath(GitUtils.FindRepoRoot(), Path.GetFullPath(filePath));
 
                 var result = await AnsiConsole.Status()
                     .Spinner(Spinner.Known.Dots)
                     .StartAsync($"Analyzing {fileName} ({ecosystem})...", async _ =>
-                        await analysisClient.AnalyzeFileAsync(pc.ProjectId, fileName, content, ecosystem,
-                            cancellationToken));
+                        await analysisClient.AnalyzeFileAsync(pc.ProjectId, fileName, relativePath, content,
+                            ecosystem, cancellationToken));
 
                 if (result is null)
                 {
