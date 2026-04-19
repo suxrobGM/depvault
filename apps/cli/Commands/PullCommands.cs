@@ -1,6 +1,7 @@
 using System.CommandLine;
 using DepVault.Cli.Commands.Pull;
 using DepVault.Cli.Crypto;
+using DepVault.Cli.EnvFiles;
 using DepVault.Cli.Utils;
 using Spectre.Console;
 
@@ -51,7 +52,10 @@ public sealed class PullCommands(
             }
 
             var envType = ctx.ResolveEnvironmentType(parseResult.GetValue(envOpt), null);
-            var format = parseResult.GetValue(formatOpt) ?? "env";
+            var formatStr = parseResult.GetValue(formatOpt) ?? "env";
+            var format = formatStr.Equals("json", StringComparison.OrdinalIgnoreCase)
+                ? EnvFileFormat.Json
+                : EnvFileFormat.Env;
             var outputDir = Path.GetFullPath(parseResult.GetValue(outputDirOpt) ?? GitUtils.FindRepoRoot());
             var includeSecrets = parseResult.GetValue(includeSecretsOpt);
             var force = parseResult.GetValue(forceOpt);

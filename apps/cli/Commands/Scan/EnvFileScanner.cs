@@ -1,5 +1,6 @@
 using DepVault.Cli.Commands.Pull;
 using DepVault.Cli.Commands.Push;
+using DepVault.Cli.EnvFiles;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
@@ -111,24 +112,6 @@ internal sealed class EnvFileScanner(
         return null;
     }
 
-    internal static string DetectEnvFormat(string fileName)
-    {
-        if (fileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
-        {
-            return "appsettings.json";
-        }
-
-        if (fileName.EndsWith(".yaml", StringComparison.OrdinalIgnoreCase) ||
-            fileName.EndsWith(".yml", StringComparison.OrdinalIgnoreCase))
-        {
-            return "secrets.yaml";
-        }
-
-        if (fileName.EndsWith(".toml", StringComparison.OrdinalIgnoreCase))
-        {
-            return "config.toml";
-        }
-
-        return "env";
-    }
+    internal static EnvFileFormat DetectEnvFormat(string fileName) =>
+        EnvFormat.Detect(fileName);
 }

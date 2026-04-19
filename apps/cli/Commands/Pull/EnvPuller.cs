@@ -1,5 +1,6 @@
 using DepVault.Cli.Auth;
 using DepVault.Cli.Crypto;
+using DepVault.Cli.EnvFiles;
 using DepVault.Cli.Output;
 using DepVault.Cli.Utils;
 using Microsoft.Kiota.Abstractions;
@@ -18,7 +19,7 @@ public sealed class EnvPuller(
     /// <summary>Pulls env vars for each group, decrypts, and writes files. Returns number of files written.</summary>
     public async Task<int> PullAsync(
         string projectId, List<VaultGroupsModel> groups,
-        string envType, string format, string outputDir, byte[] dek, CancellationToken ct)
+        string envType, EnvFileFormat format, string outputDir, byte[] dek, CancellationToken ct)
     {
         var client = clientFactory.Create();
         var filesWritten = 0;
@@ -86,7 +87,7 @@ public sealed class EnvPuller(
         return result?.Entries;
     }
 
-    private static string DecryptAndSerialize(List<ExportEntries> entries, byte[] dek, string format)
+    private static string DecryptAndSerialize(List<ExportEntries> entries, byte[] dek, EnvFileFormat format)
     {
         var pairs = new List<ParsedEnvEntry>();
 
@@ -95,18 +96,20 @@ public sealed class EnvPuller(
             var value = VaultCrypto.Decrypt(
                 entry.EncryptedValue ?? "", entry.Iv ?? "", entry.AuthTag ?? "", dek);
 
-            string? comment = null;
+            string? wireComment = null;
             if (!string.IsNullOrEmpty(entry.EncryptedComment) &&
                 !string.IsNullOrEmpty(entry.CommentIv) &&
                 !string.IsNullOrEmpty(entry.CommentAuthTag))
             {
-                comment = VaultCrypto.Decrypt(entry.EncryptedComment, entry.CommentIv, entry.CommentAuthTag, dek);
+                wireComment = VaultCrypto.Decrypt(
+                    entry.EncryptedComment, entry.CommentIv, entry.CommentAuthTag, dek);
             }
 
-            pairs.Add(new ParsedEnvEntry(entry.Key ?? "", value, comment));
+            var (leading, trailing) = CommentCodec.Decode(wireComment);
+            pairs.Add(new ParsedEnvEntry(entry.Key ?? "", value, leading, trailing));
         }
 
-        return EnvFormatUtils.Serialize(pairs, format);
+        return EnvFormat.Serialize(pairs, format);
     }
 
     internal static string ResolveEnvFilePath(VaultGroupsModel group, int totalGroups, string outputDir)

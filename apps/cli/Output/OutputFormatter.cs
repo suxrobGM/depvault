@@ -76,8 +76,8 @@ public sealed class OutputFormatter : IOutputFormatter
     {
         if (!string.IsNullOrEmpty(outputPath))
         {
-            var output = content.Length > 0 && !content.EndsWith(Environment.NewLine)
-                ? content + Environment.NewLine
+            var output = content.Length > 0 && !content.EndsWith('\n')
+                ? content + '\n'
                 : content;
             File.WriteAllText(outputPath, output);
             PrintSuccess($"Written to {outputPath}");
@@ -85,7 +85,7 @@ public sealed class OutputFormatter : IOutputFormatter
         else
         {
             Console.Write(content);
-            if (content.Length > 0 && !content.EndsWith(Environment.NewLine))
+            if (content.Length > 0 && !content.EndsWith('\n'))
             {
                 Console.WriteLine();
             }

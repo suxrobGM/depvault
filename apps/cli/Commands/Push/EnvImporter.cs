@@ -1,6 +1,7 @@
 using DepVault.Cli.Auth;
 using DepVault.Cli.Commands.Scan;
 using DepVault.Cli.Crypto;
+using DepVault.Cli.EnvFiles;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
@@ -54,7 +55,7 @@ internal sealed class EnvImporter(
 
         var content = await File.ReadAllTextAsync(file.FullPath, ct);
         var format = EnvFileScanner.DetectEnvFormat(file.FileName);
-        var pairs = EnvFormatUtils.Parse(content, format);
+        var pairs = EnvFormat.Parse(content, format);
 
         var entries = new List<ImportEntry>();
         var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -72,9 +73,10 @@ internal sealed class EnvImporter(
                 SortOrder = index
             };
 
-            if (entry.Comment is not null)
+            var wireComment = CommentCodec.Encode(entry.Leading, entry.Trailing);
+            if (wireComment is not null)
             {
-                var (commentCt, commentIv, commentTag) = VaultCrypto.Encrypt(entry.Comment, cachedDek!);
+                var (commentCt, commentIv, commentTag) = VaultCrypto.Encrypt(wireComment, cachedDek!);
                 importEntry.EncryptedComment = commentCt;
                 importEntry.CommentIv = commentIv;
                 importEntry.CommentAuthTag = commentTag;
