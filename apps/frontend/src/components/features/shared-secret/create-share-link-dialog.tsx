@@ -107,7 +107,11 @@ export function CreateShareLinkDialog(props: CreateShareLinkDialogProps): ReactE
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <LinkIcon fontSize="small" />
+        <LinkIcon
+          sx={{
+            fontSize: "small",
+          }}
+        />
         Share Secret
       </DialogTitle>
       <DialogContent>
@@ -157,21 +161,35 @@ export function CreateShareLinkDialog(props: CreateShareLinkDialogProps): ReactE
                   bgcolor: "action.hover",
                 }}
               >
-                <Typography variant="caption" color="text.secondary">
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "text.secondary",
+                  }}
+                >
                   {variables.length === 1
                     ? "Sharing variable"
                     : `Sharing ${variables.length} variables`}
                 </Typography>
                 {variables.length === 1 ? (
-                  <Typography variant="body2" fontFamily="monospace" fontWeight={600}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontFamily: "monospace",
+                      fontWeight: 600,
+                    }}
+                  >
                     {variables[0]?.key}
                   </Typography>
                 ) : (
                   <Typography
                     variant="body2"
-                    fontFamily="monospace"
-                    fontWeight={600}
-                    sx={{ maxHeight: 80, overflow: "auto" }}
+                    sx={{
+                      fontFamily: "monospace",
+                      fontWeight: 600,
+                      maxHeight: 80,
+                      overflow: "auto",
+                    }}
                   >
                     {variables.map((v) => v.key).join(", ")}
                   </Typography>

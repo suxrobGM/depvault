@@ -22,7 +22,12 @@ export default function AuthLayout(props: PropsWithChildren): ReactElement {
       <Box className="vault-gradient-mesh" />
       <Box className="vault-dot-grid" />
       <Container maxWidth="sm" sx={{ position: "relative", zIndex: 1, py: { xs: 4, sm: 6 } }}>
-        <Stack alignItems="center" spacing={3}>
+        <Stack
+          spacing={3}
+          sx={{
+            alignItems: "center",
+          }}
+        >
           <Link href={ROUTES.home} style={{ textDecoration: "none", display: "flex" }}>
             <Image src="/depvault-logo-dark.svg" alt="DepVault" width={150} height={43} priority />
           </Link>

@@ -62,7 +62,13 @@ export function AdminStats(): ReactElement {
           <Grid key={stat.label} size={{ xs: 12, sm: 6, md: 3 }}>
             <Card sx={{ height: "100%" }}>
               <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
-                <Stack direction="row" alignItems="center" spacing={2}>
+                <Stack
+                  direction="row"
+                  spacing={2}
+                  sx={{
+                    alignItems: "center",
+                  }}
+                >
                   <Box
                     sx={{
                       width: 44,
@@ -81,12 +87,29 @@ export function AdminStats(): ReactElement {
                     {isLoading ? (
                       <Skeleton variant="text" width={60} height={36} />
                     ) : (
-                      <Typography variant="h5" fontWeight={700} lineHeight={1.2}>
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          fontWeight: 700,
+                          lineHeight: 1.2,
+                        }}
+                      >
                         {stat.value}
                       </Typography>
                     )}
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <Typography variant="body2" color="text.secondary">
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      sx={{
+                        alignItems: "center",
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "text.secondary",
+                        }}
+                      >
                         {stat.label}
                       </Typography>
                       {stat.chip && (
@@ -100,8 +123,13 @@ export function AdminStats(): ReactElement {
           </Grid>
         ))}
       </Grid>
-
-      <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+      <Typography
+        variant="h6"
+        sx={{
+          fontWeight: 600,
+          mb: 2,
+        }}
+      >
         Plan Breakdown
       </Typography>
       <Grid container spacing={2}>
@@ -109,17 +137,32 @@ export function AdminStats(): ReactElement {
           <Grid key={plan} size={{ xs: 12, sm: 4 }}>
             <Card>
               <CardContent>
-                <Typography variant="overline" color="text.secondary">
+                <Typography
+                  variant="overline"
+                  sx={{
+                    color: "text.secondary",
+                  }}
+                >
                   {plan.toUpperCase()}
                 </Typography>
                 {isLoading ? (
                   <Skeleton variant="text" width={40} height={40} />
                 ) : (
-                  <Typography variant="h4" fontWeight={700}>
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      fontWeight: 700,
+                    }}
+                  >
                     {data?.planBreakdown?.[plan] ?? 0}
                   </Typography>
                 )}
-                <Typography variant="body2" color="text.secondary">
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.secondary",
+                  }}
+                >
                   users
                 </Typography>
               </CardContent>

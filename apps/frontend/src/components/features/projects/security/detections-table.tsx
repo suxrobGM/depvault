@@ -2,7 +2,7 @@
 
 import { useState, type ReactElement } from "react";
 import {
-  RemoveCircleOutline as FalsePositiveIcon,
+  RemoveCircleOutlined as FalsePositiveIcon,
   CheckCircle as ResolveIcon,
 } from "@mui/icons-material";
 import {
@@ -121,7 +121,14 @@ export function DetectionsTable(props: DetectionsTableProps): ReactElement {
 
   return (
     <GlassCard sx={{ p: 2 }}>
-      <Stack direction="row" spacing={2} sx={{ mb: 2 }} alignItems="center">
+      <Stack
+        direction="row"
+        spacing={2}
+        sx={{
+          alignItems: "center",
+          mb: 2,
+        }}
+      >
         <TextField
           select
           size="small"
@@ -159,7 +166,12 @@ export function DetectionsTable(props: DetectionsTableProps): ReactElement {
         {someSelected && (
           <>
             <Box sx={{ flex: 1 }} />
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               {selectedIds.size} selected
             </Typography>
             <Button
@@ -184,7 +196,6 @@ export function DetectionsTable(props: DetectionsTableProps): ReactElement {
           </>
         )}
       </Stack>
-
       {detections.length === 0 && !isLoading ? (
         <EmptyState
           title="No detections found"
@@ -232,7 +243,6 @@ export function DetectionsTable(props: DetectionsTableProps): ReactElement {
           </Table>
         </TableContainer>
       )}
-
       {data && (
         <PaginationBar
           page={page}

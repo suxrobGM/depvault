@@ -48,8 +48,11 @@ export function SortableHeader(props: SortableHeaderProps): ReactElement {
     >
       <Typography
         variant="caption"
-        fontWeight={active ? 700 : 500}
-        sx={{ ...labelSx, color: active ? "text.primary" : "text.secondary" }}
+        sx={{
+          fontWeight: active ? 700 : 500,
+          ...labelSx,
+          color: active ? "text.primary" : "text.secondary",
+        }}
       >
         {label}
       </Typography>

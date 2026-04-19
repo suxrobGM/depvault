@@ -49,11 +49,13 @@ export function NotificationsView(): ReactElement {
     <Box>
       <Stack
         direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={{ mb: 2 }}
-        flexWrap="wrap"
-        gap={1}
+        sx={{
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 1,
+          mb: 2,
+        }}
       >
         <NotificationFilters
           readFilter={readFilter}
@@ -76,7 +78,6 @@ export function NotificationsView(): ReactElement {
           Mark all read
         </Button>
       </Stack>
-
       <GlassCard hoverGlow={false}>
         <List disablePadding>
           {isLoading && (
@@ -86,10 +87,20 @@ export function NotificationsView(): ReactElement {
           )}
           {!isLoading && notifications.length === 0 && (
             <Box sx={{ p: 6, textAlign: "center" }}>
-              <Typography variant="body1" color="text.secondary">
+              <Typography
+                variant="body1"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 No notifications found
               </Typography>
-              <Typography variant="caption" color="text.disabled">
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.disabled",
+                }}
+              >
                 {readFilter !== "all" || typeFilter
                   ? "Try adjusting your filters"
                   : "You're all caught up!"}
@@ -100,8 +111,8 @@ export function NotificationsView(): ReactElement {
             <Stack
               key={notification.id}
               direction="row"
-              alignItems="center"
               sx={{
+                alignItems: "center",
                 borderBottom: 1,
                 borderColor: "divider",
                 "&:last-child": { borderBottom: 0 },

@@ -30,15 +30,36 @@ export function PaginationBar(props: PaginationBarProps): ReactElement {
   return (
     <Stack
       direction={{ xs: "column", sm: "row" }}
-      alignItems="center"
-      justifyContent="space-between"
       spacing={1.5}
-      sx={{ p: 1.5 }}
+      sx={{
+        alignItems: "center",
+        justifyContent: "space-between",
+        p: 1.5,
+      }}
     >
-      <Stack direction="row" alignItems="center" spacing={1.5} sx={{ minWidth: 0 }}>
+      <Stack
+        direction="row"
+        spacing={1.5}
+        sx={{
+          alignItems: "center",
+          minWidth: 0,
+        }}
+      >
         {showPageSize && (
-          <Stack direction="row" alignItems="center" spacing={1}>
-            <Typography variant="caption" color="text.secondary" noWrap>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              alignItems: "center",
+            }}
+          >
+            <Typography
+              variant="caption"
+              noWrap
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               Rows per page
             </Typography>
             <TextField
@@ -60,12 +81,17 @@ export function PaginationBar(props: PaginationBarProps): ReactElement {
           </Stack>
         )}
         {total != null && (
-          <Typography variant="caption" color="text.secondary" noWrap>
+          <Typography
+            variant="caption"
+            noWrap
+            sx={{
+              color: "text.secondary",
+            }}
+          >
             {total} {total === 1 ? "result" : "results"}
           </Typography>
         )}
       </Stack>
-
       <Pagination
         count={count}
         page={page}

@@ -28,9 +28,11 @@ export function DashboardRecentProjects(props: DashboardRecentProjectsProps): Re
         <Stack
           className="vault-fade-up vault-delay-8"
           direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          sx={{ mb: 2 }}
+          sx={{
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 2,
+          }}
         >
           <Typography variant="h6">Recent Projects</Typography>
           {hasProjects && (
@@ -57,13 +59,18 @@ export function DashboardRecentProjects(props: DashboardRecentProjectsProps): Re
                   }}
                 >
                   <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
-                    <Typography variant="subtitle1" fontWeight={600}>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{
+                        fontWeight: 600,
+                      }}
+                    >
                       {project.name}
                     </Typography>
                     <Typography
                       variant="body2"
-                      color="text.secondary"
                       sx={{
+                        color: "text.secondary",
                         mt: 0.5,
                         mb: 1.5,
                         display: "-webkit-box",
@@ -74,9 +81,20 @@ export function DashboardRecentProjects(props: DashboardRecentProjectsProps): Re
                     >
                       {project.description ?? "No description"}
                     </Typography>
-                    <Stack direction="row" alignItems="center" spacing={0.5}>
+                    <Stack
+                      direction="row"
+                      spacing={0.5}
+                      sx={{
+                        alignItems: "center",
+                      }}
+                    >
                       <CalendarIcon sx={{ fontSize: 14, color: "text.secondary" }} />
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: "text.secondary",
+                        }}
+                      >
                         {new Date(project.createdAt).toLocaleDateString()}
                       </Typography>
                     </Stack>

@@ -97,7 +97,13 @@ export function SettingsTab(props: SettingsTabProps): ReactElement {
       <Grid size={{ xs: 12 }}>
         <GlassCard>
           <CardContent sx={{ p: 3 }}>
-            <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 600,
+                mb: 2,
+              }}
+            >
               Project Settings
             </Typography>
             <form
@@ -138,15 +144,27 @@ export function SettingsTab(props: SettingsTabProps): ReactElement {
       <Grid size={{ xs: 12 }}>
         <CiTokensSection projectId={projectId} canEdit={canEdit} />
       </Grid>
-
       {isOwner && (
         <Grid size={{ xs: 12 }}>
           <GlassCard sx={{ borderColor: "error.dark" }}>
             <CardContent sx={{ p: 3 }}>
-              <Typography variant="subtitle1" fontWeight={600} color="error.main" sx={{ mb: 1 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: 600,
+                  color: "error.main",
+                  mb: 1,
+                }}
+              >
                 Danger Zone
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  mb: 2,
+                }}
+              >
                 Permanently delete this project and all associated data including analyses,
                 environments, and variables. This action cannot be undone.
               </Typography>

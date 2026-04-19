@@ -92,7 +92,6 @@ export function SubscriptionsTable(): ReactElement {
           minWidth={160}
         />
       </Stack>
-
       {isLoading ? (
         <SkeletonList count={6} height={48} />
       ) : subscriptions.length === 0 ? (
@@ -117,10 +116,20 @@ export function SubscriptionsTable(): ReactElement {
                   <TableRow key={sub.id} hover>
                     <TableCell>
                       <Box>
-                        <Typography variant="body2" fontWeight={600}>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: 600,
+                          }}
+                        >
                           {[sub.user.firstName, sub.user.lastName].filter(Boolean).join(" ") || "—"}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "text.secondary",
+                          }}
+                        >
                           {sub.user.email}
                         </Typography>
                       </Box>

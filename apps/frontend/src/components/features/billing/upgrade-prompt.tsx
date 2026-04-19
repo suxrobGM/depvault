@@ -29,7 +29,12 @@ export function UpgradePrompt(props: UpgradePromptProps): ReactElement {
         <Typography variant="body1" sx={{ mb: 1 }}>
           {message}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+          }}
+        >
           Upgrade your plan to increase your limits and unlock additional features.
         </Typography>
       </DialogContent>

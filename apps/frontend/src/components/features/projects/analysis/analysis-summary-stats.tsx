@@ -77,13 +77,26 @@ export function AnalysisSummaryStats(props: AnalysisSummaryStatsProps): ReactEle
                 {stat.icon}
               </IconBox>
               {typeof stat.value === "number" ? (
-                <Typography variant="h4" fontWeight={700} sx={{ mb: 0.25, ml: 1 }}>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    fontWeight: 700,
+                    mb: 0.25,
+                    ml: 1,
+                  }}
+                >
                   {stat.value}
                 </Typography>
               ) : (
                 stat.value
               )}
-              <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  ml: 1,
+                }}
+              >
                 {stat.label}
               </Typography>
             </CardContent>

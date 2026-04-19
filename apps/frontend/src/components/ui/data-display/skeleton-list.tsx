@@ -27,7 +27,15 @@ export function SkeletonList(props: SkeletonListProps): ReactElement {
 
         if (variant === "avatar") {
           return (
-            <Stack key={i} direction="row" spacing={1.5} alignItems="center" sx={{ opacity }}>
+            <Stack
+              key={i}
+              direction="row"
+              spacing={1.5}
+              sx={{
+                alignItems: "center",
+                opacity,
+              }}
+            >
               <Skeleton variant="circular" width={avatarSize} height={avatarSize} />
               <Box sx={{ flex: 1 }}>
                 <Skeleton variant="text" width="55%" height={20} />

@@ -130,8 +130,19 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
 
   if (!analysis) {
     return (
-      <Stack alignItems="center" sx={{ py: 6 }}>
-        <Typography color="text.secondary">Analysis not found</Typography>
+      <Stack
+        sx={{
+          alignItems: "center",
+          py: 6,
+        }}
+      >
+        <Typography
+          sx={{
+            color: "text.secondary",
+          }}
+        >
+          Analysis not found
+        </Typography>
         <Button
           onClick={() => router.push(ROUTES.projectAnalysis(projectId) as Route)}
           sx={{ mt: 2 }}
@@ -156,7 +167,13 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
           { label: displayName },
         ]}
         actions={
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              alignItems: "center",
+            }}
+          >
             {canEdit && (
               <Tooltip title="Rescan dependencies">
                 <IconButton
@@ -199,22 +216,39 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
           </Stack>
         }
       />
-
-      <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 3 }}>
+      <Stack
+        direction="row"
+        spacing={1.5}
+        sx={{
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
         <Chip label={getEcosystemLabel(analysis.ecosystem)} size="small" variant="outlined" />
         <StatusBadge
           label={analysis.healthScore !== null ? `${analysis.healthScore}%` : "Pending"}
           variant={getHealthColor(analysis.healthScore)}
           glow
         />
-        <Typography variant="caption" color="text.secondary">
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+          }}
+        >
           {new Date(analysis.createdAt).toLocaleString()} &middot; {analysis.dependencies.length}{" "}
           dependencies
         </Typography>
       </Stack>
-
       {canEdit && (
-        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            alignItems: "center",
+            mb: 2,
+          }}
+        >
           {editingPath ? (
             <>
               <TextField
@@ -259,12 +293,10 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
           )}
         </Stack>
       )}
-
       <AnalysisSummaryStats
         dependencies={analysis.dependencies}
         healthScore={analysis.healthScore}
       />
-
       {viewMode === "table" ? (
         <DependencyDataGrid dependencies={analysis.dependencies} ecosystem={analysis.ecosystem} />
       ) : (

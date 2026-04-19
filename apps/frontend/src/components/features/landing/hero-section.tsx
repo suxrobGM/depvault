@@ -26,7 +26,13 @@ export function HeroSection(): ReactElement {
       <Box className="vault-gradient-mesh" />
       <Box className="vault-dot-grid" />
       <SectionContainer sx={{ pt: { xs: 16, md: 20 }, pb: { xs: 4, md: 6 } }}>
-        <Stack alignItems="center" textAlign="center" spacing={3}>
+        <Stack
+          spacing={3}
+          sx={{
+            alignItems: "center",
+            textAlign: "center",
+          }}
+        >
           <Box className="vault-fade-up" sx={{ mb: 1 }}>
             <Chip
               icon={<LockIcon sx={{ fontSize: 14 }} />}
@@ -67,11 +73,13 @@ export function HeroSection(): ReactElement {
 
           <Typography
             variant="h6"
-            color="text.secondary"
-            fontWeight={400}
-            maxWidth={640}
             className="vault-fade-up vault-delay-1"
-            sx={{ fontSize: { xs: "1rem", md: "1.25rem" } }}
+            sx={{
+              color: "text.secondary",
+              fontWeight: 400,
+              maxWidth: 640,
+              fontSize: { xs: "1rem", md: "1.25rem" },
+            }}
           >
             Scan dependencies for vulnerabilities across{" "}
             <TypingEffect words={ECOSYSTEM_FILES} interval={2000} /> and 9+ ecosystems — store
@@ -132,7 +140,6 @@ export function HeroSection(): ReactElement {
           </Stack>
         </Stack>
       </SectionContainer>
-
       {/* Demo video */}
       <SectionContainer>
         <DemoVideo />

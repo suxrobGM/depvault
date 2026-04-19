@@ -77,21 +77,44 @@ export function QuickStatsCard(props: QuickStatsCardProps): ReactElement {
   return (
     <GlassCard sx={{ height: "100%" }}>
       <CardContent sx={{ p: 3 }}>
-        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+        <Typography
+          variant="subtitle1"
+          sx={{
+            fontWeight: 600,
+            mb: 2,
+          }}
+        >
           Quick Stats
         </Typography>
         <Grid container spacing={2}>
           {stats.map((stat) => (
             <Grid size={6} key={stat.label}>
-              <Stack direction="row" alignItems="center" spacing={1.5}>
+              <Stack
+                direction="row"
+                spacing={1.5}
+                sx={{
+                  alignItems: "center",
+                }}
+              >
                 <IconBox color={stat.color} size={40}>
                   {stat.icon}
                 </IconBox>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "text.secondary",
+                    }}
+                  >
                     {stat.label}
                   </Typography>
-                  <Typography variant="h6" fontWeight={700} lineHeight={1.2}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      lineHeight: 1.2,
+                    }}
+                  >
                     {stat.value}
                   </Typography>
                 </Box>

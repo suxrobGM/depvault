@@ -66,7 +66,6 @@ export function SecurityOverviewView(): ReactElement {
           color="success"
         />
       </Grid>
-
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 6 }}>
           <Card variant="outlined">
@@ -92,8 +91,20 @@ export function SecurityOverviewView(): ReactElement {
                 Secret Scan Detections
               </Typography>
               <Stack spacing={2} sx={{ mt: 2 }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="center">
-                  <Stack direction="row" spacing={1} alignItems="center">
+                <Stack
+                  direction="row"
+                  sx={{
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{
+                      alignItems: "center",
+                    }}
+                  >
                     <DetectionIcon color="warning" fontSize="small" />
                     <Typography variant="body2">Open Detections</Typography>
                   </Stack>
@@ -103,8 +114,20 @@ export function SecurityOverviewView(): ReactElement {
                     color={scans.openDetections > 0 ? "warning" : "default"}
                   />
                 </Stack>
-                <Stack direction="row" justifyContent="space-between" alignItems="center">
-                  <Stack direction="row" spacing={1} alignItems="center">
+                <Stack
+                  direction="row"
+                  sx={{
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{
+                      alignItems: "center",
+                    }}
+                  >
                     <ResolvedIcon color="success" fontSize="small" />
                     <Typography variant="body2">Resolved</Typography>
                   </Stack>
@@ -133,7 +156,14 @@ function StatCard(props: StatCardProps): ReactElement {
     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
       <Card variant="outlined" className="vault-fade-up">
         <CardContent>
-          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
+          <Stack
+            direction="row"
+            spacing={1.5}
+            sx={{
+              alignItems: "center",
+              mb: 1,
+            }}
+          >
             <Box
               sx={{
                 width: 36,
@@ -149,11 +179,21 @@ function StatCard(props: StatCardProps): ReactElement {
             >
               {icon}
             </Box>
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               {title}
             </Typography>
           </Stack>
-          <Typography variant="h4" fontWeight={700}>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 700,
+            }}
+          >
             {value}
           </Typography>
         </CardContent>
@@ -172,7 +212,13 @@ function SeverityRow(props: SeverityRowProps): ReactElement {
   const { label, count, color } = props;
 
   return (
-    <Stack direction="row" justifyContent="space-between" alignItems="center">
+    <Stack
+      direction="row"
+      sx={{
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+    >
       <Typography variant="body2">{label}</Typography>
       <Chip label={count} size="small" color={color} />
     </Stack>

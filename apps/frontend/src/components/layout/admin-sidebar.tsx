@@ -43,7 +43,13 @@ export function AdminSidebar(props: PropsWithChildren): ReactElement {
         <Image src="/depvault-logo-dark.svg" alt="DepVault" width={130} height={37} />
       </Box>
       <Box sx={{ px: 2, pb: 1 }}>
-        <Typography variant="overline" color="text.secondary" fontWeight={700}>
+        <Typography
+          variant="overline"
+          sx={{
+            color: "text.secondary",
+            fontWeight: 700,
+          }}
+        >
           Admin Panel
         </Typography>
       </Box>

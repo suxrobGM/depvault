@@ -56,7 +56,12 @@ export function InvitationAction(props: InvitationActionProps): ReactElement {
             <Typography variant="h5" gutterBottom>
               Invitation Accepted
             </Typography>
-            <Typography color="text.secondary" sx={{ mb: 3 }}>
+            <Typography
+              sx={{
+                color: "text.secondary",
+                mb: 3,
+              }}
+            >
               You are now a member of the project.
             </Typography>
             <Button variant="contained" onClick={() => router.push(ROUTES.dashboard)}>
@@ -77,7 +82,12 @@ export function InvitationAction(props: InvitationActionProps): ReactElement {
             <Typography variant="h5" gutterBottom>
               Invitation Declined
             </Typography>
-            <Typography color="text.secondary" sx={{ mb: 3 }}>
+            <Typography
+              sx={{
+                color: "text.secondary",
+                mb: 3,
+              }}
+            >
               You have declined the invitation.
             </Typography>
             <Button variant="contained" onClick={() => router.push(ROUTES.dashboard)}>
@@ -119,21 +129,41 @@ export function InvitationAction(props: InvitationActionProps): ReactElement {
 
           <Stack spacing={2} sx={{ mb: 4 }}>
             <Box>
-              <Typography variant="caption" color="text.secondary">
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 Project
               </Typography>
-              <Typography variant="body1" fontWeight={500}>
+              <Typography
+                variant="body1"
+                sx={{
+                  fontWeight: 500,
+                }}
+              >
                 {invitation.project.name}
               </Typography>
             </Box>
             <Box>
-              <Typography variant="caption" color="text.secondary">
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 Invited by
               </Typography>
               <Typography variant="body1">{inviterName}</Typography>
             </Box>
             <Box>
-              <Typography variant="caption" color="text.secondary">
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 Role
               </Typography>
               <Box sx={{ mt: 0.5 }}>

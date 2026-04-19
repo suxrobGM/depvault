@@ -44,21 +44,37 @@ export function HowItWorksSection(): ReactElement {
   return (
     <Box component="section" id="how-it-works" sx={{ position: "relative", height: "100%" }}>
       <SectionContainer>
-        <Typography variant="h2" textAlign="center" sx={{ mb: 1 }}>
+        <Typography
+          variant="h2"
+          sx={{
+            textAlign: "center",
+            mb: 1,
+          }}
+        >
           How it works
         </Typography>
         <Typography
           variant="body1"
-          color="text.secondary"
-          textAlign="center"
-          sx={{ mb: 6, maxWidth: 500, mx: "auto" }}
+          sx={{
+            color: "text.secondary",
+            textAlign: "center",
+            mb: 6,
+            maxWidth: 500,
+            mx: "auto",
+          }}
         >
           From install to secure in four CLI commands
         </Typography>
         <Grid container spacing={4}>
           {steps.map((step, i) => (
             <Grid key={step.number} size={{ xs: 12, sm: 6, md: 3 }}>
-              <Stack alignItems="center" sx={{ position: "relative", height: "100%" }}>
+              <Stack
+                sx={{
+                  alignItems: "center",
+                  position: "relative",
+                  height: "100%",
+                }}
+              >
                 {i < steps.length - 1 && (
                   <Box
                     sx={{
@@ -110,7 +126,13 @@ export function HowItWorksSection(): ReactElement {
                   <Typography variant="h5" sx={{ mt: 1, mb: 1 }}>
                     {step.title}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                      lineHeight: 1.7,
+                    }}
+                  >
                     {step.description}
                   </Typography>
                 </GlassCard>

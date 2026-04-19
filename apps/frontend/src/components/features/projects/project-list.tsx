@@ -71,8 +71,21 @@ export function ProjectList(): ReactElement {
               }}
             >
               <CardContent sx={{ p: 3 }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                  <Typography variant="h6" fontWeight={600} noWrap sx={{ flex: 1 }}>
+                <Stack
+                  direction="row"
+                  sx={{
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    noWrap
+                    sx={{
+                      fontWeight: 600,
+                      flex: 1,
+                    }}
+                  >
                     {project.name}
                   </Typography>
                   {project.repositoryUrl && (
@@ -98,8 +111,8 @@ export function ProjectList(): ReactElement {
                 </Stack>
                 <Typography
                   variant="body2"
-                  color="text.secondary"
                   sx={{
+                    color: "text.secondary",
                     mt: 1,
                     mb: 2,
                     minHeight: 40,
@@ -111,9 +124,20 @@ export function ProjectList(): ReactElement {
                 >
                   {project.description ?? "No description"}
                 </Typography>
-                <Stack direction="row" alignItems="center" spacing={0.5}>
+                <Stack
+                  direction="row"
+                  spacing={0.5}
+                  sx={{
+                    alignItems: "center",
+                  }}
+                >
                   <CalendarIcon sx={{ fontSize: 14, color: "text.secondary" }} />
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "text.secondary",
+                    }}
+                  >
                     {new Date(project.createdAt).toLocaleDateString()}
                   </Typography>
                 </Stack>

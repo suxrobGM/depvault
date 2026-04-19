@@ -79,7 +79,11 @@ export function SharedLinksDialog(props: SharedLinksDialogProps): ReactElement {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <LinkIcon fontSize="small" />
+        <LinkIcon
+          sx={{
+            fontSize: "small",
+          }}
+        />
         Share Links
       </DialogTitle>
       <DialogContent sx={{ px: 0, pb: 0 }}>
@@ -89,7 +93,13 @@ export function SharedLinksDialog(props: SharedLinksDialogProps): ReactElement {
           </Box>
         ) : items.length === 0 ? (
           <Box sx={{ px: 3, py: 4, textAlign: "center" }}>
-            <Typography color="text.secondary">No share links created yet.</Typography>
+            <Typography
+              sx={{
+                color: "text.secondary",
+              }}
+            >
+              No share links created yet.
+            </Typography>
           </Box>
         ) : (
           <Table size="small">
@@ -117,7 +127,13 @@ export function SharedLinksDialog(props: SharedLinksDialogProps): ReactElement {
                     />
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" fontFamily="monospace" fontSize="0.75rem">
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: "monospace",
+                        fontSize: "0.75rem",
+                      }}
+                    >
                       {item.fileName ?? item.token.slice(0, 16) + "…"}
                     </Typography>
                   </TableCell>
@@ -129,22 +145,42 @@ export function SharedLinksDialog(props: SharedLinksDialogProps): ReactElement {
                     />
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: "text.secondary",
+                      }}
+                    >
                       {item.hasPassword ? "Yes" : "No"}
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: "text.secondary",
+                      }}
+                    >
                       {formatDate(item.expiresAt)}
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: "text.secondary",
+                      }}
+                    >
                       {item.viewedAt ? formatDate(item.viewedAt) : "—"}
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: "text.secondary",
+                      }}
+                    >
                       {formatDate(item.createdAt)}
                     </Typography>
                   </TableCell>

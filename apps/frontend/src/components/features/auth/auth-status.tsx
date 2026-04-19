@@ -17,7 +17,12 @@ export function AuthStatus(props: AuthStatusProps): ReactElement {
 
   return (
     <AuthCard title={title}>
-      <Stack spacing={2} alignItems="center">
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: "center",
+        }}
+      >
         <Alert severity={severity} sx={{ width: "100%" }}>
           {message}
         </Alert>

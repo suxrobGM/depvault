@@ -71,12 +71,26 @@ export function NotificationDropdown(props: NotificationDropdownProps): ReactEle
     >
       <Stack
         direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        sx={{ px: 2, py: 1.5 }}
+        sx={{
+          alignItems: "center",
+          justifyContent: "space-between",
+          px: 2,
+          py: 1.5,
+        }}
       >
-        <Stack direction="row" alignItems="center" spacing={1}>
-          <Typography variant="subtitle1" fontWeight={700}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            alignItems: "center",
+          }}
+        >
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: 700,
+            }}
+          >
             Notifications
           </Typography>
           {unreadCount > 0 && (
@@ -121,10 +135,21 @@ export function NotificationDropdown(props: NotificationDropdownProps): ReactEle
         {!isLoading && notifications.length === 0 && (
           <Box sx={{ py: 5, px: 3, textAlign: "center" }}>
             <NotificationsNoneIcon sx={{ fontSize: 40, color: "text.disabled", mb: 1 }} />
-            <Typography variant="body2" color="text.secondary" fontWeight={500}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                fontWeight: 500,
+              }}
+            >
               You&apos;re all caught up
             </Typography>
-            <Typography variant="caption" color="text.disabled">
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.disabled",
+              }}
+            >
               No new notifications
             </Typography>
           </Box>

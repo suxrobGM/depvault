@@ -32,7 +32,13 @@ const severityColors: Record<string, { bg: string; color: string; label: string 
 
 export function FeatureAnalysis(): ReactElement {
   return (
-    <Grid container spacing={4} alignItems="center">
+    <Grid
+      container
+      spacing={4}
+      sx={{
+        alignItems: "center",
+      }}
+    >
       <Grid size={{ xs: 12, md: 6 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
           <IconBox color="#10b981">
@@ -42,12 +48,26 @@ export function FeatureAnalysis(): ReactElement {
             Dependency Analysis
           </GradientText>
         </Box>
-        <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8, mb: 2 }}>
+        <Typography
+          variant="body1"
+          sx={{
+            color: "text.secondary",
+            lineHeight: 1.8,
+            mb: 2,
+          }}
+        >
           Run <code>depvault scan</code> in any repo to instantly detect outdated packages, known
           CVEs, and license conflicts. Supports package.json, requirements.txt, Cargo.toml, go.mod,
           *.csproj, and more — no file uploads needed.
         </Typography>
-        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+        <Stack
+          direction="row"
+          spacing={1}
+          useFlexGap
+          sx={{
+            flexWrap: "wrap",
+          }}
+        >
           <Chip label="8+ Ecosystems" size="small" variant="outlined" color="primary" />
           <Chip label="CVE Detection" size="small" variant="outlined" color="primary" />
           <Chip label="CLI + Dashboard" size="small" variant="outlined" color="primary" />
@@ -69,16 +89,40 @@ export function FeatureAnalysis(): ReactElement {
                 bgcolor: "rgba(255,255,255,0.02)",
               }}
             >
-              <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  fontWeight: 600,
+                }}
+              >
                 Package
               </Typography>
-              <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  fontWeight: 600,
+                }}
+              >
                 Current
               </Typography>
-              <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  fontWeight: 600,
+                }}
+              >
                 Latest
               </Typography>
-              <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                  fontWeight: 600,
+                }}
+              >
                 Status
               </Typography>
             </Box>
@@ -99,20 +143,29 @@ export function FeatureAnalysis(): ReactElement {
                     "&:hover": { bgcolor: "rgba(255,255,255,0.02)" },
                   }}
                 >
-                  <Typography variant="caption" fontFamily="var(--font-jetbrains), monospace">
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontFamily: "var(--font-jetbrains), monospace",
+                    }}
+                  >
                     {row.name}
                   </Typography>
                   <Typography
                     variant="caption"
-                    fontFamily="var(--font-jetbrains), monospace"
-                    color="text.secondary"
+                    sx={{
+                      fontFamily: "var(--font-jetbrains), monospace",
+                      color: "text.secondary",
+                    }}
                   >
                     {row.current}
                   </Typography>
                   <Typography
                     variant="caption"
-                    fontFamily="var(--font-jetbrains), monospace"
-                    color="text.secondary"
+                    sx={{
+                      fontFamily: "var(--font-jetbrains), monospace",
+                      color: "text.secondary",
+                    }}
                   >
                     {row.latest}
                   </Typography>

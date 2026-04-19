@@ -149,27 +149,52 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
           </IconButton>
         </TableCell>
         <TableCell>
-          <Typography variant="body2" fontWeight={500}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 500,
+            }}
+          >
             {file.name}
           </Typography>
           {file.description && (
-            <Typography variant="caption" color="text.secondary">
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               {file.description}
             </Typography>
           )}
         </TableCell>
         <TableCell>
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+            }}
+          >
             {file.vaultGroupName}
           </Typography>
         </TableCell>
         <TableCell>
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+            }}
+          >
             {formatBytes(file.fileSize)}
           </Typography>
         </TableCell>
         <TableCell>
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+            }}
+          >
             {formatDate(file.createdAt)}
           </Typography>
         </TableCell>
@@ -212,14 +237,12 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
           />
         </TableCell>
       </TableRow>
-
       <CreateFileShareDialog
         open={shareOpen}
         onClose={() => setShareOpen(false)}
         projectId={projectId}
         file={file}
       />
-
       <TableRow>
         <TableCell colSpan={6} sx={{ py: 0 }}>
           <Collapse in={historyOpen} timeout="auto" unmountOnExit>
@@ -235,7 +258,12 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
               {versionsLoading ? (
                 <Skeleton variant="rounded" height={60} />
               ) : versions.length === 0 ? (
-                <Typography variant="body2" color="text.secondary">
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.secondary",
+                  }}
+                >
                   No previous versions.
                 </Typography>
               ) : (
@@ -255,12 +283,22 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
                           <Typography variant="body2">v{versions.length - idx}</Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: "text.secondary",
+                            }}
+                          >
                             {formatDate(v.createdAt)}
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: "text.secondary",
+                            }}
+                          >
                             {formatBytes(v.fileSize)}
                           </Typography>
                         </TableCell>

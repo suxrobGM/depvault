@@ -60,16 +60,34 @@ export function DashboardQuickActions(): ReactElement {
                 }}
               >
                 <CardContent className={`vault-fade-up vault-delay-${index + 5}`} sx={{ p: 3 }}>
-                  <Stack direction="row" alignItems="center" justifyContent="space-between">
+                  <Stack
+                    direction="row"
+                    sx={{
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
                     <IconBox color={action.color} size={56}>
                       {action.icon}
                     </IconBox>
                     <ChevronIcon sx={{ color: "text.secondary", fontSize: 20 }} />
                   </Stack>
-                  <Typography variant="subtitle1" fontWeight={600} sx={{ mt: 2 }} gutterBottom>
+                  <Typography
+                    variant="subtitle1"
+                    gutterBottom
+                    sx={{
+                      fontWeight: 600,
+                      mt: 2,
+                    }}
+                  >
                     {action.title}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                    }}
+                  >
                     {action.description}
                   </Typography>
                 </CardContent>

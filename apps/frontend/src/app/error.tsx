@@ -53,8 +53,8 @@ export default function ErrorPage(props: ErrorPageProps): ReactElement {
         </GradientText>
         <Typography
           variant="body2"
-          color="text.secondary"
           sx={{
+            color: "text.secondary",
             mt: 2,
             mb: 4,
             fontFamily: "var(--font-jetbrains), monospace",
@@ -64,7 +64,13 @@ export default function ErrorPage(props: ErrorPageProps): ReactElement {
         >
           {error.message || "An unexpected error occurred."}
         </Typography>
-        <Stack direction="row" spacing={2} justifyContent="center">
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            justifyContent: "center",
+          }}
+        >
           <Button variant="contained" size="large" onClick={reset}>
             Try Again
           </Button>

@@ -117,9 +117,21 @@ export function GitHubTabContent(props: GitHubTabContentProps): ReactElement {
 
   if (!hasGitHub) {
     return (
-      <Stack spacing={2} alignItems="center" sx={{ py: 3 }}>
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: "center",
+          py: 3,
+        }}
+      >
         <GitHubIcon sx={{ fontSize: 48, color: "text.secondary" }} />
-        <Typography variant="body1" color="text.secondary" textAlign="center">
+        <Typography
+          variant="body1"
+          sx={{
+            color: "text.secondary",
+            textAlign: "center",
+          }}
+        >
           Link your GitHub account to import dependency files from your repositories.
         </Typography>
         <Button

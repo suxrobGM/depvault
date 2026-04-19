@@ -65,7 +65,12 @@ export function ScanHistory(props: ScanHistoryProps): ReactElement {
               {scans.map((scan) => (
                 <TableRow key={scan.id} hover>
                   <TableCell>
-                    <Typography variant="body2" fontSize={13}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontSize: 13,
+                      }}
+                    >
                       {new Date(scan.createdAt).toLocaleString()}
                     </Typography>
                   </TableCell>
@@ -82,8 +87,10 @@ export function ScanHistory(props: ScanHistoryProps): ReactElement {
                   <TableCell align="right">
                     <Typography
                       variant="body2"
-                      fontWeight={scan.detectionsFound > 0 ? 600 : 400}
                       color={scan.detectionsFound > 0 ? "error.main" : "text.primary"}
+                      sx={{
+                        fontWeight: scan.detectionsFound > 0 ? 600 : 400,
+                      }}
                     >
                       {scan.detectionsFound}
                     </Typography>
@@ -93,9 +100,11 @@ export function ScanHistory(props: ScanHistoryProps): ReactElement {
                       <Typography
                         variant="body2"
                         color="error"
-                        fontSize={12}
                         noWrap
-                        sx={{ maxWidth: 200 }}
+                        sx={{
+                          fontSize: 12,
+                          maxWidth: 200,
+                        }}
                       >
                         {scan.errorMessage}
                       </Typography>
@@ -107,7 +116,6 @@ export function ScanHistory(props: ScanHistoryProps): ReactElement {
           </Table>
         </TableContainer>
       )}
-
       {data && (
         <PaginationBar
           page={page}

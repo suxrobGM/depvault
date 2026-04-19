@@ -164,7 +164,12 @@ export function CreateCiTokenDialog(props: CreateCiTokenDialogProps): ReactEleme
               notification="Token copied to clipboard"
               fullWidth
             />
-            <Typography variant="caption" color="text.secondary">
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               Expires: {new Date(createdToken.expiresAt).toLocaleString()}
             </Typography>
             <Button

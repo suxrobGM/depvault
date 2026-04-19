@@ -51,11 +51,23 @@ export function EmptyState(props: EmptyStateProps): ReactElement {
           {icon}
         </Box>
       )}
-      <Typography variant="h5" color="text.secondary">
+      <Typography
+        variant="h5"
+        sx={{
+          color: "text.secondary",
+        }}
+      >
         {title}
       </Typography>
       {description && (
-        <Typography variant="body2" color="text.secondary" textAlign="center" maxWidth={400}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            textAlign: "center",
+            maxWidth: 400,
+          }}
+        >
           {description}
         </Typography>
       )}

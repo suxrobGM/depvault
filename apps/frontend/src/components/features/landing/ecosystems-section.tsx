@@ -59,14 +59,24 @@ export function EcosystemsSection(): ReactElement {
   return (
     <Box component="section" id="ecosystems" sx={{ position: "relative" }}>
       <SectionContainer>
-        <Typography variant="h2" textAlign="center" sx={{ mb: 1 }}>
+        <Typography
+          variant="h2"
+          sx={{
+            textAlign: "center",
+            mb: 1,
+          }}
+        >
           Works with your stack
         </Typography>
         <Typography
           variant="body1"
-          color="text.secondary"
-          textAlign="center"
-          sx={{ mb: 6, maxWidth: 540, mx: "auto" }}
+          sx={{
+            color: "text.secondary",
+            textAlign: "center",
+            mb: 6,
+            maxWidth: 540,
+            mx: "auto",
+          }}
         >
           Analyze dependencies, manage secrets, and store sensitive files across every major
           ecosystem
@@ -76,7 +86,14 @@ export function EcosystemsSection(): ReactElement {
           {categories.map((cat) => (
             <Grid key={cat.title} size={{ xs: 12, md: 4 }}>
               <GlassCard hoverGlow={false} sx={{ height: "100%", p: 3 }}>
-                <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2.5 }}>
+                <Stack
+                  direction="row"
+                  spacing={1.5}
+                  sx={{
+                    alignItems: "center",
+                    mb: 2.5,
+                  }}
+                >
                   <IconBox color={cat.color} size={36}>
                     {cat.icon}
                   </IconBox>
@@ -86,7 +103,14 @@ export function EcosystemsSection(): ReactElement {
                 </Stack>
                 <Stack spacing={0.5}>
                   {cat.items.map((item) => (
-                    <Stack key={item} direction="row" alignItems="center" spacing={1.5}>
+                    <Stack
+                      key={item}
+                      direction="row"
+                      spacing={1.5}
+                      sx={{
+                        alignItems: "center",
+                      }}
+                    >
                       <Box
                         sx={{
                           width: 6,
@@ -99,8 +123,9 @@ export function EcosystemsSection(): ReactElement {
                       />
                       <Typography
                         variant="body2"
-                        color="text.secondary"
                         sx={{
+                          color: "text.secondary",
+
                           ...(cat.mono && {
                             fontFamily: "var(--font-jetbrains), monospace",
                             fontSize: "0.8rem",

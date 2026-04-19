@@ -73,7 +73,6 @@ export function DependencyRow(props: DependencyRowProps): ReactElement {
         {packageUrl ? (
           <Typography
             variant="body2"
-            fontWeight={600}
             noWrap
             component="a"
             href={packageUrl}
@@ -81,6 +80,7 @@ export function DependencyRow(props: DependencyRowProps): ReactElement {
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
             sx={{
+              fontWeight: 600,
               color: "primary.main",
               textDecoration: "none",
               "&:hover": { textDecoration: "underline" },
@@ -89,12 +89,23 @@ export function DependencyRow(props: DependencyRowProps): ReactElement {
             {dep.name}
           </Typography>
         ) : (
-          <Typography variant="body2" fontWeight={600} noWrap>
+          <Typography
+            variant="body2"
+            noWrap
+            sx={{
+              fontWeight: 600,
+            }}
+          >
             {dep.name}
           </Typography>
         )}
 
-        <Typography variant="mono" color="text.secondary">
+        <Typography
+          variant="mono"
+          sx={{
+            color: "text.secondary",
+          }}
+        >
           {dep.currentVersion}
         </Typography>
 
@@ -136,7 +147,12 @@ export function DependencyRow(props: DependencyRowProps): ReactElement {
               sx={{ minWidth: 32, fontWeight: 700 }}
             />
           ) : (
-            <Typography variant="caption" color="text.disabled">
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.disabled",
+              }}
+            >
               0
             </Typography>
           )}
@@ -154,7 +170,6 @@ export function DependencyRow(props: DependencyRowProps): ReactElement {
           )}
         </Box>
       </Box>
-
       <Collapse in={expanded}>
         {hasVulns && (
           <Box
@@ -174,9 +189,12 @@ export function DependencyRow(props: DependencyRowProps): ReactElement {
           >
             <Typography
               variant="caption"
-              fontWeight={700}
-              color="error.main"
-              sx={{ mb: 1, display: "block" }}
+              sx={{
+                fontWeight: 700,
+                color: "error.main",
+                mb: 1,
+                display: "block",
+              }}
             >
               {dep.vulnerabilities.length} VULNERABILIT
               {dep.vulnerabilities.length === 1 ? "Y" : "IES"}

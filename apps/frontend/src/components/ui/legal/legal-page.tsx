@@ -14,7 +14,13 @@ export function LegalPage(props: LegalPageProps): ReactElement {
         <Typography variant="h3" component="h1" sx={{ fontWeight: 800, mb: 1 }}>
           {props.title}
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mb: 4,
+          }}
+        >
           Last updated: {props.lastUpdated}
         </Typography>
         <Divider sx={{ mb: 4 }} />
@@ -37,7 +43,13 @@ export function LegalSection(props: { title: string } & PropsWithChildren): Reac
 
 export function LegalParagraph(props: PropsWithChildren): ReactElement {
   return (
-    <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8 }}>
+    <Typography
+      variant="body1"
+      sx={{
+        color: "text.secondary",
+        lineHeight: 1.8,
+      }}
+    >
       {props.children}
     </Typography>
   );

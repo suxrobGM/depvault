@@ -42,40 +42,81 @@ export function AnalysisSummaryCard(props: AnalysisSummaryCardProps): ReactEleme
   return (
     <GlassCard sx={{ height: "100%" }}>
       <CardContent sx={{ p: 3 }}>
-        <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2.5 }}>
+        <Stack
+          direction="row"
+          spacing={1.5}
+          sx={{
+            alignItems: "center",
+            mb: 2.5,
+          }}
+        >
           <IconBox color="var(--mui-palette-info-main)" size={40}>
             <AnalysisIcon sx={{ fontSize: 22 }} />
           </IconBox>
-          <Typography variant="subtitle1" fontWeight={600}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: 600,
+            }}
+          >
             Analysis Summary
           </Typography>
         </Stack>
         <Grid container spacing={2} sx={{ mb: 2.5 }}>
           <Grid size={4}>
-            <Typography variant="caption" color="text.secondary">
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               Analyses
             </Typography>
-            <Typography variant="h6" fontWeight={700} lineHeight={1.2}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                lineHeight: 1.2,
+              }}
+            >
               {analysisCount}
             </Typography>
           </Grid>
           <Grid size={4}>
-            <Typography variant="caption" color="text.secondary">
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               Dependencies
             </Typography>
-            <Typography variant="h6" fontWeight={700} lineHeight={1.2}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                lineHeight: 1.2,
+              }}
+            >
               {totalDeps}
             </Typography>
           </Grid>
           <Grid size={4}>
-            <Typography variant="caption" color="text.secondary">
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               Avg Health
             </Typography>
             <Typography
               variant="h6"
-              fontWeight={700}
-              lineHeight={1.2}
-              sx={{ color: avgHealth !== null ? getHealthColor(avgHealth) : "text.secondary" }}
+              sx={{
+                fontWeight: 700,
+                lineHeight: 1.2,
+                color: avgHealth !== null ? getHealthColor(avgHealth) : "text.secondary",
+              }}
             >
               {avgHealth !== null ? `${avgHealth}%` : "\u2014"}
             </Typography>

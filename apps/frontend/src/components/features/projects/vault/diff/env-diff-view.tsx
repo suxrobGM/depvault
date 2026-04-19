@@ -35,11 +35,22 @@ export function EnvDiffView(props: EnvDiffViewProps): ReactElement {
   return (
     <Box>
       <Stack spacing={3}>
-        <Stack direction="row" alignItems="center" spacing={2}>
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            alignItems: "center",
+          }}
+        >
           <Button startIcon={<BackIcon />} onClick={onBack} size="small">
             Variables
           </Button>
-          <Typography variant="subtitle1" fontWeight={600}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: 600,
+            }}
+          >
             Compare Environments
           </Typography>
         </Stack>

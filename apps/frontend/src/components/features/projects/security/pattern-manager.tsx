@@ -67,8 +67,20 @@ export function PatternManager(props: PatternManagerProps): ReactElement {
     <>
       <GlassCard>
         <Box sx={{ p: 2 }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-            <Typography variant="subtitle1" fontWeight={600}>
+          <Stack
+            direction="row"
+            sx={{
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 2,
+            }}
+          >
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 600,
+              }}
+            >
               Scan Patterns
             </Typography>
             <Button
@@ -88,9 +100,12 @@ export function PatternManager(props: PatternManagerProps): ReactElement {
             <>
               <Typography
                 variant="caption"
-                color="text.secondary"
-                fontWeight={600}
-                sx={{ mb: 1, display: "block" }}
+                sx={{
+                  color: "text.secondary",
+                  fontWeight: 600,
+                  mb: 1,
+                  display: "block",
+                }}
               >
                 Custom Patterns
               </Typography>
@@ -113,10 +128,12 @@ export function PatternManager(props: PatternManagerProps): ReactElement {
                         <TableCell>
                           <Typography
                             variant="body2"
-                            fontFamily="monospace"
-                            fontSize={12}
                             noWrap
-                            sx={{ maxWidth: 300 }}
+                            sx={{
+                              fontFamily: "monospace",
+                              fontSize: 12,
+                              maxWidth: 300,
+                            }}
                           >
                             {pattern.regex}
                           </Typography>
@@ -129,7 +146,13 @@ export function PatternManager(props: PatternManagerProps): ReactElement {
                           />
                         </TableCell>
                         <TableCell align="right">
-                          <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                          <Stack
+                            direction="row"
+                            spacing={0.5}
+                            sx={{
+                              justifyContent: "flex-end",
+                            }}
+                          >
                             <Tooltip title="Edit">
                               <IconButton
                                 size="small"
@@ -163,9 +186,12 @@ export function PatternManager(props: PatternManagerProps): ReactElement {
 
           <Typography
             variant="caption"
-            color="text.secondary"
-            fontWeight={600}
-            sx={{ mb: 1, display: "block" }}
+            sx={{
+              color: "text.secondary",
+              fontWeight: 600,
+              mb: 1,
+              display: "block",
+            }}
           >
             Built-in Patterns
           </Typography>
@@ -188,10 +214,12 @@ export function PatternManager(props: PatternManagerProps): ReactElement {
                     <TableCell>
                       <Typography
                         variant="body2"
-                        fontFamily="monospace"
-                        fontSize={12}
                         noWrap
-                        sx={{ maxWidth: 300 }}
+                        sx={{
+                          fontFamily: "monospace",
+                          fontSize: 12,
+                          maxWidth: 300,
+                        }}
                       >
                         {pattern.regex}
                       </Typography>
@@ -215,7 +243,6 @@ export function PatternManager(props: PatternManagerProps): ReactElement {
           </TableContainer>
         </Box>
       </GlassCard>
-
       <CreatePatternDialog
         open={dialogOpen}
         onClose={() => {

@@ -31,10 +31,22 @@ export function AboutCard(props: AboutCardProps): ReactElement {
   return (
     <GlassCard sx={{ height: "100%" }}>
       <CardContent sx={{ p: 3 }}>
-        <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+        <Typography
+          variant="subtitle1"
+          sx={{
+            fontWeight: 600,
+            mb: 2,
+          }}
+        >
           About
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mb: 3,
+          }}
+        >
           {project.description || "No description provided."}
         </Typography>
         {project.repositoryUrl && (
@@ -53,15 +65,37 @@ export function AboutCard(props: AboutCardProps): ReactElement {
           </Button>
         )}
         <Stack spacing={1.5} sx={{ mt: 3 }}>
-          <Stack direction="row" alignItems="center" spacing={1}>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              alignItems: "center",
+            }}
+          >
             <CalendarIcon sx={{ fontSize: 16, color: "text.secondary" }} />
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               Created {new Date(project.createdAt).toLocaleDateString()}
             </Typography>
           </Stack>
-          <Stack direction="row" alignItems="center" spacing={1}>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              alignItems: "center",
+            }}
+          >
             <UpdateIcon sx={{ fontSize: 16, color: "text.secondary" }} />
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               Updated {new Date(project.updatedAt).toLocaleDateString()}
             </Typography>
           </Stack>

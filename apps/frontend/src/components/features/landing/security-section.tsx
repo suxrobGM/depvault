@@ -51,7 +51,14 @@ export function SecuritySection(): ReactElement {
   return (
     <Box component="section" id="security" sx={{ position: "relative" }}>
       <SectionContainer sx={{ py: { xs: 8, md: 12 } }}>
-        <Typography variant="h2" textAlign="center" className="vault-fade-up" sx={{ mb: 1 }}>
+        <Typography
+          variant="h2"
+          className="vault-fade-up"
+          sx={{
+            textAlign: "center",
+            mb: 1,
+          }}
+        >
           Built on{" "}
           <GradientText variant="h2" component="span" animated>
             zero trust
@@ -59,10 +66,14 @@ export function SecuritySection(): ReactElement {
         </Typography>
         <Typography
           variant="body1"
-          color="text.secondary"
-          textAlign="center"
           className="vault-fade-up vault-delay-1"
-          sx={{ mb: 6, maxWidth: 520, mx: "auto" }}
+          sx={{
+            color: "text.secondary",
+            textAlign: "center",
+            mb: 6,
+            maxWidth: 520,
+            mx: "auto",
+          }}
         >
           Your secrets are encrypted before they leave your browser. The server stores only
           ciphertext — it can never decrypt your data.
@@ -75,10 +86,22 @@ export function SecuritySection(): ReactElement {
                   <IconBox color={card.color} sx={{ mb: 2 }}>
                     {card.icon}
                   </IconBox>
-                  <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 0.5 }}>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      fontWeight: 600,
+                      mb: 0.5,
+                    }}
+                  >
                     {card.title}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                      lineHeight: 1.7,
+                    }}
+                  >
                     {card.description}
                   </Typography>
                 </CardContent>

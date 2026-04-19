@@ -108,18 +108,31 @@ export function ConverterView(): ReactElement {
   const canConvert = content.trim().length > 0 && fromFormat !== toFormat && !mutation.isPending;
 
   return (
-    <Grid container spacing={3} alignItems="stretch">
+    <Grid
+      container
+      spacing={3}
+      sx={{
+        alignItems: "stretch",
+      }}
+    >
       {/* Input Panel */}
       <Grid size={{ xs: 12, md: 5.5 }}>
         <GlassCard className="vault-fade-up vault-delay-1" sx={{ height: "100%" }}>
           <CardContent sx={{ p: 3, height: "100%", display: "flex", flexDirection: "column" }}>
             <Stack
               direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-              sx={{ mb: 2 }}
+              sx={{
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
             >
-              <Typography variant="subtitle1" fontWeight={600}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: 600,
+                }}
+              >
                 Input
               </Typography>
               <TextField
@@ -152,7 +165,13 @@ export function ConverterView(): ReactElement {
               sx={{ flex: 1, mb: 2 }}
             />
 
-            <Stack direction="row" spacing={1} justifyContent="flex-end">
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{
+                justifyContent: "flex-end",
+              }}
+            >
               <Button variant="outlined" onClick={handleClear} disabled={!content}>
                 Clear
               </Button>
@@ -163,7 +182,6 @@ export function ConverterView(): ReactElement {
           </CardContent>
         </GlassCard>
       </Grid>
-
       {/* Swap Button */}
       <Grid
         size={{ xs: 12, md: 1 }}
@@ -187,18 +205,24 @@ export function ConverterView(): ReactElement {
           </IconButton>
         </Tooltip>
       </Grid>
-
       {/* Output Panel */}
       <Grid size={{ xs: 12, md: 5.5 }}>
         <GlassCard className="vault-fade-up vault-delay-2" sx={{ height: "100%" }}>
           <CardContent sx={{ p: 3, height: "100%", display: "flex", flexDirection: "column" }}>
             <Stack
               direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-              sx={{ mb: 2 }}
+              sx={{
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
             >
-              <Typography variant="subtitle1" fontWeight={600}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: 600,
+                }}
+              >
                 Output
               </Typography>
               <TextField
@@ -228,7 +252,14 @@ export function ConverterView(): ReactElement {
               sx={{ flex: 1, mb: 2 }}
             />
 
-            <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center">
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{
+                justifyContent: "flex-end",
+                alignItems: "center",
+              }}
+            >
               {result && (
                 <>
                   <Chip

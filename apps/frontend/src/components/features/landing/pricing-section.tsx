@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { CheckCircleOutline as CheckIcon } from "@mui/icons-material";
+import { CheckCircleOutlined as CheckIcon } from "@mui/icons-material";
 import {
   Button,
   Chip,
@@ -86,7 +86,13 @@ const TIERS: PricingTier[] = [
 export function PricingSection(): ReactElement {
   return (
     <SectionContainer>
-      <Typography variant="h2" textAlign="center" sx={{ mb: 1 }}>
+      <Typography
+        variant="h2"
+        sx={{
+          textAlign: "center",
+          mb: 1,
+        }}
+      >
         Simple, transparent{" "}
         <GradientText variant="h2" component="span" animated>
           pricing
@@ -94,13 +100,25 @@ export function PricingSection(): ReactElement {
       </Typography>
       <Typography
         variant="body1"
-        color="text.secondary"
-        textAlign="center"
-        sx={{ mb: 6, maxWidth: 500, mx: "auto", lineHeight: 1.7 }}
+        sx={{
+          color: "text.secondary",
+          textAlign: "center",
+          mb: 6,
+          maxWidth: 500,
+          mx: "auto",
+          lineHeight: 1.7,
+        }}
       >
         Free for individual developers. Scalable for teams of any size.
       </Typography>
-      <Grid container spacing={3} justifyContent="center" alignItems="stretch">
+      <Grid
+        container
+        spacing={3}
+        sx={{
+          justifyContent: "center",
+          alignItems: "stretch",
+        }}
+      >
         {TIERS.map((tier) => (
           <Grid key={tier.name} size={{ xs: 12, sm: 6, md: 4 }}>
             <GlassCard
@@ -135,17 +153,36 @@ export function PricingSection(): ReactElement {
               <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
                 {tier.name}
               </Typography>
-              <Stack direction="row" alignItems="baseline" spacing={0.5} sx={{ mb: 1 }}>
+              <Stack
+                direction="row"
+                spacing={0.5}
+                sx={{
+                  alignItems: "baseline",
+                  mb: 1,
+                }}
+              >
                 <Typography variant="h3" sx={{ fontWeight: 800 }}>
                   {tier.price}
                 </Typography>
                 {tier.period && (
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                    }}
+                  >
                     {tier.period}
                   </Typography>
                 )}
               </Stack>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3, lineHeight: 1.7 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  mb: 3,
+                  lineHeight: 1.7,
+                }}
+              >
                 {tier.description}
               </Typography>
               <List dense disablePadding sx={{ flex: 1, mb: 3 }}>

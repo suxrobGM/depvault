@@ -147,7 +147,12 @@ export function ImportVariablesDialog(props: ImportVariablesDialogProps): ReactE
               placeholder="Paste your config file content here..."
               slotProps={{ input: { sx: { fontFamily: "monospace", fontSize: 13 } } }}
             />
-            <Typography variant="caption" color="text.secondary">
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               Upload a file or paste content directly. Format is auto-detected from file extension.
             </Typography>
           </Stack>

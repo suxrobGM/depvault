@@ -4,7 +4,7 @@ import { type ReactElement } from "react";
 import {
   ExpandLess as CollapseIcon,
   ExpandMore as ExpandIcon,
-  RemoveCircleOutline as FalsePositiveIcon,
+  RemoveCircleOutlined as FalsePositiveIcon,
   CheckCircle as ResolveIcon,
 } from "@mui/icons-material";
 import {
@@ -80,24 +80,47 @@ export function DetectionTableRow(props: DetectionTableRowProps): ReactElement {
           <IconButton size="small">{expanded ? <CollapseIcon /> : <ExpandIcon />}</IconButton>
         </TableCell>
         <TableCell>
-          <Typography variant="body2" fontFamily="monospace" fontSize={12}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontFamily: "monospace",
+              fontSize: 12,
+            }}
+          >
             {detection.commitHash.slice(0, 7)}
           </Typography>
         </TableCell>
         <TableCell>
           <Tooltip title={detection.filePath} placement="top-start" enterDelay={300}>
-            <Typography variant="body2" fontSize={13} sx={{ maxWidth: 250 }} noWrap>
+            <Typography
+              variant="body2"
+              noWrap
+              sx={{
+                fontSize: 13,
+                maxWidth: 250,
+              }}
+            >
               {detection.filePath}
             </Typography>
           </Tooltip>
           {detection.lineNumber && (
-            <Typography variant="caption" color="text.secondary">
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               Line {detection.lineNumber}
             </Typography>
           )}
         </TableCell>
         <TableCell>
-          <Typography variant="body2" fontSize={13}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontSize: 13,
+            }}
+          >
             {detection.patternName}
           </Typography>
         </TableCell>
@@ -118,7 +141,13 @@ export function DetectionTableRow(props: DetectionTableRowProps): ReactElement {
         </TableCell>
         <TableCell align="right">
           {detection.status === "OPEN" && (
-            <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+            <Stack
+              direction="row"
+              spacing={0.5}
+              sx={{
+                justifyContent: "flex-end",
+              }}
+            >
               <Tooltip title="Mark as resolved">
                 <IconButton
                   size="small"
@@ -154,28 +183,43 @@ export function DetectionTableRow(props: DetectionTableRowProps): ReactElement {
             <Box sx={{ p: 2 }}>
               <Stack spacing={1.5}>
                 <Box>
-                  <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "text.secondary",
+                      fontWeight: 600,
+                    }}
+                  >
                     File
                   </Typography>
                   <Typography
                     variant="body2"
-                    fontFamily="monospace"
-                    fontSize={12}
-                    sx={{ mt: 0.5, wordBreak: "break-all" }}
+                    sx={{
+                      fontFamily: "monospace",
+                      fontSize: 12,
+                      mt: 0.5,
+                      wordBreak: "break-all",
+                    }}
                   >
                     {detection.filePath}
                     {detection.lineNumber ? `:${detection.lineNumber}` : ""}
                   </Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "text.secondary",
+                      fontWeight: 600,
+                    }}
+                  >
                     Matched Snippet
                   </Typography>
                   <Typography
                     variant="body2"
-                    fontFamily="monospace"
-                    fontSize={12}
                     sx={{
+                      fontFamily: "monospace",
+                      fontSize: 12,
                       mt: 0.5,
                       p: 1,
                       borderRadius: 1,
@@ -187,7 +231,13 @@ export function DetectionTableRow(props: DetectionTableRowProps): ReactElement {
                 </Box>
                 {detection.remediationSteps && (
                   <Box>
-                    <Typography variant="caption" color="text.secondary" fontWeight={600}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "text.secondary",
+                        fontWeight: 600,
+                      }}
+                    >
                       Remediation
                     </Typography>
                     <Typography variant="body2" sx={{ mt: 0.5 }}>

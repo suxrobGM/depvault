@@ -35,7 +35,12 @@ export function ResetPasswordForm(props: ResetPasswordFormProps): ReactElement {
 
   if (success) {
     return (
-      <Stack spacing={2} alignItems="center">
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: "center",
+        }}
+      >
         <Alert severity="success" sx={{ width: "100%" }}>
           Password reset successfully. You can now sign in with your new password.
         </Alert>

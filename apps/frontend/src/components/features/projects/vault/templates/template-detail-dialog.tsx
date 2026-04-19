@@ -48,7 +48,12 @@ export function TemplateDetailDialog(props: TemplateDetailDialogProps): ReactEle
         {data && (
           <Stack spacing={2}>
             {data.description && (
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 {data.description}
               </Typography>
             )}
@@ -67,12 +72,23 @@ export function TemplateDetailDialog(props: TemplateDetailDialogProps): ReactEle
                   {data.variables.map((v) => (
                     <TableRow key={v.id} hover>
                       <TableCell>
-                        <Typography variant="body2" fontFamily="monospace" fontWeight={600}>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontFamily: "monospace",
+                            fontWeight: 600,
+                          }}
+                        >
                           {v.key}
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "text.secondary",
+                          }}
+                        >
                           {v.description || "—"}
                         </Typography>
                       </TableCell>

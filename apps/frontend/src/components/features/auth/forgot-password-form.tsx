@@ -29,7 +29,12 @@ export function ForgotPasswordForm(): ReactElement {
 
   if (success) {
     return (
-      <Stack spacing={2} alignItems="center">
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: "center",
+        }}
+      >
         <Alert severity="success" sx={{ width: "100%" }}>
           If an account with that email exists, we&apos;ve sent a password reset link.
         </Alert>
@@ -69,7 +74,12 @@ export function ForgotPasswordForm(): ReactElement {
           {form.state.isSubmitting ? "Sending..." : "Send reset link"}
         </Button>
 
-        <Typography variant="body2" textAlign="center">
+        <Typography
+          variant="body2"
+          sx={{
+            textAlign: "center",
+          }}
+        >
           <Link href={ROUTES.login}>Back to sign in</Link>
         </Typography>
       </Stack>

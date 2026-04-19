@@ -28,11 +28,22 @@ export function AuthCard(props: AuthCardProps): ReactElement {
           >
             <Image src="/depvault-icon.svg" alt="" width={24} height={30} />
           </Box>
-          <Typography variant="h5" fontWeight={700} gutterBottom>
+          <Typography
+            variant="h5"
+            gutterBottom
+            sx={{
+              fontWeight: 700,
+            }}
+          >
             {title}
           </Typography>
           {subtitle && (
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               {subtitle}
             </Typography>
           )}

@@ -93,7 +93,13 @@ export function VaultToolbar(props: VaultToolbarProps): ReactElement {
   ];
 
   return (
-    <Stack direction="row" spacing={1} alignItems="center">
+    <Stack
+      direction="row"
+      spacing={1}
+      sx={{
+        alignItems: "center",
+      }}
+    >
       {canEdit && (
         <Button variant="contained" size="small" startIcon={<AddIcon />} onClick={onCreateVariable}>
           New Variable

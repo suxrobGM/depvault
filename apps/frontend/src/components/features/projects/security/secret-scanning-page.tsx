@@ -106,16 +106,27 @@ export function SecretScanningPage(props: SecretScanningPageProps): ReactElement
           </Stack>
         }
       />
-
       <Grid container spacing={3} className="vault-fade-up vault-delay-1">
         <Grid size={{ xs: 12, md: 4 }}>
           <GlassCard sx={{ height: "100%" }}>
             <CardContent sx={{ p: 3 }}>
-              <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
+              <Stack
+                direction="row"
+                spacing={1.5}
+                sx={{
+                  alignItems: "center",
+                  mb: 2,
+                }}
+              >
                 <IconBox color="var(--mui-palette-warning-main)" size={40}>
                   <ShieldIcon sx={{ fontSize: 22 }} />
                 </IconBox>
-                <Typography variant="subtitle1" fontWeight={600}>
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    fontWeight: 600,
+                  }}
+                >
                   Last Scan
                 </Typography>
               </Stack>
@@ -123,7 +134,13 @@ export function SecretScanningPage(props: SecretScanningPageProps): ReactElement
                 <Skeleton variant="text" width="60%" />
               ) : summary?.lastScan ? (
                 <Stack spacing={1}>
-                  <Stack direction="row" alignItems="center" spacing={1}>
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{
+                      alignItems: "center",
+                    }}
+                  >
                     <Chip
                       label={summary.lastScan.status}
                       size="small"
@@ -136,15 +153,30 @@ export function SecretScanningPage(props: SecretScanningPageProps): ReactElement
                       }
                     />
                   </Stack>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                    }}
+                  >
                     {new Date(summary.lastScan.createdAt).toLocaleString()}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                    }}
+                  >
                     {summary.lastScan.commitsScanned} commits scanned
                   </Typography>
                 </Stack>
               ) : (
-                <Typography variant="body2" color="text.secondary">
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.secondary",
+                  }}
+                >
                   No scans yet
                 </Typography>
               )}
@@ -155,7 +187,13 @@ export function SecretScanningPage(props: SecretScanningPageProps): ReactElement
         <Grid size={{ xs: 12, md: 8 }}>
           <GlassCard sx={{ height: "100%" }}>
             <CardContent sx={{ p: 3 }}>
-              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: 600,
+                  mb: 2,
+                }}
+              >
                 Open Detections
               </Typography>
               {summaryLoading ? (
@@ -164,11 +202,27 @@ export function SecretScanningPage(props: SecretScanningPageProps): ReactElement
                 <Grid container spacing={2}>
                   {SEVERITY_CONFIG.map((s) => (
                     <Grid size={3} key={s.key}>
-                      <Stack alignItems="center" spacing={0.5}>
-                        <Typography variant="h4" fontWeight={700} sx={{ color: s.color }}>
+                      <Stack
+                        spacing={0.5}
+                        sx={{
+                          alignItems: "center",
+                        }}
+                      >
+                        <Typography
+                          variant="h4"
+                          sx={{
+                            fontWeight: 700,
+                            color: s.color,
+                          }}
+                        >
                           {summary?.openDetections[s.key] ?? 0}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "text.secondary",
+                          }}
+                        >
                           {s.label}
                         </Typography>
                       </Stack>
@@ -178,11 +232,21 @@ export function SecretScanningPage(props: SecretScanningPageProps): ReactElement
               )}
               <Stack
                 direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-                sx={{ mt: 2, pt: 2, borderTop: 1, borderColor: "divider" }}
+                sx={{
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mt: 2,
+                  pt: 2,
+                  borderTop: 1,
+                  borderColor: "divider",
+                }}
               >
-                <Typography variant="body2" color="text.secondary">
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.secondary",
+                  }}
+                >
                   Total open: {totalOpen} | Resolved: {summary?.totalResolved ?? 0}
                 </Typography>
               </Stack>
@@ -190,7 +254,6 @@ export function SecretScanningPage(props: SecretScanningPageProps): ReactElement
           </GlassCard>
         </Grid>
       </Grid>
-
       <Stack
         direction="row"
         spacing={1}
@@ -215,7 +278,6 @@ export function SecretScanningPage(props: SecretScanningPageProps): ReactElement
           ),
         )}
       </Stack>
-
       <Box className="vault-fade-up vault-delay-3">
         {activeSection === "detections" && <DetectionsTable projectId={projectId} />}
         {activeSection === "history" && <ScanHistory projectId={projectId} />}

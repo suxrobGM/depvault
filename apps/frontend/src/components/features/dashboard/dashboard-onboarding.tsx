@@ -107,11 +107,23 @@ export function DashboardOnboarding(): ReactElement {
   return (
     <GlassCard hoverGlow={false}>
       <CardContent sx={{ p: 3 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2.5 }}>
+        <Stack
+          direction="row"
+          sx={{
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 2.5,
+          }}
+        >
           <GradientText variant="h6" component="h2">
             Getting Started
           </GradientText>
-          <Typography variant="caption" color="text.secondary">
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+            }}
+          >
             {progress}% complete
           </Typography>
         </Stack>
@@ -162,12 +174,18 @@ export function DashboardOnboarding(): ReactElement {
                   )}
                 </Box>
                 <Box sx={{ flex: 1 }}>
-                  <Stack direction="row" alignItems="center" spacing={1}>
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{
+                      alignItems: "center",
+                    }}
+                  >
                     <Box sx={{ color: done ? "text.secondary" : "text.primary" }}>{step.icon}</Box>
                     <Typography
                       variant="body2"
-                      fontWeight={600}
                       sx={{
+                        fontWeight: 600,
                         textDecoration: done ? "line-through" : "none",
                         color: done ? "text.secondary" : "text.primary",
                       }}
@@ -177,8 +195,11 @@ export function DashboardOnboarding(): ReactElement {
                   </Stack>
                   <Typography
                     variant="caption"
-                    color="text.secondary"
-                    sx={{ mt: 0.25, display: "block" }}
+                    sx={{
+                      color: "text.secondary",
+                      mt: 0.25,
+                      display: "block",
+                    }}
                   >
                     {step.description}
                   </Typography>

@@ -36,8 +36,20 @@ export function ProjectTemplatesSection(props: ProjectTemplatesSectionProps): Re
 
   return (
     <Box sx={{ mb: 4 }}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-        <Typography variant="subtitle1" fontWeight={600}>
+      <Stack
+        direction="row"
+        sx={{
+          alignItems: "center",
+          justifyContent: "space-between",
+          mb: 2,
+        }}
+      >
+        <Typography
+          variant="subtitle1"
+          sx={{
+            fontWeight: 600,
+          }}
+        >
           Project Templates
         </Typography>
         {canEdit && (
@@ -51,9 +63,7 @@ export function ProjectTemplatesSection(props: ProjectTemplatesSectionProps): Re
           </Button>
         )}
       </Stack>
-
       {isLoading && <SkeletonList count={2} height={80} spacing={1} />}
-
       {templates && templates.length === 0 && (
         <EmptyState
           title="No templates yet"
@@ -62,7 +72,6 @@ export function ProjectTemplatesSection(props: ProjectTemplatesSectionProps): Re
           onAction={canEdit ? () => setSaveOpen(true) : undefined}
         />
       )}
-
       {templates && templates.length > 0 && (
         <TemplateList
           projectId={projectId}
@@ -72,7 +81,6 @@ export function ProjectTemplatesSection(props: ProjectTemplatesSectionProps): Re
           onApply={setApplyTemplateId}
         />
       )}
-
       {canEdit && (
         <TemplateSaveDialog
           open={saveOpen}
@@ -81,14 +89,12 @@ export function ProjectTemplatesSection(props: ProjectTemplatesSectionProps): Re
           vaultGroups={groupsForDialogs}
         />
       )}
-
       <TemplateDetailDialog
         open={!!viewTemplateId}
         onClose={() => setViewTemplateId(null)}
         projectId={projectId}
         templateId={viewTemplateId}
       />
-
       {canEdit && (
         <TemplateApplyDialog
           open={!!applyTemplateId}

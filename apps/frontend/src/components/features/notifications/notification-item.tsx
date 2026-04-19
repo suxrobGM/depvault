@@ -71,12 +71,20 @@ export function NotificationItem(props: NotificationItemProps): ReactElement {
         {config.icon}
       </Box>
       <Box sx={{ minWidth: 0, flex: 1 }}>
-        <Stack direction="row" alignItems="center" spacing={0.75}>
+        <Stack
+          direction="row"
+          spacing={0.75}
+          sx={{
+            alignItems: "center",
+          }}
+        >
           <Typography
             variant="body2"
-            fontWeight={notification.read ? 400 : 600}
             noWrap
-            sx={{ flex: 1 }}
+            sx={{
+              fontWeight: notification.read ? 400 : 600,
+              flex: 1,
+            }}
           >
             {notification.title}
           </Typography>
@@ -86,8 +94,8 @@ export function NotificationItem(props: NotificationItemProps): ReactElement {
         </Stack>
         <Typography
           variant="caption"
-          color="text.secondary"
           sx={{
+            color: "text.secondary",
             display: "-webkit-box",
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",
@@ -98,7 +106,14 @@ export function NotificationItem(props: NotificationItemProps): ReactElement {
         >
           {notification.message}
         </Typography>
-        <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, display: "block" }}>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.disabled",
+            mt: 0.5,
+            display: "block",
+          }}
+        >
           {formatRelativeTime(notification.createdAt)}
         </Typography>
       </Box>

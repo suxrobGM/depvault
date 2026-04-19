@@ -160,10 +160,20 @@ export function CreateFileShareDialog(props: CreateFileShareDialogProps): ReactE
                   bgcolor: "action.hover",
                 }}
               >
-                <Typography variant="caption" color="text.secondary">
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "text.secondary",
+                  }}
+                >
                   Sharing file
                 </Typography>
-                <Typography variant="body2" fontWeight={600}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 600,
+                  }}
+                >
                   {file.name}
                 </Typography>
               </Box>

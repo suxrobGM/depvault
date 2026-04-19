@@ -56,7 +56,12 @@ export function FormSelectField(props: FormSelectFieldProps): ReactElement {
           return (
             <Stack spacing={0.5}>
               {label && (
-                <Typography variant="body2" color="text.secondary">
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.secondary",
+                  }}
+                >
                   {label}
                 </Typography>
               )}

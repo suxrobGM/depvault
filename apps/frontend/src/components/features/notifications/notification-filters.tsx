@@ -26,7 +26,14 @@ export function NotificationFilters(props: NotificationFiltersProps): ReactEleme
   const { readFilter, typeFilter, onReadFilterChange, onTypeFilterChange } = props;
 
   return (
-    <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
+    <Stack
+      direction="row"
+      spacing={2}
+      sx={{
+        alignItems: "center",
+        flexWrap: "wrap",
+      }}
+    >
       <ToggleButtonGroup
         value={readFilter}
         exclusive

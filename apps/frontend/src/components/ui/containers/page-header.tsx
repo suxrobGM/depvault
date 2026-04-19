@@ -22,10 +22,12 @@ export function PageHeader(props: PageHeaderProps): ReactElement {
   return (
     <Stack
       direction="row"
-      justifyContent="space-between"
-      alignItems="flex-start"
       className="vault-fade-up"
-      sx={{ mb: 3 }}
+      sx={{
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        mb: 3,
+      }}
     >
       <Box sx={{ minWidth: 0, flex: 1 }}>
         {breadcrumbs && breadcrumbs.length > 0 && (
@@ -33,9 +35,13 @@ export function PageHeader(props: PageHeaderProps): ReactElement {
             component="nav"
             aria-label="Breadcrumb"
             direction="row"
-            alignItems="center"
             spacing={0}
-            sx={{ mb: 1.5, flexWrap: "wrap", rowGap: 0.5 }}
+            sx={{
+              alignItems: "center",
+              mb: 1.5,
+              flexWrap: "wrap",
+              rowGap: 0.5,
+            }}
           >
             {breadcrumbs.map((item, index) => {
               const isLast = index === breadcrumbs.length - 1;
@@ -45,8 +51,10 @@ export function PageHeader(props: PageHeaderProps): ReactElement {
                 <Stack
                   key={`${index}-${item.label}`}
                   direction="row"
-                  alignItems="center"
                   spacing={0}
+                  sx={{
+                    alignItems: "center",
+                  }}
                 >
                   {!isFirst && (
                     <ChevronIcon
@@ -95,7 +103,12 @@ export function PageHeader(props: PageHeaderProps): ReactElement {
           {title}
         </Typography>
         {subtitle && (
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+            }}
+          >
             {subtitle}
           </Typography>
         )}

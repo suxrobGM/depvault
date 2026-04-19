@@ -81,12 +81,29 @@ export function CiTokensSection(props: CiTokensSectionProps): ReactElement {
     <>
       <GlassCard>
         <CardContent sx={{ p: 3 }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+          <Stack
+            direction="row"
+            sx={{
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 2,
+            }}
+          >
             <Box>
-              <Typography variant="subtitle1" fontWeight={600}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: 600,
+                }}
+              >
                 CI/CD Tokens
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 Generate scoped tokens for CI/CD pipelines to fetch secrets at build time.
               </Typography>
             </Box>
@@ -103,7 +120,14 @@ export function CiTokensSection(props: CiTokensSectionProps): ReactElement {
           </Stack>
 
           {tokens.length === 0 ? (
-            <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: "center" }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                py: 2,
+                textAlign: "center",
+              }}
+            >
               No CI/CD tokens yet. Generate one to get started.
             </Typography>
           ) : (
@@ -126,12 +150,23 @@ export function CiTokensSection(props: CiTokensSectionProps): ReactElement {
                     return (
                       <TableRow key={token.id}>
                         <TableCell>
-                          <Typography variant="body2" fontWeight={500}>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: 500,
+                            }}
+                          >
                             {token.name}
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" fontFamily="monospace" color="text.secondary">
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontFamily: "monospace",
+                              color: "text.secondary",
+                            }}
+                          >
                             dvci_{token.tokenPrefix}...
                           </Typography>
                         </TableCell>
@@ -177,13 +212,11 @@ export function CiTokensSection(props: CiTokensSectionProps): ReactElement {
           )}
         </CardContent>
       </GlassCard>
-
       <CreateCiTokenDialog
         open={createOpen}
         onClose={() => setCreateOpen(false)}
         projectId={projectId}
       />
-
       <Dialog open={snippetsOpen} onClose={() => setSnippetsOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Integration Code</DialogTitle>
         <DialogContent>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import { CheckCircleOutline as CheckIcon, Terminal as TerminalIcon } from "@mui/icons-material";
+import { CheckCircleOutlined as CheckIcon, Terminal as TerminalIcon } from "@mui/icons-material";
 import { Alert, Button, Stack, Typography } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import { useSearchParams } from "next/navigation";
@@ -43,12 +43,29 @@ export function DeviceVerifyForm(): ReactElement {
 
   if (success) {
     return (
-      <Stack spacing={2} alignItems="center" sx={{ py: 2 }}>
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: "center",
+          py: 2,
+        }}
+      >
         <CheckIcon sx={{ fontSize: 48, color: "success.main" }} />
-        <Typography variant="h6" fontWeight={600}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 600,
+          }}
+        >
           CLI Authorized
         </Typography>
-        <Typography variant="body2" color="text.secondary" textAlign="center">
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            textAlign: "center",
+          }}
+        >
           Your terminal is now authenticated. You can close this tab.
         </Typography>
       </Stack>
@@ -65,9 +82,21 @@ export function DeviceVerifyForm(): ReactElement {
       }}
     >
       <Stack spacing={2.5}>
-        <Stack direction="row" spacing={1} alignItems="center" sx={{ justifyContent: "center" }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <TerminalIcon sx={{ color: "text.secondary", fontSize: 20 }} />
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+            }}
+          >
             depvault login
           </Typography>
         </Stack>

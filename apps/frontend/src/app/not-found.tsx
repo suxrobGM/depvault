@@ -42,7 +42,14 @@ export default function NotFound(): ReactElement {
         >
           404
         </GradientText>
-        <Typography variant="h6" color="text.secondary" sx={{ mt: 2, mb: 4 }}>
+        <Typography
+          variant="h6"
+          sx={{
+            color: "text.secondary",
+            mt: 2,
+            mb: 4,
+          }}
+        >
           This page doesn&apos;t exist or has been moved.
         </Typography>
         <Link href={ROUTES.home} style={{ textDecoration: "none" }}>

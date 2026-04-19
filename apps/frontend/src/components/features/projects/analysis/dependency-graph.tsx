@@ -53,11 +53,29 @@ function DependencyNode(props: NodeProps<Node<{ dep: Dependency }>>): ReactEleme
       }}
     >
       <Handle type="target" position={Position.Top} style={{ visibility: "hidden" }} />
-      <Stack spacing={0.5} alignItems="center">
-        <Typography variant="caption" fontWeight={700} noWrap sx={{ maxWidth: 160 }}>
+      <Stack
+        spacing={0.5}
+        sx={{
+          alignItems: "center",
+        }}
+      >
+        <Typography
+          variant="caption"
+          noWrap
+          sx={{
+            fontWeight: 700,
+            maxWidth: 160,
+          }}
+        >
           {dep.name}
         </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ fontSize: "0.65rem" }}>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            fontSize: "0.65rem",
+          }}
+        >
           {dep.currentVersion}
         </Typography>
         {hasVulns && (
@@ -91,7 +109,13 @@ function ProjectNode(props: NodeProps<Node<{ label: string }>>): ReactElement {
       }}
     >
       <Handle type="target" position={Position.Top} style={{ visibility: "hidden" }} />
-      <Typography variant="body2" fontWeight={700} color="primary.main">
+      <Typography
+        variant="body2"
+        sx={{
+          fontWeight: 700,
+          color: "primary.main",
+        }}
+      >
         {data.label}
       </Typography>
       <Handle type="source" position={Position.Bottom} style={{ visibility: "hidden" }} />

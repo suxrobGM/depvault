@@ -116,7 +116,12 @@ export function AvatarUploader(props: AvatarUploaderProps): ReactElement {
 
   return (
     <>
-      <Stack alignItems="center" spacing={2}>
+      <Stack
+        spacing={2}
+        sx={{
+          alignItems: "center",
+        }}
+      >
         <Avatar
           src={currentAvatarUrl ?? undefined}
           sx={{ width: 120, height: 120, fontSize: 40, cursor: "pointer" }}
@@ -140,10 +145,20 @@ export function AvatarUploader(props: AvatarUploaderProps): ReactElement {
           }}
         >
           <UploadIcon sx={{ color: "text.secondary", fontSize: 32, mb: 0.5 }} />
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+            }}
+          >
             Drop an image here or click to upload
           </Typography>
-          <Typography variant="caption" color="text.disabled">
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.disabled",
+            }}
+          >
             JPG, PNG, GIF, or WebP · Max 5 MB
           </Typography>
         </Box>
@@ -156,7 +171,6 @@ export function AvatarUploader(props: AvatarUploaderProps): ReactElement {
           onChange={handleInputChange}
         />
       </Stack>
-
       <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
         <DialogTitle>Crop Avatar</DialogTitle>
         <DialogContent>
@@ -175,8 +189,21 @@ export function AvatarUploader(props: AvatarUploaderProps): ReactElement {
               />
             )}
           </Box>
-          <Stack direction="row" alignItems="center" spacing={2} sx={{ mt: 2, px: 2 }}>
-            <Typography variant="body2" color="text.secondary">
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{
+              alignItems: "center",
+              mt: 2,
+              px: 2,
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               Zoom
             </Typography>
             <Slider

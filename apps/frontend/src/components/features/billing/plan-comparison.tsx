@@ -6,7 +6,7 @@ import {
   SubscriptionPlanName,
   type SubscriptionPlanValue,
 } from "@depvault/shared/constants";
-import { CheckCircleOutline as CheckIcon } from "@mui/icons-material";
+import { CheckCircleOutlined as CheckIcon } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -149,10 +149,15 @@ export function PlanComparison(): ReactElement {
 
   return (
     <Box>
-      <Typography variant="h5" fontWeight={700} sx={{ mb: 3 }}>
+      <Typography
+        variant="h5"
+        sx={{
+          fontWeight: 700,
+          mb: 3,
+        }}
+      >
         Plans
       </Typography>
-
       {currentPlan !== SubscriptionPlanName.TEAM && (
         <Box sx={{ mb: 3, maxWidth: 320 }}>
           <TextField
@@ -165,8 +170,13 @@ export function PlanComparison(): ReactElement {
           />
         </Box>
       )}
-
-      <Grid container spacing={3} alignItems="stretch">
+      <Grid
+        container
+        spacing={3}
+        sx={{
+          alignItems: "stretch",
+        }}
+      >
         {PLANS.map((planDef) => {
           const isCurrent = planDef.key === currentPlan;
 
@@ -184,16 +194,38 @@ export function PlanComparison(): ReactElement {
               >
                 <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
                   <Box>
-                    <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
-                      <Typography variant="h6" fontWeight={700}>
+                    <Stack
+                      direction="row"
+                      spacing={1}
+                      sx={{
+                        alignItems: "center",
+                        mb: 0.5,
+                      }}
+                    >
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontWeight: 700,
+                        }}
+                      >
                         {planDef.name}
                       </Typography>
                       {isCurrent && <StatusBadge label="Current" variant="info" />}
                     </Stack>
-                    <Typography variant="h4" fontWeight={800}>
+                    <Typography
+                      variant="h4"
+                      sx={{
+                        fontWeight: 800,
+                      }}
+                    >
                       {planDef.price}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: "text.secondary",
+                      }}
+                    >
                       {planDef.description}
                     </Typography>
                   </Box>

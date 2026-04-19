@@ -64,7 +64,12 @@ export function VaultRegenerateRecoveryDialog(props: DialogProps): ReactElement 
       <DialogTitle>Regenerate Recovery Key</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+            }}
+          >
             This will generate a new recovery key and invalidate the old one. You will need to save
             the new key in a secure location.
           </Typography>

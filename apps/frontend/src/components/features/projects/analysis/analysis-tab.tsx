@@ -56,8 +56,20 @@ export function AnalysisTab(props: AnalysisTabProps): ReactElement {
 
   return (
     <Box className="vault-fade-up vault-delay-2">
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-        <Typography variant="subtitle1" fontWeight={600}>
+      <Stack
+        direction="row"
+        sx={{
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
+        <Typography
+          variant="subtitle1"
+          sx={{
+            fontWeight: 600,
+          }}
+        >
           Recent Analyses
         </Typography>
         {canEdit && (
@@ -71,7 +83,6 @@ export function AnalysisTab(props: AnalysisTabProps): ReactElement {
           </Button>
         )}
       </Stack>
-
       <Grid container spacing={2}>
         {data.items.map((analysis) => (
           <Grid size={{ xs: 12 }} key={analysis.id}>
@@ -81,18 +92,40 @@ export function AnalysisTab(props: AnalysisTabProps): ReactElement {
             >
               <GlassCard sx={{ cursor: "pointer", "&:hover": { borderColor: "primary.main" } }}>
                 <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
-                  <Stack direction="row" alignItems="center" justifyContent="space-between">
+                  <Stack
+                    direction="row"
+                    sx={{
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
                     <Stack spacing={0.5}>
-                      <Typography variant="subtitle2" fontWeight={600}>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          fontWeight: 600,
+                        }}
+                      >
                         {analysis.filePath ?? analysis.fileName}
                       </Typography>
-                      <Stack direction="row" spacing={1} alignItems="center">
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        sx={{
+                          alignItems: "center",
+                        }}
+                      >
                         <Chip
                           label={getEcosystemLabel(analysis.ecosystem)}
                           size="small"
                           variant="outlined"
                         />
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "text.secondary",
+                          }}
+                        >
                           {new Date(analysis.createdAt).toLocaleDateString()}
                         </Typography>
                       </Stack>
@@ -109,13 +142,16 @@ export function AnalysisTab(props: AnalysisTabProps): ReactElement {
           </Grid>
         ))}
       </Grid>
-
-      <Stack alignItems="center" sx={{ mt: 3 }}>
+      <Stack
+        sx={{
+          alignItems: "center",
+          mt: 3,
+        }}
+      >
         <LinkButton href={ROUTES.projectAnalysis(projectId)} endIcon={<ChevronRightIcon />}>
           View all analyses ({data.pagination.total})
         </LinkButton>
       </Stack>
-
       <CreateAnalysisDialog
         open={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}

@@ -37,11 +37,28 @@ function UsageMeter(props: UsageMeterProps): ReactElement {
 
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
-        <Typography variant="body2" color="text.secondary">
+      <Stack
+        direction="row"
+        sx={{
+          justifyContent: "space-between",
+          mb: 0.5,
+        }}
+      >
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+          }}
+        >
           {label}
         </Typography>
-        <Typography variant="body2" fontWeight={600} color={isOverLimit ? "error.main" : undefined}>
+        <Typography
+          variant="body2"
+          color={isOverLimit ? "error.main" : undefined}
+          sx={{
+            fontWeight: 600,
+          }}
+        >
           {current} / {unlimited ? "Unlimited" : limit}
         </Typography>
       </Stack>
@@ -123,8 +140,20 @@ export function BillingOverview(): ReactElement {
   return (
     <Card sx={{ mb: 3 }}>
       <CardContent>
-        <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-          <Typography variant="h5" fontWeight={700}>
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            alignItems: "center",
+            mb: 3,
+          }}
+        >
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 700,
+            }}
+          >
             Current Plan
           </Typography>
           <StatusBadge label={plan} variant={PLAN_VARIANT[plan] ?? "default"} />
@@ -169,12 +198,24 @@ export function BillingOverview(): ReactElement {
             <Stack spacing={1.5}>
               <Stack spacing={0.5}>
                 {subscription?.status === "PAST_DUE" && (
-                  <Typography variant="body2" color="error.main" fontWeight={600}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "error.main",
+                      fontWeight: 600,
+                    }}
+                  >
                     Payment failed — please update your payment method to avoid losing access
                   </Typography>
                 )}
                 {subscription?.cancelAtPeriodEnd && (
-                  <Typography variant="body2" color="warning.main" fontWeight={600}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "warning.main",
+                      fontWeight: 600,
+                    }}
+                  >
                     {subscription.currentPeriodEnd
                       ? `Cancels on ${new Date(subscription.currentPeriodEnd).toLocaleDateString()}`
                       : "Scheduled for cancellation"}
@@ -182,24 +223,44 @@ export function BillingOverview(): ReactElement {
                   </Typography>
                 )}
                 {!subscription?.cancelAtPeriodEnd && subscription?.currentPeriodEnd && (
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                    }}
+                  >
                     Next billing date:{" "}
                     {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
                   </Typography>
                 )}
                 {subscription?.currentPeriodStart && (
-                  <Typography variant="caption" color="text.disabled">
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "text.disabled",
+                    }}
+                  >
                     Current period started:{" "}
                     {new Date(subscription.currentPeriodStart).toLocaleDateString()}
                   </Typography>
                 )}
                 {subscription?.isComp && (
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                    }}
+                  >
                     This subscription was granted by an administrator — no billing applies
                   </Typography>
                 )}
                 {subscription?.quantity && subscription.quantity > 1 && (
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                    }}
+                  >
                     Seats: {subscription.quantity}
                   </Typography>
                 )}

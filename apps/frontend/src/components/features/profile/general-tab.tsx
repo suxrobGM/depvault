@@ -51,18 +51,29 @@ export function GeneralTab(props: GeneralTabProps): ReactElement {
       <Grid size={{ xs: 12, md: 4 }}>
         <GlassCard sx={{ height: "100%" }} className="vault-fade-up vault-delay-2">
           <CardContent sx={{ p: 3 }}>
-            <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 600,
+                mb: 2,
+              }}
+            >
               Avatar
             </Typography>
             <AvatarUploader currentAvatarUrl={user.avatarUrl} onAvatarChange={handleAvatarChange} />
           </CardContent>
         </GlassCard>
       </Grid>
-
       <Grid size={{ xs: 12, md: 8 }}>
         <GlassCard className="vault-fade-up vault-delay-3">
           <CardContent sx={{ p: 3 }}>
-            <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 600,
+                mb: 2,
+              }}
+            >
               Personal Information
             </Typography>
             <form
@@ -75,13 +86,25 @@ export function GeneralTab(props: GeneralTabProps): ReactElement {
                 <FormTextField form={form} name="firstName" label="First Name" />
                 <FormTextField form={form} name="lastName" label="Last Name" />
                 <Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                      mb: 1,
+                    }}
+                  >
                     Email
                   </Typography>
                   <Typography variant="body1">{user.email}</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                      mb: 1,
+                    }}
+                  >
                     Role
                   </Typography>
                   <Typography variant="body1">{user.role}</Typography>

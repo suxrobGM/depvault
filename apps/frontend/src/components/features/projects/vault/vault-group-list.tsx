@@ -65,21 +65,35 @@ export function VaultGroupList(props: VaultGroupListProps): ReactElement {
             >
               <FolderIcon sx={{ color: "primary.main", fontSize: 22 }} />
               <Box sx={{ minWidth: 0, flex: 1 }}>
-                <Typography variant="subtitle1" fontWeight={600} noWrap>
+                <Typography
+                  variant="subtitle1"
+                  noWrap
+                  sx={{
+                    fontWeight: 600,
+                  }}
+                >
                   {group.name}
                 </Typography>
                 {group.directoryPath && (
                   <Typography
                     variant="caption"
-                    color="text.secondary"
                     noWrap
-                    sx={{ fontFamily: "monospace" }}
+                    sx={{
+                      color: "text.secondary",
+                      fontFamily: "monospace",
+                    }}
                   >
                     {group.directoryPath}
                   </Typography>
                 )}
                 {!group.directoryPath && group.description && (
-                  <Typography variant="caption" color="text.secondary" noWrap>
+                  <Typography
+                    variant="caption"
+                    noWrap
+                    sx={{
+                      color: "text.secondary",
+                    }}
+                  >
                     {group.description}
                   </Typography>
                 )}

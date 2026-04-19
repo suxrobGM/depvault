@@ -134,7 +134,6 @@ export function LicenseTab(props: LicenseTabProps): ReactElement {
           </Stack>
         }
       />
-
       {compliance && (
         <ComplianceSummaryStats
           total={compliance.total}
@@ -143,10 +142,21 @@ export function LicenseTab(props: LicenseTabProps): ReactElement {
           blocked={compliance.blocked}
         />
       )}
-
       <Box sx={{ mb: 4 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-          <Typography variant="subtitle1" fontWeight={600}>
+        <Stack
+          direction="row"
+          sx={{
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 2,
+          }}
+        >
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: 600,
+            }}
+          >
             Dependency Licenses
           </Typography>
           <TextField
@@ -195,12 +205,22 @@ export function LicenseTab(props: LicenseTabProps): ReactElement {
                 {compliance?.dependencies.map((dep) => (
                   <TableRow key={dep.name}>
                     <TableCell>
-                      <Typography variant="body2" fontWeight={500}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 500,
+                        }}
+                      >
                         {dep.name}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "text.secondary",
+                        }}
+                      >
                         {dep.analysisFileName}
                       </Typography>
                     </TableCell>
@@ -226,9 +246,7 @@ export function LicenseTab(props: LicenseTabProps): ReactElement {
           <PaginationBar count={compliance.pagination.totalPages} page={page} onChange={setPage} />
         )}
       </Box>
-
       <LicenseRulesTable projectId={projectId} canEdit={canEdit} />
-
       <CreateAnalysisDialog
         open={createDialogOpen}
         onClose={() => setCreateDialogOpen(false)}

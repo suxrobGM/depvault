@@ -80,10 +80,20 @@ export function UserDetailDialog(props: UserDetailDialogProps): ReactElement {
         ) : (
           <Stack spacing={3}>
             <Box>
-              <Typography variant="h6" fontWeight={600}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                }}
+              >
                 {fullName}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 {user.email}
               </Typography>
               <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
@@ -104,31 +114,67 @@ export function UserDetailDialog(props: UserDetailDialogProps): ReactElement {
             <Divider />
 
             <Box>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: 600,
+                  mb: 1,
+                }}
+              >
                 Usage
               </Typography>
               <Stack direction="row" spacing={3}>
                 <Box>
-                  <Typography variant="h6" fontWeight={700}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                    }}
+                  >
                     {user.usage.projects}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "text.secondary",
+                    }}
+                  >
                     Projects
                   </Typography>
                 </Box>
                 <Box>
-                  <Typography variant="h6" fontWeight={700}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                    }}
+                  >
                     {user.usage.analyses}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "text.secondary",
+                    }}
+                  >
                     Analyses
                   </Typography>
                 </Box>
                 <Box>
-                  <Typography variant="h6" fontWeight={700}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                    }}
+                  >
                     {user.usage.secretFiles}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: "text.secondary",
+                    }}
+                  >
                     Secret Files
                   </Typography>
                 </Box>
@@ -139,10 +185,22 @@ export function UserDetailDialog(props: UserDetailDialogProps): ReactElement {
 
             {sub && (
               <Box>
-                <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontWeight: 600,
+                    mb: 1,
+                  }}
+                >
                   Current Subscription
                 </Typography>
-                <Stack direction="row" spacing={1} alignItems="center">
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{
+                    alignItems: "center",
+                  }}
+                >
                   <Chip label={sub.plan} size="small" color="primary" />
                   <Chip
                     label={sub.status}
@@ -156,8 +214,11 @@ export function UserDetailDialog(props: UserDetailDialogProps): ReactElement {
                 {sub.currentPeriodEnd && (
                   <Typography
                     variant="caption"
-                    color="text.secondary"
-                    sx={{ mt: 0.5, display: "block" }}
+                    sx={{
+                      color: "text.secondary",
+                      mt: 0.5,
+                      display: "block",
+                    }}
                   >
                     Period ends: {new Date(sub.currentPeriodEnd).toLocaleDateString()}
                   </Typography>
@@ -168,10 +229,22 @@ export function UserDetailDialog(props: UserDetailDialogProps): ReactElement {
             <Divider />
 
             <Box>
-              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1.5 }}>
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: 600,
+                  mb: 1.5,
+                }}
+              >
                 Comp Subscription
               </Typography>
-              <Stack direction="row" spacing={2} alignItems="center">
+              <Stack
+                direction="row"
+                spacing={2}
+                sx={{
+                  alignItems: "center",
+                }}
+              >
                 <SelectField
                   value={compPlan}
                   onChange={(v) => setCompPlan(v as CompSubscriptionBody["plan"])}
@@ -203,7 +276,12 @@ export function UserDetailDialog(props: UserDetailDialogProps): ReactElement {
               </Stack>
             </Box>
 
-            <Typography variant="caption" color="text.secondary">
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               Account created: {new Date(user.createdAt).toLocaleDateString()}
             </Typography>
           </Stack>

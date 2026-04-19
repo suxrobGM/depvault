@@ -26,7 +26,13 @@ export function FeatureCard(props: FeatureCardProps): ReactElement {
         <Typography variant="h6" gutterBottom>
           {title}
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            lineHeight: 1.7,
+          }}
+        >
           {description}
         </Typography>
       </CardContent>

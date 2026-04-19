@@ -110,15 +110,38 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
     <Stack spacing={3}>
       <GlassCard className="vault-fade-up vault-delay-1">
         <CardContent sx={{ p: 3 }}>
-          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: 600,
+              mb: 2,
+            }}
+          >
             GitHub Account
           </Typography>
           {user.githubId ? (
-            <Stack direction="row" alignItems="center" justifyContent="space-between">
-              <Stack direction="row" alignItems="center" spacing={1.5}>
+            <Stack
+              direction="row"
+              sx={{
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <Stack
+                direction="row"
+                spacing={1.5}
+                sx={{
+                  alignItems: "center",
+                }}
+              >
                 <GitHubIcon />
                 <Box>
-                  <Typography variant="body2" fontWeight={600}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 600,
+                    }}
+                  >
                     {user.githubUsername ?? "Connected"}
                   </Typography>
                   <Chip label="Linked" size="small" color="success" />
@@ -135,7 +158,12 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
             </Stack>
           ) : (
             <Stack spacing={1.5}>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 Link your GitHub account to import dependencies from your repositories.
               </Typography>
               <Box>
@@ -152,10 +180,15 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
           )}
         </CardContent>
       </GlassCard>
-
       <GlassCard className="vault-fade-up vault-delay-2">
         <CardContent sx={{ p: 3 }}>
-          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: 600,
+              mb: 2,
+            }}
+          >
             Change Email
           </Typography>
           {oauthOnly ? (
@@ -169,7 +202,13 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
             >
               <Stack spacing={2.5}>
                 <Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                      mb: 1,
+                    }}
+                  >
                     Current email
                   </Typography>
                   <Typography variant="body1">{user.email}</Typography>
@@ -198,10 +237,15 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
           )}
         </CardContent>
       </GlassCard>
-
       <GlassCard className="vault-fade-up vault-delay-3">
         <CardContent sx={{ p: 3 }}>
-          <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: 600,
+              mb: 2,
+            }}
+          >
             {oauthOnly ? "Set Password" : "Change Password"}
           </Typography>
           {oauthOnly ? (
@@ -275,15 +319,26 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
           )}
         </CardContent>
       </GlassCard>
-
       <VaultSecurityPanel />
-
       <GlassCard glowColor="var(--mui-palette-error-main)" className="vault-fade-up vault-delay-5">
         <CardContent sx={{ p: 3 }}>
-          <Typography variant="subtitle1" fontWeight={600} color="error" sx={{ mb: 1 }}>
+          <Typography
+            variant="subtitle1"
+            color="error"
+            sx={{
+              fontWeight: 600,
+              mb: 1,
+            }}
+          >
             Danger Zone
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              mb: 2,
+            }}
+          >
             Permanently delete your account and all associated data. This action cannot be undone.
           </Typography>
           <Button variant="outlined" color="error" onClick={handleDeleteAccount}>

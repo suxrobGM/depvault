@@ -35,36 +35,81 @@ export function VaultSummaryCard(props: VaultSummaryCardProps): ReactElement {
   return (
     <GlassCard sx={{ height: "100%" }}>
       <CardContent sx={{ p: 3 }}>
-        <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2.5 }}>
+        <Stack
+          direction="row"
+          spacing={1.5}
+          sx={{
+            alignItems: "center",
+            mb: 2.5,
+          }}
+        >
           <IconBox color="var(--mui-palette-success-main)" size={40}>
             <VpnKeyIcon sx={{ fontSize: 22 }} />
           </IconBox>
-          <Typography variant="subtitle1" fontWeight={600}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: 600,
+            }}
+          >
             Vault Summary
           </Typography>
         </Stack>
         <Grid container spacing={2} sx={{ mb: 2.5 }}>
           <Grid size={4}>
-            <Typography variant="caption" color="text.secondary">
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               Groups
             </Typography>
-            <Typography variant="h6" fontWeight={700} lineHeight={1.2}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                lineHeight: 1.2,
+              }}
+            >
               {groupCount}
             </Typography>
           </Grid>
           <Grid size={4}>
-            <Typography variant="caption" color="text.secondary">
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               Variables
             </Typography>
-            <Typography variant="h6" fontWeight={700} lineHeight={1.2}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                lineHeight: 1.2,
+              }}
+            >
               {variableCount}
             </Typography>
           </Grid>
           <Grid size={4}>
-            <Typography variant="caption" color="text.secondary">
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               Secret Files
             </Typography>
-            <Typography variant="h6" fontWeight={700} lineHeight={1.2}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                lineHeight: 1.2,
+              }}
+            >
               {secretFileCount}
             </Typography>
           </Grid>

@@ -14,11 +14,19 @@ export function MaskedValue(props: MaskedValueProps): ReactElement {
   const [visible, setVisible] = useState(false);
 
   return (
-    <Stack direction="row" alignItems="center" spacing={0.5}>
+    <Stack
+      direction="row"
+      spacing={0.5}
+      sx={{
+        alignItems: "center",
+      }}
+    >
       <Typography
         variant="body2"
-        fontFamily="monospace"
-        sx={{ userSelect: visible ? "text" : "none" }}
+        sx={{
+          fontFamily: "monospace",
+          userSelect: visible ? "text" : "none",
+        }}
       >
         {visible ? value : maskChar.repeat(12)}
       </Typography>

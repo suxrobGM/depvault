@@ -63,8 +63,12 @@ export function LandingNavbar(): ReactElement {
           <Stack
             direction="row"
             spacing={3}
-            alignItems="center"
-            sx={{ display: { xs: "none", md: "flex" }, flexGrow: 1, justifyContent: "center" }}
+            sx={{
+              alignItems: "center",
+              display: { xs: "none", md: "flex" },
+              flexGrow: 1,
+              justifyContent: "center",
+            }}
           >
             {NAV_ITEMS.map((item) => (
               <Button
@@ -80,7 +84,13 @@ export function LandingNavbar(): ReactElement {
             ))}
           </Stack>
           <Box sx={{ flexGrow: { xs: 1, md: 0 } }} />
-          <Stack direction="row" spacing={1.5} alignItems="center">
+          <Stack
+            direction="row"
+            spacing={1.5}
+            sx={{
+              alignItems: "center",
+            }}
+          >
             <LinkButton
               href={ROUTES.login}
               color="inherit"
@@ -107,7 +117,6 @@ export function LandingNavbar(): ReactElement {
           </Stack>
         </Toolbar>
       </AppBar>
-
       <Drawer
         anchor="right"
         open={drawerOpen}

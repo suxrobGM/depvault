@@ -188,7 +188,13 @@ export function Sidebar(props: SidebarProps): ReactElement {
               <NotificationBell open={open} />
             </List>
           ) : (
-            <Stack alignItems="center" spacing={0.5} sx={{ py: 0.75 }}>
+            <Stack
+              spacing={0.5}
+              sx={{
+                alignItems: "center",
+                py: 0.75,
+              }}
+            >
               <FeedbackMenu open={open} />
               <VaultLockButton open={open} />
               <NotificationBell open={open} />
@@ -240,8 +246,21 @@ export function Sidebar(props: SidebarProps): ReactElement {
                   </Box>
                   {open && (
                     <Box sx={{ minWidth: 0, flex: 1 }}>
-                      <Stack direction="row" alignItems="center" spacing={0.5}>
-                        <Typography variant="body2" noWrap fontWeight={600} sx={{ flex: 1 }}>
+                      <Stack
+                        direction="row"
+                        spacing={0.5}
+                        sx={{
+                          alignItems: "center",
+                        }}
+                      >
+                        <Typography
+                          variant="body2"
+                          noWrap
+                          sx={{
+                            fontWeight: 600,
+                            flex: 1,
+                          }}
+                        >
                           {displayName || user.email}
                         </Typography>
                         {showRoleBadge && (
@@ -263,10 +282,12 @@ export function Sidebar(props: SidebarProps): ReactElement {
                       </Stack>
                       <Typography
                         variant="caption"
-                        color="text.secondary"
                         noWrap
                         component="div"
-                        sx={{ mt: 0.25 }}
+                        sx={{
+                          color: "text.secondary",
+                          mt: 0.25,
+                        }}
                       >
                         {user.email}
                       </Typography>

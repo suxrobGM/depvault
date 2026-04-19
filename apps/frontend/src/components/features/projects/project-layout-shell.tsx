@@ -34,8 +34,19 @@ export function ProjectLayoutShell(props: ProjectLayoutShellProps): ReactElement
 
   if (!project) {
     return (
-      <Stack alignItems="center" justifyContent="center" sx={{ minHeight: "40vh" }}>
-        <Typography variant="h5" color="text.secondary">
+      <Stack
+        sx={{
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "40vh",
+        }}
+      >
+        <Typography
+          variant="h5"
+          sx={{
+            color: "text.secondary",
+          }}
+        >
           Project not found
         </Typography>
       </Stack>

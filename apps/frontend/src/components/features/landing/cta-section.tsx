@@ -26,8 +26,13 @@ export function CtaSection(): ReactElement {
             </GradientText>
             <Typography
               variant="body1"
-              color="text.secondary"
-              sx={{ mb: 1.5, maxWidth: 480, mx: "auto", lineHeight: 1.7 }}
+              sx={{
+                color: "text.secondary",
+                mb: 1.5,
+                maxWidth: 480,
+                mx: "auto",
+                lineHeight: 1.7,
+              }}
             >
               Install the CLI, scan your repo, and push secrets to the vault — all in under 2
               minutes. Free for individual developers, scalable for teams.
@@ -62,10 +67,23 @@ export function CtaSection(): ReactElement {
                 curl -fsSL https://get.depvault.com | bash
               </Typography>
             </Box>
-            <Typography variant="caption" color="text.secondary" sx={{ mb: 4, display: "block" }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+                mb: 4,
+                display: "block",
+              }}
+            >
               No credit card required. One command to get started.
             </Typography>
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={2} justifyContent="center">
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={2}
+              sx={{
+                justifyContent: "center",
+              }}
+            >
               <Link href={ROUTES.register} style={{ textDecoration: "none" }}>
                 <Button variant="contained" size="large" sx={{ px: 5 }}>
                   Get Started Free

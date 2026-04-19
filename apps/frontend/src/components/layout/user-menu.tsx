@@ -57,11 +57,24 @@ export function UserMenu(props: UserMenuProps): ReactElement {
             />
             <Box sx={{ minWidth: 0 }}>
               {displayName && (
-                <Typography variant="body2" fontWeight={600} noWrap>
+                <Typography
+                  variant="body2"
+                  noWrap
+                  sx={{
+                    fontWeight: 600,
+                  }}
+                >
                   {displayName}
                 </Typography>
               )}
-              <Typography variant="caption" color="text.secondary" noWrap component="div">
+              <Typography
+                variant="caption"
+                noWrap
+                component="div"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 {user.email}
               </Typography>
             </Box>

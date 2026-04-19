@@ -49,7 +49,14 @@ export function SecretFilesTab(props: SecretFilesTabProps): ReactElement {
 
   return (
     <>
-      <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ mb: 3 }}>
+      <Stack
+        direction="row"
+        sx={{
+          alignItems: "center",
+          justifyContent: "flex-end",
+          mb: 3,
+        }}
+      >
         {canEdit && (
           <Button
             variant="contained"
@@ -60,7 +67,6 @@ export function SecretFilesTab(props: SecretFilesTabProps): ReactElement {
           </Button>
         )}
       </Stack>
-
       {isLoading ? (
         <Skeleton variant="rounded" height={300} />
       ) : files.length === 0 ? (
@@ -83,14 +89,12 @@ export function SecretFilesTab(props: SecretFilesTabProps): ReactElement {
           onEdit={setEditFile}
         />
       )}
-
       <UploadSecretFileDialog
         open={uploadOpen}
         onClose={() => setUploadOpen(false)}
         projectId={projectId}
         vaultGroups={vaultGroups}
       />
-
       {editFile && (
         <EditSecretFileDialog
           open={!!editFile}

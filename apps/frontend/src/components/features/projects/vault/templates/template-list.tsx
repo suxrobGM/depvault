@@ -57,17 +57,30 @@ export function TemplateList(props: TemplateListProps): ReactElement {
             <GlassCard>
               <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
                 <Stack spacing={1}>
-                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                  <Stack
+                    direction="row"
+                    sx={{
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                    }}
+                  >
                     <Stack spacing={0.5}>
-                      <Typography variant="subtitle2" fontWeight={600}>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          fontWeight: 600,
+                        }}
+                      >
                         {template.name}
                       </Typography>
                       {template.description && (
                         <Typography
                           variant="body2"
-                          color="text.secondary"
                           noWrap
-                          sx={{ maxWidth: 250 }}
+                          sx={{
+                            color: "text.secondary",
+                            maxWidth: 250,
+                          }}
                         >
                           {template.description}
                         </Typography>
@@ -95,13 +108,24 @@ export function TemplateList(props: TemplateListProps): ReactElement {
                       )}
                     </Stack>
                   </Stack>
-                  <Stack direction="row" spacing={1} alignItems="center">
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{
+                      alignItems: "center",
+                    }}
+                  >
                     <Chip
                       label={`${template.variableCount} variables`}
                       size="small"
                       variant="outlined"
                     />
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "text.secondary",
+                      }}
+                    >
                       {new Date(template.createdAt).toLocaleDateString()}
                     </Typography>
                   </Stack>
@@ -111,7 +135,6 @@ export function TemplateList(props: TemplateListProps): ReactElement {
           </Grid>
         ))}
       </Grid>
-
       <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)} maxWidth="xs" fullWidth>
         <DialogTitle>Delete Template</DialogTitle>
         <DialogContent>

@@ -10,7 +10,13 @@ import { BrowserWindow } from "@/components/ui/containers";
 
 export function FeatureSharing(): ReactElement {
   return (
-    <Grid container spacing={4} alignItems="center">
+    <Grid
+      container
+      spacing={4}
+      sx={{
+        alignItems: "center",
+      }}
+    >
       <Grid size={{ xs: 12, md: 6 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
           <IconBox color="#06b6d4">
@@ -24,13 +30,27 @@ export function FeatureSharing(): ReactElement {
             Secret Sharing
           </GradientText>
         </Box>
-        <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8, mb: 2 }}>
+        <Typography
+          variant="body1"
+          sx={{
+            color: "text.secondary",
+            lineHeight: 1.8,
+            mb: 2,
+          }}
+        >
           Generate one-time encrypted links where the decryption key lives only in the URL — the
           server never sees it. Set expiration times, add optional passwords, and stop credentials
           from sitting in Slack or email history. Every link creation, access, and expiration is
           tracked in the audit log.
         </Typography>
-        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+        <Stack
+          direction="row"
+          spacing={1}
+          useFlexGap
+          sx={{
+            flexWrap: "wrap",
+          }}
+        >
           <Chip label="One-Time Links" size="small" variant="outlined" color="info" />
           <Chip label="Auto-Expiration" size="small" variant="outlined" color="info" />
           <Chip label="Audit Trail" size="small" variant="outlined" color="info" />
@@ -40,7 +60,14 @@ export function FeatureSharing(): ReactElement {
         <GlassCard hoverGlow={false} sx={{ overflow: "hidden" }}>
           <BrowserWindow title="share secret" />
           <Box sx={{ p: 2.5 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: "block" }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+                mb: 1,
+                display: "block",
+              }}
+            >
               Secure link generated
             </Typography>
             <Box
@@ -76,9 +103,20 @@ export function FeatureSharing(): ReactElement {
               </IconButton>
             </Box>
             <Stack direction="row" spacing={2}>
-              <Stack direction="row" alignItems="center" spacing={0.5}>
+              <Stack
+                direction="row"
+                spacing={0.5}
+                sx={{
+                  alignItems: "center",
+                }}
+              >
                 <ScheduleIcon sx={{ fontSize: 14, color: "text.secondary" }} />
-                <Typography variant="caption" color="text.secondary">
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "text.secondary",
+                  }}
+                >
                   Expires in 24h
                 </Typography>
               </Stack>

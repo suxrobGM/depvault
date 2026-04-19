@@ -130,7 +130,11 @@ export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
         <Typography variant="h6" gutterBottom>
           File downloaded
         </Typography>
-        <Typography color="text.secondary">
+        <Typography
+          sx={{
+            color: "text.secondary",
+          }}
+        >
           This link has been consumed and is no longer valid.
         </Typography>
       </Box>
@@ -159,15 +163,24 @@ export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
               {result.variables.map((v) => (
                 <TableRow key={v.key}>
                   <TableCell>
-                    <Typography variant="body2" fontFamily="monospace" fontWeight={600} noWrap>
+                    <Typography
+                      variant="body2"
+                      noWrap
+                      sx={{
+                        fontFamily: "monospace",
+                        fontWeight: 600,
+                      }}
+                    >
                       {v.key}
                     </Typography>
                   </TableCell>
                   <TableCell>
                     <Typography
                       variant="body2"
-                      fontFamily="monospace"
-                      sx={{ wordBreak: "break-all" }}
+                      sx={{
+                        fontFamily: "monospace",
+                        wordBreak: "break-all",
+                      }}
                     >
                       {v.value}
                     </Typography>
@@ -177,7 +190,13 @@ export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
             </TableBody>
           </Table>
         </Paper>
-        <Stack direction="row" spacing={1} alignItems="center">
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            alignItems: "center",
+          }}
+        >
           <Box sx={{ minWidth: 180 }}>
             <FormSelectField
               form={downloadForm}
@@ -197,31 +216,49 @@ export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
   return (
     <Stack spacing={3}>
       <Box>
-        <Typography variant="body2" color="text.secondary">
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+          }}
+        >
           Type:{" "}
           <strong>
             {info.payloadType === "ENV_VARIABLES" ? "Environment Variables" : "Secret File"}
           </strong>
         </Typography>
         {info.fileName && (
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+            }}
+          >
             File: <strong>{info.fileName}</strong>
           </Typography>
         )}
-        <Typography variant="body2" color="text.secondary">
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+          }}
+        >
           Expires: <strong>{new Date(info.expiresAt).toLocaleString()}</strong>
         </Typography>
       </Box>
-
       <Alert severity="info">
         This is a one-time link. After you access it, the content is permanently destroyed.
       </Alert>
-
       {info.hasPassword && (
         <>
           <Divider />
           <Stack spacing={1}>
-            <Typography variant="body2" fontWeight={500}>
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 500,
+              }}
+            >
               <LockIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: "middle" }} />
               Password required
             </Typography>
@@ -248,9 +285,7 @@ export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
           </Stack>
         </>
       )}
-
       {mutation.isError && <Alert severity="error">{mutation.error?.message}</Alert>}
-
       <Button
         variant="contained"
         size="large"

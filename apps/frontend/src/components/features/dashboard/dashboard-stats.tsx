@@ -61,7 +61,13 @@ export function DashboardStats(): ReactElement {
               className={`vault-fade-up vault-delay-${i + 1}`}
               sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}
             >
-              <Stack direction="row" alignItems="center" spacing={2}>
+              <Stack
+                direction="row"
+                spacing={2}
+                sx={{
+                  alignItems: "center",
+                }}
+              >
                 <IconBox color={stat.color} size={44}>
                   {stat.icon}
                 </IconBox>
@@ -69,11 +75,22 @@ export function DashboardStats(): ReactElement {
                   {isLoading ? (
                     <Skeleton variant="text" width={60} height={36} />
                   ) : (
-                    <Typography variant="h4" fontWeight={700} lineHeight={1.2}>
+                    <Typography
+                      variant="h4"
+                      sx={{
+                        fontWeight: 700,
+                        lineHeight: 1.2,
+                      }}
+                    >
                       {stat.value}
                     </Typography>
                   )}
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                    }}
+                  >
                     {stat.label}
                   </Typography>
                 </Box>

@@ -73,8 +73,12 @@ export function LandingFooter(): ReactElement {
             </Box>
             <Typography
               variant="body2"
-              color="text.secondary"
-              sx={{ maxWidth: 280, lineHeight: 1.7, mb: 2 }}
+              sx={{
+                color: "text.secondary",
+                maxWidth: 280,
+                lineHeight: 1.7,
+                mb: 2,
+              }}
             >
               Analyze dependencies, detect vulnerabilities, and securely store environment variables
               and secret files across any tech stack.
@@ -95,8 +99,12 @@ export function LandingFooter(): ReactElement {
             <Grid key={category} size={{ xs: 6, sm: 3, md: 2 }}>
               <Typography
                 variant="overline"
-                color="text.secondary"
-                sx={{ mb: 1.5, display: "block", letterSpacing: "0.1em" }}
+                sx={{
+                  color: "text.secondary",
+                  mb: 1.5,
+                  display: "block",
+                  letterSpacing: "0.1em",
+                }}
               >
                 {category}
               </Typography>
@@ -131,7 +139,12 @@ export function LandingFooter(): ReactElement {
           ))}
         </Grid>
         <Divider sx={{ my: 4 }} />
-        <Typography variant="caption" color="text.secondary">
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+          }}
+        >
           &copy; 2026 DepVault. All rights reserved.
         </Typography>
       </SectionContainer>

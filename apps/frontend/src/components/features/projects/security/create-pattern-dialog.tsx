@@ -131,9 +131,12 @@ export function CreatePatternDialog(props: CreatePatternDialogProps): ReactEleme
             <Box>
               <Typography
                 variant="caption"
-                color="text.secondary"
-                fontWeight={600}
-                sx={{ mb: 0.5, display: "block" }}
+                sx={{
+                  color: "text.secondary",
+                  fontWeight: 600,
+                  mb: 0.5,
+                  display: "block",
+                }}
               >
                 Test your pattern
               </Typography>
@@ -146,13 +149,26 @@ export function CreatePatternDialog(props: CreatePatternDialogProps): ReactEleme
                 sx={{ "& input": { fontFamily: "monospace", fontSize: 13 } }}
               />
               {testInput && regexValid && (
-                <Stack direction="row" spacing={0.5} sx={{ mt: 1 }} flexWrap="wrap" useFlexGap>
+                <Stack
+                  direction="row"
+                  spacing={0.5}
+                  useFlexGap
+                  sx={{
+                    flexWrap: "wrap",
+                    mt: 1,
+                  }}
+                >
                   {testMatches.length > 0 ? (
                     testMatches.map((match, i) => (
                       <Chip key={i} label={match} size="small" color="warning" />
                     ))
                   ) : (
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "text.secondary",
+                      }}
+                    >
                       No matches
                     </Typography>
                   )}

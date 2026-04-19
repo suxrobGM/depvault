@@ -52,16 +52,19 @@ export function GitHubFileSelector(props: GitHubFileSelectorProps): ReactElement
       <Button size="small" onClick={onBack} disabled={isAnalyzing} sx={{ mb: 1 }}>
         &larr; Back to repositories
       </Button>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 1.5,
+        }}
+      >
         {repoLabel}
       </Typography>
-
       {isLoading && <LoadingSpinner size={32} py={3} />}
-
       {files && files.length === 0 && (
         <Alert severity="info">No dependency files found in this repository.</Alert>
       )}
-
       <Stack spacing={1}>
         {files && files.length > 0 && (
           <FormControlLabel
@@ -74,7 +77,12 @@ export function GitHubFileSelector(props: GitHubFileSelectorProps): ReactElement
               />
             }
             label={
-              <Typography variant="body2" fontWeight={600}>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 600,
+                }}
+              >
                 Select all ({files.length})
               </Typography>
             }
@@ -92,7 +100,13 @@ export function GitHubFileSelector(props: GitHubFileSelectorProps): ReactElement
               />
             }
             label={
-              <Stack direction="row" spacing={1} alignItems="center">
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{
+                  alignItems: "center",
+                }}
+              >
                 <Typography variant="body2">{file.path}</Typography>
                 <Chip label={file.ecosystem} size="small" variant="outlined" />
               </Stack>
@@ -100,7 +114,6 @@ export function GitHubFileSelector(props: GitHubFileSelectorProps): ReactElement
           />
         ))}
       </Stack>
-
       <DialogActions sx={{ px: 0, pb: 0, mt: 2 }}>
         <Button onClick={onClose} disabled={isAnalyzing}>
           Cancel

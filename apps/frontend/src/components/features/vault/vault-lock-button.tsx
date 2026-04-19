@@ -45,7 +45,14 @@ export function VaultLockButton(props: VaultLockButtonProps): ReactElement {
       {open ? (
         <ListItemButton onClick={handleClick} sx={{ mb: 0.5, px: 2 }}>
           <ListItemIcon sx={{ minWidth: 40, color: iconColor }}>{icon}</ListItemIcon>
-          <Stack direction="row" alignItems="center" spacing={1} sx={{ flex: 1 }}>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              alignItems: "center",
+              flex: 1,
+            }}
+          >
             <ListItemText primary="Vault" />
             <Chip
               label={label}

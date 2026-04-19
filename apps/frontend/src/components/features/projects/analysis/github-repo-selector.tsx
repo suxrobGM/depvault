@@ -61,14 +61,34 @@ export function GitHubRepoSelector(props: GitHubRepoSelectorProps): ReactElement
               sx={{ flexShrink: 0, "&:hover": { borderColor: "primary.main" } }}
               onClick={() => onSelectRepo(repo.fullName)}
             >
-              <Stack direction="row" alignItems="center" spacing={1.5} sx={{ p: 1.5 }}>
+              <Stack
+                direction="row"
+                spacing={1.5}
+                sx={{
+                  alignItems: "center",
+                  p: 1.5,
+                }}
+              >
                 <GitHubIcon fontSize="small" sx={{ flexShrink: 0 }} />
                 <Box sx={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
-                  <Typography variant="body2" fontWeight={600} noWrap>
+                  <Typography
+                    variant="body2"
+                    noWrap
+                    sx={{
+                      fontWeight: 600,
+                    }}
+                  >
                     {repo.fullName}
                   </Typography>
                   {repo.description && (
-                    <Typography variant="caption" color="text.secondary" noWrap display="block">
+                    <Typography
+                      variant="caption"
+                      noWrap
+                      sx={{
+                        color: "text.secondary",
+                        display: "block",
+                      }}
+                    >
                       {repo.description}
                     </Typography>
                   )}

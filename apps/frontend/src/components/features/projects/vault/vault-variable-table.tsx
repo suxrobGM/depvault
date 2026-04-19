@@ -52,7 +52,12 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
   if (variables.length === 0) {
     return (
       <Box sx={{ py: 4, textAlign: "center" }}>
-        <Typography variant="body2" color="text.secondary">
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+          }}
+        >
           No variables in this environment yet.
         </Typography>
       </Box>
@@ -83,8 +88,20 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
   return (
     <Stack spacing={1}>
       {canEdit && selectedIds.size > 0 && (
-        <Stack direction="row" alignItems="center" spacing={1.5} sx={{ px: 1 }}>
-          <Typography variant="body2" color="text.secondary">
+        <Stack
+          direction="row"
+          spacing={1.5}
+          sx={{
+            alignItems: "center",
+            px: 1,
+          }}
+        >
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+            }}
+          >
             {selectedIds.size} selected
           </Typography>
           <Button
@@ -98,7 +115,6 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
           </Button>
         </Stack>
       )}
-
       <GlassCard>
         <TableContainer>
           <Table size="small">

@@ -84,12 +84,20 @@ function EncryptedValue(props: EncryptedValueProps): ReactElement {
   };
 
   return (
-    <Stack direction="row" alignItems="center" spacing={0.5}>
+    <Stack
+      direction="row"
+      spacing={0.5}
+      sx={{
+        alignItems: "center",
+      }}
+    >
       <Typography
         variant="body2"
-        fontFamily="monospace"
         color={error ? "error" : undefined}
-        sx={{ userSelect: visible ? "text" : "none" }}
+        sx={{
+          fontFamily: "monospace",
+          userSelect: visible ? "text" : "none",
+        }}
       >
         {error ? "Decryption failed" : visible ? decrypted : "\u2022".repeat(12)}
       </Typography>
@@ -173,7 +181,13 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
           </TableCell>
         )}
         <TableCell>
-          <Typography variant="body2" fontFamily="monospace" fontWeight={600}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontFamily: "monospace",
+              fontWeight: 600,
+            }}
+          >
             {variable.key}
           </Typography>
         </TableCell>
@@ -186,7 +200,14 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
           />
         </TableCell>
         <TableCell>
-          <Typography variant="body2" color="text.secondary" noWrap sx={{ maxWidth: 200 }}>
+          <Typography
+            variant="body2"
+            noWrap
+            sx={{
+              color: "text.secondary",
+              maxWidth: 200,
+            }}
+          >
             {variable.description ?? "—"}
           </Typography>
         </TableCell>
@@ -226,14 +247,12 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
           />
         </TableCell>
       </TableRow>
-
       <CreateShareLinkDialog
         open={shareOpen}
         onClose={() => setShareOpen(false)}
         projectId={projectId}
         variables={[variable]}
       />
-
       <TableRow>
         <TableCell colSpan={canEdit ? 6 : 5} sx={{ py: 0 }}>
           <Collapse in={historyOpen} timeout="auto" unmountOnExit>
@@ -253,7 +272,12 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
               {versionsLoading ? (
                 <Skeleton variant="rounded" height={60} />
               ) : versions.length === 0 ? (
-                <Typography variant="body2" color="text.secondary">
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.secondary",
+                  }}
+                >
                   No previous versions.
                 </Typography>
               ) : (
@@ -271,17 +295,32 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
                     {versions.map((v, idx) => (
                       <TableRow key={v.id}>
                         <TableCell>
-                          <Typography variant="body2" fontFamily="monospace">
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontFamily: "monospace",
+                            }}
+                          >
                             v{versions.length - idx}
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: "text.secondary",
+                            }}
+                          >
                             {v.changedByName}
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              color: "text.secondary",
+                            }}
+                          >
                             {formatDate(v.createdAt)}
                           </Typography>
                         </TableCell>

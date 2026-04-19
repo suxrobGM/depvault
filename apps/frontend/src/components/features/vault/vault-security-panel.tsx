@@ -37,9 +37,21 @@ export function VaultSecurityPanel(): ReactElement {
     return (
       <GlassCard className="vault-fade-up vault-delay-4">
         <CardContent sx={{ p: 3 }}>
-          <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              alignItems: "center",
+              mb: 2,
+            }}
+          >
             <LockIcon fontSize="small" />
-            <Typography variant="subtitle1" fontWeight={600}>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 600,
+              }}
+            >
               Encryption Vault
             </Typography>
           </Stack>
@@ -55,9 +67,21 @@ export function VaultSecurityPanel(): ReactElement {
     return (
       <GlassCard className="vault-fade-up vault-delay-4">
         <CardContent sx={{ p: 3 }}>
-          <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              alignItems: "center",
+              mb: 2,
+            }}
+          >
             <LockIcon fontSize="small" />
-            <Typography variant="subtitle1" fontWeight={600}>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 600,
+              }}
+            >
               Encryption Vault
             </Typography>
             <Chip label="Locked" size="small" color="warning" />
@@ -74,9 +98,21 @@ export function VaultSecurityPanel(): ReactElement {
     <>
       <GlassCard className="vault-fade-up vault-delay-4">
         <CardContent sx={{ p: 3 }}>
-          <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2.5 }}>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              alignItems: "center",
+              mb: 2.5,
+            }}
+          >
             <LockIcon fontSize="small" />
-            <Typography variant="subtitle1" fontWeight={600}>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 600,
+              }}
+            >
               Encryption Vault
             </Typography>
             <Chip label="Unlocked" size="small" color="success" />
@@ -89,10 +125,20 @@ export function VaultSecurityPanel(): ReactElement {
             }}
           >
             <Stack spacing={2.5}>
-              <Typography variant="body2" fontWeight={600}>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 600,
+                }}
+              >
                 Change Vault Password
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 Your vault password is separate from your login password and never sent to the
                 server.
               </Typography>
@@ -132,10 +178,20 @@ export function VaultSecurityPanel(): ReactElement {
           <Divider sx={{ my: 3 }} />
 
           <Stack spacing={2}>
-            <Typography variant="body2" fontWeight={600}>
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 600,
+              }}
+            >
               Recovery Key
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               Generate a new recovery key if you suspect your current one has been compromised. This
               will invalidate the previous key.
             </Typography>
@@ -151,7 +207,6 @@ export function VaultSecurityPanel(): ReactElement {
           </Stack>
         </CardContent>
       </GlassCard>
-
       <VaultRegenerateRecoveryDialog
         open={showRegenerateDialog}
         onClose={() => setShowRegenerateDialog(false)}

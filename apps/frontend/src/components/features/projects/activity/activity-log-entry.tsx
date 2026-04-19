@@ -54,7 +54,6 @@ export function ActivityLogEntry(props: ActivityLogEntryProps): ReactElement {
           }}
         />
       )}
-
       {/* Action icon */}
       <Box
         sx={{
@@ -75,14 +74,16 @@ export function ActivityLogEntry(props: ActivityLogEntryProps): ReactElement {
       >
         {config.icon}
       </Box>
-
       {/* Content */}
       <Box sx={{ flex: 1, ml: 1.5, pb: isLast ? 0 : 3, minWidth: 0 }}>
         <Stack
           direction="row"
           spacing={1}
-          alignItems="center"
-          sx={{ flexWrap: "wrap", rowGap: 0.5 }}
+          sx={{
+            alignItems: "center",
+            flexWrap: "wrap",
+            rowGap: 0.5,
+          }}
         >
           <UserAvatar
             firstName={entry.userFirstName}
@@ -93,14 +94,22 @@ export function ActivityLogEntry(props: ActivityLogEntryProps): ReactElement {
           />
           <Typography
             variant="body2"
-            fontWeight={600}
             component="span"
             noWrap
-            sx={{ flexShrink: 0 }}
+            sx={{
+              fontWeight: 600,
+              flexShrink: 0,
+            }}
           >
             {userName}
           </Typography>
-          <Typography variant="body2" color="text.secondary" component="span">
+          <Typography
+            variant="body2"
+            component="span"
+            sx={{
+              color: "text.secondary",
+            }}
+          >
             {desc.summary}
           </Typography>
           {desc.highlight && (
@@ -133,12 +142,29 @@ export function ActivityLogEntry(props: ActivityLogEntryProps): ReactElement {
           )}
         </Stack>
 
-        <Stack direction="row" spacing={0.5} alignItems="center" sx={{ mt: 0.25 }}>
-          <Typography variant="caption" color="text.disabled">
+        <Stack
+          direction="row"
+          spacing={0.5}
+          sx={{
+            alignItems: "center",
+            mt: 0.25,
+          }}
+        >
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.disabled",
+            }}
+          >
             {formatRelativeTime(new Date(entry.createdAt))}
           </Typography>
           {desc.detail && (
-            <Typography variant="caption" color="text.disabled">
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.disabled",
+              }}
+            >
               · {desc.detail}
             </Typography>
           )}

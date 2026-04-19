@@ -175,7 +175,13 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
   if (!environments || environments.length === 0) {
     return (
       <Box>
-        <Stack direction="row" justifyContent="flex-end" sx={{ mb: 2 }}>
+        <Stack
+          direction="row"
+          sx={{
+            justifyContent: "flex-end",
+            mb: 2,
+          }}
+        >
           <VaultToolbar
             canEdit={canEdit}
             onImport={() => setImportOpen(true)}
@@ -215,11 +221,13 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
       <Stack spacing={3}>
         <Stack
           direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          flexWrap="wrap"
           useFlexGap
-          rowGap={2}
+          sx={{
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            rowGap: 2,
+          }}
         >
           <EnvironmentSelector
             environments={environments}
@@ -247,7 +255,12 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
         </Stack>
 
         {activeEnv && (
-          <Typography variant="subtitle1" fontWeight={600}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: 600,
+            }}
+          >
             Variables
           </Typography>
         )}
@@ -266,7 +279,6 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
           />
         )}
       </Stack>
-
       {canEdit && activeEnv && (
         <>
           <CreateVariableDialog
@@ -300,7 +312,6 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
           />
         </>
       )}
-
       {canEdit && activeEnv && variablesData && variablesData.items.length > 0 && (
         <CreateShareLinkDialog
           open={shareOpen}
@@ -309,7 +320,6 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
           variables={variablesData.items}
         />
       )}
-
       {canEdit && activeEnv && (
         <DownloadBundleDialog
           open={bundleOpen}
@@ -320,7 +330,6 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
           variables={variablesData?.items ?? []}
         />
       )}
-
       {activeEnv && (
         <ExportVariablesDialog
           open={exportOpen}
@@ -330,7 +339,6 @@ export function VaultGroupCard(props: VaultGroupCardProps): ReactElement {
           environmentType={activeEnv as EnvironmentTypeValue}
         />
       )}
-
       {canEdit && (
         <EditGroupDialog
           open={editGroupOpen}

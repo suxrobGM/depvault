@@ -74,12 +74,28 @@ export function RegisterForm(props: RegisterFormProps): ReactElement {
 
   if (registered) {
     return (
-      <Stack spacing={2.5} alignItems="center">
+      <Stack
+        spacing={2.5}
+        sx={{
+          alignItems: "center",
+        }}
+      >
         <MarkEmailReadIcon sx={{ fontSize: 48, color: "primary.main" }} />
-        <Typography variant="h6" fontWeight={600}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 600,
+          }}
+        >
           Check your email
         </Typography>
-        <Typography variant="body2" color="text.secondary" textAlign="center">
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            textAlign: "center",
+          }}
+        >
           We&apos;ve sent a verification link to your email address. Please verify your email to
           activate your account.
         </Typography>
@@ -100,7 +116,6 @@ export function RegisterForm(props: RegisterFormProps): ReactElement {
           account to get started.
         </Alert>
       )}
-
       <Button
         variant="outlined"
         size="large"
@@ -111,13 +126,16 @@ export function RegisterForm(props: RegisterFormProps): ReactElement {
       >
         Sign up with GitHub
       </Button>
-
       <Divider>
-        <Typography variant="caption" color="text.secondary">
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+          }}
+        >
           or
         </Typography>
       </Divider>
-
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -178,7 +196,12 @@ export function RegisterForm(props: RegisterFormProps): ReactElement {
             {form.state.isSubmitting ? "Creating account..." : "Create account"}
           </Button>
 
-          <Typography variant="body2" textAlign="center">
+          <Typography
+            variant="body2"
+            sx={{
+              textAlign: "center",
+            }}
+          >
             Already have an account?{" "}
             <Link href={ROUTES.login} style={{ color: "inherit" }}>
               Sign in

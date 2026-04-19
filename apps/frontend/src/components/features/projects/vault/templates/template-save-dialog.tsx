@@ -104,7 +104,12 @@ export function TemplateSaveDialog(props: TemplateSaveDialogProps): ReactElement
               label="Description"
               placeholder="Optional description"
             />
-            <Typography variant="subtitle2" color="text.secondary">
+            <Typography
+              variant="subtitle2"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               Copy from existing environment (optional)
             </Typography>
             <FormSelectField

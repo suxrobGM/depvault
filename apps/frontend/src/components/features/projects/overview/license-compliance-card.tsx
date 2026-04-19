@@ -33,58 +33,102 @@ export function LicenseComplianceCard(props: LicenseComplianceCardProps): ReactE
   return (
     <GlassCard sx={{ height: "100%" }}>
       <CardContent sx={{ p: 3 }}>
-        <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2.5 }}>
+        <Stack
+          direction="row"
+          spacing={1.5}
+          sx={{
+            alignItems: "center",
+            mb: 2.5,
+          }}
+        >
           <IconBox color="var(--mui-palette-warning-main)" size={40}>
             <LicenseIcon sx={{ fontSize: 22 }} />
           </IconBox>
-          <Typography variant="subtitle1" fontWeight={600}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              fontWeight: 600,
+            }}
+          >
             License Compliance
           </Typography>
         </Stack>
         <Grid container spacing={2} sx={{ mb: 2.5 }}>
           <Grid size={3}>
-            <Typography variant="caption" color="text.secondary">
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               Total
             </Typography>
-            <Typography variant="h6" fontWeight={700} lineHeight={1.2}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                lineHeight: 1.2,
+              }}
+            >
               {total}
             </Typography>
           </Grid>
           <Grid size={3}>
-            <Typography variant="caption" color="text.secondary">
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               Allowed
             </Typography>
             <Typography
               variant="h6"
-              fontWeight={700}
-              lineHeight={1.2}
-              sx={{ color: allowed > 0 ? "var(--mui-palette-success-main)" : "text.secondary" }}
+              sx={{
+                fontWeight: 700,
+                lineHeight: 1.2,
+                color: allowed > 0 ? "var(--mui-palette-success-main)" : "text.secondary",
+              }}
             >
               {allowed}
             </Typography>
           </Grid>
           <Grid size={3}>
-            <Typography variant="caption" color="text.secondary">
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               Warned
             </Typography>
             <Typography
               variant="h6"
-              fontWeight={700}
-              lineHeight={1.2}
-              sx={{ color: warned > 0 ? "var(--mui-palette-warning-main)" : "text.secondary" }}
+              sx={{
+                fontWeight: 700,
+                lineHeight: 1.2,
+                color: warned > 0 ? "var(--mui-palette-warning-main)" : "text.secondary",
+              }}
             >
               {warned}
             </Typography>
           </Grid>
           <Grid size={3}>
-            <Typography variant="caption" color="text.secondary">
+            <Typography
+              variant="caption"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               Blocked
             </Typography>
             <Typography
               variant="h6"
-              fontWeight={700}
-              lineHeight={1.2}
-              sx={{ color: blocked > 0 ? "var(--mui-palette-error-main)" : "text.secondary" }}
+              sx={{
+                fontWeight: 700,
+                lineHeight: 1.2,
+                color: blocked > 0 ? "var(--mui-palette-error-main)" : "text.secondary",
+              }}
             >
               {blocked}
             </Typography>

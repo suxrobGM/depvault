@@ -261,22 +261,16 @@ export const theme = createTheme({
     },
     MuiAlert: {
       styleOverrides: {
-        root: { borderRadius: 10, border: "1px solid" },
-        standardError: ({ theme: t }) => ({
-          backgroundColor: alpha(t.palette.error.main, 0.1),
-          borderColor: alpha(t.palette.error.main, 0.2),
-        }),
-        standardWarning: ({ theme: t }) => ({
-          backgroundColor: alpha(t.palette.warning.main, 0.1),
-          borderColor: alpha(t.palette.warning.main, 0.2),
-        }),
-        standardSuccess: ({ theme: t }) => ({
-          backgroundColor: alpha(t.palette.success.main, 0.1),
-          borderColor: alpha(t.palette.success.main, 0.2),
-        }),
-        standardInfo: ({ theme: t }) => ({
-          backgroundColor: alpha(t.palette.info.main, 0.1),
-          borderColor: alpha(t.palette.info.main, 0.2),
+        root: ({ theme: t }) => ({
+          borderRadius: 10,
+          border: "1px solid",
+          variants: (["error", "warning", "success", "info"] as const).map((severity) => ({
+            props: { variant: "standard", severity },
+            style: {
+              backgroundColor: alpha(t.palette[severity].main, 0.1),
+              borderColor: alpha(t.palette[severity].main, 0.2),
+            },
+          })),
         }),
       },
     },

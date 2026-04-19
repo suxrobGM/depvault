@@ -16,7 +16,14 @@ const envTabs = ["DEV", "STAGING", "PROD"];
 
 export function FeatureVault(): ReactElement {
   return (
-    <Grid container spacing={4} alignItems="center" direction="row-reverse">
+    <Grid
+      container
+      spacing={4}
+      direction="row-reverse"
+      sx={{
+        alignItems: "center",
+      }}
+    >
       <Grid size={{ xs: 12, md: 6 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
           <IconBox color="#f59e0b">
@@ -30,12 +37,26 @@ export function FeatureVault(): ReactElement {
             Environment Vault
           </GradientText>
         </Box>
-        <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8, mb: 2 }}>
+        <Typography
+          variant="body1"
+          sx={{
+            color: "text.secondary",
+            lineHeight: 1.8,
+            mb: 2,
+          }}
+        >
           End-to-end encrypt environment variables and secret files — SSL certificates, private
           keys, keystores, cloud credentials — with AES-256-GCM. Secrets are encrypted in your
           browser before they reach the server. Even we can&apos;t read them.
         </Typography>
-        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+        <Stack
+          direction="row"
+          spacing={1}
+          useFlexGap
+          sx={{
+            flexWrap: "wrap",
+          }}
+        >
           <Chip label="Zero-Knowledge" size="small" variant="outlined" color="secondary" />
           <Chip label="AES-256-GCM" size="small" variant="outlined" color="secondary" />
           <Chip label="Version History" size="small" variant="outlined" color="secondary" />

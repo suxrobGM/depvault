@@ -3,7 +3,7 @@
 import { useState, type ReactElement } from "react";
 import {
   CheckCircle as CheckIcon,
-  ErrorOutline as MissingIcon,
+  ErrorOutlined as MissingIcon,
   Visibility,
   VisibilityOff,
 } from "@mui/icons-material";
@@ -42,7 +42,12 @@ export function DiffTable(props: DiffTableProps): ReactElement {
   if (rows.length === 0) {
     return (
       <Box sx={{ py: 4, textAlign: "center" }}>
-        <Typography variant="body2" color="text.secondary">
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+          }}
+        >
           No variables found in the selected environments.
         </Typography>
       </Box>
@@ -51,7 +56,13 @@ export function DiffTable(props: DiffTableProps): ReactElement {
 
   return (
     <Stack spacing={2}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
+      <Stack
+        direction="row"
+        sx={{
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Stack direction="row" spacing={2}>
           <Chip
             icon={<MissingIcon />}
@@ -76,7 +87,6 @@ export function DiffTable(props: DiffTableProps): ReactElement {
           {revealAll ? "Hide All" : "Reveal All"}
         </Button>
       </Stack>
-
       <GlassCard>
         <TableContainer sx={{ maxHeight: 600 }}>
           <Table size="small" stickyHeader>
@@ -103,7 +113,13 @@ export function DiffTable(props: DiffTableProps): ReactElement {
                     </TableCell>
                     <TableCell>
                       <Stack spacing={0.25}>
-                        <Typography variant="body2" fontFamily="monospace" fontWeight={600}>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontFamily: "monospace",
+                            fontWeight: 600,
+                          }}
+                        >
                           {row.key}
                         </Typography>
                         {row.isRequired && (
@@ -122,7 +138,13 @@ export function DiffTable(props: DiffTableProps): ReactElement {
                       if (!cell) {
                         return (
                           <TableCell key={env} sx={{ bgcolor: "rgba(211, 47, 47, 0.06)" }}>
-                            <Typography variant="body2" color="error.main" fontStyle="italic">
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: "error.main",
+                                fontStyle: "italic",
+                              }}
+                            >
                               not set
                             </Typography>
                           </TableCell>
@@ -131,7 +153,13 @@ export function DiffTable(props: DiffTableProps): ReactElement {
                       return (
                         <TableCell key={env}>
                           <DiffCellValue value="[encrypted]" revealAll={revealAll} />
-                          <Typography variant="caption" color="text.secondary" display="block">
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: "text.secondary",
+                              display: "block",
+                            }}
+                          >
                             {new Date(cell.updatedAt).toLocaleDateString()}
                           </Typography>
                         </TableCell>
@@ -154,11 +182,17 @@ function DiffCellValue(props: { value: string; revealAll: boolean }): ReactEleme
   const visible = revealAll || localVisible;
 
   return (
-    <Stack direction="row" alignItems="center" spacing={0.5}>
+    <Stack
+      direction="row"
+      spacing={0.5}
+      sx={{
+        alignItems: "center",
+      }}
+    >
       <Typography
         variant="body2"
-        fontFamily="monospace"
         sx={{
+          fontFamily: "monospace",
           userSelect: visible ? "text" : "none",
           maxWidth: 220,
           overflow: "hidden",

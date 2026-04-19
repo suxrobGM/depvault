@@ -95,14 +95,25 @@ export function LicenseRulesTable(props: LicenseRulesTableProps): ReactElement {
 
   return (
     <Box>
-      <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+      <Typography
+        variant="subtitle1"
+        sx={{
+          fontWeight: 600,
+          mb: 2,
+        }}
+      >
         License Policy Rules
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 2,
+        }}
+      >
         Override the default policy for specific SPDX license identifiers. Defaults: permissive
         (MIT, Apache-2.0, BSD) = Allow; copyleft (GPL, AGPL) = Warn; unknown = Warn.
       </Typography>
-
       <TableContainer
         sx={{
           borderRadius: 2,
@@ -124,7 +135,12 @@ export function LicenseRulesTable(props: LicenseRulesTableProps): ReactElement {
             {data?.items.map((rule) => (
               <TableRow key={rule.id}>
                 <TableCell>
-                  <Typography variant="body2" fontWeight={500}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 500,
+                    }}
+                  >
                     {rule.licenseId}
                   </Typography>
                 </TableCell>
@@ -177,8 +193,11 @@ export function LicenseRulesTable(props: LicenseRulesTableProps): ReactElement {
                 <TableCell colSpan={canEdit ? 3 : 2}>
                   <Typography
                     variant="body2"
-                    color="text.disabled"
-                    sx={{ py: 2, textAlign: "center" }}
+                    sx={{
+                      color: "text.disabled",
+                      py: 2,
+                      textAlign: "center",
+                    }}
                   >
                     No custom rules. Default policies are applied.
                   </Typography>
@@ -188,9 +207,15 @@ export function LicenseRulesTable(props: LicenseRulesTableProps): ReactElement {
           </TableBody>
         </Table>
       </TableContainer>
-
       {canEdit && (
-        <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mt: 2 }}>
+        <Stack
+          direction="row"
+          spacing={1.5}
+          sx={{
+            alignItems: "center",
+            mt: 2,
+          }}
+        >
           <TextField
             size="small"
             placeholder="e.g. GPL-3.0"

@@ -16,8 +16,22 @@ export function EnvironmentSelector(props: EnvironmentSelectorProps): ReactEleme
   const { environments, selected, onSelect, onDelete } = props;
 
   return (
-    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
-      <Typography variant="body2" color="text.secondary" sx={{ mr: 0.5 }}>
+    <Stack
+      direction="row"
+      spacing={1}
+      useFlexGap
+      sx={{
+        alignItems: "center",
+        flexWrap: "wrap",
+      }}
+    >
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mr: 0.5,
+        }}
+      >
         Environment:
       </Typography>
       {environments.map((env) => (

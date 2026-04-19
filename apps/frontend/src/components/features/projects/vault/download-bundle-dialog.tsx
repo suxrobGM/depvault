@@ -175,7 +175,12 @@ export function DownloadBundleDialog(props: DownloadBundleDialogProps): ReactEle
                   />
                 }
                 label={
-                  <Typography variant="body2" fontWeight={600}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 600,
+                    }}
+                  >
                     Variables ({variables.length})
                   </Typography>
                 }
@@ -192,7 +197,12 @@ export function DownloadBundleDialog(props: DownloadBundleDialogProps): ReactEle
                       />
                     }
                     label={
-                      <Typography variant="body2" fontFamily="monospace">
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily: "monospace",
+                        }}
+                      >
                         {v.key}
                       </Typography>
                     }
@@ -215,7 +225,12 @@ export function DownloadBundleDialog(props: DownloadBundleDialogProps): ReactEle
                   />
                 }
                 label={
-                  <Typography variant="body2" fontWeight={600}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 600,
+                    }}
+                  >
                     Secret Files ({secretFiles.length})
                   </Typography>
                 }
@@ -232,7 +247,12 @@ export function DownloadBundleDialog(props: DownloadBundleDialogProps): ReactEle
                       />
                     }
                     label={
-                      <Typography variant="body2" fontFamily="monospace">
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily: "monospace",
+                        }}
+                      >
                         {f.name}
                       </Typography>
                     }
