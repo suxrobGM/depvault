@@ -3,7 +3,7 @@ import { EnvironmentTypeSchema } from "@/modules/environment";
 
 const SyncEntrySchema = t.Object({
   key: t.String({ minLength: 1, maxLength: 255 }),
-  encryptedValue: t.String({ minLength: 1 }),
+  encryptedValue: t.String(),
   iv: t.String({ minLength: 1 }),
   authTag: t.String({ minLength: 1 }),
   description: t.Optional(t.Nullable(t.String({ maxLength: 500 }))),
