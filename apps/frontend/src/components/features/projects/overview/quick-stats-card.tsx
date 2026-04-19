@@ -18,6 +18,13 @@ interface QuickStatsCardProps {
   projectId: string;
 }
 
+interface StatsItem {
+  icon: ReactElement;
+  value: number | string;
+  label: string;
+  valueColor?: string;
+}
+
 export function QuickStatsCard(props: QuickStatsCardProps): ReactElement {
   const { projectId } = props;
 
@@ -47,30 +54,27 @@ export function QuickStatsCard(props: QuickStatsCardProps): ReactElement {
     return "var(--mui-palette-success-main)";
   };
 
-  const stats = [
+  const stats: StatsItem[] = [
     {
       icon: <GroupIcon sx={{ fontSize: 22 }} />,
-      color: "var(--mui-palette-primary-main)",
       value: memberCount,
       label: "Members",
     },
     {
       icon: <AnalysisIcon sx={{ fontSize: 22 }} />,
-      color: "var(--mui-palette-info-main)",
       value: analysisCount,
       label: "Analyses",
     },
     {
       icon: <DepsIcon sx={{ fontSize: 22 }} />,
-      color: "var(--mui-palette-warning-main)",
       value: totalDeps,
       label: "Dependencies",
     },
     {
       icon: <HealthIcon sx={{ fontSize: 22 }} />,
-      color: getHealthColor(),
       value: avgHealth !== null ? `${avgHealth}%` : "\u2014",
       label: "Avg Health",
+      valueColor: getHealthColor(),
     },
   ];
 
@@ -96,7 +100,7 @@ export function QuickStatsCard(props: QuickStatsCardProps): ReactElement {
                   alignItems: "center",
                 }}
               >
-                <IconBox color={stat.color} size={40}>
+                <IconBox color="var(--mui-palette-primary-main)" size={40}>
                   {stat.icon}
                 </IconBox>
                 <Box>
@@ -113,6 +117,7 @@ export function QuickStatsCard(props: QuickStatsCardProps): ReactElement {
                     sx={{
                       fontWeight: 700,
                       lineHeight: 1.2,
+                      color: stat.valueColor ?? "text.primary",
                     }}
                   >
                     {stat.value}

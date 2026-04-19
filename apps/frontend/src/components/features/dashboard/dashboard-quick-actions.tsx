@@ -24,7 +24,7 @@ const quickActions = [
     title: "Analyze Dependencies",
     description:
       "Open a project to scan dependencies for vulnerabilities, outdated packages, and license issues",
-    color: "var(--mui-palette-secondary-main)",
+    color: "var(--mui-palette-primary-main)",
     href: ROUTES.projects,
   },
   {
@@ -32,7 +32,7 @@ const quickActions = [
     title: "Manage Vault",
     description:
       "Select a project to manage its encrypted vault, secret files, and environment variables",
-    color: "var(--mui-palette-info-dark)",
+    color: "var(--mui-palette-primary-main)",
     href: ROUTES.projects,
   },
 ];

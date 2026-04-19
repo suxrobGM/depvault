@@ -58,12 +58,17 @@ export function SecurityOverviewView(): ReactElement {
           value={data.projectCount}
           color="primary"
         />
-        <StatCard icon={<ScanIcon />} title="Secret Scans" value={scans.totalScans} color="info" />
+        <StatCard
+          icon={<ScanIcon />}
+          title="Secret Scans"
+          value={scans.totalScans}
+          color="primary"
+        />
         <StatCard
           icon={<ResolvedIcon />}
           title="Resolved Detections"
           value={scans.resolvedDetections}
-          color="success"
+          color="primary"
         />
       </Grid>
       <Grid container spacing={3}>

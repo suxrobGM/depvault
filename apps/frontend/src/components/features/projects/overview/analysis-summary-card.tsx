@@ -50,7 +50,7 @@ export function AnalysisSummaryCard(props: AnalysisSummaryCardProps): ReactEleme
             mb: 2.5,
           }}
         >
-          <IconBox color="var(--mui-palette-info-main)" size={40}>
+          <IconBox color="var(--mui-palette-primary-main)" size={40}>
             <AnalysisIcon sx={{ fontSize: 22 }} />
           </IconBox>
           <Typography

@@ -36,7 +36,7 @@ export function DashboardStats(): ReactElement {
       icon: <InventoryIcon sx={{ fontSize: 22 }} />,
       label: "Dependencies",
       value: data?.dependencyCount ?? 0,
-      color: "var(--mui-palette-info-light)",
+      color: "var(--mui-palette-primary-main)",
     },
     {
       icon: <BugIcon sx={{ fontSize: 22 }} />,
@@ -48,7 +48,7 @@ export function DashboardStats(): ReactElement {
       icon: <SecretIcon sx={{ fontSize: 22 }} />,
       label: "Env Variables",
       value: data?.envVariableCount ?? 0,
-      color: "var(--mui-palette-secondary-main)",
+      color: "var(--mui-palette-primary-main)",
     },
   ];
 

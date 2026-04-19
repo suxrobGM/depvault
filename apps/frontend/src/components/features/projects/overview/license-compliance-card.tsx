@@ -41,7 +41,7 @@ export function LicenseComplianceCard(props: LicenseComplianceCardProps): ReactE
             mb: 2.5,
           }}
         >
-          <IconBox color="var(--mui-palette-warning-main)" size={40}>
+          <IconBox color="var(--mui-palette-primary-main)" size={40}>
             <LicenseIcon sx={{ fontSize: 22 }} />
           </IconBox>
           <Typography
