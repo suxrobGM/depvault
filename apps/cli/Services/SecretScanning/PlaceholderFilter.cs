@@ -14,12 +14,21 @@ internal static partial class PlaceholderFilter
             return true;
         }
 
-        if (trimmed.Contains("<PLACEHOLDER>", StringComparison.OrdinalIgnoreCase)
-            || trimmed.Contains("<YOUR_", StringComparison.OrdinalIgnoreCase)
-            || trimmed.Contains("your_", StringComparison.OrdinalIgnoreCase)
+        var isPlaceholder = trimmed.StartsWith("<PLACEHOLDER>", StringComparison.OrdinalIgnoreCase)
+            || trimmed.StartsWith("<YOUR_", StringComparison.OrdinalIgnoreCase)
+            || trimmed.StartsWith("your_", StringComparison.OrdinalIgnoreCase)
+            || trimmed.StartsWith("your-", StringComparison.OrdinalIgnoreCase)
             || trimmed.Contains("xxxxxxxx", StringComparison.OrdinalIgnoreCase)
             || trimmed.Contains("changeme", StringComparison.OrdinalIgnoreCase)
-            || trimmed.Contains("replace_me", StringComparison.OrdinalIgnoreCase))
+            || trimmed.Contains("change-me", StringComparison.OrdinalIgnoreCase)
+            || trimmed.Contains("change-in-production", StringComparison.OrdinalIgnoreCase)
+            || trimmed.Contains("change_in_production", StringComparison.OrdinalIgnoreCase)
+            || trimmed.Contains("replace_me", StringComparison.OrdinalIgnoreCase)
+            || trimmed.Contains("replace-me", StringComparison.OrdinalIgnoreCase)
+            || trimmed.Contains("example.com", StringComparison.OrdinalIgnoreCase)
+            || trimmed.Contains("dummy", StringComparison.OrdinalIgnoreCase);
+
+        if (isPlaceholder)
         {
             return true;
         }

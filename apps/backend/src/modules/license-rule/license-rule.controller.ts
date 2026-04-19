@@ -19,7 +19,7 @@ const licenseRuleService = container.resolve(LicenseRuleService);
 
 export const licenseRuleController = new Elysia({
   prefix: "/projects/:id/license-rules",
-  detail: { tags: ["License Rules"] },
+  detail: { tags: ["License Rules"], security: [{ bearerAuth: [] }] },
 })
   .use(projectGuard("VIEWER"))
   .get("/", ({ params }) => licenseRuleService.list(params.id), {
@@ -29,7 +29,6 @@ export const licenseRuleController = new Elysia({
       operationId: "listLicenseRules",
       summary: "List license rules",
       description: "Return all license policy rules for the project.",
-      security: [{ bearerAuth: [] }],
     },
   })
   .get(
@@ -45,7 +44,6 @@ export const licenseRuleController = new Elysia({
         summary: "License compliance summary",
         description:
           "Return a paginated compliance summary with pass/warn/fail counts for all dependencies in the project.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -64,7 +62,6 @@ export const licenseRuleController = new Elysia({
         operationId: "exportLicenseReport",
         summary: "Export license audit report",
         description: "Export a license audit report as CSV or text.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -78,7 +75,6 @@ export const licenseRuleController = new Elysia({
       summary: "Create license rule",
       description:
         "Create a license policy rule mapping an SPDX license ID to ALLOW, WARN, or BLOCK.",
-      security: [{ bearerAuth: [] }],
     },
   })
   .put(
@@ -92,7 +88,6 @@ export const licenseRuleController = new Elysia({
         operationId: "updateLicenseRule",
         summary: "Update license rule",
         description: "Update the policy for an existing license rule.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -103,6 +98,5 @@ export const licenseRuleController = new Elysia({
       operationId: "deleteLicenseRule",
       summary: "Delete license rule",
       description: "Delete a license policy rule from the project.",
-      security: [{ bearerAuth: [] }],
     },
   });

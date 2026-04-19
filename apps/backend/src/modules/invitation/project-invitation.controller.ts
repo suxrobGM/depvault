@@ -17,7 +17,7 @@ const invitationService = container.resolve(InvitationService);
 /** Project-scoped invitation endpoints registered under /projects/:id */
 export const projectInvitationController = new Elysia({
   prefix: "/projects/:id",
-  detail: { tags: ["Invitations"] },
+  detail: { tags: ["Invitations"], security: [{ bearerAuth: [] }] },
 })
   .use(projectGuard("VIEWER"))
   .get(
@@ -32,7 +32,6 @@ export const projectInvitationController = new Elysia({
         summary: "List project invitations",
         description:
           "Return a paginated list of pending invitations for the project. Any project member can view invitations.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -50,7 +49,6 @@ export const projectInvitationController = new Elysia({
         summary: "Invite member to project",
         description:
           "Create a pending invitation for a user by email to join the project with a specified role (editor or viewer). If the user is not on the platform, a registration invitation email is sent. Only the project owner can invite members.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -66,7 +64,6 @@ export const projectInvitationController = new Elysia({
         summary: "Resend project invitation",
         description:
           "Resend the invitation email for a pending invitation. Only the project owner can resend invitations.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -80,7 +77,6 @@ export const projectInvitationController = new Elysia({
         operationId: "cancelInvitation",
         summary: "Cancel project invitation",
         description: "Cancel a pending invitation. Only the project owner can cancel invitations.",
-        security: [{ bearerAuth: [] }],
       },
     },
   );

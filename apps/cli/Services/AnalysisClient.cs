@@ -15,8 +15,12 @@ public sealed class AnalysisResult
 public sealed class AnalysisClient(IApiClientFactory clientFactory)
 {
     public async Task<AnalysisResult?> AnalyzeFileAsync(
-        string projectId, string fileName, string content,
-        AnalysesPostRequestBody_ecosystem? ecosystem, CancellationToken ct)
+        string projectId,
+        string fileName,
+        string filePath,
+        string content,
+        AnalysesPostRequestBody_ecosystem? ecosystem,
+        CancellationToken ct)
     {
         var client = clientFactory.Create();
 
@@ -24,6 +28,7 @@ public sealed class AnalysisClient(IApiClientFactory clientFactory)
             new AnalysesPostRequestBody
             {
                 FileName = fileName,
+                FilePath = filePath,
                 Content = content,
                 Ecosystem = ecosystem
             }, cancellationToken: ct);

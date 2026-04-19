@@ -25,7 +25,7 @@ const secretFileVersionService = container.resolve(SecretFileVersionService);
 
 export const secretFileController = new Elysia({
   prefix: "/projects/:id/secrets",
-  detail: { tags: ["Secret Files"] },
+  detail: { tags: ["Secret Files"], security: [{ bearerAuth: [] }] },
 })
   .use(projectGuard("VIEWER"))
   .use(rateLimiter({ max: 20, windowMs: 60 * 1000 }))
@@ -38,7 +38,6 @@ export const secretFileController = new Elysia({
       summary: "List secret files",
       description:
         "List secret file metadata for a project. File contents are not included — use the download endpoint to retrieve decrypted content.",
-      security: [{ bearerAuth: [] }],
     },
   })
   .get(
@@ -52,7 +51,6 @@ export const secretFileController = new Elysia({
         summary: "List secret file versions",
         description:
           "List all version history entries for a secret file. Any project member can view version metadata.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -76,7 +74,6 @@ export const secretFileController = new Elysia({
         summary: "Upload a secret file",
         description:
           "Upload a client-encrypted secret file for the project. Executable file types (.exe, .sh, .bat, .cmd, .ps1) are rejected. Max file size is 25 MB. Only owners and editors can upload.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -97,26 +94,20 @@ export const secretFileController = new Elysia({
         summary: "Download a secret file",
         description:
           "Download an encrypted secret file. Decryption happens client-side. Only owners and editors can download file contents. Viewers can only see metadata via the list endpoint.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
-  .put(
-    "/:fileId",
-    ({ params, body, projectMember }) => secretFileService.update(params.id, params.fileId, body),
-    {
-      params: SecretFileParamsSchema,
-      body: UpdateSecretFileBodySchema,
-      response: SecretFileResponseSchema,
-      detail: {
-        operationId: "updateSecretFile",
-        summary: "Update secret file metadata",
-        description:
-          "Update the name, description, or vault group of a secret file. Only owners and editors can update.",
-        security: [{ bearerAuth: [] }],
-      },
+  .put("/:fileId", ({ params, body }) => secretFileService.update(params.id, params.fileId, body), {
+    params: SecretFileParamsSchema,
+    body: UpdateSecretFileBodySchema,
+    response: SecretFileResponseSchema,
+    detail: {
+      operationId: "updateSecretFile",
+      summary: "Update secret file metadata",
+      description:
+        "Update the name, description, or vault group of a secret file. Only owners and editors can update.",
     },
-  )
+  })
   .delete(
     "/:fileId",
     ({ params, projectMember, request, server }) =>
@@ -134,7 +125,6 @@ export const secretFileController = new Elysia({
         summary: "Delete a secret file",
         description:
           "Permanently delete a secret file and all its version history. Only owners and editors can delete.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -157,7 +147,6 @@ export const secretFileController = new Elysia({
         summary: "Upload a new version of a secret file",
         description:
           "Replace a secret file's content with a new client-encrypted upload. The current content is saved as a version before being replaced. Only owners and editors can upload new versions.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -173,7 +162,6 @@ export const secretFileController = new Elysia({
         summary: "Download a specific version of a secret file",
         description:
           "Download an encrypted previous version of a secret file. Decryption happens client-side. Only owners and editors can download.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -194,7 +182,6 @@ export const secretFileController = new Elysia({
         summary: "Rollback to a previous version",
         description:
           "Rollback a secret file to a previous version. The current content is saved as a new version before restoring. Only owners and editors can rollback.",
-        security: [{ bearerAuth: [] }],
       },
     },
   );

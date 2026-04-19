@@ -21,7 +21,7 @@ const templateService = container.resolve(EnvTemplateService);
 /** Read-only template endpoints (VIEWER+). */
 const envTemplateReadController = new Elysia({
   prefix: "/projects/:id/env-templates",
-  detail: { tags: ["Environment Templates"] },
+  detail: { tags: ["Environment Templates"], security: [{ bearerAuth: [] }] },
 })
   .use(projectGuard("VIEWER"))
   .get("/", ({ params }) => templateService.list(params.id), {
@@ -31,7 +31,6 @@ const envTemplateReadController = new Elysia({
       operationId: "listEnvTemplates",
       summary: "List templates",
       description: "List all environment templates for a project.",
-      security: [{ bearerAuth: [] }],
     },
   })
   .get("/:templateId", ({ params }) => templateService.getDetail(params.id, params.templateId), {
@@ -41,7 +40,6 @@ const envTemplateReadController = new Elysia({
       operationId: "getEnvTemplate",
       summary: "Get template detail",
       description: "Get a template with its variables.",
-      security: [{ bearerAuth: [] }],
     },
   });
 
@@ -63,7 +61,6 @@ const envTemplateWriteController = new Elysia({
         operationId: "createEnvTemplate",
         summary: "Create template",
         description: "Create a template from an existing environment or a manual variable list.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -85,7 +82,6 @@ const envTemplateWriteController = new Elysia({
         operationId: "updateEnvTemplate",
         summary: "Update template",
         description: "Update template name or description.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -105,7 +101,6 @@ const envTemplateWriteController = new Elysia({
         operationId: "deleteEnvTemplate",
         summary: "Delete template",
         description: "Delete a template and all its variables.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -127,7 +122,6 @@ const envTemplateWriteController = new Elysia({
         operationId: "applyEnvTemplate",
         summary: "Apply template",
         description: "Apply a template to create a new environment with empty-valued variables.",
-        security: [{ bearerAuth: [] }],
       },
     },
   );

@@ -11,7 +11,7 @@ const auditLogService = container.resolve(AuditLogService);
 
 export const activityController = new Elysia({
   prefix: "/activity",
-  detail: { tags: ["Activity"] },
+  detail: { tags: ["Activity"], security: [{ bearerAuth: [] }] },
 })
   .use(authGuard)
   .get(
@@ -36,7 +36,6 @@ export const activityController = new Elysia({
         summary: "List global activity",
         description:
           "Return a paginated list of audit log events across all projects the user is a member of.",
-        security: [{ bearerAuth: [] }],
       },
     },
   );

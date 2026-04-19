@@ -16,7 +16,7 @@ const vaultGroupService = container.resolve(VaultGroupService);
 
 export const vaultGroupController = new Elysia({
   prefix: "/projects/:id/vault-groups",
-  detail: { tags: ["Vault Groups"] },
+  detail: { tags: ["Vault Groups"], security: [{ bearerAuth: [] }] },
 })
   .use(projectGuard("VIEWER"))
   .get("/", ({ params }) => vaultGroupService.list(params.id), {
@@ -26,7 +26,6 @@ export const vaultGroupController = new Elysia({
       operationId: "listVaultGroups",
       summary: "List vault groups",
       description: "List all vault groups for a project with environment and variable counts.",
-      security: [{ bearerAuth: [] }],
     },
   })
   .use(projectGuard("EDITOR"))
@@ -39,7 +38,6 @@ export const vaultGroupController = new Elysia({
       summary: "Create vault group",
       description:
         "Create a new vault group for organizing environment variables by sub-project or env file.",
-      security: [{ bearerAuth: [] }],
     },
   })
   .put(
@@ -53,7 +51,6 @@ export const vaultGroupController = new Elysia({
         operationId: "updateVaultGroup",
         summary: "Update vault group",
         description: "Update a vault group's name, description, or sort order.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -65,6 +62,5 @@ export const vaultGroupController = new Elysia({
       summary: "Delete vault group",
       description:
         "Delete a vault group and all its environments and variables. This action cannot be undone.",
-      security: [{ bearerAuth: [] }],
     },
   });

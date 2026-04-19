@@ -10,7 +10,7 @@ const envBundleService = container.resolve(EnvBundleService);
 
 export const envBundleController = new Elysia({
   prefix: "/projects/:id/environments",
-  detail: { tags: ["Environment Bundle"] },
+  detail: { tags: ["Environment Bundle"], security: [{ bearerAuth: [] }] },
 })
   .use(projectGuard("EDITOR"))
   .post(
@@ -31,7 +31,6 @@ export const envBundleController = new Elysia({
         summary: "Download environment bundle",
         description:
           "Return encrypted environment variables and secret files for client-side decryption and bundling. Only owners and editors can download bundles.",
-        security: [{ bearerAuth: [] }],
       },
     },
   );

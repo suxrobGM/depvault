@@ -46,6 +46,11 @@ const IGNORED_PATTERNS: RegExp[] = [
   /Gemfile\.lock$/,
   /Cargo\.lock$/,
   /go\.sum$/,
+  /\.example$/i,
+  /\.sample$/i,
+  /\.template$/i,
+  /\.dist$/i,
+  /\.tmpl$/i,
 ];
 
 /** Returns true if the file should be skipped during secret scanning. */

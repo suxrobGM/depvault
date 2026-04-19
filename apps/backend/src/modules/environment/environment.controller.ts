@@ -15,7 +15,7 @@ const environmentService = container.resolve(EnvironmentService);
 
 export const environmentController = new Elysia({
   prefix: "/projects/:id/environments",
-  detail: { tags: ["Environments"] },
+  detail: { tags: ["Environments"], security: [{ bearerAuth: [] }] },
 })
   .use(projectGuard("VIEWER"))
   .get(
@@ -29,7 +29,6 @@ export const environmentController = new Elysia({
         operationId: "listEnvironments",
         summary: "List environments",
         description: "List all environments for a project with variable counts.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -51,7 +50,6 @@ export const environmentController = new Elysia({
         summary: "Delete an environment",
         description:
           "Permanently delete an environment and all its variables. Only owners and editors can delete.",
-        security: [{ bearerAuth: [] }],
       },
     },
   );

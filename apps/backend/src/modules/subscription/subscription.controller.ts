@@ -18,7 +18,7 @@ const billingService = container.resolve(StripeBillingService);
 
 export const subscriptionController = new Elysia({
   prefix: "/subscription",
-  detail: { tags: ["Subscription"] },
+  detail: { tags: ["Subscription"], security: [{ bearerAuth: [] }] },
 })
   .use(authGuard)
   .get("/", ({ user }) => subscriptionService.getSubscriptionResponse(user.id), {
@@ -28,7 +28,6 @@ export const subscriptionController = new Elysia({
       summary: "Get current subscription",
       description:
         "Return the authenticated user's subscription details including plan, limits, and current usage.",
-      security: [{ bearerAuth: [] }],
     },
   })
   .get("/plans", () => subscriptionService.getPlans(), {
@@ -37,7 +36,6 @@ export const subscriptionController = new Elysia({
       operationId: "getPlans",
       summary: "Get available plans",
       description: "Return all available subscription plans with pricing and limits.",
-      security: [{ bearerAuth: [] }],
     },
   })
   .post(
@@ -51,7 +49,6 @@ export const subscriptionController = new Elysia({
         summary: "Create Stripe checkout session",
         description:
           "Create a Stripe Checkout session for upgrading to a paid plan. Returns a URL to redirect the user to Stripe.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -66,7 +63,6 @@ export const subscriptionController = new Elysia({
         summary: "Create Stripe customer portal session",
         description:
           "Create a Stripe Customer Portal session for managing billing, invoices, and subscription changes.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -77,7 +73,6 @@ export const subscriptionController = new Elysia({
       summary: "Cancel subscription",
       description:
         "Schedule the current subscription to cancel at the end of the billing period. Access continues until then.",
-      security: [{ bearerAuth: [] }],
     },
   })
   .post("/resume", ({ user }) => billingService.resumeSubscription(user.id), {
@@ -86,6 +81,5 @@ export const subscriptionController = new Elysia({
       operationId: "resumeSubscription",
       summary: "Resume canceled subscription",
       description: "Reverse a pending cancellation so the subscription renews normally.",
-      security: [{ bearerAuth: [] }],
     },
   });

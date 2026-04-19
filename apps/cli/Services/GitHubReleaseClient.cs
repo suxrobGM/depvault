@@ -15,7 +15,7 @@ public interface IGitHubReleaseClient
 
 public sealed class GitHubReleaseClient : IGitHubReleaseClient
 {
-    private static readonly HttpClient http = new()
+    private static readonly HttpClient Http = new()
     {
         DefaultRequestHeaders =
         {
@@ -34,7 +34,7 @@ public sealed class GitHubReleaseClient : IGitHubReleaseClient
         try
         {
             var url = $"https://api.github.com/repos/{Constants.GitHubRepo}/releases?per_page=20";
-            var releases = await http.GetFromJsonAsync(url, GitHubJsonContext.Default.GitHubReleaseArray, ct);
+            var releases = await Http.GetFromJsonAsync(url, GitHubJsonContext.Default.GitHubReleaseArray, ct);
 
             if (releases is null)
             {

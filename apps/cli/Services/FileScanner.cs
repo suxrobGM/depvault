@@ -23,27 +23,27 @@ public interface IFileScanner
 
 public sealed class FileScanner : IFileScanner
 {
-    private static readonly IReadOnlySet<string> excludedDirs = ExcludedDirectories.Names;
+    private static readonly IReadOnlySet<string> ExcludedDirs = ExcludedDirectories.Names;
 
-    private static readonly HashSet<string> envFileNames = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly HashSet<string> EnvFileNames = new(StringComparer.OrdinalIgnoreCase)
     {
         ".env", ".env.local", ".env.development", ".env.staging", ".env.production",
         ".env.test"
     };
 
-    private static readonly HashSet<string> secretFileExtensions = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly HashSet<string> SecretFileExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
         ".pem", ".key", ".p12", ".pfx", ".jks", ".keystore"
     };
 
-    private static readonly HashSet<string> secretFileNames = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly HashSet<string> SecretFileNames = new(StringComparer.OrdinalIgnoreCase)
     {
         "firebase-config.json", "service-account.json", "service-account-key.json",
         "credentials.json", "gcp-key.json", "google-services.json",
         "GoogleService-Info.plist"
     };
 
-    private static readonly string[] secretFileNamePatterns = ["firebase-adminsdk"];
+    private static readonly string[] SecretFileNamePatterns = ["firebase-adminsdk"];
 
     public List<DiscoveredFile> FindDependencyFiles(string rootPath)
     {
@@ -134,7 +134,7 @@ public sealed class FileScanner : IFileScanner
 
         for (var i = 0; i < parts.Length - 1; i++)
         {
-            if (excludedDirs.Contains(parts[i]))
+            if (ExcludedDirs.Contains(parts[i]))
             {
                 return true;
             }
@@ -150,7 +150,7 @@ public sealed class FileScanner : IFileScanner
 
     private static bool IsEnvFile(string fileName)
     {
-        if (envFileNames.Contains(fileName))
+        if (EnvFileNames.Contains(fileName))
         {
             return true;
         }
@@ -182,17 +182,17 @@ public sealed class FileScanner : IFileScanner
     private static bool IsSecretFile(string fileName)
     {
         var ext = Path.GetExtension(fileName);
-        if (secretFileExtensions.Contains(ext))
+        if (SecretFileExtensions.Contains(ext))
         {
             return true;
         }
 
-        if (secretFileNames.Contains(fileName))
+        if (SecretFileNames.Contains(fileName))
         {
             return true;
         }
 
-        return secretFileNamePatterns.Any(p => fileName.Contains(p, StringComparison.OrdinalIgnoreCase));
+        return SecretFileNamePatterns.Any(p => fileName.Contains(p, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>

@@ -13,7 +13,7 @@ public interface IUpdateService
 
 public sealed class UpdateService(IVersionChecker versionChecker, IGitHubReleaseClient gitHub) : IUpdateService
 {
-    private static readonly HttpClient http = new()
+    private static readonly HttpClient Http = new()
     {
         DefaultRequestHeaders =
         {
@@ -88,7 +88,7 @@ public sealed class UpdateService(IVersionChecker versionChecker, IGitHubRelease
             var archivePath = Path.Combine(tempDir, $"depvault{archiveExt}");
 
             // Download
-            using (var response = await http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct))
+            using (var response = await Http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct))
             {
                 response.EnsureSuccessStatusCode();
                 await using var stream = await response.Content.ReadAsStreamAsync(ct);

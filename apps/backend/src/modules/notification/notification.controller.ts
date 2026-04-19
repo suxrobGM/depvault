@@ -16,7 +16,7 @@ const notificationService = container.resolve(NotificationService);
 
 export const notificationController = new Elysia({
   prefix: "/notifications",
-  detail: { tags: ["Notifications"] },
+  detail: { tags: ["Notifications"], security: [{ bearerAuth: [] }] },
 })
   .use(authGuard)
   .get(
@@ -35,7 +35,6 @@ export const notificationController = new Elysia({
         operationId: "listNotifications",
         summary: "List notifications",
         description: "Return a paginated list of notifications for the authenticated user.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -54,7 +53,6 @@ export const notificationController = new Elysia({
       operationId: "markAllNotificationsRead",
       summary: "Mark all notifications read",
       description: "Mark all unread notifications as read for the authenticated user.",
-      security: [{ bearerAuth: [] }],
     },
   })
   .get(
@@ -67,7 +65,6 @@ export const notificationController = new Elysia({
         operationId: "getNotification",
         summary: "Get notification",
         description: "Return a single notification by ID.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -81,7 +78,6 @@ export const notificationController = new Elysia({
         operationId: "markNotificationRead",
         summary: "Mark notification read",
         description: "Mark a single notification as read.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -95,7 +91,6 @@ export const notificationController = new Elysia({
         operationId: "deleteNotification",
         summary: "Delete notification",
         description: "Delete a single notification.",
-        security: [{ bearerAuth: [] }],
       },
     },
   );

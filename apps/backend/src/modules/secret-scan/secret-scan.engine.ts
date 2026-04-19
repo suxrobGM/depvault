@@ -29,6 +29,29 @@ interface ScanResult {
 
 const MAX_DIFF_SIZE = 1024 * 1024; // 1MB
 
+const PLACEHOLDER_MARKERS = [
+  "<placeholder>",
+  "<your_",
+  "your_",
+  "your-",
+  "xxxxxxxx",
+  "changeme",
+  "change-me",
+  "change-in-production",
+  "change_in_production",
+  "replace_me",
+  "replace-me",
+  "example.com",
+  "dummy",
+  "ci-token",
+];
+
+/** Returns true if the line appears to contain a template placeholder rather than a real secret. */
+function isPlaceholderLine(line: string): boolean {
+  const lower = line.toLowerCase();
+  return PLACEHOLDER_MARKERS.some((marker) => lower.includes(marker));
+}
+
 /** Redacts a matched secret, showing only first 4 and last 4 characters. */
 function redactMatch(match: string): string {
   if (match.length <= 12) {
@@ -72,6 +95,8 @@ export async function scanCommitHistory(
     const addedLines = parseUnifiedDiff(diff);
 
     for (const line of addedLines) {
+      if (isPlaceholderLine(line.content)) continue;
+
       for (const pattern of compiledPatterns) {
         pattern.compiled.lastIndex = 0;
         let regexMatch: RegExpExecArray | null;

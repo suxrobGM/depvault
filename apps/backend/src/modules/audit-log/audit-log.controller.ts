@@ -9,7 +9,7 @@ const auditLogService = container.resolve(AuditLogService);
 
 export const auditLogController = new Elysia({
   prefix: "/projects/:id/audit-log",
-  detail: { tags: ["Audit Log"] },
+  detail: { tags: ["Audit Log"], security: [{ bearerAuth: [] }] },
 })
   .use(projectGuard("EDITOR"))
   .get(
@@ -37,7 +37,6 @@ export const auditLogController = new Elysia({
         summary: "List audit log events",
         description:
           "Return a paginated list of audit log events for a project. Only owners and editors can view audit logs. Audit logs are append-only and cannot be modified or deleted.",
-        security: [{ bearerAuth: [] }],
       },
     },
   );

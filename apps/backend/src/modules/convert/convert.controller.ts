@@ -8,7 +8,7 @@ const convertService = container.resolve(ConvertService);
 
 export const convertController = new Elysia({
   prefix: "/convert",
-  detail: { tags: ["Convert"] },
+  detail: { tags: ["Convert"], security: [{ bearerAuth: [] }] },
 })
   .use(authGuard)
   .post("/", ({ body }) => convertService.convert(body), {
@@ -19,6 +19,5 @@ export const convertController = new Elysia({
       summary: "Convert between config formats",
       description:
         "Convert configuration content between supported formats (.env, appsettings.json, secrets.yaml, config.toml). No project needed — standalone conversion with preview.",
-      security: [{ bearerAuth: [] }],
     },
   });

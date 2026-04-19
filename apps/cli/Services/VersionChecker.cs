@@ -20,7 +20,7 @@ public interface IVersionChecker
 
 public sealed class VersionChecker(IGitHubReleaseClient gitHub) : IVersionChecker
 {
-    private static readonly TimeSpan checkInterval = TimeSpan.FromHours(24);
+    private static readonly TimeSpan CheckInterval = TimeSpan.FromHours(24);
 
     public string GetCurrentVersion()
     {
@@ -87,7 +87,7 @@ public sealed class VersionChecker(IGitHubReleaseClient gitHub) : IVersionChecke
             var json = File.ReadAllText(Constants.VersionCheckPath);
             var cache = JsonSerializer.Deserialize(json, VersionCheckJsonContext.Default.VersionCheckCache);
 
-            if (cache is null || DateTime.UtcNow - cache.CheckedAt > checkInterval)
+            if (cache is null || DateTime.UtcNow - cache.CheckedAt > CheckInterval)
             {
                 return null;
             }

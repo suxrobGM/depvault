@@ -15,7 +15,7 @@ const githubApiService = container.resolve(GitHubApiService);
 
 export const githubApiController = new Elysia({
   prefix: "/github",
-  detail: { tags: ["GitHub"] },
+  detail: { tags: ["GitHub"], security: [{ bearerAuth: [] }] },
 })
   .use(authGuard)
   .get(
@@ -29,7 +29,6 @@ export const githubApiController = new Elysia({
         summary: "List GitHub repositories",
         description:
           "List the authenticated user's GitHub repositories. Requires a linked GitHub account with repo scope.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -44,7 +43,6 @@ export const githubApiController = new Elysia({
         summary: "Discover dependency files",
         description:
           "Scan a GitHub repository for known dependency files (package.json, requirements.txt, etc.). Supports monorepos with nested projects.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -60,7 +58,6 @@ export const githubApiController = new Elysia({
         operationId: "getGithubFileContent",
         summary: "Get file content",
         description: "Fetch the content of a specific file from a GitHub repository.",
-        security: [{ bearerAuth: [] }],
       },
     },
   );

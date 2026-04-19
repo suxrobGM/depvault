@@ -17,7 +17,7 @@ const environmentSyncService = container.resolve(EnvironmentSyncService);
 
 export const envDiffController = new Elysia({
   prefix: "/projects/:id/environments",
-  detail: { tags: ["Environment Diff & Clone"] },
+  detail: { tags: ["Environment Diff & Clone"], security: [{ bearerAuth: [] }] },
 })
   .use(projectGuard("VIEWER"))
   .get(
@@ -39,7 +39,6 @@ export const envDiffController = new Elysia({
         summary: "Diff environments",
         description:
           "Compare variable keys across 2-3 environments. Returns rows with match/missing status.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -62,7 +61,6 @@ export const envDiffController = new Elysia({
         summary: "Sync environment",
         description:
           "Sync an environment's variables into another environment. Existing keys are overwritten, new keys are added.",
-        security: [{ bearerAuth: [] }],
       },
     },
   );

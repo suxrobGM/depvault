@@ -17,7 +17,7 @@ const environmentIOService = container.resolve(EnvironmentIOService);
 
 export const envIOController = new Elysia({
   prefix: "/projects/:id/environments",
-  detail: { tags: ["Environment Import/Export"] },
+  detail: { tags: ["Environment Import/Export"], security: [{ bearerAuth: [] }] },
 })
   .use(projectGuard("VIEWER"))
   .get(
@@ -32,7 +32,6 @@ export const envIOController = new Elysia({
         summary: "Generate .env.example template",
         description:
           "Generate a .env.example template with keys and placeholder annotations but no real values. Any project member can access this.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -55,7 +54,6 @@ export const envIOController = new Elysia({
         summary: "Bulk import environment variables",
         description:
           "Bulk import pre-encrypted environment variables. The client encrypts values before sending. Existing keys are updated. Only owners and editors can import.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -78,7 +76,6 @@ export const envIOController = new Elysia({
         summary: "Export environment variables",
         description:
           "Export all encrypted environment variables for a given environment. The client is responsible for decryption and formatting. Only owners and editors can export.",
-        security: [{ bearerAuth: [] }],
       },
     },
   );

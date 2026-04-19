@@ -23,7 +23,7 @@ const ciTokenService = container.resolve(CiTokenService);
 /** Read-only CI token endpoints (VIEWER+). */
 const ciTokenReadController = new Elysia({
   prefix: "/projects/:id/ci-tokens",
-  detail: { tags: ["CI/CD Tokens"] },
+  detail: { tags: ["CI/CD Tokens"], security: [{ bearerAuth: [] }] },
 })
   .use(projectGuard("VIEWER"))
   .get("/", ({ params, query }) => ciTokenService.list(params.id, query.page, query.limit), {
@@ -34,14 +34,13 @@ const ciTokenReadController = new Elysia({
       operationId: "listCiTokens",
       summary: "List CI tokens",
       description: "List all CI/CD tokens for a project.",
-      security: [{ bearerAuth: [] }],
     },
   });
 
 /** Write CI token endpoints (EDITOR+). */
 const ciTokenWriteController = new Elysia({
   prefix: "/projects/:id/ci-tokens",
-  detail: { tags: ["CI/CD Tokens"] },
+  detail: { tags: ["CI/CD Tokens"], security: [{ bearerAuth: [] }] },
 })
   .use(projectGuard("EDITOR"))
   .post(
@@ -56,7 +55,6 @@ const ciTokenWriteController = new Elysia({
         operationId: "createCiToken",
         summary: "Create CI token",
         description: "Generate a scoped CI/CD token bound to a specific environment.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -76,7 +74,6 @@ const ciTokenWriteController = new Elysia({
         operationId: "revokeCiToken",
         summary: "Revoke CI token",
         description: "Immediately revoke a CI/CD token.",
-        security: [{ bearerAuth: [] }],
       },
     },
   );
@@ -89,7 +86,7 @@ export const ciTokenController = new Elysia()
 /** CI/CD access endpoints (CI token authenticated). */
 export const ciAccessController = new Elysia({
   prefix: "/ci/secrets",
-  detail: { tags: ["CI/CD Access"] },
+  detail: { tags: ["CI/CD Access"], security: [{ bearerAuth: [] }] },
 })
   .use(ciTokenGuard)
   .get(

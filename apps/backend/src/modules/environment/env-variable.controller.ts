@@ -26,7 +26,7 @@ const envVariableVersionService = container.resolve(EnvVariableVersionService);
 
 export const envVariableController = new Elysia({
   prefix: "/projects/:id/environments",
-  detail: { tags: ["Environment Variables"] },
+  detail: { tags: ["Environment Variables"], security: [{ bearerAuth: [] }] },
 })
   .use(projectGuard("VIEWER"))
   .get(
@@ -50,7 +50,6 @@ export const envVariableController = new Elysia({
         summary: "List environment variables",
         description:
           "List environment variables for a project, optionally filtered by environment type. Viewers see masked values; editors and owners see decrypted values.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -65,7 +64,6 @@ export const envVariableController = new Elysia({
         summary: "List variable version history",
         description:
           "List the version history for an environment variable. Editors and owners see decrypted values; viewers see masked values.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -88,7 +86,6 @@ export const envVariableController = new Elysia({
         summary: "Create an environment variable",
         description:
           "Create a new encrypted environment variable for the project. The environment is auto-created if it doesn't exist. Only owners and editors can create variables.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -111,7 +108,6 @@ export const envVariableController = new Elysia({
         summary: "Update an environment variable",
         description:
           "Update key, value, or metadata of an environment variable. When the value changes, the previous value is saved as a version snapshot. Only owners and editors can update.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -132,7 +128,6 @@ export const envVariableController = new Elysia({
         summary: "Delete an environment variable",
         description:
           "Permanently delete an environment variable and all its version history. Only owners and editors can delete.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -154,7 +149,6 @@ export const envVariableController = new Elysia({
         summary: "Batch delete environment variables",
         description:
           "Permanently delete multiple environment variables and their version history. Only owners and editors can delete.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -175,7 +169,6 @@ export const envVariableController = new Elysia({
         summary: "Rollback variable to a previous version",
         description:
           "Restore an environment variable to a previous version. The current value is saved as a new version snapshot before rolling back. Only owners and editors can rollback.",
-        security: [{ bearerAuth: [] }],
       },
     },
   );

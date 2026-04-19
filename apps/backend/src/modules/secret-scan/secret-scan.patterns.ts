@@ -66,7 +66,7 @@ export const BUILT_IN_PATTERNS: BuiltInPattern[] = [
   },
   {
     name: "Generic API Key",
-    regex: "(api[_-]?key|apikey)\\s*[:=]\\s*['\"][A-Za-z0-9]{16,}['\"]",
+    regex: "(?:^|[^A-Za-z])(api[_-]?key|apikey)\\s*[:=]\\s*['\"][A-Za-z0-9]{16,}['\"]",
     severity: "HIGH",
     remediation:
       "Identify the service this API key belongs to and rotate it. Store API keys in environment variables or a secrets manager.",
@@ -87,7 +87,8 @@ export const BUILT_IN_PATTERNS: BuiltInPattern[] = [
   },
   {
     name: "Generic Secret Assignment",
-    regex: "(secret|password|passwd|token)\\s*[:=]\\s*['\"][^\\s'\"]{8,}['\"]",
+    regex:
+      "(?:^|[^A-Za-z])(secret|password|passwd|token)\\s*[:=]\\s*['\"](?!ci-token|test|changeme|change-me|your-|your_|xxxx|example|placeholder|dummy|replace-me|replace_me)[A-Za-z0-9+/=_\\-]{12,}['\"]",
     severity: "MEDIUM",
     remediation:
       "Move the secret to environment variables or a secrets manager. Rotate the credential if it grants access to any service.",

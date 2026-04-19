@@ -14,7 +14,10 @@ import { UserService } from "./user.service";
 
 const userService = container.resolve(UserService);
 
-export const userController = new Elysia({ prefix: "/users", detail: { tags: ["Users"] } })
+export const userController = new Elysia({
+  prefix: "/users",
+  detail: { tags: ["Users"], security: [{ bearerAuth: [] }] },
+})
   .use(authGuard)
   .get("/me", ({ user }) => userService.getProfile(user.id), {
     response: UserProfileResponseSchema,
@@ -23,7 +26,6 @@ export const userController = new Elysia({ prefix: "/users", detail: { tags: ["U
       summary: "Get current user profile",
       description:
         "Return the authenticated user's profile including email, username, avatar, and linked accounts.",
-      security: [{ bearerAuth: [] }],
     },
   })
   .patch("/me", ({ user, body }) => userService.updateProfile(user.id, body), {
@@ -34,7 +36,6 @@ export const userController = new Elysia({ prefix: "/users", detail: { tags: ["U
       summary: "Update profile",
       description:
         "Update the authenticated user's username and/or avatar URL. Username must be unique.",
-      security: [{ bearerAuth: [] }],
     },
   })
   .patch("/me/password", ({ user, body }) => userService.changePassword(user.id, body), {
@@ -45,7 +46,6 @@ export const userController = new Elysia({ prefix: "/users", detail: { tags: ["U
       summary: "Change password",
       description:
         "Change the authenticated user's password. Requires the current password for verification. Not available for OAuth-only accounts.",
-      security: [{ bearerAuth: [] }],
     },
   })
   .patch("/me/email", ({ user, body }) => userService.changeEmail(user.id, body), {
@@ -56,7 +56,6 @@ export const userController = new Elysia({ prefix: "/users", detail: { tags: ["U
       summary: "Change email address",
       description:
         "Change the authenticated user's email. Requires password verification. A new verification email is sent to the updated address.",
-      security: [{ bearerAuth: [] }],
     },
   })
   .post("/me/avatar", ({ user, body }) => userService.uploadAvatar(user.id, body.file), {
@@ -67,7 +66,6 @@ export const userController = new Elysia({ prefix: "/users", detail: { tags: ["U
       summary: "Upload avatar",
       description:
         "Upload and set the authenticated user's avatar image. Accepts jpg, png, gif, or webp up to 5 MB.",
-      security: [{ bearerAuth: [] }],
     },
   })
   .delete("/me", ({ user }) => userService.deleteAccount(user.id), {
@@ -77,6 +75,5 @@ export const userController = new Elysia({ prefix: "/users", detail: { tags: ["U
       summary: "Delete account",
       description:
         "Permanently delete the authenticated user's account and all associated data including projects, analyses, uploads, and secret files. This action is irreversible.",
-      security: [{ bearerAuth: [] }],
     },
   });

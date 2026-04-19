@@ -57,7 +57,8 @@ internal sealed class DependencyScanner(
             var content = await File.ReadAllTextAsync(file.FullPath, ct);
             task.Value = 30;
 
-            var result = await analysisClient.AnalyzeFileAsync(projectId, file.FileName, content, ecosystem, ct);
+            var result = await analysisClient.AnalyzeFileAsync(
+                projectId, file.FileName, file.RelativePath, content, ecosystem, ct);
 
             task.Value = 100;
 

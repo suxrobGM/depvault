@@ -19,7 +19,7 @@ const adminService = container.resolve(AdminService);
 
 export const adminController = new Elysia({
   prefix: "/admin",
-  detail: { tags: ["Admin"] },
+  detail: { tags: ["Admin"], security: [{ bearerAuth: [] }] },
 })
   .use(authGuard)
   .use(requireRole("ADMIN"))
@@ -29,7 +29,6 @@ export const adminController = new Elysia({
       operationId: "getAdminStats",
       summary: "Get admin dashboard stats",
       description: "Return aggregate statistics: total users, plan breakdown, MRR, churn.",
-      security: [{ bearerAuth: [] }],
     },
   })
   .get("/users", ({ query }) => adminService.listUsers(query), {
@@ -40,7 +39,6 @@ export const adminController = new Elysia({
       summary: "List all users",
       description:
         "Return a paginated list of all users with subscription info. Supports search and plan filter.",
-      security: [{ bearerAuth: [] }],
     },
   })
   .get("/users/:id", ({ params }) => adminService.getUserDetail(params.id), {
@@ -50,7 +48,6 @@ export const adminController = new Elysia({
       operationId: "getAdminUserDetail",
       summary: "Get user detail",
       description: "Return detailed user info with subscription, usage stats, and owned projects.",
-      security: [{ bearerAuth: [] }],
     },
   })
   .patch(
@@ -65,7 +62,6 @@ export const adminController = new Elysia({
         summary: "Assign admin-granted subscription",
         description:
           "Grant a PRO or TEAM subscription to a user without Stripe charge. Useful for test accounts or internal users.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -79,7 +75,6 @@ export const adminController = new Elysia({
         operationId: "revokeCompSubscription",
         summary: "Revoke admin-granted subscription",
         description: "Revert a user's admin-granted subscription back to the FREE plan.",
-        security: [{ bearerAuth: [] }],
       },
     },
   )
@@ -90,6 +85,5 @@ export const adminController = new Elysia({
       operationId: "listAdminSubscriptions",
       summary: "List all subscriptions",
       description: "Return a paginated list of all subscriptions with user info and filters.",
-      security: [{ bearerAuth: [] }],
     },
   });

@@ -8,7 +8,7 @@ const securityService = container.resolve(SecurityService);
 
 export const securityController = new Elysia({
   prefix: "/security",
-  detail: { tags: ["Security"] },
+  detail: { tags: ["Security"], security: [{ bearerAuth: [] }] },
 })
   .use(authGuard)
   .get("/overview", ({ user }) => securityService.getOverview(user.id), {
@@ -18,6 +18,5 @@ export const securityController = new Elysia({
       summary: "Security overview",
       description:
         "Return aggregated vulnerability and secret scan statistics across all projects the user is a member of.",
-      security: [{ bearerAuth: [] }],
     },
   });
