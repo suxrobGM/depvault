@@ -1,3 +1,4 @@
 <Solution>
   <Project Path="apps/cli/DepVault.Cli.csproj" />
+  <Project Path="tests/DepVault.Cli.Tests/DepVault.Cli.Tests.csproj" />
 </Solution>
