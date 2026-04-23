@@ -57,22 +57,22 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: SITE_URL,
     siteName: SITE_NAME,
-    title: `${SITE_NAME} — Dependency Analysis & Environment Vault`,
+    title: `${SITE_NAME} - Dependency Analysis & Environment Vault`,
     description: SITE_DESCRIPTION,
     images: [
       {
-        url: "/depvault-og.png",
+        url: "https://ogstack.dev/api/og/45f73d525853?url=https://depvault.com&ai=true",
         width: 1200,
         height: 630,
-        alt: `${SITE_NAME} — Dependency Analysis & Environment Vault`,
+        alt: `${SITE_NAME} - Dependency Analysis & Environment Vault`,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${SITE_NAME} — Dependency Analysis & Environment Vault`,
+    title: `${SITE_NAME} - Dependency Analysis & Environment Vault`,
     description: SITE_DESCRIPTION,
-    images: ["/depvault-og.png"],
+    images: ["https://ogstack.dev/api/og/45f73d525853?url=https://depvault.com&ai=true"],
   },
   icons: {
     icon: { url: "/depvault-icon.svg", type: "image/svg+xml" },
