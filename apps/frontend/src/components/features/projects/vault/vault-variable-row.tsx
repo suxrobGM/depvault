@@ -2,40 +2,20 @@
 
 import { useState, type ReactElement } from "react";
 import {
-  Close as CloseIcon,
   Delete as DeleteIcon,
   Edit as EditIcon,
   History as HistoryIcon,
-  Replay as ReplayIcon,
   Share as ShareIcon,
-  Visibility,
-  VisibilityOff,
 } from "@mui/icons-material";
-import {
-  Box,
-  Checkbox,
-  Chip,
-  Collapse,
-  IconButton,
-  Skeleton,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material";
+import { Checkbox, Chip, TableCell, TableRow, Typography } from "@mui/material";
 import { CreateShareLinkDialog } from "@/components/features/shared-secret/create-share-link-dialog";
-import { ActionMenu } from "@/components/ui/inputs";
+import { ActionMenu, type ActionMenuItem } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useApiQuery } from "@/hooks/use-api-query";
 import { useConfirm } from "@/hooks/use-confirm";
-import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
-import { decrypt } from "@/lib/crypto";
-import type { EnvVariable, EnvVariableVersionListResponse } from "@/types/api/env-variable";
-import { formatDate } from "@/utils/formatters";
+import type { EnvVariable } from "@/types/api/env-variable";
+import { EncryptedValue } from "./encrypted-value";
+import { VaultVariableHistory } from "./vault-variable-history";
 
 export interface VaultVariableRowProps {
   projectId: string;
@@ -47,87 +27,12 @@ export interface VaultVariableRowProps {
   onEdit?: (variable: EnvVariable) => void;
 }
 
-interface EncryptedValueProps {
-  projectId: string;
-  encryptedValue: string;
-  iv: string;
-  authTag: string;
-}
-
-/** Decrypts a value on-demand when the user clicks the reveal toggle. */
-function EncryptedValue(props: EncryptedValueProps): ReactElement {
-  const { projectId, encryptedValue, iv, authTag } = props;
-  const { getProjectDEK } = useVault();
-  const [decrypted, setDecrypted] = useState<string | null>(null);
-  const [visible, setVisible] = useState(false);
-  const [error, setError] = useState(false);
-
-  const handleToggle = async () => {
-    if (visible) {
-      setVisible(false);
-      return;
-    }
-
-    if (decrypted !== null) {
-      setVisible(true);
-      return;
-    }
-
-    try {
-      const dek = await getProjectDEK(projectId);
-      const plaintext = await decrypt(encryptedValue, iv, authTag, dek);
-      setDecrypted(plaintext);
-      setVisible(true);
-    } catch {
-      setError(true);
-    }
-  };
-
-  return (
-    <Stack
-      direction="row"
-      spacing={0.5}
-      sx={{
-        alignItems: "center",
-      }}
-    >
-      <Typography
-        variant="body2"
-        color={error ? "error" : undefined}
-        sx={{
-          fontFamily: "monospace",
-          userSelect: visible ? "text" : "none",
-        }}
-      >
-        {error ? "Decryption failed" : visible ? decrypted : "\u2022".repeat(12)}
-      </Typography>
-      {!error && (
-        <IconButton size="small" onClick={handleToggle} aria-label="Toggle visibility">
-          {visible ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
-        </IconButton>
-      )}
-    </Stack>
-  );
-}
-
 export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
   const { projectId, vaultId, variable, canEdit, selected, onToggleSelect, onEdit } = props;
-
   const confirm = useConfirm();
+
   const [historyOpen, setHistoryOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
-
-  const { data: versionsData, isLoading: versionsLoading } =
-    useApiQuery<EnvVariableVersionListResponse>(
-      ["env-variable-versions", projectId, variable.id],
-      () =>
-        client.api
-          .projects({ id: projectId })
-          .vaults({ vaultId })
-          .variables({ varId: variable.id })
-          .versions.get(),
-      { enabled: historyOpen },
-    );
 
   const deleteMutation = useApiMutation(
     () =>
@@ -142,23 +47,6 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
     },
   );
 
-  const rollbackMutation = useApiMutation(
-    (versionId: string) =>
-      client.api
-        .projects({ id: projectId })
-        .vaults({ vaultId })
-        .variables({ varId: variable.id })
-        .versions({ versionId })
-        .rollback.post(),
-    {
-      invalidateKeys: [
-        ["vault-variables", projectId, vaultId],
-        ["env-variable-versions", projectId, variable.id],
-      ],
-      successMessage: "Variable rolled back successfully",
-    },
-  );
-
   const handleDelete = async () => {
     const ok = await confirm({
       title: "Delete Variable",
@@ -169,7 +57,15 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
     if (ok) deleteMutation.mutate();
   };
 
-  const versions = versionsData?.items ?? [];
+  const actions = buildActionMenuItems({
+    canEdit,
+    onEdit: () => onEdit?.(variable),
+    onShare: () => setShareOpen(true),
+    onShowHistory: () => setHistoryOpen(true),
+    onDelete: handleDelete,
+  });
+
+  const colSpan = canEdit ? 6 : 5;
 
   return (
     <>
@@ -184,13 +80,7 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
           </TableCell>
         )}
         <TableCell>
-          <Typography
-            variant="body2"
-            sx={{
-              fontFamily: "monospace",
-              fontWeight: 600,
-            }}
-          >
+          <Typography variant="body2" sx={{ fontFamily: "monospace", fontWeight: 600 }}>
             {variable.key}
           </Typography>
         </TableCell>
@@ -203,14 +93,7 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
           />
         </TableCell>
         <TableCell>
-          <Typography
-            variant="body2"
-            noWrap
-            sx={{
-              color: "text.secondary",
-              maxWidth: 200,
-            }}
-          >
+          <Typography variant="body2" noWrap sx={{ color: "text.secondary", maxWidth: 200 }}>
             {variable.description ?? "—"}
           </Typography>
         </TableCell>
@@ -220,142 +103,64 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
           )}
         </TableCell>
         <TableCell align="right">
-          <ActionMenu
-            items={[
-              {
-                label: "Edit",
-                icon: <EditIcon fontSize="small" />,
-                onClick: () => onEdit?.(variable),
-                hidden: !canEdit,
-              },
-              {
-                label: "Share",
-                icon: <ShareIcon fontSize="small" />,
-                onClick: () => setShareOpen(true),
-                hidden: !canEdit,
-              },
-              {
-                label: "Version History",
-                icon: <HistoryIcon fontSize="small" />,
-                onClick: () => setHistoryOpen(true),
-              },
-              {
-                label: "Delete",
-                icon: <DeleteIcon fontSize="small" />,
-                onClick: handleDelete,
-                hidden: !canEdit,
-                destructive: true,
-              },
-            ]}
-          />
+          <ActionMenu items={actions} />
         </TableCell>
       </TableRow>
+
+      <VaultVariableHistory
+        projectId={projectId}
+        vaultId={vaultId}
+        variableId={variable.id}
+        canEdit={canEdit}
+        colSpan={colSpan}
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+      />
+
       <CreateShareLinkDialog
         open={shareOpen}
         onClose={() => setShareOpen(false)}
         projectId={projectId}
         variables={[variable]}
       />
-      <TableRow>
-        <TableCell colSpan={canEdit ? 6 : 5} sx={{ py: 0 }}>
-          <Collapse in={historyOpen} timeout="auto" unmountOnExit>
-            <Box sx={{ py: 2, pl: 6, pr: 2 }}>
-              <Typography
-                variant="subtitle2"
-                gutterBottom
-                sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
-              >
-                <HistoryIcon fontSize="small" />
-                Version History
-                <IconButton size="small" onClick={() => setHistoryOpen(false)} sx={{ ml: "auto" }}>
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-              </Typography>
-
-              {versionsLoading ? (
-                <Skeleton variant="rounded" height={60} />
-              ) : versions.length === 0 ? (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "text.secondary",
-                  }}
-                >
-                  No previous versions.
-                </Typography>
-              ) : (
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Version</TableCell>
-                      <TableCell>Changed by</TableCell>
-                      <TableCell>Date</TableCell>
-                      <TableCell>Value</TableCell>
-                      {canEdit && <TableCell align="right">Actions</TableCell>}
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {versions.map((v, idx) => (
-                      <TableRow key={v.id}>
-                        <TableCell>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontFamily: "monospace",
-                            }}
-                          >
-                            v{versions.length - idx}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: "text.secondary",
-                            }}
-                          >
-                            {v.changedByName}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: "text.secondary",
-                            }}
-                          >
-                            {formatDate(v.createdAt)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <EncryptedValue
-                            projectId={projectId}
-                            encryptedValue={v.encryptedValue}
-                            iv={v.iv}
-                            authTag={v.authTag}
-                          />
-                        </TableCell>
-                        {canEdit && (
-                          <TableCell align="right">
-                            <IconButton
-                              size="small"
-                              title="Rollback to this version"
-                              disabled={rollbackMutation.isPending}
-                              onClick={() => rollbackMutation.mutate(v.id)}
-                            >
-                              <ReplayIcon fontSize="small" />
-                            </IconButton>
-                          </TableCell>
-                        )}
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
     </>
   );
+}
+
+interface ActionBuilderArgs {
+  canEdit: boolean;
+  onEdit: () => void;
+  onShare: () => void;
+  onShowHistory: () => void;
+  onDelete: () => void;
+}
+
+function buildActionMenuItems(args: ActionBuilderArgs): ActionMenuItem[] {
+  const { canEdit, onEdit, onShare, onShowHistory, onDelete } = args;
+  return [
+    {
+      label: "Edit",
+      icon: <EditIcon fontSize="small" />,
+      onClick: onEdit,
+      hidden: !canEdit,
+    },
+    {
+      label: "Share",
+      icon: <ShareIcon fontSize="small" />,
+      onClick: onShare,
+      hidden: !canEdit,
+    },
+    {
+      label: "Version History",
+      icon: <HistoryIcon fontSize="small" />,
+      onClick: onShowHistory,
+    },
+    {
+      label: "Delete",
+      icon: <DeleteIcon fontSize="small" />,
+      onClick: onDelete,
+      hidden: !canEdit,
+      destructive: true,
+    },
+  ];
 }
