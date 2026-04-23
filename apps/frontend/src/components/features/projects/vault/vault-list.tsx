@@ -1,38 +1,16 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import {
-  ContentCopy as CloneIcon,
-  Delete as DeleteIcon,
-  MoreVert as MoreIcon,
-} from "@mui/icons-material";
-import {
-  Box,
-  Chip,
-  IconButton,
-  LinearProgress,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Menu,
-  MenuItem,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { ContentCopy as CloneIcon, Delete as DeleteIcon } from "@mui/icons-material";
+import { Box, List, Menu, MenuItem, Typography } from "@mui/material";
 import { GlassCard } from "@/components/ui/cards";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useConfirm } from "@/hooks/use-confirm";
 import { client } from "@/lib/api";
 import type { Vault } from "@/types/api/vault";
 import { CloneVaultDialog } from "./clone-vault-dialog";
-
-const BLESSED_TAGS: Record<string, string> = {
-  prod: "#ef4444",
-  staging: "#eab308",
-  dev: "#10b981",
-  preview: "#6366f1",
-};
+import { VaultListItem } from "./vault-list-item";
+import { ALL_TAGS, VaultListToolbar } from "./vault-list-toolbar";
 
 interface VaultListProps {
   projectId: string;
@@ -46,6 +24,8 @@ export function VaultList(props: VaultListProps): ReactElement {
   const { projectId, vaults, canEdit, selectedVaultId, onSelectVault } = props;
   const confirm = useConfirm();
 
+  const [search, setSearch] = useState("");
+  const [activeTag, setActiveTag] = useState(ALL_TAGS);
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const [menuVault, setMenuVault] = useState<Vault | null>(null);
   const [cloneOpen, setCloneOpen] = useState(false);
@@ -58,6 +38,9 @@ export function VaultList(props: VaultListProps): ReactElement {
     },
   );
 
+  const availableTags = collectTags(vaults);
+  const filteredVaults = filterVaults(vaults, search, activeTag);
+
   const handleDelete = async (vault: Vault) => {
     const ok = await confirm({
       title: "Delete vault",
@@ -69,89 +52,37 @@ export function VaultList(props: VaultListProps): ReactElement {
   };
 
   return (
-    <GlassCard>
-      <List dense disablePadding>
-        {vaults.map((vault) => {
-          const requiredTotal = Number(vault.requiredTotal ?? 0);
-          const requiredFilled = Number(vault.requiredFilled ?? 0);
-          const progress = requiredTotal > 0 ? (requiredFilled / requiredTotal) * 100 : 0;
+    <GlassCard hoverGlow={false} sx={{ overflow: "hidden" }}>
+      <VaultListToolbar
+        search={search}
+        onSearchChange={setSearch}
+        tags={availableTags}
+        activeTag={activeTag}
+        onTagChange={setActiveTag}
+      />
 
-          return (
-            <ListItem
+      <List dense disablePadding sx={{ borderTop: "1px solid", borderColor: "divider" }}>
+        {filteredVaults.length === 0 ? (
+          <Box sx={{ py: 3, textAlign: "center" }}>
+            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+              No vaults match.
+            </Typography>
+          </Box>
+        ) : (
+          filteredVaults.map((vault) => (
+            <VaultListItem
               key={vault.id}
-              disablePadding
-              secondaryAction={
-                canEdit ? (
-                  <IconButton
-                    edge="end"
-                    size="small"
-                    onClick={(e) => {
-                      setMenuAnchor(e.currentTarget);
-                      setMenuVault(vault);
-                    }}
-                  >
-                    <MoreIcon fontSize="small" />
-                  </IconButton>
-                ) : null
-              }
-            >
-              <ListItemButton
-                selected={selectedVaultId === vault.id}
-                onClick={() => onSelectVault(vault.id)}
-              >
-                <ListItemText
-                  disableTypography
-                  primary={
-                    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                        {vault.name}
-                      </Typography>
-                      {vault.tags?.map((tag) => {
-                        const color = BLESSED_TAGS[tag.toLowerCase()];
-                        return (
-                          <Chip
-                            key={tag}
-                            label={tag}
-                            size="small"
-                            sx={color ? { bgcolor: color, color: "#fff" } : undefined}
-                          />
-                        );
-                      })}
-                    </Stack>
-                  }
-                  secondary={
-                    <Stack spacing={0.5} sx={{ mt: 0.5 }}>
-                      {vault.directoryPath ? (
-                        <Typography variant="caption" sx={{ fontFamily: "monospace" }}>
-                          {vault.directoryPath}
-                        </Typography>
-                      ) : null}
-                      <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-                        <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                          {Number(vault.variableCount ?? 0)} variables ·{" "}
-                          {Number(vault.secretFileCount ?? 0)} files
-                        </Typography>
-                        {requiredTotal > 0 ? (
-                          <Box sx={{ flex: 1, minWidth: 80 }}>
-                            <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                              {requiredFilled} of {requiredTotal} required filled
-                            </Typography>
-                            <LinearProgress
-                              variant="determinate"
-                              value={progress}
-                              color={progress === 100 ? "success" : "warning"}
-                              sx={{ mt: 0.25, height: 4, borderRadius: 2 }}
-                            />
-                          </Box>
-                        ) : null}
-                      </Stack>
-                    </Stack>
-                  }
-                />
-              </ListItemButton>
-            </ListItem>
-          );
-        })}
+              vault={vault}
+              canEdit={canEdit}
+              selected={selectedVaultId === vault.id}
+              onSelect={() => onSelectVault(vault.id)}
+              onOpenMenu={(target) => {
+                setMenuAnchor(target);
+                setMenuVault(vault);
+              }}
+            />
+          ))
+        )}
       </List>
 
       <Menu anchorEl={menuAnchor} open={!!menuAnchor} onClose={() => setMenuAnchor(null)}>
@@ -184,4 +115,28 @@ export function VaultList(props: VaultListProps): ReactElement {
       />
     </GlassCard>
   );
+}
+
+function collectTags(vaults: Vault[]): string[] {
+  const set = new Set<string>();
+  for (const v of vaults) {
+    for (const t of v.tags ?? []) {
+      set.add(t);
+    }
+  }
+  return Array.from(set).sort();
+}
+
+function filterVaults(vaults: Vault[], search: string, tag: string): Vault[] {
+  const q = search.trim().toLowerCase();
+  return vaults.filter((v) => {
+    if (tag !== ALL_TAGS && !(v.tags ?? []).includes(tag)) {
+      return false;
+    }
+    if (!q) {
+      return true;
+    }
+    const hay = `${v.name} ${v.directoryPath ?? ""} ${(v.tags ?? []).join(" ")}`.toLowerCase();
+    return hay.includes(q);
+  });
 }

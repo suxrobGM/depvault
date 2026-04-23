@@ -34,7 +34,7 @@ public sealed class ReplHost(VaultState vaultState, ConsoleRenderer renderer)
             firstIteration = false;
 
             var prompt = vaultState.IsUnlocked
-                ? "[{ConsoleTheme.BrandMarkup}]depvault[/][grey]>[/] "
+                ? $"[{ConsoleTheme.BrandMarkup}]depvault[/][grey]>[/] "
                 : "[grey]depvault>[/] ";
 
             string input;

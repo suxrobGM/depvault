@@ -94,7 +94,7 @@ export function VaultVariablesView(props: VaultVariablesViewProps): ReactElement
         />
       ) : (
         <Grid container spacing={2}>
-          <Grid size={{ xs: 12, md: 4 }}>
+          <Grid size={{ xs: 12, md: 3 }}>
             <VaultList
               projectId={projectId}
               vaults={list}
@@ -103,7 +103,7 @@ export function VaultVariablesView(props: VaultVariablesViewProps): ReactElement
               onSelectVault={setSelectedVaultId}
             />
           </Grid>
-          <Grid size={{ xs: 12, md: 8 }}>
+          <Grid size={{ xs: 12, md: 9 }}>
             <Box>
               {activeVaultId && (
                 <VaultVariableTable

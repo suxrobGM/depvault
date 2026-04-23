@@ -1,5 +1,4 @@
 import { t, type Static } from "elysia";
-import { PaginationQuerySchema } from "@/types/pagination";
 import { PaginatedResponseSchema } from "@/types/response";
 
 export const CreateEnvVariableBodySchema = t.Object({
@@ -46,7 +45,12 @@ export const EnvVariableWithValueResponseSchema = t.Object({
   updatedAt: t.Date(),
 });
 
-export const EnvVariableListQuerySchema = PaginationQuerySchema(t.Object({}));
+// Vault UI loads every variable in one pass (no page controls), so allow a higher
+// limit than the generic pagination cap of 100.
+export const EnvVariableListQuerySchema = t.Object({
+  page: t.Integer({ minimum: 1, default: 1 }),
+  limit: t.Integer({ minimum: 1, maximum: 1000, default: 500 }),
+});
 
 export const EnvVariableListResponseSchema = PaginatedResponseSchema(
   EnvVariableWithValueResponseSchema,
