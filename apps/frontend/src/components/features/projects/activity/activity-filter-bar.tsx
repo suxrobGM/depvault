@@ -21,7 +21,6 @@ const ACTION_OPTIONS = [
 const RESOURCE_TYPE_OPTIONS = [
   { value: "", label: "All Types" },
   { value: "ENV_VARIABLE", label: "Env Variable" },
-  { value: "ENV_TEMPLATE", label: "Env Template" },
   { value: "SECRET_FILE", label: "Secret File" },
   { value: "SHARE_LINK", label: "Share Link" },
   { value: "CI_TOKEN", label: "CI Token" },

@@ -35,7 +35,6 @@ model User {
   sharedSecrets       SharedSecret[]
   notifications       Notification[]
   uploadedFiles       SecretFile[]
-  envTemplates        EnvTemplate[]       @relation("envTemplateCreator")
   auditLogs           AuditLog[]
   triggeredScans      SecretScan[]        @relation("scanTriggeredBy")
   resolvedDetections  SecretDetection[]   @relation("detectionResolvedBy")

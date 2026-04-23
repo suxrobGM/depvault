@@ -30,22 +30,22 @@ export class SubscriptionService {
     return this.prisma.project.count({ where: { ownerId: userId } });
   }
 
-  /** Count distinct env variable keys per vault group across all owned projects. */
+  /** Count distinct env variable keys per vault across all owned projects. */
   async countDistinctEnvVars(userId: string): Promise<number> {
     const rows = await this.prisma.envVariable.findMany({
-      where: { environment: { project: { ownerId: userId } } },
-      select: { key: true, environment: { select: { vaultGroupId: true } } },
+      where: { vault: { project: { ownerId: userId } } },
+      select: { key: true, vaultId: true },
     });
-    return new Set(rows.map((v) => `${v.environment.vaultGroupId}:${v.key}`)).size;
+    return new Set(rows.map((v) => `${v.vaultId}:${v.key}`)).size;
   }
 
-  /** Count distinct secret file names per vault group across all owned projects. */
+  /** Count distinct secret file names per vault across all owned projects. */
   async countDistinctSecretFiles(userId: string): Promise<number> {
     const rows = await this.prisma.secretFile.findMany({
-      where: { vaultGroup: { project: { ownerId: userId } } },
-      select: { name: true, vaultGroupId: true },
+      where: { vault: { project: { ownerId: userId } } },
+      select: { name: true, vaultId: true },
     });
-    return new Set(rows.map((f) => `${f.vaultGroupId}:${f.name}`)).size;
+    return new Set(rows.map((f) => `${f.vaultId}:${f.name}`)).size;
   }
 
   async countAnalysesThisMonth(userId: string): Promise<number> {

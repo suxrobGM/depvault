@@ -235,7 +235,7 @@ describe("unlockVaultKeys", () => {
     const info = await buildFakeVaultInfo("pw");
     // Flip one bit in the wrapped private key and ensure unlock fails loudly.
     const corrupted = fromBase64(info.wrappedPrivateKey);
-    corrupted[0] ^= 0xff;
+    corrupted[0]! ^= 0xff;
     info.wrappedPrivateKey = toBase64(corrupted.buffer as ArrayBuffer);
 
     await expect(unlockVaultKeys("pw", info)).rejects.toThrow(/Incorrect vault password/);
@@ -244,7 +244,7 @@ describe("unlockVaultKeys", () => {
   it("throws if the wrapped recovery key was corrupted (failure is surfaced, not silent)", async () => {
     const info = await buildFakeVaultInfo("pw");
     const corrupted = fromBase64(info.wrappedRecoveryKey);
-    corrupted[0] ^= 0xff;
+    corrupted[0]! ^= 0xff;
     info.wrappedRecoveryKey = toBase64(corrupted.buffer as ArrayBuffer);
 
     // Not a wrong-password error; propagates as a raw AES-GCM failure.

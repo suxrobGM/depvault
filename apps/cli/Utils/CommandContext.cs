@@ -182,27 +182,6 @@ public sealed class CommandContext(
         return false;
     }
 
-    /// <summary>Resolves environment type from explicit flag, filename detection, or interactive prompt.</summary>
-    public string ResolveEnvironmentType(string? explicitEnv, string? detected)
-    {
-        if (!string.IsNullOrEmpty(explicitEnv))
-        {
-            return explicitEnv;
-        }
-
-        if (!string.IsNullOrEmpty(detected))
-        {
-            return detected;
-        }
-
-        if (prompter.IsInteractive)
-        {
-            return prompter.Select("Select environment type", CommandUtils.EnvironmentTypes, e => e);
-        }
-
-        return "DEVELOPMENT";
-    }
-
     /// <summary>Resolves a file path from CLI option or interactive file discovery.</summary>
     public string? ResolveFileInteractive(
         ParseResult parseResult, Option<string?> fileOpt,

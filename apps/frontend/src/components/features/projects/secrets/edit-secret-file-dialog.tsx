@@ -19,7 +19,7 @@ import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
 import { encryptBinary } from "@/lib/crypto";
 import type { SecretFile } from "@/types/api/secret-file";
-import type { VaultGroup } from "@/types/api/vault-group";
+import type { Vault } from "@/types/api/vault";
 import { editSecretFileSchema } from "./secret-file-schemas";
 
 interface EditSecretFileDialogProps {
@@ -27,19 +27,19 @@ interface EditSecretFileDialogProps {
   onClose: () => void;
   projectId: string;
   file: SecretFile;
-  vaultGroups: VaultGroup[];
+  vaults: Vault[];
 }
 
 export function EditSecretFileDialog(props: EditSecretFileDialogProps): ReactElement {
-  const { open, onClose, projectId, file, vaultGroups } = props;
+  const { open, onClose, projectId, file, vaults } = props;
   const { getProjectDEK } = useVault();
 
   const [newFile, setNewFile] = useState<File | null>(null);
 
-  const groupItems = vaultGroups.map((g) => ({ value: g.id, label: g.name }));
+  const vaultItems = vaults.map((v) => ({ value: v.id, label: v.name }));
 
   const metadataMutation = useApiMutation(
-    (values: { name?: string; description?: string; vaultGroupId?: string }) =>
+    (values: { name?: string; description?: string; vaultId?: string }) =>
       client.api.projects({ id: projectId }).secrets({ fileId: file.id }).put(values),
     { invalidateKeys: [["secret-files", projectId]], successMessage: "File updated" },
   );
@@ -66,14 +66,14 @@ export function EditSecretFileDialog(props: EditSecretFileDialogProps): ReactEle
     defaultValues: {
       name: file.name,
       description: file.description ?? "",
-      vaultGroupId: "",
+      vaultId: "",
     },
     validators: { onSubmit: editSecretFileSchema },
     onSubmit: async ({ value }) => {
       await metadataMutation.mutateAsync({
         name: value.name,
         description: value.description,
-        vaultGroupId: value.vaultGroupId || undefined,
+        vaultId: value.vaultId || undefined,
       });
       if (newFile) {
         const dek = await getProjectDEK(projectId);
@@ -120,9 +120,9 @@ export function EditSecretFileDialog(props: EditSecretFileDialogProps): ReactEle
             />
             <FormSelectField
               form={form}
-              name="vaultGroupId"
-              label="Move to Vault Group"
-              items={groupItems}
+              name="vaultId"
+              label="Move to Vault"
+              items={vaultItems}
               optional
               emptyLabel="Keep current"
             />

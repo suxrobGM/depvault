@@ -1,12 +1,7 @@
 "use client";
 
 import type { ReactElement } from "react";
-import {
-  CONFIG_FORMATS,
-  ENVIRONMENT_TYPES,
-  type ConfigFormat,
-  type EnvironmentTypeValue,
-} from "@depvault/shared/constants";
+import { CONFIG_FORMATS, type ConfigFormat } from "@depvault/shared/constants";
 import { parseConfig } from "@depvault/shared/parsers";
 import {
   Button,
@@ -24,28 +19,22 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
 import { encrypt } from "@/lib/crypto";
+import type { ImportResult } from "@/types/api/env-variable";
 import { importVariablesSchema } from "./vault-schemas";
 
 interface ImportVariablesDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
-  vaultGroupId: string;
-  /** Pass the environment type when importing into an existing environment, or omit for first-time import. */
-  environmentType?: string;
+  vaultId: string;
 }
 
 export function ImportVariablesDialog(props: ImportVariablesDialogProps): ReactElement {
-  const { open, onClose, projectId, vaultGroupId, environmentType } = props;
-  const isNewEnvironment = !environmentType;
+  const { open, onClose, projectId, vaultId } = props;
   const { getProjectDEK } = useVault();
 
   const mutation = useApiMutation(
-    async (values: {
-      environmentType: EnvironmentTypeValue;
-      format: ConfigFormat;
-      content: string;
-    }) => {
+    async (values: { format: ConfigFormat; content: string }) => {
       const dek = await getProjectDEK(projectId);
       const parsed = parseConfig(values.format, values.content);
 
@@ -74,26 +63,21 @@ export function ImportVariablesDialog(props: ImportVariablesDialogProps): ReactE
         }),
       );
 
-      return client.api.projects({ id: projectId }).environments.import.post({
-        vaultGroupId,
-        environmentType: values.environmentType,
-        entries,
-      });
+      return client.api.projects({ id: projectId }).vaults({ vaultId }).import.post({ entries });
     },
     {
       invalidateKeys: [
-        ["env-variables", projectId],
-        ["environments", projectId],
-        ["vault-groups", projectId],
+        ["vault-variables", projectId, vaultId],
+        ["vaults", projectId],
       ],
-      successMessage: (data) => `Imported ${data?.imported} variables (${data?.updated} updated)`,
+      successMessage: (data: ImportResult | undefined) =>
+        `Imported ${data?.imported ?? 0} variables (${data?.updated ?? 0} updated)`,
       onSuccess: () => handleClose(),
     },
   );
 
   const form = useForm({
     defaultValues: {
-      environmentType: (environmentType ?? "DEVELOPMENT") as EnvironmentTypeValue,
       format: "env" as ConfigFormat,
       content: "",
     },
@@ -126,15 +110,6 @@ export function ImportVariablesDialog(props: ImportVariablesDialogProps): ReactE
         <DialogTitle>Import Variables</DialogTitle>
         <DialogContent>
           <Stack spacing={2.5} sx={{ mt: 1 }}>
-            {isNewEnvironment && (
-              <FormSelectField
-                form={form}
-                name="environmentType"
-                label="Environment Type"
-                items={ENVIRONMENT_TYPES}
-                autoFocus
-              />
-            )}
             <FormSelectField form={form} name="format" label="Format" items={CONFIG_FORMATS} />
             <FileUploadButton onFileRead={handleFileRead} />
             <FormTextField
@@ -147,12 +122,7 @@ export function ImportVariablesDialog(props: ImportVariablesDialogProps): ReactE
               placeholder="Paste your config file content here..."
               slotProps={{ input: { sx: { fontFamily: "monospace", fontSize: 13 } } }}
             />
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
+            <Typography variant="caption" sx={{ color: "text.secondary" }}>
               Upload a file or paste content directly. Format is auto-detected from file extension.
             </Typography>
           </Stack>

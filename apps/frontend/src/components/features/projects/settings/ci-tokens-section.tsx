@@ -171,7 +171,7 @@ export function CiTokensSection(props: CiTokensSectionProps): ReactElement {
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2">{token.environmentLabel}</Typography>
+                          <Typography variant="body2">{token.vaultName}</Typography>
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2">{formatDateTime(token.expiresAt)}</Typography>

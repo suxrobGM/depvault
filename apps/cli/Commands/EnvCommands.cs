@@ -1,7 +1,6 @@
 using System.CommandLine;
 using DepVault.Cli.Utils;
 using Spectre.Console;
-using VarNs = DepVault.Cli.ApiClient.Api.Projects.Item.Environments.Variables;
 
 namespace DepVault.Cli.Commands;
 
@@ -18,13 +17,13 @@ public sealed class EnvCommands(CommandContext ctx)
     private Command CreateListCommand()
     {
         var projectOpt = new Option<string?>("--project") { Description = "Project ID" };
-        var vaultGroupOpt = new Option<string?>("--vault-group") { Description = "Vault group ID" };
-        var envOpt = new Option<string?>("--environment") { Description = "Environment type" };
+        var vaultIdOpt = new Option<string>("--vault-id")
+        { Description = "Vault ID to list variables from" };
         var outputOpt = new Option<string>("--output")
         { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
 
-        var cmd = new Command("list", "List environment variables")
-            { projectOpt, vaultGroupOpt, envOpt, outputOpt };
+        var cmd = new Command("list", "List environment variables in a vault")
+            { projectOpt, vaultIdOpt, outputOpt };
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
@@ -34,26 +33,20 @@ public sealed class EnvCommands(CommandContext ctx)
                 return;
             }
 
+            var vaultId = parseResult.GetValue(vaultIdOpt);
+            if (string.IsNullOrEmpty(vaultId))
+            {
+                ctx.Output.PrintError("--vault-id is required.");
+                return;
+            }
+
             try
             {
-                var result = await pc.Client.Api.Projects[pc.ProjectId].Environments.Variables
+                var result = await pc.Client.Api.Projects[pc.ProjectId].Vaults[vaultId].Variables
                     .GetAsync(config =>
                     {
                         config.QueryParameters.Page = 1;
                         config.QueryParameters.Limit = 100;
-
-                        var vgId = parseResult.GetValue(vaultGroupOpt);
-                        if (!string.IsNullOrEmpty(vgId))
-                        {
-                            config.QueryParameters.VaultGroupId = vgId;
-                        }
-
-                        var env = parseResult.GetValue(envOpt);
-                        if (!string.IsNullOrEmpty(env))
-                        {
-                            config.QueryParameters.EnvironmentType =
-                                CommandUtils.ParseEnum(env, VarNs.GetEnvironmentTypeQueryParameterType.DEVELOPMENT);
-                        }
                     }, cancellationToken);
 
                 var items = result?.Items;
@@ -66,16 +59,16 @@ public sealed class EnvCommands(CommandContext ctx)
                 if (parseResult.GetValue(outputOpt) == "json")
                 {
                     ctx.Output.PrintJson(items.Select(v => new
-                        { key = v.Key, environmentId = v.EnvironmentId, isRequired = v.IsRequired }));
+                        { key = v.Key, vaultId = v.VaultId, isRequired = v.IsRequired }));
                     return;
                 }
 
                 ctx.Output.PrintTable(
-                    ["KEY", "ENVIRONMENT", "UPDATED"],
+                    ["KEY", "REQUIRED", "UPDATED"],
                     items.Select(v => new[]
                     {
                         v.Key ?? "",
-                        v.EnvironmentId ?? "",
+                        v.IsRequired == true ? "yes" : "",
                         v.UpdatedAt?.ToString("yyyy-MM-dd") ?? ""
                     }).ToList());
             }
@@ -87,5 +80,4 @@ public sealed class EnvCommands(CommandContext ctx)
 
         return cmd;
     }
-
 }

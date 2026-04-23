@@ -85,13 +85,9 @@ All modules are mounted under the `/api` group in `src/app.ts`:
 
 - `auth` -- registration, login, logout, refresh, GitHub OAuth, email verification, password reset
 - `project` -- CRUD, list with pagination
-- `vaultGroup` -- vault organization within projects
-- `environment` -- CRUD per project
-- `envVariable` -- CRUD, bulk operations, version history
-- `envDiff` -- side-by-side environment comparison
+- `projectVault` -- vault CRUD, clone, tag listing; env variable CRUD + version history nested under each vault
 - `envIO` -- import/export in various formats
 - `envBundle` -- download encrypted archives
-- `envTemplate` -- create and apply environment templates
 - `secretFile` -- upload, download, version history
 - `secret` -- one-time link generation
 - `sharedSecret` -- one-time link access
@@ -143,18 +139,15 @@ User ──────────┬──── Account (auth providers: EMAI
                │
                ├──── Project (owner)
                │       ├──── ProjectMember (OWNER / EDITOR / VIEWER)
-               │       ├──── VaultGroup
-               │       │       └──── Environment (DEV / STAGING / PROD / GLOBAL)
-               │       │               ├──── EnvVariable
-               │       │               │       └──── EnvVariableVersion
-               │       │               ├──── SecretFile
-               │       │               │       └──── SecretFileVersion
-               │       │               └──── CiToken
+               │       ├──── Vault (name, directoryPath?, tags[])
+               │       │       ├──── EnvVariable
+               │       │       │       └──── EnvVariableVersion
+               │       │       ├──── SecretFile
+               │       │       │       └──── SecretFileVersion
+               │       │       └──── CiToken
                │       ├──── Analysis
                │       │       └──── Dependency (self-referencing tree)
                │       │               └──── Vulnerability
-               │       ├──── EnvTemplate
-               │       │       └──── EnvTemplateVariable
                │       ├──── SharedSecret
                │       ├──── AuditLog
                │       ├──── LicenseRule
@@ -169,30 +162,28 @@ User ──────────┬──── Account (auth providers: EMAI
 
 ### Key Models
 
-| Model                  | Purpose                                                                     |
-| ---------------------- | --------------------------------------------------------------------------- |
-| **User**               | Email/password or GitHub OAuth accounts, soft-deletable                     |
-| **Account**            | Auth provider link (EMAIL or GITHUB) with refresh token family              |
-| **Project**            | Top-level container owned by a user                                         |
-| **ProjectMember**      | Role-based membership (OWNER, EDITOR, VIEWER)                               |
-| **VaultGroup**         | Logical grouping of environments within a project                           |
-| **Environment**        | DEVELOPMENT, STAGING, PRODUCTION, or GLOBAL scope                           |
-| **EnvVariable**        | Encrypted key-value pair with IV and auth tag                               |
-| **EnvVariableVersion** | Immutable version history for variable changes                              |
-| **SecretFile**         | Encrypted binary file (certs, keys, keystores) with metadata                |
-| **SecretFileVersion**  | Immutable version history for file changes                                  |
-| **EnvTemplate**        | Reusable environment variable structure template                            |
-| **SharedSecret**       | One-time encrypted share link (PENDING / VIEWED / EXPIRED)                  |
-| **Analysis**           | Dependency analysis run for a specific file and ecosystem                   |
-| **Dependency**         | Parsed package with version info, self-referencing tree for transitive deps |
-| **Vulnerability**      | CVE record linked to a dependency (NONE through CRITICAL severity)          |
-| **LicenseRule**        | Per-project license policy (ALLOW / WARN / BLOCK)                           |
-| **AuditLog**           | Append-only log of secret-related actions with IP address                   |
-| **CiToken**            | Scoped, short-lived CI/CD access token with IP allowlist                    |
-| **ScanPattern**        | Regex pattern for git secret detection (built-in or custom)                 |
-| **SecretScan**         | Git repository scan run with status tracking                                |
-| **SecretDetection**    | Individual secret found in a commit (OPEN / RESOLVED / FALSE_POSITIVE)      |
-| **Notification**       | User notification for various event types                                   |
+| Model                  | Purpose                                                                                                                                                                          |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **User**               | Email/password or GitHub OAuth accounts, soft-deletable                                                                                                                          |
+| **Account**            | Auth provider link (EMAIL or GITHUB) with refresh token family                                                                                                                   |
+| **Project**            | Top-level container owned by a user                                                                                                                                              |
+| **ProjectMember**      | Role-based membership (OWNER, EDITOR, VIEWER)                                                                                                                                    |
+| **Vault**              | User-named container for variables, secret files, and CI tokens; freeform `tags[]` (blessed: `prod`, `staging`, `dev`, `preview`) and optional `directoryPath` for CLI placement |
+| **EnvVariable**        | Encrypted key-value pair with IV and auth tag (empty ciphertext = "blank", used by cloned-keyset vaults)                                                                         |
+| **EnvVariableVersion** | Immutable version history for variable changes                                                                                                                                   |
+| **SecretFile**         | Encrypted binary file (certs, keys, keystores) with metadata                                                                                                                     |
+| **SecretFileVersion**  | Immutable version history for file changes                                                                                                                                       |
+| **SharedSecret**       | One-time encrypted share link (PENDING / VIEWED / EXPIRED)                                                                                                                       |
+| **Analysis**           | Dependency analysis run for a specific file and ecosystem                                                                                                                        |
+| **Dependency**         | Parsed package with version info, self-referencing tree for transitive deps                                                                                                      |
+| **Vulnerability**      | CVE record linked to a dependency (NONE through CRITICAL severity)                                                                                                               |
+| **LicenseRule**        | Per-project license policy (ALLOW / WARN / BLOCK)                                                                                                                                |
+| **AuditLog**           | Append-only log of secret-related actions with IP address                                                                                                                        |
+| **CiToken**            | Scoped, short-lived CI/CD access token with IP allowlist                                                                                                                         |
+| **ScanPattern**        | Regex pattern for git secret detection (built-in or custom)                                                                                                                      |
+| **SecretScan**         | Git repository scan run with status tracking                                                                                                                                     |
+| **SecretDetection**    | Individual secret found in a commit (OPEN / RESOLVED / FALSE_POSITIVE)                                                                                                           |
+| **Notification**       | User notification for various event types                                                                                                                                        |
 
 ---
 

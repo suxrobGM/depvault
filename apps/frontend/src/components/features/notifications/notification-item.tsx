@@ -4,7 +4,6 @@ import type { ReactElement } from "react";
 import {
   BugReport as BugReportIcon,
   Circle as CircleIcon,
-  CompareArrows as CompareArrowsIcon,
   GppBad as GppBadIcon,
   ManageAccounts as ManageAccountsIcon,
   PersonAdd as PersonAddIcon,
@@ -22,7 +21,6 @@ interface NotificationItemProps {
 const TYPE_CONFIG: Record<string, { icon: ReactElement; color: string }> = {
   VULNERABILITY_FOUND: { icon: <BugReportIcon fontSize="small" />, color: "error.main" },
   SECRET_ROTATION: { icon: <RotateRightIcon fontSize="small" />, color: "warning.main" },
-  ENV_DRIFT: { icon: <CompareArrowsIcon fontSize="small" />, color: "warning.light" },
   GIT_SECRET_DETECTION: { icon: <GppBadIcon fontSize="small" />, color: "error.main" },
   TEAM_INVITE: { icon: <PersonAddIcon fontSize="small" />, color: "success.main" },
   ROLE_CHANGE: { icon: <ManageAccountsIcon fontSize="small" />, color: "info.main" },

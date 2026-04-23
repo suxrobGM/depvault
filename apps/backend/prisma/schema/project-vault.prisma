@@ -1,0 +1,55 @@
+model Vault {
+  id            String   @id @default(uuid()) @db.Uuid
+  projectId     String   @map("project_id") @db.Uuid
+  name          String
+  directoryPath String?  @map("directory_path")
+  tags          String[] @default([])
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  project     Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  variables   EnvVariable[]
+  secretFiles SecretFile[]
+  ciTokens    CiToken[]
+
+  @@unique([projectId, name])
+  @@index([tags], type: Gin)
+  @@map("vaults")
+}
+
+model EnvVariable {
+  id               String   @id @default(uuid()) @db.Uuid
+  vaultId          String   @map("vault_id") @db.Uuid
+  key              String
+  encryptedValue   String   @map("encrypted_value")
+  iv               String
+  authTag          String   @map("auth_tag")
+  sortOrder        Int?     @map("sort_order")
+  encryptedComment String?  @map("encrypted_comment")
+  commentIv        String?  @map("comment_iv")
+  commentAuthTag   String?  @map("comment_auth_tag")
+  description      String?
+  isRequired       Boolean  @default(false) @map("is_required")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  vault    Vault                @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  versions EnvVariableVersion[]
+
+  @@unique([vaultId, key])
+  @@map("env_variables")
+}
+
+model EnvVariableVersion {
+  id             String   @id @default(uuid()) @db.Uuid
+  variableId     String   @map("variable_id") @db.Uuid
+  encryptedValue String   @map("encrypted_value")
+  iv             String
+  authTag        String   @map("auth_tag")
+  changedBy      String   @map("changed_by") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  variable EnvVariable @relation(fields: [variableId], references: [id], onDelete: Cascade)
+
+  @@map("env_variable_versions")
+}

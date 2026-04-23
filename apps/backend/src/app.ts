@@ -14,16 +14,13 @@ import { authController } from "@/modules/auth";
 import { ciAccessController, ciTokenController } from "@/modules/ci-token";
 import { convertController } from "@/modules/convert";
 import { envBundleController } from "@/modules/env-bundle";
-import { envDiffController } from "@/modules/env-diff";
 import { envIOController } from "@/modules/env-io";
-import { envSyncController } from "@/modules/env-sync";
-import { envTemplateController } from "@/modules/env-template";
-import { environmentController, envVariableController } from "@/modules/environment";
 import { githubApiController } from "@/modules/github";
 import { invitationController, projectInvitationController } from "@/modules/invitation";
 import { licenseRuleController } from "@/modules/license-rule";
 import { notificationController } from "@/modules/notification";
 import { projectController } from "@/modules/project";
+import { envVariableController, projectVaultController } from "@/modules/project-vault";
 import { scanPatternController } from "@/modules/scan-pattern";
 import {
   secretFileController,
@@ -35,7 +32,6 @@ import { securityController } from "@/modules/security/security.controller";
 import { subscriptionController, subscriptionWebhookController } from "@/modules/subscription";
 import { userController } from "@/modules/user";
 import { keyGrantController, vaultController } from "@/modules/vault";
-import { vaultGroupController } from "@/modules/vault-group";
 import { HttpErrorResponses } from "@/types/response";
 
 // Validate environment
@@ -61,14 +57,10 @@ const app = new Elysia()
       .use(projectController)
       .use(invitationController)
       .use(projectInvitationController)
-      .use(vaultGroupController)
-      .use(environmentController)
+      .use(projectVaultController)
       .use(envVariableController)
-      .use(envDiffController)
-      .use(envSyncController)
       .use(envIOController)
       .use(envBundleController)
-      .use(envTemplateController)
       .use(secretFileController)
       .use(sharedSecretAccessController)
       .use(sharedSecretController)

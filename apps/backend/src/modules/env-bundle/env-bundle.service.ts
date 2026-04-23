@@ -2,7 +2,7 @@ import { singleton } from "tsyringe";
 import { BadRequestError } from "@/common/errors";
 import { PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
-import { EnvironmentRepository } from "@/modules/environment";
+import { ProjectVaultRepository } from "@/modules/project-vault";
 import type { EnvBundleBody, EnvBundleResponse } from "./env-bundle.schema";
 
 @singleton()
@@ -10,22 +10,18 @@ export class EnvBundleService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly auditLogService: AuditLogService,
-    private readonly envRepository: EnvironmentRepository,
+    private readonly vaultRepo: ProjectVaultRepository,
   ) {}
 
   /** Return encrypted variables and secret files for client-side bundling. */
   async createBundle(
     projectId: string,
+    vaultId: string,
     body: EnvBundleBody,
     userId: string,
     ipAddress: string,
   ): Promise<EnvBundleResponse> {
-    const groupName = await this.envRepository.getVaultGroupName(body.vaultGroupId);
-
-    const env = await this.envRepository.requireEnvironment(
-      body.vaultGroupId,
-      body.environmentType,
-    );
+    const vault = await this.vaultRepo.requireVault(projectId, vaultId);
 
     if (body.variableIds.length === 0 && body.secretFileIds.length === 0) {
       throw new BadRequestError("At least one variable or secret file must be selected");
@@ -43,7 +39,7 @@ export class EnvBundleService {
 
     if (body.variableIds.length > 0) {
       const vars = await this.prisma.envVariable.findMany({
-        where: { id: { in: body.variableIds }, environmentId: env.id },
+        where: { id: { in: body.variableIds }, vaultId: vault.id },
       });
 
       if (vars.length !== body.variableIds.length) {
@@ -60,7 +56,7 @@ export class EnvBundleService {
 
     if (body.secretFileIds.length > 0) {
       const secretFiles = await this.prisma.secretFile.findMany({
-        where: { id: { in: body.secretFileIds }, vaultGroupId: body.vaultGroupId },
+        where: { id: { in: body.secretFileIds }, vaultId: vault.id },
       });
 
       if (secretFiles.length !== body.secretFileIds.length) {
@@ -82,13 +78,13 @@ export class EnvBundleService {
       projectId,
       action: "DOWNLOAD",
       resourceType: "ENV_VARIABLE",
-      resourceId: env.id,
+      resourceId: vault.id,
       ipAddress,
       metadata: {
         type: "bundle",
         variableCount: body.variableIds.length,
         fileCount: body.secretFileIds.length,
-        vaultGroupName: groupName,
+        vaultName: vault.name,
       },
     });
 

@@ -25,14 +25,14 @@ interface EditVariableDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
-  environmentType: string;
+  vaultId: string;
   variable: EnvVariable | null;
 }
 
 export function EditVariableDialog(props: EditVariableDialogProps): ReactElement {
-  const { open, onClose, projectId, environmentType, variable } = props;
+  const { open, onClose, projectId, vaultId, variable } = props;
   const { getProjectDEK } = useVault();
-  const [decrypting, setDecrypting] = useState(open && !!variable);
+  const [decrypting, setDecrypting] = useState(open && !!variable && !!variable?.encryptedValue);
 
   const mutation = useApiMutation(
     (values: {
@@ -45,10 +45,14 @@ export function EditVariableDialog(props: EditVariableDialogProps): ReactElement
     }) =>
       client.api
         .projects({ id: projectId })
-        .environments.variables({ varId: variable?.id ?? "" })
+        .vaults({ vaultId })
+        .variables({ varId: variable?.id ?? "" })
         .put(values),
     {
-      invalidateKeys: [["env-variables", projectId, environmentType]],
+      invalidateKeys: [
+        ["vault-variables", projectId, vaultId],
+        ["vaults", projectId],
+      ],
       successMessage: "Variable updated",
       onSuccess: () => handleClose(),
     },
@@ -77,7 +81,10 @@ export function EditVariableDialog(props: EditVariableDialogProps): ReactElement
   });
 
   useEffect(() => {
-    if (!open || !variable) return;
+    if (!open || !variable || !variable.encryptedValue) {
+      setDecrypting(false);
+      return;
+    }
     let cancelled = false;
     getProjectDEK(projectId)
       .then((dek) => decrypt(variable.encryptedValue, variable.iv, variable.authTag, dek))

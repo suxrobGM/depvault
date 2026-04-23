@@ -1,11 +1,7 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import {
-  CONFIG_FORMATS,
-  type ConfigFormat,
-  type EnvironmentTypeValue,
-} from "@depvault/shared/constants";
+import { CONFIG_FORMATS, type ConfigFormat } from "@depvault/shared/constants";
 import { getConfigFileName, serializeConfig } from "@depvault/shared/serializers";
 import { FolderZip as FolderZipIcon } from "@mui/icons-material";
 import {
@@ -28,8 +24,7 @@ import { useApiQuery } from "@/hooks/use-api-query";
 import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
 import { decrypt, decryptBinary } from "@/lib/crypto";
-import type { EnvVariable } from "@/types/api/env-variable";
-import type { EnvironmentBundleBody } from "@/types/api/environment";
+import type { EnvBundleResult, EnvVariable } from "@/types/api/env-variable";
 import type { SecretFileListResponse } from "@/types/api/secret-file";
 import { downloadFile } from "@/utils/download-file";
 
@@ -37,13 +32,12 @@ interface DownloadBundleDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
-  vaultGroupId: string;
-  environmentType: EnvironmentTypeValue;
+  vaultId: string;
   variables: EnvVariable[];
 }
 
 export function DownloadBundleDialog(props: DownloadBundleDialogProps): ReactElement {
-  const { open, onClose, projectId, vaultGroupId, environmentType, variables } = props;
+  const { open, onClose, projectId, vaultId, variables } = props;
   const { getProjectDEK } = useVault();
 
   const [selectedVarIds, setSelectedVarIds] = useState<Set<string>>(new Set());
@@ -62,14 +56,14 @@ export function DownloadBundleDialog(props: DownloadBundleDialogProps): ReactEle
     { enabled: open },
   );
 
-  const secretFiles = secretFilesData?.items ?? [];
+  const secretFiles = (secretFilesData?.items ?? []).filter((f) => f.vaultId === vaultId);
 
   const mutation = useApiMutation(
-    (body: EnvironmentBundleBody) =>
-      client.api.projects({ id: projectId }).environments.bundle.post(body),
+    (body: { variableIds: string[]; secretFileIds: string[] }) =>
+      client.api.projects({ id: projectId }).vaults({ vaultId }).bundle.post(body),
     {
       errorMessage: "Failed to download bundle",
-      onSuccess: async (result) => {
+      onSuccess: async (result: EnvBundleResult) => {
         const dek = await getProjectDEK(projectId);
         const format = formatForm.getFieldValue("format") as ConfigFormat;
 
@@ -130,8 +124,6 @@ export function DownloadBundleDialog(props: DownloadBundleDialogProps): ReactEle
 
   const handleDownload = () => {
     mutation.mutate({
-      vaultGroupId,
-      environmentType,
       variableIds: Array.from(selectedVarIds),
       secretFileIds: Array.from(selectedFileIds),
     });
@@ -175,12 +167,7 @@ export function DownloadBundleDialog(props: DownloadBundleDialogProps): ReactEle
                   />
                 }
                 label={
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 600,
-                    }}
-                  >
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
                     Variables ({variables.length})
                   </Typography>
                 }
@@ -197,12 +184,7 @@ export function DownloadBundleDialog(props: DownloadBundleDialogProps): ReactEle
                       />
                     }
                     label={
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontFamily: "monospace",
-                        }}
-                      >
+                      <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
                         {v.key}
                       </Typography>
                     }
@@ -225,12 +207,7 @@ export function DownloadBundleDialog(props: DownloadBundleDialogProps): ReactEle
                   />
                 }
                 label={
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 600,
-                    }}
-                  >
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
                     Secret Files ({secretFiles.length})
                   </Typography>
                 }
@@ -247,12 +224,7 @@ export function DownloadBundleDialog(props: DownloadBundleDialogProps): ReactEle
                       />
                     }
                     label={
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontFamily: "monospace",
-                        }}
-                      >
+                      <Typography variant="body2" sx={{ fontFamily: "monospace" }}>
                         {f.name}
                       </Typography>
                     }

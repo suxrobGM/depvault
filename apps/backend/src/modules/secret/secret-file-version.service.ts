@@ -61,10 +61,10 @@ export class SecretFileVersionService {
         authTag: version.authTag,
         fileSize: version.fileSize,
       },
-      include: { vaultGroup: true },
+      include: { vault: true },
     });
 
-    return toSecretFileResponse(updated, updated.vaultGroup);
+    return toSecretFileResponse(updated, updated.vault);
   }
 
   async downloadVersion(
@@ -93,7 +93,7 @@ export class SecretFileVersionService {
 
   private async findFileOrThrow(projectId: string, fileId: string) {
     const file = await this.prisma.secretFile.findFirst({
-      where: { id: fileId, vaultGroup: { projectId } },
+      where: { id: fileId, vault: { projectId } },
     });
 
     if (!file) {

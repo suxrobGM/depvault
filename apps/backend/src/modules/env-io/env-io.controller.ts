@@ -1,12 +1,9 @@
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import { container } from "@/common/di/container";
 import { projectGuard } from "@/common/middleware";
 import { getClientIp } from "@/common/utils/ip";
-import { StringIdParamSchema } from "@/types/request";
 import {
-  EnvExampleQuerySchema,
   EnvExampleResponseSchema,
-  ExportEnvVariablesQuerySchema,
   ExportEnvVariablesResponseSchema,
   ImportEnvVariablesBodySchema,
   ImportEnvVariablesResponseSchema,
@@ -15,23 +12,24 @@ import { EnvironmentIOService } from "./env-io.service";
 
 const environmentIOService = container.resolve(EnvironmentIOService);
 
+const VaultIOParamsSchema = t.Object({ id: t.String(), vaultId: t.String() });
+
 export const envIOController = new Elysia({
-  prefix: "/projects/:id/environments",
+  prefix: "/projects/:id/vaults/:vaultId",
   detail: { tags: ["Environment Import/Export"], security: [{ bearerAuth: [] }] },
 })
   .use(projectGuard("VIEWER"))
   .get(
     "/example",
-    ({ query }) => environmentIOService.generateExample(query.vaultGroupId, query.environmentType),
+    ({ params }) => environmentIOService.generateExample(params.id, params.vaultId),
     {
-      params: StringIdParamSchema,
-      query: EnvExampleQuerySchema,
+      params: VaultIOParamsSchema,
       response: EnvExampleResponseSchema,
       detail: {
         operationId: "generateEnvExample",
         summary: "Generate .env.example template",
         description:
-          "Generate a .env.example template with keys and placeholder annotations but no real values. Any project member can access this.",
+          "Generate a .env.example template with keys and placeholder annotations but no real values.",
       },
     },
   )
@@ -41,41 +39,40 @@ export const envIOController = new Elysia({
     ({ params, body, projectMember, request, server }) =>
       environmentIOService.bulkImport(
         params.id,
+        params.vaultId,
         body,
         projectMember.userId,
         getClientIp(request, server),
       ),
     {
-      params: StringIdParamSchema,
+      params: VaultIOParamsSchema,
       body: ImportEnvVariablesBodySchema,
       response: ImportEnvVariablesResponseSchema,
       detail: {
         operationId: "importEnvVariables",
-        summary: "Bulk import environment variables",
+        summary: "Bulk import environment variables into a vault",
         description:
-          "Bulk import pre-encrypted environment variables. The client encrypts values before sending. Existing keys are updated. Only owners and editors can import.",
+          "Bulk import pre-encrypted environment variables into the target vault. Existing keys are updated.",
       },
     },
   )
   .get(
     "/export",
-    ({ params, query, projectMember, request, server }) =>
+    ({ params, projectMember, request, server }) =>
       environmentIOService.export(
         params.id,
-        query.vaultGroupId,
-        query.environmentType,
+        params.vaultId,
         projectMember.userId,
         getClientIp(request, server),
       ),
     {
-      params: StringIdParamSchema,
-      query: ExportEnvVariablesQuerySchema,
+      params: VaultIOParamsSchema,
       response: ExportEnvVariablesResponseSchema,
       detail: {
         operationId: "exportEnvVariables",
-        summary: "Export environment variables",
+        summary: "Export environment variables from a vault",
         description:
-          "Export all encrypted environment variables for a given environment. The client is responsible for decryption and formatting. Only owners and editors can export.",
+          "Export all encrypted environment variables for a given vault. The client is responsible for decryption and formatting.",
       },
     },
   );

@@ -1,23 +1,21 @@
 import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
-import { ForbiddenError, NotFoundError } from "@/common/errors";
-import { ProjectRole } from "@/generated/prisma";
+import { NotFoundError } from "@/common/errors";
 import { SecretFileVersionService } from "./secret-file-version.service";
 
 const now = new Date();
 const projectId = "project-uuid";
 const userId = "user-uuid";
-const envId = "env-uuid";
 const fileId = "file-uuid";
 const versionId = "version-uuid";
 
 const fakeEncryptedContent = Buffer.from("encrypted-content");
 
-const vaultGroupId = "vault-group-uuid";
+const vaultId = "vault-uuid";
 
 const mockSecretFile = {
   id: fileId,
-  vaultGroupId,
+  vaultId,
   name: "config.json",
   description: "Config file",
   encryptedContent: fakeEncryptedContent,
@@ -28,7 +26,7 @@ const mockSecretFile = {
   uploadedBy: userId,
   createdAt: now,
   updatedAt: now,
-  vaultGroup: { id: vaultGroupId, name: "Default" },
+  vault: { id: vaultId, name: "api-prod" },
 };
 
 const mockVersion = {
@@ -110,7 +108,7 @@ describe("SecretFileVersionService", () => {
           authTag: mockVersion.authTag,
           fileSize: mockVersion.fileSize,
         },
-        include: { vaultGroup: true },
+        include: { vault: true },
       });
     });
 

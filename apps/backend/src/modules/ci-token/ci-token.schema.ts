@@ -3,7 +3,7 @@ import { PaginatedResponseSchema } from "@/types/response";
 
 export const CreateCiTokenBodySchema = t.Object({
   name: t.String({ minLength: 1, maxLength: 100 }),
-  environmentId: t.String({ format: "uuid" }),
+  vaultId: t.String({ format: "uuid" }),
   expiresIn: t.Integer({
     minimum: 3600,
     maximum: 31536000,
@@ -23,8 +23,8 @@ export const CiTokenResponseSchema = t.Object({
   name: t.String(),
   tokenPrefix: t.String(),
   projectId: t.String(),
-  environmentId: t.String(),
-  environmentLabel: t.String(),
+  vaultId: t.String(),
+  vaultName: t.String(),
   ipAllowlist: t.Array(t.String()),
   expiresAt: t.Date(),
   lastUsedAt: t.Nullable(t.Date()),

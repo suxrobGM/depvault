@@ -1,31 +1,28 @@
 # Environment Vault
 
-Store, organize, and manage environment variables for each project environment. All values are end-to-end encrypted — encrypted in your browser before they reach the server, and decrypted only on your device. See [Encryption & Security](/guides/encryption) for details.
+Store, organize, and manage environment variables per project. All values are end-to-end encrypted — encrypted in your browser before they reach the server, and decrypted only on your device. See [Encryption & Security](/guides/encryption) for details.
 
 You'll need to enter your vault password to view or edit encrypted values. The vault locks automatically after 30 minutes of inactivity.
 
 ---
 
-## Environments
+## Vaults
 
-Each project supports four tiers:
+A vault is a named container for environment variables and secret files inside a project. Name it however fits your repo — `api-prod`, `api-dev`, `worker`, `eu-west-1`, etc. — and organize by service, region, deployment target, or a single flat namespace if you prefer.
 
-| Environment | Purpose |
-| --- | --- |
-| **DEVELOPMENT** | Local development configuration. |
-| **STAGING** | Pre-production for testing and QA. |
-| **PRODUCTION** | Live production configuration. |
-| **GLOBAL** | Shared defaults across all environments (e.g., API base URLs, feature flags). |
+| Field | Required | Description |
+| --- | --- | --- |
+| **Name** | Yes | Unique within the project. |
+| **Directory path** | No | Where `depvault pull` writes `.env` and `.secrets/` for this vault. |
+| **Tags** | No | Freeform labels. Blessed tags (`prod`, `staging`, `dev`, `preview`) get colored chips. Use tags to filter pulls (`depvault pull --tag prod`). |
 
-Environment-specific values take precedence over GLOBAL.
+### Creating a Vault
 
----
+Open the **Vault** tab, click **New Vault**, and fill in the name, optional directory path, and any tags. Tag suggestions autocomplete from tags already used on the same project.
 
-## Vault Groups
+### Cloning a Vault (Keys Only)
 
-Vault groups organize environments within a project — by microservice, region, or deployment target. Each group contains its own set of variables per environment tier.
-
-To create one: open the **Vault** tab, click **New Vault Group**, and enter a name (e.g., `api-server`, `us-east-1`).
+Right-click a vault → **Clone (keys only)**. This creates a new vault with the same keys, descriptions, required flags, directory path, and tags — but with **blank values**. Useful for bootstrapping a new environment (e.g., clone `api-prod` → `api-staging`) without leaking secrets.
 
 ---
 
@@ -33,20 +30,24 @@ To create one: open the **Vault** tab, click **New Vault Group**, and enter a na
 
 ### Adding a Variable
 
-Select an environment, click **Add Variable**, and fill in:
+Select a vault, click **Add Variable**, and fill in:
 
 | Field | Required | Description |
 | --- | --- | --- |
-| **Key** | Yes | Variable name (e.g., `DATABASE_URL`). Must be unique within the environment. |
+| **Key** | Yes | Variable name (e.g., `DATABASE_URL`). Must be unique within the vault. |
 | **Value** | Yes | Encrypted immediately upon save. |
 | **Description** | No | What this variable is for. |
-| **Validation Rule** | No | Regex pattern enforced on save and update. |
-| **Required for Local Setup** | No | Included when generating `.env.example` files. |
-| **Rotation Policy** | No | How often to rotate (30, 60, or 90 days). DepVault alerts when due. |
+| **Required for Local Setup** | No | Counted by the vault's "N of M required filled" progress indicator and included in `.env.example`. |
 
 ### Editing and Deleting
 
 Click a variable row to edit. Each save creates a new version automatically. To delete, click the delete icon and confirm — deletion is permanent.
+
+---
+
+## Required-Filled Progress
+
+Each vault card shows `N of M required filled` with a progress bar. Variables flagged **Required for Local Setup** count toward `M`; variables with a non-empty encrypted value count toward `N`. Clone-created blanks start at 0 of M; the bar turns green when all required keys have values.
 
 ---
 
@@ -78,36 +79,45 @@ Use the **Import** and **Export** buttons in the Vault tab. On import, review pa
 ### CLI
 
 ```bash
-# Export variables to a file
-depvault env pull --vault-group <id> --environment PRODUCTION --format env --output .env
+# Pull every vault in the project
+depvault pull
 
-# Import variables from a file
-depvault env push --vault-group <id> --file .env
+# Pull specific vaults by name
+depvault pull --vault api-prod,web-prod
+
+# Pull vaults matching a tag (intersection for comma-separated tags)
+depvault pull --tag prod
+
+# Push a file into a specific vault
+depvault push --vault api-prod --file .env
 ```
 
 #### Pull Flags
 
 | Flag | Description | Default |
 | --- | --- | --- |
-| `--vault-group` | Vault group ID. | Required |
-| `--environment` | DEVELOPMENT, STAGING, PRODUCTION, or GLOBAL. | `DEVELOPMENT` |
+| `--vault` | Comma-separated vault names. Prompts interactively when omitted. | Interactive |
+| `--tag` | Comma-separated tags; matches vaults carrying **all** listed tags. | — |
 | `--format` | `env`, `appsettings.json`, `secrets.yaml`, `config.toml`. | `env` |
-| `--output` | File path. Omit for stdout. | stdout |
+| `--output-dir` | Base directory for written files. | Repo root |
+| `--include-secrets` | Also download secret files. | `true` |
+| `--force` | Skip overwrite confirmation. | `false` |
 
 #### Push Flags
 
 | Flag | Description | Default |
 | --- | --- | --- |
-| `--vault-group` | Vault group ID. Prompts interactively when omitted. | Interactive |
-| `--file` | Path to the file to import. Auto-detects env files when omitted. | Interactive |
-| `--environment` | Target environment. | `DEVELOPMENT` |
+| `--vault` | Target vault name. Creates the vault if it doesn't exist. | Auto-matched from directory |
+| `--file` | Path to the file to import. Auto-discovers env files when omitted. | Interactive |
+| `--create-missing` | Auto-create suggested vaults in non-interactive mode. | `false` |
+| `--no-sync` | Skip removing stale variables not present in the pushed file. | `false` |
 
-In interactive mode, the CLI prompts for vault group and file selection when flags are omitted.
+Without `--vault`, push matches files to vaults by directory path or blessed tag inferred from the filename (`.env.production` → `prod` tag). If no match exists, interactive mode prompts to create a new vault.
 
 ### List Variables
 
 ```bash
-depvault env list --vault-group <id> --environment DEVELOPMENT
+depvault env list --vault-id <id>
 ```
 
 Values are masked by default. Use `--output json` for full decrypted values (use with caution).

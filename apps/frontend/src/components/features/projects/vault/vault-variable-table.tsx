@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import { Delete as DeleteIcon } from "@mui/icons-material";
 import {
   Box,
@@ -17,33 +17,56 @@ import {
 } from "@mui/material";
 import { GlassCard } from "@/components/ui/cards";
 import { SkeletonList } from "@/components/ui/data-display";
+import { useApiMutation } from "@/hooks/use-api-mutation";
+import { useConfirm } from "@/hooks/use-confirm";
+import { client } from "@/lib/api";
 import type { EnvVariable } from "@/types/api/env-variable";
 import { VaultVariableRow } from "./vault-variable-row";
 
 interface VaultVariableTableProps {
   projectId: string;
-  environmentType: string;
+  vaultId: string;
   variables: EnvVariable[];
   isLoading?: boolean;
   canEdit?: boolean;
-  selectedIds?: Set<string>;
-  onSelectionChange?: (ids: Set<string>) => void;
   onEditVariable?: (variable: EnvVariable) => void;
-  onBatchDelete?: () => void;
 }
 
 export function VaultVariableTable(props: VaultVariableTableProps): ReactElement {
   const {
     projectId,
-    environmentType,
+    vaultId,
     variables,
     isLoading = false,
     canEdit = false,
-    selectedIds = new Set(),
-    onSelectionChange,
     onEditVariable,
-    onBatchDelete,
   } = props;
+  const confirm = useConfirm();
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const batchDelete = useApiMutation(
+    (ids: string[]) =>
+      client.api
+        .projects({ id: projectId })
+        .vaults({ vaultId })
+        .variables.batch.delete({ variableIds: ids }),
+    {
+      invalidateKeys: [["vault-variables", projectId, vaultId]],
+      successMessage: "Variables deleted",
+      onSuccess: () => setSelectedIds(new Set()),
+    },
+  );
+
+  const handleBatchDelete = async () => {
+    const count = selectedIds.size;
+    const ok = await confirm({
+      title: `Delete ${count} variable(s)`,
+      description: "This action cannot be undone.",
+      confirmLabel: "Delete",
+      destructive: true,
+    });
+    if (ok) batchDelete.mutate([...selectedIds]);
+  };
 
   if (isLoading) {
     return <SkeletonList count={3} height={48} spacing={1} />;
@@ -52,13 +75,8 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
   if (variables.length === 0) {
     return (
       <Box sx={{ py: 4, textAlign: "center" }}>
-        <Typography
-          variant="body2"
-          sx={{
-            color: "text.secondary",
-          }}
-        >
-          No variables in this environment yet.
+        <Typography variant="body2" sx={{ color: "text.secondary" }}>
+          No variables in this vault yet.
         </Typography>
       </Box>
     );
@@ -69,9 +87,9 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
 
   const handleSelectAll = () => {
     if (allSelected) {
-      onSelectionChange?.(new Set());
+      setSelectedIds(new Set());
     } else {
-      onSelectionChange?.(new Set(variables.map((v) => v.id)));
+      setSelectedIds(new Set(variables.map((v) => v.id)));
     }
   };
 
@@ -82,26 +100,14 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
     } else {
       next.add(id);
     }
-    onSelectionChange?.(next);
+    setSelectedIds(next);
   };
 
   return (
     <Stack spacing={1}>
       {canEdit && selectedIds.size > 0 && (
-        <Stack
-          direction="row"
-          spacing={1.5}
-          sx={{
-            alignItems: "center",
-            px: 1,
-          }}
-        >
-          <Typography
-            variant="body2"
-            sx={{
-              color: "text.secondary",
-            }}
-          >
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", px: 1 }}>
+          <Typography variant="body2" sx={{ color: "text.secondary" }}>
             {selectedIds.size} selected
           </Typography>
           <Button
@@ -109,7 +115,7 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
             color="error"
             variant="outlined"
             startIcon={<DeleteIcon />}
-            onClick={onBatchDelete}
+            onClick={handleBatchDelete}
           >
             Delete
           </Button>
@@ -142,7 +148,7 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
                 <VaultVariableRow
                   key={variable.id}
                   projectId={projectId}
-                  environmentType={environmentType}
+                  vaultId={vaultId}
                   variable={variable}
                   canEdit={canEdit}
                   selected={selectedIds.has(variable.id)}

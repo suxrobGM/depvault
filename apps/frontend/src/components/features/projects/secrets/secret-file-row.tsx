@@ -175,7 +175,7 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
               color: "text.secondary",
             }}
           >
-            {file.vaultGroupName}
+            {file.vaultName}
           </Typography>
         </TableCell>
         <TableCell>

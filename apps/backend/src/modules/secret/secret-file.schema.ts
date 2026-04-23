@@ -9,8 +9,8 @@ export { FORBIDDEN_EXTENSIONS, MAX_FILE_SIZE };
 
 export const SecretFileResponseSchema = t.Object({
   id: t.String(),
-  vaultGroupId: t.String(),
-  vaultGroupName: t.String(),
+  vaultId: t.String(),
+  vaultName: t.String(),
   name: t.String(),
   description: t.Nullable(t.String()),
   mimeType: t.String(),
@@ -48,7 +48,7 @@ export const UploadSecretFileBodySchema = t.Object({
   name: t.String({ minLength: 1, maxLength: 255 }),
   mimeType: t.String(),
   fileSize: t.Number({ minimum: 1, maximum: MAX_FILE_SIZE }),
-  vaultGroupId: t.String(),
+  vaultId: t.String(),
   description: t.Optional(t.String({ maxLength: 500 })),
 });
 
@@ -70,7 +70,7 @@ export const UploadNewVersionBodySchema = t.Object({
 export const UpdateSecretFileBodySchema = t.Object({
   name: t.Optional(t.String({ minLength: 1, maxLength: 255 })),
   description: t.Optional(t.String({ maxLength: 500 })),
-  vaultGroupId: t.Optional(t.String()),
+  vaultId: t.Optional(t.String()),
 });
 
 export const SecretFileDownloadResponseSchema = t.Object({

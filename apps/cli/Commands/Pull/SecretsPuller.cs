@@ -2,22 +2,22 @@ using DepVault.Cli.Auth;
 using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
 using Spectre.Console;
-using VaultGroupsModel = DepVault.Cli.ApiClient.Api.Projects.Item.VaultGroups.VaultGroups;
+using VaultModel = DepVault.Cli.ApiClient.Api.Projects.Item.Vaults.Vaults;
 
 namespace DepVault.Cli.Commands.Pull;
 
-/// <summary>Lists and downloads secret files for selected vault groups.</summary>
+/// <summary>Lists and downloads secret files for selected vaults.</summary>
 public sealed class SecretsPuller(
     IApiClientFactory clientFactory,
     IOutputFormatter output)
 {
-    /// <summary>Downloads secret files for the selected groups. Returns number of files written.</summary>
+    /// <summary>Downloads secret files for the selected vaults. Returns number of files written.</summary>
     public async Task<int> PullAsync(
-        string projectId, List<VaultGroupsModel> groups,
+        string projectId, List<VaultModel> vaults,
         string outputDir, byte[] dek, CancellationToken ct)
     {
         var client = clientFactory.Create();
-        var selectedGroupIds = groups.Select(g => g.Id).ToHashSet();
+        var selectedVaultIds = vaults.Select(v => v.Id).ToHashSet();
 
         ApiClient.Api.Projects.Item.Secrets.SecretsGetResponse? files;
 
@@ -39,7 +39,7 @@ public sealed class SecretsPuller(
         }
 
         var items = files?.Items?
-            .Where(f => selectedGroupIds.Contains(f.VaultGroupId))
+            .Where(f => selectedVaultIds.Contains(f.VaultId))
             .ToList();
 
         if (items is null || items.Count == 0)
@@ -54,8 +54,8 @@ public sealed class SecretsPuller(
         {
             try
             {
-                var group = groups.FirstOrDefault(g => g.Id == file.VaultGroupId);
-                var secretsDir = ResolveSecretsDir(group, outputDir);
+                var vault = vaults.FirstOrDefault(v => v.Id == file.VaultId);
+                var secretsDir = ResolveSecretsDir(vault, outputDir);
                 Directory.CreateDirectory(secretsDir);
 
                 var filePath = Path.Combine(secretsDir, file.Name ?? $"secret-{file.Id}");
@@ -86,9 +86,9 @@ public sealed class SecretsPuller(
         return filesWritten;
     }
 
-    private static string ResolveSecretsDir(VaultGroupsModel? group, string outputDir)
+    private static string ResolveSecretsDir(VaultModel? vault, string outputDir)
     {
-        var dirPath = group?.DirectoryPath;
+        var dirPath = vault?.DirectoryPath;
 
         if (!string.IsNullOrEmpty(dirPath))
         {

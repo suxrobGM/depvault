@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactElement } from "react";
-import type { EnvironmentTypeValue } from "@depvault/shared/constants";
 import {
   Button,
   Checkbox,
@@ -24,31 +23,26 @@ interface CreateVariableDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
-  vaultGroupId: string;
-  environmentType: string;
+  vaultId: string;
 }
 
 export function CreateVariableDialog(props: CreateVariableDialogProps): ReactElement {
-  const { open, onClose, projectId, vaultGroupId, environmentType } = props;
+  const { open, onClose, projectId, vaultId } = props;
   const { getProjectDEK } = useVault();
 
   const mutation = useApiMutation(
     (values: {
-      environmentType: EnvironmentTypeValue;
       key: string;
       encryptedValue: string;
       iv: string;
       authTag: string;
       description?: string;
       isRequired?: boolean;
-    }) =>
-      client.api
-        .projects({ id: projectId })
-        .environments.variables.post({ ...values, vaultGroupId }),
+    }) => client.api.projects({ id: projectId }).vaults({ vaultId }).variables.post(values),
     {
       invalidateKeys: [
-        ["env-variables", projectId],
-        ["environments", projectId],
+        ["vault-variables", projectId, vaultId],
+        ["vaults", projectId],
       ],
       successMessage: "Variable created",
       onSuccess: () => handleClose(),
@@ -57,7 +51,6 @@ export function CreateVariableDialog(props: CreateVariableDialogProps): ReactEle
 
   const form = useForm({
     defaultValues: {
-      environmentType: environmentType as EnvironmentTypeValue,
       key: "",
       value: "",
       description: "",
@@ -68,7 +61,6 @@ export function CreateVariableDialog(props: CreateVariableDialogProps): ReactEle
       const dek = await getProjectDEK(projectId);
       const encrypted = await encrypt(value.value, dek);
       await mutation.mutateAsync({
-        environmentType: value.environmentType,
         key: value.key,
         encryptedValue: encrypted.ciphertext,
         iv: encrypted.iv,

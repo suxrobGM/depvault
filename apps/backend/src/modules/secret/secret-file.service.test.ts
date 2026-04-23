@@ -7,13 +7,13 @@ const now = new Date();
 const projectId = "project-uuid";
 const userId = "user-uuid";
 const fileId = "file-uuid";
-const vaultGroupId = "vault-group-uuid";
+const vaultId = "vault-uuid";
 
-const mockVaultGroup = { id: vaultGroupId, name: "Default", projectId };
+const mockVault = { id: vaultId, name: "api-prod", projectId };
 
 const mockSecretFile = {
   id: fileId,
-  vaultGroupId,
+  vaultId,
   name: "config.json",
   description: "Config file",
   encryptedContent: Buffer.from("encrypted-content"),
@@ -24,7 +24,7 @@ const mockSecretFile = {
   uploadedBy: userId,
   createdAt: now,
   updatedAt: now,
-  vaultGroup: { id: vaultGroupId, name: "Default" },
+  vault: { id: vaultId, name: "api-prod" },
 };
 
 function createMockPrisma() {
@@ -47,8 +47,8 @@ function createMockPrisma() {
     secretFileAuditLog: {
       create: mock(() => Promise.resolve({})),
     },
-    vaultGroup: {
-      findFirst: mock(() => Promise.resolve(mockVaultGroup)),
+    vault: {
+      findFirst: mock(() => Promise.resolve(mockVault)),
     },
   } as any;
 }
@@ -87,7 +87,7 @@ describe("SecretFileService", () => {
         authTag: "tag-base64",
         mimeType: "application/json",
         fileSize: 100,
-        vaultGroupId,
+        vaultId,
         description: "Config file",
       };
       const result = await service.upload(projectId, userId, body);
@@ -106,7 +106,7 @@ describe("SecretFileService", () => {
           authTag: "tag",
           mimeType: "application/octet-stream",
           fileSize: 100,
-          vaultGroupId,
+          vaultId,
         };
         expect(service.upload(projectId, userId, body)).rejects.toBeInstanceOf(BadRequestError);
       }
@@ -120,7 +120,7 @@ describe("SecretFileService", () => {
         authTag: "tag",
         mimeType: "text/plain",
         fileSize: 100,
-        vaultGroupId,
+        vaultId,
       };
       expect(service.upload(projectId, userId, body)).rejects.toBeInstanceOf(BadRequestError);
     });
@@ -133,7 +133,7 @@ describe("SecretFileService", () => {
         authTag: "tag",
         mimeType: "application/json",
         fileSize: 512,
-        vaultGroupId,
+        vaultId,
       };
       await service.upload(projectId, userId, body);
 
@@ -153,7 +153,7 @@ describe("SecretFileService", () => {
       expect(result.items[0]!.name).toBe("config.json");
       expect(mockPrisma.secretFile.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          include: { vaultGroup: true },
+          include: { vault: true },
         }),
       );
     });
@@ -169,7 +169,7 @@ describe("SecretFileService", () => {
     it("should return encrypted content and metadata for OWNER", async () => {
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce({
         ...mockSecretFile,
-        vaultGroup: { id: vaultGroupId, name: "Default" },
+        vault: { id: vaultId, name: "api-prod" },
       });
 
       const result = await service.download(projectId, fileId, userId);
@@ -224,24 +224,24 @@ describe("SecretFileService", () => {
       expect(mockPrisma.secretFile.update).toHaveBeenCalledWith({
         where: { id: fileId },
         data: { name: "updated.json", description: "Updated desc" },
-        include: { vaultGroup: true },
+        include: { vault: true },
       });
     });
 
-    it("should move file to a different vault group", async () => {
-      const newVaultGroupId = "new-vault-group-id";
+    it("should move file to a different vault", async () => {
+      const newVaultId = "new-vault-id";
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
       mockPrisma.secretFile.update.mockResolvedValueOnce({
         ...mockSecretFile,
-        vaultGroupId: newVaultGroupId,
+        vaultId: newVaultId,
       });
 
-      await service.update(projectId, fileId, { vaultGroupId: newVaultGroupId });
+      await service.update(projectId, fileId, { vaultId: newVaultId });
 
       expect(mockPrisma.secretFile.update).toHaveBeenCalledWith({
         where: { id: fileId },
-        data: { vaultGroupId: newVaultGroupId },
-        include: { vaultGroup: true },
+        data: { vaultId: newVaultId },
+        include: { vault: true },
       });
     });
 

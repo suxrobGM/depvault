@@ -1,7 +1,7 @@
 model CiToken {
   id            String    @id @default(uuid()) @db.Uuid
   projectId     String    @map("project_id") @db.Uuid
-  environmentId String    @map("environment_id") @db.Uuid
+  vaultId       String    @map("vault_id") @db.Uuid
   createdBy     String    @map("created_by") @db.Uuid
   name          String
   tokenHash     String    @unique @map("token_hash")
@@ -16,9 +16,9 @@ model CiToken {
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
-  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  environment Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
-  creator     User        @relation(fields: [createdBy], references: [id])
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  vault   Vault   @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+  creator User    @relation(fields: [createdBy], references: [id])
 
   @@index([projectId])
   @@map("ci_tokens")

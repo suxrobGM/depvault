@@ -10,18 +10,18 @@ import { useToast } from "@/hooks/use-toast";
 import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
 import { encryptBinary } from "@/lib/crypto";
-import type { VaultGroup } from "@/types/api/vault-group";
+import type { Vault } from "@/types/api/vault";
 import { uploadSecretFileSchema } from "./secret-file-schemas";
 
 interface UploadSecretFileDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
-  vaultGroups: VaultGroup[];
+  vaults: Vault[];
 }
 
 export function UploadSecretFileDialog(props: UploadSecretFileDialogProps): ReactElement {
-  const { open, onClose, projectId, vaultGroups } = props;
+  const { open, onClose, projectId, vaults } = props;
 
   const [file, setFile] = useState<File | null>(null);
   const toast = useToast();
@@ -35,7 +35,7 @@ export function UploadSecretFileDialog(props: UploadSecretFileDialogProps): Reac
       authTag: string;
       mimeType: string;
       fileSize: number;
-      vaultGroupId: string;
+      vaultId: string;
       description?: string;
     }) => client.api.projects({ id: projectId }).secrets.post(values),
     {
@@ -45,11 +45,11 @@ export function UploadSecretFileDialog(props: UploadSecretFileDialogProps): Reac
     },
   );
 
-  const groupItems = vaultGroups.map((g) => ({ value: g.id, label: g.name }));
+  const vaultItems = vaults.map((v) => ({ value: v.id, label: v.name }));
 
   const form = useForm({
     defaultValues: {
-      vaultGroupId: "",
+      vaultId: "",
       description: "",
     },
     validators: { onSubmit: uploadSecretFileSchema },
@@ -68,7 +68,7 @@ export function UploadSecretFileDialog(props: UploadSecretFileDialogProps): Reac
         authTag: encrypted.authTag,
         mimeType: file.type || "application/octet-stream",
         fileSize: file.size,
-        vaultGroupId: value.vaultGroupId,
+        vaultId: value.vaultId,
         description: value.description?.trim() ?? "",
       });
     },
@@ -99,11 +99,11 @@ export function UploadSecretFileDialog(props: UploadSecretFileDialogProps): Reac
 
             <FormSelectField
               form={form}
-              name="vaultGroupId"
-              label="Vault Group"
-              items={groupItems}
-              emptyLabel="Select a vault group"
-              emptyMessage="No vault groups found. Create a group in the Variables tab first."
+              name="vaultId"
+              label="Vault"
+              items={vaultItems}
+              emptyLabel="Select a vault"
+              emptyMessage="No vaults found. Create a vault in the Variables tab first."
             />
 
             <FormTextField

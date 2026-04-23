@@ -1,6 +1,6 @@
 using System.Net.Http.Headers;
 using System.Text;
-using DepVault.Cli.Commands.Pull;
+using DepVault.Cli.Commands.Push;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
@@ -15,7 +15,7 @@ internal sealed class SecretFileScanner(
     IFileScanner fileScanner,
     IConfigService configService,
     ICredentialStore credentialStore,
-    DirectoryVaultGroupMapper dirMapper)
+    DirectoryVaultMapper vaultMapper)
 {
     private HttpClient? httpClient;
 
@@ -39,7 +39,7 @@ internal sealed class SecretFileScanner(
             return;
         }
 
-        var dirMap = await dirMapper.MapAsync(projectId, selected, ct);
+        var dirMap = await vaultMapper.MapAsync(projectId, selected, null, false, ct);
         if (dirMap is null)
         {
             return;
@@ -48,15 +48,15 @@ internal sealed class SecretFileScanner(
         foreach (var file in selected)
         {
             var dir = Path.GetDirectoryName(file.RelativePath)?.Replace('\\', '/') ?? ".";
-            if (!dirMap.TryGetValue(dir, out var vaultGroupId))
+            if (!dirMap.TryGetValue(dir, out var vaultId))
             {
-                AnsiConsole.MarkupLine($"[grey]Skipped {Markup.Escape(file.RelativePath)} (no vault group)[/]");
+                AnsiConsole.MarkupLine($"[grey]Skipped {Markup.Escape(file.RelativePath)} (no vault)[/]");
                 continue;
             }
 
             try
             {
-                await UploadAsync(projectId, file, vaultGroupId, ct);
+                await UploadAsync(projectId, file, vaultId, ct);
                 results.SecretFilesUploaded++;
                 output.PrintSuccess($"Uploaded {file.RelativePath}");
             }
@@ -70,12 +70,12 @@ internal sealed class SecretFileScanner(
     /// <summary>Uploads a single secret file via multipart/form-data.</summary>
     public async Task UploadAsync(
         string projectId, DiscoveredFile file,
-        string vaultGroupId, CancellationToken ct)
+        string vaultId, CancellationToken ct)
     {
         var fileBytes = await File.ReadAllBytesAsync(file.FullPath, ct);
         var baseUrl = configService.Load().Server.TrimEnd('/');
 
-        using var body = BuildMultipartBody(fileBytes, file.FileName, vaultGroupId);
+        using var body = BuildMultipartBody(fileBytes, file.FileName, vaultId);
         var http = GetHttpClient();
 
         await AnsiConsole.Status()
@@ -94,7 +94,7 @@ internal sealed class SecretFileScanner(
     /// that Bun's parser doesn't recognize as a file upload.
     /// </summary>
     private static ByteArrayContent BuildMultipartBody(
-        byte[] fileBytes, string fileName, string vaultGroupId)
+        byte[] fileBytes, string fileName, string vaultId)
     {
         var boundary = "----FormBoundary" + Guid.NewGuid().ToString("N")[..16];
         using var ms = new MemoryStream();
@@ -107,7 +107,7 @@ internal sealed class SecretFileScanner(
         ms.Write(fileBytes);
         WriteUtf8(ms, "\r\n");
 
-        WriteTextField(ms, boundary, "vaultGroupId", vaultGroupId);
+        WriteTextField(ms, boundary, "vaultId", vaultId);
         WriteTextField(ms, boundary, "description", fileName);
 
         WriteUtf8(ms, $"--{boundary}--\r\n");

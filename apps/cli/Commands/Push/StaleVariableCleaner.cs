@@ -1,24 +1,21 @@
 using DepVault.Cli.Auth;
 using DepVault.Cli.Output;
-using DepVault.Cli.Utils;
 using Spectre.Console;
-using VarsNs = DepVault.Cli.ApiClient.Api.Projects.Item.Environments.Variables;
 
 namespace DepVault.Cli.Commands.Push;
 
 /// <summary>
-/// Finds and deletes environment variables on the server that are not present in the pushed file.
+/// Finds and deletes environment variables in a vault that are not present in the pushed file.
 /// </summary>
 internal sealed class StaleVariableCleaner(IApiClientFactory clientFactory, IConsolePrompter prompter)
 {
     public async Task<int> CleanAsync(
-        string projectId, string vaultGroupId, string envType,
+        string projectId, string vaultId,
         HashSet<string> importedKeys, CancellationToken ct)
     {
         var client = clientFactory.Create();
-        var envTypeEnum = CommandUtils.ParseEnum(envType, VarsNs.GetEnvironmentTypeQueryParameterType.DEVELOPMENT);
 
-        var stale = await FindStaleVariablesAsync(client, projectId, vaultGroupId, envTypeEnum, importedKeys, ct);
+        var stale = await FindStaleVariablesAsync(client, projectId, vaultId, importedKeys, ct);
         if (stale.Count == 0)
         {
             return 0;
@@ -43,7 +40,7 @@ internal sealed class StaleVariableCleaner(IApiClientFactory clientFactory, ICon
         {
             try
             {
-                await client.Api.Projects[projectId].Environments.Variables[varId]
+                await client.Api.Projects[projectId].Vaults[vaultId].Variables[varId]
                     .DeleteAsync(cancellationToken: ct);
                 deleted++;
             }
@@ -57,8 +54,7 @@ internal sealed class StaleVariableCleaner(IApiClientFactory clientFactory, ICon
     }
 
     private static async Task<List<(string Key, string Id)>> FindStaleVariablesAsync(
-        ApiClient.ApiClient client, string projectId, string vaultGroupId,
-        VarsNs.GetEnvironmentTypeQueryParameterType envType,
+        ApiClient.ApiClient client, string projectId, string vaultId,
         HashSet<string> importedKeys, CancellationToken ct)
     {
         var stale = new List<(string Key, string Id)>();
@@ -68,11 +64,9 @@ internal sealed class StaleVariableCleaner(IApiClientFactory clientFactory, ICon
         while (true)
         {
             var currentPage = page;
-            var result = await client.Api.Projects[projectId].Environments.Variables
+            var result = await client.Api.Projects[projectId].Vaults[vaultId].Variables
                 .GetAsync(config =>
                 {
-                    config.QueryParameters.VaultGroupId = vaultGroupId;
-                    config.QueryParameters.EnvironmentType = envType;
                     config.QueryParameters.Page = currentPage;
                     config.QueryParameters.Limit = limit;
                 }, ct);

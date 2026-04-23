@@ -31,7 +31,6 @@ export const PlanLimitsSchema = t.Object({
   gitSecretScanning: t.Boolean(),
   ipAllowlists: t.Boolean(),
   secretSharing: t.Boolean(),
-  envDiff: t.Boolean(),
   prioritySupport: t.Boolean(),
 });
 

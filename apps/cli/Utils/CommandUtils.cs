@@ -6,8 +6,6 @@ namespace DepVault.Cli.Utils;
 /// <summary>Pure utility methods for command-line parsing (no DI deps).</summary>
 internal static class CommandUtils
 {
-    internal static readonly string[] EnvironmentTypes = ["DEVELOPMENT", "STAGING", "PRODUCTION", "GLOBAL"];
-
     /// <summary>
     /// Parses a Kiota-generated enum by member name or [EnumMember] value attribute.
     /// Handles values like "appsettings.json" that don't match the C# member name.

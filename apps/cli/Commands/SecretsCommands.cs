@@ -54,7 +54,7 @@ public sealed class SecretsCommands(CommandContext ctx)
                     {
                         id = f.Id,
                         name = f.Name,
-                        vaultGroup = f.VaultGroupName,
+                        vault = f.VaultName,
                         mimeType = f.MimeType,
                         fileSize = f.FileSize
                     }));
@@ -62,11 +62,11 @@ public sealed class SecretsCommands(CommandContext ctx)
                 }
 
                 ctx.Output.PrintTable(
-                    ["NAME", "VAULT GROUP", "TYPE", "SIZE", "UPDATED"],
+                    ["NAME", "VAULT", "TYPE", "SIZE", "UPDATED"],
                     items.Select(f => new[]
                     {
                         f.Name ?? "",
-                        f.VaultGroupName ?? "",
+                        f.VaultName ?? "",
                         f.MimeType ?? "",
                         FormatUtils.FileSize(f.FileSize),
                         f.UpdatedAt?.ToString("yyyy-MM-dd") ?? ""

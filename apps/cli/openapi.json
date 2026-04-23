@@ -2800,13 +2800,13 @@
         "tags": [
           "Projects"
         ],
-        "summary": "Get dashboard stats",
-        "description": "Return aggregate statistics across all projects the authenticated user is a member of.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Get dashboard stats",
+        "description": "Return aggregate statistics across all projects the authenticated user is a member of."
       }
     },
     "/api/projects/{id}": {
@@ -2992,13 +2992,13 @@
         "tags": [
           "Projects"
         ],
-        "summary": "Get project details",
-        "description": "Return details of a specific project. The authenticated user must be a member of the project.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Get project details",
+        "description": "Return details of a specific project. The authenticated user must be a member of the project."
       },
       "put": {
         "parameters": [
@@ -3182,13 +3182,13 @@
         "tags": [
           "Projects"
         ],
-        "summary": "Update project",
-        "description": "Update project name and/or description. Only owners and editors are allowed to update.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Update project",
+        "description": "Update project name and/or description. Only owners and editors are allowed to update.",
         "requestBody": {
           "required": true,
           "content": {
@@ -3365,13 +3365,13 @@
         "tags": [
           "Projects"
         ],
-        "summary": "Delete project",
-        "description": "Permanently delete a project and all associated data (analyses, environments, variables). Only the project owner can delete.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Delete project",
+        "description": "Permanently delete a project and all associated data (analyses, environments, variables). Only the project owner can delete."
       }
     },
     "/api/projects/{id}/members": {
@@ -3635,13 +3635,13 @@
         "tags": [
           "Members"
         ],
-        "summary": "List project members",
-        "description": "Return a paginated list of all members in the project with their roles. Any project member can view the member list.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "List project members",
+        "description": "Return a paginated list of all members in the project with their roles. Any project member can view the member list."
       },
       "post": {
         "parameters": [
@@ -3875,13 +3875,13 @@
         "tags": [
           "Invitations"
         ],
-        "summary": "Invite member to project",
-        "description": "Create a pending invitation for a user by email to join the project with a specified role (editor or viewer). If the user is not on the platform, a registration invitation email is sent. Only the project owner can invite members.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Invite member to project",
+        "description": "Create a pending invitation for a user by email to join the project with a specified role (editor or viewer). If the user is not on the platform, a registration invitation email is sent. Only the project owner can invite members.",
         "requestBody": {
           "required": true,
           "content": {
@@ -4126,13 +4126,13 @@
         "tags": [
           "Members"
         ],
-        "summary": "Update member role",
-        "description": "Update the role of a project member. Only the project owner can change member roles.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Update member role",
+        "description": "Update the role of a project member. Only the project owner can change member roles.",
         "requestBody": {
           "required": true,
           "content": {
@@ -4314,13 +4314,13 @@
         "tags": [
           "Members"
         ],
-        "summary": "Remove member from project",
-        "description": "Remove a member from the project. Only the project owner can remove members. The owner cannot be removed.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Remove member from project",
+        "description": "Remove a member from the project. Only the project owner can remove members. The owner cannot be removed."
       }
     },
     "/api/projects/{id}/transfer": {
@@ -4474,13 +4474,13 @@
         "tags": [
           "Members"
         ],
-        "summary": "Transfer project ownership",
-        "description": "Transfer project ownership to another member. The current owner becomes an editor. Only the current owner can transfer ownership.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Transfer project ownership",
+        "description": "Transfer project ownership to another member. The current owner becomes an editor. Only the current owner can transfer ownership.",
         "requestBody": {
           "required": true,
           "content": {
@@ -4655,6 +4655,11 @@
         "operationId": "getInvitationInfo",
         "tags": [
           "Invitations"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ],
         "summary": "Get invitation info by token",
         "description": "Return minimal invitation details (email, project name) for the registration form. No authentication required."
@@ -4939,13 +4944,13 @@
         "tags": [
           "Invitations"
         ],
-        "summary": "List pending invitations for current user",
-        "description": "Return a paginated list of pending project invitations for the authenticated user.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "List pending invitations for current user",
+        "description": "Return a paginated list of pending project invitations for the authenticated user."
       }
     },
     "/api/invitations/{token}/accept": {
@@ -5099,13 +5104,13 @@
         "tags": [
           "Invitations"
         ],
-        "summary": "Accept a project invitation",
-        "description": "Accept a pending project invitation using its token. The authenticated user must match the invitation's email.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Accept a project invitation",
+        "description": "Accept a pending project invitation using its token. The authenticated user must match the invitation's email."
       }
     },
     "/api/invitations/{token}/decline": {
@@ -5259,13 +5264,13 @@
         "tags": [
           "Invitations"
         ],
-        "summary": "Decline a project invitation",
-        "description": "Decline a pending project invitation using its token. The authenticated user must match the invitation's email.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Decline a project invitation",
+        "description": "Decline a pending project invitation using its token. The authenticated user must match the invitation's email."
       }
     },
     "/api/projects/{id}/invitations": {
@@ -5555,13 +5560,13 @@
         "tags": [
           "Invitations"
         ],
-        "summary": "List project invitations",
-        "description": "Return a paginated list of pending invitations for the project. Any project member can view invitations.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "List project invitations",
+        "description": "Return a paginated list of pending invitations for the project. Any project member can view invitations."
       }
     },
     "/api/projects/{id}/invitations/{invitationId}/resend": {
@@ -5723,13 +5728,13 @@
         "tags": [
           "Invitations"
         ],
-        "summary": "Resend project invitation",
-        "description": "Resend the invitation email for a pending invitation. Only the project owner can resend invitations.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Resend project invitation",
+        "description": "Resend the invitation email for a pending invitation. Only the project owner can resend invitations."
       }
     },
     "/api/projects/{id}/invitations/{invitationId}": {
@@ -5891,17 +5896,17 @@
         "tags": [
           "Invitations"
         ],
-        "summary": "Cancel project invitation",
-        "description": "Cancel a pending invitation. Only the project owner can cancel invitations.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Cancel project invitation",
+        "description": "Cancel a pending invitation. Only the project owner can cancel invitations."
       }
     },
-    "/api/projects/{id}/vault-groups/{groupId}": {
-      "put": {
+    "/api/projects/{id}/vaults": {
+      "get": {
         "parameters": [
           {
             "schema": {
@@ -5910,13 +5915,212 @@
             "in": "path",
             "name": "id",
             "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "projectId",
+                      "name",
+                      "directoryPath",
+                      "tags",
+                      "variableCount",
+                      "secretFileCount",
+                      "requiredTotal",
+                      "requiredFilled",
+                      "createdAt",
+                      "updatedAt"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "projectId": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "directoryPath": {
+                        "nullable": true,
+                        "type": "string"
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "variableCount": {
+                        "type": "number"
+                      },
+                      "secretFileCount": {
+                        "type": "number"
+                      },
+                      "requiredTotal": {
+                        "type": "number"
+                      },
+                      "requiredFilled": {
+                        "type": "number"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Success"
           },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "listVaults",
+        "tags": [
+          "Vaults"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List project vaults",
+        "description": "List every vault in the project with variable/secret-file counts and required-filled progress."
+      },
+      "post": {
+        "parameters": [
           {
             "schema": {
               "type": "string"
             },
             "in": "path",
-            "name": "groupId",
+            "name": "id",
             "required": true
           }
         ],
@@ -5930,24 +6134,32 @@
                     "id": {
                       "type": "string"
                     },
-                    "name": {
+                    "projectId": {
                       "type": "string"
                     },
-                    "description": {
-                      "nullable": true,
+                    "name": {
                       "type": "string"
                     },
                     "directoryPath": {
                       "nullable": true,
                       "type": "string"
                     },
-                    "sortOrder": {
-                      "type": "number"
-                    },
-                    "environmentCount": {
-                      "type": "number"
+                    "tags": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
                     },
                     "variableCount": {
+                      "type": "number"
+                    },
+                    "secretFileCount": {
+                      "type": "number"
+                    },
+                    "requiredTotal": {
+                      "type": "number"
+                    },
+                    "requiredFilled": {
                       "type": "number"
                     },
                     "createdAt": {
@@ -5961,12 +6173,14 @@
                   },
                   "required": [
                     "id",
+                    "projectId",
                     "name",
-                    "description",
                     "directoryPath",
-                    "sortOrder",
-                    "environmentCount",
+                    "tags",
                     "variableCount",
+                    "secretFileCount",
+                    "requiredTotal",
+                    "requiredFilled",
                     "createdAt",
                     "updatedAt"
                   ]
@@ -6091,17 +6305,419 @@
             }
           }
         },
-        "operationId": "updateVaultGroup",
+        "operationId": "createVault",
         "tags": [
-          "Vault Groups"
+          "Vaults"
         ],
-        "summary": "Update vault group",
-        "description": "Update a vault group's name, description, or sort order.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Create a vault",
+        "description": "Create a new vault under the project. Names are unique within a project. Tags are freeform.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "type": "string"
+                  },
+                  "directoryPath": {
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  "tags": {
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "minLength": 1,
+                      "maxLength": 50,
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{id}/vault-tags": {
+      "get": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "listVaultTags",
+        "tags": [
+          "Vaults"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List distinct vault tags",
+        "description": "Return the distinct tag values across every vault in the project, sorted."
+      }
+    },
+    "/api/projects/{id}/vaults/{vaultId}": {
+      "put": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "vaultId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "projectId": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "directoryPath": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "variableCount": {
+                      "type": "number"
+                    },
+                    "secretFileCount": {
+                      "type": "number"
+                    },
+                    "requiredTotal": {
+                      "type": "number"
+                    },
+                    "requiredFilled": {
+                      "type": "number"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "projectId",
+                    "name",
+                    "directoryPath",
+                    "tags",
+                    "variableCount",
+                    "secretFileCount",
+                    "requiredTotal",
+                    "requiredFilled",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "updateVault",
+        "tags": [
+          "Vaults"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update a vault",
+        "description": "Update a vault's name, directory path, or tags.",
         "requestBody": {
           "required": true,
           "content": {
@@ -6114,19 +6730,19 @@
                     "maxLength": 100,
                     "type": "string"
                   },
-                  "description": {
-                    "nullable": true,
-                    "maxLength": 500,
-                    "type": "string"
-                  },
                   "directoryPath": {
                     "nullable": true,
                     "maxLength": 500,
                     "type": "string"
                   },
-                  "sortOrder": {
-                    "minimum": 0,
-                    "type": "integer"
+                  "tags": {
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "minLength": 1,
+                      "maxLength": 50,
+                      "type": "string"
+                    }
                   }
                 }
               }
@@ -6149,7 +6765,7 @@
               "type": "string"
             },
             "in": "path",
-            "name": "groupId",
+            "name": "vaultId",
             "required": true
           }
         ],
@@ -6288,21 +6904,21 @@
             }
           }
         },
-        "operationId": "deleteVaultGroup",
+        "operationId": "deleteVault",
         "tags": [
-          "Vault Groups"
+          "Vaults"
         ],
-        "summary": "Delete vault group",
-        "description": "Delete a vault group and all its environments and variables. This action cannot be undone.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Delete a vault",
+        "description": "Delete a vault and cascade-delete all of its variables, secret files, and CI tokens."
       }
     },
-    "/api/projects/{id}/environments/{envId}": {
-      "delete": {
+    "/api/projects/{id}/vaults/{vaultId}/clone": {
+      "post": {
         "parameters": [
           {
             "schema": {
@@ -6317,7 +6933,7 @@
               "type": "string"
             },
             "in": "path",
-            "name": "envId",
+            "name": "vaultId",
             "required": true
           }
         ],
@@ -6328,12 +6944,58 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "message": {
+                    "id": {
                       "type": "string"
+                    },
+                    "projectId": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "directoryPath": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "variableCount": {
+                      "type": "number"
+                    },
+                    "secretFileCount": {
+                      "type": "number"
+                    },
+                    "requiredTotal": {
+                      "type": "number"
+                    },
+                    "requiredFilled": {
+                      "type": "number"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
                     }
                   },
                   "required": [
-                    "message"
+                    "id",
+                    "projectId",
+                    "name",
+                    "directoryPath",
+                    "tags",
+                    "variableCount",
+                    "secretFileCount",
+                    "requiredTotal",
+                    "requiredFilled",
+                    "createdAt",
+                    "updatedAt"
                   ]
                 }
               }
@@ -6456,20 +7118,40 @@
             }
           }
         },
-        "operationId": "deleteEnvironment",
+        "operationId": "cloneVault",
         "tags": [
-          "Environments"
+          "Vaults"
         ],
-        "summary": "Delete an environment",
-        "description": "Permanently delete an environment and all its variables. Only owners and editors can delete.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Clone a vault's keyset with blank values",
+        "description": "Create a new vault with the same keys, descriptions, required flags, directory path, and tags as the source. Values are blank so the new vault starts at 0 of N required filled.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "targetName"
+                ],
+                "properties": {
+                  "targetName": {
+                    "minLength": 1,
+                    "maxLength": 100,
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
-    "/api/projects/{id}/environments/variables": {
+    "/api/projects/{id}/vaults/{vaultId}/variables": {
       "get": {
         "parameters": [
           {
@@ -6478,6 +7160,14 @@
             },
             "in": "path",
             "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "vaultId",
             "required": true
           },
           {
@@ -6498,28 +7188,6 @@
             "in": "query",
             "name": "limit",
             "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "vaultGroupId",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "DEVELOPMENT",
-                "STAGING",
-                "PRODUCTION",
-                "GLOBAL"
-              ]
-            },
-            "in": "query",
-            "name": "environmentType",
-            "required": false
           }
         ],
         "responses": {
@@ -6535,7 +7203,7 @@
                         "type": "object",
                         "required": [
                           "id",
-                          "environmentId",
+                          "vaultId",
                           "key",
                           "encryptedValue",
                           "iv",
@@ -6553,7 +7221,7 @@
                           "id": {
                             "type": "string"
                           },
-                          "environmentId": {
+                          "vaultId": {
                             "type": "string"
                           },
                           "key": {
@@ -6755,13 +7423,13 @@
         "tags": [
           "Environment Variables"
         ],
-        "summary": "List environment variables",
-        "description": "List environment variables for a project, optionally filtered by environment type. Viewers see masked values; editors and owners see decrypted values.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "List environment variables in a vault",
+        "description": "List the environment variables stored in a vault."
       },
       "post": {
         "parameters": [
@@ -6771,6 +7439,14 @@
             },
             "in": "path",
             "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "vaultId",
             "required": true
           }
         ],
@@ -6784,7 +7460,7 @@
                     "id": {
                       "type": "string"
                     },
-                    "environmentId": {
+                    "vaultId": {
                       "type": "string"
                     },
                     "key": {
@@ -6833,7 +7509,7 @@
                   },
                   "required": [
                     "id",
-                    "environmentId",
+                    "vaultId",
                     "key",
                     "encryptedValue",
                     "iv",
@@ -6972,13 +7648,13 @@
         "tags": [
           "Environment Variables"
         ],
-        "summary": "Create an environment variable",
-        "description": "Create a new encrypted environment variable for the project. The environment is auto-created if it doesn't exist. Only owners and editors can create variables.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Create an environment variable",
+        "description": "Create a new encrypted environment variable inside a vault. Only owners and editors can create variables.",
         "requestBody": {
           "required": true,
           "content": {
@@ -6986,41 +7662,24 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "vaultGroupId",
-                  "environmentType",
                   "key",
                   "encryptedValue",
                   "iv",
                   "authTag"
                 ],
                 "properties": {
-                  "vaultGroupId": {
-                    "type": "string"
-                  },
-                  "environmentType": {
-                    "type": "string",
-                    "enum": [
-                      "DEVELOPMENT",
-                      "STAGING",
-                      "PRODUCTION",
-                      "GLOBAL"
-                    ]
-                  },
                   "key": {
                     "minLength": 1,
                     "maxLength": 255,
                     "type": "string"
                   },
                   "encryptedValue": {
-                    "minLength": 1,
                     "type": "string"
                   },
                   "iv": {
-                    "minLength": 1,
                     "type": "string"
                   },
                   "authTag": {
-                    "minLength": 1,
                     "type": "string"
                   },
                   "description": {
@@ -7049,7 +7708,7 @@
         }
       }
     },
-    "/api/projects/{id}/environments/variables/{varId}/versions": {
+    "/api/projects/{id}/vaults/{vaultId}/variables/{varId}/versions": {
       "get": {
         "parameters": [
           {
@@ -7058,6 +7717,14 @@
             },
             "in": "path",
             "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "vaultId",
             "required": true
           },
           {
@@ -7244,16 +7911,16 @@
         "tags": [
           "Environment Variables"
         ],
-        "summary": "List variable version history",
-        "description": "List the version history for an environment variable. Editors and owners see decrypted values; viewers see masked values.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "List variable version history",
+        "description": "List the version history for an environment variable."
       }
     },
-    "/api/projects/{id}/environments/variables/{varId}": {
+    "/api/projects/{id}/vaults/{vaultId}/variables/{varId}": {
       "put": {
         "parameters": [
           {
@@ -7262,6 +7929,14 @@
             },
             "in": "path",
             "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "vaultId",
             "required": true
           },
           {
@@ -7283,7 +7958,7 @@
                     "id": {
                       "type": "string"
                     },
-                    "environmentId": {
+                    "vaultId": {
                       "type": "string"
                     },
                     "key": {
@@ -7332,7 +8007,7 @@
                   },
                   "required": [
                     "id",
-                    "environmentId",
+                    "vaultId",
                     "key",
                     "encryptedValue",
                     "iv",
@@ -7471,13 +8146,13 @@
         "tags": [
           "Environment Variables"
         ],
-        "summary": "Update an environment variable",
-        "description": "Update key, value, or metadata of an environment variable. When the value changes, the previous value is saved as a version snapshot. Only owners and editors can update.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Update an environment variable",
+        "description": "Update key, value, or metadata of an environment variable. When the value changes, the previous non-blank value is saved as a version snapshot.",
         "requestBody": {
           "required": true,
           "content": {
@@ -7491,15 +8166,12 @@
                     "type": "string"
                   },
                   "encryptedValue": {
-                    "minLength": 1,
                     "type": "string"
                   },
                   "iv": {
-                    "minLength": 1,
                     "type": "string"
                   },
                   "authTag": {
-                    "minLength": 1,
                     "type": "string"
                   },
                   "description": {
@@ -7538,6 +8210,14 @@
             },
             "in": "path",
             "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "vaultId",
             "required": true
           },
           {
@@ -7688,16 +8368,16 @@
         "tags": [
           "Environment Variables"
         ],
-        "summary": "Delete an environment variable",
-        "description": "Permanently delete an environment variable and all its version history. Only owners and editors can delete.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Delete an environment variable",
+        "description": "Permanently delete an environment variable and all its version history."
       }
     },
-    "/api/projects/{id}/environments/variables/batch": {
+    "/api/projects/{id}/vaults/{vaultId}/variables/batch": {
       "delete": {
         "parameters": [
           {
@@ -7706,6 +8386,14 @@
             },
             "in": "path",
             "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "vaultId",
             "required": true
           }
         ],
@@ -7848,13 +8536,13 @@
         "tags": [
           "Environment Variables"
         ],
-        "summary": "Batch delete environment variables",
-        "description": "Permanently delete multiple environment variables and their version history. Only owners and editors can delete.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Batch delete environment variables",
+        "description": "Permanently delete multiple environment variables in a vault and their version history.",
         "requestBody": {
           "required": true,
           "content": {
@@ -7880,7 +8568,7 @@
         }
       }
     },
-    "/api/projects/{id}/environments/variables/{varId}/versions/{versionId}/rollback": {
+    "/api/projects/{id}/vaults/{vaultId}/variables/{varId}/versions/{versionId}/rollback": {
       "post": {
         "parameters": [
           {
@@ -7889,6 +8577,14 @@
             },
             "in": "path",
             "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "vaultId",
             "required": true
           },
           {
@@ -7918,7 +8614,7 @@
                     "id": {
                       "type": "string"
                     },
-                    "environmentId": {
+                    "vaultId": {
                       "type": "string"
                     },
                     "key": {
@@ -7967,7 +8663,7 @@
                   },
                   "required": [
                     "id",
-                    "environmentId",
+                    "vaultId",
                     "key",
                     "encryptedValue",
                     "iv",
@@ -8106,16 +8802,16 @@
         "tags": [
           "Environment Variables"
         ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "summary": "Rollback variable to a previous version",
-        "description": "Restore an environment variable to a previous version. The current value is saved as a new version snapshot before rolling back. Only owners and editors can rollback.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        "description": "Restore an environment variable to a previous version. The current value is saved as a new version snapshot before rolling back."
       }
     },
-    "/api/projects/{id}/environments/diff": {
+    "/api/projects/{id}/vaults/{vaultId}/example": {
       "get": {
         "parameters": [
           {
@@ -8130,216 +8826,8 @@
             "schema": {
               "type": "string"
             },
-            "in": "query",
-            "name": "vaultGroupId",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string",
-              "minLength": 1
-            },
-            "in": "query",
-            "name": "environments",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "environments": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "rows": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "required": [
-                          "key",
-                          "description",
-                          "isRequired",
-                          "status",
-                          "values"
-                        ],
-                        "properties": {
-                          "key": {
-                            "type": "string"
-                          },
-                          "description": {
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          "isRequired": {
-                            "type": "boolean"
-                          },
-                          "status": {
-                            "type": "string",
-                            "enum": [
-                              "match",
-                              "missing"
-                            ]
-                          },
-                          "values": {
-                            "type": "object"
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "required": [
-                    "environments",
-                    "rows"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "diffEnvironments",
-        "tags": [
-          "Environment Diff & Clone"
-        ],
-        "summary": "Diff environments",
-        "description": "Compare variable keys across 2-3 environments. Returns rows with match/missing status.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/projects/{id}/environments/sync": {
-      "post": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
             "in": "path",
-            "name": "id",
+            "name": "vaultId",
             "required": true
           }
         ],
@@ -8350,309 +8838,20 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": {
+                    "vaultId": {
                       "type": "string"
                     },
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "DEVELOPMENT",
-                        "STAGING",
-                        "PRODUCTION",
-                        "GLOBAL"
-                      ]
-                    },
-                    "variableCount": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "type",
-                    "variableCount"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
+                    "vaultName": {
                       "type": "string"
                     },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "syncEnvironment",
-        "tags": [
-          "Environment Diff & Clone"
-        ],
-        "summary": "Sync environment",
-        "description": "Sync an environment's variables into another environment. Existing keys are overwritten, new keys are added.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "vaultGroupId",
-                  "sourceEnvironmentType",
-                  "targetEnvironmentType",
-                  "entries"
-                ],
-                "properties": {
-                  "vaultGroupId": {
-                    "type": "string"
-                  },
-                  "sourceEnvironmentType": {
-                    "type": "string",
-                    "enum": [
-                      "DEVELOPMENT",
-                      "STAGING",
-                      "PRODUCTION",
-                      "GLOBAL"
-                    ]
-                  },
-                  "targetEnvironmentType": {
-                    "type": "string",
-                    "enum": [
-                      "DEVELOPMENT",
-                      "STAGING",
-                      "PRODUCTION",
-                      "GLOBAL"
-                    ]
-                  },
-                  "entries": {
-                    "minItems": 1,
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "required": [
-                        "key",
-                        "encryptedValue",
-                        "iv",
-                        "authTag"
-                      ],
-                      "properties": {
-                        "key": {
-                          "minLength": 1,
-                          "maxLength": 255,
-                          "type": "string"
-                        },
-                        "encryptedValue": {
-                          "minLength": 1,
-                          "type": "string"
-                        },
-                        "iv": {
-                          "minLength": 1,
-                          "type": "string"
-                        },
-                        "authTag": {
-                          "minLength": 1,
-                          "type": "string"
-                        },
-                        "description": {
-                          "nullable": true,
-                          "maxLength": 500,
-                          "type": "string"
-                        },
-                        "isRequired": {
-                          "type": "boolean"
-                        },
-                        "sortOrder": {
-                          "type": "number"
-                        },
-                        "encryptedComment": {
-                          "type": "string"
-                        },
-                        "commentIv": {
-                          "type": "string"
-                        },
-                        "commentAuthTag": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/projects/{id}/environments/example": {
-      "get": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "vaultGroupId",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "DEVELOPMENT",
-                "STAGING",
-                "PRODUCTION",
-                "GLOBAL"
-              ]
-            },
-            "in": "query",
-            "name": "environmentType",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
                     "content": {
                       "type": "string"
-                    },
-                    "environmentType": {
-                      "type": "string",
-                      "enum": [
-                        "DEVELOPMENT",
-                        "STAGING",
-                        "PRODUCTION",
-                        "GLOBAL"
-                      ]
                     }
                   },
                   "required": [
-                    "content",
-                    "environmentType"
+                    "vaultId",
+                    "vaultName",
+                    "content"
                   ]
                 }
               }
@@ -8779,16 +8978,16 @@
         "tags": [
           "Environment Import/Export"
         ],
-        "summary": "Generate .env.example template",
-        "description": "Generate a .env.example template with keys and placeholder annotations but no real values. Any project member can access this.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Generate .env.example template",
+        "description": "Generate a .env.example template with keys and placeholder annotations but no real values."
       }
     },
-    "/api/projects/{id}/environments/import": {
+    "/api/projects/{id}/vaults/{vaultId}/import": {
       "post": {
         "parameters": [
           {
@@ -8797,6 +8996,14 @@
             },
             "in": "path",
             "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "vaultId",
             "required": true
           }
         ],
@@ -8819,7 +9026,7 @@
                         "type": "object",
                         "required": [
                           "id",
-                          "environmentId",
+                          "vaultId",
                           "key",
                           "encryptedValue",
                           "iv",
@@ -8837,7 +9044,7 @@
                           "id": {
                             "type": "string"
                           },
-                          "environmentId": {
+                          "vaultId": {
                             "type": "string"
                           },
                           "key": {
@@ -9017,13 +9224,13 @@
         "tags": [
           "Environment Import/Export"
         ],
-        "summary": "Bulk import environment variables",
-        "description": "Bulk import pre-encrypted environment variables. The client encrypts values before sending. Existing keys are updated. Only owners and editors can import.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Bulk import environment variables into a vault",
+        "description": "Bulk import pre-encrypted environment variables into the target vault. Existing keys are updated.",
         "requestBody": {
           "required": true,
           "content": {
@@ -9031,23 +9238,9 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "vaultGroupId",
-                  "environmentType",
                   "entries"
                 ],
                 "properties": {
-                  "vaultGroupId": {
-                    "type": "string"
-                  },
-                  "environmentType": {
-                    "type": "string",
-                    "enum": [
-                      "DEVELOPMENT",
-                      "STAGING",
-                      "PRODUCTION",
-                      "GLOBAL"
-                    ]
-                  },
                   "entries": {
                     "minItems": 1,
                     "type": "array",
@@ -9066,15 +9259,12 @@
                           "type": "string"
                         },
                         "encryptedValue": {
-                          "minLength": 1,
                           "type": "string"
                         },
                         "iv": {
-                          "minLength": 1,
                           "type": "string"
                         },
                         "authTag": {
-                          "minLength": 1,
                           "type": "string"
                         },
                         "description": {
@@ -9106,7 +9296,7 @@
         }
       }
     },
-    "/api/projects/{id}/environments/export": {
+    "/api/projects/{id}/vaults/{vaultId}/export": {
       "get": {
         "parameters": [
           {
@@ -9121,22 +9311,8 @@
             "schema": {
               "type": "string"
             },
-            "in": "query",
-            "name": "vaultGroupId",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "DEVELOPMENT",
-                "STAGING",
-                "PRODUCTION",
-                "GLOBAL"
-              ]
-            },
-            "in": "query",
-            "name": "environmentType",
+            "in": "path",
+            "name": "vaultId",
             "required": true
           }
         ],
@@ -9147,6 +9323,12 @@
                 "schema": {
                   "type": "object",
                   "properties": {
+                    "vaultId": {
+                      "type": "string"
+                    },
+                    "vaultName": {
+                      "type": "string"
+                    },
                     "entries": {
                       "type": "array",
                       "items": {
@@ -9192,20 +9374,12 @@
                           }
                         }
                       }
-                    },
-                    "environmentType": {
-                      "type": "string",
-                      "enum": [
-                        "DEVELOPMENT",
-                        "STAGING",
-                        "PRODUCTION",
-                        "GLOBAL"
-                      ]
                     }
                   },
                   "required": [
-                    "entries",
-                    "environmentType"
+                    "vaultId",
+                    "vaultName",
+                    "entries"
                   ]
                 }
               }
@@ -9332,16 +9506,16 @@
         "tags": [
           "Environment Import/Export"
         ],
-        "summary": "Export environment variables",
-        "description": "Export all encrypted environment variables for a given environment. The client is responsible for decryption and formatting. Only owners and editors can export.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Export environment variables from a vault",
+        "description": "Export all encrypted environment variables for a given vault. The client is responsible for decryption and formatting."
       }
     },
-    "/api/projects/{id}/environments/bundle": {
+    "/api/projects/{id}/vaults/{vaultId}/bundle": {
       "post": {
         "parameters": [
           {
@@ -9350,6 +9524,14 @@
             },
             "in": "path",
             "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "vaultId",
             "required": true
           }
         ],
@@ -9550,13 +9732,13 @@
         "tags": [
           "Environment Bundle"
         ],
-        "summary": "Download environment bundle",
-        "description": "Return encrypted environment variables and secret files for client-side decryption and bundling. Only owners and editors can download bundles.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Download encrypted bundle for a vault",
+        "description": "Return encrypted environment variables and secret files for client-side decryption and bundling.",
         "requestBody": {
           "required": true,
           "content": {
@@ -9564,24 +9746,10 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "vaultGroupId",
-                  "environmentType",
                   "variableIds",
                   "secretFileIds"
                 ],
                 "properties": {
-                  "vaultGroupId": {
-                    "type": "string"
-                  },
-                  "environmentType": {
-                    "type": "string",
-                    "enum": [
-                      "DEVELOPMENT",
-                      "STAGING",
-                      "PRODUCTION",
-                      "GLOBAL"
-                    ]
-                  },
                   "variableIds": {
                     "minItems": 0,
                     "type": "array",
@@ -9594,857 +9762,6 @@
                     "type": "array",
                     "items": {
                       "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/projects/{id}/env-templates/{templateId}": {
-      "get": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "templateId",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "description": {
-                      "nullable": true,
-                      "type": "string"
-                    },
-                    "createdBy": {
-                      "type": "string"
-                    },
-                    "createdAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "updatedAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "variables": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "required": [
-                          "id",
-                          "key",
-                          "description",
-                          "isRequired",
-                          "sortOrder"
-                        ],
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "key": {
-                            "type": "string"
-                          },
-                          "description": {
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          "isRequired": {
-                            "type": "boolean"
-                          },
-                          "sortOrder": {
-                            "type": "number"
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "name",
-                    "description",
-                    "createdBy",
-                    "createdAt",
-                    "updatedAt",
-                    "variables"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "getEnvTemplate",
-        "tags": [
-          "Environment Templates"
-        ],
-        "summary": "Get template detail",
-        "description": "Get a template with its variables.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      },
-      "put": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "templateId",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "description": {
-                      "nullable": true,
-                      "type": "string"
-                    },
-                    "variableCount": {
-                      "type": "number"
-                    },
-                    "createdBy": {
-                      "type": "string"
-                    },
-                    "createdAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "updatedAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "name",
-                    "description",
-                    "variableCount",
-                    "createdBy",
-                    "createdAt",
-                    "updatedAt"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "updateEnvTemplate",
-        "tags": [
-          "Environment Templates"
-        ],
-        "summary": "Update template",
-        "description": "Update template name or description.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "minLength": 1,
-                    "maxLength": 100,
-                    "type": "string"
-                  },
-                  "description": {
-                    "maxLength": 500,
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "templateId",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "message"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "deleteEnvTemplate",
-        "tags": [
-          "Environment Templates"
-        ],
-        "summary": "Delete template",
-        "description": "Delete a template and all its variables.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/projects/{id}/env-templates/{templateId}/apply": {
-      "post": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "templateId",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "environmentId": {
-                      "type": "string"
-                    },
-                    "environmentType": {
-                      "type": "string",
-                      "enum": [
-                        "DEVELOPMENT",
-                        "STAGING",
-                        "PRODUCTION",
-                        "GLOBAL"
-                      ]
-                    },
-                    "variablesCreated": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "environmentId",
-                    "environmentType",
-                    "variablesCreated"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "applyEnvTemplate",
-        "tags": [
-          "Environment Templates"
-        ],
-        "summary": "Apply template",
-        "description": "Apply a template to create a new environment with empty-valued variables.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "vaultGroupId",
-                  "environmentType",
-                  "encryptedVariables"
-                ],
-                "properties": {
-                  "vaultGroupId": {
-                    "type": "string"
-                  },
-                  "environmentType": {
-                    "type": "string",
-                    "enum": [
-                      "DEVELOPMENT",
-                      "STAGING",
-                      "PRODUCTION",
-                      "GLOBAL"
-                    ]
-                  },
-                  "encryptedVariables": {
-                    "description": "Pre-encrypted variable entries from the client",
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "required": [
-                        "key",
-                        "encryptedValue",
-                        "iv",
-                        "authTag"
-                      ],
-                      "properties": {
-                        "key": {
-                          "minLength": 1,
-                          "maxLength": 255,
-                          "type": "string"
-                        },
-                        "encryptedValue": {
-                          "type": "string"
-                        },
-                        "iv": {
-                          "type": "string"
-                        },
-                        "authTag": {
-                          "type": "string"
-                        },
-                        "description": {
-                          "nullable": true,
-                          "maxLength": 500,
-                          "type": "string"
-                        },
-                        "isRequired": {
-                          "type": "boolean"
-                        }
-                      }
                     }
                   }
                 }
@@ -10641,13 +9958,13 @@
         "tags": [
           "Secret Files"
         ],
-        "summary": "List secret file versions",
-        "description": "List all version history entries for a secret file. Any project member can view version metadata.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "List secret file versions",
+        "description": "List all version history entries for a secret file. Any project member can view version metadata."
       }
     },
     "/api/projects/{id}/secrets/{fileId}/download": {
@@ -10826,13 +10143,13 @@
         "tags": [
           "Secret Files"
         ],
-        "summary": "Download a secret file",
-        "description": "Download an encrypted secret file. Decryption happens client-side. Only owners and editors can download file contents. Viewers can only see metadata via the list endpoint.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Download a secret file",
+        "description": "Download an encrypted secret file. Decryption happens client-side. Only owners and editors can download file contents. Viewers can only see metadata via the list endpoint."
       }
     },
     "/api/projects/{id}/secrets/{fileId}": {
@@ -10865,10 +10182,10 @@
                     "id": {
                       "type": "string"
                     },
-                    "vaultGroupId": {
+                    "vaultId": {
                       "type": "string"
                     },
-                    "vaultGroupName": {
+                    "vaultName": {
                       "type": "string"
                     },
                     "name": {
@@ -10898,8 +10215,8 @@
                   },
                   "required": [
                     "id",
-                    "vaultGroupId",
-                    "vaultGroupName",
+                    "vaultId",
+                    "vaultName",
                     "name",
                     "description",
                     "mimeType",
@@ -11033,13 +10350,13 @@
         "tags": [
           "Secret Files"
         ],
-        "summary": "Update secret file metadata",
-        "description": "Update the name, description, or vault group of a secret file. Only owners and editors can update.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Update secret file metadata",
+        "description": "Update the name, description, or vault group of a secret file. Only owners and editors can update.",
         "requestBody": {
           "required": true,
           "content": {
@@ -11056,7 +10373,7 @@
                     "maxLength": 500,
                     "type": "string"
                   },
-                  "vaultGroupId": {
+                  "vaultId": {
                     "type": "string"
                   }
                 }
@@ -11223,13 +10540,13 @@
         "tags": [
           "Secret Files"
         ],
-        "summary": "Delete a secret file",
-        "description": "Permanently delete a secret file and all its version history. Only owners and editors can delete.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Delete a secret file",
+        "description": "Permanently delete a secret file and all its version history. Only owners and editors can delete."
       }
     },
     "/api/projects/{id}/secrets/{fileId}/content": {
@@ -11262,10 +10579,10 @@
                     "id": {
                       "type": "string"
                     },
-                    "vaultGroupId": {
+                    "vaultId": {
                       "type": "string"
                     },
-                    "vaultGroupName": {
+                    "vaultName": {
                       "type": "string"
                     },
                     "name": {
@@ -11295,8 +10612,8 @@
                   },
                   "required": [
                     "id",
-                    "vaultGroupId",
-                    "vaultGroupName",
+                    "vaultId",
+                    "vaultName",
                     "name",
                     "description",
                     "mimeType",
@@ -11430,13 +10747,13 @@
         "tags": [
           "Secret Files"
         ],
-        "summary": "Upload a new version of a secret file",
-        "description": "Replace a secret file's content with a new client-encrypted upload. The current content is saved as a version before being replaced. Only owners and editors can upload new versions.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Upload a new version of a secret file",
+        "description": "Replace a secret file's content with a new client-encrypted upload. The current content is saved as a version before being replaced. Only owners and editors can upload new versions.",
         "requestBody": {
           "required": true,
           "content": {
@@ -11666,13 +10983,13 @@
         "tags": [
           "Secret Files"
         ],
-        "summary": "Download a specific version of a secret file",
-        "description": "Download an encrypted previous version of a secret file. Decryption happens client-side. Only owners and editors can download.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Download a specific version of a secret file",
+        "description": "Download an encrypted previous version of a secret file. Decryption happens client-side. Only owners and editors can download."
       }
     },
     "/api/projects/{id}/secrets/{fileId}/rollback/{versionId}": {
@@ -11713,10 +11030,10 @@
                     "id": {
                       "type": "string"
                     },
-                    "vaultGroupId": {
+                    "vaultId": {
                       "type": "string"
                     },
-                    "vaultGroupName": {
+                    "vaultName": {
                       "type": "string"
                     },
                     "name": {
@@ -11746,8 +11063,8 @@
                   },
                   "required": [
                     "id",
-                    "vaultGroupId",
-                    "vaultGroupName",
+                    "vaultId",
+                    "vaultName",
                     "name",
                     "description",
                     "mimeType",
@@ -11881,13 +11198,13 @@
         "tags": [
           "Secret Files"
         ],
-        "summary": "Rollback to a previous version",
-        "description": "Rollback a secret file to a previous version. The current content is saved as a new version before restoring. Only owners and editors can rollback.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Rollback to a previous version",
+        "description": "Rollback a secret file to a previous version. The current content is saved as a new version before restoring. Only owners and editors can rollback."
       }
     },
     "/api/secrets/shared/{token}/info": {
@@ -12511,13 +11828,13 @@
         "tags": [
           "Shared Secrets"
         ],
-        "summary": "Create a share link for environment variables",
-        "description": "Generate a one-time shareable link for one or more environment variables. Optional password and expiry supported.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Create a share link for environment variables",
+        "description": "Generate a one-time shareable link for one or more environment variables. Optional password and expiry supported.",
         "requestBody": {
           "required": true,
           "content": {
@@ -12721,13 +12038,13 @@
         "tags": [
           "Shared Secrets"
         ],
-        "summary": "Create a share link for a secret file",
-        "description": "Generate a one-time shareable link for a client-encrypted secret file. Optional password and expiry supported.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Create a share link for a secret file",
+        "description": "Generate a one-time shareable link for a client-encrypted secret file. Optional password and expiry supported.",
         "requestBody": {
           "required": true,
           "content": {
@@ -12935,13 +12252,13 @@
         "tags": [
           "Shared Secrets"
         ],
-        "summary": "Revoke a pending share link",
-        "description": "Permanently delete a pending share link. Already-viewed links cannot be revoked.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Revoke a pending share link",
+        "description": "Permanently delete a pending share link. Already-viewed links cannot be revoked."
       }
     },
     "/api/users/me": {
@@ -13128,13 +12445,13 @@
         "tags": [
           "Users"
         ],
-        "summary": "Get current user profile",
-        "description": "Return the authenticated user's profile including email, username, avatar, and linked accounts.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Get current user profile",
+        "description": "Return the authenticated user's profile including email, username, avatar, and linked accounts."
       },
       "patch": {
         "parameters": [],
@@ -13320,13 +12637,13 @@
         "tags": [
           "Users"
         ],
-        "summary": "Update profile",
-        "description": "Update the authenticated user's username and/or avatar URL. Username must be unique.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Update profile",
+        "description": "Update the authenticated user's username and/or avatar URL. Username must be unique.",
         "requestBody": {
           "required": true,
           "content": {
@@ -13494,13 +12811,13 @@
         "tags": [
           "Users"
         ],
-        "summary": "Delete account",
-        "description": "Permanently delete the authenticated user's account and all associated data including projects, analyses, uploads, and secret files. This action is irreversible.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Delete account",
+        "description": "Permanently delete the authenticated user's account and all associated data including projects, analyses, uploads, and secret files. This action is irreversible."
       }
     },
     "/api/users/me/password": {
@@ -13645,13 +12962,13 @@
         "tags": [
           "Users"
         ],
-        "summary": "Change password",
-        "description": "Change the authenticated user's password. Requires the current password for verification. Not available for OAuth-only accounts.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Change password",
+        "description": "Change the authenticated user's password. Requires the current password for verification. Not available for OAuth-only accounts.",
         "requestBody": {
           "required": true,
           "content": {
@@ -13819,13 +13136,13 @@
         "tags": [
           "Users"
         ],
-        "summary": "Change email address",
-        "description": "Change the authenticated user's email. Requires password verification. A new verification email is sent to the updated address.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Change email address",
+        "description": "Change the authenticated user's email. Requires password verification. A new verification email is sent to the updated address.",
         "requestBody": {
           "required": true,
           "content": {
@@ -13993,13 +13310,13 @@
         "tags": [
           "Users"
         ],
-        "summary": "Upload avatar",
-        "description": "Upload and set the authenticated user's avatar image. Accepts jpg, png, gif, or webp up to 5 MB.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Upload avatar",
+        "description": "Upload and set the authenticated user's avatar image. Accepts jpg, png, gif, or webp up to 5 MB.",
         "requestBody": {
           "required": true,
           "content": {
@@ -14342,13 +13659,13 @@
         "tags": [
           "Analyses"
         ],
-        "summary": "Get analysis details",
-        "description": "Return analysis details with all parsed dependencies. The authenticated user must be a member of the project.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Get analysis details",
+        "description": "Return analysis details with all parsed dependencies. The authenticated user must be a member of the project."
       },
       "patch": {
         "parameters": [
@@ -14670,13 +13987,13 @@
         "tags": [
           "Analyses"
         ],
-        "summary": "Update analysis",
-        "description": "Update analysis metadata such as file path. Only owners and editors can update.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Update analysis",
+        "description": "Update analysis metadata such as file path. Only owners and editors can update.",
         "requestBody": {
           "required": true,
           "content": {
@@ -14855,13 +14172,13 @@
         "tags": [
           "Analyses"
         ],
-        "summary": "Delete analysis",
-        "description": "Delete an analysis and all its dependencies. Only owners and editors can delete analyses.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Delete analysis",
+        "description": "Delete an analysis and all its dependencies. Only owners and editors can delete analyses."
       }
     },
     "/api/projects/{id}/analyses/{analysisId}/rescan": {
@@ -15185,13 +14502,13 @@
         "tags": [
           "Analyses"
         ],
-        "summary": "Rescan analysis",
-        "description": "Re-check version updates and vulnerabilities for all dependencies in an existing analysis.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Rescan analysis",
+        "description": "Re-check version updates and vulnerabilities for all dependencies in an existing analysis."
       }
     },
     "/api/github/repos": {
@@ -15397,13 +14714,13 @@
         "tags": [
           "GitHub"
         ],
-        "summary": "List GitHub repositories",
-        "description": "List the authenticated user's GitHub repositories. Requires a linked GitHub account with repo scope.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "List GitHub repositories",
+        "description": "List the authenticated user's GitHub repositories. Requires a linked GitHub account with repo scope."
       }
     },
     "/api/github/repos/{owner}/{repo}/dependency-files": {
@@ -15587,13 +14904,13 @@
         "tags": [
           "GitHub"
         ],
-        "summary": "Discover dependency files",
-        "description": "Scan a GitHub repository for known dependency files (package.json, requirements.txt, etc.). Supports monorepos with nested projects.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Discover dependency files",
+        "description": "Scan a GitHub repository for known dependency files (package.json, requirements.txt, etc.). Supports monorepos with nested projects."
       }
     },
     "/api/github/repos/{owner}/{repo}/content": {
@@ -15768,13 +15085,13 @@
         "tags": [
           "GitHub"
         ],
-        "summary": "Get file content",
-        "description": "Fetch the content of a specific file from a GitHub repository.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Get file content",
+        "description": "Fetch the content of a specific file from a GitHub repository."
       }
     },
     "/api/notifications/unread-count": {
@@ -15918,13 +15235,13 @@
         "tags": [
           "Notifications"
         ],
-        "summary": "Get unread count",
-        "description": "Return the number of unread notifications for the authenticated user.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Get unread count",
+        "description": "Return the number of unread notifications for the authenticated user."
       }
     },
     "/api/notifications/read-all": {
@@ -16068,13 +15385,13 @@
         "tags": [
           "Notifications"
         ],
-        "summary": "Mark all notifications read",
-        "description": "Mark all unread notifications as read for the authenticated user.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Mark all notifications read",
+        "description": "Mark all unread notifications as read for the authenticated user."
       }
     },
     "/api/notifications/{notificationId}": {
@@ -16107,7 +15424,6 @@
                       "enum": [
                         "VULNERABILITY_FOUND",
                         "SECRET_ROTATION",
-                        "ENV_DRIFT",
                         "TEAM_INVITE",
                         "ROLE_CHANGE",
                         "GIT_SECRET_DETECTION",
@@ -16272,13 +15588,13 @@
         "tags": [
           "Notifications"
         ],
-        "summary": "Get notification",
-        "description": "Return a single notification by ID.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Get notification",
+        "description": "Return a single notification by ID."
       },
       "delete": {
         "parameters": [
@@ -16430,13 +15746,13 @@
         "tags": [
           "Notifications"
         ],
-        "summary": "Delete notification",
-        "description": "Delete a single notification.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Delete notification",
+        "description": "Delete a single notification."
       }
     },
     "/api/notifications/{notificationId}/read": {
@@ -16469,7 +15785,6 @@
                       "enum": [
                         "VULNERABILITY_FOUND",
                         "SECRET_ROTATION",
-                        "ENV_DRIFT",
                         "TEAM_INVITE",
                         "ROLE_CHANGE",
                         "GIT_SECRET_DETECTION",
@@ -16634,13 +15949,13 @@
         "tags": [
           "Notifications"
         ],
-        "summary": "Mark notification read",
-        "description": "Mark a single notification as read.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Mark notification read",
+        "description": "Mark a single notification as read."
       }
     },
     "/api/projects/{id}/scans": {
@@ -18533,13 +17848,13 @@
         "tags": [
           "Scan Patterns"
         ],
-        "summary": "Update custom pattern",
-        "description": "Update a custom scan pattern. Built-in patterns cannot be modified.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Update custom pattern",
+        "description": "Update a custom scan pattern. Built-in patterns cannot be modified.",
         "requestBody": {
           "required": true,
           "content": {
@@ -18732,13 +18047,13 @@
         "tags": [
           "Scan Patterns"
         ],
-        "summary": "Delete custom pattern",
-        "description": "Delete a custom scan pattern. Built-in patterns cannot be deleted.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Delete custom pattern",
+        "description": "Delete a custom scan pattern. Built-in patterns cannot be deleted."
       }
     },
     "/api/projects/{id}/ci-tokens/{tokenId}": {
@@ -18900,13 +18215,13 @@
         "tags": [
           "CI/CD Tokens"
         ],
-        "summary": "Revoke CI token",
-        "description": "Immediately revoke a CI/CD token.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Revoke CI token",
+        "description": "Immediately revoke a CI/CD token."
       }
     },
     "/api/ci/secrets/files/{fileId}": {
@@ -19084,6 +18399,11 @@
         "operationId": "downloadCiSecretFile",
         "tags": [
           "CI/CD Access"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ],
         "summary": "Download encrypted secret file",
         "description": "Download an encrypted secret file using a CI token. Decryption happens client-side using the wrapped DEK."
@@ -19336,13 +18656,13 @@
         "tags": [
           "License Rules"
         ],
-        "summary": "License compliance summary",
-        "description": "Return a paginated compliance summary with pass/warn/fail counts for all dependencies in the project.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "License compliance summary",
+        "description": "Return a paginated compliance summary with pass/warn/fail counts for all dependencies in the project."
       }
     },
     "/api/projects/{id}/license-rules/export": {
@@ -19491,13 +18811,13 @@
         "tags": [
           "License Rules"
         ],
-        "summary": "Export license audit report",
-        "description": "Export a license audit report as CSV or text.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Export license audit report",
+        "description": "Export a license audit report as CSV or text."
       }
     },
     "/api/projects/{id}/license-rules/{ruleId}": {
@@ -19688,13 +19008,13 @@
         "tags": [
           "License Rules"
         ],
-        "summary": "Update license rule",
-        "description": "Update the policy for an existing license rule.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Update license rule",
+        "description": "Update the policy for an existing license rule.",
         "requestBody": {
           "required": true,
           "content": {
@@ -19879,13 +19199,13 @@
         "tags": [
           "License Rules"
         ],
-        "summary": "Delete license rule",
-        "description": "Delete a license policy rule from the project.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Delete license rule",
+        "description": "Delete a license policy rule from the project."
       }
     },
     "/api/security/overview": {
@@ -20081,13 +19401,13 @@
         "tags": [
           "Security"
         ],
-        "summary": "Security overview",
-        "description": "Return aggregated vulnerability and secret scan statistics across all projects the user is a member of.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Security overview",
+        "description": "Return aggregated vulnerability and secret scan statistics across all projects the user is a member of."
       }
     },
     "/api/subscription/plans": {
@@ -20129,7 +19449,6 @@
                           "gitSecretScanning",
                           "ipAllowlists",
                           "secretSharing",
-                          "envDiff",
                           "prioritySupport"
                         ],
                         "properties": {
@@ -20161,9 +19480,6 @@
                             "type": "boolean"
                           },
                           "secretSharing": {
-                            "type": "boolean"
-                          },
-                          "envDiff": {
                             "type": "boolean"
                           },
                           "prioritySupport": {
@@ -20298,13 +19614,13 @@
         "tags": [
           "Subscription"
         ],
-        "summary": "Get available plans",
-        "description": "Return all available subscription plans with pricing and limits.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Get available plans",
+        "description": "Return all available subscription plans with pricing and limits."
       }
     },
     "/api/subscription/checkout": {
@@ -20449,13 +19765,13 @@
         "tags": [
           "Subscription"
         ],
-        "summary": "Create Stripe checkout session",
-        "description": "Create a Stripe Checkout session for upgrading to a paid plan. Returns a URL to redirect the user to Stripe.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Create Stripe checkout session",
+        "description": "Create a Stripe Checkout session for upgrading to a paid plan. Returns a URL to redirect the user to Stripe.",
         "requestBody": {
           "required": true,
           "content": {
@@ -20637,13 +19953,13 @@
         "tags": [
           "Subscription"
         ],
-        "summary": "Create Stripe customer portal session",
-        "description": "Create a Stripe Customer Portal session for managing billing, invoices, and subscription changes.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Create Stripe customer portal session",
+        "description": "Create a Stripe Customer Portal session for managing billing, invoices, and subscription changes.",
         "requestBody": {
           "required": true,
           "content": {
@@ -20805,13 +20121,13 @@
         "tags": [
           "Subscription"
         ],
-        "summary": "Cancel subscription",
-        "description": "Schedule the current subscription to cancel at the end of the billing period. Access continues until then.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Cancel subscription",
+        "description": "Schedule the current subscription to cancel at the end of the billing period. Access continues until then."
       }
     },
     "/api/subscription/resume": {
@@ -20955,13 +20271,13 @@
         "tags": [
           "Subscription"
         ],
-        "summary": "Resume canceled subscription",
-        "description": "Reverse a pending cancellation so the subscription renews normally.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Resume canceled subscription",
+        "description": "Reverse a pending cancellation so the subscription renews normally."
       }
     },
     "/api/vault/status": {
@@ -21145,13 +20461,13 @@
         "tags": [
           "Vault"
         ],
-        "summary": "Get vault status",
-        "description": "Check whether the authenticated user has set up their encryption vault.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Get vault status",
+        "description": "Check whether the authenticated user has set up their encryption vault."
       }
     },
     "/api/vault/setup": {
@@ -21296,13 +20612,13 @@
         "tags": [
           "Vault"
         ],
-        "summary": "Set up vault",
-        "description": "Initialize the user's encryption vault with a KEK salt, ECDH keypair, and recovery key hash.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Set up vault",
+        "description": "Initialize the user's encryption vault with a KEK salt, ECDH keypair, and recovery key hash.",
         "requestBody": {
           "required": true,
           "content": {
@@ -21511,13 +20827,13 @@
         "tags": [
           "Vault"
         ],
-        "summary": "Change vault password",
-        "description": "Update the vault password by providing new wrapped keys and re-wrapped project key grants.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Change vault password",
+        "description": "Update the vault password by providing new wrapped keys and re-wrapped project key grants.",
         "requestBody": {
           "required": true,
           "content": {
@@ -21747,13 +21063,13 @@
         "tags": [
           "Vault"
         ],
-        "summary": "Recover vault",
-        "description": "Recover vault access using the recovery key. Sets a new vault password and re-wraps all keys.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Recover vault",
+        "description": "Recover vault access using the recovery key. Sets a new vault password and re-wraps all keys.",
         "requestBody": {
           "required": true,
           "content": {
@@ -22002,13 +21318,13 @@
         "tags": [
           "Vault"
         ],
-        "summary": "Regenerate recovery key",
-        "description": "Generate a new recovery key while the vault is unlocked. Re-wraps all RECOVERY grants.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Regenerate recovery key",
+        "description": "Generate a new recovery key while the vault is unlocked. Re-wraps all RECOVERY grants.",
         "requestBody": {
           "required": true,
           "content": {
@@ -22232,13 +21548,13 @@
         "tags": [
           "Vault"
         ],
-        "summary": "Get all recovery grants",
-        "description": "Fetch all RECOVERY-type key grants for the current user across all projects.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Get all recovery grants",
+        "description": "Fetch all RECOVERY-type key grants for the current user across all projects."
       }
     },
     "/api/vault/keygrants/self": {
@@ -22397,13 +21713,13 @@
         "tags": [
           "Vault"
         ],
-        "summary": "Get all self grants",
-        "description": "Fetch all SELF-type key grants for the current user across all projects.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Get all self grants",
+        "description": "Fetch all SELF-type key grants for the current user across all projects."
       }
     },
     "/api/vault/publickey/{userId}": {
@@ -22566,13 +21882,13 @@
         "tags": [
           "Vault"
         ],
-        "summary": "Get user public key",
-        "description": "Retrieve another user's ECDH public key for key distribution.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Get user public key",
+        "description": "Retrieve another user's ECDH public key for key distribution."
       }
     },
     "/api/projects/{id}/keygrants/my": {
@@ -22750,13 +22066,13 @@
         "tags": [
           "Key Grants"
         ],
-        "summary": "Get my key grant",
-        "description": "Get the current user's wrapped DEK for this project.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Get my key grant",
+        "description": "Get the current user's wrapped DEK for this project.",
         "parameters": [
           {
             "schema": {
@@ -22934,13 +22250,13 @@
         "tags": [
           "Key Grants"
         ],
-        "summary": "List members needing key grants",
-        "description": "List project members who do not yet have a key grant.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "List members needing key grants",
+        "description": "List project members who do not yet have a key grant.",
         "parameters": [
           {
             "schema": {
@@ -23104,13 +22420,13 @@
         "tags": [
           "Key Grants"
         ],
-        "summary": "Batch update key grants",
-        "description": "Update multiple key grants at once (used during vault password change).",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Batch update key grants",
+        "description": "Update multiple key grants at once (used during vault password change).",
         "requestBody": {
           "required": true,
           "content": {
@@ -23327,13 +22643,13 @@
         "tags": [
           "Admin"
         ],
-        "summary": "Get admin dashboard stats",
-        "description": "Return aggregate statistics: total users, plan breakdown, MRR, churn.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Get admin dashboard stats",
+        "description": "Return aggregate statistics: total users, plan breakdown, MRR, churn."
       }
     },
     "/api/admin/users": {
@@ -23606,13 +22922,13 @@
         "tags": [
           "Admin"
         ],
-        "summary": "List all users",
-        "description": "Return a paginated list of all users with subscription info. Supports search and plan filter.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "List all users",
+        "description": "Return a paginated list of all users with subscription info. Supports search and plan filter."
       }
     },
     "/api/admin/users/{id}": {
@@ -23882,13 +23198,13 @@
         "tags": [
           "Admin"
         ],
-        "summary": "Get user detail",
-        "description": "Return detailed user info with subscription, usage stats, and owned projects.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Get user detail",
+        "description": "Return detailed user info with subscription, usage stats, and owned projects."
       }
     },
     "/api/admin/users/{id}/subscription": {
@@ -24042,13 +23358,13 @@
         "tags": [
           "Admin"
         ],
-        "summary": "Assign admin-granted subscription",
-        "description": "Grant a PRO or TEAM subscription to a user without Stripe charge. Useful for test accounts or internal users.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Assign admin-granted subscription",
+        "description": "Grant a PRO or TEAM subscription to a user without Stripe charge. Useful for test accounts or internal users.",
         "requestBody": {
           "required": true,
           "content": {
@@ -24222,13 +23538,13 @@
         "tags": [
           "Admin"
         ],
-        "summary": "Revoke admin-granted subscription",
-        "description": "Revert a user's admin-granted subscription back to the FREE plan.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Revoke admin-granted subscription",
+        "description": "Revert a user's admin-granted subscription back to the FREE plan."
       }
     },
     "/api/admin/subscriptions": {
@@ -24508,13 +23824,13 @@
         "tags": [
           "Admin"
         ],
-        "summary": "List all subscriptions",
-        "description": "Return a paginated list of all subscriptions with user info and filters.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "List all subscriptions",
+        "description": "Return a paginated list of all subscriptions with user info and filters."
       }
     },
     "/api/projects": {
@@ -24691,13 +24007,13 @@
         "tags": [
           "Projects"
         ],
-        "summary": "Create a new project",
-        "description": "Create a project and add the authenticated user as the owner. Projects serve as containers for dependency analyses and environment variables.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Create a new project",
+        "description": "Create a project and add the authenticated user as the owner. Projects serve as containers for dependency analyses and environment variables.",
         "requestBody": {
           "required": true,
           "content": {
@@ -24799,8 +24115,7 @@
                             "type": "string",
                             "format": "date-time"
                           }
-                        },
-                        "additionalProperties": false
+                        }
                       }
                     },
                     "pagination": {
@@ -24956,1071 +24271,13 @@
         "tags": [
           "Projects"
         ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "summary": "List projects",
-        "description": "Return a paginated list of projects where the authenticated user is a member (owner, editor, or viewer).",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/projects/{id}/vault-groups": {
-      "get": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "required": [
-                      "id",
-                      "name",
-                      "description",
-                      "directoryPath",
-                      "sortOrder",
-                      "environmentCount",
-                      "variableCount",
-                      "createdAt",
-                      "updatedAt"
-                    ],
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "description": {
-                        "nullable": true,
-                        "type": "string"
-                      },
-                      "directoryPath": {
-                        "nullable": true,
-                        "type": "string"
-                      },
-                      "sortOrder": {
-                        "type": "number"
-                      },
-                      "environmentCount": {
-                        "type": "number"
-                      },
-                      "variableCount": {
-                        "type": "number"
-                      },
-                      "createdAt": {
-                        "type": "string",
-                        "format": "date-time"
-                      },
-                      "updatedAt": {
-                        "type": "string",
-                        "format": "date-time"
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "listVaultGroups",
-        "tags": [
-          "Vault Groups"
-        ],
-        "summary": "List vault groups",
-        "description": "List all vault groups for a project with environment and variable counts.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      },
-      "post": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "description": {
-                      "nullable": true,
-                      "type": "string"
-                    },
-                    "directoryPath": {
-                      "nullable": true,
-                      "type": "string"
-                    },
-                    "sortOrder": {
-                      "type": "number"
-                    },
-                    "environmentCount": {
-                      "type": "number"
-                    },
-                    "variableCount": {
-                      "type": "number"
-                    },
-                    "createdAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "updatedAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "name",
-                    "description",
-                    "directoryPath",
-                    "sortOrder",
-                    "environmentCount",
-                    "variableCount",
-                    "createdAt",
-                    "updatedAt"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "createVaultGroup",
-        "tags": [
-          "Vault Groups"
-        ],
-        "summary": "Create vault group",
-        "description": "Create a new vault group for organizing environment variables by sub-project or env file.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "name"
-                ],
-                "properties": {
-                  "name": {
-                    "minLength": 1,
-                    "maxLength": 100,
-                    "type": "string"
-                  },
-                  "description": {
-                    "maxLength": 500,
-                    "type": "string"
-                  },
-                  "directoryPath": {
-                    "maxLength": 500,
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/projects/{id}/environments": {
-      "get": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "query",
-            "name": "vaultGroupId",
-            "required": false
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "required": [
-                      "id",
-                      "type",
-                      "vaultGroupId",
-                      "vaultGroupName",
-                      "variableCount",
-                      "secretFileCount",
-                      "createdAt"
-                    ],
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "type": {
-                        "type": "string",
-                        "enum": [
-                          "DEVELOPMENT",
-                          "STAGING",
-                          "PRODUCTION",
-                          "GLOBAL"
-                        ]
-                      },
-                      "vaultGroupId": {
-                        "type": "string"
-                      },
-                      "vaultGroupName": {
-                        "type": "string"
-                      },
-                      "variableCount": {
-                        "type": "number"
-                      },
-                      "secretFileCount": {
-                        "type": "number"
-                      },
-                      "createdAt": {
-                        "type": "string",
-                        "format": "date-time"
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "listEnvironments",
-        "tags": [
-          "Environments"
-        ],
-        "summary": "List environments",
-        "description": "List all environments for a project with variable counts.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/projects/{id}/env-templates": {
-      "get": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "required": [
-                      "id",
-                      "name",
-                      "description",
-                      "variableCount",
-                      "createdBy",
-                      "createdAt",
-                      "updatedAt"
-                    ],
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "description": {
-                        "nullable": true,
-                        "type": "string"
-                      },
-                      "variableCount": {
-                        "type": "number"
-                      },
-                      "createdBy": {
-                        "type": "string"
-                      },
-                      "createdAt": {
-                        "type": "string",
-                        "format": "date-time"
-                      },
-                      "updatedAt": {
-                        "type": "string",
-                        "format": "date-time"
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "listEnvTemplates",
-        "tags": [
-          "Environment Templates"
-        ],
-        "summary": "List templates",
-        "description": "List all environment templates for a project.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      },
-      "post": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "description": {
-                      "nullable": true,
-                      "type": "string"
-                    },
-                    "variableCount": {
-                      "type": "number"
-                    },
-                    "createdBy": {
-                      "type": "string"
-                    },
-                    "createdAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "updatedAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "name",
-                    "description",
-                    "variableCount",
-                    "createdBy",
-                    "createdAt",
-                    "updatedAt"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "createEnvTemplate",
-        "tags": [
-          "Environment Templates"
-        ],
-        "summary": "Create template",
-        "description": "Create a template from an existing environment or a manual variable list.",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "name"
-                ],
-                "properties": {
-                  "name": {
-                    "minLength": 1,
-                    "maxLength": 100,
-                    "type": "string"
-                  },
-                  "description": {
-                    "maxLength": 500,
-                    "type": "string"
-                  },
-                  "sourceEnvironmentType": {
-                    "type": "string",
-                    "enum": [
-                      "DEVELOPMENT",
-                      "STAGING",
-                      "PRODUCTION",
-                      "GLOBAL"
-                    ]
-                  },
-                  "sourceVaultGroupId": {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  "variables": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "required": [
-                        "key"
-                      ],
-                      "properties": {
-                        "key": {
-                          "minLength": 1,
-                          "maxLength": 255,
-                          "type": "string"
-                        },
-                        "description": {
-                          "maxLength": 500,
-                          "type": "string"
-                        },
-                        "isRequired": {
-                          "type": "boolean"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
+        "description": "Return a paginated list of projects where the authenticated user is a member (owner, editor, or viewer)."
       }
     },
     "/api/projects/{id}/secrets": {
@@ -26067,8 +24324,8 @@
                         "type": "object",
                         "required": [
                           "id",
-                          "vaultGroupId",
-                          "vaultGroupName",
+                          "vaultId",
+                          "vaultName",
                           "name",
                           "description",
                           "mimeType",
@@ -26081,10 +24338,10 @@
                           "id": {
                             "type": "string"
                           },
-                          "vaultGroupId": {
+                          "vaultId": {
                             "type": "string"
                           },
-                          "vaultGroupName": {
+                          "vaultName": {
                             "type": "string"
                           },
                           "name": {
@@ -26267,13 +24524,13 @@
         "tags": [
           "Secret Files"
         ],
-        "summary": "List secret files",
-        "description": "List secret file metadata for a project. File contents are not included — use the download endpoint to retrieve decrypted content.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "List secret files",
+        "description": "List secret file metadata for a project. File contents are not included — use the download endpoint to retrieve decrypted content."
       },
       "post": {
         "parameters": [
@@ -26296,10 +24553,10 @@
                     "id": {
                       "type": "string"
                     },
-                    "vaultGroupId": {
+                    "vaultId": {
                       "type": "string"
                     },
-                    "vaultGroupName": {
+                    "vaultName": {
                       "type": "string"
                     },
                     "name": {
@@ -26329,8 +24586,8 @@
                   },
                   "required": [
                     "id",
-                    "vaultGroupId",
-                    "vaultGroupName",
+                    "vaultId",
+                    "vaultName",
                     "name",
                     "description",
                     "mimeType",
@@ -26464,13 +24721,13 @@
         "tags": [
           "Secret Files"
         ],
-        "summary": "Upload a secret file",
-        "description": "Upload a client-encrypted secret file for the project. Executable file types (.exe, .sh, .bat, .cmd, .ps1) are rejected. Max file size is 25 MB. Only owners and editors can upload.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Upload a secret file",
+        "description": "Upload a client-encrypted secret file for the project. Executable file types (.exe, .sh, .bat, .cmd, .ps1) are rejected. Max file size is 25 MB. Only owners and editors can upload.",
         "requestBody": {
           "required": true,
           "content": {
@@ -26484,7 +24741,7 @@
                   "name",
                   "mimeType",
                   "fileSize",
-                  "vaultGroupId"
+                  "vaultId"
                 ],
                 "properties": {
                   "encryptedContent": {
@@ -26510,7 +24767,7 @@
                     "maximum": 26214400,
                     "type": "number"
                   },
-                  "vaultGroupId": {
+                  "vaultId": {
                     "type": "string"
                   },
                   "description": {
@@ -26732,13 +24989,13 @@
         "tags": [
           "Shared Secrets"
         ],
-        "summary": "List shared secret links",
-        "description": "List all share links created for this project with their status (PENDING, VIEWED, EXPIRED).",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "List shared secret links",
+        "description": "List all share links created for this project with their status (PENDING, VIEWED, EXPIRED)."
       }
     },
     "/api/projects/{id}/audit-log": {
@@ -26815,7 +25072,6 @@
               "type": "string",
               "enum": [
                 "ENV_VARIABLE",
-                "ENV_TEMPLATE",
                 "SECRET_FILE",
                 "SHARE_LINK",
                 "CI_TOKEN"
@@ -26889,7 +25145,6 @@
                             "type": "string",
                             "enum": [
                               "ENV_VARIABLE",
-                              "ENV_TEMPLATE",
                               "SECRET_FILE",
                               "SHARE_LINK",
                               "CI_TOKEN"
@@ -27080,13 +25335,13 @@
         "tags": [
           "Audit Log"
         ],
-        "summary": "List audit log events",
-        "description": "Return a paginated list of audit log events for a project. Only owners and editors can view audit logs. Audit logs are append-only and cannot be modified or deleted.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "List audit log events",
+        "description": "Return a paginated list of audit log events for a project. Only owners and editors can view audit logs. Audit logs are append-only and cannot be modified or deleted."
       }
     },
     "/api/projects/{id}/analyses": {
@@ -27346,13 +25601,13 @@
         "tags": [
           "Analyses"
         ],
-        "summary": "List project analyses",
-        "description": "Return a paginated list of analyses for a specific project. The authenticated user must be a member of the project.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "List project analyses",
+        "description": "Return a paginated list of analyses for a specific project. The authenticated user must be a member of the project."
       },
       "post": {
         "parameters": [
@@ -27665,13 +25920,13 @@
         "tags": [
           "Analyses"
         ],
-        "summary": "Create analysis",
-        "description": "Parse a dependency file and store the analysis results. Accepts file content, ecosystem type, and project ID. Supports Node.js (package.json, package-lock.json) and Python (requirements.txt, pyproject.toml).",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Create analysis",
+        "description": "Parse a dependency file and store the analysis results. Accepts file content, ecosystem type, and project ID. Supports Node.js (package.json, package-lock.json) and Python (requirements.txt, pyproject.toml).",
         "requestBody": {
           "required": true,
           "content": {
@@ -27884,13 +26139,13 @@
         "tags": [
           "Convert"
         ],
-        "summary": "Convert between config formats",
-        "description": "Convert configuration content between supported formats (.env, appsettings.json, secrets.yaml, config.toml). No project needed — standalone conversion with preview.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Convert between config formats",
+        "description": "Convert configuration content between supported formats (.env, appsettings.json, secrets.yaml, config.toml). No project needed — standalone conversion with preview.",
         "requestBody": {
           "required": true,
           "content": {
@@ -27960,7 +26215,6 @@
               "enum": [
                 "VULNERABILITY_FOUND",
                 "SECRET_ROTATION",
-                "ENV_DRIFT",
                 "TEAM_INVITE",
                 "ROLE_CHANGE",
                 "GIT_SECRET_DETECTION",
@@ -28015,7 +26269,6 @@
                             "enum": [
                               "VULNERABILITY_FOUND",
                               "SECRET_ROTATION",
-                              "ENV_DRIFT",
                               "TEAM_INVITE",
                               "ROLE_CHANGE",
                               "GIT_SECRET_DETECTION",
@@ -28199,13 +26452,13 @@
         "tags": [
           "Notifications"
         ],
-        "summary": "List notifications",
-        "description": "Return a paginated list of notifications for the authenticated user.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "List notifications",
+        "description": "Return a paginated list of notifications for the authenticated user."
       }
     },
     "/api/projects/{id}/scan-patterns": {
@@ -28403,13 +26656,13 @@
         "tags": [
           "Scan Patterns"
         ],
-        "summary": "List scan patterns",
-        "description": "Return built-in and custom scan patterns for the project.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "List scan patterns",
+        "description": "Return built-in and custom scan patterns for the project."
       },
       "post": {
         "parameters": [
@@ -28594,13 +26847,13 @@
         "tags": [
           "Scan Patterns"
         ],
-        "summary": "Create custom pattern",
-        "description": "Create a new custom scan pattern for the project. Requires editor or owner role.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Create custom pattern",
+        "description": "Create a new custom scan pattern for the project. Requires editor or owner role.",
         "requestBody": {
           "required": true,
           "content": {
@@ -28686,12 +26939,11 @@
                           "name",
                           "tokenPrefix",
                           "projectId",
-                          "environmentId",
-                          "environmentLabel",
+                          "vaultId",
+                          "vaultName",
                           "ipAllowlist",
                           "expiresAt",
                           "lastUsedAt",
-                          "revokedAt",
                           "createdAt",
                           "createdByEmail"
                         ],
@@ -28708,10 +26960,10 @@
                           "projectId": {
                             "type": "string"
                           },
-                          "environmentId": {
+                          "vaultId": {
                             "type": "string"
                           },
-                          "environmentLabel": {
+                          "vaultName": {
                             "type": "string"
                           },
                           "ipAllowlist": {
@@ -28725,11 +26977,6 @@
                             "format": "date-time"
                           },
                           "lastUsedAt": {
-                            "nullable": true,
-                            "type": "string",
-                            "format": "date-time"
-                          },
-                          "revokedAt": {
                             "nullable": true,
                             "type": "string",
                             "format": "date-time"
@@ -28897,13 +27144,13 @@
         "tags": [
           "CI/CD Tokens"
         ],
-        "summary": "List CI tokens",
-        "description": "List all CI/CD tokens for a project.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "List CI tokens",
+        "description": "List all CI/CD tokens for a project."
       },
       "post": {
         "parameters": [
@@ -29068,13 +27315,13 @@
         "tags": [
           "CI/CD Tokens"
         ],
-        "summary": "Create CI token",
-        "description": "Generate a scoped CI/CD token bound to a specific environment.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Create CI token",
+        "description": "Generate a scoped CI/CD token bound to a specific environment.",
         "requestBody": {
           "required": true,
           "content": {
@@ -29083,11 +27330,12 @@
                 "type": "object",
                 "required": [
                   "name",
-                  "environmentId",
+                  "vaultId",
                   "expiresIn",
                   "wrappedDek",
                   "wrappedDekIv",
-                  "wrappedDekTag"
+                  "wrappedDekTag",
+                  "wrapPlaceholder"
                 ],
                 "properties": {
                   "name": {
@@ -29095,7 +27343,7 @@
                     "maxLength": 100,
                     "type": "string"
                   },
-                  "environmentId": {
+                  "vaultId": {
                     "format": "uuid",
                     "type": "string"
                   },
@@ -29121,6 +27369,10 @@
                     "type": "string"
                   },
                   "wrappedDekTag": {
+                    "type": "string"
+                  },
+                  "wrapPlaceholder": {
+                    "description": "Placeholder token used to wrap DEK client-side",
                     "type": "string"
                   }
                 }
@@ -29341,6 +27593,11 @@
         "tags": [
           "CI/CD Access"
         ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "summary": "Fetch secrets",
         "description": "Fetch all environment variables and secret file metadata for the token's bound environment."
       }
@@ -29535,13 +27792,13 @@
         "tags": [
           "License Rules"
         ],
-        "summary": "List license rules",
-        "description": "Return all license policy rules for the project.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "List license rules",
+        "description": "Return all license policy rules for the project."
       },
       "post": {
         "parameters": [
@@ -29721,13 +27978,13 @@
         "tags": [
           "License Rules"
         ],
-        "summary": "Create license rule",
-        "description": "Create a license policy rule mapping an SPDX license ID to ALLOW, WARN, or BLOCK.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Create license rule",
+        "description": "Create a license policy rule mapping an SPDX license ID to ALLOW, WARN, or BLOCK.",
         "requestBody": {
           "required": true,
           "content": {
@@ -29825,7 +28082,6 @@
               "type": "string",
               "enum": [
                 "ENV_VARIABLE",
-                "ENV_TEMPLATE",
                 "SECRET_FILE",
                 "SHARE_LINK",
                 "CI_TOKEN"
@@ -29892,7 +28148,6 @@
                             "type": "string",
                             "enum": [
                               "ENV_VARIABLE",
-                              "ENV_TEMPLATE",
                               "SECRET_FILE",
                               "SHARE_LINK",
                               "CI_TOKEN"
@@ -30086,13 +28341,13 @@
         "tags": [
           "Activity"
         ],
-        "summary": "List global activity",
-        "description": "Return a paginated list of audit log events across all projects the user is a member of.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "List global activity",
+        "description": "Return a paginated list of audit log events across all projects the user is a member of."
       }
     },
     "/api/subscription": {
@@ -30153,7 +28408,6 @@
                         "gitSecretScanning",
                         "ipAllowlists",
                         "secretSharing",
-                        "envDiff",
                         "prioritySupport"
                       ],
                       "properties": {
@@ -30185,9 +28439,6 @@
                           "type": "boolean"
                         },
                         "secretSharing": {
-                          "type": "boolean"
-                        },
-                        "envDiff": {
                           "type": "boolean"
                         },
                         "prioritySupport": {
@@ -30366,13 +28617,13 @@
         "tags": [
           "Subscription"
         ],
-        "summary": "Get current subscription",
-        "description": "Return the authenticated user's subscription details including plan, limits, and current usage.",
         "security": [
           {
             "bearerAuth": []
           }
-        ]
+        ],
+        "summary": "Get current subscription",
+        "description": "Return the authenticated user's subscription details including plan, limits, and current usage."
       }
     },
     "/api/projects/{id}/keygrants": {
@@ -30560,13 +28811,13 @@
         "tags": [
           "Key Grants"
         ],
-        "summary": "Create key grant",
-        "description": "Store a wrapped DEK for a project member.",
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "summary": "Create key grant",
+        "description": "Store a wrapped DEK for a project member.",
         "requestBody": {
           "required": true,
           "content": {

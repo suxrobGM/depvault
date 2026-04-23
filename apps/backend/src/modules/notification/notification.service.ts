@@ -1,6 +1,5 @@
 import { singleton } from "tsyringe";
 import {
-  EnvDriftWarningTemplate,
   GitSecretAlertTemplate,
   MemberRemovedTemplate,
   SecretRotationReminderTemplate,
@@ -209,18 +208,6 @@ export class NotificationService {
             firstName,
             projectName,
             variableNames: payload.variableNames,
-            dashboardUrl,
-          }),
-        });
-        break;
-      case "ENV_DRIFT":
-        void this.emailService.send({
-          to: email,
-          subject: `Environment Drift Warning — ${projectName}`,
-          react: EnvDriftWarningTemplate({
-            firstName,
-            projectName,
-            missingVars: payload.missingVars,
             dashboardUrl,
           }),
         });

@@ -3,11 +3,9 @@ using DepVault.Cli.Commands.Scan;
 using DepVault.Cli.Crypto;
 using DepVault.Cli.EnvFiles;
 using DepVault.Cli.Services;
-using DepVault.Cli.Utils;
 using Spectre.Console;
-using ImportBody = DepVault.Cli.ApiClient.Api.Projects.Item.Environments.Import.ImportPostRequestBody;
-using ImportEntry = DepVault.Cli.ApiClient.Api.Projects.Item.Environments.Import.ImportPostRequestBody_entries;
-using ImportEnvType = DepVault.Cli.ApiClient.Api.Projects.Item.Environments.Import.ImportPostRequestBody_environmentType;
+using ImportBody = DepVault.Cli.ApiClient.Api.Projects.Item.Vaults.Item.Import.ImportPostRequestBody;
+using ImportEntry = DepVault.Cli.ApiClient.Api.Projects.Item.Vaults.Item.Import.ImportPostRequestBody_entries;
 
 namespace DepVault.Cli.Commands.Push;
 
@@ -15,7 +13,7 @@ namespace DepVault.Cli.Commands.Push;
 internal sealed record ImportResult(int Imported, HashSet<string> ImportedKeys);
 
 /// <summary>
-/// Parses an environment file, encrypts each value client-side, and pushes encrypted entries to the API.
+/// Parses an environment file, encrypts each value client-side, and pushes encrypted entries into a vault.
 /// </summary>
 internal sealed class EnvImporter(
     IApiClientFactory clientFactory,
@@ -41,8 +39,7 @@ internal sealed class EnvImporter(
     }
 
     public async Task<ImportResult> ImportAsync(
-        string projectId, DiscoveredFile file, string vaultGroupId,
-        string envType, CancellationToken ct)
+        string projectId, DiscoveredFile file, string vaultId, CancellationToken ct)
     {
         if (cachedDek is null)
         {
@@ -87,27 +84,20 @@ internal sealed class EnvImporter(
             index++;
         }
 
-        var result = await AnsiConsole.Status()
+        var imported = await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .StartAsync($"Pushing {file.RelativePath}...", async _ =>
-                await PostEncryptedEntriesAsync(projectId, entries, vaultGroupId, envType, ct));
+                await PostEncryptedEntriesAsync(projectId, vaultId, entries, ct));
 
-        return new ImportResult(result ?? entries.Count, keys);
+        return new ImportResult(imported ?? entries.Count, keys);
     }
 
     private async Task<int?> PostEncryptedEntriesAsync(
-        string projectId, List<ImportEntry> entries,
-        string vaultGroupId, string envType, CancellationToken ct)
+        string projectId, string vaultId, List<ImportEntry> entries, CancellationToken ct)
     {
-        var body = new ImportBody
-        {
-            Entries = entries,
-            VaultGroupId = vaultGroupId,
-            EnvironmentType = CommandUtils.ParseEnum(envType, ImportEnvType.DEVELOPMENT)
-        };
-
+        var body = new ImportBody { Entries = entries };
         var client = clientFactory.Create();
-        var response = await client.Api.Projects[projectId].Environments.Import
+        var response = await client.Api.Projects[projectId].Vaults[vaultId].Import
             .PostAsync(body, cancellationToken: ct);
 
         return (int?)response?.Imported;

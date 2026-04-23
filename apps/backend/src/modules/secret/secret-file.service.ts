@@ -47,17 +47,17 @@ export class SecretFileService {
 
     validateFileName(body.name);
 
-    const vaultGroup = await this.prisma.vaultGroup.findFirst({
-      where: { id: body.vaultGroupId, projectId },
+    const vault = await this.prisma.vault.findFirst({
+      where: { id: body.vaultId, projectId },
     });
-    if (!vaultGroup) {
-      throw new NotFoundError("Vault group not found");
+    if (!vault) {
+      throw new NotFoundError("Vault not found");
     }
 
     const encryptedContent = Buffer.from(body.encryptedContent, "base64");
 
     const existing = await this.prisma.secretFile.findUnique({
-      where: { vaultGroupId_name: { vaultGroupId: body.vaultGroupId, name: body.name } },
+      where: { vaultId_name: { vaultId: body.vaultId, name: body.name } },
     });
 
     let secretFile;
@@ -87,7 +87,7 @@ export class SecretFileService {
     } else {
       secretFile = await this.prisma.secretFile.create({
         data: {
-          vaultGroupId: body.vaultGroupId,
+          vaultId: body.vaultId,
           name: body.name,
           description: body.description,
           encryptedContent: new Uint8Array(encryptedContent),
@@ -107,10 +107,10 @@ export class SecretFileService {
       resourceType: "SECRET_FILE",
       resourceId: secretFile.id,
       ipAddress,
-      metadata: { fileName: body.name, vaultGroupName: vaultGroup.name },
+      metadata: { fileName: body.name, vaultName: vault.name },
     });
 
-    return toSecretFileResponse(secretFile, vaultGroup);
+    return toSecretFileResponse(secretFile, vault);
   }
 
   async list(
@@ -118,7 +118,7 @@ export class SecretFileService {
     page = 1,
     limit = 20,
   ): Promise<PaginatedResponse<SecretFileResponse>> {
-    const where = { vaultGroup: { projectId } };
+    const where = { vault: { projectId } };
 
     const [files, total] = await Promise.all([
       this.prisma.secretFile.findMany({
@@ -126,13 +126,13 @@ export class SecretFileService {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: "desc" },
-        include: { vaultGroup: true },
+        include: { vault: true },
       }),
       this.prisma.secretFile.count({ where }),
     ]);
 
     return {
-      items: files.map((f) => toSecretFileResponse(f, f.vaultGroup)),
+      items: files.map((f) => toSecretFileResponse(f, f.vault)),
       pagination: {
         page,
         limit,
@@ -157,7 +157,7 @@ export class SecretFileService {
       resourceType: "SECRET_FILE",
       resourceId: fileId,
       ipAddress,
-      metadata: { fileName: file.name, vaultGroupName: file.vaultGroup.name },
+      metadata: { fileName: file.name, vaultName: file.vault.name },
     });
 
     return {
@@ -202,7 +202,7 @@ export class SecretFileService {
         mimeType: body.mimeType,
         fileSize: body.fileSize,
       },
-      include: { vaultGroup: true },
+      include: { vault: true },
     });
 
     await this.auditLogService.log({
@@ -215,11 +215,11 @@ export class SecretFileService {
       metadata: {
         fileName: body.name,
         action: "new_version",
-        vaultGroupName: existing.vaultGroup.name,
+        vaultName: existing.vault.name,
       },
     });
 
-    return toSecretFileResponse(updated, updated.vaultGroup);
+    return toSecretFileResponse(updated, updated.vault);
   }
 
   async update(
@@ -227,7 +227,7 @@ export class SecretFileService {
     fileId: string,
     data: UpdateSecretFileBody,
   ): Promise<SecretFileResponse> {
-    const file = await this.findFileOrThrow(projectId, fileId);
+    await this.findFileOrThrow(projectId, fileId);
 
     if (data.name) {
       validateFileName(data.name);
@@ -238,12 +238,12 @@ export class SecretFileService {
       data: {
         ...(data.name && { name: data.name }),
         ...(data.description !== undefined && { description: data.description }),
-        ...(data.vaultGroupId && { vaultGroupId: data.vaultGroupId }),
+        ...(data.vaultId && { vaultId: data.vaultId }),
       },
-      include: { vaultGroup: true },
+      include: { vault: true },
     });
 
-    return toSecretFileResponse(updated, updated.vaultGroup);
+    return toSecretFileResponse(updated, updated.vault);
   }
 
   async delete(
@@ -262,7 +262,7 @@ export class SecretFileService {
       resourceType: "SECRET_FILE",
       resourceId: fileId,
       ipAddress,
-      metadata: { fileName: file.name, vaultGroupName: file.vaultGroup.name },
+      metadata: { fileName: file.name, vaultName: file.vault.name },
     });
 
     return { message: "Secret file deleted successfully" };
@@ -270,8 +270,8 @@ export class SecretFileService {
 
   private async findFileOrThrow(projectId: string, fileId: string) {
     const file = await this.prisma.secretFile.findFirst({
-      where: { id: fileId, vaultGroup: { projectId } },
-      include: { vaultGroup: { select: { id: true, name: true } } },
+      where: { id: fileId, vault: { projectId } },
+      include: { vault: { select: { id: true, name: true } } },
     });
 
     if (!file) {

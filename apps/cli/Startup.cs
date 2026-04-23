@@ -45,12 +45,11 @@ internal static class Startup
             .AddSingleton<SecretLeakScanner>()
             .AddSingleton<SecretFileScanner>()
             // Shared resolvers
-            .AddSingleton<VaultGroupResolver>()
-            .AddSingleton<VaultGroupSelector>()
-            .AddSingleton<DirectoryVaultGroupMapper>()
+            .AddSingleton<VaultResolver>()
+            .AddSingleton<VaultSelector>()
+            .AddSingleton<DirectoryVaultMapper>()
             .AddSingleton<EnvPuller>()
             .AddSingleton<SecretsPuller>()
-            .AddSingleton<FileEnvironmentAssigner>()
             .AddSingleton<EnvImporter>()
             .AddSingleton<StaleVariableCleaner>()
             // Commands

@@ -12,7 +12,6 @@ export interface PlanLimits {
   gitSecretScanning: boolean;
   ipAllowlists: boolean;
   secretSharing: boolean;
-  envDiff: boolean;
   prioritySupport: boolean;
 }
 
@@ -28,7 +27,6 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
     gitSecretScanning: false,
     ipAllowlists: false,
     secretSharing: true,
-    envDiff: false,
     prioritySupport: false,
   },
   PRO: {
@@ -42,7 +40,6 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
     gitSecretScanning: true,
     ipAllowlists: false,
     secretSharing: true,
-    envDiff: true,
     prioritySupport: false,
   },
   TEAM: {
@@ -56,7 +53,6 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
     gitSecretScanning: true,
     ipAllowlists: true,
     secretSharing: true,
-    envDiff: true,
     prioritySupport: true,
   },
 };

@@ -1,11 +1,11 @@
 import { t, type Static } from "elysia";
-import { EnvironmentTypeSchema, EnvVariableWithValueResponseSchema } from "@/modules/environment";
+import { EnvVariableWithValueResponseSchema } from "@/modules/project-vault";
 
 const ImportEntrySchema = t.Object({
   key: t.String({ minLength: 1, maxLength: 255 }),
   encryptedValue: t.String(),
-  iv: t.String({ minLength: 1 }),
-  authTag: t.String({ minLength: 1 }),
+  iv: t.String(),
+  authTag: t.String(),
   description: t.Optional(t.String({ maxLength: 500 })),
   isRequired: t.Optional(t.Boolean()),
   sortOrder: t.Optional(t.Number()),
@@ -15,8 +15,6 @@ const ImportEntrySchema = t.Object({
 });
 
 export const ImportEnvVariablesBodySchema = t.Object({
-  vaultGroupId: t.String(),
-  environmentType: EnvironmentTypeSchema,
   entries: t.Array(ImportEntrySchema, { minItems: 1 }),
 });
 
@@ -24,11 +22,6 @@ export const ImportEnvVariablesResponseSchema = t.Object({
   imported: t.Number(),
   updated: t.Number(),
   variables: t.Array(EnvVariableWithValueResponseSchema),
-});
-
-export const ExportEnvVariablesQuerySchema = t.Object({
-  vaultGroupId: t.String(),
-  environmentType: EnvironmentTypeSchema,
 });
 
 const ExportEntrySchema = t.Object({
@@ -43,18 +36,15 @@ const ExportEntrySchema = t.Object({
 });
 
 export const ExportEnvVariablesResponseSchema = t.Object({
+  vaultId: t.String(),
+  vaultName: t.String(),
   entries: t.Array(ExportEntrySchema),
-  environmentType: EnvironmentTypeSchema,
-});
-
-export const EnvExampleQuerySchema = t.Object({
-  vaultGroupId: t.String(),
-  environmentType: EnvironmentTypeSchema,
 });
 
 export const EnvExampleResponseSchema = t.Object({
+  vaultId: t.String(),
+  vaultName: t.String(),
   content: t.String(),
-  environmentType: EnvironmentTypeSchema,
 });
 
 export type ImportEnvVariablesBody = Static<typeof ImportEnvVariablesBodySchema>;

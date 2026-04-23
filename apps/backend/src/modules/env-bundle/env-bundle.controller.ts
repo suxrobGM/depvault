@@ -1,15 +1,16 @@
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import { container } from "@/common/di/container";
 import { projectGuard } from "@/common/middleware";
 import { getClientIp } from "@/common/utils/ip";
-import { StringIdParamSchema } from "@/types/request";
 import { EnvBundleBodySchema, EnvBundleResponseSchema } from "./env-bundle.schema";
 import { EnvBundleService } from "./env-bundle.service";
 
 const envBundleService = container.resolve(EnvBundleService);
 
+const VaultBundleParamsSchema = t.Object({ id: t.String(), vaultId: t.String() });
+
 export const envBundleController = new Elysia({
-  prefix: "/projects/:id/environments",
+  prefix: "/projects/:id/vaults/:vaultId",
   detail: { tags: ["Environment Bundle"], security: [{ bearerAuth: [] }] },
 })
   .use(projectGuard("EDITOR"))
@@ -18,19 +19,20 @@ export const envBundleController = new Elysia({
     ({ params, body, projectMember, request, server }) =>
       envBundleService.createBundle(
         params.id,
+        params.vaultId,
         body,
         projectMember.userId,
         getClientIp(request, server),
       ),
     {
-      params: StringIdParamSchema,
+      params: VaultBundleParamsSchema,
       body: EnvBundleBodySchema,
       response: EnvBundleResponseSchema,
       detail: {
         operationId: "downloadEnvBundle",
-        summary: "Download environment bundle",
+        summary: "Download encrypted bundle for a vault",
         description:
-          "Return encrypted environment variables and secret files for client-side decryption and bundling. Only owners and editors can download bundles.",
+          "Return encrypted environment variables and secret files for client-side decryption and bundling.",
       },
     },
   );

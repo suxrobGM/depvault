@@ -39,7 +39,7 @@ import { formatDate } from "@/utils/formatters";
 
 export interface VaultVariableRowProps {
   projectId: string;
-  environmentType: string;
+  vaultId: string;
   variable: EnvVariable;
   canEdit: boolean;
   selected: boolean;
@@ -111,7 +111,7 @@ function EncryptedValue(props: EncryptedValueProps): ReactElement {
 }
 
 export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
-  const { projectId, environmentType, variable, canEdit, selected, onToggleSelect, onEdit } = props;
+  const { projectId, vaultId, variable, canEdit, selected, onToggleSelect, onEdit } = props;
 
   const confirm = useConfirm();
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -123,7 +123,8 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
       () =>
         client.api
           .projects({ id: projectId })
-          .environments.variables({ varId: variable.id })
+          .vaults({ vaultId })
+          .variables({ varId: variable.id })
           .versions.get(),
       { enabled: historyOpen },
     );
@@ -132,10 +133,11 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
     () =>
       client.api
         .projects({ id: projectId })
-        .environments.variables({ varId: variable.id })
+        .vaults({ vaultId })
+        .variables({ varId: variable.id })
         .delete(),
     {
-      invalidateKeys: [["env-variables", projectId, environmentType]],
+      invalidateKeys: [["vault-variables", projectId, vaultId]],
       successMessage: "Variable deleted",
     },
   );
@@ -144,12 +146,13 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
     (versionId: string) =>
       client.api
         .projects({ id: projectId })
-        .environments.variables({ varId: variable.id })
+        .vaults({ vaultId })
+        .variables({ varId: variable.id })
         .versions({ versionId })
         .rollback.post(),
     {
       invalidateKeys: [
-        ["env-variables", projectId, environmentType],
+        ["vault-variables", projectId, vaultId],
         ["env-variable-versions", projectId, variable.id],
       ],
       successMessage: "Variable rolled back successfully",

@@ -1,12 +1,12 @@
 import { singleton } from "tsyringe";
-import { EnvironmentType, PrismaClient } from "@/generated/prisma";
+import { PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import {
-  EnvironmentRepository,
+  ProjectVaultRepository,
   toEncryptedResponse,
   toExampleLine,
   type EnvVariableWithValueResponse,
-} from "@/modules/environment";
+} from "@/modules/project-vault";
 import type {
   EnvExampleResponse,
   ExportEnvVariablesResponse,
@@ -19,22 +19,17 @@ export class EnvironmentIOService {
   constructor(
     private readonly prisma: PrismaClient,
     private readonly auditLogService: AuditLogService,
-    private readonly envRepository: EnvironmentRepository,
+    private readonly vaultRepo: ProjectVaultRepository,
   ) {}
 
   async bulkImport(
     projectId: string,
+    vaultId: string,
     body: ImportEnvVariablesBody,
     userId: string,
     ipAddress: string,
   ): Promise<ImportEnvVariablesResponse> {
-    const groupName = await this.envRepository.getVaultGroupName(body.vaultGroupId);
-
-    const environment = await this.envRepository.findOrCreateEnvironment(
-      projectId,
-      body.vaultGroupId,
-      body.environmentType as EnvironmentType,
-    );
+    const vault = await this.vaultRepo.requireVault(projectId, vaultId);
 
     const variables: EnvVariableWithValueResponse[] = [];
     let updated = 0;
@@ -53,8 +48,8 @@ export class EnvironmentIOService {
       };
 
       const variable = await this.prisma.envVariable.upsert({
-        where: { environmentId_key: { environmentId: environment.id, key: entry.key } },
-        create: { environmentId: environment.id, key: entry.key, ...data },
+        where: { vaultId_key: { vaultId: vault.id, key: entry.key } },
+        create: { vaultId: vault.id, key: entry.key, ...data },
         update: data,
       });
 
@@ -75,7 +70,7 @@ export class EnvironmentIOService {
       metadata: {
         imported: variables.length,
         updated,
-        vaultGroupName: groupName,
+        vaultName: vault.name,
       },
     });
 
@@ -84,16 +79,14 @@ export class EnvironmentIOService {
 
   async export(
     projectId: string,
-    vaultGroupId: string,
-    environmentType: EnvironmentType,
+    vaultId: string,
     userId: string,
     ipAddress: string,
   ): Promise<ExportEnvVariablesResponse> {
-    const groupName = await this.envRepository.getVaultGroupName(vaultGroupId);
-    const env = await this.envRepository.requireEnvironment(vaultGroupId, environmentType);
+    const vault = await this.vaultRepo.requireVault(projectId, vaultId);
 
     const variables = await this.prisma.envVariable.findMany({
-      where: { environmentId: env.id },
+      where: { vaultId: vault.id },
       orderBy: [{ sortOrder: { sort: "asc", nulls: "last" } }, { key: "asc" }],
     });
 
@@ -115,24 +108,21 @@ export class EnvironmentIOService {
       resourceType: "ENV_VARIABLE",
       resourceId: projectId,
       ipAddress,
-      metadata: { environmentType, count: variables.length, vaultGroupName: groupName },
+      metadata: { vaultName: vault.name, count: variables.length },
     });
 
-    return { entries, environmentType };
+    return { vaultId: vault.id, vaultName: vault.name, entries };
   }
 
-  async generateExample(
-    vaultGroupId: string,
-    environmentType: EnvironmentType,
-  ): Promise<EnvExampleResponse> {
-    const env = await this.envRepository.requireEnvironment(vaultGroupId, environmentType);
+  async generateExample(projectId: string, vaultId: string): Promise<EnvExampleResponse> {
+    const vault = await this.vaultRepo.requireVault(projectId, vaultId);
 
     const variables = await this.prisma.envVariable.findMany({
-      where: { environmentId: env.id },
+      where: { vaultId: vault.id },
       orderBy: { key: "asc" },
     });
 
     const content = variables.map(toExampleLine).join("\n");
-    return { content, environmentType };
+    return { vaultId: vault.id, vaultName: vault.name, content };
   }
 }

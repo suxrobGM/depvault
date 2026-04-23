@@ -1,12 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactElement } from "react";
-import {
-  CONFIG_FORMATS,
-  getEnvironmentLabel,
-  type ConfigFormat,
-  type EnvironmentTypeValue,
-} from "@depvault/shared/constants";
+import { CONFIG_FORMATS, type ConfigFormat } from "@depvault/shared/constants";
 import { serializeConfig, type ConfigEntry } from "@depvault/shared/serializers";
 import {
   Box,
@@ -33,35 +28,32 @@ interface ExportVariablesDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
-  vaultGroupId: string;
-  environmentType: EnvironmentTypeValue;
+  vaultId: string;
+  vaultName?: string;
 }
 
 export function ExportVariablesDialog(props: ExportVariablesDialogProps): ReactElement {
-  const { open, onClose, projectId, vaultGroupId, environmentType } = props;
+  const { open, onClose, projectId, vaultId, vaultName } = props;
   const { getProjectDEK } = useVault();
   const [format, setFormat] = useState<ConfigFormat>("env");
   const [decryptResult, setDecryptResult] = useState<{ content: string; key: string } | null>(null);
   const effectKeyRef = useRef("");
 
   const { data } = useApiQuery<ExportResult>(
-    ["env-export", projectId, environmentType],
-    () =>
-      client.api
-        .projects({ id: projectId })
-        .environments.export.get({ query: { environmentType, vaultGroupId } }),
-    { enabled: open && !!environmentType },
+    ["env-export", projectId, vaultId],
+    () => client.api.projects({ id: projectId }).vaults({ vaultId }).export.get(),
+    { enabled: open && !!vaultId },
   );
 
   const hasEntries = !!data?.entries?.length;
-  const currentKey = `${projectId}:${data?.entries?.length ?? 0}:${format}`;
+  const currentKey = `${projectId}:${vaultId}:${data?.entries?.length ?? 0}:${format}`;
   const decrypting = hasEntries && decryptResult?.key !== currentKey;
   const displayContent =
     hasEntries && decryptResult?.key === currentKey ? decryptResult.content : null;
 
   useEffect(() => {
     if (!data?.entries?.length) return;
-    const key = `${projectId}:${data.entries.length}:${format}`;
+    const key = `${projectId}:${vaultId}:${data.entries.length}:${format}`;
     if (effectKeyRef.current === key) return;
 
     effectKeyRef.current = key;
@@ -69,21 +61,23 @@ export function ExportVariablesDialog(props: ExportVariablesDialogProps): ReactE
 
     getProjectDEK(projectId).then(async (dek) => {
       const decryptedEntries: ConfigEntry[] = await Promise.all(
-        data.entries.map(async (entry) => {
-          const result: ConfigEntry = {
-            key: entry.key,
-            value: await decrypt(entry.encryptedValue, entry.iv, entry.authTag, dek),
-          };
-          if (entry.encryptedComment && entry.commentIv && entry.commentAuthTag) {
-            result.comment = await decrypt(
-              entry.encryptedComment,
-              entry.commentIv,
-              entry.commentAuthTag,
-              dek,
-            );
-          }
-          return result;
-        }),
+        data.entries
+          .filter((e) => !!e.encryptedValue)
+          .map(async (entry) => {
+            const result: ConfigEntry = {
+              key: entry.key,
+              value: await decrypt(entry.encryptedValue, entry.iv, entry.authTag, dek),
+            };
+            if (entry.encryptedComment && entry.commentIv && entry.commentAuthTag) {
+              result.comment = await decrypt(
+                entry.encryptedComment,
+                entry.commentIv,
+                entry.commentAuthTag,
+                dek,
+              );
+            }
+            return result;
+          }),
       );
       if (!cancelled) {
         setDecryptResult({ content: serializeConfig(format, decryptedEntries), key });
@@ -92,12 +86,13 @@ export function ExportVariablesDialog(props: ExportVariablesDialogProps): ReactE
     return () => {
       cancelled = true;
     };
-  }, [data, format, projectId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [data, format, projectId, vaultId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDownload = () => {
     if (!displayContent) return;
     const ext = format === "env" ? ".env" : `.${format}`;
-    downloadFile(displayContent, `${getEnvironmentLabel(environmentType).toLowerCase()}${ext}`);
+    const base = (vaultName ?? "vault").toLowerCase().replace(/[^a-z0-9-_]/g, "-");
+    downloadFile(displayContent, `${base}${ext}`);
   };
 
   return (

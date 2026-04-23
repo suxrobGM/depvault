@@ -151,7 +151,7 @@ export class ProjectService {
           where: { dependency: { analysis: { project: memberFilter } } },
         }),
         this.prisma.envVariable.count({
-          where: { environment: { project: memberFilter } },
+          where: { vault: { project: memberFilter } },
         }),
       ],
     );

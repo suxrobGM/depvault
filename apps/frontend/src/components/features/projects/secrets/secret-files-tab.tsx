@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { client } from "@/lib/api";
 import type { MemberListResponse } from "@/types/api/project";
 import type { SecretFile, SecretFileListResponse } from "@/types/api/secret-file";
-import type { VaultGroup, VaultGroupListResponse } from "@/types/api/vault-group";
+import type { Vault, VaultListResponse } from "@/types/api/vault";
 import { EditSecretFileDialog } from "./edit-secret-file-dialog";
 import { SecretFileTable } from "./secret-file-table";
 import { UploadSecretFileDialog } from "./upload-secret-file-dialog";
@@ -30,8 +30,8 @@ export function SecretFilesTab(props: SecretFilesTabProps): ReactElement {
     () => client.api.projects({ id: projectId }).members.get({ query: { page: 1, limit: 50 } }),
   );
 
-  const { data: groups } = useApiQuery<VaultGroupListResponse>(["vault-groups", projectId], () =>
-    client.api.projects({ id: projectId })["vault-groups"].get(),
+  const { data: vaults } = useApiQuery<VaultListResponse>(["vaults", projectId], () =>
+    client.api.projects({ id: projectId }).vaults.get(),
   );
 
   const { data: filesData, isLoading } = useApiQuery<SecretFileListResponse>(
@@ -44,7 +44,7 @@ export function SecretFilesTab(props: SecretFilesTabProps): ReactElement {
 
   const currentMember = membersData?.items.find((m) => m.user.id === user?.id);
   const canEdit = currentMember?.role === "OWNER" || currentMember?.role === "EDITOR";
-  const vaultGroups: VaultGroup[] = groups ?? [];
+  const projectVaults: Vault[] = vaults ?? [];
   const files = filesData?.items ?? [];
 
   return (
@@ -93,7 +93,7 @@ export function SecretFilesTab(props: SecretFilesTabProps): ReactElement {
         open={uploadOpen}
         onClose={() => setUploadOpen(false)}
         projectId={projectId}
-        vaultGroups={vaultGroups}
+        vaults={projectVaults}
       />
       {editFile && (
         <EditSecretFileDialog
@@ -101,7 +101,7 @@ export function SecretFilesTab(props: SecretFilesTabProps): ReactElement {
           onClose={() => setEditFile(null)}
           projectId={projectId}
           file={editFile}
-          vaultGroups={vaultGroups}
+          vaults={projectVaults}
         />
       )}
     </>

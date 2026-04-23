@@ -8,7 +8,6 @@ const meta: MetaRecord = {
   "secret-files": "Secret Files",
   "secret-sharing": "Secret Sharing",
   "config-converter": "Config Converter",
-  "env-templates": "Environment Templates",
   "license-compliance": "License Compliance",
   encryption: "Encryption & Security",
   "secret-scanning": "Secret Scanning",

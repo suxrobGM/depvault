@@ -1,5 +1,4 @@
 using System.CommandLine;
-using DepVault.Cli.Commands.Pull;
 using DepVault.Cli.Commands.Push;
 using DepVault.Cli.Commands.Scan;
 using DepVault.Cli.Services;
@@ -11,8 +10,7 @@ namespace DepVault.Cli.Commands;
 internal sealed class PushCommands(
     CommandContext ctx,
     IFileScanner fileScanner,
-    DirectoryVaultGroupMapper dirMapper,
-    FileEnvironmentAssigner envAssigner,
+    DirectoryVaultMapper vaultMapper,
     EnvImporter envImporter,
     SecretFileScanner secretFileScanner,
     StaleVariableCleaner staleVariableCleaner)
@@ -20,17 +18,19 @@ internal sealed class PushCommands(
     public Command CreatePushCommand()
     {
         var projectOpt = new Option<string?>("--project") { Description = "Project ID (defaults to active)" };
-        var envOpt = new Option<string?>("--environment")
-        { Description = "Environment type (prompts per file if not set)" };
+        var vaultOpt = new Option<string?>("--vault")
+        { Description = "Vault name (creates it if missing). All files push into this vault." };
         var fileOpt = new Option<string?>("--file")
         { Description = "Single file to push (auto-discovers if omitted)" };
         var formatOpt = new Option<string>("--format")
         { Description = "Import format for env files", DefaultValueFactory = _ => "env" };
         var noSyncOpt = new Option<bool>("--no-sync")
         { Description = "Skip removing stale variables that are no longer in the pushed file" };
+        var createMissingOpt = new Option<bool>("--create-missing")
+        { Description = "Auto-create missing vaults without prompting (non-interactive)" };
 
         var cmd = new Command("push", "Push environment variables and secret files")
-            { projectOpt, envOpt, fileOpt, formatOpt, noSyncOpt };
+            { projectOpt, vaultOpt, fileOpt, formatOpt, noSyncOpt, createMissingOpt };
 
         cmd.SetAction(async (parseResult, ct) =>
         {
@@ -41,8 +41,9 @@ internal sealed class PushCommands(
                 return;
             }
 
-            var explicitEnv = parseResult.GetValue(envOpt);
+            var explicitVault = parseResult.GetValue(vaultOpt);
             var noSync = parseResult.GetValue(noSyncOpt);
+            var createMissing = parseResult.GetValue(createMissingOpt);
             var selected = ResolveFiles(parseResult.GetValue(fileOpt));
             if (selected.Count == 0)
             {
@@ -50,18 +51,15 @@ internal sealed class PushCommands(
                 return;
             }
 
-            var dirMap = await dirMapper.MapAsync(pc.ProjectId, selected, ct);
+            var dirMap = await vaultMapper.MapAsync(pc.ProjectId, selected, explicitVault, createMissing, ct);
             if (dirMap is null)
             {
                 Environment.ExitCode = 1;
                 return;
             }
 
-            AnsiConsole.WriteLine();
-            var assignments = envAssigner.AssignEnvironments(selected, explicitEnv);
-
             // Resolve encryption key once before processing any env files
-            var hasEnvFiles = assignments.Any(a => a.File.Category == FileCategory.Environment);
+            var hasEnvFiles = selected.Any(a => a.Category == FileCategory.Environment);
             if (hasEnvFiles && !await envImporter.EnsureDekAsync(pc.ProjectId, ct))
             {
                 ctx.Output.PrintError("Failed to resolve encryption key. Aborting push.");
@@ -71,14 +69,14 @@ internal sealed class PushCommands(
 
             var envImported = 0;
             var secretsUploaded = 0;
-            var importedGroups = new List<(string VaultGroupId, string EnvType, HashSet<string> Keys)>();
+            var importedVaults = new List<(string VaultId, HashSet<string> Keys)>();
 
-            foreach (var (file, envType) in assignments)
+            foreach (var file in selected)
             {
                 var dir = Path.GetDirectoryName(file.RelativePath)?.Replace('\\', '/') ?? ".";
-                if (!dirMap.TryGetValue(dir, out var vaultGroupId))
+                if (!dirMap.TryGetValue(dir, out var vaultId))
                 {
-                    AnsiConsole.MarkupLine($"[grey]Skipped {Markup.Escape(file.RelativePath)} (no vault group)[/]");
+                    AnsiConsole.MarkupLine($"[grey]Skipped {Markup.Escape(file.RelativePath)} (no vault)[/]");
                     continue;
                 }
 
@@ -86,15 +84,14 @@ internal sealed class PushCommands(
                 {
                     if (file.Category == FileCategory.Environment)
                     {
-                        var result = await envImporter.ImportAsync(
-                            pc.ProjectId, file, vaultGroupId, envType, ct);
-                        ctx.Output.PrintSuccess($"  {file.RelativePath}: {result.Imported} variables ({envType})");
+                        var result = await envImporter.ImportAsync(pc.ProjectId, file, vaultId, ct);
+                        ctx.Output.PrintSuccess($"  {file.RelativePath}: {result.Imported} variables");
                         envImported += result.Imported;
-                        importedGroups.Add((vaultGroupId, envType, result.ImportedKeys));
+                        importedVaults.Add((vaultId, result.ImportedKeys));
                     }
                     else
                     {
-                        await secretFileScanner.UploadAsync(pc.ProjectId, file, vaultGroupId, ct);
+                        await secretFileScanner.UploadAsync(pc.ProjectId, file, vaultId, ct);
                         ctx.Output.PrintSuccess($"  {file.RelativePath}");
                         secretsUploaded++;
                     }
@@ -107,20 +104,19 @@ internal sealed class PushCommands(
 
             // Sync: remove stale variables not present in pushed files
             var totalDeleted = 0;
-            if (!noSync && importedGroups.Count > 0)
+            if (!noSync && importedVaults.Count > 0)
             {
                 AnsiConsole.WriteLine();
-                foreach (var (vaultGroupId, envType, keys) in importedGroups)
+                foreach (var (vaultId, keys) in importedVaults)
                 {
                     try
                     {
-                        var deleted = await staleVariableCleaner.CleanAsync(
-                            pc.ProjectId, vaultGroupId, envType, keys, ct);
+                        var deleted = await staleVariableCleaner.CleanAsync(pc.ProjectId, vaultId, keys, ct);
                         totalDeleted += deleted;
                     }
                     catch (Exception ex)
                     {
-                        ApiErrorHandler.HandleError(ex, $"Failed to clean stale variables for {envType}");
+                        ApiErrorHandler.HandleError(ex, "Failed to clean stale variables");
                     }
                 }
             }

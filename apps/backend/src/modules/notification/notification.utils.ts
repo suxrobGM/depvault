@@ -2,13 +2,6 @@ export type NotifyPayload =
   | { type: "VULNERABILITY_FOUND"; userId: string; projectId: string; count: number }
   | { type: "SECRET_ROTATION"; userId: string; projectId: string; variableNames: string[] }
   | {
-      type: "ENV_DRIFT";
-      userId: string;
-      projectId: string;
-      vaultGroupId: string;
-      missingVars: { env: string; variable: string }[];
-    }
-  | {
       type: "GIT_SECRET_DETECTION";
       userId: string;
       projectId: string;
@@ -54,12 +47,6 @@ export function createNotificationContent(
         title: "Secret Rotation Reminder",
         message: `${payload.variableNames.length} variable${payload.variableNames.length === 1 ? "" : "s"} in ${projectName} are due for rotation`,
         metadata: { ...base, variableNames: payload.variableNames },
-      };
-    case "ENV_DRIFT":
-      return {
-        title: "Environment Drift Detected",
-        message: `${payload.missingVars.length} variable${payload.missingVars.length === 1 ? "" : "s"} missing across environments in ${projectName}`,
-        metadata: { ...base, vaultGroupId: payload.vaultGroupId, missingVars: payload.missingVars },
       };
     case "GIT_SECRET_DETECTION": {
       const count = payload.count ?? 1;

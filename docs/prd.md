@@ -176,7 +176,6 @@ Developers working across multiple projects and tech stacks waste time switching
 
 - Email alerts for newly discovered vulnerabilities
 - Secret rotation reminders
-- Environment drift warnings when variables are missing across environments
 - Team invite and role change notifications
 - Git secret detection alerts when leaked credentials are found in connected repositories
 - CI/CD token expiration and revocation notifications
@@ -482,10 +481,10 @@ Developers working across multiple projects and tech stacks waste time switching
 | Dependency parser — Rust, .NET, Go | Parse Cargo.toml, .csproj, go.mod                                                                                                                                                     |
 | Git secret detection               | GitHub repo connection via OAuth, commit history scanning with built-in + custom regex patterns, leak alerts and remediation guidance                                                 |
 | CI/CD secret injection             | Scoped short-lived API tokens for CI pipelines, environment variable + secret file fetch endpoint, token revocation, audit logging, example snippets for GitHub Actions and GitLab CI |
-| Environment templates              | Clone environment variable structure to new environment, save reusable templates, template-vs-environment diff                                                                        |
-| Secret file bundler                | One-click encrypted .zip download of selected variables + secret files per environment, one-time password encryption, shareable via one-time link                                     |
+| Vault cloning                      | Clone an existing vault's keyset (keys, descriptions, required flags, directory path, tags) into a new vault with blank values                                                        |
+| Secret file bundler                | One-click encrypted .zip download of selected variables + secret files per vault, one-time password encryption, shareable via one-time link                                           |
 | Health score engine                | Composite score from dependency freshness + vulnerability count + env hygiene + secret rotation age                                                                                   |
 | Dashboard — final                  | Sortable/filterable project cards with health scores, git scan status, alerts, and last updated                                                                                       |
-| Notifications                      | Email alerts for new vulnerabilities, rotation reminders, env drift warnings, git leak detection alerts, CI token expiration notices                                                  |
+| Notifications                      | Email alerts for new vulnerabilities, rotation reminders, git leak detection alerts, CI token expiration notices                                                                      |
 | Security audit                     | Automated CI checks for plaintext secret leakage in logs/responses, pre-commit hooks for secret scanning, verify zero-leakage guarantees end-to-end                                   |
 | CD pipeline                        | GitHub Actions deploy workflow to production environment                                                                                                                              |

@@ -5,7 +5,6 @@ export { EmailChangeVerificationTemplate } from "./templates/email-change-verifi
 export { TeamInviteTemplate } from "./templates/team-invite";
 export { VulnerabilityAlertTemplate } from "./templates/vulnerability-alert";
 export { SecretRotationReminderTemplate } from "./templates/secret-rotation-reminder";
-export { EnvDriftWarningTemplate } from "./templates/env-drift-warning";
 export { RoleChangeTemplate } from "./templates/role-change";
 export { GitSecretAlertTemplate } from "./templates/git-secret-alert";
 export { PlatformInviteTemplate } from "./templates/platform-invite";

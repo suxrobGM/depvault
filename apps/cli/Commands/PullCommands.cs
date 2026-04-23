@@ -9,7 +9,7 @@ namespace DepVault.Cli.Commands;
 
 public sealed class PullCommands(
     CommandContext ctx,
-    VaultGroupSelector vaultGroupSelector,
+    VaultSelector vaultSelector,
     DekResolver dekResolver,
     EnvPuller envPuller,
     SecretsPuller secretsPuller)
@@ -17,10 +17,10 @@ public sealed class PullCommands(
     public Command CreatePullCommand()
     {
         var projectOpt = new Option<string?>("--project") { Description = "Project ID (defaults to active)" };
-        var envOpt = new Option<string?>("--environment")
-        { Description = "Environment type (prompts if not set)" };
-        var vaultGroupsOpt = new Option<string?>("--vault-groups")
-        { Description = "Comma-separated vault group names" };
+        var vaultsOpt = new Option<string?>("--vault")
+        { Description = "Comma-separated vault names" };
+        var tagOpt = new Option<string?>("--tag")
+        { Description = "Filter vaults by tag (intersection for comma-separated tags)" };
         var includeSecretsOpt = new Option<bool>("--include-secrets")
         { Description = "Also download secret files", DefaultValueFactory = _ => true };
         var formatOpt = new Option<string>("--format")
@@ -33,7 +33,7 @@ public sealed class PullCommands(
         var forceOpt = new Option<bool>("--force") { Description = "Overwrite without prompting" };
 
         var cmd = new Command("pull", "Pull environment variables and secret files")
-            { projectOpt, envOpt, vaultGroupsOpt, includeSecretsOpt, formatOpt, outputDirOpt, forceOpt };
+            { projectOpt, vaultsOpt, tagOpt, includeSecretsOpt, formatOpt, outputDirOpt, forceOpt };
 
         cmd.SetAction(async (parseResult, ct) =>
         {
@@ -44,14 +44,17 @@ public sealed class PullCommands(
                 return;
             }
 
-            var groups = await vaultGroupSelector.SelectAsync(pc.ProjectId, parseResult.GetValue(vaultGroupsOpt), ct);
-            if (groups is null)
+            var vaults = await vaultSelector.SelectAsync(
+                pc.ProjectId,
+                parseResult.GetValue(vaultsOpt),
+                parseResult.GetValue(tagOpt),
+                ct);
+            if (vaults is null)
             {
                 Environment.ExitCode = 1;
                 return;
             }
 
-            var envType = ctx.ResolveEnvironmentType(parseResult.GetValue(envOpt), null);
             var formatStr = parseResult.GetValue(formatOpt) ?? "env";
             var format = formatStr.Equals("json", StringComparison.OrdinalIgnoreCase)
                 ? EnvFileFormat.Json
@@ -65,7 +68,7 @@ public sealed class PullCommands(
                 return;
             }
 
-            AnsiConsole.MarkupLine($"[cyan1]Pulling ({envType})...[/]");
+            AnsiConsole.MarkupLine($"[cyan1]Pulling {vaults.Count} vault(s)...[/]");
 
             var password = dekResolver.CollectVaultPassword();
             var dek = await AnsiConsole.Status()
@@ -80,12 +83,12 @@ public sealed class PullCommands(
                 return;
             }
 
-            var envCount = await envPuller.PullAsync(pc.ProjectId, groups, envType, format, outputDir, dek, ct);
+            var envCount = await envPuller.PullAsync(pc.ProjectId, vaults, format, outputDir, dek, ct);
 
             var secretCount = 0;
             if (includeSecrets)
             {
-                secretCount = await secretsPuller.PullAsync(pc.ProjectId, groups, outputDir, dek, ct);
+                secretCount = await secretsPuller.PullAsync(pc.ProjectId, vaults, outputDir, dek, ct);
             }
 
             AnsiConsole.WriteLine();

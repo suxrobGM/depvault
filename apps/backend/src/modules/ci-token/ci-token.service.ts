@@ -34,11 +34,11 @@ export class CiTokenService {
   ): Promise<CiTokenCreatedResponse> {
     await this.planEnforcement.enforceForProject(projectId, "ciToken");
 
-    const environment = await this.prisma.environment.findFirst({
-      where: { id: body.environmentId, projectId },
+    const vault = await this.prisma.vault.findFirst({
+      where: { id: body.vaultId, projectId },
     });
-    if (!environment) {
-      throw new NotFoundError("Environment not found in this project");
+    if (!vault) {
+      throw new NotFoundError("Vault not found in this project");
     }
 
     const ipAllowlist = body.ipAllowlist ?? [];
@@ -71,7 +71,7 @@ export class CiTokenService {
     const ciToken = await this.prisma.ciToken.create({
       data: {
         projectId,
-        environmentId: body.environmentId,
+        vaultId: body.vaultId,
         createdBy: userId,
         name: body.name,
         tokenHash,
@@ -91,7 +91,7 @@ export class CiTokenService {
       resourceType: "CI_TOKEN",
       resourceId: ciToken.id,
       ipAddress,
-      metadata: { name: body.name, environmentId: body.environmentId },
+      metadata: { name: body.name, vaultName: vault.name },
     });
 
     return {
@@ -109,9 +109,7 @@ export class CiTokenService {
         where,
         include: {
           creator: { select: { email: true } },
-          environment: {
-            include: { vaultGroup: { select: { name: true } } },
-          },
+          vault: { select: { name: true } },
         },
         skip: (page - 1) * limit,
         take: limit,
@@ -125,8 +123,8 @@ export class CiTokenService {
       name: token.name,
       tokenPrefix: token.tokenPrefix,
       projectId: token.projectId,
-      environmentId: token.environmentId,
-      environmentLabel: `${token.environment.vaultGroup.name} / ${token.environment.type}`,
+      vaultId: token.vaultId,
+      vaultName: token.vault.name,
       ipAllowlist: token.ipAllowlist,
       expiresAt: token.expiresAt,
       lastUsedAt: token.lastUsedAt,
@@ -204,10 +202,10 @@ export class CiTokenService {
   ): Promise<CiSecretsResponse> {
     const [variables, files] = await Promise.all([
       this.prisma.envVariable.findMany({
-        where: { environmentId: ciToken.environmentId },
+        where: { vaultId: ciToken.vaultId },
       }),
       this.prisma.secretFile.findMany({
-        where: { vaultGroup: { environments: { some: { id: ciToken.environmentId } } } },
+        where: { vaultId: ciToken.vaultId },
         select: { id: true, name: true, encryptedContent: true, iv: true, authTag: true },
       }),
     ]);
@@ -251,7 +249,7 @@ export class CiTokenService {
 
   async downloadFile(ciToken: CiToken, fileId: string): Promise<CiFileDownloadResponse> {
     const file = await this.prisma.secretFile.findFirst({
-      where: { id: fileId, vaultGroup: { environments: { some: { id: ciToken.environmentId } } } },
+      where: { id: fileId, vaultId: ciToken.vaultId },
     });
 
     if (!file) {

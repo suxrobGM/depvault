@@ -9,7 +9,7 @@ import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 import type { SecretFileListResponse } from "@/types/api/secret-file";
-import type { VaultGroupListResponse } from "@/types/api/vault-group";
+import type { VaultListResponse } from "@/types/api/vault";
 
 interface VaultSummaryCardProps {
   projectId: string;
@@ -18,9 +18,8 @@ interface VaultSummaryCardProps {
 export function VaultSummaryCard(props: VaultSummaryCardProps): ReactElement {
   const { projectId } = props;
 
-  const { data: vaultGroups } = useApiQuery<VaultGroupListResponse>(
-    ["vault-groups", projectId, "overview"],
-    () => client.api.projects({ id: projectId })["vault-groups"].get(),
+  const { data: vaults } = useApiQuery<VaultListResponse>(["vaults", projectId, "overview"], () =>
+    client.api.projects({ id: projectId }).vaults.get(),
   );
 
   const { data: secretFilesData } = useApiQuery<SecretFileListResponse>(
@@ -28,8 +27,9 @@ export function VaultSummaryCard(props: VaultSummaryCardProps): ReactElement {
     () => client.api.projects({ id: projectId }).secrets.get({ query: { page: 1, limit: 1 } }),
   );
 
-  const groupCount = vaultGroups?.length ?? 0;
-  const variableCount = vaultGroups?.reduce((sum, g) => sum + (g.variableCount ?? 0), 0) ?? 0;
+  const vaultCount = vaults?.length ?? 0;
+  const variableCount =
+    vaults?.reduce((sum: number, v) => sum + Number(v.variableCount ?? 0), 0) ?? 0;
   const secretFileCount = secretFilesData?.pagination.total ?? 0;
 
   return (
@@ -63,7 +63,7 @@ export function VaultSummaryCard(props: VaultSummaryCardProps): ReactElement {
                 color: "text.secondary",
               }}
             >
-              Groups
+              Vaults
             </Typography>
             <Typography
               variant="h6"
@@ -72,7 +72,7 @@ export function VaultSummaryCard(props: VaultSummaryCardProps): ReactElement {
                 lineHeight: 1.2,
               }}
             >
-              {groupCount}
+              {vaultCount}
             </Typography>
           </Grid>
           <Grid size={4}>

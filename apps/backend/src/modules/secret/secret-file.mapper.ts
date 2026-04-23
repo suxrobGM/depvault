@@ -3,7 +3,7 @@ import type { SecretFileResponse } from "./secret-file.schema";
 export function toSecretFileResponse(
   file: {
     id: string;
-    vaultGroupId: string;
+    vaultId: string;
     name: string;
     description: string | null;
     mimeType: string;
@@ -12,12 +12,12 @@ export function toSecretFileResponse(
     createdAt: Date;
     updatedAt: Date;
   },
-  vaultGroup: { id: string; name: string },
+  vault: { id: string; name: string },
 ): SecretFileResponse {
   return {
     id: file.id,
-    vaultGroupId: vaultGroup.id,
-    vaultGroupName: vaultGroup.name,
+    vaultId: vault.id,
+    vaultName: vault.name,
     name: file.name,
     description: file.description,
     mimeType: file.mimeType,

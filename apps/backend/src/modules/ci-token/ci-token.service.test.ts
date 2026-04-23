@@ -25,11 +25,12 @@ const baseProjectMember = {
   updatedAt: new Date(),
 };
 
-const baseEnvironment = {
-  id: "env-uuid",
+const baseVault = {
+  id: "vault-uuid",
   projectId: "project-uuid",
-  vaultGroupId: "vg-uuid",
-  type: "PRODUCTION",
+  name: "api-prod",
+  directoryPath: null,
+  tags: ["prod"],
   createdAt: new Date(),
   updatedAt: new Date(),
 };
@@ -37,7 +38,7 @@ const baseEnvironment = {
 const baseCiToken = {
   id: "token-uuid",
   projectId: "project-uuid",
-  environmentId: "env-uuid",
+  vaultId: "vault-uuid",
   createdBy: "user-uuid",
   name: "GitHub Actions Prod",
   tokenHash: "hash",
@@ -54,8 +55,8 @@ function createMockPrisma() {
     projectMember: {
       findUnique: mock(() => Promise.resolve({ ...baseProjectMember })),
     },
-    environment: {
-      findFirst: mock(() => Promise.resolve({ ...baseEnvironment })),
+    vault: {
+      findFirst: mock(() => Promise.resolve({ ...baseVault })),
     },
     ciToken: {
       create: mock(() => Promise.resolve({ ...baseCiToken })),
@@ -100,7 +101,7 @@ describe("CiTokenService", () => {
   describe("create", () => {
     const body = {
       name: "GitHub Actions Prod",
-      environmentId: "env-uuid",
+      vaultId: "vault-uuid",
       wrappedDek: "wrapped-dek",
       wrappedDekIv: "wrapped-iv",
       wrappedDekTag: "wrapped-tag",
@@ -118,8 +119,8 @@ describe("CiTokenService", () => {
       expect(mockAudit.log).toHaveBeenCalled();
     });
 
-    it("should throw NotFoundError when environment not in project", async () => {
-      mockPrisma.environment.findFirst.mockResolvedValueOnce(null);
+    it("should throw NotFoundError when vault not in project", async () => {
+      mockPrisma.vault.findFirst.mockResolvedValueOnce(null);
 
       expect(service.create("project-uuid", "user-uuid", body, "127.0.0.1")).rejects.toBeInstanceOf(
         NotFoundError,
@@ -149,10 +150,7 @@ describe("CiTokenService", () => {
       const tokenWithRelations = {
         ...baseCiToken,
         creator: { email: "user@test.com" },
-        environment: {
-          type: "PRODUCTION",
-          vaultGroup: { name: "Default" },
-        },
+        vault: { name: "api-prod" },
       };
       mockPrisma.ciToken.findMany.mockResolvedValueOnce([tokenWithRelations]);
       mockPrisma.ciToken.count.mockResolvedValueOnce(1);
@@ -160,7 +158,7 @@ describe("CiTokenService", () => {
       const result = await service.list("project-uuid");
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0]!.environmentLabel).toBe("Default / PRODUCTION");
+      expect(result.items[0]!.vaultName).toBe("api-prod");
       expect(result.pagination.total).toBe(1);
     });
   });
@@ -239,7 +237,7 @@ describe("CiTokenService", () => {
       mockPrisma.envVariable.findMany.mockResolvedValueOnce([
         {
           id: "var-1",
-          environmentId: "env-uuid",
+          vaultId: "vault-uuid",
           key: "DB_HOST",
           encryptedValue: "enc",
           iv: "iv",
@@ -280,7 +278,7 @@ describe("CiTokenService", () => {
     it("should return decrypted file buffer", async () => {
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce({
         id: "file-1",
-        environmentId: "env-uuid",
+        vaultId: "vault-uuid",
         name: "config.json",
         mimeType: "application/json",
         encryptedContent: Buffer.from("encrypted"),
@@ -295,7 +293,7 @@ describe("CiTokenService", () => {
       expect(result.encryptedContent).toBeDefined();
     });
 
-    it("should throw NotFoundError when file not in environment", async () => {
+    it("should throw NotFoundError when file not in vault", async () => {
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(null);
 
       expect(service.downloadFile(baseCiToken as any, "bad-id")).rejects.toBeInstanceOf(

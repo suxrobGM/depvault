@@ -22,7 +22,6 @@ function createMockSubscriptionService(plan = "FREE", overrides: Record<string, 
                 gitSecretScanning: false,
                 ipAllowlists: false,
                 secretSharing: true,
-                envDiff: false,
                 prioritySupport: false,
               }
             : {
@@ -36,7 +35,6 @@ function createMockSubscriptionService(plan = "FREE", overrides: Record<string, 
                 gitSecretScanning: true,
                 ipAllowlists: true,
                 secretSharing: true,
-                envDiff: true,
                 prioritySupport: true,
               },
       }),
@@ -263,7 +261,6 @@ describe("PlanEnforcementService", () => {
       );
       expect(service.enforceFeatureAccess("owner-1", "gitSecretScanning")).resolves.toBeUndefined();
       expect(service.enforceFeatureAccess("owner-1", "ipAllowlists")).resolves.toBeUndefined();
-      expect(service.enforceFeatureAccess("owner-1", "envDiff")).resolves.toBeUndefined();
     });
   });
 
