@@ -2,11 +2,11 @@ import { singleton } from "tsyringe";
 import { PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import {
-  ProjectVaultRepository,
   toEncryptedResponse,
   toExampleLine,
   type EnvVariableWithValueResponse,
-} from "@/modules/project-vault";
+} from "@/modules/env-variable";
+import { ProjectVaultRepository } from "@/modules/project-vault";
 import type {
   EnvExampleResponse,
   ExportEnvVariablesResponse,

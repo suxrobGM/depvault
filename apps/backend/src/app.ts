@@ -15,12 +15,13 @@ import { ciAccessController, ciTokenController } from "@/modules/ci-token";
 import { convertController } from "@/modules/convert";
 import { envBundleController } from "@/modules/env-bundle";
 import { envIOController } from "@/modules/env-io";
+import { envVariableController } from "@/modules/env-variable";
 import { githubApiController } from "@/modules/github";
 import { invitationController, projectInvitationController } from "@/modules/invitation";
 import { licenseRuleController } from "@/modules/license-rule";
 import { notificationController } from "@/modules/notification";
 import { projectController } from "@/modules/project";
-import { envVariableController, projectVaultController } from "@/modules/project-vault";
+import { projectVaultController } from "@/modules/project-vault";
 import { scanPatternController } from "@/modules/scan-pattern";
 import {
   secretFileController,

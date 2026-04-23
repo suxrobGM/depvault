@@ -2,6 +2,7 @@ import { singleton } from "tsyringe";
 import { NotFoundError } from "@/common/errors";
 import { PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
+import { ProjectVaultRepository } from "@/modules/project-vault";
 import { PlanEnforcementService } from "@/modules/subscription/plan-enforcement.service";
 import type { PaginatedResponse } from "@/types/response";
 import { toEncryptedResponse } from "./env-variable.mapper";
@@ -10,7 +11,6 @@ import type {
   EnvVariableWithValueResponse,
   UpdateEnvVariableBody,
 } from "./env-variable.schema";
-import { ProjectVaultRepository } from "./project-vault.repository";
 
 @singleton()
 export class EnvVariableService {

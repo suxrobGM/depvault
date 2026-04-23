@@ -1,5 +1,5 @@
 import { t, type Static } from "elysia";
-import { EnvVariableWithValueResponseSchema } from "@/modules/project-vault";
+import { EnvVariableWithValueResponseSchema } from "@/modules/env-variable";
 
 const ImportEntrySchema = t.Object({
   key: t.String({ minLength: 1, maxLength: 255 }),
