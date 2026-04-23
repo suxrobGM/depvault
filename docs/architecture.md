@@ -169,7 +169,7 @@ User ──────────┬──── Account (auth providers: EMAI
 | **Project**            | Top-level container owned by a user                                                                                                                                              |
 | **ProjectMember**      | Role-based membership (OWNER, EDITOR, VIEWER)                                                                                                                                    |
 | **Vault**              | User-named container for variables, secret files, and CI tokens; freeform `tags[]` (blessed: `prod`, `staging`, `dev`, `preview`) and optional `directoryPath` for CLI placement |
-| **EnvVariable**        | Encrypted key-value pair with IV and auth tag (empty ciphertext = "blank", used by cloned-keyset vaults)                                                                         |
+| **EnvVariable**        | Encrypted key-value pair with IV and auth tag; empty ciphertext represents an intentionally-blank value                                                                          |
 | **EnvVariableVersion** | Immutable version history for variable changes                                                                                                                                   |
 | **SecretFile**         | Encrypted binary file (certs, keys, keystores) with metadata                                                                                                                     |
 | **SecretFileVersion**  | Immutable version history for file changes                                                                                                                                       |

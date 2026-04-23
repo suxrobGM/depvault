@@ -35,7 +35,7 @@ export function CloneVaultDialog(props: CloneVaultDialogProps): ReactElement {
         .clone.post(values),
     {
       invalidateKeys: [["vaults", projectId]],
-      successMessage: "Vault cloned (keys only, blank values)",
+      successMessage: "Vault duplicated",
       onSuccess: () => handleClose(),
     },
   );
@@ -63,13 +63,13 @@ export function CloneVaultDialog(props: CloneVaultDialogProps): ReactElement {
           form.handleSubmit();
         }}
       >
-        <DialogTitle>Clone Vault (keys only)</DialogTitle>
+        <DialogTitle>Duplicate Vault</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
             <DialogContentText>
-              Creates a new vault with the same keys, descriptions, required flags, directory path,
-              and tags as <b>{sourceVault?.name}</b>. Values are blank, so the new vault starts at 0
-              of {sourceVault?.requiredTotal ?? 0} required filled.
+              Creates a full copy of <b>{sourceVault?.name}</b> — same keys, values, descriptions,
+              required flags, directory path, and tags. Secret files are not copied. Edit the new
+              vault to change whatever needs to differ.
             </DialogContentText>
             <FormTextField form={form} name="targetName" label="Target vault name" autoFocus />
           </Stack>
@@ -77,7 +77,7 @@ export function CloneVaultDialog(props: CloneVaultDialogProps): ReactElement {
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={handleClose}>Cancel</Button>
           <Button type="submit" variant="contained" disabled={mutation.isPending}>
-            {mutation.isPending ? "Cloning..." : "Clone"}
+            {mutation.isPending ? "Duplicating..." : "Duplicate"}
           </Button>
         </DialogActions>
       </form>

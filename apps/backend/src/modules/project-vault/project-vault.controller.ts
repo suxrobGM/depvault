@@ -97,9 +97,9 @@ export const projectVaultController = new Elysia({
       response: VaultResponseSchema,
       detail: {
         operationId: "cloneVault",
-        summary: "Clone a vault's keyset with blank values",
+        summary: "Duplicate a vault",
         description:
-          "Create a new vault with the same keys, descriptions, required flags, directory path, and tags as the source. Values are blank so the new vault starts at 0 of N required filled.",
+          "Create a new vault with the same keys, values, descriptions, required flags, directory path, and tags as the source. Values are copied verbatim — clones within a project share the project DEK, so no re-encryption is needed. Secret files are not copied.",
       },
     },
   );

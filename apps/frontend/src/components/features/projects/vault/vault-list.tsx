@@ -93,7 +93,7 @@ export function VaultList(props: VaultListProps): ReactElement {
           }}
         >
           <CloneIcon fontSize="small" sx={{ mr: 1 }} />
-          Clone (keys only)
+          Duplicate
         </MenuItem>
         <MenuItem
           onClick={() => {

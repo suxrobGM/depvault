@@ -110,9 +110,9 @@ export class ProjectVaultService {
   }
 
   /**
-   * Clone a vault's keyset into a new vault with blank values.
-   * Keys, descriptions, required flags, sort order, directoryPath and tags carry over.
-   * encryptedValue/iv/authTag are set to empty strings so the new vault shows 0 of N required filled.
+   * Duplicate a vault inside the same project. Values are copied verbatim —
+   * same-project clones share the project's DEK, so ciphertext is portable with
+   * no re-encryption needed. Secret files are not copied.
    */
   async clone(
     projectId: string,
@@ -134,9 +134,15 @@ export class ProjectVaultService {
       where: { vaultId: sourceVaultId },
       select: {
         key: true,
+        encryptedValue: true,
+        iv: true,
+        authTag: true,
         description: true,
         isRequired: true,
         sortOrder: true,
+        encryptedComment: true,
+        commentIv: true,
+        commentAuthTag: true,
       },
     });
 
@@ -155,12 +161,15 @@ export class ProjectVaultService {
           data: sourceVars.map((v) => ({
             vaultId: vault.id,
             key: v.key,
-            encryptedValue: "",
-            iv: "",
-            authTag: "",
+            encryptedValue: v.encryptedValue,
+            iv: v.iv,
+            authTag: v.authTag,
             description: v.description,
             isRequired: v.isRequired,
             sortOrder: v.sortOrder,
+            encryptedComment: v.encryptedComment,
+            commentIv: v.commentIv,
+            commentAuthTag: v.commentAuthTag,
           })),
         });
       }
@@ -182,11 +191,13 @@ export class ProjectVaultService {
       },
     });
 
+    const required = sourceVars.filter((v) => v.isRequired);
+    const filled = required.filter((v) => v.encryptedValue !== "");
     return this.toResponse(
       target,
       { variableCount: sourceVars.length, secretFileCount: 0 },
-      sourceVars.filter((v) => v.isRequired),
-      [],
+      required,
+      filled,
     );
   }
 

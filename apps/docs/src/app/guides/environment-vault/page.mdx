@@ -20,9 +20,9 @@ A vault is a named container for environment variables and secret files inside a
 
 Open the **Vault** tab, click **New Vault**, and fill in the name, optional directory path, and any tags. Tag suggestions autocomplete from tags already used on the same project.
 
-### Cloning a Vault (Keys Only)
+### Duplicating a Vault
 
-Right-click a vault → **Clone (keys only)**. This creates a new vault with the same keys, descriptions, required flags, directory path, and tags — but with **blank values**. Useful for bootstrapping a new environment (e.g., clone `api-prod` → `api-staging`) without leaking secrets.
+Open the vault's menu → **Duplicate**. This creates a full copy of the vault — same keys, values, descriptions, required flags, directory path, and tags. Secret files are not copied. Useful for bootstrapping a new environment (e.g., duplicate `api-prod` → `api-staging`) when you want a working baseline to edit down from.
 
 ---
 
