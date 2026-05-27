@@ -50,7 +50,7 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { label: "Dashboard", icon: <DashboardIcon />, href: ROUTES.dashboard },
+  { label: "Overview", icon: <DashboardIcon />, href: ROUTES.overview },
   { label: "Projects", icon: <FolderIcon />, href: ROUTES.projects },
   { label: "Activity", icon: <HistoryIcon />, href: ROUTES.activity },
   { label: "Security", icon: <SecurityNavIcon />, href: ROUTES.security },

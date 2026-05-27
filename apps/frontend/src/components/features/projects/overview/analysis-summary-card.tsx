@@ -2,8 +2,8 @@
 
 import type { ReactElement } from "react";
 import { Security as AnalysisIcon, ArrowForward as ArrowForwardIcon } from "@mui/icons-material";
-import { CardContent, Grid, Stack, Typography } from "@mui/material";
-import { GlassCard, IconBox } from "@/components/ui/cards";
+import { CardActions, CardContent, CardHeader, Grid, Typography } from "@mui/material";
+import { IconBox, Surface } from "@/components/ui/cards";
 import { LinkButton } from "@/components/ui/inputs";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
@@ -40,29 +40,17 @@ export function AnalysisSummaryCard(props: AnalysisSummaryCardProps): ReactEleme
       : null;
 
   return (
-    <GlassCard sx={{ height: "100%" }}>
-      <CardContent sx={{ p: 3 }}>
-        <Stack
-          direction="row"
-          spacing={1.5}
-          sx={{
-            alignItems: "center",
-            mb: 2.5,
-          }}
-        >
+    <Surface accent="primary" sx={{ height: "100%" }}>
+      <CardHeader
+        avatar={
           <IconBox color="var(--mui-palette-primary-main)" size={40}>
             <AnalysisIcon sx={{ fontSize: 22 }} />
           </IconBox>
-          <Typography
-            variant="subtitle1"
-            sx={{
-              fontWeight: 600,
-            }}
-          >
-            Analysis Summary
-          </Typography>
-        </Stack>
-        <Grid container spacing={2} sx={{ mb: 2.5 }}>
+        }
+        title="Analysis Summary"
+      />
+      <CardContent sx={{ p: 3 }}>
+        <Grid container spacing={2}>
           <Grid size={4}>
             <Typography
               variant="caption"
@@ -122,6 +110,8 @@ export function AnalysisSummaryCard(props: AnalysisSummaryCardProps): ReactEleme
             </Typography>
           </Grid>
         </Grid>
+      </CardContent>
+      <CardActions>
         <LinkButton
           href={ROUTES.projectAnalysis(projectId)}
           variant="outlined"
@@ -130,7 +120,7 @@ export function AnalysisSummaryCard(props: AnalysisSummaryCardProps): ReactEleme
         >
           Go to Analysis
         </LinkButton>
-      </CardContent>
-    </GlassCard>
+      </CardActions>
+    </Surface>
   );
 }

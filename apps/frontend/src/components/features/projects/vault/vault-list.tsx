@@ -3,7 +3,7 @@
 import { useState, type ReactElement } from "react";
 import { ContentCopy as CloneIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { Box, List, Menu, MenuItem, Typography } from "@mui/material";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useConfirm } from "@/hooks/use-confirm";
 import { client } from "@/lib/api";
@@ -52,7 +52,7 @@ export function VaultList(props: VaultListProps): ReactElement {
   };
 
   return (
-    <GlassCard hoverGlow={false} sx={{ overflow: "hidden" }}>
+    <Surface sx={{ overflow: "hidden" }}>
       <VaultListToolbar
         search={search}
         onSearchChange={setSearch}
@@ -113,7 +113,7 @@ export function VaultList(props: VaultListProps): ReactElement {
         projectId={projectId}
         sourceVault={menuVault}
       />
-    </GlassCard>
+    </Surface>
   );
 }
 

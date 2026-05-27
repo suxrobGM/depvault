@@ -11,7 +11,7 @@ import {
   SwapHoriz as SwapHorizIcon,
 } from "@mui/icons-material";
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { SkeletonList, UserAvatar } from "@/components/ui/data-display";
 import { ActionMenu } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
@@ -170,7 +170,7 @@ export function MembersTab(props: MembersTabProps): ReactElement {
           </Typography>
           <Stack spacing={1.5}>
             {pendingInvitations.map((invitation) => (
-              <GlassCard key={invitation.id} hoverGlow={false}>
+              <Surface key={invitation.id}>
                 <Stack
                   direction="row"
                   spacing={2}
@@ -242,7 +242,7 @@ export function MembersTab(props: MembersTabProps): ReactElement {
                     ]}
                   />
                 </Stack>
-              </GlassCard>
+              </Surface>
             ))}
           </Stack>
         </Box>
@@ -251,7 +251,7 @@ export function MembersTab(props: MembersTabProps): ReactElement {
         {members.map((member) => {
           const name = [member.user.firstName, member.user.lastName].filter(Boolean).join(" ");
           return (
-            <GlassCard key={member.id} hoverGlow={false}>
+            <Surface key={member.id}>
               <Stack
                 direction="row"
                 spacing={2}
@@ -321,7 +321,7 @@ export function MembersTab(props: MembersTabProps): ReactElement {
                   />
                 )}
               </Stack>
-            </GlassCard>
+            </Surface>
           );
         })}
       </Stack>

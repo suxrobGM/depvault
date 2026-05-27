@@ -1,9 +1,18 @@
 "use client";
 
 import type { ReactElement } from "react";
-import { Box, Button, CardContent, Grid, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  CardHeader,
+  Grid,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { useForm } from "@tanstack/react-form";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
@@ -49,75 +58,47 @@ export function GeneralTab(props: GeneralTabProps): ReactElement {
   return (
     <Grid container spacing={3}>
       <Grid size={{ xs: 12, md: 4 }}>
-        <GlassCard sx={{ height: "100%" }} className="vault-fade-up vault-delay-2">
+        <Surface sx={{ height: "100%" }} className="vault-fade-up vault-delay-2">
+          <CardHeader title="Avatar" />
           <CardContent sx={{ p: 3 }}>
-            <Typography
-              variant="subtitle1"
-              sx={{
-                fontWeight: 600,
-                mb: 2,
-              }}
-            >
-              Avatar
-            </Typography>
             <AvatarUploader currentAvatarUrl={user.avatarUrl} onAvatarChange={handleAvatarChange} />
           </CardContent>
-        </GlassCard>
+        </Surface>
       </Grid>
       <Grid size={{ xs: 12, md: 8 }}>
-        <GlassCard className="vault-fade-up vault-delay-3">
-          <CardContent sx={{ p: 3 }}>
-            <Typography
-              variant="subtitle1"
-              sx={{
-                fontWeight: 600,
-                mb: 2,
-              }}
-            >
-              Personal Information
-            </Typography>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                form.handleSubmit();
-              }}
-            >
+        <Surface className="vault-fade-up vault-delay-3">
+          <CardHeader title="Personal Information" />
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              form.handleSubmit();
+            }}
+          >
+            <CardContent sx={{ p: 3 }}>
               <Stack spacing={2.5}>
                 <FormTextField form={form} name="firstName" label="First Name" />
                 <FormTextField form={form} name="lastName" label="Last Name" />
                 <Box>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: "text.secondary",
-                      mb: 1,
-                    }}
-                  >
+                  <Typography variant="body2" sx={{ color: "text.secondary", mb: 1 }}>
                     Email
                   </Typography>
                   <Typography variant="body1">{user.email}</Typography>
                 </Box>
                 <Box>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: "text.secondary",
-                      mb: 1,
-                    }}
-                  >
+                  <Typography variant="body2" sx={{ color: "text.secondary", mb: 1 }}>
                     Role
                   </Typography>
                   <Typography variant="body1">{user.role}</Typography>
                 </Box>
-                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                  <Button type="submit" variant="contained" disabled={updateMutation.isPending}>
-                    {updateMutation.isPending ? "Saving..." : "Save Changes"}
-                  </Button>
-                </Box>
               </Stack>
-            </form>
-          </CardContent>
-        </GlassCard>
+            </CardContent>
+            <CardActions>
+              <Button type="submit" variant="contained" disabled={updateMutation.isPending}>
+                {updateMutation.isPending ? "Saving..." : "Save Changes"}
+              </Button>
+            </CardActions>
+          </form>
+        </Surface>
       </Grid>
     </Grid>
   );

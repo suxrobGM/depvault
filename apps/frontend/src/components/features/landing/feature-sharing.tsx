@@ -5,18 +5,12 @@ import {
   Share as ShareIcon,
 } from "@mui/icons-material";
 import { Box, Chip, Grid, IconButton, Stack, Typography } from "@mui/material";
-import { GlassCard, GradientText, IconBox } from "@/components/ui/cards";
+import { GradientText, IconBox, Surface } from "@/components/ui/cards";
 import { BrowserWindow } from "@/components/ui/containers";
 
 export function FeatureSharing(): ReactElement {
   return (
-    <Grid
-      container
-      spacing={4}
-      sx={{
-        alignItems: "center",
-      }}
-    >
+    <Grid container spacing={4} sx={{ alignItems: "center" }}>
       <Grid size={{ xs: 12, md: 6 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
           <IconBox color="#06b6d4">
@@ -43,21 +37,14 @@ export function FeatureSharing(): ReactElement {
           from sitting in Slack or email history. Every link creation, access, and expiration is
           tracked in the audit log.
         </Typography>
-        <Stack
-          direction="row"
-          spacing={1}
-          useFlexGap
-          sx={{
-            flexWrap: "wrap",
-          }}
-        >
+        <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
           <Chip label="One-Time Links" size="small" variant="outlined" color="info" />
           <Chip label="Auto-Expiration" size="small" variant="outlined" color="info" />
           <Chip label="Audit Trail" size="small" variant="outlined" color="info" />
         </Stack>
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
-        <GlassCard hoverGlow={false} sx={{ overflow: "hidden" }}>
+        <Surface sx={{ overflow: "hidden" }}>
           <BrowserWindow title="share secret" />
           <Box sx={{ p: 2.5 }}>
             <Typography
@@ -103,20 +90,9 @@ export function FeatureSharing(): ReactElement {
               </IconButton>
             </Box>
             <Stack direction="row" spacing={2}>
-              <Stack
-                direction="row"
-                spacing={0.5}
-                sx={{
-                  alignItems: "center",
-                }}
-              >
+              <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
                 <ScheduleIcon sx={{ fontSize: 14, color: "text.secondary" }} />
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: "text.secondary",
-                  }}
-                >
+                <Typography variant="caption" sx={{ color: "text.secondary" }}>
                   Expires in 24h
                 </Typography>
               </Stack>
@@ -144,7 +120,7 @@ export function FeatureSharing(): ReactElement {
               />
             </Stack>
           </Box>
-        </GlassCard>
+        </Surface>
       </Grid>
     </Grid>
   );

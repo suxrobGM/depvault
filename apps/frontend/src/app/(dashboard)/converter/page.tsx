@@ -10,7 +10,7 @@ export default function ConverterPage(): ReactElement {
       <PageHeader
         title="Config Converter"
         subtitle="Convert between .env, appsettings.json, secrets.yaml, and config.toml"
-        breadcrumbs={[{ label: "Dashboard", href: ROUTES.dashboard }, { label: "Converter" }]}
+        breadcrumbs={[{ label: "Overview", href: ROUTES.overview }, { label: "Converter" }]}
       />
       <ConverterView />
     </Box>

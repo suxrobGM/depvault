@@ -8,10 +8,9 @@ import {
   Security as SecurityIcon,
 } from "@mui/icons-material";
 import { Box, Button, Chip, IconButton, Skeleton, Stack, Tooltip, Typography } from "@mui/material";
-import { alpha } from "@mui/material/styles";
 import type { Route } from "next";
 import Link from "next/link";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { PageHeader } from "@/components/ui/containers";
 import { HealthArc, PaginationBar, SkeletonList } from "@/components/ui/data-display";
 import { EmptyState } from "@/components/ui/feedback";
@@ -79,7 +78,9 @@ function AnalysisRow(props: AnalysisRowProps): ReactElement {
       href={ROUTES.projectAnalysisDetail(projectId, item.id) as Route}
       style={{ textDecoration: "none", display: "block" }}
     >
-      <GlassCard
+      <Surface
+        accent="primary"
+        interactive
         className={`vault-fade-up ${delayClass}`}
         sx={{
           display: "flex",
@@ -87,11 +88,6 @@ function AnalysisRow(props: AnalysisRowProps): ReactElement {
           gap: 2.5,
           px: 2.5,
           py: 2,
-          "&:hover": {
-            borderColor: (t) => alpha(t.palette.primary.main, 0.25),
-            boxShadow: (t) => `0 0 20px ${alpha(t.palette.primary.main, 0.08)}`,
-            transform: "translateY(-1px)",
-          },
         }}
       >
         <HealthArc score={item.healthScore ?? null} />
@@ -179,7 +175,7 @@ function AnalysisRow(props: AnalysisRowProps): ReactElement {
             </Tooltip>
           )}
         </Stack>
-      </GlassCard>
+      </Surface>
     </Link>
   );
 }
@@ -227,7 +223,7 @@ export function AnalysisListView(props: AnalysisListViewProps): ReactElement {
       <PageHeader
         title="Analysis"
         breadcrumbs={[
-          { label: "Dashboard", href: ROUTES.dashboard as Route },
+          { label: "Overview", href: ROUTES.overview as Route },
           { label: "Projects", href: ROUTES.projects as Route },
           { label: project?.name ?? "Project", href: ROUTES.project(projectId) as Route },
           { label: "Analysis" },

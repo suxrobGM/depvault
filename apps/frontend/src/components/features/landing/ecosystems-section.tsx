@@ -5,7 +5,7 @@ import {
   VpnKey as KeyIcon,
 } from "@mui/icons-material";
 import { Box, Grid, Stack, Typography } from "@mui/material";
-import { GlassCard, IconBox } from "@/components/ui/cards";
+import { IconBox, Surface } from "@/components/ui/cards";
 import { SectionContainer } from "@/components/ui/containers";
 
 interface EcosystemCategory {
@@ -59,13 +59,7 @@ export function EcosystemsSection(): ReactElement {
   return (
     <Box component="section" id="ecosystems" sx={{ position: "relative" }}>
       <SectionContainer>
-        <Typography
-          variant="h2"
-          sx={{
-            textAlign: "center",
-            mb: 1,
-          }}
-        >
+        <Typography variant="h2" sx={{ textAlign: "center", mb: 1 }}>
           Works with your stack
         </Typography>
         <Typography
@@ -85,15 +79,8 @@ export function EcosystemsSection(): ReactElement {
         <Grid container spacing={3}>
           {categories.map((cat) => (
             <Grid key={cat.title} size={{ xs: 12, md: 4 }}>
-              <GlassCard hoverGlow={false} sx={{ height: "100%", p: 3 }}>
-                <Stack
-                  direction="row"
-                  spacing={1.5}
-                  sx={{
-                    alignItems: "center",
-                    mb: 2.5,
-                  }}
-                >
+              <Surface sx={{ height: "100%", p: 3 }}>
+                <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", mb: 2.5 }}>
                   <IconBox color={cat.color} size={36}>
                     {cat.icon}
                   </IconBox>
@@ -103,14 +90,7 @@ export function EcosystemsSection(): ReactElement {
                 </Stack>
                 <Stack spacing={0.5}>
                   {cat.items.map((item) => (
-                    <Stack
-                      key={item}
-                      direction="row"
-                      spacing={1.5}
-                      sx={{
-                        alignItems: "center",
-                      }}
-                    >
+                    <Stack key={item} direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
                       <Box
                         sx={{
                           width: 6,
@@ -125,7 +105,6 @@ export function EcosystemsSection(): ReactElement {
                         variant="body2"
                         sx={{
                           color: "text.secondary",
-
                           ...(cat.mono && {
                             fontFamily: "var(--font-jetbrains), monospace",
                             fontSize: "0.8rem",
@@ -137,7 +116,7 @@ export function EcosystemsSection(): ReactElement {
                     </Stack>
                   ))}
                 </Stack>
-              </GlassCard>
+              </Surface>
             </Grid>
           ))}
         </Grid>

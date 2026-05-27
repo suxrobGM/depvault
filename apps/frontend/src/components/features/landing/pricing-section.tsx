@@ -12,7 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import Link from "next/link";
-import { GlassCard, GradientText } from "@/components/ui/cards";
+import { GradientText, Surface } from "@/components/ui/cards";
 import { SectionContainer } from "@/components/ui/containers";
 import { ROUTES } from "@/lib/constants";
 
@@ -121,8 +121,8 @@ export function PricingSection(): ReactElement {
       >
         {TIERS.map((tier) => (
           <Grid key={tier.name} size={{ xs: 12, sm: 6, md: 4 }}>
-            <GlassCard
-              glowColor={tier.highlighted ? "#10b981" : undefined}
+            <Surface
+              accent={tier.highlighted ? "primary" : undefined}
               sx={{
                 height: "100%",
                 p: 4,
@@ -153,24 +153,12 @@ export function PricingSection(): ReactElement {
               <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
                 {tier.name}
               </Typography>
-              <Stack
-                direction="row"
-                spacing={0.5}
-                sx={{
-                  alignItems: "baseline",
-                  mb: 1,
-                }}
-              >
+              <Stack direction="row" spacing={0.5} sx={{ alignItems: "baseline", mb: 1 }}>
                 <Typography variant="h3" sx={{ fontWeight: 800 }}>
                   {tier.price}
                 </Typography>
                 {tier.period && (
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: "text.secondary",
-                    }}
-                  >
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
                     {tier.period}
                   </Typography>
                 )}
@@ -208,7 +196,7 @@ export function PricingSection(): ReactElement {
                   {tier.cta}
                 </Button>
               </Link>
-            </GlassCard>
+            </Surface>
           </Grid>
         ))}
       </Grid>

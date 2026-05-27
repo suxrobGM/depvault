@@ -10,7 +10,7 @@ import {
 import { CardContent, Grid, IconButton, Skeleton, Stack, Tooltip, Typography } from "@mui/material";
 import type { Route } from "next";
 import Link from "next/link";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
@@ -60,15 +60,11 @@ export function ProjectList(): ReactElement {
             href={ROUTES.project(project.id) as Route}
             style={{ textDecoration: "none", display: "block", height: "100%" }}
           >
-            <GlassCard
-              glowColor="var(--mui-palette-primary-main)"
+            <Surface
+              accent="primary"
+              interactive
               className={`vault-fade-up vault-delay-${index + 1}`}
-              sx={{
-                height: "100%",
-                cursor: "pointer",
-                transition: "transform 0.2s ease",
-                "&:hover": { transform: "translateY(-2px)" },
-              }}
+              sx={{ height: "100%" }}
             >
               <CardContent sx={{ p: 3 }}>
                 <Stack
@@ -142,7 +138,7 @@ export function ProjectList(): ReactElement {
                   </Typography>
                 </Stack>
               </CardContent>
-            </GlassCard>
+            </Surface>
           </Link>
         </Grid>
       ))}

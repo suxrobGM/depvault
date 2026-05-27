@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/dashboard/", "/projects/", "/settings/", "/profile/"],
+        disallow: ["/overview/", "/projects/", "/settings/", "/profile/"],
       },
     ],
     sitemap: "https://depvault.com/sitemap.xml",

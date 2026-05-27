@@ -32,7 +32,7 @@ export function LoginForm(): ReactElement {
       if (role === UserRole.ADMIN || role === UserRole.SUPER_ADMIN) {
         router.push(ROUTES.admin);
       } else {
-        router.push(ROUTES.dashboard);
+        router.push(ROUTES.overview);
       }
     },
   });

@@ -160,7 +160,7 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
       <PageHeader
         title={displayName}
         breadcrumbs={[
-          { label: "Dashboard", href: ROUTES.dashboard as Route },
+          { label: "Overview", href: ROUTES.overview as Route },
           { label: "Projects", href: ROUTES.projects as Route },
           { label: project?.name ?? "Project", href: ROUTES.project(projectId) as Route },
           { label: "Analysis", href: ROUTES.projectAnalysis(projectId) as Route },

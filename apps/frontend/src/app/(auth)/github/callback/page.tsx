@@ -27,7 +27,7 @@ export default async function GitHubCallbackPage(props: Props): Promise<ReactEle
   const { error } = await client.api.auth.github.callback.get({ query: { code } });
 
   if (!error) {
-    redirect(ROUTES.dashboard);
+    redirect(ROUTES.overview);
   }
 
   return (

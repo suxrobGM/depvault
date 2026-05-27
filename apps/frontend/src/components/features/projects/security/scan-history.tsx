@@ -11,7 +11,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { PaginationBar } from "@/components/ui/data-display";
 import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
@@ -43,7 +43,7 @@ export function ScanHistory(props: ScanHistoryProps): ReactElement {
   const scans = data?.items ?? [];
 
   return (
-    <GlassCard>
+    <Surface>
       {scans.length === 0 && !isLoading ? (
         <EmptyState
           title="No scans yet"
@@ -65,12 +65,7 @@ export function ScanHistory(props: ScanHistoryProps): ReactElement {
               {scans.map((scan) => (
                 <TableRow key={scan.id} hover>
                   <TableCell>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontSize: 13,
-                      }}
-                    >
+                    <Typography variant="body2" sx={{ fontSize: 13 }}>
                       {new Date(scan.createdAt).toLocaleString()}
                     </Typography>
                   </TableCell>
@@ -101,10 +96,7 @@ export function ScanHistory(props: ScanHistoryProps): ReactElement {
                         variant="body2"
                         color="error"
                         noWrap
-                        sx={{
-                          fontSize: 12,
-                          maxWidth: 200,
-                        }}
+                        sx={{ fontSize: 12, maxWidth: 200 }}
                       >
                         {scan.errorMessage}
                       </Typography>
@@ -126,6 +118,6 @@ export function ScanHistory(props: ScanHistoryProps): ReactElement {
           onPageSizeChange={setPageSize}
         />
       )}
-    </GlassCard>
+    </Surface>
   );
 }

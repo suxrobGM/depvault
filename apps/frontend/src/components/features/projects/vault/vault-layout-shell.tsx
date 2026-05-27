@@ -28,7 +28,7 @@ export function VaultLayoutShell(props: VaultLayoutShellProps): ReactElement {
         title="Vault"
         subtitle={project ? `Secure storage for ${project.name}` : undefined}
         breadcrumbs={[
-          { label: "Dashboard", href: ROUTES.dashboard },
+          { label: "Overview", href: ROUTES.overview },
           { label: "Projects", href: ROUTES.projects },
           { label: project?.name ?? "...", href: ROUTES.project(projectId) },
           { label: "Vault" },

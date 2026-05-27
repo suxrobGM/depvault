@@ -7,8 +7,8 @@ import {
   Group as GroupIcon,
   TrendingUp as HealthIcon,
 } from "@mui/icons-material";
-import { Box, CardContent, Grid, Stack, Typography } from "@mui/material";
-import { GlassCard, IconBox } from "@/components/ui/cards";
+import { Box, CardContent, CardHeader, Grid, Stack, Typography } from "@mui/material";
+import { IconBox, Surface } from "@/components/ui/cards";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import type { AnalysisListResponse } from "@/types/api/analysis";
@@ -79,17 +79,9 @@ export function QuickStatsCard(props: QuickStatsCardProps): ReactElement {
   ];
 
   return (
-    <GlassCard sx={{ height: "100%" }}>
+    <Surface sx={{ height: "100%" }}>
+      <CardHeader title="Quick Stats" />
       <CardContent sx={{ p: 3 }}>
-        <Typography
-          variant="subtitle1"
-          sx={{
-            fontWeight: 600,
-            mb: 2,
-          }}
-        >
-          Quick Stats
-        </Typography>
         <Grid container spacing={2}>
           {stats.map((stat) => (
             <Grid size={6} key={stat.label}>
@@ -128,6 +120,6 @@ export function QuickStatsCard(props: QuickStatsCardProps): ReactElement {
           ))}
         </Grid>
       </CardContent>
-    </GlassCard>
+    </Surface>
   );
 }

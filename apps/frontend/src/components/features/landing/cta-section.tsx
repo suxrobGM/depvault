@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import Link from "next/link";
-import { GlassCard, GradientText } from "@/components/ui/cards";
+import { GradientText, Surface } from "@/components/ui/cards";
 import { SectionContainer } from "@/components/ui/containers";
 import { ROUTES } from "@/lib/constants";
 
@@ -9,8 +9,7 @@ export function CtaSection(): ReactElement {
   return (
     <Box component="section" sx={{ position: "relative" }}>
       <SectionContainer>
-        <GlassCard
-          hoverGlow={false}
+        <Surface
           sx={{
             position: "relative",
             overflow: "hidden",
@@ -67,14 +66,7 @@ export function CtaSection(): ReactElement {
                 curl -fsSL https://get.depvault.com | bash
               </Typography>
             </Box>
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.secondary",
-                mb: 4,
-                display: "block",
-              }}
-            >
+            <Typography variant="caption" sx={{ color: "text.secondary", mb: 4, display: "block" }}>
               No credit card required. One command to get started.
             </Typography>
             <Stack
@@ -94,7 +86,7 @@ export function CtaSection(): ReactElement {
               </Button>
             </Stack>
           </Box>
-        </GlassCard>
+        </Surface>
       </SectionContainer>
     </Box>
   );

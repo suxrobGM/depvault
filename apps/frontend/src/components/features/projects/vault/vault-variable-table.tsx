@@ -18,7 +18,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { SkeletonList } from "@/components/ui/data-display";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useConfirm } from "@/hooks/use-confirm";
@@ -44,6 +44,7 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
     canEdit = false,
     onEditVariable,
   } = props;
+
   const confirm = useConfirm();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
@@ -87,7 +88,9 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
       confirmLabel: "Delete",
       destructive: true,
     });
-    if (ok) batchDelete.mutate([...selectedIds]);
+    if (ok) {
+      batchDelete.mutate([...selectedIds]);
+    }
   };
 
   const handleSelectAll = () => {
@@ -164,7 +167,7 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
           </>
         )}
       </Stack>
-      <GlassCard>
+      <Surface>
         <TableContainer>
           <Table size="small">
             <TableHead>
@@ -231,7 +234,7 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
             rowsPerPageOptions={[10, 25, 50, 100]}
           />
         )}
-      </GlassCard>
+      </Surface>
     </Stack>
   );
 }

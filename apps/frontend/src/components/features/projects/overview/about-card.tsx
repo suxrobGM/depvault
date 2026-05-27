@@ -7,8 +7,8 @@ import {
   OpenInNew as OpenInNewIcon,
   Update as UpdateIcon,
 } from "@mui/icons-material";
-import { Button, CardContent, Stack, Typography } from "@mui/material";
-import { GlassCard } from "@/components/ui/cards";
+import { Button, CardContent, CardHeader, Stack, Typography } from "@mui/material";
+import { Surface } from "@/components/ui/cards";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import type { ProjectResponse } from "@/types/api/project";
@@ -25,21 +25,13 @@ export function AboutCard(props: AboutCardProps): ReactElement {
   );
 
   if (!project) {
-    return <GlassCard sx={{ height: "100%" }} />;
+    return <Surface sx={{ height: "100%" }} />;
   }
 
   return (
-    <GlassCard sx={{ height: "100%" }}>
+    <Surface sx={{ height: "100%" }}>
+      <CardHeader title="About" />
       <CardContent sx={{ p: 3 }}>
-        <Typography
-          variant="subtitle1"
-          sx={{
-            fontWeight: 600,
-            mb: 2,
-          }}
-        >
-          About
-        </Typography>
         <Typography
           variant="body2"
           sx={{
@@ -101,6 +93,6 @@ export function AboutCard(props: AboutCardProps): ReactElement {
           </Stack>
         </Stack>
       </CardContent>
-    </GlassCard>
+    </Surface>
   );
 }

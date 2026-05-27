@@ -98,7 +98,7 @@ export function LicenseTab(props: LicenseTabProps): ReactElement {
       <PageHeader
         title="License Compliance"
         breadcrumbs={[
-          { label: "Dashboard", href: ROUTES.dashboard as Route },
+          { label: "Overview", href: ROUTES.overview as Route },
           { label: "Projects", href: ROUTES.projects as Route },
           { label: project?.name ?? "Project", href: ROUTES.project(projectId) as Route },
           { label: "Licenses" },

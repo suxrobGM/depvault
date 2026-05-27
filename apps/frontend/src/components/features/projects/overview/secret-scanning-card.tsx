@@ -2,8 +2,8 @@
 
 import type { ReactElement } from "react";
 import { ArrowForward as ArrowForwardIcon, Shield as ShieldIcon } from "@mui/icons-material";
-import { CardContent, Chip, Grid, Stack, Typography } from "@mui/material";
-import { GlassCard, IconBox } from "@/components/ui/cards";
+import { CardActions, CardContent, CardHeader, Chip, Grid, Stack, Typography } from "@mui/material";
+import { IconBox, Surface } from "@/components/ui/cards";
 import { LinkButton } from "@/components/ui/inputs";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
@@ -23,28 +23,16 @@ export function SecretScanningCard(props: SecretScanningCardProps): ReactElement
   );
 
   return (
-    <GlassCard sx={{ height: "100%" }}>
-      <CardContent sx={{ p: 3 }}>
-        <Stack
-          direction="row"
-          spacing={1.5}
-          sx={{
-            alignItems: "center",
-            mb: 2.5,
-          }}
-        >
+    <Surface accent="primary" sx={{ height: "100%" }}>
+      <CardHeader
+        avatar={
           <IconBox color="var(--mui-palette-primary-main)" size={40}>
             <ShieldIcon sx={{ fontSize: 22 }} />
           </IconBox>
-          <Typography
-            variant="subtitle1"
-            sx={{
-              fontWeight: 600,
-            }}
-          >
-            Secret Scanning
-          </Typography>
-        </Stack>
+        }
+        title="Secret Scanning"
+      />
+      <CardContent sx={{ p: 3 }}>
         {scanSummary?.lastScan ? (
           <>
             <Grid container spacing={2} sx={{ mb: 2.5 }}>
@@ -163,6 +151,8 @@ export function SecretScanningCard(props: SecretScanningCardProps): ReactElement
             No scans yet. Run your first scan to detect leaked secrets.
           </Typography>
         )}
+      </CardContent>
+      <CardActions>
         <LinkButton
           href={ROUTES.projectSecretScanning(projectId)}
           variant="outlined"
@@ -171,7 +161,7 @@ export function SecretScanningCard(props: SecretScanningCardProps): ReactElement
         >
           {scanSummary?.lastScan ? "View Details" : "Set Up Scanning"}
         </LinkButton>
-      </CardContent>
-    </GlassCard>
+      </CardActions>
+    </Surface>
   );
 }

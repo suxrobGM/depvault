@@ -59,7 +59,7 @@ export function ProjectLayoutShell(props: ProjectLayoutShellProps): ReactElement
         title={project.name}
         subtitle={project.description}
         breadcrumbs={[
-          { label: "Dashboard", href: ROUTES.dashboard },
+          { label: "Overview", href: ROUTES.overview },
           { label: "Projects", href: ROUTES.projects },
           { label: project.name },
         ]}

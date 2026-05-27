@@ -6,7 +6,7 @@ import {
   Terminal as TerminalIcon,
 } from "@mui/icons-material";
 import { Box, Grid, Stack, Typography } from "@mui/material";
-import { GlassCard, GradientText } from "@/components/ui/cards";
+import { GradientText, Surface } from "@/components/ui/cards";
 import { SectionContainer } from "@/components/ui/containers";
 
 const steps = [
@@ -88,8 +88,7 @@ export function HowItWorksSection(): ReactElement {
                     }}
                   />
                 )}
-                <GlassCard
-                  hoverGlow={false}
+                <Surface
                   sx={{
                     width: "100%",
                     height: "100%",
@@ -135,7 +134,7 @@ export function HowItWorksSection(): ReactElement {
                   >
                     {step.description}
                   </Typography>
-                </GlassCard>
+                </Surface>
               </Stack>
             </Grid>
           ))}

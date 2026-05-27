@@ -11,7 +11,7 @@ import {
   VpnKey as VaultIcon,
 } from "@mui/icons-material";
 import { Box, CardContent, Stack, Typography } from "@mui/material";
-import { GlassCard, GradientText } from "@/components/ui/cards";
+import { GradientText, Surface } from "@/components/ui/cards";
 import { useAuth } from "@/hooks/use-auth";
 
 interface OnboardingStep {
@@ -105,7 +105,7 @@ export function DashboardOnboarding(): ReactElement {
   const progress = steps.length > 0 ? Math.round((completed.size / steps.length) * 100) : 0;
 
   return (
-    <GlassCard hoverGlow={false}>
+    <Surface>
       <CardContent sx={{ p: 3 }}>
         <Stack
           direction="row"
@@ -118,12 +118,7 @@ export function DashboardOnboarding(): ReactElement {
           <GradientText variant="h6" component="h2">
             Getting Started
           </GradientText>
-          <Typography
-            variant="caption"
-            sx={{
-              color: "text.secondary",
-            }}
-          >
+          <Typography variant="caption" sx={{ color: "text.secondary" }}>
             {progress}% complete
           </Typography>
         </Stack>
@@ -174,13 +169,7 @@ export function DashboardOnboarding(): ReactElement {
                   )}
                 </Box>
                 <Box sx={{ flex: 1 }}>
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    sx={{
-                      alignItems: "center",
-                    }}
-                  >
+                  <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                     <Box sx={{ color: done ? "text.secondary" : "text.primary" }}>{step.icon}</Box>
                     <Typography
                       variant="body2"
@@ -209,6 +198,6 @@ export function DashboardOnboarding(): ReactElement {
           })}
         </Stack>
       </CardContent>
-    </GlassCard>
+    </Surface>
   );
 }

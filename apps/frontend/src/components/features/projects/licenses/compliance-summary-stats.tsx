@@ -8,7 +8,7 @@ import {
   Warning as WarnIcon,
 } from "@mui/icons-material";
 import { CardContent, Grid, Typography } from "@mui/material";
-import { GlassCard, IconBox } from "@/components/ui/cards";
+import { IconBox, Surface, type SurfaceAccent } from "@/components/ui/cards";
 
 interface ComplianceSummaryStatsProps {
   total: number;
@@ -21,7 +21,7 @@ interface StatItem {
   icon: ReactNode;
   label: string;
   value: number;
-  color: string;
+  accent: SurfaceAccent;
 }
 
 export function ComplianceSummaryStats(props: ComplianceSummaryStatsProps): ReactElement {
@@ -32,25 +32,25 @@ export function ComplianceSummaryStats(props: ComplianceSummaryStatsProps): Reac
       icon: <TotalIcon />,
       label: "Total Dependencies",
       value: total,
-      color: "var(--mui-palette-primary-main)",
+      accent: "primary",
     },
     {
       icon: <CheckIcon />,
       label: "Allowed",
       value: allowed,
-      color: "var(--mui-palette-success-main)",
+      accent: "success",
     },
     {
       icon: <WarnIcon />,
       label: "Warned",
       value: warned,
-      color: "var(--mui-palette-warning-main)",
+      accent: "warning",
     },
     {
       icon: <BlockIcon />,
       label: "Blocked",
       value: blocked,
-      color: "var(--mui-palette-error-main)",
+      accent: "error",
     },
   ];
 
@@ -58,9 +58,9 @@ export function ComplianceSummaryStats(props: ComplianceSummaryStatsProps): Reac
     <Grid container spacing={2} sx={{ mb: 3 }}>
       {stats.map((stat) => (
         <Grid key={stat.label} size={{ xs: 6, md: 3 }}>
-          <GlassCard glowColor={stat.color} sx={{ height: "100%" }}>
+          <Surface accent={stat.accent} sx={{ height: "100%" }}>
             <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
-              <IconBox color={stat.color} size={36} sx={{ mb: 1 }}>
+              <IconBox color={`var(--mui-palette-${stat.accent}-main)`} size={36} sx={{ mb: 1 }}>
                 {stat.icon}
               </IconBox>
               <Typography
@@ -83,7 +83,7 @@ export function ComplianceSummaryStats(props: ComplianceSummaryStatsProps): Reac
                 {stat.label}
               </Typography>
             </CardContent>
-          </GlassCard>
+          </Surface>
         </Grid>
       ))}
     </Grid>

@@ -35,14 +35,7 @@ export function DashboardGreeting(): ReactElement {
       }}
     >
       <Box>
-        <Stack
-          direction="row"
-          spacing={1.5}
-          sx={{
-            alignItems: "center",
-            mb: 0.5,
-          }}
-        >
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", mb: 0.5 }}>
           <GradientText variant="h4" component="h1">
             {greeting}
           </GradientText>
@@ -50,16 +43,11 @@ export function DashboardGreeting(): ReactElement {
             <Chip label={user.role} size="small" color="primary" variant="outlined" />
           )}
         </Stack>
-        <Typography
-          variant="body2"
-          sx={{
-            color: "text.secondary",
-          }}
-        >
+        <Typography variant="body2" sx={{ color: "text.secondary" }}>
           {today}
         </Typography>
       </Box>
-      <LinkButton href={ROUTES.dashboard} variant="contained" startIcon={<AddIcon />} size="small">
+      <LinkButton href={ROUTES.overview} variant="contained" startIcon={<AddIcon />} size="small">
         New Project
       </LinkButton>
     </Box>

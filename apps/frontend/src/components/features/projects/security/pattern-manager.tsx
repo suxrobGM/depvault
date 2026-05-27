@@ -22,7 +22,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
@@ -65,7 +65,7 @@ export function PatternManager(props: PatternManagerProps): ReactElement {
 
   return (
     <>
-      <GlassCard>
+      <Surface>
         <Box sx={{ p: 2 }}>
           <Stack
             direction="row"
@@ -75,12 +75,7 @@ export function PatternManager(props: PatternManagerProps): ReactElement {
               mb: 2,
             }}
           >
-            <Typography
-              variant="subtitle1"
-              sx={{
-                fontWeight: 600,
-              }}
-            >
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
               Scan Patterns
             </Typography>
             <Button
@@ -146,13 +141,7 @@ export function PatternManager(props: PatternManagerProps): ReactElement {
                           />
                         </TableCell>
                         <TableCell align="right">
-                          <Stack
-                            direction="row"
-                            spacing={0.5}
-                            sx={{
-                              justifyContent: "flex-end",
-                            }}
-                          >
+                          <Stack direction="row" spacing={0.5} sx={{ justifyContent: "flex-end" }}>
                             <Tooltip title="Edit">
                               <IconButton
                                 size="small"
@@ -242,7 +231,7 @@ export function PatternManager(props: PatternManagerProps): ReactElement {
             </Table>
           </TableContainer>
         </Box>
-      </GlassCard>
+      </Surface>
       <CreatePatternDialog
         open={dialogOpen}
         onClose={() => {

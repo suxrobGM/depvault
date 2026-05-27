@@ -10,7 +10,7 @@ export default function SecurityPage(): ReactElement {
       <PageHeader
         title="Security"
         subtitle="Vulnerability and secret scan overview across all your projects"
-        breadcrumbs={[{ label: "Dashboard", href: ROUTES.dashboard }, { label: "Security" }]}
+        breadcrumbs={[{ label: "Overview", href: ROUTES.overview }, { label: "Security" }]}
       />
       <SecurityOverviewView />
     </Box>

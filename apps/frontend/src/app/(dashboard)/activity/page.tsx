@@ -10,7 +10,7 @@ export default function ActivityPage(): ReactElement {
       <PageHeader
         title="Activity"
         subtitle="Recent activity across all your projects"
-        breadcrumbs={[{ label: "Dashboard", href: ROUTES.dashboard }, { label: "Activity" }]}
+        breadcrumbs={[{ label: "Overview", href: ROUTES.overview }, { label: "Activity" }]}
       />
       <GlobalActivityView />
     </Box>

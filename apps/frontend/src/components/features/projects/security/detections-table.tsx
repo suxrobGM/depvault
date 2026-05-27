@@ -20,7 +20,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { PaginationBar } from "@/components/ui/data-display";
 import { EmptyState } from "@/components/ui/feedback";
 import { useApiMutation } from "@/hooks/use-api-mutation";
@@ -120,7 +120,7 @@ export function DetectionsTable(props: DetectionsTableProps): ReactElement {
   };
 
   return (
-    <GlassCard sx={{ p: 2 }}>
+    <Surface sx={{ p: 2 }}>
       <Stack
         direction="row"
         spacing={2}
@@ -253,6 +253,6 @@ export function DetectionsTable(props: DetectionsTableProps): ReactElement {
           onPageSizeChange={setPageSize}
         />
       )}
-    </GlassCard>
+    </Surface>
   );
 }

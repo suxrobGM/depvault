@@ -17,7 +17,7 @@ interface FooterLink {
 
 const footerLinks: Record<string, FooterLink[]> = {
   Product: [
-    { label: "Dashboard", href: ROUTES.dashboard },
+    { label: "Overview", href: ROUTES.overview },
     { label: "Dependency Analysis", href: "/docs/guides/dependency-analysis" },
     { label: "Environment Vault", href: "/docs/guides/environment-vault" },
     { label: "Secret Sharing", href: "/docs/guides/secret-sharing" },
