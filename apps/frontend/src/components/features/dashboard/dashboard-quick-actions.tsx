@@ -64,12 +64,10 @@ export function DashboardQuickActions(): ReactElement {
                     </IconBox>
                     <ChevronIcon sx={{ color: "text.secondary", fontSize: 20 }} />
                   </Stack>
-                  <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600, mt: 2 }}>
+                  <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
                     {action.title}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                    {action.description}
-                  </Typography>
+                  <Typography variant="body2Muted">{action.description}</Typography>
                 </CardContent>
               </Surface>
             </Link>

@@ -32,13 +32,7 @@ export function AboutCard(props: AboutCardProps): ReactElement {
     <Surface sx={{ height: "100%" }}>
       <CardHeader title="About" />
       <CardContent sx={{ p: 3 }}>
-        <Typography
-          variant="body2"
-          sx={{
-            color: "text.secondary",
-            mb: 3,
-          }}
-        >
+        <Typography variant="body2Muted" sx={{ mb: 3 }}>
           {project.description || "No description provided."}
         </Typography>
         {project.repositoryUrl && (
@@ -57,37 +51,15 @@ export function AboutCard(props: AboutCardProps): ReactElement {
           </Button>
         )}
         <Stack spacing={1.5} sx={{ mt: 3 }}>
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{
-              alignItems: "center",
-            }}
-          >
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
             <CalendarIcon sx={{ fontSize: 16, color: "text.secondary" }} />
-            <Typography
-              variant="body2"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
+            <Typography variant="body2Muted">
               Created {new Date(project.createdAt).toLocaleDateString()}
             </Typography>
           </Stack>
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{
-              alignItems: "center",
-            }}
-          >
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
             <UpdateIcon sx={{ fontSize: 16, color: "text.secondary" }} />
-            <Typography
-              variant="body2"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
+            <Typography variant="body2Muted">
               Updated {new Date(project.updatedAt).toLocaleDateString()}
             </Typography>
           </Stack>

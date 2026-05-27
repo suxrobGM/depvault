@@ -118,9 +118,7 @@ export function DashboardOnboarding(): ReactElement {
           <GradientText variant="h6" component="h2">
             Getting Started
           </GradientText>
-          <Typography variant="caption" sx={{ color: "text.secondary" }}>
-            {progress}% complete
-          </Typography>
+          <Typography variant="captionMuted">{progress}% complete</Typography>
         </Stack>
         <Box
           sx={{
@@ -172,9 +170,8 @@ export function DashboardOnboarding(): ReactElement {
                   <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                     <Box sx={{ color: done ? "text.secondary" : "text.primary" }}>{step.icon}</Box>
                     <Typography
-                      variant="body2"
+                      variant="label"
                       sx={{
-                        fontWeight: 600,
                         textDecoration: done ? "line-through" : "none",
                         color: done ? "text.secondary" : "text.primary",
                       }}
@@ -183,9 +180,8 @@ export function DashboardOnboarding(): ReactElement {
                     </Typography>
                   </Stack>
                   <Typography
-                    variant="caption"
+                    variant="captionMuted"
                     sx={{
-                      color: "text.secondary",
                       mt: 0.25,
                       display: "block",
                     }}

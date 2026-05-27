@@ -25,13 +25,7 @@ export function BrowserWindow(props: BrowserWindowProps): ReactElement {
         <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "error.main" }} />
         <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "warning.main" }} />
         <Box sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: "success.main" }} />
-        <Typography
-          variant="caption"
-          sx={{
-            color: "text.secondary",
-            ml: 1,
-          }}
-        >
+        <Typography variant="captionMuted" sx={{ ml: 1 }}>
           {title}
         </Typography>
       </Box>

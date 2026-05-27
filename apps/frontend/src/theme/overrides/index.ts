@@ -7,6 +7,7 @@ import { feedbackOverrides } from "./feedback";
 import { inputOverrides } from "./inputs";
 import { menuOverrides } from "./menu";
 import { navigationOverrides } from "./navigation";
+import { typographyOverrides } from "./typography";
 
 export const componentOverrides: Components<Theme> = {
   ...baseOverrides,
@@ -17,4 +18,5 @@ export const componentOverrides: Components<Theme> = {
   ...menuOverrides,
   ...feedbackOverrides,
   ...dataDisplayOverrides,
+  ...typographyOverrides,
 };

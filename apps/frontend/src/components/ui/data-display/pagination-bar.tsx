@@ -53,13 +53,7 @@ export function PaginationBar(props: PaginationBarProps): ReactElement {
               alignItems: "center",
             }}
           >
-            <Typography
-              variant="caption"
-              noWrap
-              sx={{
-                color: "text.secondary",
-              }}
-            >
+            <Typography variant="captionMuted" noWrap>
               Rows per page
             </Typography>
             <TextField
@@ -81,13 +75,7 @@ export function PaginationBar(props: PaginationBarProps): ReactElement {
           </Stack>
         )}
         {total != null && (
-          <Typography
-            variant="caption"
-            noWrap
-            sx={{
-              color: "text.secondary",
-            }}
-          >
+          <Typography variant="captionMuted" noWrap>
             {total} {total === 1 ? "result" : "results"}
           </Typography>
         )}

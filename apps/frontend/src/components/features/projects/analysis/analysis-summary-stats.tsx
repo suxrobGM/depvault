@@ -78,9 +78,8 @@ export function AnalysisSummaryStats(props: AnalysisSummaryStatsProps): ReactEle
               </IconBox>
               {typeof stat.value === "number" ? (
                 <Typography
-                  variant="h4"
+                  variant="statValue"
                   sx={{
-                    fontWeight: 700,
                     mb: 0.25,
                     ml: 1,
                   }}
@@ -91,9 +90,8 @@ export function AnalysisSummaryStats(props: AnalysisSummaryStatsProps): ReactEle
                 stat.value
               )}
               <Typography
-                variant="body2"
+                variant="body2Muted"
                 sx={{
-                  color: "text.secondary",
                   ml: 1,
                 }}
               >

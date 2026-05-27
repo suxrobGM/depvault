@@ -50,14 +50,7 @@ export function LoginForm(): ReactElement {
         Sign in with GitHub
       </Button>
       <Divider>
-        <Typography
-          variant="caption"
-          sx={{
-            color: "text.secondary",
-          }}
-        >
-          or
-        </Typography>
+        <Typography variant="captionMuted">or</Typography>
       </Divider>
       <form
         onSubmit={(e) => {
@@ -95,12 +88,7 @@ export function LoginForm(): ReactElement {
             {form.state.isSubmitting ? "Signing in..." : "Sign in"}
           </Button>
 
-          <Stack
-            direction="row"
-            sx={{
-              justifyContent: "space-between",
-            }}
-          >
+          <Stack direction="row" sx={{ justifyContent: "space-between" }}>
             <Typography variant="body2">
               <Link href={ROUTES.forgotPassword} style={{ color: "inherit" }}>
                 Forgot password?

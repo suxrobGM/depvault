@@ -37,117 +37,43 @@ export function SecretScanningCard(props: SecretScanningCardProps): ReactElement
           <>
             <Grid container spacing={2} sx={{ mb: 2.5 }}>
               <Grid size={3}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: "text.secondary",
-                  }}
-                >
-                  Critical
-                </Typography>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 700,
-                    lineHeight: 1.2,
-                    color: "error.main",
-                  }}
-                >
+                <Typography variant="captionMuted">Critical</Typography>
+                <Typography variant="statValue" sx={{ fontSize: "1rem", color: "error.main" }}>
                   {scanSummary.openDetections.critical}
                 </Typography>
               </Grid>
               <Grid size={3}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: "text.secondary",
-                  }}
-                >
-                  High
-                </Typography>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 700,
-                    lineHeight: 1.2,
-                    color: "warning.main",
-                  }}
-                >
+                <Typography variant="captionMuted">High</Typography>
+                <Typography variant="statValue" sx={{ fontSize: "1rem", color: "warning.main" }}>
                   {scanSummary.openDetections.high}
                 </Typography>
               </Grid>
               <Grid size={3}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: "text.secondary",
-                  }}
-                >
-                  Medium
-                </Typography>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 700,
-                    lineHeight: 1.2,
-                    color: "info.main",
-                  }}
-                >
+                <Typography variant="captionMuted">Medium</Typography>
+                <Typography variant="statValue" sx={{ fontSize: "1rem", color: "info.main" }}>
                   {scanSummary.openDetections.medium}
                 </Typography>
               </Grid>
               <Grid size={3}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: "text.secondary",
-                  }}
-                >
-                  Low
-                </Typography>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 700,
-                    lineHeight: 1.2,
-                    color: "success.main",
-                  }}
-                >
+                <Typography variant="captionMuted">Low</Typography>
+                <Typography variant="statValue" sx={{ fontSize: "1rem", color: "success.main" }}>
                   {scanSummary.openDetections.low}
                 </Typography>
               </Grid>
             </Grid>
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{
-                alignItems: "center",
-                mb: 2,
-              }}
-            >
+            <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 2 }}>
               <Chip
                 label={scanSummary.lastScan.status}
                 size="small"
                 color={scanSummary.lastScan.status === "COMPLETED" ? "success" : "warning"}
               />
-              <Typography
-                variant="caption"
-                sx={{
-                  color: "text.secondary",
-                }}
-              >
+              <Typography variant="captionMuted">
                 {new Date(scanSummary.lastScan.createdAt).toLocaleDateString()}
               </Typography>
             </Stack>
           </>
         ) : (
-          <Typography
-            variant="body2"
-            sx={{
-              color: "text.secondary",
-              mb: 2.5,
-            }}
-          >
+          <Typography variant="body2Muted" sx={{ mb: 2.5 }}>
             No scans yet. Run your first scan to detect leaked secrets.
           </Typography>
         )}

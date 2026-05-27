@@ -30,14 +30,32 @@ declare module "@mui/material/styles" {
 
   interface TypographyVariants {
     mono: CSSProperties;
+    label: CSSProperties;
+    statValue: CSSProperties;
+    h6Muted: CSSProperties;
+    body1Muted: CSSProperties;
+    body2Muted: CSSProperties;
+    captionMuted: CSSProperties;
   }
   interface TypographyVariantsOptions {
     mono?: CSSProperties;
+    label?: CSSProperties;
+    statValue?: CSSProperties;
+    h6Muted?: CSSProperties;
+    body1Muted?: CSSProperties;
+    body2Muted?: CSSProperties;
+    captionMuted?: CSSProperties;
   }
 }
 
 declare module "@mui/material/Typography" {
   interface TypographyPropsVariantOverrides {
     mono: true;
+    label: true;
+    statValue: true;
+    h6Muted: true;
+    body1Muted: true;
+    body2Muted: true;
+    captionMuted: true;
   }
 }

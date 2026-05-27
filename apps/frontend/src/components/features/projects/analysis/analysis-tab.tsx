@@ -64,9 +64,7 @@ export function AnalysisTab(props: AnalysisTabProps): ReactElement {
           mb: 3,
         }}
       >
-        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-          Recent Analyses
-        </Typography>
+        <Typography variant="subtitle1">Recent Analyses</Typography>
         {canEdit && (
           <Button
             variant="contained"
@@ -89,10 +87,7 @@ export function AnalysisTab(props: AnalysisTabProps): ReactElement {
                 <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
                   <Stack
                     direction="row"
-                    sx={{
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
+                    sx={{ alignItems: "center", justifyContent: "space-between" }}
                   >
                     <Stack spacing={0.5}>
                       <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
@@ -104,7 +99,7 @@ export function AnalysisTab(props: AnalysisTabProps): ReactElement {
                           size="small"
                           variant="outlined"
                         />
-                        <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                        <Typography variant="captionMuted">
                           {new Date(analysis.createdAt).toLocaleDateString()}
                         </Typography>
                       </Stack>

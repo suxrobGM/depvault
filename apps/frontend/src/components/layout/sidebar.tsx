@@ -188,13 +188,7 @@ export function Sidebar(props: SidebarProps): ReactElement {
               <NotificationBell open={open} />
             </List>
           ) : (
-            <Stack
-              spacing={0.5}
-              sx={{
-                alignItems: "center",
-                py: 0.75,
-              }}
-            >
+            <Stack spacing={0.5} sx={{ alignItems: "center", py: 0.75 }}>
               <FeedbackMenu open={open} />
               <VaultLockButton open={open} />
               <NotificationBell open={open} />
@@ -246,21 +240,8 @@ export function Sidebar(props: SidebarProps): ReactElement {
                   </Box>
                   {open && (
                     <Box sx={{ minWidth: 0, flex: 1 }}>
-                      <Stack
-                        direction="row"
-                        spacing={0.5}
-                        sx={{
-                          alignItems: "center",
-                        }}
-                      >
-                        <Typography
-                          variant="body2"
-                          noWrap
-                          sx={{
-                            fontWeight: 600,
-                            flex: 1,
-                          }}
-                        >
+                      <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+                        <Typography variant="label" noWrap sx={{ flex: 1 }}>
                           {displayName || user.email}
                         </Typography>
                         {showRoleBadge && (
@@ -280,15 +261,7 @@ export function Sidebar(props: SidebarProps): ReactElement {
                           sx={{ fontSize: "0.6rem", height: 18 }}
                         />
                       </Stack>
-                      <Typography
-                        variant="caption"
-                        noWrap
-                        component="div"
-                        sx={{
-                          color: "text.secondary",
-                          mt: 0.25,
-                        }}
-                      >
+                      <Typography variant="captionMuted" noWrap component="div" sx={{ mt: 0.25 }}>
                         {user.email}
                       </Typography>
                     </Box>

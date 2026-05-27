@@ -75,9 +75,7 @@ export function PatternManager(props: PatternManagerProps): ReactElement {
               mb: 2,
             }}
           >
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              Scan Patterns
-            </Typography>
+            <Typography variant="subtitle1">Scan Patterns</Typography>
             <Button
               variant="contained"
               size="small"
@@ -93,15 +91,7 @@ export function PatternManager(props: PatternManagerProps): ReactElement {
 
           {custom.length > 0 && (
             <>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: "text.secondary",
-                  fontWeight: 600,
-                  mb: 1,
-                  display: "block",
-                }}
-              >
+              <Typography variant="captionMuted" sx={{ fontWeight: 600, mb: 1, display: "block" }}>
                 Custom Patterns
               </Typography>
               <TableContainer sx={{ mb: 3 }}>
@@ -174,9 +164,8 @@ export function PatternManager(props: PatternManagerProps): ReactElement {
           )}
 
           <Typography
-            variant="caption"
+            variant="captionMuted"
             sx={{
-              color: "text.secondary",
               fontWeight: 600,
               mb: 1,
               display: "block",

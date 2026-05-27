@@ -49,9 +49,8 @@ export function FeatureAnalysis(): ReactElement {
           </GradientText>
         </Box>
         <Typography
-          variant="body1"
+          variant="body1Muted"
           sx={{
-            color: "text.secondary",
             lineHeight: 1.8,
             mb: 2,
           }}
@@ -89,16 +88,16 @@ export function FeatureAnalysis(): ReactElement {
                 bgcolor: "rgba(255,255,255,0.02)",
               }}
             >
-              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600 }}>
+              <Typography variant="captionMuted" sx={{ fontWeight: 600 }}>
                 Package
               </Typography>
-              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600 }}>
+              <Typography variant="captionMuted" sx={{ fontWeight: 600 }}>
                 Current
               </Typography>
-              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600 }}>
+              <Typography variant="captionMuted" sx={{ fontWeight: 600 }}>
                 Latest
               </Typography>
-              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600 }}>
+              <Typography variant="captionMuted" sx={{ fontWeight: 600 }}>
                 Status
               </Typography>
             </Box>
@@ -126,19 +125,17 @@ export function FeatureAnalysis(): ReactElement {
                     {row.name}
                   </Typography>
                   <Typography
-                    variant="caption"
+                    variant="captionMuted"
                     sx={{
                       fontFamily: "var(--font-jetbrains), monospace",
-                      color: "text.secondary",
                     }}
                   >
                     {row.current}
                   </Typography>
                   <Typography
-                    variant="caption"
+                    variant="captionMuted"
                     sx={{
                       fontFamily: "var(--font-jetbrains), monospace",
-                      color: "text.secondary",
                     }}
                   >
                     {row.latest}

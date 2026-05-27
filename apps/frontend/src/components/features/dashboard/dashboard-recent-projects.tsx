@@ -52,13 +52,10 @@ export function DashboardRecentProjects(props: DashboardRecentProjectsProps): Re
               >
                 <Surface accent="primary" interactive>
                   <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                      {project.name}
-                    </Typography>
+                    <Typography variant="subtitle1">{project.name}</Typography>
                     <Typography
-                      variant="body2"
+                      variant="body2Muted"
                       sx={{
-                        color: "text.secondary",
                         mt: 0.5,
                         mb: 1.5,
                         display: "-webkit-box",
@@ -71,7 +68,7 @@ export function DashboardRecentProjects(props: DashboardRecentProjectsProps): Re
                     </Typography>
                     <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
                       <CalendarIcon sx={{ fontSize: 14, color: "text.secondary" }} />
-                      <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                      <Typography variant="captionMuted">
                         {new Date(project.createdAt).toLocaleDateString()}
                       </Typography>
                     </Stack>

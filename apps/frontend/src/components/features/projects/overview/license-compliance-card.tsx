@@ -43,38 +43,17 @@ export function LicenseComplianceCard(props: LicenseComplianceCardProps): ReactE
       <CardContent sx={{ p: 3 }}>
         <Grid container spacing={2}>
           <Grid size={3}>
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
-              Total
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                lineHeight: 1.2,
-              }}
-            >
+            <Typography variant="captionMuted">Total</Typography>
+            <Typography variant="statValue" sx={{ fontSize: "1rem" }}>
               {total}
             </Typography>
           </Grid>
           <Grid size={3}>
+            <Typography variant="captionMuted">Allowed</Typography>
             <Typography
-              variant="caption"
+              variant="statValue"
               sx={{
-                color: "text.secondary",
-              }}
-            >
-              Allowed
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                lineHeight: 1.2,
+                fontSize: "1rem",
                 color: allowed > 0 ? "var(--mui-palette-success-main)" : "text.secondary",
               }}
             >
@@ -82,19 +61,11 @@ export function LicenseComplianceCard(props: LicenseComplianceCardProps): ReactE
             </Typography>
           </Grid>
           <Grid size={3}>
+            <Typography variant="captionMuted">Warned</Typography>
             <Typography
-              variant="caption"
+              variant="statValue"
               sx={{
-                color: "text.secondary",
-              }}
-            >
-              Warned
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                lineHeight: 1.2,
+                fontSize: "1rem",
                 color: warned > 0 ? "var(--mui-palette-warning-main)" : "text.secondary",
               }}
             >
@@ -102,19 +73,11 @@ export function LicenseComplianceCard(props: LicenseComplianceCardProps): ReactE
             </Typography>
           </Grid>
           <Grid size={3}>
+            <Typography variant="captionMuted">Blocked</Typography>
             <Typography
-              variant="caption"
+              variant="statValue"
               sx={{
-                color: "text.secondary",
-              }}
-            >
-              Blocked
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                lineHeight: 1.2,
+                fontSize: "1rem",
                 color: blocked > 0 ? "var(--mui-palette-error-main)" : "text.secondary",
               }}
             >

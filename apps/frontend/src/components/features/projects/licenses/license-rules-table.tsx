@@ -95,22 +95,10 @@ export function LicenseRulesTable(props: LicenseRulesTableProps): ReactElement {
 
   return (
     <Box>
-      <Typography
-        variant="subtitle1"
-        sx={{
-          fontWeight: 600,
-          mb: 2,
-        }}
-      >
+      <Typography variant="subtitle1" sx={{ mb: 2 }}>
         License Policy Rules
       </Typography>
-      <Typography
-        variant="body2"
-        sx={{
-          color: "text.secondary",
-          mb: 2,
-        }}
-      >
+      <Typography variant="body2Muted" sx={{ mb: 2 }}>
         Override the default policy for specific SPDX license identifiers. Defaults: permissive
         (MIT, Apache-2.0, BSD) = Allow; copyleft (GPL, AGPL) = Warn; unknown = Warn.
       </Typography>
@@ -135,12 +123,7 @@ export function LicenseRulesTable(props: LicenseRulesTableProps): ReactElement {
             {data?.items.map((rule) => (
               <TableRow key={rule.id}>
                 <TableCell>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 500,
-                    }}
-                  >
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
                     {rule.licenseId}
                   </Typography>
                 </TableCell>
@@ -208,14 +191,7 @@ export function LicenseRulesTable(props: LicenseRulesTableProps): ReactElement {
         </Table>
       </TableContainer>
       {canEdit && (
-        <Stack
-          direction="row"
-          spacing={1.5}
-          sx={{
-            alignItems: "center",
-            mt: 2,
-          }}
-        >
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", mt: 2 }}>
           <TextField
             size="small"
             placeholder="e.g. GPL-3.0"

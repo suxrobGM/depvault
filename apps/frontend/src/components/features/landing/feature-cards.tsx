@@ -82,10 +82,9 @@ export function LandingFeatureCards(): ReactElement {
           Everything you need to ship securely
         </Typography>
         <Typography
-          variant="body1"
+          variant="body1Muted"
           className="vault-fade-up vault-delay-1"
           sx={{
-            color: "text.secondary",
             textAlign: "center",
             mb: 8,
             maxWidth: 520,
@@ -117,9 +116,8 @@ export function LandingFeatureCards(): ReactElement {
           And that&apos;s not all
         </Typography>
         <Typography
-          variant="body1"
+          variant="body1Muted"
           sx={{
-            color: "text.secondary",
             textAlign: "center",
             mb: 6,
             maxWidth: 480,
@@ -136,10 +134,10 @@ export function LandingFeatureCards(): ReactElement {
                   <IconBox color={feature.color} sx={{ mb: 2 }}>
                     {feature.icon}
                   </IconBox>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
+                  <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
                     {feature.title}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.7 }}>
+                  <Typography variant="body2Muted" sx={{ lineHeight: 1.7 }}>
                     {feature.description}
                   </Typography>
                 </CardContent>

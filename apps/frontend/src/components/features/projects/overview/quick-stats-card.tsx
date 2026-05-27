@@ -96,21 +96,10 @@ export function QuickStatsCard(props: QuickStatsCardProps): ReactElement {
                   {stat.icon}
                 </IconBox>
                 <Box>
+                  <Typography variant="captionMuted">{stat.label}</Typography>
                   <Typography
-                    variant="caption"
-                    sx={{
-                      color: "text.secondary",
-                    }}
-                  >
-                    {stat.label}
-                  </Typography>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 700,
-                      lineHeight: 1.2,
-                      color: stat.valueColor ?? "text.primary",
-                    }}
+                    variant="statValue"
+                    sx={{ fontSize: "1rem", color: stat.valueColor ?? "text.primary" }}
                   >
                     {stat.value}
                   </Typography>

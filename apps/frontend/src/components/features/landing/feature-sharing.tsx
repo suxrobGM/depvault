@@ -24,14 +24,7 @@ export function FeatureSharing(): ReactElement {
             Secret Sharing
           </GradientText>
         </Box>
-        <Typography
-          variant="body1"
-          sx={{
-            color: "text.secondary",
-            lineHeight: 1.8,
-            mb: 2,
-          }}
-        >
+        <Typography variant="body1Muted" sx={{ lineHeight: 1.8, mb: 2 }}>
           Generate one-time encrypted links where the decryption key lives only in the URL — the
           server never sees it. Set expiration times, add optional passwords, and stop credentials
           from sitting in Slack or email history. Every link creation, access, and expiration is
@@ -47,14 +40,7 @@ export function FeatureSharing(): ReactElement {
         <Surface sx={{ overflow: "hidden" }}>
           <BrowserWindow title="share secret" />
           <Box sx={{ p: 2.5 }}>
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.secondary",
-                mb: 1,
-                display: "block",
-              }}
-            >
+            <Typography variant="captionMuted" sx={{ mb: 1, display: "block" }}>
               Secure link generated
             </Typography>
             <Box
@@ -92,9 +78,7 @@ export function FeatureSharing(): ReactElement {
             <Stack direction="row" spacing={2}>
               <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
                 <ScheduleIcon sx={{ fontSize: 14, color: "text.secondary" }} />
-                <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                  Expires in 24h
-                </Typography>
+                <Typography variant="captionMuted">Expires in 24h</Typography>
               </Stack>
               <Chip
                 label="One-time access"

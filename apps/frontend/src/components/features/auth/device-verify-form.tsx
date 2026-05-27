@@ -43,29 +43,12 @@ export function DeviceVerifyForm(): ReactElement {
 
   if (success) {
     return (
-      <Stack
-        spacing={2}
-        sx={{
-          alignItems: "center",
-          py: 2,
-        }}
-      >
+      <Stack spacing={2} sx={{ alignItems: "center", py: 2 }}>
         <CheckIcon sx={{ fontSize: 48, color: "success.main" }} />
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 600,
-          }}
-        >
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
           CLI Authorized
         </Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            color: "text.secondary",
-            textAlign: "center",
-          }}
-        >
+        <Typography variant="body2Muted" sx={{ textAlign: "center" }}>
           Your terminal is now authenticated. You can close this tab.
         </Typography>
       </Stack>
@@ -82,33 +65,19 @@ export function DeviceVerifyForm(): ReactElement {
       }}
     >
       <Stack spacing={2.5}>
-        <Stack
-          direction="row"
-          spacing={1}
-          sx={{
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center", justifyContent: "center" }}>
           <TerminalIcon sx={{ color: "text.secondary", fontSize: 20 }} />
-          <Typography
-            variant="body2"
-            sx={{
-              color: "text.secondary",
-            }}
-          >
-            depvault login
-          </Typography>
+          <Typography variant="body2Muted">depvault login</Typography>
         </Stack>
 
         {serverError === "sign_in_required" && (
           <Alert severity="warning">
             You need to sign in first before authorizing the CLI.
             <Typography
-              variant="body2"
+              variant="label"
               component="a"
               href={`${ROUTES.login}?redirect=/cli/verify${codeValue ? `?code=${codeValue}` : ""}`}
-              sx={{ display: "block", mt: 0.5, color: "inherit", fontWeight: 600 }}
+              sx={{ display: "block", mt: 0.5, color: "inherit" }}
             >
               Sign in now
             </Typography>

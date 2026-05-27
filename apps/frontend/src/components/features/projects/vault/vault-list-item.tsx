@@ -59,11 +59,7 @@ export function VaultListItem(props: VaultListItemProps): ReactElement {
             spacing={1}
             sx={{ width: "100%", alignItems: "center", minWidth: 0 }}
           >
-            <Typography
-              variant="body2"
-              noWrap
-              sx={{ fontWeight: 600, flexShrink: 0, maxWidth: "45%" }}
-            >
+            <Typography variant="label" noWrap sx={{ flexShrink: 0, maxWidth: "45%" }}>
               {vault.name}
             </Typography>
             <Stack direction="row" spacing={0.5} sx={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
@@ -71,9 +67,7 @@ export function VaultListItem(props: VaultListItemProps): ReactElement {
                 <VaultTagChip key={tag} tag={tag} compact />
               ))}
               {tags.length > 2 && (
-                <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                  +{tags.length - 2}
-                </Typography>
+                <Typography variant="captionMuted">+{tags.length - 2}</Typography>
               )}
             </Stack>
             <Typography
@@ -120,9 +114,7 @@ function VaultTooltipContent(props: VaultTooltipContentProps): ReactElement {
       <Typography variant="caption" sx={{ fontFamily: "monospace" }}>
         {vault.directoryPath}
       </Typography>
-      <Typography variant="caption" sx={{ color: "text.secondary" }}>
-        {counts}
-      </Typography>
+      <Typography variant="captionMuted">{counts}</Typography>
     </Stack>
   );
 }

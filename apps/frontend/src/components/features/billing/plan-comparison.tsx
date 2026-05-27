@@ -194,40 +194,16 @@ export function PlanComparison(): ReactElement {
               >
                 <CardContent sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
                   <Box>
-                    <Stack
-                      direction="row"
-                      spacing={1}
-                      sx={{
-                        alignItems: "center",
-                        mb: 0.5,
-                      }}
-                    >
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          fontWeight: 700,
-                        }}
-                      >
+                    <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 0.5 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 700 }}>
                         {planDef.name}
                       </Typography>
                       {isCurrent && <StatusBadge label="Current" variant="info" />}
                     </Stack>
-                    <Typography
-                      variant="h4"
-                      sx={{
-                        fontWeight: 800,
-                      }}
-                    >
+                    <Typography variant="h4" sx={{ fontWeight: 800 }}>
                       {planDef.price}
                     </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "text.secondary",
-                      }}
-                    >
-                      {planDef.description}
-                    </Typography>
+                    <Typography variant="body2Muted">{planDef.description}</Typography>
                   </Box>
 
                   <List dense disablePadding sx={{ flex: 1 }}>

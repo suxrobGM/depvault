@@ -120,9 +120,7 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
   if (variables.length === 0) {
     return (
       <Box sx={{ py: 4, textAlign: "center" }}>
-        <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          No variables in this vault yet.
-        </Typography>
+        <Typography variant="body2Muted">No variables in this vault yet.</Typography>
       </Box>
     );
   }
@@ -152,9 +150,7 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
         <Box sx={{ flex: 1 }} />
         {canEdit && selectedIds.size > 0 && (
           <>
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              {selectedIds.size} selected
-            </Typography>
+            <Typography variant="body2Muted">{selectedIds.size} selected</Typography>
             <Button
               size="small"
               color="error"
@@ -195,10 +191,7 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
               {filteredVariables.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={canEdit ? 6 : 5}>
-                    <Typography
-                      variant="body2"
-                      sx={{ color: "text.secondary", textAlign: "center", py: 2 }}
-                    >
+                    <Typography variant="body2Muted" sx={{ textAlign: "center", py: 2 }}>
                       No variables match your search.
                     </Typography>
                   </TableCell>

@@ -30,14 +30,7 @@ export function CiTokenUsageSnippets(): ReactElement {
 
   return (
     <Box>
-      <Typography
-        variant="caption"
-        sx={{
-          color: "text.secondary",
-          mb: 0.5,
-          display: "block",
-        }}
-      >
+      <Typography variant="captionMuted" sx={{ mb: 0.5, display: "block" }}>
         Integration examples
       </Typography>
       <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ minHeight: 32 }}>

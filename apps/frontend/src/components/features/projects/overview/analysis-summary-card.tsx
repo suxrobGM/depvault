@@ -52,57 +52,23 @@ export function AnalysisSummaryCard(props: AnalysisSummaryCardProps): ReactEleme
       <CardContent sx={{ p: 3 }}>
         <Grid container spacing={2}>
           <Grid size={4}>
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
-              Analyses
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                lineHeight: 1.2,
-              }}
-            >
+            <Typography variant="captionMuted">Analyses</Typography>
+            <Typography variant="statValue" sx={{ fontSize: "1rem" }}>
               {analysisCount}
             </Typography>
           </Grid>
           <Grid size={4}>
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
-              Dependencies
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                lineHeight: 1.2,
-              }}
-            >
+            <Typography variant="captionMuted">Dependencies</Typography>
+            <Typography variant="statValue" sx={{ fontSize: "1rem" }}>
               {totalDeps}
             </Typography>
           </Grid>
           <Grid size={4}>
+            <Typography variant="captionMuted">Avg Health</Typography>
             <Typography
-              variant="caption"
+              variant="statValue"
               sx={{
-                color: "text.secondary",
-              }}
-            >
-              Avg Health
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                lineHeight: 1.2,
+                fontSize: "1rem",
                 color: avgHealth !== null ? getHealthColor(avgHealth) : "text.secondary",
               }}
             >

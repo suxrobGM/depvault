@@ -81,21 +81,10 @@ export function RegisterForm(props: RegisterFormProps): ReactElement {
         }}
       >
         <MarkEmailReadIcon sx={{ fontSize: 48, color: "primary.main" }} />
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 600,
-          }}
-        >
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
           Check your email
         </Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            color: "text.secondary",
-            textAlign: "center",
-          }}
-        >
+        <Typography variant="body2Muted" sx={{ textAlign: "center" }}>
           We&apos;ve sent a verification link to your email address. Please verify your email to
           activate your account.
         </Typography>
@@ -127,14 +116,7 @@ export function RegisterForm(props: RegisterFormProps): ReactElement {
         Sign up with GitHub
       </Button>
       <Divider>
-        <Typography
-          variant="caption"
-          sx={{
-            color: "text.secondary",
-          }}
-        >
-          or
-        </Typography>
+        <Typography variant="captionMuted">or</Typography>
       </Divider>
       <form
         onSubmit={(e) => {
@@ -196,12 +178,7 @@ export function RegisterForm(props: RegisterFormProps): ReactElement {
             {form.state.isSubmitting ? "Creating account..." : "Create account"}
           </Button>
 
-          <Typography
-            variant="body2"
-            sx={{
-              textAlign: "center",
-            }}
-          >
+          <Typography variant="body2" sx={{ textAlign: "center" }}>
             Already have an account?{" "}
             <Link href={ROUTES.login} style={{ color: "inherit" }}>
               Sign in

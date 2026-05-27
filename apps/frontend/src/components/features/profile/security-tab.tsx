@@ -138,14 +138,7 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
               >
                 <GitHubIcon />
                 <Box>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 600,
-                    }}
-                  >
-                    {user.githubUsername ?? "Connected"}
-                  </Typography>
+                  <Typography variant="label">{user.githubUsername ?? "Connected"}</Typography>
                   <Chip label="Linked" size="small" color="success" />
                 </Box>
               </Stack>
@@ -160,12 +153,7 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
             </Stack>
           ) : (
             <Stack spacing={1.5}>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "text.secondary",
-                }}
-              >
+              <Typography variant="body2Muted">
                 Link your GitHub account to import dependencies from your repositories.
               </Typography>
               <Box>
@@ -198,7 +186,7 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
             <CardContent sx={{ p: 3 }}>
               <Stack spacing={2.5}>
                 <Box>
-                  <Typography variant="body2" sx={{ color: "text.secondary", mb: 1 }}>
+                  <Typography variant="body2Muted" sx={{ mb: 1 }}>
                     Current email
                   </Typography>
                   <Typography variant="body1">{user.email}</Typography>
@@ -303,7 +291,7 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
       <Surface className="vault-fade-up vault-delay-5" accent="error">
         <CardHeader title="Danger Zone" slotProps={{ title: { sx: { color: "error.main" } } }} />
         <CardContent sx={{ p: 3 }}>
-          <Typography variant="body2" sx={{ color: "text.secondary" }}>
+          <Typography variant="body2Muted">
             Permanently delete your account and all associated data. This action cannot be undone.
           </Typography>
         </CardContent>

@@ -97,10 +97,7 @@ export function CiTokensSection(props: CiTokensSectionProps): ReactElement {
         />
         <CardContent sx={{ p: 3 }}>
           {tokens.length === 0 ? (
-            <Typography
-              variant="body2"
-              sx={{ color: "text.secondary", py: 2, textAlign: "center" }}
-            >
+            <Typography variant="body2Muted" sx={{ py: 2, textAlign: "center" }}>
               No CI/CD tokens yet. Generate one to get started.
             </Typography>
           ) : (
@@ -128,10 +125,7 @@ export function CiTokensSection(props: CiTokensSectionProps): ReactElement {
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography
-                            variant="body2"
-                            sx={{ fontFamily: "monospace", color: "text.secondary" }}
-                          >
+                          <Typography variant="body2Muted" sx={{ fontFamily: "monospace" }}>
                             dvci_{token.tokenPrefix}...
                           </Typography>
                         </TableCell>

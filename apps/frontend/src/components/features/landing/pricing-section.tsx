@@ -99,9 +99,8 @@ export function PricingSection(): ReactElement {
         </GradientText>
       </Typography>
       <Typography
-        variant="body1"
+        variant="body1Muted"
         sx={{
-          color: "text.secondary",
           textAlign: "center",
           mb: 6,
           maxWidth: 500,
@@ -157,20 +156,9 @@ export function PricingSection(): ReactElement {
                 <Typography variant="h3" sx={{ fontWeight: 800 }}>
                   {tier.price}
                 </Typography>
-                {tier.period && (
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                    {tier.period}
-                  </Typography>
-                )}
+                {tier.period && <Typography variant="body2Muted">{tier.period}</Typography>}
               </Stack>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "text.secondary",
-                  mb: 3,
-                  lineHeight: 1.7,
-                }}
-              >
+              <Typography variant="body2Muted" sx={{ mb: 3, lineHeight: 1.7 }}>
                 {tier.description}
               </Typography>
               <List dense disablePadding sx={{ flex: 1, mb: 3 }}>

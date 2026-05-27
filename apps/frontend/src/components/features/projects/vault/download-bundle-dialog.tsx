@@ -166,11 +166,7 @@ export function DownloadBundleDialog(props: DownloadBundleDialogProps): ReactEle
                     onChange={toggleAllVars}
                   />
                 }
-                label={
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    Variables ({variables.length})
-                  </Typography>
-                }
+                label={<Typography variant="label">Variables ({variables.length})</Typography>}
               />
               <Stack sx={{ ml: 3, maxHeight: 200, overflow: "auto" }}>
                 {variables.map((v) => (
@@ -206,11 +202,7 @@ export function DownloadBundleDialog(props: DownloadBundleDialogProps): ReactEle
                     onChange={toggleAllFiles}
                   />
                 }
-                label={
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    Secret Files ({secretFiles.length})
-                  </Typography>
-                }
+                label={<Typography variant="label">Secret Files ({secretFiles.length})</Typography>}
               />
               <Stack sx={{ ml: 3, maxHeight: 200, overflow: "auto" }}>
                 {secretFiles.map((f) => (

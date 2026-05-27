@@ -127,9 +127,7 @@ export function ConverterView(): ReactElement {
                 mb: 2,
               }}
             >
-              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                Input
-              </Typography>
+              <Typography variant="subtitle1">Input</Typography>
               <TextField
                 select
                 size="small"
@@ -206,9 +204,7 @@ export function ConverterView(): ReactElement {
                 mb: 2,
               }}
             >
-              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                Output
-              </Typography>
+              <Typography variant="subtitle1">Output</Typography>
               <TextField
                 select
                 size="small"

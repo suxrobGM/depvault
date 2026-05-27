@@ -69,13 +69,9 @@ export function DashboardStats(): ReactElement {
                   {isLoading ? (
                     <Skeleton variant="text" width={60} height={36} />
                   ) : (
-                    <Typography variant="h4" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-                      {stat.value}
-                    </Typography>
+                    <Typography variant="statValue">{stat.value}</Typography>
                   )}
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                    {stat.label}
-                  </Typography>
+                  <Typography variant="body2Muted">{stat.label}</Typography>
                 </Box>
               </Stack>
             </CardContent>

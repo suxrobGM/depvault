@@ -68,13 +68,7 @@ export function TransferOwnershipDialog(props: TransferOwnershipDialogProps): Re
             This action cannot be undone. You will become an Editor after the transfer.
           </Typography>
         </Alert>
-        <Typography
-          variant="body2"
-          sx={{
-            color: "text.secondary",
-            mb: 2,
-          }}
-        >
+        <Typography variant="body2Muted" sx={{ mb: 2 }}>
           Select the new owner:
         </Typography>
         <List>

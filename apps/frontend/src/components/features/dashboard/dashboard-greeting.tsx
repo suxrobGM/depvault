@@ -43,9 +43,7 @@ export function DashboardGreeting(): ReactElement {
             <Chip label={user.role} size="small" color="primary" variant="outlined" />
           )}
         </Stack>
-        <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          {today}
-        </Typography>
+        <Typography variant="body2Muted">{today}</Typography>
       </Box>
       <LinkButton href={ROUTES.overview} variant="contained" startIcon={<AddIcon />} size="small">
         New Project

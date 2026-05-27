@@ -68,9 +68,8 @@ export function PageHeader(props: PageHeaderProps): ReactElement {
                   {item.href && !isLast ? (
                     <Link href={item.href} style={{ textDecoration: "none" }}>
                       <Typography
-                        variant="caption"
+                        variant="captionMuted"
                         sx={{
-                          color: "text.secondary",
                           fontWeight: 500,
                           fontSize: "0.75rem",
                           letterSpacing: "0.01em",
@@ -102,16 +101,7 @@ export function PageHeader(props: PageHeaderProps): ReactElement {
         <Typography variant="h4" component="h1" gutterBottom={!!subtitle}>
           {title}
         </Typography>
-        {subtitle && (
-          <Typography
-            variant="body2"
-            sx={{
-              color: "text.secondary",
-            }}
-          >
-            {subtitle}
-          </Typography>
-        )}
+        {subtitle && <Typography variant="body2Muted">{subtitle}</Typography>}
       </Box>
       {actions && (
         <Stack direction="row" spacing={1} sx={{ flexShrink: 0, ml: 2 }}>

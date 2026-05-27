@@ -79,13 +79,13 @@ export function GeneralTab(props: GeneralTabProps): ReactElement {
                 <FormTextField form={form} name="firstName" label="First Name" />
                 <FormTextField form={form} name="lastName" label="Last Name" />
                 <Box>
-                  <Typography variant="body2" sx={{ color: "text.secondary", mb: 1 }}>
+                  <Typography variant="body2Muted" sx={{ mb: 1 }}>
                     Email
                   </Typography>
                   <Typography variant="body1">{user.email}</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="body2" sx={{ color: "text.secondary", mb: 1 }}>
+                  <Typography variant="body2Muted" sx={{ mb: 1 }}>
                     Role
                   </Typography>
                   <Typography variant="body1">{user.role}</Typography>

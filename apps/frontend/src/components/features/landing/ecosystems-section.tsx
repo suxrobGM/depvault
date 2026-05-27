@@ -63,9 +63,8 @@ export function EcosystemsSection(): ReactElement {
           Works with your stack
         </Typography>
         <Typography
-          variant="body1"
+          variant="body1Muted"
           sx={{
-            color: "text.secondary",
             textAlign: "center",
             mb: 6,
             maxWidth: 540,
@@ -102,9 +101,8 @@ export function EcosystemsSection(): ReactElement {
                         }}
                       />
                       <Typography
-                        variant="body2"
+                        variant="body2Muted"
                         sx={{
-                          color: "text.secondary",
                           ...(cat.mono && {
                             fontFamily: "var(--font-jetbrains), monospace",
                             fontSize: "0.8rem",

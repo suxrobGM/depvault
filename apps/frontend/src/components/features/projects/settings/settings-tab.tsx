@@ -152,7 +152,7 @@ export function SettingsTab(props: SettingsTabProps): ReactElement {
               slotProps={{ title: { sx: { color: "error.main" } } }}
             />
             <CardContent sx={{ p: 3 }}>
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              <Typography variant="body2Muted">
                 Permanently delete this project and all associated data including analyses,
                 environments, and variables. This action cannot be undone.
               </Typography>

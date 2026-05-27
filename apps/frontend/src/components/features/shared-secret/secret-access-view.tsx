@@ -130,11 +130,7 @@ export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
         <Typography variant="h6" gutterBottom>
           File downloaded
         </Typography>
-        <Typography
-          sx={{
-            color: "text.secondary",
-          }}
-        >
+        <Typography variant="body1Muted">
           This link has been consumed and is no longer valid.
         </Typography>
       </Box>
@@ -163,14 +159,7 @@ export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
               {result.variables.map((v) => (
                 <TableRow key={v.key}>
                   <TableCell>
-                    <Typography
-                      variant="body2"
-                      noWrap
-                      sx={{
-                        fontFamily: "monospace",
-                        fontWeight: 600,
-                      }}
-                    >
+                    <Typography variant="label" noWrap sx={{ fontFamily: "monospace" }}>
                       {v.key}
                     </Typography>
                   </TableCell>
@@ -216,33 +205,18 @@ export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
   return (
     <Stack spacing={3}>
       <Box>
-        <Typography
-          variant="body2"
-          sx={{
-            color: "text.secondary",
-          }}
-        >
+        <Typography variant="body2Muted">
           Type:{" "}
           <strong>
             {info.payloadType === "ENV_VARIABLES" ? "Environment Variables" : "Secret File"}
           </strong>
         </Typography>
         {info.fileName && (
-          <Typography
-            variant="body2"
-            sx={{
-              color: "text.secondary",
-            }}
-          >
+          <Typography variant="body2Muted">
             File: <strong>{info.fileName}</strong>
           </Typography>
         )}
-        <Typography
-          variant="body2"
-          sx={{
-            color: "text.secondary",
-          }}
-        >
+        <Typography variant="body2Muted">
           Expires: <strong>{new Date(info.expiresAt).toLocaleString()}</strong>
         </Typography>
       </Box>
@@ -253,12 +227,7 @@ export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
         <>
           <Divider />
           <Stack spacing={1}>
-            <Typography
-              variant="body2"
-              sx={{
-                fontWeight: 500,
-              }}
-            >
+            <Typography variant="body2" sx={{ fontWeight: 500 }}>
               <LockIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: "middle" }} />
               Password required
             </Typography>

@@ -93,15 +93,7 @@ function AnalysisRow(props: AnalysisRowProps): ReactElement {
         <HealthArc score={item.healthScore ?? null} />
 
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography
-            variant="body2"
-            noWrap
-            sx={{
-              fontWeight: 600,
-              color: "text.primary",
-              lineHeight: 1.4,
-            }}
-          >
+          <Typography variant="label" noWrap sx={{ color: "text.primary", lineHeight: 1.4 }}>
             {dirPath && (
               <Typography
                 component="span"
@@ -113,26 +105,14 @@ function AnalysisRow(props: AnalysisRowProps): ReactElement {
             )}
             {fileName}
           </Typography>
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{
-              alignItems: "center",
-              mt: 0.5,
-            }}
-          >
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center", mt: 0.5 }}>
             <Chip
               label={getEcosystemLabel(item.ecosystem)}
               size="small"
               variant="outlined"
               sx={{ height: 22, fontSize: "0.7rem" }}
             />
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.disabled",
-              }}
-            >
+            <Typography variant="caption" sx={{ color: "text.disabled" }}>
               {new Date(item.createdAt).toLocaleDateString(undefined, {
                 month: "short",
                 day: "numeric",
@@ -142,14 +122,7 @@ function AnalysisRow(props: AnalysisRowProps): ReactElement {
           </Stack>
         </Box>
 
-        <Stack
-          direction="row"
-          spacing={1.5}
-          sx={{
-            alignItems: "center",
-            flexShrink: 0,
-          }}
-        >
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", flexShrink: 0 }}>
           {item.dependencyCount !== undefined && item.dependencyCount > 0 && (
             <Chip
               icon={<FolderIcon sx={{ fontSize: 14 }} />}
@@ -237,7 +210,7 @@ export function AnalysisListView(props: AnalysisListViewProps): ReactElement {
             >
               New Analysis
             </Button>
-          ) : undefined
+          ) : null
         }
       />
 

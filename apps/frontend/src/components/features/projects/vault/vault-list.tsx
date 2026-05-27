@@ -64,9 +64,7 @@ export function VaultList(props: VaultListProps): ReactElement {
       <List dense disablePadding sx={{ borderTop: "1px solid", borderColor: "divider" }}>
         {filteredVaults.length === 0 ? (
           <Box sx={{ py: 3, textAlign: "center" }}>
-            <Typography variant="caption" sx={{ color: "text.secondary" }}>
-              No vaults match.
-            </Typography>
+            <Typography variant="captionMuted">No vaults match.</Typography>
           </Box>
         ) : (
           filteredVaults.map((vault) => (

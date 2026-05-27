@@ -121,14 +121,7 @@ export function DetectionsTable(props: DetectionsTableProps): ReactElement {
 
   return (
     <Surface sx={{ p: 2 }}>
-      <Stack
-        direction="row"
-        spacing={2}
-        sx={{
-          alignItems: "center",
-          mb: 2,
-        }}
-      >
+      <Stack direction="row" spacing={2} sx={{ alignItems: "center", mb: 2 }}>
         <TextField
           select
           size="small"
@@ -166,14 +159,7 @@ export function DetectionsTable(props: DetectionsTableProps): ReactElement {
         {someSelected && (
           <>
             <Box sx={{ flex: 1 }} />
-            <Typography
-              variant="body2"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
-              {selectedIds.size} selected
-            </Typography>
+            <Typography variant="body2Muted">{selectedIds.size} selected</Typography>
             <Button
               size="small"
               variant="outlined"

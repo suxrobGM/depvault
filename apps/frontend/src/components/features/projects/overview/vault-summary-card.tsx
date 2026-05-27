@@ -45,59 +45,20 @@ export function VaultSummaryCard(props: VaultSummaryCardProps): ReactElement {
       <CardContent sx={{ p: 3 }}>
         <Grid container spacing={2}>
           <Grid size={4}>
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
-              Vaults
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                lineHeight: 1.2,
-              }}
-            >
+            <Typography variant="captionMuted">Vaults</Typography>
+            <Typography variant="statValue" sx={{ fontSize: "1rem" }}>
               {vaultCount}
             </Typography>
           </Grid>
           <Grid size={4}>
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
-              Variables
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                lineHeight: 1.2,
-              }}
-            >
+            <Typography variant="captionMuted">Variables</Typography>
+            <Typography variant="statValue" sx={{ fontSize: "1rem" }}>
               {variableCount}
             </Typography>
           </Grid>
           <Grid size={4}>
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
-              Secret Files
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                lineHeight: 1.2,
-              }}
-            >
+            <Typography variant="captionMuted">Secret Files</Typography>
+            <Typography variant="statValue" sx={{ fontSize: "1rem" }}>
               {secretFileCount}
             </Typography>
           </Grid>

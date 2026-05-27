@@ -161,32 +161,20 @@ export function CreateShareLinkDialog(props: CreateShareLinkDialogProps): ReactE
                   bgcolor: "action.hover",
                 }}
               >
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: "text.secondary",
-                  }}
-                >
+                <Typography variant="captionMuted">
                   {variables.length === 1
                     ? "Sharing variable"
                     : `Sharing ${variables.length} variables`}
                 </Typography>
                 {variables.length === 1 ? (
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontFamily: "monospace",
-                      fontWeight: 600,
-                    }}
-                  >
+                  <Typography variant="label" sx={{ fontFamily: "monospace" }}>
                     {variables[0]?.key}
                   </Typography>
                 ) : (
                   <Typography
-                    variant="body2"
+                    variant="label"
                     sx={{
                       fontFamily: "monospace",
-                      fontWeight: 600,
                       maxHeight: 80,
                       overflow: "auto",
                     }}

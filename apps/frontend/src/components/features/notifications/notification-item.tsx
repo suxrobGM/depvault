@@ -91,9 +91,8 @@ export function NotificationItem(props: NotificationItemProps): ReactElement {
           )}
         </Stack>
         <Typography
-          variant="caption"
+          variant="captionMuted"
           sx={{
-            color: "text.secondary",
             display: "-webkit-box",
             WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical",

@@ -114,9 +114,7 @@ export function SecretScanningPage(props: SecretScanningPageProps): ReactElement
                 <IconBox color="var(--mui-palette-warning-main)" size={40}>
                   <ShieldIcon sx={{ fontSize: 22 }} />
                 </IconBox>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                  Last Scan
-                </Typography>
+                <Typography variant="subtitle1">Last Scan</Typography>
               </Stack>
               {summaryLoading ? (
                 <Skeleton variant="text" width="60%" />
@@ -135,17 +133,15 @@ export function SecretScanningPage(props: SecretScanningPageProps): ReactElement
                       }
                     />
                   </Stack>
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  <Typography variant="body2Muted">
                     {new Date(summary.lastScan.createdAt).toLocaleString()}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  <Typography variant="body2Muted">
                     {summary.lastScan.commitsScanned} commits scanned
                   </Typography>
                 </Stack>
               ) : (
-                <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  No scans yet
-                </Typography>
+                <Typography variant="body2Muted">No scans yet</Typography>
               )}
             </CardContent>
           </Surface>
@@ -154,7 +150,7 @@ export function SecretScanningPage(props: SecretScanningPageProps): ReactElement
         <Grid size={{ xs: 12, md: 8 }}>
           <Surface sx={{ height: "100%" }}>
             <CardContent sx={{ p: 3 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+              <Typography variant="subtitle1" sx={{ mb: 2 }}>
                 Open Detections
               </Typography>
               {summaryLoading ? (
@@ -167,9 +163,7 @@ export function SecretScanningPage(props: SecretScanningPageProps): ReactElement
                         <Typography variant="h4" sx={{ fontWeight: 700, color: s.color }}>
                           {summary?.openDetections[s.key] ?? 0}
                         </Typography>
-                        <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                          {s.label}
-                        </Typography>
+                        <Typography variant="captionMuted">{s.label}</Typography>
                       </Stack>
                     </Grid>
                   ))}
@@ -186,7 +180,7 @@ export function SecretScanningPage(props: SecretScanningPageProps): ReactElement
                   borderColor: "divider",
                 }}
               >
-                <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                <Typography variant="body2Muted">
                   Total open: {totalOpen} | Resolved: {summary?.totalResolved ?? 0}
                 </Typography>
               </Stack>

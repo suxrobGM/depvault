@@ -87,9 +87,7 @@ export function NotificationsView(): ReactElement {
           )}
           {!isLoading && notifications.length === 0 && (
             <Box sx={{ p: 6, textAlign: "center" }}>
-              <Typography variant="body1" sx={{ color: "text.secondary" }}>
-                No notifications found
-              </Typography>
+              <Typography variant="body1Muted">No notifications found</Typography>
               <Typography variant="caption" sx={{ color: "text.disabled" }}>
                 {readFilter !== "all" || typeFilter
                   ? "Try adjusting your filters"

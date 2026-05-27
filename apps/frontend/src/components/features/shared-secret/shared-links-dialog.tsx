@@ -93,13 +93,7 @@ export function SharedLinksDialog(props: SharedLinksDialogProps): ReactElement {
           </Box>
         ) : items.length === 0 ? (
           <Box sx={{ px: 3, py: 4, textAlign: "center" }}>
-            <Typography
-              sx={{
-                color: "text.secondary",
-              }}
-            >
-              No share links created yet.
-            </Typography>
+            <Typography variant="body1Muted">No share links created yet.</Typography>
           </Box>
         ) : (
           <Table size="small">
@@ -145,44 +139,18 @@ export function SharedLinksDialog(props: SharedLinksDialogProps): ReactElement {
                     />
                   </TableCell>
                   <TableCell>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "text.secondary",
-                      }}
-                    >
-                      {item.hasPassword ? "Yes" : "No"}
-                    </Typography>
+                    <Typography variant="body2Muted">{item.hasPassword ? "Yes" : "No"}</Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "text.secondary",
-                      }}
-                    >
-                      {formatDate(item.expiresAt)}
-                    </Typography>
+                    <Typography variant="body2Muted">{formatDate(item.expiresAt)}</Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "text.secondary",
-                      }}
-                    >
+                    <Typography variant="body2Muted">
                       {item.viewedAt ? formatDate(item.viewedAt) : "—"}
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "text.secondary",
-                      }}
-                    >
-                      {formatDate(item.createdAt)}
-                    </Typography>
+                    <Typography variant="body2Muted">{formatDate(item.createdAt)}</Typography>
                   </TableCell>
                   <TableCell align="right">
                     {item.status === "PENDING" && (

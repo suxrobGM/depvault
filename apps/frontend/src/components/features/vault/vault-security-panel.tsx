@@ -75,10 +75,8 @@ export function VaultSecurityPanel(): ReactElement {
 
               <Divider />
 
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                Forgot your vault password?
-              </Typography>
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              <Typography variant="label">Forgot your vault password?</Typography>
+              <Typography variant="body2Muted">
                 Use the recovery key you saved when setting up your vault to reset your vault
                 password and regain access to your encrypted secrets.
               </Typography>
@@ -119,10 +117,8 @@ export function VaultSecurityPanel(): ReactElement {
             }}
           >
             <Stack spacing={2.5}>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                Change Vault Password
-              </Typography>
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              <Typography variant="label">Change Vault Password</Typography>
+              <Typography variant="body2Muted">
                 Your vault password is separate from your login password and never sent to the
                 server.
               </Typography>
@@ -162,10 +158,8 @@ export function VaultSecurityPanel(): ReactElement {
           <Divider sx={{ my: 3 }} />
 
           <Stack spacing={2}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              Recovery Key
-            </Typography>
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            <Typography variant="label">Recovery Key</Typography>
+            <Typography variant="body2Muted">
               Generate a new recovery key if you suspect your current one has been compromised. This
               will invalidate the previous key.
             </Typography>

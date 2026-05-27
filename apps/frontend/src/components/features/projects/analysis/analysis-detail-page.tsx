@@ -136,13 +136,7 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
           py: 6,
         }}
       >
-        <Typography
-          sx={{
-            color: "text.secondary",
-          }}
-        >
-          Analysis not found
-        </Typography>
+        <Typography variant="body1Muted">Analysis not found</Typography>
         <Button
           onClick={() => router.push(ROUTES.projectAnalysis(projectId) as Route)}
           sx={{ mt: 2 }}
@@ -230,12 +224,7 @@ export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement
           variant={getHealthColor(analysis.healthScore)}
           glow
         />
-        <Typography
-          variant="caption"
-          sx={{
-            color: "text.secondary",
-          }}
-        >
+        <Typography variant="captionMuted">
           {new Date(analysis.createdAt).toLocaleString()} &middot; {analysis.dependencies.length}{" "}
           dependencies
         </Typography>

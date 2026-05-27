@@ -149,54 +149,19 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
           </IconButton>
         </TableCell>
         <TableCell>
-          <Typography
-            variant="body2"
-            sx={{
-              fontWeight: 500,
-            }}
-          >
+          <Typography variant="body2" sx={{ fontWeight: 500 }}>
             {file.name}
           </Typography>
-          {file.description && (
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
-              {file.description}
-            </Typography>
-          )}
+          {file.description && <Typography variant="captionMuted">{file.description}</Typography>}
         </TableCell>
         <TableCell>
-          <Typography
-            variant="body2"
-            sx={{
-              color: "text.secondary",
-            }}
-          >
-            {file.vaultName}
-          </Typography>
+          <Typography variant="body2Muted">{file.vaultName}</Typography>
         </TableCell>
         <TableCell>
-          <Typography
-            variant="body2"
-            sx={{
-              color: "text.secondary",
-            }}
-          >
-            {formatBytes(file.fileSize)}
-          </Typography>
+          <Typography variant="body2Muted">{formatBytes(file.fileSize)}</Typography>
         </TableCell>
         <TableCell>
-          <Typography
-            variant="body2"
-            sx={{
-              color: "text.secondary",
-            }}
-          >
-            {formatDate(file.createdAt)}
-          </Typography>
+          <Typography variant="body2Muted">{formatDate(file.createdAt)}</Typography>
         </TableCell>
         <TableCell align="right">
           <ActionMenu
@@ -237,12 +202,7 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
           />
         </TableCell>
       </TableRow>
-      <CreateFileShareDialog
-        open={shareOpen}
-        onClose={() => setShareOpen(false)}
-        projectId={projectId}
-        file={file}
-      />
+
       <TableRow>
         <TableCell colSpan={6} sx={{ py: 0 }}>
           <Collapse in={historyOpen} timeout="auto" unmountOnExit>
@@ -258,14 +218,7 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
               {versionsLoading ? (
                 <Skeleton variant="rounded" height={60} />
               ) : versions.length === 0 ? (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "text.secondary",
-                  }}
-                >
-                  No previous versions.
-                </Typography>
+                <Typography variant="body2Muted">No previous versions.</Typography>
               ) : (
                 <Table size="small">
                   <TableHead>
@@ -283,24 +236,10 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
                           <Typography variant="body2">v{versions.length - idx}</Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: "text.secondary",
-                            }}
-                          >
-                            {formatDate(v.createdAt)}
-                          </Typography>
+                          <Typography variant="body2Muted">{formatDate(v.createdAt)}</Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: "text.secondary",
-                            }}
-                          >
-                            {formatBytes(v.fileSize)}
-                          </Typography>
+                          <Typography variant="body2Muted">{formatBytes(v.fileSize)}</Typography>
                         </TableCell>
                         <TableCell align="right">
                           <IconButton
@@ -331,6 +270,13 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
           </Collapse>
         </TableCell>
       </TableRow>
+
+      <CreateFileShareDialog
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        projectId={projectId}
+        file={file}
+      />
     </>
   );
 }
