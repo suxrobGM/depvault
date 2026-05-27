@@ -58,21 +58,10 @@ export function ActivityUpgradeGate(props: PropsWithChildren): ReactElement {
         >
           <LockIcon sx={{ fontSize: 28, color: "text.secondary" }} />
         </Box>
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 700,
-          }}
-        >
+        <Typography variant="h6" sx={{ fontWeight: 700 }}>
           Activity Logs
         </Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            color: "text.secondary",
-            maxWidth: 400,
-          }}
-        >
+        <Typography variant="body2Muted" sx={{ maxWidth: 400 }}>
           Activity logs track every action across your projects — variable changes, imports, shares,
           and more. Upgrade to Pro or Team to unlock audit logs.
         </Typography>

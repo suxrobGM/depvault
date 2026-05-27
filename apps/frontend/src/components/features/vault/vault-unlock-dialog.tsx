@@ -55,12 +55,7 @@ export function VaultUnlockDialog(props: VaultUnlockDialogProps): ReactElement {
         <DialogTitle>Unlock Vault</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
+            <Typography variant="body2Muted">
               Enter your vault password to access encrypted secrets.
             </Typography>
 

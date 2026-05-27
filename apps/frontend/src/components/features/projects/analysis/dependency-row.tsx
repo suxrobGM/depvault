@@ -72,7 +72,7 @@ export function DependencyRow(props: DependencyRowProps): ReactElement {
       >
         {packageUrl ? (
           <Typography
-            variant="body2"
+            variant="label"
             noWrap
             component="a"
             href={packageUrl}
@@ -80,7 +80,6 @@ export function DependencyRow(props: DependencyRowProps): ReactElement {
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
             sx={{
-              fontWeight: 600,
               color: "primary.main",
               textDecoration: "none",
               "&:hover": { textDecoration: "underline" },
@@ -89,23 +88,12 @@ export function DependencyRow(props: DependencyRowProps): ReactElement {
             {dep.name}
           </Typography>
         ) : (
-          <Typography
-            variant="body2"
-            noWrap
-            sx={{
-              fontWeight: 600,
-            }}
-          >
+          <Typography variant="label" noWrap>
             {dep.name}
           </Typography>
         )}
 
-        <Typography
-          variant="mono"
-          sx={{
-            color: "text.secondary",
-          }}
-        >
+        <Typography variant="mono" sx={{ color: "text.secondary" }}>
           {dep.currentVersion}
         </Typography>
 
@@ -147,12 +135,7 @@ export function DependencyRow(props: DependencyRowProps): ReactElement {
               sx={{ minWidth: 32, fontWeight: 700 }}
             />
           ) : (
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.disabled",
-              }}
-            >
+            <Typography variant="caption" sx={{ color: "text.disabled" }}>
               0
             </Typography>
           )}

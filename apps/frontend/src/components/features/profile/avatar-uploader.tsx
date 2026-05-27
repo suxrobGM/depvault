@@ -145,20 +145,8 @@ export function AvatarUploader(props: AvatarUploaderProps): ReactElement {
           }}
         >
           <UploadIcon sx={{ color: "text.secondary", fontSize: 32, mb: 0.5 }} />
-          <Typography
-            variant="body2"
-            sx={{
-              color: "text.secondary",
-            }}
-          >
-            Drop an image here or click to upload
-          </Typography>
-          <Typography
-            variant="caption"
-            sx={{
-              color: "text.disabled",
-            }}
-          >
+          <Typography variant="body2Muted">Drop an image here or click to upload</Typography>
+          <Typography variant="caption" sx={{ color: "text.disabled" }}>
             JPG, PNG, GIF, or WebP · Max 5 MB
           </Typography>
         </Box>
@@ -198,14 +186,7 @@ export function AvatarUploader(props: AvatarUploaderProps): ReactElement {
               px: 2,
             }}
           >
-            <Typography
-              variant="body2"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
-              Zoom
-            </Typography>
+            <Typography variant="body2Muted">Zoom</Typography>
             <Slider
               value={zoom}
               min={1}

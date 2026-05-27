@@ -52,9 +52,8 @@ export default function ErrorPage(props: ErrorPageProps): ReactElement {
           Something went wrong
         </GradientText>
         <Typography
-          variant="body2"
+          variant="body2Muted"
           sx={{
-            color: "text.secondary",
             mt: 2,
             mb: 4,
             fontFamily: "var(--font-jetbrains), monospace",

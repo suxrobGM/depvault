@@ -27,14 +27,7 @@ export function StatsSection(): ReactElement {
                 <GradientText variant="h3" component="p" sx={{ mb: 0.5 }}>
                   {stat.value}
                 </GradientText>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "text.secondary",
-                  }}
-                >
-                  {stat.label}
-                </Typography>
+                <Typography variant="body2Muted">{stat.label}</Typography>
               </Box>
             </Grid>
           ))}

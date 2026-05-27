@@ -7,8 +7,8 @@ import {
   Group as GroupIcon,
   TrendingUp as HealthIcon,
 } from "@mui/icons-material";
-import { Box, CardContent, Grid, Stack, Typography } from "@mui/material";
-import { GlassCard, IconBox } from "@/components/ui/cards";
+import { Box, CardContent, CardHeader, Grid, Stack, Typography } from "@mui/material";
+import { IconBox, Surface } from "@/components/ui/cards";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import type { AnalysisListResponse } from "@/types/api/analysis";
@@ -79,17 +79,9 @@ export function QuickStatsCard(props: QuickStatsCardProps): ReactElement {
   ];
 
   return (
-    <GlassCard sx={{ height: "100%" }}>
+    <Surface sx={{ height: "100%" }}>
+      <CardHeader title="Quick Stats" />
       <CardContent sx={{ p: 3 }}>
-        <Typography
-          variant="subtitle1"
-          sx={{
-            fontWeight: 600,
-            mb: 2,
-          }}
-        >
-          Quick Stats
-        </Typography>
         <Grid container spacing={2}>
           {stats.map((stat) => (
             <Grid size={6} key={stat.label}>
@@ -104,21 +96,10 @@ export function QuickStatsCard(props: QuickStatsCardProps): ReactElement {
                   {stat.icon}
                 </IconBox>
                 <Box>
+                  <Typography variant="captionMuted">{stat.label}</Typography>
                   <Typography
-                    variant="caption"
-                    sx={{
-                      color: "text.secondary",
-                    }}
-                  >
-                    {stat.label}
-                  </Typography>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 700,
-                      lineHeight: 1.2,
-                      color: stat.valueColor ?? "text.primary",
-                    }}
+                    variant="statValue"
+                    sx={{ fontSize: "1rem", color: stat.valueColor ?? "text.primary" }}
                   >
                     {stat.value}
                   </Typography>
@@ -128,6 +109,6 @@ export function QuickStatsCard(props: QuickStatsCardProps): ReactElement {
           ))}
         </Grid>
       </CardContent>
-    </GlassCard>
+    </Surface>
   );
 }

@@ -98,7 +98,7 @@ export function LicenseTab(props: LicenseTabProps): ReactElement {
       <PageHeader
         title="License Compliance"
         breadcrumbs={[
-          { label: "Dashboard", href: ROUTES.dashboard as Route },
+          { label: "Overview", href: ROUTES.overview as Route },
           { label: "Projects", href: ROUTES.projects as Route },
           { label: project?.name ?? "Project", href: ROUTES.project(projectId) as Route },
           { label: "Licenses" },
@@ -151,14 +151,7 @@ export function LicenseTab(props: LicenseTabProps): ReactElement {
             mb: 2,
           }}
         >
-          <Typography
-            variant="subtitle1"
-            sx={{
-              fontWeight: 600,
-            }}
-          >
-            Dependency Licenses
-          </Typography>
+          <Typography variant="subtitle1">Dependency Licenses</Typography>
           <TextField
             size="small"
             placeholder="Search dependencies..."
@@ -215,14 +208,7 @@ export function LicenseTab(props: LicenseTabProps): ReactElement {
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: "text.secondary",
-                        }}
-                      >
-                        {dep.analysisFileName}
-                      </Typography>
+                      <Typography variant="body2Muted">{dep.analysisFileName}</Typography>
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2">{dep.license ?? "Unknown"}</Typography>

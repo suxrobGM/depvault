@@ -88,9 +88,7 @@ export function VaultVariableHistory(props: VaultVariableHistoryProps): ReactEle
             {isLoading ? (
               <Skeleton variant="rounded" height={60} />
             ) : versions.length === 0 ? (
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                No previous versions.
-              </Typography>
+              <Typography variant="body2Muted">No previous versions.</Typography>
             ) : (
               <VersionTable
                 projectId={projectId}
@@ -138,14 +136,10 @@ function VersionTable(props: VersionTableProps): ReactElement {
               </Typography>
             </TableCell>
             <TableCell>
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                {v.changedByName}
-              </Typography>
+              <Typography variant="body2Muted">{v.changedByName}</Typography>
             </TableCell>
             <TableCell>
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                {formatDate(v.createdAt)}
-              </Typography>
+              <Typography variant="body2Muted">{formatDate(v.createdAt)}</Typography>
             </TableCell>
             <TableCell>
               <EncryptedValue

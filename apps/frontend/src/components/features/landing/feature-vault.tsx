@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { Lock as LockIcon } from "@mui/icons-material";
 import { Box, Chip, Grid, Stack, Typography } from "@mui/material";
-import { GlassCard, GradientText, IconBox } from "@/components/ui/cards";
+import { GradientText, IconBox, Surface } from "@/components/ui/cards";
 import { BrowserWindow } from "@/components/ui/containers";
 
 const envVars = [
@@ -16,14 +16,7 @@ const envTabs = ["DEV", "STAGING", "PROD"];
 
 export function FeatureVault(): ReactElement {
   return (
-    <Grid
-      container
-      spacing={4}
-      direction="row-reverse"
-      sx={{
-        alignItems: "center",
-      }}
-    >
+    <Grid container spacing={4} direction="row-reverse" sx={{ alignItems: "center" }}>
       <Grid size={{ xs: 12, md: 6 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
           <IconBox color="#f59e0b">
@@ -37,26 +30,12 @@ export function FeatureVault(): ReactElement {
             Environment Vault
           </GradientText>
         </Box>
-        <Typography
-          variant="body1"
-          sx={{
-            color: "text.secondary",
-            lineHeight: 1.8,
-            mb: 2,
-          }}
-        >
+        <Typography variant="body1Muted" sx={{ lineHeight: 1.8, mb: 2 }}>
           End-to-end encrypt environment variables and secret files — SSL certificates, private
           keys, keystores, cloud credentials — with AES-256-GCM. Secrets are encrypted in your
           browser before they reach the server. Even we can&apos;t read them.
         </Typography>
-        <Stack
-          direction="row"
-          spacing={1}
-          useFlexGap
-          sx={{
-            flexWrap: "wrap",
-          }}
-        >
+        <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
           <Chip label="Zero-Knowledge" size="small" variant="outlined" color="secondary" />
           <Chip label="AES-256-GCM" size="small" variant="outlined" color="secondary" />
           <Chip label="Version History" size="small" variant="outlined" color="secondary" />
@@ -65,7 +44,7 @@ export function FeatureVault(): ReactElement {
         </Stack>
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
-        <GlassCard hoverGlow={false} sx={{ overflow: "hidden" }}>
+        <Surface sx={{ overflow: "hidden" }}>
           <BrowserWindow title="vault — production" />
           <Box sx={{ px: 2, pt: 1.5, pb: 0.5 }}>
             <Stack direction="row" spacing={0.5} sx={{ mb: 1.5 }}>
@@ -119,11 +98,10 @@ export function FeatureVault(): ReactElement {
                   {v.key}
                 </Typography>
                 <Typography
-                  variant="caption"
+                  variant="captionMuted"
                   sx={{
                     fontFamily: "var(--font-jetbrains), monospace",
                     fontSize: "0.7rem",
-                    color: "text.secondary",
                   }}
                 >
                   {v.value}
@@ -131,7 +109,7 @@ export function FeatureVault(): ReactElement {
               </Box>
             ))}
           </Box>
-        </GlassCard>
+        </Surface>
       </Grid>
     </Grid>
   );

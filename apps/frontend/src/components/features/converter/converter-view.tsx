@@ -15,7 +15,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { CopyButton, FileUploadButton, type FileUploadResult } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useToast } from "@/hooks/use-toast";
@@ -117,7 +117,7 @@ export function ConverterView(): ReactElement {
     >
       {/* Input Panel */}
       <Grid size={{ xs: 12, md: 5.5 }}>
-        <GlassCard className="vault-fade-up vault-delay-1" sx={{ height: "100%" }}>
+        <Surface className="vault-fade-up vault-delay-1" sx={{ height: "100%" }}>
           <CardContent sx={{ p: 3, height: "100%", display: "flex", flexDirection: "column" }}>
             <Stack
               direction="row"
@@ -127,14 +127,7 @@ export function ConverterView(): ReactElement {
                 mb: 2,
               }}
             >
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  fontWeight: 600,
-                }}
-              >
-                Input
-              </Typography>
+              <Typography variant="subtitle1">Input</Typography>
               <TextField
                 select
                 size="small"
@@ -165,13 +158,7 @@ export function ConverterView(): ReactElement {
               sx={{ flex: 1, mb: 2 }}
             />
 
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{
-                justifyContent: "flex-end",
-              }}
-            >
+            <Stack direction="row" spacing={1} sx={{ justifyContent: "flex-end" }}>
               <Button variant="outlined" onClick={handleClear} disabled={!content}>
                 Clear
               </Button>
@@ -180,7 +167,7 @@ export function ConverterView(): ReactElement {
               </Button>
             </Stack>
           </CardContent>
-        </GlassCard>
+        </Surface>
       </Grid>
       {/* Swap Button */}
       <Grid
@@ -207,7 +194,7 @@ export function ConverterView(): ReactElement {
       </Grid>
       {/* Output Panel */}
       <Grid size={{ xs: 12, md: 5.5 }}>
-        <GlassCard className="vault-fade-up vault-delay-2" sx={{ height: "100%" }}>
+        <Surface className="vault-fade-up vault-delay-2" sx={{ height: "100%" }}>
           <CardContent sx={{ p: 3, height: "100%", display: "flex", flexDirection: "column" }}>
             <Stack
               direction="row"
@@ -217,14 +204,7 @@ export function ConverterView(): ReactElement {
                 mb: 2,
               }}
             >
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  fontWeight: 600,
-                }}
-              >
-                Output
-              </Typography>
+              <Typography variant="subtitle1">Output</Typography>
               <TextField
                 select
                 size="small"
@@ -281,7 +261,7 @@ export function ConverterView(): ReactElement {
               )}
             </Stack>
           </CardContent>
-        </GlassCard>
+        </Surface>
       </Grid>
     </Grid>
   );

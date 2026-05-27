@@ -18,7 +18,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { SkeletonList } from "@/components/ui/data-display";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useConfirm } from "@/hooks/use-confirm";
@@ -44,6 +44,7 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
     canEdit = false,
     onEditVariable,
   } = props;
+
   const confirm = useConfirm();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
@@ -87,7 +88,9 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
       confirmLabel: "Delete",
       destructive: true,
     });
-    if (ok) batchDelete.mutate([...selectedIds]);
+    if (ok) {
+      batchDelete.mutate([...selectedIds]);
+    }
   };
 
   const handleSelectAll = () => {
@@ -117,9 +120,7 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
   if (variables.length === 0) {
     return (
       <Box sx={{ py: 4, textAlign: "center" }}>
-        <Typography variant="body2" sx={{ color: "text.secondary" }}>
-          No variables in this vault yet.
-        </Typography>
+        <Typography variant="body2Muted">No variables in this vault yet.</Typography>
       </Box>
     );
   }
@@ -149,9 +150,7 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
         <Box sx={{ flex: 1 }} />
         {canEdit && selectedIds.size > 0 && (
           <>
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              {selectedIds.size} selected
-            </Typography>
+            <Typography variant="body2Muted">{selectedIds.size} selected</Typography>
             <Button
               size="small"
               color="error"
@@ -164,7 +163,7 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
           </>
         )}
       </Stack>
-      <GlassCard>
+      <Surface>
         <TableContainer>
           <Table size="small">
             <TableHead>
@@ -192,10 +191,7 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
               {filteredVariables.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={canEdit ? 6 : 5}>
-                    <Typography
-                      variant="body2"
-                      sx={{ color: "text.secondary", textAlign: "center", py: 2 }}
-                    >
+                    <Typography variant="body2Muted" sx={{ textAlign: "center", py: 2 }}>
                       No variables match your search.
                     </Typography>
                   </TableCell>
@@ -231,7 +227,7 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
             rowsPerPageOptions={[10, 25, 50, 100]}
           />
         )}
-      </GlassCard>
+      </Surface>
     </Stack>
   );
 }

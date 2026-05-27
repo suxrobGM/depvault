@@ -98,18 +98,9 @@ export function SecurityOverviewView(): ReactElement {
               <Stack spacing={2} sx={{ mt: 2 }}>
                 <Stack
                   direction="row"
-                  sx={{
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
+                  sx={{ justifyContent: "space-between", alignItems: "center" }}
                 >
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    sx={{
-                      alignItems: "center",
-                    }}
-                  >
+                  <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                     <DetectionIcon color="warning" fontSize="small" />
                     <Typography variant="body2">Open Detections</Typography>
                   </Stack>
@@ -121,18 +112,9 @@ export function SecurityOverviewView(): ReactElement {
                 </Stack>
                 <Stack
                   direction="row"
-                  sx={{
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
+                  sx={{ justifyContent: "space-between", alignItems: "center" }}
                 >
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    sx={{
-                      alignItems: "center",
-                    }}
-                  >
+                  <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                     <ResolvedIcon color="success" fontSize="small" />
                     <Typography variant="body2">Resolved</Typography>
                   </Stack>
@@ -161,14 +143,7 @@ function StatCard(props: StatCardProps): ReactElement {
     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
       <Card variant="outlined" className="vault-fade-up">
         <CardContent>
-          <Stack
-            direction="row"
-            spacing={1.5}
-            sx={{
-              alignItems: "center",
-              mb: 1,
-            }}
-          >
+          <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", mb: 1 }}>
             <Box
               sx={{
                 width: 36,
@@ -184,21 +159,9 @@ function StatCard(props: StatCardProps): ReactElement {
             >
               {icon}
             </Box>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
-              {title}
-            </Typography>
+            <Typography variant="body2Muted">{title}</Typography>
           </Stack>
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-            }}
-          >
+          <Typography variant="h4" sx={{ fontWeight: 700 }}>
             {value}
           </Typography>
         </CardContent>

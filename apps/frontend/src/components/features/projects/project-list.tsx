@@ -10,7 +10,7 @@ import {
 import { CardContent, Grid, IconButton, Skeleton, Stack, Tooltip, Typography } from "@mui/material";
 import type { Route } from "next";
 import Link from "next/link";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
@@ -60,15 +60,11 @@ export function ProjectList(): ReactElement {
             href={ROUTES.project(project.id) as Route}
             style={{ textDecoration: "none", display: "block", height: "100%" }}
           >
-            <GlassCard
-              glowColor="var(--mui-palette-primary-main)"
+            <Surface
+              accent="primary"
+              interactive
               className={`vault-fade-up vault-delay-${index + 1}`}
-              sx={{
-                height: "100%",
-                cursor: "pointer",
-                transition: "transform 0.2s ease",
-                "&:hover": { transform: "translateY(-2px)" },
-              }}
+              sx={{ height: "100%" }}
             >
               <CardContent sx={{ p: 3 }}>
                 <Stack
@@ -78,14 +74,7 @@ export function ProjectList(): ReactElement {
                     alignItems: "flex-start",
                   }}
                 >
-                  <Typography
-                    variant="h6"
-                    noWrap
-                    sx={{
-                      fontWeight: 600,
-                      flex: 1,
-                    }}
-                  >
+                  <Typography variant="h6" noWrap sx={{ fontWeight: 600, flex: 1 }}>
                     {project.name}
                   </Typography>
                   {project.repositoryUrl && (
@@ -110,9 +99,8 @@ export function ProjectList(): ReactElement {
                   )}
                 </Stack>
                 <Typography
-                  variant="body2"
+                  variant="body2Muted"
                   sx={{
-                    color: "text.secondary",
                     mt: 1,
                     mb: 2,
                     minHeight: 40,
@@ -124,25 +112,14 @@ export function ProjectList(): ReactElement {
                 >
                   {project.description ?? "No description"}
                 </Typography>
-                <Stack
-                  direction="row"
-                  spacing={0.5}
-                  sx={{
-                    alignItems: "center",
-                  }}
-                >
+                <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
                   <CalendarIcon sx={{ fontSize: 14, color: "text.secondary" }} />
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: "text.secondary",
-                    }}
-                  >
+                  <Typography variant="captionMuted">
                     {new Date(project.createdAt).toLocaleDateString()}
                   </Typography>
                 </Stack>
               </CardContent>
-            </GlassCard>
+            </Surface>
           </Link>
         </Grid>
       ))}

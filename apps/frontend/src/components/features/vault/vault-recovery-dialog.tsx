@@ -62,12 +62,7 @@ export function VaultRecoveryDialog(props: VaultRecoveryDialogProps): ReactEleme
         <DialogTitle>Recover Vault</DialogTitle>
         <DialogContent>
           <Stack spacing={2.5} sx={{ mt: 1 }}>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
+            <Typography variant="body2Muted">
               Enter the recovery key you saved when setting up your vault, then choose a new vault
               password.
             </Typography>

@@ -55,16 +55,7 @@ export function FormSelectField(props: FormSelectFieldProps): ReactElement {
           const isNumeric = typeof field.state.value === "number";
           return (
             <Stack spacing={0.5}>
-              {label && (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "text.secondary",
-                  }}
-                >
-                  {label}
-                </Typography>
-              )}
+              {label && <Typography variant="body2Muted">{label}</Typography>}
               <Select
                 size="small"
                 disabled={disabled}

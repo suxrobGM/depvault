@@ -2,11 +2,19 @@
 
 import { type ReactElement } from "react";
 import { Delete as DeleteIcon } from "@mui/icons-material";
-import { Box, Button, CardContent, Grid, Stack, Typography } from "@mui/material";
+import {
+  Button,
+  CardActions,
+  CardContent,
+  CardHeader,
+  Grid,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
@@ -95,23 +103,15 @@ export function SettingsTab(props: SettingsTabProps): ReactElement {
   return (
     <Grid container spacing={3} className="vault-fade-up vault-delay-2">
       <Grid size={{ xs: 12 }}>
-        <GlassCard>
-          <CardContent sx={{ p: 3 }}>
-            <Typography
-              variant="subtitle1"
-              sx={{
-                fontWeight: 600,
-                mb: 2,
-              }}
-            >
-              Project Settings
-            </Typography>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                form.handleSubmit();
-              }}
-            >
+        <Surface>
+          <CardHeader title="Project Settings" />
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              form.handleSubmit();
+            }}
+          >
+            <CardContent sx={{ p: 3 }}>
               <Stack spacing={2.5}>
                 <FormTextField form={form} name="name" label="Project Name" disabled={!canEdit} />
                 <FormTextField
@@ -129,45 +129,35 @@ export function SettingsTab(props: SettingsTabProps): ReactElement {
                   placeholder="https://github.com/org/repo"
                   disabled={!canEdit}
                 />
-                {canEdit && (
-                  <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                    <Button type="submit" variant="contained" disabled={updateMutation.isPending}>
-                      {updateMutation.isPending ? "Saving..." : "Save Changes"}
-                    </Button>
-                  </Box>
-                )}
               </Stack>
-            </form>
-          </CardContent>
-        </GlassCard>
+            </CardContent>
+            {canEdit && (
+              <CardActions>
+                <Button type="submit" variant="contained" disabled={updateMutation.isPending}>
+                  {updateMutation.isPending ? "Saving..." : "Save Changes"}
+                </Button>
+              </CardActions>
+            )}
+          </form>
+        </Surface>
       </Grid>
       <Grid size={{ xs: 12 }}>
         <CiTokensSection projectId={projectId} canEdit={canEdit} />
       </Grid>
       {isOwner && (
         <Grid size={{ xs: 12 }}>
-          <GlassCard sx={{ borderColor: "error.dark" }}>
+          <Surface sx={{ borderColor: "error.dark" }}>
+            <CardHeader
+              title="Danger Zone"
+              slotProps={{ title: { sx: { color: "error.main" } } }}
+            />
             <CardContent sx={{ p: 3 }}>
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  fontWeight: 600,
-                  color: "error.main",
-                  mb: 1,
-                }}
-              >
-                Danger Zone
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "text.secondary",
-                  mb: 2,
-                }}
-              >
+              <Typography variant="body2Muted">
                 Permanently delete this project and all associated data including analyses,
                 environments, and variables. This action cannot be undone.
               </Typography>
+            </CardContent>
+            <CardActions>
               <Button
                 variant="outlined"
                 color="error"
@@ -176,8 +166,8 @@ export function SettingsTab(props: SettingsTabProps): ReactElement {
               >
                 Delete Project
               </Button>
-            </CardContent>
-          </GlassCard>
+            </CardActions>
+          </Surface>
         </Grid>
       )}
     </Grid>

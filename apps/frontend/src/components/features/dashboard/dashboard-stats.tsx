@@ -8,7 +8,7 @@ import {
   VpnKey as SecretIcon,
 } from "@mui/icons-material";
 import { Box, CardContent, Grid, Skeleton, Stack, Typography } from "@mui/material";
-import { GlassCard, IconBox } from "@/components/ui/cards";
+import { IconBox, Surface, type SurfaceAccent } from "@/components/ui/cards";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import type { ProjectStatsResponse } from "@/types/api/project";
@@ -17,7 +17,7 @@ interface StatCard {
   icon: ReactNode;
   label: string;
   value: number;
-  color: string;
+  accent: SurfaceAccent;
 }
 
 export function DashboardStats(): ReactElement {
@@ -30,25 +30,25 @@ export function DashboardStats(): ReactElement {
       icon: <FolderIcon sx={{ fontSize: 22 }} />,
       label: "Projects",
       value: data?.projectCount ?? 0,
-      color: "var(--mui-palette-primary-main)",
+      accent: "primary",
     },
     {
       icon: <InventoryIcon sx={{ fontSize: 22 }} />,
       label: "Dependencies",
       value: data?.dependencyCount ?? 0,
-      color: "var(--mui-palette-primary-main)",
+      accent: "primary",
     },
     {
       icon: <BugIcon sx={{ fontSize: 22 }} />,
       label: "Vulnerabilities",
       value: data?.vulnerabilityCount ?? 0,
-      color: "var(--mui-palette-error-main)",
+      accent: "error",
     },
     {
       icon: <SecretIcon sx={{ fontSize: 22 }} />,
       label: "Env Variables",
       value: data?.envVariableCount ?? 0,
-      color: "var(--mui-palette-primary-main)",
+      accent: "primary",
     },
   ];
 
@@ -56,47 +56,26 @@ export function DashboardStats(): ReactElement {
     <Grid container spacing={2} sx={{ mb: 3 }}>
       {stats.map((stat, i) => (
         <Grid key={stat.label} size={{ xs: 6, sm: 4, md: "grow" }}>
-          <GlassCard glowColor={stat.color} sx={{ height: "100%" }}>
+          <Surface accent={stat.accent} sx={{ height: "100%" }}>
             <CardContent
               className={`vault-fade-up vault-delay-${i + 1}`}
               sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}
             >
-              <Stack
-                direction="row"
-                spacing={2}
-                sx={{
-                  alignItems: "center",
-                }}
-              >
-                <IconBox color={stat.color} size={44}>
+              <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+                <IconBox color={`var(--mui-palette-${stat.accent}-main)`} size={44}>
                   {stat.icon}
                 </IconBox>
                 <Box>
                   {isLoading ? (
                     <Skeleton variant="text" width={60} height={36} />
                   ) : (
-                    <Typography
-                      variant="h4"
-                      sx={{
-                        fontWeight: 700,
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      {stat.value}
-                    </Typography>
+                    <Typography variant="statValue">{stat.value}</Typography>
                   )}
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: "text.secondary",
-                    }}
-                  >
-                    {stat.label}
-                  </Typography>
+                  <Typography variant="body2Muted">{stat.label}</Typography>
                 </Box>
               </Stack>
             </CardContent>
-          </GlassCard>
+          </Surface>
         </Grid>
       ))}
     </Grid>

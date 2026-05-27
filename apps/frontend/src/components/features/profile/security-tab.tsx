@@ -2,10 +2,20 @@
 
 import type { ReactElement } from "react";
 import { GitHub as GitHubIcon } from "@mui/icons-material";
-import { Alert, Box, Button, CardContent, Chip, Stack, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  CardHeader,
+  Chip,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import { VaultSecurityPanel } from "@/components/features/vault";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useAuth } from "@/hooks/use-auth";
@@ -108,17 +118,9 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
 
   return (
     <Stack spacing={3}>
-      <GlassCard className="vault-fade-up vault-delay-1">
+      <Surface className="vault-fade-up vault-delay-1">
+        <CardHeader title="GitHub Account" />
         <CardContent sx={{ p: 3 }}>
-          <Typography
-            variant="subtitle1"
-            sx={{
-              fontWeight: 600,
-              mb: 2,
-            }}
-          >
-            GitHub Account
-          </Typography>
           {user.githubId ? (
             <Stack
               direction="row"
@@ -136,14 +138,7 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
               >
                 <GitHubIcon />
                 <Box>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 600,
-                    }}
-                  >
-                    {user.githubUsername ?? "Connected"}
-                  </Typography>
+                  <Typography variant="label">{user.githubUsername ?? "Connected"}</Typography>
                   <Chip label="Linked" size="small" color="success" />
                 </Box>
               </Stack>
@@ -158,12 +153,7 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
             </Stack>
           ) : (
             <Stack spacing={1.5}>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "text.secondary",
-                }}
-              >
+              <Typography variant="body2Muted">
                 Link your GitHub account to import dependencies from your repositories.
               </Typography>
               <Box>
@@ -179,36 +169,24 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
             </Stack>
           )}
         </CardContent>
-      </GlassCard>
-      <GlassCard className="vault-fade-up vault-delay-2">
-        <CardContent sx={{ p: 3 }}>
-          <Typography
-            variant="subtitle1"
-            sx={{
-              fontWeight: 600,
-              mb: 2,
+      </Surface>
+      <Surface className="vault-fade-up vault-delay-2">
+        <CardHeader title="Change Email" />
+        {oauthOnly ? (
+          <CardContent sx={{ p: 3 }}>
+            <Alert severity="info">Set a password first to enable email changes.</Alert>
+          </CardContent>
+        ) : (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              emailForm.handleSubmit();
             }}
           >
-            Change Email
-          </Typography>
-          {oauthOnly ? (
-            <Alert severity="info">Set a password first to enable email changes.</Alert>
-          ) : (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                emailForm.handleSubmit();
-              }}
-            >
+            <CardContent sx={{ p: 3 }}>
               <Stack spacing={2.5}>
                 <Box>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: "text.secondary",
-                      mb: 1,
-                    }}
-                  >
+                  <Typography variant="body2Muted" sx={{ mb: 1 }}>
                     Current email
                   </Typography>
                   <Typography variant="body1">{user.email}</Typography>
@@ -227,34 +205,26 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
                   type="password"
                   autoComplete="off"
                 />
-                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                  <Button type="submit" variant="contained" disabled={emailMutation.isPending}>
-                    {emailMutation.isPending ? "Updating..." : "Update Email"}
-                  </Button>
-                </Box>
               </Stack>
-            </form>
-          )}
-        </CardContent>
-      </GlassCard>
-      <GlassCard className="vault-fade-up vault-delay-3">
-        <CardContent sx={{ p: 3 }}>
-          <Typography
-            variant="subtitle1"
-            sx={{
-              fontWeight: 600,
-              mb: 2,
+            </CardContent>
+            <CardActions>
+              <Button type="submit" variant="contained" disabled={emailMutation.isPending}>
+                {emailMutation.isPending ? "Updating..." : "Update Email"}
+              </Button>
+            </CardActions>
+          </form>
+        )}
+      </Surface>
+      <Surface className="vault-fade-up vault-delay-3">
+        <CardHeader title={oauthOnly ? "Set Password" : "Change Password"} />
+        {oauthOnly ? (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              setPasswordForm.handleSubmit();
             }}
           >
-            {oauthOnly ? "Set Password" : "Change Password"}
-          </Typography>
-          {oauthOnly ? (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                setPasswordForm.handleSubmit();
-              }}
-            >
+            <CardContent sx={{ p: 3 }}>
               <Stack spacing={2.5}>
                 <Alert severity="info" sx={{ mb: 1 }}>
                   Your account was created via GitHub. Set a password to also log in with email and
@@ -272,24 +242,22 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
                   label="Confirm Password"
                   type="password"
                 />
-                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    disabled={setPasswordMutation.isPending}
-                  >
-                    {setPasswordMutation.isPending ? "Setting..." : "Set Password"}
-                  </Button>
-                </Box>
               </Stack>
-            </form>
-          ) : (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                passwordForm.handleSubmit();
-              }}
-            >
+            </CardContent>
+            <CardActions>
+              <Button type="submit" variant="contained" disabled={setPasswordMutation.isPending}>
+                {setPasswordMutation.isPending ? "Setting..." : "Set Password"}
+              </Button>
+            </CardActions>
+          </form>
+        ) : (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              passwordForm.handleSubmit();
+            }}
+          >
+            <CardContent sx={{ p: 3 }}>
               <Stack spacing={2.5}>
                 <FormTextField
                   form={passwordForm}
@@ -309,43 +277,30 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
                   label="Confirm New Password"
                   type="password"
                 />
-                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                  <Button type="submit" variant="contained" disabled={passwordMutation.isPending}>
-                    {passwordMutation.isPending ? "Changing..." : "Change Password"}
-                  </Button>
-                </Box>
               </Stack>
-            </form>
-          )}
-        </CardContent>
-      </GlassCard>
+            </CardContent>
+            <CardActions>
+              <Button type="submit" variant="contained" disabled={passwordMutation.isPending}>
+                {passwordMutation.isPending ? "Changing..." : "Change Password"}
+              </Button>
+            </CardActions>
+          </form>
+        )}
+      </Surface>
       <VaultSecurityPanel />
-      <GlassCard glowColor="var(--mui-palette-error-main)" className="vault-fade-up vault-delay-5">
+      <Surface className="vault-fade-up vault-delay-5" accent="error">
+        <CardHeader title="Danger Zone" slotProps={{ title: { sx: { color: "error.main" } } }} />
         <CardContent sx={{ p: 3 }}>
-          <Typography
-            variant="subtitle1"
-            color="error"
-            sx={{
-              fontWeight: 600,
-              mb: 1,
-            }}
-          >
-            Danger Zone
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              color: "text.secondary",
-              mb: 2,
-            }}
-          >
+          <Typography variant="body2Muted">
             Permanently delete your account and all associated data. This action cannot be undone.
           </Typography>
+        </CardContent>
+        <CardActions>
           <Button variant="outlined" color="error" onClick={handleDeleteAccount}>
             Delete Account
           </Button>
-        </CardContent>
-      </GlassCard>
+        </CardActions>
+      </Surface>
     </Stack>
   );
 }

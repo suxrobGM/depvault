@@ -9,7 +9,7 @@ import {
 import { Box, Button, CardContent, Chip, Grid, Stack, Typography } from "@mui/material";
 import type { Route } from "next";
 import Link from "next/link";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { StatusBadge } from "@/components/ui/data-display";
 import { EmptyState } from "@/components/ui/feedback";
 import { LinkButton } from "@/components/ui/inputs";
@@ -64,14 +64,7 @@ export function AnalysisTab(props: AnalysisTabProps): ReactElement {
           mb: 3,
         }}
       >
-        <Typography
-          variant="subtitle1"
-          sx={{
-            fontWeight: 600,
-          }}
-        >
-          Recent Analyses
-        </Typography>
+        <Typography variant="subtitle1">Recent Analyses</Typography>
         {canEdit && (
           <Button
             variant="contained"
@@ -90,42 +83,23 @@ export function AnalysisTab(props: AnalysisTabProps): ReactElement {
               href={ROUTES.projectAnalysisDetail(projectId, analysis.id) as Route}
               style={{ textDecoration: "none", display: "block" }}
             >
-              <GlassCard sx={{ cursor: "pointer", "&:hover": { borderColor: "primary.main" } }}>
+              <Surface accent="primary" interactive>
                 <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
                   <Stack
                     direction="row"
-                    sx={{
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
+                    sx={{ alignItems: "center", justifyContent: "space-between" }}
                   >
                     <Stack spacing={0.5}>
-                      <Typography
-                        variant="subtitle2"
-                        sx={{
-                          fontWeight: 600,
-                        }}
-                      >
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                         {analysis.filePath ?? analysis.fileName}
                       </Typography>
-                      <Stack
-                        direction="row"
-                        spacing={1}
-                        sx={{
-                          alignItems: "center",
-                        }}
-                      >
+                      <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                         <Chip
                           label={getEcosystemLabel(analysis.ecosystem)}
                           size="small"
                           variant="outlined"
                         />
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            color: "text.secondary",
-                          }}
-                        >
+                        <Typography variant="captionMuted">
                           {new Date(analysis.createdAt).toLocaleDateString()}
                         </Typography>
                       </Stack>
@@ -137,17 +111,12 @@ export function AnalysisTab(props: AnalysisTabProps): ReactElement {
                     />
                   </Stack>
                 </CardContent>
-              </GlassCard>
+              </Surface>
             </Link>
           </Grid>
         ))}
       </Grid>
-      <Stack
-        sx={{
-          alignItems: "center",
-          mt: 3,
-        }}
-      >
+      <Stack sx={{ alignItems: "center", mt: 3 }}>
         <LinkButton href={ROUTES.projectAnalysis(projectId)} endIcon={<ChevronRightIcon />}>
           View all analyses ({data.pagination.total})
         </LinkButton>

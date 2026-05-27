@@ -12,7 +12,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { SkeletonList } from "@/components/ui/data-display";
 import {
   useDeleteNotification,
@@ -78,7 +78,7 @@ export function NotificationsView(): ReactElement {
           Mark all read
         </Button>
       </Stack>
-      <GlassCard hoverGlow={false}>
+      <Surface>
         <List disablePadding>
           {isLoading && (
             <Box sx={{ p: 2 }}>
@@ -87,20 +87,8 @@ export function NotificationsView(): ReactElement {
           )}
           {!isLoading && notifications.length === 0 && (
             <Box sx={{ p: 6, textAlign: "center" }}>
-              <Typography
-                variant="body1"
-                sx={{
-                  color: "text.secondary",
-                }}
-              >
-                No notifications found
-              </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: "text.disabled",
-                }}
-              >
+              <Typography variant="body1Muted">No notifications found</Typography>
+              <Typography variant="caption" sx={{ color: "text.disabled" }}>
                 {readFilter !== "all" || typeFilter
                   ? "Try adjusting your filters"
                   : "You're all caught up!"}
@@ -152,7 +140,7 @@ export function NotificationsView(): ReactElement {
             rowsPerPageOptions={[10, 20, 50]}
           />
         )}
-      </GlassCard>
+      </Surface>
     </Box>
   );
 }

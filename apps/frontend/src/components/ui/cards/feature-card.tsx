@@ -1,20 +1,21 @@
 import type { ReactElement, ReactNode } from "react";
 import { CardContent, Typography } from "@mui/material";
-import { GlassCard } from "./glass-card";
 import { IconBox } from "./icon-box";
+import { Surface, type SurfaceAccent } from "./surface";
 
 interface FeatureCardProps {
   icon: ReactNode;
   title: string;
   description: string;
-  accentColor?: string;
+  accent?: SurfaceAccent;
 }
 
 export function FeatureCard(props: FeatureCardProps): ReactElement {
-  const { icon, title, description, accentColor = "var(--mui-palette-primary-main)" } = props;
+  const { icon, title, description, accent = "primary" } = props;
+  const accentColor = `var(--mui-palette-${accent}-main)`;
 
   return (
-    <GlassCard glowColor={accentColor}>
+    <Surface accent={accent}>
       <CardContent sx={{ p: 3.5 }}>
         <IconBox
           color={accentColor}
@@ -26,16 +27,10 @@ export function FeatureCard(props: FeatureCardProps): ReactElement {
         <Typography variant="h6" gutterBottom>
           {title}
         </Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            color: "text.secondary",
-            lineHeight: 1.7,
-          }}
-        >
+        <Typography variant="body2Muted" sx={{ lineHeight: 1.7 }}>
           {description}
         </Typography>
       </CardContent>
-    </GlassCard>
+    </Surface>
   );
 }

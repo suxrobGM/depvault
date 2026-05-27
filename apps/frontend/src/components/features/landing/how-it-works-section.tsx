@@ -6,7 +6,7 @@ import {
   Terminal as TerminalIcon,
 } from "@mui/icons-material";
 import { Box, Grid, Stack, Typography } from "@mui/material";
-import { GlassCard, GradientText } from "@/components/ui/cards";
+import { GradientText, Surface } from "@/components/ui/cards";
 import { SectionContainer } from "@/components/ui/containers";
 
 const steps = [
@@ -44,19 +44,12 @@ export function HowItWorksSection(): ReactElement {
   return (
     <Box component="section" id="how-it-works" sx={{ position: "relative", height: "100%" }}>
       <SectionContainer>
-        <Typography
-          variant="h2"
-          sx={{
-            textAlign: "center",
-            mb: 1,
-          }}
-        >
+        <Typography variant="h2" sx={{ textAlign: "center", mb: 1 }}>
           How it works
         </Typography>
         <Typography
-          variant="body1"
+          variant="body1Muted"
           sx={{
-            color: "text.secondary",
             textAlign: "center",
             mb: 6,
             maxWidth: 500,
@@ -88,8 +81,7 @@ export function HowItWorksSection(): ReactElement {
                     }}
                   />
                 )}
-                <GlassCard
-                  hoverGlow={false}
+                <Surface
                   sx={{
                     width: "100%",
                     height: "100%",
@@ -126,16 +118,10 @@ export function HowItWorksSection(): ReactElement {
                   <Typography variant="h5" sx={{ mt: 1, mb: 1 }}>
                     {step.title}
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: "text.secondary",
-                      lineHeight: 1.7,
-                    }}
-                  >
+                  <Typography variant="body2Muted" sx={{ lineHeight: 1.7 }}>
                     {step.description}
                   </Typography>
-                </GlassCard>
+                </Surface>
               </Stack>
             </Grid>
           ))}

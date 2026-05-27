@@ -92,24 +92,10 @@ export function ActivityLogEntry(props: ActivityLogEntryProps): ReactElement {
             avatarUrl={entry.userAvatarUrl}
             size={20}
           />
-          <Typography
-            variant="body2"
-            component="span"
-            noWrap
-            sx={{
-              fontWeight: 600,
-              flexShrink: 0,
-            }}
-          >
+          <Typography variant="label" component="span" noWrap sx={{ flexShrink: 0 }}>
             {userName}
           </Typography>
-          <Typography
-            variant="body2"
-            component="span"
-            sx={{
-              color: "text.secondary",
-            }}
-          >
+          <Typography variant="body2Muted" component="span">
             {desc.summary}
           </Typography>
           {desc.highlight && (
@@ -142,29 +128,12 @@ export function ActivityLogEntry(props: ActivityLogEntryProps): ReactElement {
           )}
         </Stack>
 
-        <Stack
-          direction="row"
-          spacing={0.5}
-          sx={{
-            alignItems: "center",
-            mt: 0.25,
-          }}
-        >
-          <Typography
-            variant="caption"
-            sx={{
-              color: "text.disabled",
-            }}
-          >
+        <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", mt: 0.25 }}>
+          <Typography variant="caption" sx={{ color: "text.disabled" }}>
             {formatRelativeTime(new Date(entry.createdAt))}
           </Typography>
           {desc.detail && (
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.disabled",
-              }}
-            >
+            <Typography variant="caption" sx={{ color: "text.disabled" }}>
               · {desc.detail}
             </Typography>
           )}

@@ -41,43 +41,15 @@ export function FileDropZone(props: FileDropZoneProps): ReactElement {
       />
       {file ? (
         <>
-          <Typography
-            variant="body2"
-            sx={{
-              fontWeight: 600,
-            }}
-          >
-            {file.name}
-          </Typography>
-          <Typography
-            variant="caption"
-            sx={{
-              color: "text.secondary",
-            }}
-          >
+          <Typography variant="label">{file.name}</Typography>
+          <Typography variant="captionMuted">
             {(file.size / 1024).toFixed(1)} KB — click to change
           </Typography>
         </>
       ) : (
         <>
-          <Typography
-            variant="body2"
-            sx={{
-              color: "text.secondary",
-            }}
-          >
-            Click to select a file
-          </Typography>
-          {hint && (
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
-              {hint}
-            </Typography>
-          )}
+          <Typography variant="body2Muted">Click to select a file</Typography>
+          {hint && <Typography variant="captionMuted">{hint}</Typography>}
         </>
       )}
     </Box>

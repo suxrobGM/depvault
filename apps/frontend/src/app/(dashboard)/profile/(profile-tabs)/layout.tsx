@@ -16,7 +16,7 @@ export default function ProfileTabsLayout(props: ProfileTabsLayoutProps): ReactE
       <PageHeader
         title="Profile"
         subtitle="Manage your account settings and preferences"
-        breadcrumbs={[{ label: "Dashboard", href: ROUTES.dashboard }, { label: "Profile" }]}
+        breadcrumbs={[{ label: "Overview", href: ROUTES.overview }, { label: "Profile" }]}
       />
       <ProfileTabs />
       {children}

@@ -87,7 +87,7 @@ export function AdminSidebar(props: PropsWithChildren): ReactElement {
       <List sx={{ px: 1 }}>
         <ListItemButton
           onClick={() => {
-            router.push(ROUTES.dashboard as Route);
+            router.push(ROUTES.overview as Route);
             setMobileOpen(false);
           }}
           sx={{ px: 2 }}

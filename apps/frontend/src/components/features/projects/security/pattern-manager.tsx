@@ -22,7 +22,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
@@ -65,7 +65,7 @@ export function PatternManager(props: PatternManagerProps): ReactElement {
 
   return (
     <>
-      <GlassCard>
+      <Surface>
         <Box sx={{ p: 2 }}>
           <Stack
             direction="row"
@@ -75,14 +75,7 @@ export function PatternManager(props: PatternManagerProps): ReactElement {
               mb: 2,
             }}
           >
-            <Typography
-              variant="subtitle1"
-              sx={{
-                fontWeight: 600,
-              }}
-            >
-              Scan Patterns
-            </Typography>
+            <Typography variant="subtitle1">Scan Patterns</Typography>
             <Button
               variant="contained"
               size="small"
@@ -98,15 +91,7 @@ export function PatternManager(props: PatternManagerProps): ReactElement {
 
           {custom.length > 0 && (
             <>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: "text.secondary",
-                  fontWeight: 600,
-                  mb: 1,
-                  display: "block",
-                }}
-              >
+              <Typography variant="captionMuted" sx={{ fontWeight: 600, mb: 1, display: "block" }}>
                 Custom Patterns
               </Typography>
               <TableContainer sx={{ mb: 3 }}>
@@ -146,13 +131,7 @@ export function PatternManager(props: PatternManagerProps): ReactElement {
                           />
                         </TableCell>
                         <TableCell align="right">
-                          <Stack
-                            direction="row"
-                            spacing={0.5}
-                            sx={{
-                              justifyContent: "flex-end",
-                            }}
-                          >
+                          <Stack direction="row" spacing={0.5} sx={{ justifyContent: "flex-end" }}>
                             <Tooltip title="Edit">
                               <IconButton
                                 size="small"
@@ -185,9 +164,8 @@ export function PatternManager(props: PatternManagerProps): ReactElement {
           )}
 
           <Typography
-            variant="caption"
+            variant="captionMuted"
             sx={{
-              color: "text.secondary",
               fontWeight: 600,
               mb: 1,
               display: "block",
@@ -242,7 +220,7 @@ export function PatternManager(props: PatternManagerProps): ReactElement {
             </Table>
           </TableContainer>
         </Box>
-      </GlassCard>
+      </Surface>
       <CreatePatternDialog
         open={dialogOpen}
         onClose={() => {

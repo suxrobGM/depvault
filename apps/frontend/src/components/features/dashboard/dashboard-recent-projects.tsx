@@ -7,7 +7,7 @@ import {
 import { Box, CardContent, Grid, Stack, Typography } from "@mui/material";
 import type { Route } from "next";
 import Link from "next/link";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { EmptyState } from "@/components/ui/feedback";
 import { LinkButton } from "@/components/ui/inputs";
 import { ROUTES } from "@/lib/constants";
@@ -50,27 +50,12 @@ export function DashboardRecentProjects(props: DashboardRecentProjectsProps): Re
                 href={ROUTES.project(project.id)}
                 style={{ textDecoration: "none", display: "block" }}
               >
-                <GlassCard
-                  glowColor="var(--mui-palette-primary-main)"
-                  sx={{
-                    cursor: "pointer",
-                    transition: "transform 0.2s ease",
-                    "&:hover": { transform: "translateY(-2px)" },
-                  }}
-                >
+                <Surface accent="primary" interactive>
                   <CardContent sx={{ p: 2.5, "&:last-child": { pb: 2.5 } }}>
+                    <Typography variant="subtitle1">{project.name}</Typography>
                     <Typography
-                      variant="subtitle1"
+                      variant="body2Muted"
                       sx={{
-                        fontWeight: 600,
-                      }}
-                    >
-                      {project.name}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: "text.secondary",
                         mt: 0.5,
                         mb: 1.5,
                         display: "-webkit-box",
@@ -81,25 +66,14 @@ export function DashboardRecentProjects(props: DashboardRecentProjectsProps): Re
                     >
                       {project.description ?? "No description"}
                     </Typography>
-                    <Stack
-                      direction="row"
-                      spacing={0.5}
-                      sx={{
-                        alignItems: "center",
-                      }}
-                    >
+                    <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
                       <CalendarIcon sx={{ fontSize: 14, color: "text.secondary" }} />
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          color: "text.secondary",
-                        }}
-                      >
+                      <Typography variant="captionMuted">
                         {new Date(project.createdAt).toLocaleDateString()}
                       </Typography>
                     </Stack>
                   </CardContent>
-                </GlassCard>
+                </Surface>
               </Link>
             ))}
           </Stack>

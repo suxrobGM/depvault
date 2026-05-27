@@ -3,15 +3,14 @@
 import { useState, type ReactElement } from "react";
 import { Add as AddIcon, Code as CodeIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import {
-  Box,
   Button,
   CardContent,
+  CardHeader,
   Chip,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Stack,
   Table,
   TableBody,
   TableCell,
@@ -20,7 +19,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { ActionMenu } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
@@ -79,35 +78,12 @@ export function CiTokensSection(props: CiTokensSectionProps): ReactElement {
 
   return (
     <>
-      <GlassCard>
-        <CardContent sx={{ p: 3 }}>
-          <Stack
-            direction="row"
-            sx={{
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 2,
-            }}
-          >
-            <Box>
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  fontWeight: 600,
-                }}
-              >
-                CI/CD Tokens
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "text.secondary",
-                }}
-              >
-                Generate scoped tokens for CI/CD pipelines to fetch secrets at build time.
-              </Typography>
-            </Box>
-            {canEdit && (
+      <Surface>
+        <CardHeader
+          title="CI/CD Tokens"
+          subheader="Generate scoped tokens for CI/CD pipelines to fetch secrets at build time."
+          action={
+            canEdit && (
               <Button
                 variant="outlined"
                 size="small"
@@ -116,18 +92,12 @@ export function CiTokensSection(props: CiTokensSectionProps): ReactElement {
               >
                 Generate Token
               </Button>
-            )}
-          </Stack>
-
+            )
+          }
+        />
+        <CardContent sx={{ p: 3 }}>
           {tokens.length === 0 ? (
-            <Typography
-              variant="body2"
-              sx={{
-                color: "text.secondary",
-                py: 2,
-                textAlign: "center",
-              }}
-            >
+            <Typography variant="body2Muted" sx={{ py: 2, textAlign: "center" }}>
               No CI/CD tokens yet. Generate one to get started.
             </Typography>
           ) : (
@@ -150,23 +120,12 @@ export function CiTokensSection(props: CiTokensSectionProps): ReactElement {
                     return (
                       <TableRow key={token.id}>
                         <TableCell>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontWeight: 500,
-                            }}
-                          >
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
                             {token.name}
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontFamily: "monospace",
-                              color: "text.secondary",
-                            }}
-                          >
+                          <Typography variant="body2Muted" sx={{ fontFamily: "monospace" }}>
                             dvci_{token.tokenPrefix}...
                           </Typography>
                         </TableCell>
@@ -211,7 +170,7 @@ export function CiTokensSection(props: CiTokensSectionProps): ReactElement {
             </TableContainer>
           )}
         </CardContent>
-      </GlassCard>
+      </Surface>
       <CreateCiTokenDialog
         open={createOpen}
         onClose={() => setCreateOpen(false)}

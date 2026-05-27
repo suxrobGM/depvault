@@ -6,7 +6,7 @@ import { DashboardRecentProjects } from "@/components/features/dashboard/dashboa
 import { DashboardStats } from "@/components/features/dashboard/dashboard-stats";
 import { getServerClient } from "@/lib/api-server";
 
-export default async function DashboardPage(): Promise<ReactElement> {
+export default async function OverviewPage(): Promise<ReactElement> {
   const client = await getServerClient();
   const { data } = await client.api.projects.get({ query: { page: 1, limit: 3 } });
   const projects = data?.items ?? [];

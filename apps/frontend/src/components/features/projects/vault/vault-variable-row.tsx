@@ -80,7 +80,7 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
           </TableCell>
         )}
         <TableCell>
-          <Typography variant="body2" sx={{ fontFamily: "monospace", fontWeight: 600 }}>
+          <Typography variant="label" sx={{ fontFamily: "monospace" }}>
             {variable.key}
           </Typography>
         </TableCell>
@@ -93,7 +93,7 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
           />
         </TableCell>
         <TableCell>
-          <Typography variant="body2" noWrap sx={{ color: "text.secondary", maxWidth: 200 }}>
+          <Typography variant="body2Muted" noWrap sx={{ maxWidth: 200 }}>
             {variable.description ?? "—"}
           </Typography>
         </TableCell>

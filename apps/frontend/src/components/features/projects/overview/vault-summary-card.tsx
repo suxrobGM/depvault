@@ -2,8 +2,8 @@
 
 import type { ReactElement } from "react";
 import { ArrowForward as ArrowForwardIcon, VpnKey as VpnKeyIcon } from "@mui/icons-material";
-import { CardContent, Grid, Stack, Typography } from "@mui/material";
-import { GlassCard, IconBox } from "@/components/ui/cards";
+import { CardActions, CardContent, CardHeader, Grid, Typography } from "@mui/material";
+import { IconBox, Surface } from "@/components/ui/cards";
 import { LinkButton } from "@/components/ui/inputs";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
@@ -33,87 +33,38 @@ export function VaultSummaryCard(props: VaultSummaryCardProps): ReactElement {
   const secretFileCount = secretFilesData?.pagination.total ?? 0;
 
   return (
-    <GlassCard sx={{ height: "100%" }}>
-      <CardContent sx={{ p: 3 }}>
-        <Stack
-          direction="row"
-          spacing={1.5}
-          sx={{
-            alignItems: "center",
-            mb: 2.5,
-          }}
-        >
+    <Surface accent="success" sx={{ height: "100%" }}>
+      <CardHeader
+        avatar={
           <IconBox color="var(--mui-palette-success-main)" size={40}>
             <VpnKeyIcon sx={{ fontSize: 22 }} />
           </IconBox>
-          <Typography
-            variant="subtitle1"
-            sx={{
-              fontWeight: 600,
-            }}
-          >
-            Vault Summary
-          </Typography>
-        </Stack>
-        <Grid container spacing={2} sx={{ mb: 2.5 }}>
+        }
+        title="Vault Summary"
+      />
+      <CardContent sx={{ p: 3 }}>
+        <Grid container spacing={2}>
           <Grid size={4}>
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
-              Vaults
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                lineHeight: 1.2,
-              }}
-            >
+            <Typography variant="captionMuted">Vaults</Typography>
+            <Typography variant="statValue" sx={{ fontSize: "1rem" }}>
               {vaultCount}
             </Typography>
           </Grid>
           <Grid size={4}>
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
-              Variables
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                lineHeight: 1.2,
-              }}
-            >
+            <Typography variant="captionMuted">Variables</Typography>
+            <Typography variant="statValue" sx={{ fontSize: "1rem" }}>
               {variableCount}
             </Typography>
           </Grid>
           <Grid size={4}>
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
-              Secret Files
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                lineHeight: 1.2,
-              }}
-            >
+            <Typography variant="captionMuted">Secret Files</Typography>
+            <Typography variant="statValue" sx={{ fontSize: "1rem" }}>
               {secretFileCount}
             </Typography>
           </Grid>
         </Grid>
+      </CardContent>
+      <CardActions>
         <LinkButton
           href={ROUTES.projectVault(projectId)}
           variant="outlined"
@@ -122,7 +73,7 @@ export function VaultSummaryCard(props: VaultSummaryCardProps): ReactElement {
         >
           Go to Vault
         </LinkButton>
-      </CardContent>
-    </GlassCard>
+      </CardActions>
+    </Surface>
   );
 }

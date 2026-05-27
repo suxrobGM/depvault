@@ -8,10 +8,9 @@ import {
   Security as SecurityIcon,
 } from "@mui/icons-material";
 import { Box, Button, Chip, IconButton, Skeleton, Stack, Tooltip, Typography } from "@mui/material";
-import { alpha } from "@mui/material/styles";
 import type { Route } from "next";
 import Link from "next/link";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { PageHeader } from "@/components/ui/containers";
 import { HealthArc, PaginationBar, SkeletonList } from "@/components/ui/data-display";
 import { EmptyState } from "@/components/ui/feedback";
@@ -79,7 +78,9 @@ function AnalysisRow(props: AnalysisRowProps): ReactElement {
       href={ROUTES.projectAnalysisDetail(projectId, item.id) as Route}
       style={{ textDecoration: "none", display: "block" }}
     >
-      <GlassCard
+      <Surface
+        accent="primary"
+        interactive
         className={`vault-fade-up ${delayClass}`}
         sx={{
           display: "flex",
@@ -87,25 +88,12 @@ function AnalysisRow(props: AnalysisRowProps): ReactElement {
           gap: 2.5,
           px: 2.5,
           py: 2,
-          "&:hover": {
-            borderColor: (t) => alpha(t.palette.primary.main, 0.25),
-            boxShadow: (t) => `0 0 20px ${alpha(t.palette.primary.main, 0.08)}`,
-            transform: "translateY(-1px)",
-          },
         }}
       >
         <HealthArc score={item.healthScore ?? null} />
 
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography
-            variant="body2"
-            noWrap
-            sx={{
-              fontWeight: 600,
-              color: "text.primary",
-              lineHeight: 1.4,
-            }}
-          >
+          <Typography variant="label" noWrap sx={{ color: "text.primary", lineHeight: 1.4 }}>
             {dirPath && (
               <Typography
                 component="span"
@@ -117,26 +105,14 @@ function AnalysisRow(props: AnalysisRowProps): ReactElement {
             )}
             {fileName}
           </Typography>
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{
-              alignItems: "center",
-              mt: 0.5,
-            }}
-          >
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center", mt: 0.5 }}>
             <Chip
               label={getEcosystemLabel(item.ecosystem)}
               size="small"
               variant="outlined"
               sx={{ height: 22, fontSize: "0.7rem" }}
             />
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.disabled",
-              }}
-            >
+            <Typography variant="caption" sx={{ color: "text.disabled" }}>
               {new Date(item.createdAt).toLocaleDateString(undefined, {
                 month: "short",
                 day: "numeric",
@@ -146,14 +122,7 @@ function AnalysisRow(props: AnalysisRowProps): ReactElement {
           </Stack>
         </Box>
 
-        <Stack
-          direction="row"
-          spacing={1.5}
-          sx={{
-            alignItems: "center",
-            flexShrink: 0,
-          }}
-        >
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", flexShrink: 0 }}>
           {item.dependencyCount !== undefined && item.dependencyCount > 0 && (
             <Chip
               icon={<FolderIcon sx={{ fontSize: 14 }} />}
@@ -179,7 +148,7 @@ function AnalysisRow(props: AnalysisRowProps): ReactElement {
             </Tooltip>
           )}
         </Stack>
-      </GlassCard>
+      </Surface>
     </Link>
   );
 }
@@ -227,7 +196,7 @@ export function AnalysisListView(props: AnalysisListViewProps): ReactElement {
       <PageHeader
         title="Analysis"
         breadcrumbs={[
-          { label: "Dashboard", href: ROUTES.dashboard as Route },
+          { label: "Overview", href: ROUTES.overview as Route },
           { label: "Projects", href: ROUTES.projects as Route },
           { label: project?.name ?? "Project", href: ROUTES.project(projectId) as Route },
           { label: "Analysis" },
@@ -241,7 +210,7 @@ export function AnalysisListView(props: AnalysisListViewProps): ReactElement {
             >
               New Analysis
             </Button>
-          ) : undefined
+          ) : null
         }
       />
 

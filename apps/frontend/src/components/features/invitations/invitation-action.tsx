@@ -56,15 +56,10 @@ export function InvitationAction(props: InvitationActionProps): ReactElement {
             <Typography variant="h5" gutterBottom>
               Invitation Accepted
             </Typography>
-            <Typography
-              sx={{
-                color: "text.secondary",
-                mb: 3,
-              }}
-            >
+            <Typography sx={{ mb: 3 }} variant="body1Muted">
               You are now a member of the project.
             </Typography>
-            <Button variant="contained" onClick={() => router.push(ROUTES.dashboard)}>
+            <Button variant="contained" onClick={() => router.push(ROUTES.overview)}>
               Go to Dashboard
             </Button>
           </CardContent>
@@ -82,15 +77,10 @@ export function InvitationAction(props: InvitationActionProps): ReactElement {
             <Typography variant="h5" gutterBottom>
               Invitation Declined
             </Typography>
-            <Typography
-              sx={{
-                color: "text.secondary",
-                mb: 3,
-              }}
-            >
+            <Typography sx={{ mb: 3 }} variant="body1Muted">
               You have declined the invitation.
             </Typography>
-            <Button variant="contained" onClick={() => router.push(ROUTES.dashboard)}>
+            <Button variant="contained" onClick={() => router.push(ROUTES.overview)}>
               Go to Dashboard
             </Button>
           </CardContent>
@@ -106,7 +96,7 @@ export function InvitationAction(props: InvitationActionProps): ReactElement {
           This invitation is no longer valid. It may have expired, been cancelled, or already been
           responded to.
         </Alert>
-        <Button sx={{ mt: 2 }} variant="contained" onClick={() => router.push(ROUTES.dashboard)}>
+        <Button sx={{ mt: 2 }} variant="contained" onClick={() => router.push(ROUTES.overview)}>
           Go to Dashboard
         </Button>
       </Box>
@@ -129,43 +119,17 @@ export function InvitationAction(props: InvitationActionProps): ReactElement {
 
           <Stack spacing={2} sx={{ mb: 4 }}>
             <Box>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: "text.secondary",
-                }}
-              >
-                Project
-              </Typography>
-              <Typography
-                variant="body1"
-                sx={{
-                  fontWeight: 500,
-                }}
-              >
+              <Typography variant="captionMuted">Project</Typography>
+              <Typography variant="body1" sx={{ fontWeight: 500 }}>
                 {invitation.project.name}
               </Typography>
             </Box>
             <Box>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: "text.secondary",
-                }}
-              >
-                Invited by
-              </Typography>
+              <Typography variant="captionMuted">Invited by</Typography>
               <Typography variant="body1">{inviterName}</Typography>
             </Box>
             <Box>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: "text.secondary",
-                }}
-              >
-                Role
-              </Typography>
+              <Typography variant="captionMuted">Role</Typography>
               <Box sx={{ mt: 0.5 }}>
                 <Chip label={invitation.role} size="small" variant="outlined" />
               </Box>

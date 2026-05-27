@@ -20,7 +20,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { PaginationBar } from "@/components/ui/data-display";
 import { EmptyState } from "@/components/ui/feedback";
 import { useApiMutation } from "@/hooks/use-api-mutation";
@@ -120,15 +120,8 @@ export function DetectionsTable(props: DetectionsTableProps): ReactElement {
   };
 
   return (
-    <GlassCard sx={{ p: 2 }}>
-      <Stack
-        direction="row"
-        spacing={2}
-        sx={{
-          alignItems: "center",
-          mb: 2,
-        }}
-      >
+    <Surface sx={{ p: 2 }}>
+      <Stack direction="row" spacing={2} sx={{ alignItems: "center", mb: 2 }}>
         <TextField
           select
           size="small"
@@ -166,14 +159,7 @@ export function DetectionsTable(props: DetectionsTableProps): ReactElement {
         {someSelected && (
           <>
             <Box sx={{ flex: 1 }} />
-            <Typography
-              variant="body2"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
-              {selectedIds.size} selected
-            </Typography>
+            <Typography variant="body2Muted">{selectedIds.size} selected</Typography>
             <Button
               size="small"
               variant="outlined"
@@ -253,6 +239,6 @@ export function DetectionsTable(props: DetectionsTableProps): ReactElement {
           onPageSizeChange={setPageSize}
         />
       )}
-    </GlassCard>
+    </Surface>
   );
 }

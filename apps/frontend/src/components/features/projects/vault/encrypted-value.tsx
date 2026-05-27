@@ -33,10 +33,7 @@ export function EncryptedValue(props: EncryptedValueProps): ReactElement {
 
 function BlankValue(): ReactElement {
   return (
-    <Typography
-      variant="body2"
-      sx={{ fontFamily: "monospace", color: "text.secondary", fontStyle: "italic" }}
-    >
+    <Typography variant="body2Muted" sx={{ fontFamily: "monospace", fontStyle: "italic" }}>
       (empty)
     </Typography>
   );

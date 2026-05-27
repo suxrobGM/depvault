@@ -17,7 +17,7 @@ interface FooterLink {
 
 const footerLinks: Record<string, FooterLink[]> = {
   Product: [
-    { label: "Dashboard", href: ROUTES.dashboard },
+    { label: "Overview", href: ROUTES.overview },
     { label: "Dependency Analysis", href: "/docs/guides/dependency-analysis" },
     { label: "Environment Vault", href: "/docs/guides/environment-vault" },
     { label: "Secret Sharing", href: "/docs/guides/secret-sharing" },
@@ -72,9 +72,8 @@ export function LandingFooter(): ReactElement {
               <Image src="/depvault-logo-dark.svg" alt="DepVault" width={140} height={40} />
             </Box>
             <Typography
-              variant="body2"
+              variant="body2Muted"
               sx={{
-                color: "text.secondary",
                 maxWidth: 280,
                 lineHeight: 1.7,
                 mb: 2,
@@ -139,14 +138,7 @@ export function LandingFooter(): ReactElement {
           ))}
         </Grid>
         <Divider sx={{ my: 4 }} />
-        <Typography
-          variant="caption"
-          sx={{
-            color: "text.secondary",
-          }}
-        >
-          &copy; 2026 DepVault. All rights reserved.
-        </Typography>
+        <Typography variant="captionMuted">&copy; 2026 DepVault. All rights reserved.</Typography>
       </SectionContainer>
     </Box>
   );

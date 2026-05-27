@@ -26,7 +26,7 @@ export function proxy(request: NextRequest): NextResponse {
   const isPublicRoute = PUBLIC_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"));
 
   if (isAuthRoute && hasToken) {
-    return NextResponse.redirect(new URL(ROUTES.dashboard, request.url));
+    return NextResponse.redirect(new URL(ROUTES.overview, request.url));
   }
 
   if (!isAuthRoute && !isPublicRoute && !hasToken) {

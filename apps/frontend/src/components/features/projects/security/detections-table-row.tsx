@@ -80,47 +80,22 @@ export function DetectionTableRow(props: DetectionTableRowProps): ReactElement {
           <IconButton size="small">{expanded ? <CollapseIcon /> : <ExpandIcon />}</IconButton>
         </TableCell>
         <TableCell>
-          <Typography
-            variant="body2"
-            sx={{
-              fontFamily: "monospace",
-              fontSize: 12,
-            }}
-          >
+          <Typography variant="body2" sx={{ fontFamily: "monospace", fontSize: 12 }}>
             {detection.commitHash.slice(0, 7)}
           </Typography>
         </TableCell>
         <TableCell>
           <Tooltip title={detection.filePath} placement="top-start" enterDelay={300}>
-            <Typography
-              variant="body2"
-              noWrap
-              sx={{
-                fontSize: 13,
-                maxWidth: 250,
-              }}
-            >
+            <Typography variant="body2" noWrap sx={{ fontSize: 13, maxWidth: 250 }}>
               {detection.filePath}
             </Typography>
           </Tooltip>
           {detection.lineNumber && (
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
-              Line {detection.lineNumber}
-            </Typography>
+            <Typography variant="captionMuted">Line {detection.lineNumber}</Typography>
           )}
         </TableCell>
         <TableCell>
-          <Typography
-            variant="body2"
-            sx={{
-              fontSize: 13,
-            }}
-          >
+          <Typography variant="body2" sx={{ fontSize: 13 }}>
             {detection.patternName}
           </Typography>
         </TableCell>
@@ -141,13 +116,7 @@ export function DetectionTableRow(props: DetectionTableRowProps): ReactElement {
         </TableCell>
         <TableCell align="right">
           {detection.status === "OPEN" && (
-            <Stack
-              direction="row"
-              spacing={0.5}
-              sx={{
-                justifyContent: "flex-end",
-              }}
-            >
+            <Stack direction="row" spacing={0.5} sx={{ justifyContent: "flex-end" }}>
               <Tooltip title="Mark as resolved">
                 <IconButton
                   size="small"
@@ -183,13 +152,7 @@ export function DetectionTableRow(props: DetectionTableRowProps): ReactElement {
             <Box sx={{ p: 2 }}>
               <Stack spacing={1.5}>
                 <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: "text.secondary",
-                      fontWeight: 600,
-                    }}
-                  >
+                  <Typography variant="captionMuted" sx={{ fontWeight: 600 }}>
                     File
                   </Typography>
                   <Typography
@@ -206,13 +169,7 @@ export function DetectionTableRow(props: DetectionTableRowProps): ReactElement {
                   </Typography>
                 </Box>
                 <Box>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: "text.secondary",
-                      fontWeight: 600,
-                    }}
-                  >
+                  <Typography variant="captionMuted" sx={{ fontWeight: 600 }}>
                     Matched Snippet
                   </Typography>
                   <Typography
@@ -231,13 +188,7 @@ export function DetectionTableRow(props: DetectionTableRowProps): ReactElement {
                 </Box>
                 {detection.remediationSteps && (
                   <Box>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: "text.secondary",
-                        fontWeight: 600,
-                      }}
-                    >
+                    <Typography variant="captionMuted" sx={{ fontWeight: 600 }}>
                       Remediation
                     </Typography>
                     <Typography variant="body2" sx={{ mt: 0.5 }}>

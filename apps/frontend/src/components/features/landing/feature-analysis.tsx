@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { Security as SecurityIcon } from "@mui/icons-material";
 import { Box, Chip, Grid, Stack, Typography } from "@mui/material";
-import { GlassCard, GradientText, IconBox } from "@/components/ui/cards";
+import { GradientText, IconBox, Surface } from "@/components/ui/cards";
 import { BrowserWindow } from "@/components/ui/containers";
 
 const mockRows = [
@@ -49,9 +49,8 @@ export function FeatureAnalysis(): ReactElement {
           </GradientText>
         </Box>
         <Typography
-          variant="body1"
+          variant="body1Muted"
           sx={{
-            color: "text.secondary",
             lineHeight: 1.8,
             mb: 2,
           }}
@@ -74,7 +73,7 @@ export function FeatureAnalysis(): ReactElement {
         </Stack>
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
-        <GlassCard hoverGlow={false} sx={{ overflow: "hidden" }}>
+        <Surface sx={{ overflow: "hidden" }}>
           <BrowserWindow title="analysis — package.json" />
           <Box sx={{ p: 0 }}>
             <Box
@@ -89,40 +88,16 @@ export function FeatureAnalysis(): ReactElement {
                 bgcolor: "rgba(255,255,255,0.02)",
               }}
             >
-              <Typography
-                variant="caption"
-                sx={{
-                  color: "text.secondary",
-                  fontWeight: 600,
-                }}
-              >
+              <Typography variant="captionMuted" sx={{ fontWeight: 600 }}>
                 Package
               </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: "text.secondary",
-                  fontWeight: 600,
-                }}
-              >
+              <Typography variant="captionMuted" sx={{ fontWeight: 600 }}>
                 Current
               </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: "text.secondary",
-                  fontWeight: 600,
-                }}
-              >
+              <Typography variant="captionMuted" sx={{ fontWeight: 600 }}>
                 Latest
               </Typography>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: "text.secondary",
-                  fontWeight: 600,
-                }}
-              >
+              <Typography variant="captionMuted" sx={{ fontWeight: 600 }}>
                 Status
               </Typography>
             </Box>
@@ -145,26 +120,22 @@ export function FeatureAnalysis(): ReactElement {
                 >
                   <Typography
                     variant="caption"
-                    sx={{
-                      fontFamily: "var(--font-jetbrains), monospace",
-                    }}
+                    sx={{ fontFamily: "var(--font-jetbrains), monospace" }}
                   >
                     {row.name}
                   </Typography>
                   <Typography
-                    variant="caption"
+                    variant="captionMuted"
                     sx={{
                       fontFamily: "var(--font-jetbrains), monospace",
-                      color: "text.secondary",
                     }}
                   >
                     {row.current}
                   </Typography>
                   <Typography
-                    variant="caption"
+                    variant="captionMuted"
                     sx={{
                       fontFamily: "var(--font-jetbrains), monospace",
-                      color: "text.secondary",
                     }}
                   >
                     {row.latest}
@@ -184,7 +155,7 @@ export function FeatureAnalysis(): ReactElement {
               );
             })}
           </Box>
-        </GlassCard>
+        </Surface>
       </Grid>
     </Grid>
   );

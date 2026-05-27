@@ -19,7 +19,7 @@ async function AuthenticatedAdminSidebar(props: PropsWithChildren): Promise<Reac
   const user = await getUser();
 
   if (!user || (user.role !== UserRole.ADMIN && user.role !== UserRole.SUPER_ADMIN)) {
-    redirect(ROUTES.dashboard);
+    redirect(ROUTES.overview);
   }
 
   return (

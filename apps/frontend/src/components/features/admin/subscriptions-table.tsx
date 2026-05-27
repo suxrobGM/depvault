@@ -116,22 +116,10 @@ export function SubscriptionsTable(): ReactElement {
                   <TableRow key={sub.id} hover>
                     <TableCell>
                       <Box>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: 600,
-                          }}
-                        >
+                        <Typography variant="label">
                           {[sub.user.firstName, sub.user.lastName].filter(Boolean).join(" ") || "—"}
                         </Typography>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            color: "text.secondary",
-                          }}
-                        >
-                          {sub.user.email}
-                        </Typography>
+                        <Typography variant="captionMuted">{sub.user.email}</Typography>
                       </Box>
                     </TableCell>
                     <TableCell>

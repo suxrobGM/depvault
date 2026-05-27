@@ -72,10 +72,9 @@ export function HeroSection(): ReactElement {
           </Box>
 
           <Typography
-            variant="h6"
+            variant="h6Muted"
             className="vault-fade-up vault-delay-1"
             sx={{
-              color: "text.secondary",
               fontWeight: 400,
               maxWidth: 640,
               fontSize: { xs: "1rem", md: "1.25rem" },
@@ -105,7 +104,8 @@ export function HeroSection(): ReactElement {
           >
             <Typography
               component="span"
-              sx={{ color: "text.secondary", fontFamily: "inherit", fontSize: "inherit" }}
+              sx={{ fontFamily: "inherit", fontSize: "inherit" }}
+              variant="body1Muted"
             >
               ${" "}
             </Typography>

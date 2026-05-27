@@ -135,21 +135,10 @@ export function NotificationDropdown(props: NotificationDropdownProps): ReactEle
         {!isLoading && notifications.length === 0 && (
           <Box sx={{ py: 5, px: 3, textAlign: "center" }}>
             <NotificationsNoneIcon sx={{ fontSize: 40, color: "text.disabled", mb: 1 }} />
-            <Typography
-              variant="body2"
-              sx={{
-                color: "text.secondary",
-                fontWeight: 500,
-              }}
-            >
+            <Typography variant="body2Muted" sx={{ fontWeight: 500 }}>
               You&apos;re all caught up
             </Typography>
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.disabled",
-              }}
-            >
+            <Typography variant="caption" sx={{ color: "text.disabled" }}>
               No new notifications
             </Typography>
           </Box>

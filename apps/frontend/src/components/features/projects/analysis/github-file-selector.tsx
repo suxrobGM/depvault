@@ -52,13 +52,7 @@ export function GitHubFileSelector(props: GitHubFileSelectorProps): ReactElement
       <Button size="small" onClick={onBack} disabled={isAnalyzing} sx={{ mb: 1 }}>
         &larr; Back to repositories
       </Button>
-      <Typography
-        variant="body2"
-        sx={{
-          color: "text.secondary",
-          mb: 1.5,
-        }}
-      >
+      <Typography variant="body2Muted" sx={{ mb: 1.5 }}>
         {repoLabel}
       </Typography>
       {isLoading && <LoadingSpinner size={32} py={3} />}
@@ -76,16 +70,7 @@ export function GitHubFileSelector(props: GitHubFileSelectorProps): ReactElement
                 disabled={isAnalyzing}
               />
             }
-            label={
-              <Typography
-                variant="body2"
-                sx={{
-                  fontWeight: 600,
-                }}
-              >
-                Select all ({files.length})
-              </Typography>
-            }
+            label={<Typography variant="label">Select all ({files.length})</Typography>}
           />
         )}
         {files?.map((file) => (
@@ -100,13 +85,7 @@ export function GitHubFileSelector(props: GitHubFileSelectorProps): ReactElement
               />
             }
             label={
-              <Stack
-                direction="row"
-                spacing={1}
-                sx={{
-                  alignItems: "center",
-                }}
-              >
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                 <Typography variant="body2">{file.path}</Typography>
                 <Chip label={file.ecosystem} size="small" variant="outlined" />
               </Stack>

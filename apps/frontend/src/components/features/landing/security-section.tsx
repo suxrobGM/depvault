@@ -6,7 +6,7 @@ import {
   VisibilityOff as ZeroKnowledgeIcon,
 } from "@mui/icons-material";
 import { Box, CardContent, Grid, Typography } from "@mui/material";
-import { GlassCard, GradientText, IconBox } from "@/components/ui/cards";
+import { GradientText, IconBox, Surface } from "@/components/ui/cards";
 import { SectionContainer } from "@/components/ui/containers";
 
 interface TrustCard {
@@ -65,10 +65,9 @@ export function SecuritySection(): ReactElement {
           </GradientText>
         </Typography>
         <Typography
-          variant="body1"
+          variant="body1Muted"
           className="vault-fade-up vault-delay-1"
           sx={{
-            color: "text.secondary",
             textAlign: "center",
             mb: 6,
             maxWidth: 520,
@@ -81,31 +80,19 @@ export function SecuritySection(): ReactElement {
         <Grid container spacing={3}>
           {trustCards.map((card) => (
             <Grid key={card.title} size={{ xs: 12, sm: 6, md: 3 }}>
-              <GlassCard glowColor={card.color} sx={{ height: "100%" }}>
+              <Surface accent="primary" sx={{ height: "100%" }}>
                 <CardContent sx={{ p: 3 }}>
                   <IconBox color={card.color} sx={{ mb: 2 }}>
                     {card.icon}
                   </IconBox>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      fontWeight: 600,
-                      mb: 0.5,
-                    }}
-                  >
+                  <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
                     {card.title}
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: "text.secondary",
-                      lineHeight: 1.7,
-                    }}
-                  >
+                  <Typography variant="body2Muted" sx={{ lineHeight: 1.7 }}>
                     {card.description}
                   </Typography>
                 </CardContent>
-              </GlassCard>
+              </Surface>
             </Grid>
           ))}
         </Grid>

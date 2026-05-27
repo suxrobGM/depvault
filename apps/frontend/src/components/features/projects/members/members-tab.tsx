@@ -11,7 +11,7 @@ import {
   SwapHoriz as SwapHorizIcon,
 } from "@mui/icons-material";
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
-import { GlassCard } from "@/components/ui/cards";
+import { Surface } from "@/components/ui/cards";
 import { SkeletonList, UserAvatar } from "@/components/ui/data-display";
 import { ActionMenu } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
@@ -159,27 +159,13 @@ export function MembersTab(props: MembersTabProps): ReactElement {
       )}
       {isOwner && pendingInvitations.length > 0 && (
         <Box sx={{ mb: 3 }}>
-          <Typography
-            variant="subtitle2"
-            sx={{
-              color: "text.secondary",
-              mb: 1.5,
-            }}
-          >
+          <Typography variant="subtitle2" sx={{ color: "text.secondary", mb: 1.5 }}>
             Pending Invitations
           </Typography>
           <Stack spacing={1.5}>
             {pendingInvitations.map((invitation) => (
-              <GlassCard key={invitation.id} hoverGlow={false}>
-                <Stack
-                  direction="row"
-                  spacing={2}
-                  sx={{
-                    alignItems: "center",
-                    px: 3,
-                    py: 2,
-                  }}
-                >
+              <Surface key={invitation.id}>
+                <Stack direction="row" spacing={2} sx={{ alignItems: "center", px: 3, py: 2 }}>
                   <Box
                     sx={{
                       width: 40,
@@ -194,22 +180,10 @@ export function MembersTab(props: MembersTabProps): ReactElement {
                     <EmailIcon fontSize="small" color="action" />
                   </Box>
                   <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography
-                      variant="body1"
-                      noWrap
-                      sx={{
-                        fontWeight: 500,
-                      }}
-                    >
+                    <Typography variant="body1" noWrap sx={{ fontWeight: 500 }}>
                       {invitation.email}
                     </Typography>
-                    <Typography
-                      variant="caption"
-                      noWrap
-                      sx={{
-                        color: "text.secondary",
-                      }}
-                    >
+                    <Typography variant="captionMuted" noWrap>
                       Invited by {invitation.invitedBy.firstName} {invitation.invitedBy.lastName}
                     </Typography>
                   </Box>
@@ -242,7 +216,7 @@ export function MembersTab(props: MembersTabProps): ReactElement {
                     ]}
                   />
                 </Stack>
-              </GlassCard>
+              </Surface>
             ))}
           </Stack>
         </Box>
@@ -251,16 +225,8 @@ export function MembersTab(props: MembersTabProps): ReactElement {
         {members.map((member) => {
           const name = [member.user.firstName, member.user.lastName].filter(Boolean).join(" ");
           return (
-            <GlassCard key={member.id} hoverGlow={false}>
-              <Stack
-                direction="row"
-                spacing={2}
-                sx={{
-                  alignItems: "center",
-                  px: 3,
-                  py: 2,
-                }}
-              >
+            <Surface key={member.id}>
+              <Stack direction="row" spacing={2} sx={{ alignItems: "center", px: 3, py: 2 }}>
                 <UserAvatar
                   firstName={member.user.firstName}
                   lastName={member.user.lastName}
@@ -269,23 +235,11 @@ export function MembersTab(props: MembersTabProps): ReactElement {
                   size={40}
                 />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography
-                    variant="body1"
-                    noWrap
-                    sx={{
-                      fontWeight: 500,
-                    }}
-                  >
+                  <Typography variant="body1" noWrap sx={{ fontWeight: 500 }}>
                     {name || member.user.email}
                   </Typography>
                   {name && (
-                    <Typography
-                      variant="caption"
-                      noWrap
-                      sx={{
-                        color: "text.secondary",
-                      }}
-                    >
+                    <Typography variant="captionMuted" noWrap>
                       {member.user.email}
                     </Typography>
                   )}
@@ -321,7 +275,7 @@ export function MembersTab(props: MembersTabProps): ReactElement {
                   />
                 )}
               </Stack>
-            </GlassCard>
+            </Surface>
           );
         })}
       </Stack>

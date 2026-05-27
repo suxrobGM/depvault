@@ -9,7 +9,7 @@ import {
   ContentCopy as TemplateIcon,
 } from "@mui/icons-material";
 import { Box, CardContent, Grid, Stack, Typography } from "@mui/material";
-import { GlassCard, IconBox } from "@/components/ui/cards";
+import { IconBox, Surface } from "@/components/ui/cards";
 import { SectionContainer } from "@/components/ui/containers";
 import { FeatureAnalysis } from "./feature-analysis";
 import { FeatureSharing } from "./feature-sharing";
@@ -78,21 +78,13 @@ export function LandingFeatureCards(): ReactElement {
   return (
     <Box component="section" id="features" sx={{ position: "relative" }}>
       <SectionContainer sx={{ pt: { xs: 10, md: 16 } }}>
-        <Typography
-          variant="h2"
-          className="vault-fade-up"
-          sx={{
-            textAlign: "center",
-            mb: 1,
-          }}
-        >
+        <Typography variant="h2" className="vault-fade-up" sx={{ textAlign: "center", mb: 1 }}>
           Everything you need to ship securely
         </Typography>
         <Typography
-          variant="body1"
+          variant="body1Muted"
           className="vault-fade-up vault-delay-1"
           sx={{
-            color: "text.secondary",
             textAlign: "center",
             mb: 8,
             maxWidth: 520,
@@ -124,9 +116,8 @@ export function LandingFeatureCards(): ReactElement {
           And that&apos;s not all
         </Typography>
         <Typography
-          variant="body1"
+          variant="body1Muted"
           sx={{
-            color: "text.secondary",
             textAlign: "center",
             mb: 6,
             maxWidth: 480,
@@ -138,31 +129,19 @@ export function LandingFeatureCards(): ReactElement {
         <Grid container spacing={3}>
           {moreFeatures.map((feature) => (
             <Grid key={feature.title} size={{ xs: 12, sm: 6, md: 3 }}>
-              <GlassCard glowColor={feature.color} sx={{ height: "100%" }}>
+              <Surface accent="primary" sx={{ height: "100%" }}>
                 <CardContent sx={{ p: 3 }}>
                   <IconBox color={feature.color} sx={{ mb: 2 }}>
                     {feature.icon}
                   </IconBox>
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      fontWeight: 600,
-                      mb: 0.5,
-                    }}
-                  >
+                  <Typography variant="subtitle1" sx={{ mb: 0.5 }}>
                     {feature.title}
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: "text.secondary",
-                      lineHeight: 1.7,
-                    }}
-                  >
+                  <Typography variant="body2Muted" sx={{ lineHeight: 1.7 }}>
                     {feature.description}
                   </Typography>
                 </CardContent>
-              </GlassCard>
+              </Surface>
             </Grid>
           ))}
         </Grid>

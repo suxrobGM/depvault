@@ -11,7 +11,7 @@ export default function ProjectsPage(): ReactElement {
       <PageHeader
         title="Projects"
         subtitle="Manage your projects and team collaboration"
-        breadcrumbs={[{ label: "Dashboard", href: ROUTES.dashboard }, { label: "Projects" }]}
+        breadcrumbs={[{ label: "Overview", href: ROUTES.overview }, { label: "Projects" }]}
         actions={<CreateProjectButton />}
       />
       <ProjectList />
