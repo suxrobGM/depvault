@@ -16,23 +16,17 @@ import {
 import { useForm } from "@tanstack/react-form";
 import { VaultSecurityPanel } from "@/components/features/vault";
 import { Surface } from "@/components/ui/cards";
+import { LoadingSpinner } from "@/components/ui/feedback";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useAuth } from "@/hooks/use-auth";
 import { useConfirm } from "@/hooks/use-confirm";
 import { client } from "@/lib/api";
 import { API_BASE_URL } from "@/lib/constants";
-import type { AuthUser } from "@/providers/auth-provider";
 import { changeEmailSchema, changePasswordSchema, setPasswordSchema } from "./schemas";
 
-interface SecurityTabProps {
-  user: AuthUser;
-  setUser: (user: AuthUser | null) => void;
-}
-
-export function SecurityTab(props: SecurityTabProps): ReactElement {
-  const { user } = props;
-  const { logout } = useAuth();
+export function SecurityTab(): ReactElement {
+  const { user, setUser, logout } = useAuth();
   const confirm = useConfirm();
 
   const emailMutation = useApiMutation(
@@ -58,7 +52,9 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
       successMessage: "Password set successfully. You can now log in with email and password.",
       onSuccess: () => {
         setPasswordForm.reset();
-        props.setUser({ ...user, hasPassword: true });
+        if (user) {
+          setUser({ ...user, hasPassword: true });
+        }
       },
     },
   );
@@ -113,6 +109,10 @@ export function SecurityTab(props: SecurityTabProps): ReactElement {
       deleteMutation.mutate();
     }
   };
+
+  if (!user) {
+    return <LoadingSpinner />;
+  }
 
   const oauthOnly = !user.hasPassword;
 

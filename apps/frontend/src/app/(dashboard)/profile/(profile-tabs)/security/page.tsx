@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
-import { SecurityTabWrapper } from "@/components/features/dashboard/profile/security-tab-wrapper";
+import { SecurityTab } from "@/components/features/dashboard/profile/security-tab";
 
 export default function ProfileSecurityPage(): ReactElement {
-  return <SecurityTabWrapper />;
+  return <SecurityTab />;
 }

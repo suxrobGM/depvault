@@ -13,27 +13,23 @@ import {
 } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import { Surface } from "@/components/ui/cards";
+import { LoadingSpinner } from "@/components/ui/feedback";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
+import { useAuth } from "@/hooks/use-auth";
 import { client } from "@/lib/api";
-import type { AuthUser } from "@/providers/auth-provider";
 import { AvatarUploader } from "./avatar-uploader";
 import { updateProfileSchema } from "./schemas";
 
-interface GeneralTabProps {
-  user: AuthUser;
-  setUser: (user: AuthUser | null) => void;
-}
-
-export function GeneralTab(props: GeneralTabProps): ReactElement {
-  const { user, setUser } = props;
+export function GeneralTab(): ReactElement {
+  const { user, setUser } = useAuth();
 
   const updateMutation = useApiMutation(
     (values: { firstName: string; lastName: string }) => client.api.users.me.patch(values),
     {
       successMessage: "Profile updated",
       onSuccess: (data) => {
-        if (data) {
+        if (data && user) {
           setUser({ ...user, firstName: data.firstName, lastName: data.lastName });
         }
       },
@@ -42,14 +38,18 @@ export function GeneralTab(props: GeneralTabProps): ReactElement {
 
   const form = useForm({
     defaultValues: {
-      firstName: user.firstName,
-      lastName: user.lastName,
+      firstName: user?.firstName ?? "",
+      lastName: user?.lastName ?? "",
     },
     validators: { onSubmit: updateProfileSchema },
     onSubmit: async ({ value }) => {
       await updateMutation.mutateAsync(value);
     },
   });
+
+  if (!user) {
+    return <LoadingSpinner />;
+  }
 
   const handleAvatarChange = (avatarUrl: string) => {
     setUser({ ...user, avatarUrl });

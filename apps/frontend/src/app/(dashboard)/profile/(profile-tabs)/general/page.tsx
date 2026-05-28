@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
-import { GeneralTabWrapper } from "@/components/features/dashboard/profile/general-tab-wrapper";
+import { GeneralTab } from "@/components/features/dashboard/profile/general-tab";
 
 export default function ProfileGeneralPage(): ReactElement {
-  return <GeneralTabWrapper />;
+  return <GeneralTab />;
 }
