@@ -24,7 +24,7 @@ import {
 import Cropper, { type Area, type Point } from "react-easy-crop";
 import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
-import { getCroppedImg } from "./crop-utils";
+import { getCroppedImg } from "./utils";
 
 interface AvatarUploaderProps {
   currentAvatarUrl: string | null;

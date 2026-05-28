@@ -26,7 +26,7 @@ const RESOURCE_TYPE_OPTIONS = [
   { value: "CI_TOKEN", label: "CI Token" },
 ] as const;
 
-export interface AuditLogFilters {
+export interface ActivityFilters {
   action: AuditAction | "";
   resourceType: AuditResourceType | "";
   from: string;
@@ -34,7 +34,7 @@ export interface AuditLogFilters {
   userEmail: string;
 }
 
-export const EMPTY_FILTERS: AuditLogFilters = {
+export const EMPTY_FILTERS: ActivityFilters = {
   action: "",
   resourceType: "",
   from: "",
@@ -43,8 +43,8 @@ export const EMPTY_FILTERS: AuditLogFilters = {
 };
 
 interface ActivityFilterBarProps {
-  filters: AuditLogFilters;
-  onFiltersChange: (filters: AuditLogFilters) => void;
+  filters: ActivityFilters;
+  onFiltersChange: (filters: ActivityFilters) => void;
 }
 
 export function ActivityFilterBar(props: ActivityFilterBarProps): ReactElement {
@@ -61,7 +61,7 @@ export function ActivityFilterBar(props: ActivityFilterBarProps): ReactElement {
 
   const hasActiveFilters = Object.values(filters).some((v) => v !== "");
 
-  const handleChange = (field: keyof AuditLogFilters, value: string) => {
+  const handleChange = (field: keyof ActivityFilters, value: string) => {
     onFiltersChange({ ...filters, [field]: value });
   };
 

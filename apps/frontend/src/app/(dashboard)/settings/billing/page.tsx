@@ -1,6 +1,10 @@
 import type { ReactElement } from "react";
 import { Box } from "@mui/material";
-import { BillingAlerts, BillingOverview, PlanComparison } from "@/components/features/billing";
+import {
+  BillingAlerts,
+  BillingOverview,
+  PlanComparison,
+} from "@/components/features/dashboard/billing";
 import { PageHeader } from "@/components/ui/containers";
 import { ROUTES } from "@/lib/constants";
 

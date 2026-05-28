@@ -20,7 +20,7 @@ import { client } from "@/lib/api";
 import { encryptBinary } from "@/lib/crypto";
 import type { SecretFile } from "@/types/api/secret-file";
 import type { Vault } from "@/types/api/vault";
-import { editSecretFileSchema } from "./secret-file-schemas";
+import { editSecretFileSchema } from "./schemas";
 
 interface EditSecretFileDialogProps {
   open: boolean;

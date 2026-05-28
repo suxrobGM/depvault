@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { Box } from "@mui/material";
-import { NotificationsView } from "@/components/features/notifications";
+import { NotificationsView } from "@/components/features/dashboard/notifications";
 import { PageHeader } from "@/components/ui/containers";
 import { ROUTES } from "@/lib/constants";
 

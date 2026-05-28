@@ -20,7 +20,7 @@ import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
 import { encrypt } from "@/lib/crypto";
 import type { ImportResult } from "@/types/api/env-variable";
-import { importVariablesSchema } from "./vault-schemas";
+import { importVariablesSchema } from "../schemas";
 
 interface ImportVariablesDialogProps {
   open: boolean;

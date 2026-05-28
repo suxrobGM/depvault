@@ -3,8 +3,8 @@
 import { useState, type ReactElement } from "react";
 import { GitHub as GitHubIcon, CloudUpload as UploadIcon } from "@mui/icons-material";
 import { Dialog, DialogContent, DialogTitle, Tab, Tabs } from "@mui/material";
-import { GitHubTabContent } from "./github-tab-content";
-import { UploadTabContent } from "./upload-tab-content";
+import { GitHubTab } from "./github-tab";
+import { UploadTab } from "./upload-tab";
 
 interface CreateAnalysisDialogProps {
   open: boolean;
@@ -30,9 +30,9 @@ export function CreateAnalysisDialog(props: CreateAnalysisDialogProps): ReactEle
           <Tab icon={<GitHubIcon />} iconPosition="start" label="GitHub" />
         </Tabs>
         {tabIndex === 0 ? (
-          <UploadTabContent projectId={projectId} onClose={handleClose} />
+          <UploadTab projectId={projectId} onClose={handleClose} />
         ) : (
-          <GitHubTabContent projectId={projectId} onClose={handleClose} />
+          <GitHubTab projectId={projectId} onClose={handleClose} />
         )}
       </DialogContent>
     </Dialog>

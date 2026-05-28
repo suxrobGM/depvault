@@ -9,7 +9,7 @@ import { Box, Chip, Collapse, IconButton, Tooltip, Typography } from "@mui/mater
 import { alpha } from "@mui/material/styles";
 import { StatusBadge } from "@/components/ui/data-display";
 import type { Dependency } from "@/types/api/analysis";
-import { getPackageUrl, STATUS_LABEL, STATUS_VARIANT } from "./analysis-utils";
+import { getPackageUrl, STATUS_LABEL, STATUS_VARIANT } from "./utils";
 import { VulnerabilityPanel } from "./vulnerability-panel";
 
 interface DependencyRowProps {

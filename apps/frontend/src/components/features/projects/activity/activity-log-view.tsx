@@ -3,13 +3,13 @@
 import { useState, type ReactElement } from "react";
 import { History as HistoryIcon } from "@mui/icons-material";
 import { Box } from "@mui/material";
-import { ActivityUpgradeGate } from "@/components/features/activity";
+import { ActivityUpgradeGate } from "@/components/features/dashboard/activity";
 import { PaginationBar, SkeletonList } from "@/components/ui/data-display";
 import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import type { AuditLogListResponse } from "@/types/api/audit-log";
-import { ActivityFilterBar, EMPTY_FILTERS, type AuditLogFilters } from "./activity-filter-bar";
+import { ActivityFilterBar, EMPTY_FILTERS, type ActivityFilters } from "./activity-filter-bar";
 import { ActivityLogEntry } from "./activity-log-entry";
 
 interface ActivityLogViewProps {
@@ -20,7 +20,7 @@ const PAGE_SIZE = 20;
 
 export function ActivityLogView(props: ActivityLogViewProps): ReactElement {
   const { projectId } = props;
-  const [filters, setFilters] = useState<AuditLogFilters>(EMPTY_FILTERS);
+  const [filters, setFilters] = useState<ActivityFilters>(EMPTY_FILTERS);
   const [page, setPage] = useState(1);
 
   const { data, isLoading } = useApiQuery<AuditLogListResponse>(
@@ -50,7 +50,7 @@ export function ActivityLogView(props: ActivityLogViewProps): ReactElement {
     { errorMessage: "Failed to load activity log" },
   );
 
-  const handleFiltersChange = (newFilters: AuditLogFilters) => {
+  const handleFiltersChange = (newFilters: ActivityFilters) => {
     setFilters(newFilters);
     setPage(1);
   };

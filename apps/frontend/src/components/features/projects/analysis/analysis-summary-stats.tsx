@@ -11,7 +11,7 @@ import { CardContent, Grid, Typography } from "@mui/material";
 import { IconBox, Surface, type SurfaceAccent } from "@/components/ui/cards";
 import { StatusBadge } from "@/components/ui/data-display";
 import type { Dependency } from "@/types/api/analysis";
-import { getHealthColor } from "./analysis-utils";
+import { getHealthColor } from "./utils";
 
 interface AnalysisSummaryStatsProps {
   dependencies: Dependency[];

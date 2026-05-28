@@ -14,8 +14,8 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useConfirm } from "@/hooks/use-confirm";
 import { client } from "@/lib/api";
 import type { EnvVariable } from "@/types/api/env-variable";
-import { EncryptedValue } from "./encrypted-value";
-import { VaultVariableHistory } from "./vault-variable-history";
+import { EncryptedValue } from "../encrypted-value";
+import { VariableHistory } from "./variable-history";
 
 export interface VaultVariableRowProps {
   projectId: string;
@@ -27,7 +27,7 @@ export interface VaultVariableRowProps {
   onEdit?: (variable: EnvVariable) => void;
 }
 
-export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
+export function VariableRow(props: VaultVariableRowProps): ReactElement {
   const { projectId, vaultId, variable, canEdit, selected, onToggleSelect, onEdit } = props;
   const confirm = useConfirm();
 
@@ -107,7 +107,7 @@ export function VaultVariableRow(props: VaultVariableRowProps): ReactElement {
         </TableCell>
       </TableRow>
 
-      <VaultVariableHistory
+      <VariableHistory
         projectId={projectId}
         vaultId={vaultId}
         variableId={variable.id}

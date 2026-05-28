@@ -17,7 +17,7 @@ import { useForm } from "@tanstack/react-form";
 import { Surface } from "@/components/ui/cards";
 import { FormTextField } from "@/components/ui/form";
 import { useVault } from "@/hooks/use-vault";
-import { vaultChangePasswordSchema } from "./schema";
+import { vaultChangePasswordSchema } from "./schemas";
 import { VaultRecoveryDialog } from "./vault-recovery-dialog";
 import { VaultRegenerateRecoveryDialog } from "./vault-regenerate-recovery-dialog";
 

@@ -1,13 +1,13 @@
 import type { PropsWithChildren, ReactElement } from "react";
 import { Box } from "@mui/material";
-import { LandingFooter, LandingNavbar } from "@/components/features/landing";
+import { Footer, Navbar } from "@/components/features/public";
 
 export default function PublicLayout(props: PropsWithChildren): ReactElement {
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
-      <LandingNavbar />
+      <Navbar />
       {props.children}
-      <LandingFooter />
+      <Footer />
     </Box>
   );
 }

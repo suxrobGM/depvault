@@ -15,7 +15,7 @@ import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
 import type { Vault } from "@/types/api/vault";
-import { cloneVaultSchema } from "./vault-schemas";
+import { cloneVaultSchema } from "./schemas";
 
 interface CloneVaultDialogProps {
   open: boolean;

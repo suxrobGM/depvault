@@ -23,7 +23,7 @@ import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import type { EnvVariableVersion, EnvVariableVersionListResponse } from "@/types/api/env-variable";
 import { formatDate } from "@/utils/formatters";
-import { EncryptedValue } from "./encrypted-value";
+import { EncryptedValue } from "../encrypted-value";
 
 interface VaultVariableHistoryProps {
   projectId: string;
@@ -35,7 +35,7 @@ interface VaultVariableHistoryProps {
   onClose: () => void;
 }
 
-export function VaultVariableHistory(props: VaultVariableHistoryProps): ReactElement {
+export function VariableHistory(props: VaultVariableHistoryProps): ReactElement {
   const { projectId, vaultId, variableId, canEdit, colSpan, open, onClose } = props;
 
   const { data, isLoading } = useApiQuery<EnvVariableVersionListResponse>(

@@ -6,8 +6,8 @@ import { Box, InputAdornment, Stack, TextField, Typography } from "@mui/material
 import { alpha } from "@mui/material/styles";
 import { PaginationBar, SortableHeader } from "@/components/ui/data-display";
 import type { Dependency } from "@/types/api/analysis";
-import { STATUS_ORDER } from "./analysis-utils";
 import { DependencyRow } from "./dependency-row";
+import { STATUS_ORDER } from "./utils";
 
 interface DependencyDataGridProps {
   dependencies: Dependency[];

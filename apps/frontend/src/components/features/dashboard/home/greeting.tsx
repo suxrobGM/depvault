@@ -9,7 +9,7 @@ import { LinkButton } from "@/components/ui/inputs";
 import { useAuth } from "@/hooks/use-auth";
 import { ROUTES } from "@/lib/constants";
 
-export function DashboardGreeting(): ReactElement {
+export function Greeting(): ReactElement {
   const { user } = useAuth();
 
   const showRoleBadge = user?.role && !DEFAULT_ROLES.has(user.role);

@@ -15,7 +15,7 @@ import { useForm } from "@tanstack/react-form";
 import { FormTextField } from "@/components/ui/form";
 import { useVault } from "@/hooks/use-vault";
 import { RecoveryKeyDisplay } from "./recovery-key-display";
-import { vaultSetupSchema } from "./schema";
+import { vaultSetupSchema } from "./schemas";
 
 interface VaultSetupDialogProps {
   open: boolean;

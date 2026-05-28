@@ -20,7 +20,7 @@ interface StatCard {
   accent: SurfaceAccent;
 }
 
-export function DashboardStats(): ReactElement {
+export function Stats(): ReactElement {
   const { data, isLoading } = useApiQuery<ProjectStatsResponse>(["project-stats"], () =>
     client.api.projects.stats.get(),
   );

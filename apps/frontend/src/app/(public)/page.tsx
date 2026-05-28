@@ -2,19 +2,19 @@ import type { ReactElement } from "react";
 import {
   CtaSection,
   EcosystemsSection,
+  FeatureCards,
   HeroSection,
   HowItWorksSection,
-  LandingFeatureCards,
   SecuritySection,
   StatsSection,
-} from "@/components/features/landing";
+} from "@/components/features/public";
 
 export default function Home(): ReactElement {
   return (
     <>
       <HeroSection />
       <HowItWorksSection />
-      <LandingFeatureCards />
+      <FeatureCards />
       <EcosystemsSection />
       <SecuritySection />
       <StatsSection />

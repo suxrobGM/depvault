@@ -3,7 +3,7 @@
 import type { ReactElement } from "react";
 import { Box, Typography } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
-import { getHealthColor } from "@/components/features/projects/analysis/analysis-utils";
+import { getHealthColor } from "@/components/features/projects/analysis/utils";
 
 interface HealthArcProps {
   score: number | null;

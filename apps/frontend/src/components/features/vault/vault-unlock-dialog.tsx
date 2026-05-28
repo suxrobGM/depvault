@@ -15,7 +15,7 @@ import {
 import { useForm } from "@tanstack/react-form";
 import { FormTextField } from "@/components/ui/form";
 import { useVault } from "@/hooks/use-vault";
-import { vaultUnlockSchema } from "./schema";
+import { vaultUnlockSchema } from "./schemas";
 
 interface VaultUnlockDialogProps {
   open: boolean;

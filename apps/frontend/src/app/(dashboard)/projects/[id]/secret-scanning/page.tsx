@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { SecretScanningPage } from "@/components/features/projects/security";
+import { SecretScanningView } from "@/components/features/projects/secret-scanning";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -7,5 +7,5 @@ interface PageProps {
 
 export default async function ProjectSecretScanningPage(props: PageProps): Promise<ReactElement> {
   const { id } = await props.params;
-  return <SecretScanningPage projectId={id} />;
+  return <SecretScanningView projectId={id} />;
 }

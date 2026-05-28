@@ -12,16 +12,16 @@ import { client } from "@/lib/api";
 import { API_BASE_URL } from "@/lib/constants";
 import type { CreateAnalysisBody } from "@/types/api/analysis";
 import type { GitHubDependencyFile, GitHubRepoListResponse } from "@/types/api/github";
-import type { EcosystemValue } from "./analysis-utils";
 import { GitHubFileSelector } from "./github-file-selector";
 import { GitHubRepoSelector } from "./github-repo-selector";
+import type { EcosystemValue } from "./utils";
 
 interface GitHubTabContentProps {
   projectId: string;
   onClose: () => void;
 }
 
-export function GitHubTabContent(props: GitHubTabContentProps): ReactElement {
+export function GitHubTab(props: GitHubTabContentProps): ReactElement {
   const { projectId, onClose } = props;
   const { user } = useAuth();
   const notification = useToast();

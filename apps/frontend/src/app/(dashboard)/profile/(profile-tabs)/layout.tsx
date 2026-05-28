@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from "react";
 import { Box } from "@mui/material";
-import { ProfileTabs } from "@/components/features/profile/profile-tabs";
+import { ProfileTabs } from "@/components/features/dashboard/profile/profile-tabs";
 import { PageHeader } from "@/components/ui/containers";
 import { ROUTES } from "@/lib/constants";
 

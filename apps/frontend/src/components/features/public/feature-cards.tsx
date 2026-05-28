@@ -74,7 +74,7 @@ const moreFeatures: MoreFeature[] = [
   },
 ];
 
-export function LandingFeatureCards(): ReactElement {
+export function FeatureCards(): ReactElement {
   return (
     <Box component="section" id="features" sx={{ position: "relative" }}>
       <SectionContainer sx={{ pt: { xs: 10, md: 16 } }}>

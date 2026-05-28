@@ -32,7 +32,7 @@ import {
 import type { Route } from "next";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { NotificationBell } from "@/components/features/notifications";
+import { NotificationBell } from "@/components/features/dashboard/notifications";
 import { VaultLockButton } from "@/components/features/vault";
 import { UserAvatar } from "@/components/ui/data-display";
 import { useAuth } from "@/hooks/use-auth";

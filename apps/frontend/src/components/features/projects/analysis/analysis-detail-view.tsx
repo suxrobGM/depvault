@@ -37,9 +37,9 @@ import { ROUTES } from "@/lib/constants";
 import type { AnalysisDetailResponse } from "@/types/api/analysis";
 import type { MemberListResponse, ProjectResponse } from "@/types/api/project";
 import { AnalysisSummaryStats } from "./analysis-summary-stats";
-import { getEcosystemLabel, getHealthColor } from "./analysis-utils";
 import { DependencyDataGrid } from "./dependency-data-grid";
 import { DependencyGraph } from "./dependency-graph";
+import { getEcosystemLabel, getHealthColor } from "./utils";
 
 interface AnalysisDetailPageProps {
   projectId: string;
@@ -48,7 +48,7 @@ interface AnalysisDetailPageProps {
 
 type ViewMode = "table" | "graph";
 
-export function AnalysisDetailPage(props: AnalysisDetailPageProps): ReactElement {
+export function AnalysisDetailView(props: AnalysisDetailPageProps): ReactElement {
   const { projectId, analysisId } = props;
   const router = useRouter();
   const { user } = useAuth();

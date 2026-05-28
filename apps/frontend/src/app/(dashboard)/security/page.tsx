@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { Box } from "@mui/material";
-import { SecurityOverviewView } from "@/components/features/security/security-overview-view";
+import { SecurityOverviewView } from "@/components/features/dashboard/security/security-overview-view";
 import { PageHeader } from "@/components/ui/containers";
 import { ROUTES } from "@/lib/constants";
 

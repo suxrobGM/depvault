@@ -7,14 +7,14 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import type { CreateAnalysisBody } from "@/types/api/analysis";
-import { ECOSYSTEMS, type EcosystemValue } from "./analysis-utils";
+import { ECOSYSTEMS, type EcosystemValue } from "./utils";
 
 interface UploadTabContentProps {
   projectId: string;
   onClose: () => void;
 }
 
-export function UploadTabContent(props: UploadTabContentProps): ReactElement {
+export function UploadTab(props: UploadTabContentProps): ReactElement {
   const { projectId, onClose } = props;
   const notification = useToast();
   const [ecosystem, setEcosystem] = useState<EcosystemValue>("NODEJS");

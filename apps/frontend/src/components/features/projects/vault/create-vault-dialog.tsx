@@ -6,7 +6,7 @@ import { useForm } from "@tanstack/react-form";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
-import { createVaultSchema } from "./vault-schemas";
+import { createVaultSchema } from "./schemas";
 import { VaultTagInput } from "./vault-tag-input";
 
 interface CreateVaultDialogProps {

@@ -17,8 +17,8 @@ import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 import type { AnalysisListResponse } from "@/types/api/analysis";
-import { getEcosystemLabel, getHealthColor } from "./analysis-utils";
 import { CreateAnalysisDialog } from "./create-analysis-dialog";
+import { getEcosystemLabel, getHealthColor } from "./utils";
 
 interface AnalysisTabProps {
   projectId: string;

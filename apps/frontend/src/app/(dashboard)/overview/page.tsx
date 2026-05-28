@@ -1,9 +1,9 @@
 import type { ReactElement } from "react";
 import { Box } from "@mui/material";
-import { DashboardGreeting } from "@/components/features/dashboard/dashboard-greeting";
-import { DashboardQuickActions } from "@/components/features/dashboard/dashboard-quick-actions";
-import { DashboardRecentProjects } from "@/components/features/dashboard/dashboard-recent-projects";
-import { DashboardStats } from "@/components/features/dashboard/dashboard-stats";
+import { Greeting } from "@/components/features/dashboard/home/greeting";
+import { QuickActions } from "@/components/features/dashboard/home/quick-actions";
+import { RecentProjects } from "@/components/features/dashboard/home/recent-projects";
+import { Stats } from "@/components/features/dashboard/home/stats";
 import { getServerClient } from "@/lib/api-server";
 
 export default async function OverviewPage(): Promise<ReactElement> {
@@ -13,10 +13,10 @@ export default async function OverviewPage(): Promise<ReactElement> {
 
   return (
     <Box>
-      <DashboardGreeting />
-      <DashboardStats />
-      <DashboardQuickActions />
-      <DashboardRecentProjects projects={projects} />
+      <Greeting />
+      <Stats />
+      <QuickActions />
+      <RecentProjects projects={projects} />
     </Box>
   );
 }

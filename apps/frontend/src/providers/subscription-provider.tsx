@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, use, useState, type PropsWithChildren, type ReactElement } from "react";
-import { UpgradePrompt } from "@/components/features/billing";
+import { UpgradePrompt } from "@/components/features/dashboard/billing";
 
 interface PlanLimitContextValue {
   showUpgradePrompt: (message: string) => void;

@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { SecretFilesTab } from "@/components/features/projects/secrets/secret-files-tab";
+import { SecretFilesTab } from "@/components/features/projects/vault/secret-files/secret-files-tab";
 
 interface PageProps {
   params: Promise<{ id: string }>;

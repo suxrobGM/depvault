@@ -11,7 +11,7 @@ import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
 import { encryptBinary } from "@/lib/crypto";
 import type { Vault } from "@/types/api/vault";
-import { uploadSecretFileSchema } from "./secret-file-schemas";
+import { uploadSecretFileSchema } from "./schemas";
 
 interface UploadSecretFileDialogProps {
   open: boolean;

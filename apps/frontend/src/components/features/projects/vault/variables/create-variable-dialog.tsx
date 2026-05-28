@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState, type ReactElement } from "react";
+import type { ReactElement } from "react";
 import {
   Button,
   Checkbox,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -17,55 +16,47 @@ import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
-import { decrypt, encrypt } from "@/lib/crypto";
-import type { EnvVariable } from "@/types/api/env-variable";
-import { updateVariableSchema } from "./vault-schemas";
+import { encrypt } from "@/lib/crypto";
+import { createVariableSchema } from "../schemas";
 
-interface EditVariableDialogProps {
+interface CreateVariableDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
   vaultId: string;
-  variable: EnvVariable | null;
 }
 
-export function EditVariableDialog(props: EditVariableDialogProps): ReactElement {
-  const { open, onClose, projectId, vaultId, variable } = props;
+export function CreateVariableDialog(props: CreateVariableDialogProps): ReactElement {
+  const { open, onClose, projectId, vaultId } = props;
   const { getProjectDEK } = useVault();
-  const [decrypting, setDecrypting] = useState(open && !!variable && !!variable?.encryptedValue);
 
   const mutation = useApiMutation(
     (values: {
-      key?: string;
-      encryptedValue?: string;
-      iv?: string;
-      authTag?: string;
+      key: string;
+      encryptedValue: string;
+      iv: string;
+      authTag: string;
       description?: string;
       isRequired?: boolean;
-    }) =>
-      client.api
-        .projects({ id: projectId })
-        .vaults({ vaultId })
-        .variables({ varId: variable?.id ?? "" })
-        .put(values),
+    }) => client.api.projects({ id: projectId }).vaults({ vaultId }).variables.post(values),
     {
       invalidateKeys: [
         ["vault-variables", projectId, vaultId],
         ["vaults", projectId],
       ],
-      successMessage: "Variable updated",
+      successMessage: "Variable created",
       onSuccess: () => handleClose(),
     },
   );
 
   const form = useForm({
     defaultValues: {
-      key: variable?.key ?? "",
+      key: "",
       value: "",
-      description: variable?.description ?? "",
-      isRequired: variable?.isRequired ?? false,
+      description: "",
+      isRequired: false,
     },
-    validators: { onSubmit: updateVariableSchema },
+    validators: { onSubmit: createVariableSchema },
     onSubmit: async ({ value }) => {
       const dek = await getProjectDEK(projectId);
       const encrypted = await encrypt(value.value, dek);
@@ -80,25 +71,6 @@ export function EditVariableDialog(props: EditVariableDialogProps): ReactElement
     },
   });
 
-  useEffect(() => {
-    if (!open || !variable || !variable.encryptedValue) {
-      setDecrypting(false);
-      return;
-    }
-    let cancelled = false;
-    getProjectDEK(projectId)
-      .then((dek) => decrypt(variable.encryptedValue, variable.iv, variable.authTag, dek))
-      .then((plaintext) => {
-        if (!cancelled) form.setFieldValue("value", plaintext);
-      })
-      .finally(() => {
-        if (!cancelled) setDecrypting(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [open, variable?.id]); // eslint-disable-line react-hooks/exhaustive-deps
-
   const handleClose = () => {
     form.reset();
     onClose();
@@ -112,23 +84,23 @@ export function EditVariableDialog(props: EditVariableDialogProps): ReactElement
           form.handleSubmit();
         }}
       >
-        <DialogTitle>Edit Variable</DialogTitle>
+        <DialogTitle>New Variable</DialogTitle>
         <DialogContent>
           <Stack spacing={2.5} sx={{ mt: 1 }}>
-            <FormTextField form={form} name="key" label="Key" autoFocus />
             <FormTextField
               form={form}
-              name="value"
-              label="Value"
-              disabled={decrypting}
-              placeholder={decrypting ? "Decrypting..." : undefined}
-              slotProps={{
-                input: {
-                  endAdornment: decrypting ? <CircularProgress size={16} /> : undefined,
-                },
-              }}
+              name="key"
+              label="Key"
+              autoFocus
+              placeholder="DATABASE_URL"
             />
-            <FormTextField form={form} name="description" label="Description" />
+            <FormTextField form={form} name="value" label="Value" placeholder="postgres://..." />
+            <FormTextField
+              form={form}
+              name="description"
+              label="Description"
+              placeholder="Optional description"
+            />
             <form.Field name="isRequired">
               {(field) => (
                 <FormControlLabel
@@ -147,7 +119,7 @@ export function EditVariableDialog(props: EditVariableDialogProps): ReactElement
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={handleClose}>Cancel</Button>
           <Button type="submit" variant="contained" disabled={mutation.isPending}>
-            {mutation.isPending ? "Saving..." : "Save"}
+            {mutation.isPending ? "Creating..." : "Create"}
           </Button>
         </DialogActions>
       </form>

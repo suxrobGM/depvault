@@ -32,7 +32,7 @@ import type {
   DetectionListResponse,
   DetectionResponse,
 } from "@/types/api/secret-scan";
-import { DetectionTableRow } from "./detections-table-row";
+import { DetectionTableRow } from "./detection-table-row";
 
 interface DetectionsTableProps {
   projectId: string;

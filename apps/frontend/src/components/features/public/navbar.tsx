@@ -31,7 +31,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Docs", href: ROUTES.docs },
 ];
 
-export function LandingNavbar(): ReactElement {
+export function Navbar(): ReactElement {
   const [scrolled, setScrolled] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 

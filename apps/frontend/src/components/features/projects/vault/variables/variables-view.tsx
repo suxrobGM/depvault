@@ -10,18 +10,18 @@ import { client } from "@/lib/api";
 import type { EnvVariableListResponse } from "@/types/api/env-variable";
 import type { MemberListResponse } from "@/types/api/project";
 import type { VaultListResponse } from "@/types/api/vault";
+import { CreateVaultDialog } from "../create-vault-dialog";
+import { PendingKeyGrantsBanner } from "../pending-key-grants-banner";
+import { VaultList } from "../vault-list";
 import { CreateVariableDialog } from "./create-variable-dialog";
-import { CreateVaultDialog } from "./create-vault-dialog";
 import { EditVariableDialog } from "./edit-variable-dialog";
-import { PendingKeyGrantsBanner } from "./pending-key-grants-banner";
-import { VaultList } from "./vault-list";
-import { VaultVariableTable } from "./vault-variable-table";
+import { VariableTable } from "./variable-table";
 
 interface VaultVariablesViewProps {
   projectId: string;
 }
 
-export function VaultVariablesView(props: VaultVariablesViewProps): ReactElement {
+export function VariablesView(props: VaultVariablesViewProps): ReactElement {
   const { projectId } = props;
   const { user } = useAuth();
 
@@ -106,7 +106,7 @@ export function VaultVariablesView(props: VaultVariablesViewProps): ReactElement
           <Grid size={{ xs: 12, md: 9 }}>
             <Box>
               {activeVaultId && (
-                <VaultVariableTable
+                <VariableTable
                   projectId={projectId}
                   vaultId={activeVaultId}
                   variables={variables}

@@ -12,13 +12,13 @@ import { EmptyState } from "@/components/ui/feedback";
 import { LinkButton } from "@/components/ui/inputs";
 import { ROUTES } from "@/lib/constants";
 import type { Project } from "@/types/api/project";
-import { DashboardOnboarding } from "./dashboard-onboarding";
+import { Onboarding } from "./onboarding";
 
 interface DashboardRecentProjectsProps {
   projects: Project[];
 }
 
-export function DashboardRecentProjects(props: DashboardRecentProjectsProps): ReactElement {
+export function RecentProjects(props: DashboardRecentProjectsProps): ReactElement {
   const { projects } = props;
   const hasProjects = projects.length > 0;
 
@@ -89,7 +89,7 @@ export function DashboardRecentProjects(props: DashboardRecentProjectsProps): Re
       </Grid>
       <Grid size={{ xs: 12, md: 5 }}>
         <Box className="vault-fade-up vault-delay-8">
-          <DashboardOnboarding />
+          <Onboarding />
         </Box>
       </Grid>
     </Grid>

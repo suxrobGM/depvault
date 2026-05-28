@@ -80,7 +80,7 @@ function loadCompleted(userId: string | undefined): Set<string> {
   return new Set();
 }
 
-export function DashboardOnboarding(): ReactElement {
+export function Onboarding(): ReactElement {
   const { user } = useAuth();
 
   const [completed, setCompleted] = useState<Set<string>>(() => loadCompleted(user?.id));

@@ -37,7 +37,7 @@ const quickActions = [
   },
 ];
 
-export function DashboardQuickActions(): ReactElement {
+export function QuickActions(): ReactElement {
   return (
     <>
       <Typography variant="h6" sx={{ mb: 2 }} className="vault-fade-up vault-delay-5">

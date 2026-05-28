@@ -49,7 +49,7 @@ const linkSx = {
   "&:hover": { color: "primary.main" },
 };
 
-export function LandingFooter(): ReactElement {
+export function Footer(): ReactElement {
   const scrollTo = useScrollTo();
 
   const handleClick = (e: MouseEvent<HTMLAnchorElement>, href: string) => {

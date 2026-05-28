@@ -22,8 +22,8 @@ import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 import type { Analysis, AnalysisListResponse } from "@/types/api/analysis";
 import type { MemberListResponse, ProjectResponse } from "@/types/api/project";
-import { getEcosystemLabel } from "./analysis-utils";
 import { CreateAnalysisDialog } from "./create-analysis-dialog";
+import { getEcosystemLabel } from "./utils";
 
 interface AnalysisListViewProps {
   projectId: string;

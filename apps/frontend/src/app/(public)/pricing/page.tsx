@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { Box } from "@mui/material";
-import { PricingSection } from "@/components/features/landing";
+import { PricingSection } from "@/components/features/public";
 
 export default function PricingPage(): ReactElement {
   return (

@@ -31,7 +31,7 @@ const SEVERITY_CONFIG = [
   { key: "low" as const, label: "Low", color: "var(--mui-palette-success-main)" },
 ];
 
-export function SecretScanningPage(props: SecretScanningPageProps): ReactElement {
+export function SecretScanningView(props: SecretScanningPageProps): ReactElement {
   const { projectId } = props;
   const [activeSection, setActiveSection] = useState<"detections" | "history" | "patterns">(
     "detections",

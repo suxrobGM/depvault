@@ -24,7 +24,7 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useConfirm } from "@/hooks/use-confirm";
 import { client } from "@/lib/api";
 import type { EnvVariable } from "@/types/api/env-variable";
-import { VaultVariableRow } from "./vault-variable-row";
+import { VariableRow } from "./variable-row";
 
 interface VaultVariableTableProps {
   projectId: string;
@@ -35,7 +35,7 @@ interface VaultVariableTableProps {
   onEditVariable?: (variable: EnvVariable) => void;
 }
 
-export function VaultVariableTable(props: VaultVariableTableProps): ReactElement {
+export function VariableTable(props: VaultVariableTableProps): ReactElement {
   const {
     projectId,
     vaultId,
@@ -198,7 +198,7 @@ export function VaultVariableTable(props: VaultVariableTableProps): ReactElement
                 </TableRow>
               ) : (
                 pagedVariables.map((variable) => (
-                  <VaultVariableRow
+                  <VariableRow
                     key={variable.id}
                     projectId={projectId}
                     vaultId={vaultId}

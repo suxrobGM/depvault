@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { InvitationAction } from "@/components/features/invitations/invitation-action";
+import { InvitationAction } from "@/components/features/dashboard/invitations/invitation-action";
 
 interface InvitationPageProps {
   params: Promise<{ token: string }>;
