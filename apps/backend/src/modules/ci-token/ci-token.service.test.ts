@@ -1,6 +1,10 @@
 import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { BadRequestError, ForbiddenError, NotFoundError, UnauthorizedError } from "@/common/errors";
+import { PrismaClient, type CiToken } from "@/generated/prisma";
+import { AuditLogService } from "@/modules/audit-log";
+import { PlanEnforcementService } from "@/modules/subscription/plan-enforcement.service";
+import type { DeepMockProxy } from "@/types/deep-mock";
 import { CiTokenService } from "./ci-token.service";
 
 mock.module("@/common/logger/logger", () => ({
@@ -74,13 +78,13 @@ function createMockPrisma() {
       findMany: mock(() => Promise.resolve([])),
       findFirst: mock(() => Promise.resolve(null)),
     },
-  } as any;
+  } as unknown as DeepMockProxy<PrismaClient>;
 }
 
 function createMockAuditLogService() {
   return {
     log: mock(() => Promise.resolve()),
-  } as any;
+  } as unknown as AuditLogService;
 }
 
 let mockPrisma: ReturnType<typeof createMockPrisma>;
@@ -93,7 +97,7 @@ beforeEach(() => {
   const mockPlanEnforcement = {
     enforceForProject: mock(() => Promise.resolve()),
     enforceFeatureForProject: mock(() => Promise.resolve()),
-  } as any;
+  } as unknown as PlanEnforcementService;
   service = new CiTokenService(mockPrisma, mockAudit, mockPlanEnforcement);
 });
 
@@ -255,11 +259,10 @@ describe("CiTokenService", () => {
       ]);
 
       const result = await service.fetchSecrets(
-        baseCiToken as any,
+        baseCiToken as unknown as CiToken,
         "dvci_raw",
         "run-123",
         "127.0.0.1",
-        "http://localhost:4000",
       );
 
       expect(result.variables).toHaveLength(1);
@@ -286,7 +289,7 @@ describe("CiTokenService", () => {
         authTag: "tag",
       });
 
-      const result = await service.downloadFile(baseCiToken as any, "file-1");
+      const result = await service.downloadFile(baseCiToken as unknown as CiToken, "file-1");
 
       expect(result.name).toBe("config.json");
       expect(result.mimeType).toBe("application/json");
@@ -296,9 +299,9 @@ describe("CiTokenService", () => {
     it("should throw NotFoundError when file not in vault", async () => {
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(null);
 
-      expect(service.downloadFile(baseCiToken as any, "bad-id")).rejects.toBeInstanceOf(
-        NotFoundError,
-      );
+      expect(
+        service.downloadFile(baseCiToken as unknown as CiToken, "bad-id"),
+      ).rejects.toBeInstanceOf(NotFoundError);
     });
   });
 });

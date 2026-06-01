@@ -198,7 +198,6 @@ export class CiTokenService {
     rawToken: string,
     pipelineRunId: string | null,
     clientIp: string,
-    baseUrl: string,
   ): Promise<CiSecretsResponse> {
     const [variables, files] = await Promise.all([
       this.prisma.envVariable.findMany({

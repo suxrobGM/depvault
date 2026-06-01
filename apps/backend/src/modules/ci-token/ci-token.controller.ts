@@ -91,10 +91,9 @@ export const ciAccessController = new Elysia({
   .use(ciTokenGuard)
   .get(
     "/",
-    ({ ciToken, rawToken, clientIp, headers, request }) => {
+    ({ ciToken, rawToken, clientIp, headers }) => {
       const pipelineRunId = headers["x-pipeline-run-id"] ?? null;
-      const baseUrl = new URL(request.url).origin;
-      return ciTokenService.fetchSecrets(ciToken, rawToken, pipelineRunId, clientIp, baseUrl);
+      return ciTokenService.fetchSecrets(ciToken, rawToken, pipelineRunId, clientIp);
     },
     {
       response: CiSecretsResponseSchema,

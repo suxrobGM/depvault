@@ -8,10 +8,15 @@ export interface JwtPayload {
   email: string; // user email
 }
 
+/** Minimal shape of the `@elysiajs/jwt` provider used for verification. */
+export interface JwtVerifier {
+  verify: (token: string) => Promise<Record<string, unknown> | false>;
+}
+
 /** Extracts a Bearer token from the Authorization header or access_token cookie. */
 export function extractToken(
   headers: Record<string, string | undefined>,
-  cookie: Record<string, { value?: string }>,
+  cookie: Record<string, { value?: unknown }>,
 ): string {
   const authorization = headers.authorization;
   const cookieToken = cookie.access_token?.value;
@@ -30,10 +35,7 @@ export function extractToken(
 }
 
 /** Verifies a JWT and returns the decoded user payload. */
-export async function verifyToken(
-  jwtProvider: { verify: (token: string) => Promise<any> },
-  token: string,
-): Promise<JwtPayload> {
+export async function verifyToken(jwtProvider: JwtVerifier, token: string): Promise<JwtPayload> {
   const payload = await jwtProvider.verify(token);
 
   if (!payload) {
@@ -41,9 +43,9 @@ export async function verifyToken(
   }
 
   return {
-    id: payload.sub,
-    role: payload.role,
-    email: payload.email,
+    id: String(payload.sub),
+    role: String(payload.role),
+    email: String(payload.email),
   };
 }
 
@@ -62,7 +64,7 @@ export const authGuard = new Elysia({ name: "auth-guard" })
     }),
   )
   .derive({ as: "scoped" }, async ({ headers, cookie, jwt }) => {
-    const token = extractToken(headers, cookie as any);
+    const token = extractToken(headers, cookie);
     const user = await verifyToken(jwt, token);
     return { user };
   });

@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
-import { ForbiddenError, NotFoundError } from "@/common/errors";
+import { PrismaClient } from "@/generated/prisma";
+import type { DeepMockProxy } from "@/types/deep-mock";
 import { AuditLogService } from "./audit-log.service";
 
 const now = new Date();
@@ -31,7 +32,7 @@ function createMockPrisma() {
     projectMember: {
       findUnique: mock(() => Promise.resolve(null)),
     },
-  } as any;
+  } as unknown as DeepMockProxy<PrismaClient>;
 }
 
 describe("AuditLogService", () => {

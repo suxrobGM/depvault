@@ -4,7 +4,7 @@ import { Elysia } from "elysia";
 import { container } from "@/common/di/container";
 import { ForbiddenError, NotFoundError } from "@/common/errors";
 import { PrismaClient, ProjectRole } from "@/generated/prisma";
-import { extractToken, verifyToken } from "./auth.middleware";
+import { extractToken, verifyToken, type JwtVerifier } from "./auth.middleware";
 
 const prisma = container.resolve(PrismaClient);
 
@@ -24,11 +24,11 @@ const prisma = container.resolve(PrismaClient);
 export const projectGuard = (minRole: ProjectRole = "VIEWER") =>
   new Elysia({ name: `project-guard-${minRole}` })
     .use(jwt({ name: `jwt-${minRole}`, secret: process.env.JWT_SECRET! }))
-    .derive({ as: "scoped" }, async ({ headers, cookie, ...ctx }) => {
-      const jwtProvider = (ctx as Record<string, any>)[`jwt-${minRole}`];
-      const projectId = ((ctx as any).params as Record<string, string>).id!;
+    .derive({ as: "scoped" }, async ({ headers, cookie, params, ...ctx }) => {
+      const jwtProvider = (ctx as unknown as Record<string, JwtVerifier>)[`jwt-${minRole}`]!;
+      const projectId = params.id!;
 
-      const token = extractToken(headers, cookie as any);
+      const token = extractToken(headers, cookie);
       const user = await verifyToken(jwtProvider, token);
 
       const member = await prisma.projectMember.findUnique({

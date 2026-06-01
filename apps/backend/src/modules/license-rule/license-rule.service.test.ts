@@ -1,11 +1,12 @@
 import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
-import { ConflictError, ForbiddenError, NotFoundError } from "@/common/errors";
+import { ConflictError, NotFoundError } from "@/common/errors";
+import { LicensePolicy, PrismaClient } from "@/generated/prisma";
+import type { DeepMockProxy } from "@/types/deep-mock";
 import { LicenseRuleService } from "./license-rule.service";
 
 const now = new Date();
 const PROJECT_ID = "project-uuid";
-const USER_ID = "user-uuid";
 const RULE_ID = "rule-uuid";
 
 const mockRule = {
@@ -34,11 +35,7 @@ function createMockPrisma() {
       findMany: mock(() => Promise.resolve([])),
       count: mock(() => Promise.resolve(0)),
     },
-  } as any;
-}
-
-function memberWith(role: string) {
-  return { userId: USER_ID, projectId: PROJECT_ID, role };
+  } as unknown as DeepMockProxy<PrismaClient>;
 }
 
 describe("LicenseRuleService", () => {
@@ -71,7 +68,7 @@ describe("LicenseRuleService", () => {
     it("should create a license rule", async () => {
       const result = await service.create(PROJECT_ID, {
         licenseId: "MIT",
-        policy: "ALLOW" as any,
+        policy: LicensePolicy.ALLOW,
       });
 
       expect(result.id).toBe(RULE_ID);
@@ -84,7 +81,7 @@ describe("LicenseRuleService", () => {
       prisma.licenseRule.findUnique.mockResolvedValueOnce(mockRule);
 
       expect(
-        service.create(PROJECT_ID, { licenseId: "MIT", policy: "ALLOW" as any }),
+        service.create(PROJECT_ID, { licenseId: "MIT", policy: LicensePolicy.ALLOW }),
       ).rejects.toBeInstanceOf(ConflictError);
     });
   });
@@ -96,7 +93,7 @@ describe("LicenseRuleService", () => {
       prisma.licenseRule.findFirst.mockResolvedValueOnce(mockRule);
 
       const result = await service.update(PROJECT_ID, RULE_ID, {
-        policy: "BLOCK" as any,
+        policy: LicensePolicy.BLOCK,
       });
 
       expect(result.id).toBe(RULE_ID);
@@ -108,7 +105,7 @@ describe("LicenseRuleService", () => {
 
     it("should throw NotFoundError when rule does not exist", async () => {
       expect(
-        service.update(PROJECT_ID, RULE_ID, { policy: "BLOCK" as any }),
+        service.update(PROJECT_ID, RULE_ID, { policy: LicensePolicy.BLOCK }),
       ).rejects.toBeInstanceOf(NotFoundError);
     });
   });
@@ -196,9 +193,9 @@ describe("LicenseRuleService", () => {
 
       await service.getComplianceSummary(PROJECT_ID, 1, 25, "express");
 
-      const countCall = prisma.dependency.count.mock.calls[0]![0];
+      const countCall = prisma.dependency.count.mock.calls[0]![0]!;
       expect(countCall.where).toHaveProperty("OR");
-      expect(countCall.where.OR).toEqual([
+      expect(countCall.where?.OR).toEqual([
         { name: { contains: "express", mode: "insensitive" } },
         { license: { contains: "express", mode: "insensitive" } },
       ]);
@@ -210,7 +207,7 @@ describe("LicenseRuleService", () => {
 
       await service.getComplianceSummary(PROJECT_ID, 1, 25);
 
-      const countCall = prisma.dependency.count.mock.calls[0]![0];
+      const countCall = prisma.dependency.count.mock.calls[0]![0]!;
       expect(countCall.where).not.toHaveProperty("OR");
     });
 

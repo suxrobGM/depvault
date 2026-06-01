@@ -1,7 +1,12 @@
 import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { BadRequestError, ConflictError, UnauthorizedError } from "@/common/errors";
+import { EmailService } from "@/common/services/email.service";
+import { PrismaClient } from "@/generated/prisma";
+import { InvitationService } from "@/modules/invitation/invitation.service";
+import type { DeepMockProxy } from "@/types/deep-mock";
 import { AuthService } from "./auth.service";
+import { TokenService } from "./token.service";
 
 mock.module("@/common/utils/jwt", () => ({
   signAccessToken: () => Promise.resolve("mock-access-token"),
@@ -49,7 +54,7 @@ function createMockPrisma() {
       update: mock(() => Promise.resolve({})),
       updateMany: mock(() => Promise.resolve({ count: 1 })),
     },
-  } as any;
+  } as unknown as DeepMockProxy<PrismaClient>;
 }
 
 function createMockTokenService() {
@@ -69,15 +74,15 @@ function createMockTokenService() {
         },
       }),
     ),
-  } as any;
+  } as unknown as TokenService;
 }
 
 function createMockEmailService() {
-  return { send: mock(() => Promise.resolve()) } as any;
+  return { send: mock(() => Promise.resolve()) } as unknown as EmailService;
 }
 
 function createMockInvitationService() {
-  return { linkPendingInvitations: mock(() => Promise.resolve()) } as any;
+  return { linkPendingInvitations: mock(() => Promise.resolve()) } as unknown as InvitationService;
 }
 
 describe("AuthService", () => {
