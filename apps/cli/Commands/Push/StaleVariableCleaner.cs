@@ -21,18 +21,16 @@ internal sealed class StaleVariableCleaner(IApiClientFactory clientFactory, ICon
             return 0;
         }
 
-        if (prompter.IsInteractive)
+        AnsiConsole.MarkupLine($"[yellow]Found {stale.Count} stale variable(s) to remove:[/]");
+        foreach (var (key, _) in stale)
         {
-            AnsiConsole.MarkupLine($"[yellow]Found {stale.Count} stale variable(s) to remove:[/]");
-            foreach (var (key, _) in stale)
-            {
-                AnsiConsole.MarkupLine($"  [grey]-[/] {Markup.Escape(key)}");
-            }
+            AnsiConsole.MarkupLine($"  [grey]-[/] {Markup.Escape(key)}");
+        }
 
-            if (!prompter.Confirm($"Delete {stale.Count} stale variable(s)?"))
-            {
-                return 0;
-            }
+        // Destructive: default to No. Non-interactive skips unless --yes is passed.
+        if (!prompter.Confirm($"Delete {stale.Count} stale variable(s)?", defaultValue: false))
+        {
+            return 0;
         }
 
         var deleted = 0;

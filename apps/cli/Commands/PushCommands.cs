@@ -173,8 +173,8 @@ internal sealed class PushCommands(
             return [];
         }
 
+        // Default to all files selected so "push everything" is one keystroke; deselect to skip.
         return ctx.Prompter.MultiSelect("Select files to push", discovered,
-            f => $"[grey]{(f.Category == FileCategory.Environment ? "env" : "secret")}[/] {Markup.Escape(f.RelativePath)}",
-            false);
+            f => $"[grey]{(f.Category == FileCategory.Environment ? "env" : "secret")}[/] {Markup.Escape(f.RelativePath)}");
     }
 }

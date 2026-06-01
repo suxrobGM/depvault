@@ -1,9 +1,11 @@
 using DepVault.Cli;
+using DepVault.Cli.Output;
 using DepVault.Cli.Repl;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Kiota.Abstractions;
+using Spectre.Console;
 
 Startup.CleanupStaleUpdate();
 
@@ -27,6 +29,11 @@ int exitCode;
 try
 {
     exitCode = await parseResult.InvokeAsync();
+}
+catch (PromptCanceledException)
+{
+    AnsiConsole.MarkupLine("[yellow]Cancelled.[/]");
+    return 130;
 }
 catch (Exception ex) when (ApiErrorHandler.IsAuthError(ex))
 {

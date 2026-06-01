@@ -186,14 +186,14 @@ export class StripeWebhookService {
  * Extracts the subscription id from an invoice. There is no top-level `invoice.subscription`
  * field; the reference lives at `invoice.parent.subscription_details.subscription`.
  */
-function resolveInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
+export function resolveInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
   const subscription = invoice.parent?.subscription_details?.subscription;
   if (typeof subscription === "string") return subscription;
   if (subscription && typeof subscription === "object") return subscription.id;
   return null;
 }
 
-function mapStripeStatus(status: Stripe.Subscription.Status): SubscriptionStatus {
+export function mapStripeStatus(status: Stripe.Subscription.Status): SubscriptionStatus {
   const mapping: Record<string, SubscriptionStatus> = {
     active: SubscriptionStatus.ACTIVE,
     past_due: SubscriptionStatus.PAST_DUE,

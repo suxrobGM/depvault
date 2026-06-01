@@ -79,6 +79,10 @@ public sealed class ReplHost(VaultState vaultState, ConsoleRenderer renderer)
                     var parseResult = rootCommand.Parse(parts);
                     await parseResult.InvokeAsync();
                 }
+                catch (PromptCanceledException)
+                {
+                    AnsiConsole.MarkupLine("[yellow]Cancelled.[/]");
+                }
                 catch (Exception ex)
                 {
                     AnsiConsole.MarkupLine($"[red]Error: {Markup.Escape(ex.Message)}[/]");
