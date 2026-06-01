@@ -159,6 +159,24 @@ describe("rateLimiter middleware", () => {
     expect(capturedKey).toBe("/custom");
   });
 
+  it("should not let one route's traffic exhaust another route's limit (default key)", async () => {
+    // Default keyFn scopes per-route, so hammering /poll must not 429 /login,
+    // even when both share the same store and client IP.
+    const app = new Elysia()
+      .use(rateLimiter({ max: 2, windowMs: 60_000, store }))
+      .get("/poll", () => ({ ok: true }))
+      .use(rateLimiter({ max: 2, windowMs: 60_000, store }))
+      .get("/login", () => ({ ok: true }));
+
+    await app.handle(new Request("http://localhost/poll"));
+    await app.handle(new Request("http://localhost/poll"));
+    const polledBlocked = await app.handle(new Request("http://localhost/poll"));
+    expect(polledBlocked.status).toBe(429);
+
+    const loginOk = await app.handle(new Request("http://localhost/login"));
+    expect(loginOk.status).toBe(200);
+  });
+
   it("should track different keys independently", async () => {
     let currentIp = "ip-1";
     const app = new Elysia()

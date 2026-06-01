@@ -25,15 +25,11 @@ export function DeviceVerifyForm(): ReactElement {
       const { error } = await client.api.auth.device.verify.post({ userCode: value.userCode });
 
       if (error) {
-        const message = error.value?.message ?? "Verification failed";
-        if (
-          message.toLowerCase().includes("unauthorized") ||
-          message.toLowerCase().includes("token")
-        ) {
+        if ((error.status as number) === 401) {
           setServerError("sign_in_required");
           return;
         }
-        setServerError(message);
+        setServerError(error.value?.message ?? "Verification failed");
         return;
       }
 

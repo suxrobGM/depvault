@@ -201,8 +201,10 @@ export const authController = new Elysia({ prefix: "/auth", detail: { tags: ["Au
       }),
   )
   .use(
+    // CLI polls every 5s (~12/min). Allow generous headroom so legitimate
+    // polling never trips the limit while still bounding abuse.
     new Elysia()
-      .use(rateLimiter({ max: 12, windowMs: 60 * 1000 }))
+      .use(rateLimiter({ max: 40, windowMs: 60 * 1000 }))
       .post("/device/token", ({ body }) => deviceCodeService.pollDeviceCode(body.deviceCode), {
         body: DeviceTokenBodySchema,
         response: { 200: DeviceTokenResponseSchema, ...TooManyRequestsErrorSchema },

@@ -101,6 +101,11 @@ function getClientIp(request: Request, server: Server<unknown> | null): string {
   return "unknown";
 }
 
+/** Scopes the counter per route + IP so one busy endpoint can't exhaust another's limit. */
+function defaultKey(request: Request, server: Server<unknown> | null): string {
+  return `${new URL(request.url).pathname}:${getClientIp(request, server)}`;
+}
+
 /**
  * Elysia plugin that rate-limits requests using a fixed-window counter.
  *
@@ -119,9 +124,7 @@ function getClientIp(request: Request, server: Server<unknown> | null): string {
  * ```
  */
 export function rateLimiter(options: RateLimitOptions) {
-  const { max, windowMs, store = globalStore } = options;
-  const keyFn =
-    options.keyFn ?? ((req: Request, server: Server<unknown> | null) => getClientIp(req, server));
+  const { max, windowMs, store = globalStore, keyFn = defaultKey } = options;
 
   return new Elysia({ name: `rate-limiter-${max}-${windowMs}` }).onBeforeHandle(
     { as: "scoped" },
