@@ -10,8 +10,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
 import { API_BASE_URL } from "@/lib/constants";
+import { queryKeys } from "@/lib/query-keys";
 import type { CreateAnalysisBody } from "@/types/api/analysis";
-import type { GitHubDependencyFile, GitHubRepoListResponse } from "@/types/api/github";
+import type { GitHubDependencyFileDto, GitHubRepoListResponseDto } from "@/types/api/github";
 import { GitHubFileSelector } from "./github-file-selector";
 import { GitHubRepoSelector } from "./github-repo-selector";
 import type { EcosystemValue } from "./utils";
@@ -28,20 +29,20 @@ export function GitHubTab(props: GitHubTabContentProps): ReactElement {
   const queryClient = useQueryClient();
   const [step, setStep] = useState(0);
   const [selectedRepo, setSelectedRepo] = useState<{ owner: string; repo: string } | null>(null);
-  const [selectedFiles, setSelectedFiles] = useState<GitHubDependencyFile[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<GitHubDependencyFileDto[]>([]);
   const [repoSearch, setRepoSearch] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const hasGitHub = !!user?.githubId;
 
-  const { data: reposData, isLoading: reposLoading } = useApiQuery<GitHubRepoListResponse>(
-    ["github-repos"],
+  const { data: reposData, isLoading: reposLoading } = useApiQuery<GitHubRepoListResponseDto>(
+    queryKeys.github.repos(),
     () => client.api.github.repos.get({ query: { page: 1, limit: 100 } }),
     { enabled: hasGitHub && step === 0 },
   );
 
-  const { data: depFiles, isLoading: filesLoading } = useApiQuery<GitHubDependencyFile[]>(
-    ["github-dep-files", selectedRepo?.owner, selectedRepo?.repo],
+  const { data: depFiles, isLoading: filesLoading } = useApiQuery<GitHubDependencyFileDto[]>(
+    queryKeys.github.dependencyFiles(selectedRepo?.owner, selectedRepo?.repo),
     () => {
       if (!selectedRepo) throw new Error("No repo selected");
       return client.api.github
@@ -63,7 +64,7 @@ export function GitHubTab(props: GitHubTabContentProps): ReactElement {
     setStep(1);
   };
 
-  const handleToggleFile = (file: GitHubDependencyFile) => {
+  const handleToggleFile = (file: GitHubDependencyFileDto) => {
     setSelectedFiles((prev) => {
       const exists = prev.some((f) => f.path === file.path);
       if (exists) return prev.filter((f) => f.path !== file.path);
@@ -107,7 +108,7 @@ export function GitHubTab(props: GitHubTabContentProps): ReactElement {
 
     setIsAnalyzing(false);
     if (successCount > 0) {
-      queryClient.invalidateQueries({ queryKey: ["analyses", projectId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.analyses.byProject(projectId) });
       notification.success(
         `${successCount} ${successCount === 1 ? "analysis" : "analyses"} created`,
       );

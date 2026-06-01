@@ -1,9 +1,9 @@
 import type { client } from "@/lib/api";
 import type { Data } from "./utils";
 
-type ProjectById = ReturnType<(typeof client)["api"]["projects"]>;
+type ProjectById = ReturnType<typeof client.api.projects>;
 
-export type AuditLogListResponse = Data<ProjectById["audit-log"]["get"]>;
-export type AuditLogEntry = AuditLogListResponse["items"][number];
-export type AuditAction = AuditLogEntry["action"];
-export type AuditResourceType = AuditLogEntry["resourceType"];
+export type AuditLogListResponseDto = Data<ProjectById["audit-log"]["get"]>;
+export type AuditLogEntryDto = AuditLogListResponseDto["items"][number];
+export type AuditAction = AuditLogEntryDto["action"];
+export type AuditResourceType = AuditLogEntryDto["resourceType"];

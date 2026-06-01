@@ -34,8 +34,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { useConfirm } from "@/hooks/use-confirm";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import type { AnalysisDetailResponse } from "@/types/api/analysis";
-import type { MemberListResponse, ProjectResponse } from "@/types/api/project";
+import { queryKeys } from "@/lib/query-keys";
+import type { AnalysisDetailDto } from "@/types/api/analysis";
+import type { MemberListResponseDto, ProjectDetailDto } from "@/types/api/project";
 import { AnalysisSummaryStats } from "./analysis-summary-stats";
 import { DependencyDataGrid } from "./dependency-data-grid";
 import { DependencyGraph } from "./dependency-graph";
@@ -58,24 +59,25 @@ export function AnalysisDetailView(props: AnalysisDetailPageProps): ReactElement
   const [editingPath, setEditingPath] = useState(false);
   const [filePathDraft, setFilePathDraft] = useState("");
 
-  const { data: project } = useApiQuery<ProjectResponse>(["projects", projectId], () =>
-    client.api.projects({ id: projectId }).get(),
+  const { data: project } = useApiQuery<ProjectDetailDto>(
+    queryKeys.projects.detail(projectId),
+    () => client.api.projects({ id: projectId }).get(),
   );
 
-  const { data: membersData } = useApiQuery<MemberListResponse>(
-    ["projects", projectId, "members"],
+  const { data: membersData } = useApiQuery<MemberListResponseDto>(
+    queryKeys.projects.members(projectId),
     () => client.api.projects({ id: projectId }).members.get({ query: { page: 1, limit: 50 } }),
   );
 
-  const { data: analysis, isLoading } = useApiQuery<AnalysisDetailResponse>(
-    ["analyses", projectId, analysisId],
+  const { data: analysis, isLoading } = useApiQuery<AnalysisDetailDto>(
+    queryKeys.analyses.detail(projectId, analysisId),
     () => client.api.projects({ id: projectId }).analyses({ analysisId }).get(),
   );
 
   const deleteMutation = useApiMutation(
     () => client.api.projects({ id: projectId }).analyses({ analysisId }).delete(),
     {
-      invalidateKeys: [["analyses", projectId]],
+      invalidateKeys: [queryKeys.analyses.byProject(projectId)],
       successMessage: "Analysis deleted",
       onSuccess: () => router.push(ROUTES.projectAnalysis(projectId) as Route),
     },
@@ -85,7 +87,7 @@ export function AnalysisDetailView(props: AnalysisDetailPageProps): ReactElement
     (body: { filePath: string | null }) =>
       client.api.projects({ id: projectId }).analyses({ analysisId }).patch(body),
     {
-      invalidateKeys: [["analyses", projectId, analysisId]],
+      invalidateKeys: [queryKeys.analyses.detail(projectId, analysisId)],
       successMessage: "File path updated",
       onSuccess: () => setEditingPath(false),
     },
@@ -95,8 +97,8 @@ export function AnalysisDetailView(props: AnalysisDetailPageProps): ReactElement
     () => client.api.projects({ id: projectId }).analyses({ analysisId }).rescan.post(),
     {
       invalidateKeys: [
-        ["analyses", projectId, analysisId],
-        ["analyses", projectId],
+        queryKeys.analyses.detail(projectId, analysisId),
+        queryKeys.analyses.byProject(projectId),
       ],
       successMessage: "Rescan completed",
     },

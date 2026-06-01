@@ -16,7 +16,8 @@ import { PaginationBar } from "@/components/ui/data-display";
 import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
-import type { ScanListResponse } from "@/types/api/secret-scan";
+import { queryKeys } from "@/lib/query-keys";
+import type { ScanListResponseDto } from "@/types/api/secret-scan";
 
 interface ScanHistoryProps {
   projectId: string;
@@ -34,8 +35,8 @@ export function ScanHistory(props: ScanHistoryProps): ReactElement {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const { data, isLoading } = useApiQuery<ScanListResponse>(
-    ["scans", projectId, page, pageSize],
+  const { data, isLoading } = useApiQuery<ScanListResponseDto>(
+    queryKeys.scanning.scansList(projectId, page, pageSize),
     () => client.api.projects({ id: projectId }).scans.get({ query: { page, limit: pageSize } }),
     { errorMessage: "Failed to load scan history" },
   );

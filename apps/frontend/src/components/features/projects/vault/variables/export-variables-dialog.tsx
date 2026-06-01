@@ -21,7 +21,8 @@ import { useApiQuery } from "@/hooks/use-api-query";
 import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
 import { decrypt } from "@/lib/crypto";
-import type { ExportResult } from "@/types/api/env-variable";
+import { queryKeys } from "@/lib/query-keys";
+import type { ExportResultDto } from "@/types/api/env-variable";
 import { downloadFile } from "@/utils/download-file";
 
 interface ExportVariablesDialogProps {
@@ -39,8 +40,8 @@ export function ExportVariablesDialog(props: ExportVariablesDialogProps): ReactE
   const [decryptResult, setDecryptResult] = useState<{ content: string; key: string } | null>(null);
   const effectKeyRef = useRef("");
 
-  const { data } = useApiQuery<ExportResult>(
-    ["env-export", projectId, vaultId],
+  const { data } = useApiQuery<ExportResultDto>(
+    queryKeys.vaults.export(projectId, vaultId),
     () => client.api.projects({ id: projectId }).vaults({ vaultId }).export.get(),
     { enabled: open && !!vaultId },
   );

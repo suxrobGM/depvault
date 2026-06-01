@@ -13,10 +13,10 @@ import {
   type Node,
   type NodeProps,
 } from "@xyflow/react";
-import type { Dependency } from "@/types/api/analysis";
+import type { DependencyDto } from "@/types/api/analysis";
 
 interface DependencyGraphProps {
-  dependencies: Dependency[];
+  dependencies: DependencyDto[];
   fileName: string;
 }
 
@@ -32,7 +32,7 @@ const STATUS_COLORS: Record<string, string> = {
   DEPRECATED: "#9ca3af",
 };
 
-function DependencyNode(props: NodeProps<Node<{ dep: Dependency }>>): ReactElement {
+function DependencyNode(props: NodeProps<Node<{ dep: DependencyDto }>>): ReactElement {
   const { data } = props;
   const { dep } = data;
   const theme = useTheme();
@@ -110,7 +110,7 @@ const nodeTypes = {
  * @param fileName The name of the project file, used as the label for the root node.
  * @returns An object containing the nodes and edges for the graph visualization.
  */
-function buildGraphData(dependencies: Dependency[], fileName: string): GraphData {
+function buildGraphData(dependencies: DependencyDto[], fileName: string): GraphData {
   const nodes: Node[] = [];
   const edges: Edge[] = [];
 

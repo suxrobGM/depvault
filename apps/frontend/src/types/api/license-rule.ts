@@ -1,13 +1,14 @@
 import type { client } from "@/lib/api";
-import type { Data } from "./utils";
+import type { Body, Data } from "./utils";
 
-type ProjectById = ReturnType<(typeof client)["api"]["projects"]>;
+type ProjectById = ReturnType<typeof client.api.projects>;
+type LicenseRuleById = ReturnType<ProjectById["license-rules"]>;
 
-export type LicenseRuleListResponse = Data<ProjectById["license-rules"]["get"]>;
-export type LicenseRule = LicenseRuleListResponse["items"][number];
+export type LicenseRuleListResponseDto = Data<ProjectById["license-rules"]["get"]>;
+export type LicenseRuleDto = LicenseRuleListResponseDto["items"][number];
 
-export type LicenseComplianceSummary = Data<ProjectById["license-rules"]["compliance"]["get"]>;
-export type LicenseComplianceDep = LicenseComplianceSummary["dependencies"][number];
+export type LicenseComplianceSummaryDto = Data<ProjectById["license-rules"]["compliance"]["get"]>;
+export type LicenseComplianceDepDto = LicenseComplianceSummaryDto["dependencies"][number];
 
-export type CreateLicenseRuleBody = Parameters<ProjectById["license-rules"]["post"]>[0];
-export type UpdateLicenseRuleBody = Parameters<ReturnType<ProjectById["license-rules"]>["put"]>[0];
+export type CreateLicenseRuleBody = Body<ProjectById["license-rules"]["post"]>;
+export type UpdateLicenseRuleBody = Body<LicenseRuleById["put"]>;

@@ -1,12 +1,11 @@
 import type { client } from "@/lib/api";
 import type { Data } from "./utils";
 
-type ProjectById = ReturnType<(typeof client)["api"]["projects"]>;
-
-export type SecretFileListResponse = Data<ProjectById["secrets"]["get"]>;
-export type SecretFile = SecretFileListResponse["items"][number];
-
+type ProjectById = ReturnType<typeof client.api.projects>;
 type SecretById = ReturnType<ProjectById["secrets"]>;
 
-export type SecretFileVersionListResponse = Data<SecretById["versions"]["get"]>;
-export type SecretFileVersion = SecretFileVersionListResponse["items"][number];
+export type SecretFileListResponseDto = Data<ProjectById["secrets"]["get"]>;
+export type SecretFileDto = SecretFileListResponseDto["items"][number];
+
+export type SecretFileVersionListResponseDto = Data<SecretById["versions"]["get"]>;
+export type SecretFileVersionDto = SecretFileVersionListResponseDto["items"][number];

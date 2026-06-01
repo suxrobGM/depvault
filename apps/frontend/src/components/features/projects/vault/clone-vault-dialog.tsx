@@ -14,14 +14,15 @@ import { useForm } from "@tanstack/react-form";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
-import type { Vault } from "@/types/api/vault";
+import { queryKeys } from "@/lib/query-keys";
+import type { VaultDto } from "@/types/api/vault";
 import { cloneVaultSchema } from "./schemas";
 
 interface CloneVaultDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
-  sourceVault: Vault | null;
+  sourceVault: VaultDto | null;
 }
 
 export function CloneVaultDialog(props: CloneVaultDialogProps): ReactElement {
@@ -34,8 +35,8 @@ export function CloneVaultDialog(props: CloneVaultDialogProps): ReactElement {
         .vaults({ vaultId: sourceVault?.id ?? "" })
         .clone.post(values),
     {
-      invalidateKeys: [["vaults", projectId]],
-      successMessage: "Vault duplicated",
+      invalidateKeys: [queryKeys.vaults.byProject(projectId)],
+      successMessage: "VaultDto duplicated",
       onSuccess: () => handleClose(),
     },
   );
@@ -63,7 +64,7 @@ export function CloneVaultDialog(props: CloneVaultDialogProps): ReactElement {
           form.handleSubmit();
         }}
       >
-        <DialogTitle>Duplicate Vault</DialogTitle>
+        <DialogTitle>Duplicate VaultDto</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
             <DialogContentText>

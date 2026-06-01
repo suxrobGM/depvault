@@ -22,8 +22,9 @@ import { useApiQuery } from "@/hooks/use-api-query";
 import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
 import { deriveCIWrapKey, exportDEK, wrapKey } from "@/lib/crypto";
-import type { CiTokenCreatedResponse, CreateCiTokenBody } from "@/types/api/ci-token";
-import type { VaultListResponse } from "@/types/api/vault";
+import { queryKeys } from "@/lib/query-keys";
+import type { CiTokenCreatedDto, CreateCiTokenBody } from "@/types/api/ci-token";
+import type { VaultListResponseDto } from "@/types/api/vault";
 import { CiTokenUsageSnippets } from "./ci-token-usage-snippets";
 
 const CUSTOM_VALUE = -1;
@@ -59,11 +60,12 @@ interface CreateCiTokenDialogProps {
 export function CreateCiTokenDialog(props: CreateCiTokenDialogProps): ReactElement {
   const { open, onClose, projectId } = props;
   const { getProjectDEK, isVaultUnlocked } = useVault();
-  const [createdToken, setCreatedToken] = useState<CiTokenCreatedResponse | null>(null);
+  const [createdToken, setCreatedToken] = useState<CiTokenCreatedDto | null>(null);
   const [showSnippets, setShowSnippets] = useState(false);
 
-  const { data: vaults } = useApiQuery<VaultListResponse>(["vaults", projectId], () =>
-    client.api.projects({ id: projectId }).vaults.get(),
+  const { data: vaults } = useApiQuery<VaultListResponseDto>(
+    queryKeys.vaults.byProject(projectId),
+    () => client.api.projects({ id: projectId }).vaults.get(),
   );
 
   const vaultItems = (vaults ?? []).map((vault) => ({
@@ -74,7 +76,7 @@ export function CreateCiTokenDialog(props: CreateCiTokenDialogProps): ReactEleme
   const mutation = useApiMutation(
     (values: CreateCiTokenBody) => client.api.projects({ id: projectId })["ci-tokens"].post(values),
     {
-      invalidateKeys: [["ci-tokens", projectId]],
+      invalidateKeys: [queryKeys.ciTokens.byProject(projectId)],
       errorMessage: "Failed to create CI token",
     },
   );

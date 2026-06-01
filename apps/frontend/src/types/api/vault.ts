@@ -1,14 +1,14 @@
 import type { client } from "@/lib/api";
-import type { Data } from "./utils";
+import type { Body, Data } from "./utils";
 
-type ProjectById = ReturnType<(typeof client)["api"]["projects"]>;
+type ProjectById = ReturnType<typeof client.api.projects>;
 type VaultById = ReturnType<ProjectById["vaults"]>;
 
-export type VaultListResponse = Data<ProjectById["vaults"]["get"]>;
-export type Vault = VaultListResponse[number];
+export type VaultListResponseDto = Data<ProjectById["vaults"]["get"]>;
+export type VaultDto = VaultListResponseDto[number];
 
-export type VaultResponse = Data<VaultById["put"]>;
+export type VaultDetailDto = Data<VaultById["put"]>;
 
-export type CloneVaultBody = Parameters<VaultById["clone"]["post"]>[0];
+export type CloneVaultBody = Body<VaultById["clone"]["post"]>;
 
-export type VaultTagListResponse = Data<ProjectById["vault-tags"]["get"]>;
+export type VaultTagListResponseDto = Data<ProjectById["vault-tags"]["get"]>;

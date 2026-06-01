@@ -21,7 +21,7 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
 import { decryptBinary, encryptBinary, generateShareKey, shareKeyToFragment } from "@/lib/crypto";
-import type { SecretFile } from "@/types/api/secret-file";
+import type { SecretFileDto } from "@/types/api/secret-file";
 
 const EXPIRY_OPTIONS = [
   { label: "1 hour", value: 3600 },
@@ -33,7 +33,7 @@ interface CreateFileShareDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
-  file: SecretFile;
+  file: SecretFileDto;
 }
 
 export function CreateFileShareDialog(props: CreateFileShareDialogProps): ReactElement {

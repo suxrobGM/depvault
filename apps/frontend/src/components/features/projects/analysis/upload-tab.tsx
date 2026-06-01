@@ -6,6 +6,7 @@ import { FileUploadButton } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 import type { CreateAnalysisBody } from "@/types/api/analysis";
 import { ECOSYSTEMS, type EcosystemValue } from "./utils";
 
@@ -25,7 +26,7 @@ export function UploadTab(props: UploadTabContentProps): ReactElement {
   const mutation = useApiMutation(
     (values: CreateAnalysisBody) => client.api.projects({ id: projectId }).analyses.post(values),
     {
-      invalidateKeys: [["analyses", projectId]],
+      invalidateKeys: [queryKeys.analyses.byProject(projectId)],
       successMessage: "Analysis created successfully",
       onSuccess: () => onClose(),
     },

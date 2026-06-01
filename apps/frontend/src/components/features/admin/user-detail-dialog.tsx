@@ -19,7 +19,8 @@ import { SelectField } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
-import type { AdminUserDetailResponse, CompSubscriptionBody } from "@/types/api";
+import { queryKeys } from "@/lib/query-keys";
+import type { AdminUserDetailDto, CompSubscriptionBody } from "@/types/api";
 
 interface UserDetailDialogProps {
   open: boolean;
@@ -31,8 +32,8 @@ export function UserDetailDialog(props: UserDetailDialogProps): ReactElement {
   const { open, onClose, userId } = props;
   const [compPlan, setCompPlan] = useState<CompSubscriptionBody["plan"]>("PRO");
 
-  const { data: user, isLoading } = useApiQuery<AdminUserDetailResponse>(
-    ["admin-user-detail", userId],
+  const { data: user, isLoading } = useApiQuery<AdminUserDetailDto>(
+    queryKeys.admin.userDetail(userId),
     () => client.api.admin.users({ id: userId! }).get(),
     { enabled: open && userId !== null, errorMessage: "Failed to load user details" },
   );
@@ -40,7 +41,11 @@ export function UserDetailDialog(props: UserDetailDialogProps): ReactElement {
   const assignMutation = useApiMutation<{ message: string }, CompSubscriptionBody>(
     (variables) => client.api.admin.users({ id: userId! }).subscription.patch(variables),
     {
-      invalidateKeys: [["admin-user-detail", userId], ["admin-users"], ["admin-stats"]],
+      invalidateKeys: [
+        queryKeys.admin.userDetail(userId),
+        queryKeys.admin.users(),
+        queryKeys.admin.stats(),
+      ],
       successMessage: "Subscription assigned successfully",
       errorMessage: "Failed to assign subscription",
     },
@@ -49,7 +54,11 @@ export function UserDetailDialog(props: UserDetailDialogProps): ReactElement {
   const revokeMutation = useApiMutation<{ message: string }>(
     () => client.api.admin.users({ id: userId! }).subscription.delete(),
     {
-      invalidateKeys: [["admin-user-detail", userId], ["admin-users"], ["admin-stats"]],
+      invalidateKeys: [
+        queryKeys.admin.userDetail(userId),
+        queryKeys.admin.users(),
+        queryKeys.admin.stats(),
+      ],
       successMessage: "Subscription revoked successfully",
       errorMessage: "Failed to revoke subscription",
     },

@@ -7,9 +7,10 @@ import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useAuth } from "@/hooks/use-auth";
 import { client } from "@/lib/api";
-import type { EnvVariableListResponse } from "@/types/api/env-variable";
-import type { MemberListResponse } from "@/types/api/project";
-import type { VaultListResponse } from "@/types/api/vault";
+import { queryKeys } from "@/lib/query-keys";
+import type { EnvVariableListResponseDto } from "@/types/api/env-variable";
+import type { MemberListResponseDto } from "@/types/api/project";
+import type { VaultListResponseDto } from "@/types/api/vault";
 import { CreateVaultDialog } from "../create-vault-dialog";
 import { PendingKeyGrantsBanner } from "../pending-key-grants-banner";
 import { VaultList } from "../vault-list";
@@ -28,17 +29,18 @@ export function VariablesView(props: VaultVariablesViewProps): ReactElement {
   const [createVaultOpen, setCreateVaultOpen] = useState(false);
   const [createVariableOpen, setCreateVariableOpen] = useState(false);
   const [editingVariable, setEditingVariable] = useState<
-    EnvVariableListResponse["items"][number] | null
+    EnvVariableListResponseDto["items"][number] | null
   >(null);
   const [selectedVaultId, setSelectedVaultId] = useState<string | null>(null);
 
-  const { data: membersData } = useApiQuery<MemberListResponse>(
-    ["projects", projectId, "members"],
+  const { data: membersData } = useApiQuery<MemberListResponseDto>(
+    queryKeys.projects.members(projectId),
     () => client.api.projects({ id: projectId }).members.get({ query: { page: 1, limit: 50 } }),
   );
 
-  const { data: vaults } = useApiQuery<VaultListResponse>(["vaults", projectId], () =>
-    client.api.projects({ id: projectId }).vaults.get(),
+  const { data: vaults } = useApiQuery<VaultListResponseDto>(
+    queryKeys.vaults.byProject(projectId),
+    () => client.api.projects({ id: projectId }).vaults.get(),
   );
 
   const currentMember = membersData?.items.find((m) => m.user.id === user?.id);
@@ -47,15 +49,16 @@ export function VariablesView(props: VaultVariablesViewProps): ReactElement {
   const list = vaults ?? [];
   const activeVaultId = selectedVaultId ?? list[0]?.id ?? null;
 
-  const { data: variablesData, isLoading: variablesLoading } = useApiQuery<EnvVariableListResponse>(
-    ["vault-variables", projectId, activeVaultId],
-    () =>
-      client.api
-        .projects({ id: projectId })
-        .vaults({ vaultId: activeVaultId ?? "" })
-        .variables.get({ query: { page: 1, limit: 500 } }),
-    { enabled: !!activeVaultId },
-  );
+  const { data: variablesData, isLoading: variablesLoading } =
+    useApiQuery<EnvVariableListResponseDto>(
+      queryKeys.vaults.variables(projectId, activeVaultId),
+      () =>
+        client.api
+          .projects({ id: projectId })
+          .vaults({ vaultId: activeVaultId ?? "" })
+          .variables.get({ query: { page: 1, limit: 500 } }),
+      { enabled: !!activeVaultId },
+    );
 
   const variables = variablesData?.items ?? [];
 

@@ -11,11 +11,11 @@ import { Surface } from "@/components/ui/cards";
 import { EmptyState } from "@/components/ui/feedback";
 import { LinkButton } from "@/components/ui/inputs";
 import { ROUTES } from "@/lib/constants";
-import type { Project } from "@/types/api/project";
+import type { ProjectDto } from "@/types/api/project";
 import { Onboarding } from "./onboarding";
 
 interface DashboardRecentProjectsProps {
-  projects: Project[];
+  projects: ProjectDto[];
 }
 
 export function RecentProjects(props: DashboardRecentProjectsProps): ReactElement {
@@ -82,7 +82,7 @@ export function RecentProjects(props: DashboardRecentProjectsProps): ReactElemen
             icon={<FolderOpenIcon />}
             title="No projects yet"
             description="Create your first project to analyze dependencies, manage secrets, and store encrypted files."
-            actionLabel="Create Project"
+            actionLabel="Create ProjectDto"
             actionHref={ROUTES.projects as Route}
           />
         )}

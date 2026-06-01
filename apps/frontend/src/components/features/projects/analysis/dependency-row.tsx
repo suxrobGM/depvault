@@ -8,12 +8,12 @@ import {
 import { Box, Chip, Collapse, IconButton, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { StatusBadge } from "@/components/ui/data-display";
-import type { Dependency } from "@/types/api/analysis";
+import type { DependencyDto } from "@/types/api/analysis";
 import { getPackageUrl, STATUS_LABEL, STATUS_VARIANT } from "./utils";
 import { VulnerabilityPanel } from "./vulnerability-panel";
 
 interface DependencyRowProps {
-  dep: Dependency;
+  dep: DependencyDto;
   ecosystem?: string;
   expanded: boolean;
   gridColumns: string;

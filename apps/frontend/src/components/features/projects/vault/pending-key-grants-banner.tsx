@@ -6,6 +6,7 @@ import { useApiQuery } from "@/hooks/use-api-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 
 interface PendingMember {
   userId: string;
@@ -29,7 +30,7 @@ export function PendingKeyGrantsBanner(props: PendingKeyGrantsBannerProps): Reac
   const [granting, setGranting] = useState(false);
 
   const { data: pendingMembers, refetch } = useApiQuery<PendingMember[]>(
-    ["projects", projectId, "keygrants", "pending"],
+    queryKeys.projects.pendingKeyGrants(projectId),
     () => client.api.projects({ id: projectId }).keygrants.pending.get(),
     { enabled: canEdit && isVaultUnlocked },
   );

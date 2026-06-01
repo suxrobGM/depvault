@@ -10,7 +10,8 @@ import {
 import { Box, Card, CardContent, Chip, Grid, Skeleton, Stack, Typography } from "@mui/material";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
-import type { AdminStatsResponse } from "@/types/api";
+import { queryKeys } from "@/lib/query-keys";
+import type { AdminStatsDto } from "@/types/api";
 
 interface StatCardData {
   icon: ReactNode;
@@ -21,8 +22,8 @@ interface StatCardData {
 }
 
 export function AdminStats(): ReactElement {
-  const { data, isLoading } = useApiQuery<AdminStatsResponse>(
-    ["admin-stats"],
+  const { data, isLoading } = useApiQuery<AdminStatsDto>(
+    queryKeys.admin.stats(),
     () => client.api.admin.stats.get(),
     { errorMessage: "Failed to load admin stats" },
   );

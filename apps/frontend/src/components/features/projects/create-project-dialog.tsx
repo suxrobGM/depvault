@@ -10,6 +10,7 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
+import { queryKeys } from "@/lib/query-keys";
 import { createProjectSchema } from "./schemas";
 
 interface CreateProjectDialogProps {
@@ -26,7 +27,7 @@ export function CreateProjectDialog(props: CreateProjectDialogProps): ReactEleme
     (values: { name: string; description?: string; repositoryUrl?: string }) =>
       client.api.projects.post(values),
     {
-      invalidateKeys: [["projects"]],
+      invalidateKeys: [queryKeys.projects.list()],
       successMessage: "Project created",
       errorMessage: "Failed to create project",
       onSuccess: async (data) => {

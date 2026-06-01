@@ -8,7 +8,8 @@ import { PaginationBar, SkeletonList } from "@/components/ui/data-display";
 import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
-import type { GlobalActivityListResponse } from "@/types/api/activity";
+import { queryKeys } from "@/lib/query-keys";
+import type { GlobalActivityListResponseDto } from "@/types/api/activity";
 import { ActivityUpgradeGate } from "./activity-upgrade-gate";
 import {
   EMPTY_FILTERS,
@@ -22,16 +23,15 @@ export function GlobalActivityView(): ReactElement {
   const [filters, setFilters] = useState<GlobalActivityFilters>(EMPTY_FILTERS);
   const [page, setPage] = useState(1);
 
-  const { data, isLoading } = useApiQuery<GlobalActivityListResponse>(
-    [
-      "global-activity",
+  const { data, isLoading } = useApiQuery<GlobalActivityListResponseDto>(
+    queryKeys.globalActivity.list(
       page,
       PAGE_SIZE,
       filters.action,
       filters.resourceType,
       filters.from,
       filters.to,
-    ],
+    ),
     () =>
       client.api.activity.get({
         query: {

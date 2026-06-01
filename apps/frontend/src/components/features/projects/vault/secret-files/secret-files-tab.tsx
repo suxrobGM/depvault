@@ -7,9 +7,10 @@ import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useAuth } from "@/hooks/use-auth";
 import { client } from "@/lib/api";
-import type { MemberListResponse } from "@/types/api/project";
-import type { SecretFile, SecretFileListResponse } from "@/types/api/secret-file";
-import type { Vault, VaultListResponse } from "@/types/api/vault";
+import { queryKeys } from "@/lib/query-keys";
+import type { MemberListResponseDto } from "@/types/api/project";
+import type { SecretFileDto, SecretFileListResponseDto } from "@/types/api/secret-file";
+import type { VaultDto, VaultListResponseDto } from "@/types/api/vault";
 import { EditSecretFileDialog } from "./edit-secret-file-dialog";
 import { SecretFileTable } from "./secret-file-table";
 import { UploadSecretFileDialog } from "./upload-secret-file-dialog";
@@ -22,20 +23,21 @@ export function SecretFilesTab(props: SecretFilesTabProps): ReactElement {
   const { projectId } = props;
   const { user } = useAuth();
 
-  const [editFile, setEditFile] = useState<SecretFile | null>(null);
+  const [editFile, setEditFile] = useState<SecretFileDto | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
 
-  const { data: membersData } = useApiQuery<MemberListResponse>(
-    ["projects", projectId, "members"],
+  const { data: membersData } = useApiQuery<MemberListResponseDto>(
+    queryKeys.projects.members(projectId),
     () => client.api.projects({ id: projectId }).members.get({ query: { page: 1, limit: 50 } }),
   );
 
-  const { data: vaults } = useApiQuery<VaultListResponse>(["vaults", projectId], () =>
-    client.api.projects({ id: projectId }).vaults.get(),
+  const { data: vaults } = useApiQuery<VaultListResponseDto>(
+    queryKeys.vaults.byProject(projectId),
+    () => client.api.projects({ id: projectId }).vaults.get(),
   );
 
-  const { data: filesData, isLoading } = useApiQuery<SecretFileListResponse>(
-    ["secret-files", projectId],
+  const { data: filesData, isLoading } = useApiQuery<SecretFileListResponseDto>(
+    queryKeys.secretFiles.byProject(projectId),
     () =>
       client.api.projects({ id: projectId }).secrets.get({
         query: { page: 1, limit: 100 },
@@ -44,7 +46,7 @@ export function SecretFilesTab(props: SecretFilesTabProps): ReactElement {
 
   const currentMember = membersData?.items.find((m) => m.user.id === user?.id);
   const canEdit = currentMember?.role === "OWNER" || currentMember?.role === "EDITOR";
-  const projectVaults: Vault[] = vaults ?? [];
+  const projectVaults: VaultDto[] = vaults ?? [];
   const files = filesData?.items ?? [];
 
   return (

@@ -3,11 +3,11 @@
 import type { ReactElement } from "react";
 import { MoreVert as MoreIcon } from "@mui/icons-material";
 import { IconButton, ListItem, ListItemButton, Stack, Tooltip, Typography } from "@mui/material";
-import type { Vault } from "@/types/api/vault";
+import type { VaultDto } from "@/types/api/vault";
 import { VaultTagChip } from "./vault-tag-chip";
 
 interface VaultListItemProps {
-  vault: Vault;
+  vault: VaultDto;
   canEdit: boolean;
   selected: boolean;
   onSelect: () => void;
@@ -96,7 +96,7 @@ function resolveRatioColor(required: number, filled: number): string {
 }
 
 interface VaultTooltipContentProps {
-  vault: Vault;
+  vault: VaultDto;
   variableCount: number;
   secretFileCount: number;
 }

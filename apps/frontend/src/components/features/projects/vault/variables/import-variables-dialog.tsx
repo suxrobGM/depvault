@@ -19,7 +19,8 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
 import { encrypt } from "@/lib/crypto";
-import type { ImportResult } from "@/types/api/env-variable";
+import { queryKeys } from "@/lib/query-keys";
+import type { ImportResultDto } from "@/types/api/env-variable";
 import { importVariablesSchema } from "../schemas";
 
 interface ImportVariablesDialogProps {
@@ -67,10 +68,10 @@ export function ImportVariablesDialog(props: ImportVariablesDialogProps): ReactE
     },
     {
       invalidateKeys: [
-        ["vault-variables", projectId, vaultId],
-        ["vaults", projectId],
+        queryKeys.vaults.variables(projectId, vaultId),
+        queryKeys.vaults.byProject(projectId),
       ],
-      successMessage: (data: ImportResult | undefined) =>
+      successMessage: (data: ImportResultDto | undefined) =>
         `Imported ${data?.imported ?? 0} variables (${data?.updated ?? 0} updated)`,
       onSuccess: () => handleClose(),
     },

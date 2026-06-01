@@ -14,7 +14,7 @@ interface EdenError extends Error {
 }
 
 interface UseApiMutationOptions<TData, TVariables> {
-  invalidateKeys?: unknown[][];
+  invalidateKeys?: ReadonlyArray<readonly unknown[]>;
   successMessage?: string | ((data: TData) => string);
   errorMessage?: string | ((error: EdenError) => string);
   onSuccess?: (data: TData, variables: TVariables) => void;

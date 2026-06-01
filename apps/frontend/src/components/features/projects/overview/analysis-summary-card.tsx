@@ -8,7 +8,8 @@ import { LinkButton } from "@/components/ui/inputs";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import type { AnalysisListResponse } from "@/types/api/analysis";
+import { queryKeys } from "@/lib/query-keys";
+import type { AnalysisListResponseDto } from "@/types/api/analysis";
 
 interface AnalysisSummaryCardProps {
   projectId: string;
@@ -23,8 +24,8 @@ function getHealthColor(avgHealth: number | null) {
 export function AnalysisSummaryCard(props: AnalysisSummaryCardProps): ReactElement {
   const { projectId } = props;
 
-  const { data: analysisData } = useApiQuery<AnalysisListResponse>(
-    ["analyses", projectId, "overview"],
+  const { data: analysisData } = useApiQuery<AnalysisListResponseDto>(
+    queryKeys.analyses.overview(projectId),
     () => client.api.projects({ id: projectId }).analyses.get({ query: { page: 1, limit: 100 } }),
   );
 

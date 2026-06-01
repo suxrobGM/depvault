@@ -13,15 +13,15 @@ import {
   Typography,
 } from "@mui/material";
 import { LoadingSpinner } from "@/components/ui/feedback";
-import type { GitHubDependencyFile } from "@/types/api/github";
+import type { GitHubDependencyFileDto } from "@/types/api/github";
 
 interface GitHubFileSelectorProps {
   repoLabel: string;
   isLoading: boolean;
-  files: GitHubDependencyFile[] | undefined;
-  selectedFiles: GitHubDependencyFile[];
+  files: GitHubDependencyFileDto[] | undefined;
+  selectedFiles: GitHubDependencyFileDto[];
   isAnalyzing: boolean;
-  onToggleFile: (file: GitHubDependencyFile) => void;
+  onToggleFile: (file: GitHubDependencyFileDto) => void;
   onToggleAll: () => void;
   onBack: () => void;
   onClose: () => void;

@@ -8,7 +8,8 @@ import { LinkButton } from "@/components/ui/inputs";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import type { ScanSummaryResponse } from "@/types/api/secret-scan";
+import { queryKeys } from "@/lib/query-keys";
+import type { ScanSummaryDto } from "@/types/api/secret-scan";
 
 interface SecretScanningCardProps {
   projectId: string;
@@ -17,8 +18,8 @@ interface SecretScanningCardProps {
 export function SecretScanningCard(props: SecretScanningCardProps): ReactElement {
   const { projectId } = props;
 
-  const { data: scanSummary } = useApiQuery<ScanSummaryResponse>(
-    ["scan-summary", projectId, "overview"],
+  const { data: scanSummary } = useApiQuery<ScanSummaryDto>(
+    queryKeys.scanning.summaryOverview(projectId),
     () => client.api.projects({ id: projectId })["scan-summary"].get(),
   );
 

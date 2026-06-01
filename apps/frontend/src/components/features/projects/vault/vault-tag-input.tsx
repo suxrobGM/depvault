@@ -4,7 +4,8 @@ import type { ReactElement } from "react";
 import { Autocomplete, Chip, TextField } from "@mui/material";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
-import type { VaultTagListResponse } from "@/types/api/vault";
+import { queryKeys } from "@/lib/query-keys";
+import type { VaultTagListResponseDto } from "@/types/api/vault";
 
 const BLESSED_TAGS: Record<string, string> = {
   prod: "#ef4444",
@@ -24,8 +25,9 @@ interface VaultTagInputProps {
 export function VaultTagInput(props: VaultTagInputProps): ReactElement {
   const { projectId, value, onChange, label = "Tags", placeholder = "Add tags" } = props;
 
-  const { data: existingTags } = useApiQuery<VaultTagListResponse>(["vault-tags", projectId], () =>
-    client.api.projects({ id: projectId })["vault-tags"].get(),
+  const { data: existingTags } = useApiQuery<VaultTagListResponseDto>(
+    queryKeys.vaults.tags(projectId),
+    () => client.api.projects({ id: projectId })["vault-tags"].get(),
   );
 
   const options = existingTags ?? [];

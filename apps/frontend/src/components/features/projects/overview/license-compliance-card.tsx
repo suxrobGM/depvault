@@ -8,7 +8,8 @@ import { LinkButton } from "@/components/ui/inputs";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import type { LicenseComplianceSummary } from "@/types/api/license-rule";
+import { queryKeys } from "@/lib/query-keys";
+import type { LicenseComplianceSummaryDto } from "@/types/api/license-rule";
 
 interface LicenseComplianceCardProps {
   projectId: string;
@@ -17,8 +18,8 @@ interface LicenseComplianceCardProps {
 export function LicenseComplianceCard(props: LicenseComplianceCardProps): ReactElement {
   const { projectId } = props;
 
-  const { data } = useApiQuery<LicenseComplianceSummary>(
-    ["license-compliance", projectId, "overview"],
+  const { data } = useApiQuery<LicenseComplianceSummaryDto>(
+    queryKeys.licenses.complianceOverview(projectId),
     () =>
       client.api.projects({ id: projectId })["license-rules"].compliance.get({
         query: { page: 1, limit: 1 },

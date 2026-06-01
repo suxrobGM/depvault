@@ -1,17 +1,17 @@
 import type { client } from "@/lib/api";
-import type { Data } from "./utils";
+import type { Body, Data } from "./utils";
 
-export type AdminStatsResponse = Data<(typeof client)["api"]["admin"]["stats"]["get"]>;
+type Admin = typeof client.api.admin;
+type AdminUserById = ReturnType<Admin["users"]>;
 
-export type AdminUserListResponse = Data<(typeof client)["api"]["admin"]["users"]["get"]>;
-export type AdminUser = AdminUserListResponse["items"][number];
+export type AdminStatsDto = Data<Admin["stats"]["get"]>;
 
-type AdminUserById = ReturnType<(typeof client)["api"]["admin"]["users"]>;
-export type AdminUserDetailResponse = Data<AdminUserById["get"]>;
+export type AdminUserListResponseDto = Data<Admin["users"]["get"]>;
+export type AdminUserDto = AdminUserListResponseDto["items"][number];
 
-export type AdminSubscriptionListResponse = Data<
-  (typeof client)["api"]["admin"]["subscriptions"]["get"]
->;
-export type AdminSubscription = AdminSubscriptionListResponse["items"][number];
+export type AdminUserDetailDto = Data<AdminUserById["get"]>;
 
-export type CompSubscriptionBody = Parameters<AdminUserById["subscription"]["patch"]>[0];
+export type AdminSubscriptionListResponseDto = Data<Admin["subscriptions"]["get"]>;
+export type AdminSubscriptionDto = AdminSubscriptionListResponseDto["items"][number];
+
+export type CompSubscriptionBody = Body<AdminUserById["subscription"]["patch"]>;

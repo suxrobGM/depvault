@@ -1,12 +1,12 @@
 import type { client } from "@/lib/api";
 import type { Data } from "./utils";
 
-type NotificationsEndpoint = (typeof client)["api"]["notifications"];
+type NotificationsEndpoint = typeof client.api.notifications;
 
-export type NotificationListResponse = Data<NotificationsEndpoint["get"]>;
-export type Notification = NotificationListResponse["items"][number];
+export type NotificationListResponseDto = Data<NotificationsEndpoint["get"]>;
+export type NotificationDto = NotificationListResponseDto["items"][number];
 
 type UnreadCountEndpoint = NotificationsEndpoint["unread-count"];
-export type UnreadCountResponse = Data<UnreadCountEndpoint["get"]>;
+export type UnreadCountDto = Data<UnreadCountEndpoint["get"]>;
 
-export type NotificationType = Notification["type"];
+export type NotificationType = NotificationDto["type"];

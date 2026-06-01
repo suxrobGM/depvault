@@ -11,11 +11,12 @@ import {
 import { Box, Card, CardContent, Chip, Grid, Stack, Typography } from "@mui/material";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
-import type { SecurityOverviewResponse } from "@/types/api/security";
+import { queryKeys } from "@/lib/query-keys";
+import type { SecurityOverviewDto } from "@/types/api/security";
 
 export function SecurityOverviewView(): ReactElement {
-  const { data, isLoading } = useApiQuery<SecurityOverviewResponse>(
-    ["security-overview"],
+  const { data, isLoading } = useApiQuery<SecurityOverviewDto>(
+    queryKeys.security.overview(),
     () => client.api.security.overview.get(),
     { errorMessage: "Failed to load security overview" },
   );

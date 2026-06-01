@@ -22,7 +22,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { useConfirm } from "@/hooks/use-confirm";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import type { MemberListResponse, ProjectResponse } from "@/types/api/project";
+import { queryKeys } from "@/lib/query-keys";
+import type { MemberListResponseDto, ProjectDetailDto } from "@/types/api/project";
 import { updateProjectSchema } from "../schemas";
 import { CiTokensSection } from "./ci-tokens-section";
 
@@ -36,12 +37,13 @@ export function SettingsTab(props: SettingsTabProps): ReactElement {
   const { user } = useAuth();
   const confirm = useConfirm();
 
-  const { data: project } = useApiQuery<ProjectResponse>(["projects", projectId], () =>
-    client.api.projects({ id: projectId }).get(),
+  const { data: project } = useApiQuery<ProjectDetailDto>(
+    queryKeys.projects.detail(projectId),
+    () => client.api.projects({ id: projectId }).get(),
   );
 
-  const { data: membersData } = useApiQuery<MemberListResponse>(
-    ["projects", projectId, "members"],
+  const { data: membersData } = useApiQuery<MemberListResponseDto>(
+    queryKeys.projects.members(projectId),
     () => client.api.projects({ id: projectId }).members.get({ query: { page: 1, limit: 50 } }),
   );
 
@@ -53,13 +55,13 @@ export function SettingsTab(props: SettingsTabProps): ReactElement {
     (values: { name: string; description?: string; repositoryUrl?: string }) =>
       client.api.projects({ id: projectId }).put(values),
     {
-      invalidateKeys: [["projects", projectId], ["projects"]],
+      invalidateKeys: [queryKeys.projects.detail(projectId), queryKeys.projects.list()],
       successMessage: "Project updated",
     },
   );
 
   const deleteMutation = useApiMutation(() => client.api.projects({ id: projectId }).delete(), {
-    invalidateKeys: [["projects"]],
+    invalidateKeys: [queryKeys.projects.list()],
     successMessage: "Project deleted",
     onSuccess: () => router.push(ROUTES.projects as Route),
   });

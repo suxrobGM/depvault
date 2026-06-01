@@ -18,7 +18,8 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
 import { decrypt, encrypt } from "@/lib/crypto";
-import type { EnvVariable } from "@/types/api/env-variable";
+import { queryKeys } from "@/lib/query-keys";
+import type { EnvVariableDto } from "@/types/api/env-variable";
 import { updateVariableSchema } from "../schemas";
 
 interface EditVariableDialogProps {
@@ -26,7 +27,7 @@ interface EditVariableDialogProps {
   onClose: () => void;
   projectId: string;
   vaultId: string;
-  variable: EnvVariable | null;
+  variable: EnvVariableDto | null;
 }
 
 export function EditVariableDialog(props: EditVariableDialogProps): ReactElement {
@@ -50,8 +51,8 @@ export function EditVariableDialog(props: EditVariableDialogProps): ReactElement
         .put(values),
     {
       invalidateKeys: [
-        ["vault-variables", projectId, vaultId],
-        ["vaults", projectId],
+        queryKeys.vaults.variables(projectId, vaultId),
+        queryKeys.vaults.byProject(projectId),
       ],
       successMessage: "Variable updated",
       onSuccess: () => handleClose(),

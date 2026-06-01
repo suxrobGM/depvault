@@ -6,6 +6,7 @@ import { useForm } from "@tanstack/react-form";
 import { FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 import { createVaultSchema } from "./schemas";
 import { VaultTagInput } from "./vault-tag-input";
 
@@ -23,10 +24,7 @@ export function CreateVaultDialog(props: CreateVaultDialogProps): ReactElement {
     (values: { name: string; directoryPath?: string; tags?: string[] }) =>
       client.api.projects({ id: projectId }).vaults.post(values),
     {
-      invalidateKeys: [
-        ["vaults", projectId],
-        ["vault-tags", projectId],
-      ],
+      invalidateKeys: [queryKeys.vaults.byProject(projectId), queryKeys.vaults.tags(projectId)],
       successMessage: "Vault created",
       onSuccess: () => handleClose(),
     },

@@ -20,8 +20,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { useConfirm } from "@/hooks/use-confirm";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import type { Analysis, AnalysisListResponse } from "@/types/api/analysis";
-import type { MemberListResponse, ProjectResponse } from "@/types/api/project";
+import { queryKeys } from "@/lib/query-keys";
+import type { AnalysisDto, AnalysisListResponseDto } from "@/types/api/analysis";
+import type { MemberListResponseDto, ProjectDetailDto } from "@/types/api/project";
 import { CreateAnalysisDialog } from "./create-analysis-dialog";
 import { getEcosystemLabel } from "./utils";
 
@@ -30,7 +31,7 @@ interface AnalysisListViewProps {
 }
 
 interface AnalysisRowProps {
-  item: Analysis;
+  item: AnalysisDto;
   projectId: string;
   index: number;
   canEdit: boolean;
@@ -46,14 +47,14 @@ function AnalysisRow(props: AnalysisRowProps): ReactElement {
     (analysisId: string) =>
       client.api.projects({ id: projectId }).analyses({ analysisId }).delete(),
     {
-      invalidateKeys: [["analyses", projectId]],
-      successMessage: "Analysis deleted",
+      invalidateKeys: [queryKeys.analyses.byProject(projectId)],
+      successMessage: "AnalysisDto deleted",
     },
   );
 
   const handleDelete = async () => {
     const confirmed = await confirm({
-      title: "Delete Analysis",
+      title: "Delete AnalysisDto",
       description: `Delete "${item.filePath ?? item.fileName}" and all its dependency data? This cannot be undone.`,
       confirmLabel: "Delete",
       destructive: true,
@@ -159,17 +160,18 @@ export function AnalysisListView(props: AnalysisListViewProps): ReactElement {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [page, setPage] = useState(1);
 
-  const { data: project } = useApiQuery<ProjectResponse>(["projects", projectId], () =>
-    client.api.projects({ id: projectId }).get(),
+  const { data: project } = useApiQuery<ProjectDetailDto>(
+    queryKeys.projects.detail(projectId),
+    () => client.api.projects({ id: projectId }).get(),
   );
 
-  const { data: membersData } = useApiQuery<MemberListResponse>(
-    ["projects", projectId, "members"],
+  const { data: membersData } = useApiQuery<MemberListResponseDto>(
+    queryKeys.projects.members(projectId),
     () => client.api.projects({ id: projectId }).members.get({ query: { page: 1, limit: 50 } }),
   );
 
-  const { data, isLoading } = useApiQuery<AnalysisListResponse>(
-    ["analyses", projectId, page, PAGE_SIZE],
+  const { data, isLoading } = useApiQuery<AnalysisListResponseDto>(
+    queryKeys.analyses.list(projectId, page, PAGE_SIZE),
     () =>
       client.api.projects({ id: projectId }).analyses.get({
         query: { page, limit: PAGE_SIZE },
@@ -194,12 +196,12 @@ export function AnalysisListView(props: AnalysisListViewProps): ReactElement {
   return (
     <Box>
       <PageHeader
-        title="Analysis"
+        title="AnalysisDto"
         breadcrumbs={[
           { label: "Overview", href: ROUTES.overview as Route },
           { label: "Projects", href: ROUTES.projects as Route },
           { label: project?.name ?? "Project", href: ROUTES.project(projectId) as Route },
-          { label: "Analysis" },
+          { label: "AnalysisDto" },
         ]}
         actions={
           canEdit ? (
@@ -208,7 +210,7 @@ export function AnalysisListView(props: AnalysisListViewProps): ReactElement {
               startIcon={<AddIcon />}
               onClick={() => setCreateDialogOpen(true)}
             >
-              New Analysis
+              New AnalysisDto
             </Button>
           ) : null
         }
@@ -219,7 +221,7 @@ export function AnalysisListView(props: AnalysisListViewProps): ReactElement {
           icon={<SecurityIcon />}
           title="No analyses yet"
           description="Upload a dependency file or import from GitHub to analyze your project's dependencies."
-          actionLabel={canEdit ? "New Analysis" : undefined}
+          actionLabel={canEdit ? "New AnalysisDto" : undefined}
           onAction={canEdit ? () => setCreateDialogOpen(true) : undefined}
         />
       ) : (

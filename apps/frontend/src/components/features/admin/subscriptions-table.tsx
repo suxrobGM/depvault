@@ -22,7 +22,8 @@ import { SelectField } from "@/components/ui/inputs";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import { PAGINATION_DEFAULTS } from "@/lib/constants";
-import type { AdminSubscriptionListResponse } from "@/types/api";
+import { queryKeys } from "@/lib/query-keys";
+import type { AdminSubscriptionListResponseDto } from "@/types/api";
 
 const STATUS_VARIANT: Record<string, "success" | "error" | "warning" | "default"> = {
   ACTIVE: "success",
@@ -44,8 +45,8 @@ export function SubscriptionsTable(): ReactElement {
   const [planFilter, setPlanFilter] = useState<PlanFilter | "ALL">("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
 
-  const { data, isLoading } = useApiQuery<AdminSubscriptionListResponse>(
-    ["admin-subscriptions", page, pageSize, planFilter, statusFilter],
+  const { data, isLoading } = useApiQuery<AdminSubscriptionListResponseDto>(
+    queryKeys.admin.subscriptionsList(page, pageSize, planFilter, statusFilter),
     () =>
       client.api.admin.subscriptions.get({
         query: {

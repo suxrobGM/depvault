@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { FormTextField } from "@/components/ui/form";
 import { client } from "@/lib/api";
 import { API_BASE_URL, ROUTES } from "@/lib/constants";
-import type { InvitationInfo } from "@/types/api/project";
+import type { InvitationInfoDto } from "@/types/api/project";
 import { registerSchema } from "./schemas";
 
 interface RegisterFormProps {
@@ -22,7 +22,7 @@ export function RegisterForm(props: RegisterFormProps): ReactElement {
 
   const [serverError, setServerError] = useState<string | null>(null);
   const [registered, setRegistered] = useState(false);
-  const [invitationInfo, setInvitationInfo] = useState<InvitationInfo | null>(null);
+  const [invitationInfo, setInvitationInfo] = useState<InvitationInfoDto | null>(null);
 
   const invitedEmail = invitationInfo?.email;
 

@@ -19,13 +19,14 @@ import {
 import { useRouter } from "next/navigation";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
-import type { Member } from "@/types/api/project";
+import { queryKeys } from "@/lib/query-keys";
+import type { MemberDto } from "@/types/api/project";
 
 interface TransferOwnershipDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
-  members: Member[];
+  members: MemberDto[];
 }
 
 export function TransferOwnershipDialog(props: TransferOwnershipDialogProps): ReactElement {
@@ -36,10 +37,7 @@ export function TransferOwnershipDialog(props: TransferOwnershipDialogProps): Re
   const mutation = useApiMutation(
     (vars: { newOwnerId: string }) => client.api.projects({ id: projectId }).transfer.post(vars),
     {
-      invalidateKeys: [
-        ["projects", projectId],
-        ["projects", projectId, "members"],
-      ],
+      invalidateKeys: [queryKeys.projects.detail(projectId), queryKeys.projects.members(projectId)],
       successMessage: "Ownership transferred",
       onSuccess: () => {
         handleClose();

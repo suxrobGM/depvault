@@ -19,13 +19,14 @@ import { z } from "zod/v4";
 import { FormSelectField, FormTextField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
-import type { PatternResponse } from "@/types/api/secret-scan";
+import { queryKeys } from "@/lib/query-keys";
+import type { PatternDto } from "@/types/api/secret-scan";
 
 interface CreatePatternDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
-  editingPattern: PatternResponse | null;
+  editingPattern: PatternDto | null;
 }
 
 const patternSchema = z.object({
@@ -47,23 +48,23 @@ export function CreatePatternDialog(props: CreatePatternDialogProps): ReactEleme
 
   const isEdit = !!editingPattern;
 
-  const createMutation = useApiMutation<PatternResponse, z.infer<typeof patternSchema>>(
+  const createMutation = useApiMutation<PatternDto, z.infer<typeof patternSchema>>(
     (values) => client.api.projects({ id: projectId })["scan-patterns"].post(values),
     {
-      invalidateKeys: [["scan-patterns", projectId]],
+      invalidateKeys: [queryKeys.scanning.patterns(projectId)],
       successMessage: "Pattern created",
       onSuccess: () => onClose(),
     },
   );
 
-  const updateMutation = useApiMutation<PatternResponse, z.infer<typeof patternSchema>>(
+  const updateMutation = useApiMutation<PatternDto, z.infer<typeof patternSchema>>(
     (values) =>
       client.api
         .projects({ id: projectId })
         ["scan-patterns"]({ patternId: editingPattern?.id ?? "" })
         .put(values),
     {
-      invalidateKeys: [["scan-patterns", projectId]],
+      invalidateKeys: [queryKeys.scanning.patterns(projectId)],
       successMessage: "Pattern updated",
       onSuccess: () => onClose(),
     },

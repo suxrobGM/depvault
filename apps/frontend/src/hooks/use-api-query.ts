@@ -18,7 +18,7 @@ interface EdenError extends Error {
  * Wraps `useQuery` with Eden Treaty response unwrapping and optional error toast via `errorMessage`.
  */
 export function useApiQuery<T>(
-  queryKey: unknown[],
+  queryKey: readonly unknown[],
   queryFn: QueryFn<T>,
   options?: UseApiQueryOptions<T>,
 ) {

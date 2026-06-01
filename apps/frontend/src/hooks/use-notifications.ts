@@ -1,6 +1,7 @@
 "use client";
 
 import { client } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 import type { NotificationType } from "@/types/api/notification";
 import { useApiMutation } from "./use-api-mutation";
 import { useApiQuery } from "./use-api-query";
@@ -16,7 +17,7 @@ interface NotificationFilters {
  * Fetches notifications with optional filtering by type and read status, and supports pagination.
  */
 export function useNotifications(filters?: NotificationFilters) {
-  return useApiQuery(["notifications", "list", filters], () =>
+  return useApiQuery(queryKeys.notifications.list(filters), () =>
     client.api.notifications.get({
       query: {
         page: filters?.page ?? 1,
@@ -34,7 +35,7 @@ export function useNotifications(filters?: NotificationFilters) {
  */
 export function useUnreadCount() {
   return useApiQuery(
-    ["notifications", "unread-count"],
+    queryKeys.notifications.unreadCount(),
     () => client.api.notifications["unread-count"].get(),
     { refetchInterval: 45_000, staleTime: 30_000 },
   );
@@ -46,7 +47,7 @@ export function useUnreadCount() {
 export function useMarkRead() {
   return useApiMutation(
     (notificationId: string) => client.api.notifications({ notificationId }).read.patch(),
-    { invalidateKeys: [["notifications"]] },
+    { invalidateKeys: [queryKeys.notifications.all] },
   );
 }
 
@@ -55,7 +56,7 @@ export function useMarkRead() {
  */
 export function useMarkAllRead() {
   return useApiMutation(() => client.api.notifications["read-all"].patch(), {
-    invalidateKeys: [["notifications"]],
+    invalidateKeys: [queryKeys.notifications.all],
   });
 }
 
@@ -65,6 +66,6 @@ export function useMarkAllRead() {
 export function useDeleteNotification() {
   return useApiMutation(
     (notificationId: string) => client.api.notifications({ notificationId }).delete(),
-    { invalidateKeys: [["notifications"]] },
+    { invalidateKeys: [queryKeys.notifications.all] },
   );
 }

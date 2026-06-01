@@ -16,7 +16,8 @@ import { LinkButton } from "@/components/ui/inputs";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import type { AnalysisListResponse } from "@/types/api/analysis";
+import { queryKeys } from "@/lib/query-keys";
+import type { AnalysisListResponseDto } from "@/types/api/analysis";
 import { CreateAnalysisDialog } from "./create-analysis-dialog";
 import { getEcosystemLabel, getHealthColor } from "./utils";
 
@@ -29,7 +30,7 @@ export function AnalysisTab(props: AnalysisTabProps): ReactElement {
   const { projectId, canEdit } = props;
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
-  const { data } = useApiQuery<AnalysisListResponse>(["analyses", projectId, 1], () =>
+  const { data } = useApiQuery<AnalysisListResponseDto>(queryKeys.analyses.preview(projectId), () =>
     client.api.projects({ id: projectId }).analyses.get({
       query: { page: 1, limit: 3 },
     }),

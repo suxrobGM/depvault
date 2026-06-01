@@ -19,11 +19,12 @@ import { useApiQuery } from "@/hooks/use-api-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useConfirm } from "@/hooks/use-confirm";
 import { client } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 import type {
-  Invitation,
-  InvitationListResponse,
-  Member,
-  MemberListResponse,
+  InvitationDto,
+  InvitationListResponseDto,
+  MemberDto,
+  MemberListResponseDto,
 } from "@/types/api/project";
 import { InviteMemberDialog } from "./invite-member-dialog";
 import { TransferOwnershipDialog } from "./transfer-ownership-dialog";
@@ -46,13 +47,13 @@ export function MembersTab(props: MembersTabProps): ReactElement {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
 
-  const { data, isLoading } = useApiQuery<MemberListResponse>(
-    ["projects", projectId, "members"],
+  const { data, isLoading } = useApiQuery<MemberListResponseDto>(
+    queryKeys.projects.members(projectId),
     () => client.api.projects({ id: projectId }).members.get({ query: { page: 1, limit: 50 } }),
   );
 
-  const { data: invitationsData } = useApiQuery<InvitationListResponse>(
-    ["projects", projectId, "invitations"],
+  const { data: invitationsData } = useApiQuery<InvitationListResponseDto>(
+    queryKeys.projects.invitations(projectId),
     () => client.api.projects({ id: projectId }).invitations.get({ query: { page: 1, limit: 50 } }),
   );
 
@@ -65,7 +66,7 @@ export function MembersTab(props: MembersTabProps): ReactElement {
         .members({ memberId: vars.memberId })
         .put({ role: vars.role }),
     {
-      invalidateKeys: [["projects", projectId, "members"]],
+      invalidateKeys: [queryKeys.projects.members(projectId)],
       successMessage: "Role updated",
     },
   );
@@ -74,8 +75,8 @@ export function MembersTab(props: MembersTabProps): ReactElement {
     (vars: { memberId: string }) =>
       client.api.projects({ id: projectId }).members({ memberId: vars.memberId }).delete(),
     {
-      invalidateKeys: [["projects", projectId, "members"]],
-      successMessage: "Member removed",
+      invalidateKeys: [queryKeys.projects.members(projectId)],
+      successMessage: "MemberDto removed",
     },
   );
 
@@ -86,8 +87,8 @@ export function MembersTab(props: MembersTabProps): ReactElement {
         .invitations({ invitationId: vars.invitationId })
         .resend.post(),
     {
-      invalidateKeys: [["projects", projectId, "invitations"]],
-      successMessage: "Invitation resent",
+      invalidateKeys: [queryKeys.projects.invitations(projectId)],
+      successMessage: "InvitationDto resent",
     },
   );
 
@@ -98,14 +99,14 @@ export function MembersTab(props: MembersTabProps): ReactElement {
         .invitations({ invitationId: vars.invitationId })
         .delete(),
     {
-      invalidateKeys: [["projects", projectId, "invitations"]],
-      successMessage: "Invitation cancelled",
+      invalidateKeys: [queryKeys.projects.invitations(projectId)],
+      successMessage: "InvitationDto cancelled",
     },
   );
 
-  const handleRemove = async (member: Member) => {
+  const handleRemove = async (member: MemberDto) => {
     const ok = await confirm({
-      title: "Remove Member",
+      title: "Remove MemberDto",
       description: `Are you sure you want to remove ${member.user.email} from this project?`,
       confirmLabel: "Remove",
       destructive: true,
@@ -115,11 +116,11 @@ export function MembersTab(props: MembersTabProps): ReactElement {
     }
   };
 
-  const handleCancelInvitation = async (invitation: Invitation) => {
+  const handleCancelInvitation = async (invitation: InvitationDto) => {
     const ok = await confirm({
-      title: "Cancel Invitation",
+      title: "Cancel InvitationDto",
       description: `Are you sure you want to cancel the invitation to ${invitation.email}?`,
-      confirmLabel: "Cancel Invitation",
+      confirmLabel: "Cancel InvitationDto",
       destructive: true,
     });
     if (ok) {
@@ -144,7 +145,7 @@ export function MembersTab(props: MembersTabProps): ReactElement {
             startIcon={<PersonAddIcon />}
             onClick={() => setInviteOpen(true)}
           >
-            Invite Member
+            Invite MemberDto
           </Button>
           {nonOwnerMembers.length > 0 && (
             <Button

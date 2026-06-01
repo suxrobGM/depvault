@@ -10,11 +10,11 @@ import {
 import { CardContent, Grid, Typography } from "@mui/material";
 import { IconBox, Surface, type SurfaceAccent } from "@/components/ui/cards";
 import { StatusBadge } from "@/components/ui/data-display";
-import type { Dependency } from "@/types/api/analysis";
+import type { DependencyDto } from "@/types/api/analysis";
 import { getHealthColor } from "./utils";
 
 interface AnalysisSummaryStatsProps {
-  dependencies: Dependency[];
+  dependencies: DependencyDto[];
   healthScore: number | null;
 }
 

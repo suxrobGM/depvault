@@ -1,5 +1,5 @@
 import type { client } from "@/lib/api";
 import type { Data } from "./utils";
 
-export type AuthResponse = Data<(typeof client)["api"]["auth"]["login"]["post"]>;
-export type AuthUser = AuthResponse["user"];
+export type AuthResponseDto = Data<typeof client.api.auth.login.post>;
+export type AuthUserDto = AuthResponseDto["user"];

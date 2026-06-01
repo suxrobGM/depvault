@@ -20,7 +20,8 @@ import { useConfirm } from "@/hooks/use-confirm";
 import { useSubscription } from "@/hooks/use-subscription";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import type { PortalSessionResponse } from "@/types/api";
+import { queryKeys } from "@/lib/query-keys";
+import type { PortalSessionDto } from "@/types/api";
 
 interface UsageMeterProps {
   label: string;
@@ -69,7 +70,7 @@ export function BillingOverview(): ReactElement {
   const { subscription, plan, limits, usage, isLoading } = useSubscription();
   const confirm = useConfirm();
 
-  const portalMutation = useApiMutation<PortalSessionResponse>(
+  const portalMutation = useApiMutation<PortalSessionDto>(
     () =>
       client.api.subscription.portal.post({
         returnUrl: ROUTES.billing,
@@ -87,7 +88,7 @@ export function BillingOverview(): ReactElement {
     {
       successMessage: "Subscription will cancel at the end of the billing period",
       errorMessage: "Failed to cancel subscription",
-      invalidateKeys: [["subscription"]],
+      invalidateKeys: [queryKeys.subscription.current()],
     },
   );
 
@@ -96,7 +97,7 @@ export function BillingOverview(): ReactElement {
     {
       successMessage: "Subscription cancellation reversed",
       errorMessage: "Failed to resume subscription",
-      invalidateKeys: [["subscription"]],
+      invalidateKeys: [queryKeys.subscription.current()],
     },
   );
 

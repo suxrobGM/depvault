@@ -21,7 +21,11 @@ import {
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
-import type { EnvVariableVersion, EnvVariableVersionListResponse } from "@/types/api/env-variable";
+import { queryKeys } from "@/lib/query-keys";
+import type {
+  EnvVariableVersionDto,
+  EnvVariableVersionListResponseDto,
+} from "@/types/api/env-variable";
 import { formatDate } from "@/utils/formatters";
 import { EncryptedValue } from "../encrypted-value";
 
@@ -38,8 +42,8 @@ interface VaultVariableHistoryProps {
 export function VariableHistory(props: VaultVariableHistoryProps): ReactElement {
   const { projectId, vaultId, variableId, canEdit, colSpan, open, onClose } = props;
 
-  const { data, isLoading } = useApiQuery<EnvVariableVersionListResponse>(
-    ["env-variable-versions", projectId, variableId],
+  const { data, isLoading } = useApiQuery<EnvVariableVersionListResponseDto>(
+    queryKeys.vaults.variableVersions(projectId, variableId),
     () =>
       client.api
         .projects({ id: projectId })
@@ -59,8 +63,8 @@ export function VariableHistory(props: VaultVariableHistoryProps): ReactElement 
         .rollback.post(),
     {
       invalidateKeys: [
-        ["vault-variables", projectId, vaultId],
-        ["env-variable-versions", projectId, variableId],
+        queryKeys.vaults.variables(projectId, vaultId),
+        queryKeys.vaults.variableVersions(projectId, variableId),
       ],
       successMessage: "Variable rolled back successfully",
     },
@@ -107,7 +111,7 @@ export function VariableHistory(props: VaultVariableHistoryProps): ReactElement 
 
 interface VersionTableProps {
   projectId: string;
-  versions: EnvVariableVersion[];
+  versions: EnvVariableVersionDto[];
   canEdit: boolean;
   rollbackPending: boolean;
   onRollback: (versionId: string) => void;

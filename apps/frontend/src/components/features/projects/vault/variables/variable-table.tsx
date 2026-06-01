@@ -23,16 +23,17 @@ import { SkeletonList } from "@/components/ui/data-display";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useConfirm } from "@/hooks/use-confirm";
 import { client } from "@/lib/api";
-import type { EnvVariable } from "@/types/api/env-variable";
+import { queryKeys } from "@/lib/query-keys";
+import type { EnvVariableDto } from "@/types/api/env-variable";
 import { VariableRow } from "./variable-row";
 
 interface VaultVariableTableProps {
   projectId: string;
   vaultId: string;
-  variables: EnvVariable[];
+  variables: EnvVariableDto[];
   isLoading?: boolean;
   canEdit?: boolean;
-  onEditVariable?: (variable: EnvVariable) => void;
+  onEditVariable?: (variable: EnvVariableDto) => void;
 }
 
 export function VariableTable(props: VaultVariableTableProps): ReactElement {
@@ -74,7 +75,7 @@ export function VariableTable(props: VaultVariableTableProps): ReactElement {
         .vaults({ vaultId })
         .variables.batch.delete({ variableIds: ids }),
     {
-      invalidateKeys: [["vault-variables", projectId, vaultId]],
+      invalidateKeys: [queryKeys.vaults.variables(projectId, vaultId)],
       successMessage: "Variables deleted",
       onSuccess: () => setSelectedIds(new Set()),
     },
@@ -232,7 +233,7 @@ export function VariableTable(props: VaultVariableTableProps): ReactElement {
   );
 }
 
-function filterVariables(variables: EnvVariable[], search: string): EnvVariable[] {
+function filterVariables(variables: EnvVariableDto[], search: string): EnvVariableDto[] {
   const q = search.trim().toLowerCase();
   if (!q) {
     return variables;

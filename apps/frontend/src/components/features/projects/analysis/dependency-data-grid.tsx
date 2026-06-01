@@ -5,12 +5,12 @@ import { Search as SearchIcon } from "@mui/icons-material";
 import { Box, InputAdornment, Stack, TextField, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { PaginationBar, SortableHeader } from "@/components/ui/data-display";
-import type { Dependency } from "@/types/api/analysis";
+import type { DependencyDto } from "@/types/api/analysis";
 import { DependencyRow } from "./dependency-row";
 import { STATUS_ORDER } from "./utils";
 
 interface DependencyDataGridProps {
-  dependencies: Dependency[];
+  dependencies: DependencyDto[];
   ecosystem?: string;
 }
 

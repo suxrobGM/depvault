@@ -32,8 +32,9 @@ import { useApiQuery } from "@/hooks/use-api-query";
 import { useAuth } from "@/hooks/use-auth";
 import { client } from "@/lib/api";
 import { API_BASE_URL, ROUTES } from "@/lib/constants";
-import type { LicenseComplianceSummary } from "@/types/api/license-rule";
-import type { MemberListResponse, ProjectResponse } from "@/types/api/project";
+import { queryKeys } from "@/lib/query-keys";
+import type { LicenseComplianceSummaryDto } from "@/types/api/license-rule";
+import type { MemberListResponseDto, ProjectDetailDto } from "@/types/api/project";
 import { ComplianceSummaryStats } from "./compliance-summary-stats";
 import { LicenseRulesTable } from "./license-rules-table";
 
@@ -57,17 +58,18 @@ export function LicenseTab(props: LicenseTabProps): ReactElement {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [page, setPage] = useState(1);
 
-  const { data: project } = useApiQuery<ProjectResponse>(["projects", projectId], () =>
-    client.api.projects({ id: projectId }).get(),
+  const { data: project } = useApiQuery<ProjectDetailDto>(
+    queryKeys.projects.detail(projectId),
+    () => client.api.projects({ id: projectId }).get(),
   );
 
-  const { data: membersData } = useApiQuery<MemberListResponse>(
-    ["projects", projectId, "members"],
+  const { data: membersData } = useApiQuery<MemberListResponseDto>(
+    queryKeys.projects.members(projectId),
     () => client.api.projects({ id: projectId }).members.get({ query: { page: 1, limit: 50 } }),
   );
 
-  const { data: compliance, isLoading } = useApiQuery<LicenseComplianceSummary>(
-    ["license-compliance", projectId, page, PAGE_SIZE, search],
+  const { data: compliance, isLoading } = useApiQuery<LicenseComplianceSummaryDto>(
+    queryKeys.licenses.compliance(projectId, page, PAGE_SIZE, search),
     () =>
       client.api.projects({ id: projectId })["license-rules"].compliance.get({
         query: { page, limit: PAGE_SIZE, ...(search && { search }) },

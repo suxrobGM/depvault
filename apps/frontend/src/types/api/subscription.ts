@@ -1,22 +1,18 @@
 import type { client } from "@/lib/api";
-import type { Data } from "./utils";
+import type { Body, Data } from "./utils";
 
-export type SubscriptionResponse = Data<(typeof client)["api"]["subscription"]["get"]>;
-export type SubscriptionLimits = SubscriptionResponse["limits"];
-export type SubscriptionUsage = SubscriptionResponse["usage"];
-export type SubscriptionPlan = SubscriptionResponse["plan"];
+type Subscription = typeof client.api.subscription;
 
-export type PlansResponse = Data<(typeof client)["api"]["subscription"]["plans"]["get"]>;
-export type PlanInfo = PlansResponse[number];
+export type SubscriptionDto = Data<Subscription["get"]>;
+export type SubscriptionLimitsDto = SubscriptionDto["limits"];
+export type SubscriptionUsageDto = SubscriptionDto["usage"];
+export type SubscriptionPlan = SubscriptionDto["plan"];
 
-export type CheckoutSessionResponse = Data<
-  (typeof client)["api"]["subscription"]["checkout"]["post"]
->;
-export type CreateCheckoutBody = Parameters<
-  (typeof client)["api"]["subscription"]["checkout"]["post"]
->[0];
+export type PlansResponseDto = Data<Subscription["plans"]["get"]>;
+export type PlanInfoDto = PlansResponseDto[number];
 
-export type PortalSessionResponse = Data<(typeof client)["api"]["subscription"]["portal"]["post"]>;
-export type CreatePortalBody = Parameters<
-  (typeof client)["api"]["subscription"]["portal"]["post"]
->[0];
+export type CheckoutSessionDto = Data<Subscription["checkout"]["post"]>;
+export type CreateCheckoutBody = Body<Subscription["checkout"]["post"]>;
+
+export type PortalSessionDto = Data<Subscription["portal"]["post"]>;
+export type CreatePortalBody = Body<Subscription["portal"]["post"]>;

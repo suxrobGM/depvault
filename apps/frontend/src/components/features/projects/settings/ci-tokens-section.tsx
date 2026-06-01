@@ -25,7 +25,8 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useConfirm } from "@/hooks/use-confirm";
 import { client } from "@/lib/api";
-import type { CiToken, CiTokenListResponse } from "@/types/api/ci-token";
+import { queryKeys } from "@/lib/query-keys";
+import type { CiTokenDto, CiTokenListResponseDto } from "@/types/api/ci-token";
 import { formatDateTime } from "@/utils/formatters";
 import { CiTokenUsageSnippets } from "./ci-token-usage-snippets";
 import { CreateCiTokenDialog } from "./create-ci-token-dialog";
@@ -35,7 +36,10 @@ interface CiTokensSectionProps {
   canEdit: boolean;
 }
 
-function getTokenStatus(token: CiToken): { label: string; color: "success" | "error" | "warning" } {
+function getTokenStatus(token: CiTokenDto): {
+  label: string;
+  color: "success" | "error" | "warning";
+} {
   if (new Date(token.expiresAt) < new Date()) {
     return { label: "Expired", color: "warning" };
   }
@@ -49,14 +53,16 @@ export function CiTokensSection(props: CiTokensSectionProps): ReactElement {
   const [createOpen, setCreateOpen] = useState(false);
   const [snippetsOpen, setSnippetsOpen] = useState(false);
 
-  const { data } = useApiQuery<CiTokenListResponse>(["ci-tokens", projectId], () =>
-    client.api.projects({ id: projectId })["ci-tokens"].get({ query: { page: 1, limit: 100 } }),
+  const { data } = useApiQuery<CiTokenListResponseDto>(
+    queryKeys.ciTokens.byProject(projectId),
+    () =>
+      client.api.projects({ id: projectId })["ci-tokens"].get({ query: { page: 1, limit: 100 } }),
   );
 
   const revokeMutation = useApiMutation(
     (tokenId: string) => client.api.projects({ id: projectId })["ci-tokens"]({ tokenId }).delete(),
     {
-      invalidateKeys: [["ci-tokens", projectId]],
+      invalidateKeys: [queryKeys.ciTokens.byProject(projectId)],
       successMessage: "CI token revoked",
       errorMessage: "Failed to revoke token",
     },
@@ -64,7 +70,7 @@ export function CiTokensSection(props: CiTokensSectionProps): ReactElement {
 
   const tokens = data?.items ?? [];
 
-  const revokeToken = async (token: CiToken) => {
+  const revokeToken = async (token: CiTokenDto) => {
     const ok = await confirm({
       title: "Revoke CI Token",
       description: `Are you sure you want to revoke "${token.name}"? Any pipelines using this token will immediately lose access.`,

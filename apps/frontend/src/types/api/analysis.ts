@@ -1,15 +1,15 @@
 import type { client } from "@/lib/api";
-import type { Data } from "./utils";
+import type { Body, Data } from "./utils";
 
-type ProjectById = ReturnType<(typeof client)["api"]["projects"]>;
+type ProjectById = ReturnType<typeof client.api.projects>;
 
-export type AnalysisListResponse = Data<ProjectById["analyses"]["get"]>;
-export type Analysis = AnalysisListResponse["items"][number];
+export type AnalysisListResponseDto = Data<ProjectById["analyses"]["get"]>;
+export type AnalysisDto = AnalysisListResponseDto["items"][number];
 
 type AnalysisById = ReturnType<ProjectById["analyses"]>;
 
-export type AnalysisDetailResponse = Data<AnalysisById["get"]>;
-export type Dependency = AnalysisDetailResponse["dependencies"][number];
-export type Vulnerability = Dependency["vulnerabilities"][number];
+export type AnalysisDetailDto = Data<AnalysisById["get"]>;
+export type DependencyDto = AnalysisDetailDto["dependencies"][number];
+export type VulnerabilityDto = DependencyDto["vulnerabilities"][number];
 
-export type CreateAnalysisBody = Parameters<ProjectById["analyses"]["post"]>[0];
+export type CreateAnalysisBody = Body<ProjectById["analyses"]["post"]>;

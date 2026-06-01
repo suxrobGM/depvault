@@ -30,19 +30,20 @@ import { useApiQuery } from "@/hooks/use-api-query";
 import { useConfirm } from "@/hooks/use-confirm";
 import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 import type {
-  SecretFile,
-  SecretFileVersion,
-  SecretFileVersionListResponse,
+  SecretFileDto,
+  SecretFileVersionDto,
+  SecretFileVersionListResponseDto,
 } from "@/types/api/secret-file";
 import { downloadFile } from "@/utils/download-file";
 import { formatBytes, formatDate } from "@/utils/formatters";
 
 export interface SecretFileRowProps {
   projectId: string;
-  file: SecretFile;
+  file: SecretFileDto;
   canEdit: boolean;
-  onEdit: (file: SecretFile) => void;
+  onEdit: (file: SecretFileDto) => void;
 }
 
 export function SecretFileRow(props: SecretFileRowProps): ReactElement {
@@ -57,8 +58,8 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
   const [downloadingVersionId, setDownloadingVersionId] = useState<string | null>(null);
 
   const { data: versionsData, isLoading: versionsLoading } =
-    useApiQuery<SecretFileVersionListResponse>(
-      ["secret-file-versions", projectId, file.id],
+    useApiQuery<SecretFileVersionListResponseDto>(
+      queryKeys.secretFiles.versions(projectId, file.id),
       () => client.api.projects({ id: projectId }).secrets({ fileId: file.id }).versions.get(),
       { enabled: historyOpen },
     );
@@ -66,7 +67,7 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
   const deleteMutation = useApiMutation(
     () => client.api.projects({ id: projectId }).secrets({ fileId: file.id }).delete(),
     {
-      invalidateKeys: [["secret-files", projectId]],
+      invalidateKeys: [queryKeys.secretFiles.byProject(projectId)],
       successMessage: "File deleted",
     },
   );
@@ -80,8 +81,8 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
         .post(),
     {
       invalidateKeys: [
-        ["secret-files", projectId],
-        ["secret-file-versions", projectId, file.id],
+        queryKeys.secretFiles.byProject(projectId),
+        queryKeys.secretFiles.versions(projectId, file.id),
       ],
       successMessage: "File rolled back successfully",
     },
@@ -134,7 +135,7 @@ export function SecretFileRow(props: SecretFileRowProps): ReactElement {
     if (ok) deleteMutation.mutate();
   };
 
-  const versions: SecretFileVersion[] = versionsData?.items ?? [];
+  const versions: SecretFileVersionDto[] = versionsData?.items ?? [];
 
   return (
     <>

@@ -20,7 +20,7 @@ import { CopyButton, FileUploadButton, type FileUploadResult } from "@/component
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useToast } from "@/hooks/use-toast";
 import { client } from "@/lib/api";
-import type { ConvertResult } from "@/types/api/convert";
+import type { ConvertResultDto } from "@/types/api/convert";
 import { downloadFile } from "@/utils/download-file";
 import { CONFIG_FORMATS, type ConfigFormat } from "./schemas";
 
@@ -38,7 +38,7 @@ export function ConverterView(): ReactElement {
   const [content, setContent] = useState("");
   const [fromFormat, setFromFormat] = useState<ConfigFormat>("env");
   const [toFormat, setToFormat] = useState<ConfigFormat>("appsettings.json");
-  const [result, setResult] = useState<ConvertResult | null>(null);
+  const [result, setResult] = useState<ConvertResultDto | null>(null);
 
   const mutation = useApiMutation(
     (values: { content: string; fromFormat: ConfigFormat; toFormat: ConfigFormat }) =>

@@ -11,8 +11,9 @@ import { Box, CardContent, CardHeader, Grid, Stack, Typography } from "@mui/mate
 import { IconBox, Surface } from "@/components/ui/cards";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
-import type { AnalysisListResponse } from "@/types/api/analysis";
-import type { MemberListResponse } from "@/types/api/project";
+import { queryKeys } from "@/lib/query-keys";
+import type { AnalysisListResponseDto } from "@/types/api/analysis";
+import type { MemberListResponseDto } from "@/types/api/project";
 
 interface QuickStatsCardProps {
   projectId: string;
@@ -28,13 +29,13 @@ interface StatsItem {
 export function QuickStatsCard(props: QuickStatsCardProps): ReactElement {
   const { projectId } = props;
 
-  const { data: membersData } = useApiQuery<MemberListResponse>(
-    ["projects", projectId, "members"],
+  const { data: membersData } = useApiQuery<MemberListResponseDto>(
+    queryKeys.projects.members(projectId),
     () => client.api.projects({ id: projectId }).members.get({ query: { page: 1, limit: 50 } }),
   );
 
-  const { data: analysisData } = useApiQuery<AnalysisListResponse>(
-    ["analyses", projectId, "overview"],
+  const { data: analysisData } = useApiQuery<AnalysisListResponseDto>(
+    queryKeys.analyses.overview(projectId),
     () => client.api.projects({ id: projectId }).analyses.get({ query: { page: 1, limit: 100 } }),
   );
 

@@ -11,7 +11,8 @@ import { Box, CardContent, Grid, Skeleton, Stack, Typography } from "@mui/materi
 import { IconBox, Surface, type SurfaceAccent } from "@/components/ui/cards";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
-import type { ProjectStatsResponse } from "@/types/api/project";
+import { queryKeys } from "@/lib/query-keys";
+import type { ProjectStatsDto } from "@/types/api/project";
 
 interface StatCard {
   icon: ReactNode;
@@ -21,7 +22,7 @@ interface StatCard {
 }
 
 export function Stats(): ReactElement {
-  const { data, isLoading } = useApiQuery<ProjectStatsResponse>(["project-stats"], () =>
+  const { data, isLoading } = useApiQuery<ProjectStatsDto>(queryKeys.projects.stats(), () =>
     client.api.projects.stats.get(),
   );
 

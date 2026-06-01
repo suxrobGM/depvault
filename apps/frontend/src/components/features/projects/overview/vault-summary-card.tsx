@@ -8,8 +8,9 @@ import { LinkButton } from "@/components/ui/inputs";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import type { SecretFileListResponse } from "@/types/api/secret-file";
-import type { VaultListResponse } from "@/types/api/vault";
+import { queryKeys } from "@/lib/query-keys";
+import type { SecretFileListResponseDto } from "@/types/api/secret-file";
+import type { VaultListResponseDto } from "@/types/api/vault";
 
 interface VaultSummaryCardProps {
   projectId: string;
@@ -18,12 +19,13 @@ interface VaultSummaryCardProps {
 export function VaultSummaryCard(props: VaultSummaryCardProps): ReactElement {
   const { projectId } = props;
 
-  const { data: vaults } = useApiQuery<VaultListResponse>(["vaults", projectId, "overview"], () =>
-    client.api.projects({ id: projectId }).vaults.get(),
+  const { data: vaults } = useApiQuery<VaultListResponseDto>(
+    queryKeys.vaults.overview(projectId),
+    () => client.api.projects({ id: projectId }).vaults.get(),
   );
 
-  const { data: secretFilesData } = useApiQuery<SecretFileListResponse>(
-    ["secret-files", projectId, "overview"],
+  const { data: secretFilesData } = useApiQuery<SecretFileListResponseDto>(
+    queryKeys.secretFiles.overview(projectId),
     () => client.api.projects({ id: projectId }).secrets.get({ query: { page: 1, limit: 1 } }),
   );
 

@@ -24,9 +24,10 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useConfirm } from "@/hooks/use-confirm";
 import { client } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 import type {
-  SharedSecretAuditItem,
-  SharedSecretAuditListResponse,
+  SharedSecretAuditItemDto,
+  SharedSecretAuditListResponseDto,
 } from "@/types/api/shared-secret";
 import { formatDate } from "@/utils/formatters";
 
@@ -46,8 +47,8 @@ export function SharedLinksDialog(props: SharedLinksDialogProps): ReactElement {
   const { open, onClose, projectId } = props;
   const confirm = useConfirm();
 
-  const { data, isLoading } = useApiQuery<SharedSecretAuditListResponse>(
-    ["shared-secrets", projectId],
+  const { data, isLoading } = useApiQuery<SharedSecretAuditListResponseDto>(
+    queryKeys.sharedSecrets.byProject(projectId),
     () => client.api.projects({ id: projectId })["secrets"]["shared"].get(),
     { enabled: open },
   );
@@ -56,12 +57,12 @@ export function SharedLinksDialog(props: SharedLinksDialogProps): ReactElement {
     (secretId: string) =>
       client.api.projects({ id: projectId })["secrets"]["shared"]({ secretId }).delete(),
     {
-      invalidateKeys: [["shared-secrets", projectId]],
+      invalidateKeys: [queryKeys.sharedSecrets.byProject(projectId)],
       successMessage: "Link revoked",
     },
   );
 
-  const handleRevoke = async (item: SharedSecretAuditItem) => {
+  const handleRevoke = async (item: SharedSecretAuditItemDto) => {
     const ok = await confirm({
       title: "Revoke Share Link",
       description:

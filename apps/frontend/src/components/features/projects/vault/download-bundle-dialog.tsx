@@ -24,8 +24,9 @@ import { useApiQuery } from "@/hooks/use-api-query";
 import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
 import { decrypt, decryptBinary } from "@/lib/crypto";
-import type { EnvBundleResult, EnvVariable } from "@/types/api/env-variable";
-import type { SecretFileListResponse } from "@/types/api/secret-file";
+import { queryKeys } from "@/lib/query-keys";
+import type { EnvBundleResultDto, EnvVariableDto } from "@/types/api/env-variable";
+import type { SecretFileListResponseDto } from "@/types/api/secret-file";
 import { downloadFile } from "@/utils/download-file";
 
 interface DownloadBundleDialogProps {
@@ -33,7 +34,7 @@ interface DownloadBundleDialogProps {
   onClose: () => void;
   projectId: string;
   vaultId: string;
-  variables: EnvVariable[];
+  variables: EnvVariableDto[];
 }
 
 export function DownloadBundleDialog(props: DownloadBundleDialogProps): ReactElement {
@@ -47,8 +48,8 @@ export function DownloadBundleDialog(props: DownloadBundleDialogProps): ReactEle
     defaultValues: { format: "env" as ConfigFormat },
   });
 
-  const { data: secretFilesData } = useApiQuery<SecretFileListResponse>(
-    ["secret-files", projectId, "bundle"],
+  const { data: secretFilesData } = useApiQuery<SecretFileListResponseDto>(
+    queryKeys.secretFiles.bundle(projectId),
     () =>
       client.api.projects({ id: projectId }).secrets.get({
         query: { page: 1, limit: 100 },
@@ -63,7 +64,7 @@ export function DownloadBundleDialog(props: DownloadBundleDialogProps): ReactEle
       client.api.projects({ id: projectId }).vaults({ vaultId }).bundle.post(body),
     {
       errorMessage: "Failed to download bundle",
-      onSuccess: async (result: EnvBundleResult) => {
+      onSuccess: async (result: EnvBundleResultDto) => {
         const dek = await getProjectDEK(projectId);
         const format = formatForm.getFieldValue("format") as ConfigFormat;
 

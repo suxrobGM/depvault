@@ -17,6 +17,7 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
 import { encrypt } from "@/lib/crypto";
+import { queryKeys } from "@/lib/query-keys";
 import { createVariableSchema } from "../schemas";
 
 interface CreateVariableDialogProps {
@@ -41,8 +42,8 @@ export function CreateVariableDialog(props: CreateVariableDialogProps): ReactEle
     }) => client.api.projects({ id: projectId }).vaults({ vaultId }).variables.post(values),
     {
       invalidateKeys: [
-        ["vault-variables", projectId, vaultId],
-        ["vaults", projectId],
+        queryKeys.vaults.variables(projectId, vaultId),
+        queryKeys.vaults.byProject(projectId),
       ],
       successMessage: "Variable created",
       onSuccess: () => handleClose(),

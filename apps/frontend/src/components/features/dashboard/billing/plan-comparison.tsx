@@ -27,7 +27,8 @@ import { useConfirm } from "@/hooks/use-confirm";
 import { useSubscription } from "@/hooks/use-subscription";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import type { CheckoutSessionResponse, CreateCheckoutBody } from "@/types/api";
+import { queryKeys } from "@/lib/query-keys";
+import type { CheckoutSessionDto, CreateCheckoutBody } from "@/types/api";
 
 interface PlanDef {
   name: string;
@@ -92,7 +93,7 @@ export function PlanComparison(): ReactElement {
   const [checkoutTarget, setCheckoutTarget] = useState<SubscriptionPlanValue | null>(null);
 
   const checkoutMutation = useApiMutation<
-    CheckoutSessionResponse,
+    CheckoutSessionDto,
     Pick<CreateCheckoutBody, "plan" | "promoCode">
   >(
     (variables) =>
@@ -114,7 +115,7 @@ export function PlanComparison(): ReactElement {
     {
       successMessage: "Subscription will cancel at the end of the billing period",
       errorMessage: "Failed to cancel subscription",
-      invalidateKeys: [["subscription"]],
+      invalidateKeys: [queryKeys.subscription.current()],
     },
   );
 

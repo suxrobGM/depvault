@@ -10,12 +10,12 @@ import {
   RotateRight as RotateRightIcon,
 } from "@mui/icons-material";
 import { alpha, Box, ListItemButton, Stack, Typography } from "@mui/material";
-import type { Notification } from "@/types/api";
+import type { NotificationDto } from "@/types/api";
 import { formatRelativeTime } from "@/utils/formatters";
 
 interface NotificationItemProps {
-  notification: Notification;
-  onClick?: (notification: Notification) => void;
+  notification: NotificationDto;
+  onClick?: (notification: NotificationDto) => void;
 }
 
 const TYPE_CONFIG: Record<string, { icon: ReactElement; color: string }> = {

@@ -4,7 +4,7 @@ import type { ReactElement } from "react";
 import { Box, Chip, Stack, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { UserAvatar } from "@/components/ui/data-display";
-import type { AuditLogEntry } from "@/types/api/audit-log";
+import type { AuditLogEntryDto } from "@/types/api/audit-log";
 import { formatRelativeTime } from "@/utils/formatters";
 import {
   ACTIVITY_ACTION_CONFIG,
@@ -14,7 +14,7 @@ import {
 } from "./utils";
 
 interface ActivityLogEntryProps {
-  entry: AuditLogEntry;
+  entry: AuditLogEntryDto;
   index: number;
   isLast: boolean;
   projectName?: string;

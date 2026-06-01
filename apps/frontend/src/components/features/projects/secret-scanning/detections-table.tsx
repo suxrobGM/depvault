@@ -26,11 +26,12 @@ import { EmptyState } from "@/components/ui/feedback";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 import type {
   BatchUpdateDetectionsBody,
-  BatchUpdateDetectionsResponse,
-  DetectionListResponse,
-  DetectionResponse,
+  BatchUpdateDetectionsDto,
+  DetectionDto,
+  DetectionListResponseDto,
 } from "@/types/api/secret-scan";
 import { DetectionTableRow } from "./detection-table-row";
 
@@ -52,13 +53,13 @@ export function DetectionsTable(props: DetectionsTableProps): ReactElement {
   if (statusFilter) query.status = statusFilter;
   if (severityFilter) query.severity = severityFilter;
 
-  const { data, isLoading } = useApiQuery<DetectionListResponse>(
-    ["detections", projectId, page, pageSize, statusFilter, severityFilter],
+  const { data, isLoading } = useApiQuery<DetectionListResponseDto>(
+    queryKeys.scanning.detectionsList(projectId, page, pageSize, statusFilter, severityFilter),
     () => client.api.projects({ id: projectId }).detections.get({ query: query as never }),
     { errorMessage: "Failed to load detections" },
   );
 
-  const updateStatus = useApiMutation<DetectionResponse, { detectionId: string; status: string }>(
+  const updateStatus = useApiMutation<DetectionDto, { detectionId: string; status: string }>(
     (vars) =>
       client.api
         .projects({ id: projectId })
@@ -66,14 +67,14 @@ export function DetectionsTable(props: DetectionsTableProps): ReactElement {
         .patch({ status: vars.status as "RESOLVED" | "FALSE_POSITIVE" }),
     {
       invalidateKeys: [
-        ["detections", projectId],
-        ["scan-summary", projectId],
+        queryKeys.scanning.detections(projectId),
+        queryKeys.scanning.summary(projectId),
       ],
       successMessage: "Detection updated",
     },
   );
 
-  const batchUpdate = useApiMutation<BatchUpdateDetectionsResponse, BatchUpdateDetectionsBody>(
+  const batchUpdate = useApiMutation<BatchUpdateDetectionsDto, BatchUpdateDetectionsBody>(
     (vars) =>
       client.api.projects({ id: projectId }).detections.patch({
         detectionIds: vars.detectionIds,
@@ -81,8 +82,8 @@ export function DetectionsTable(props: DetectionsTableProps): ReactElement {
       }),
     {
       invalidateKeys: [
-        ["detections", projectId],
-        ["scan-summary", projectId],
+        queryKeys.scanning.detections(projectId),
+        queryKeys.scanning.summary(projectId),
       ],
       successMessage: "Detections updated",
       onSuccess: () => setSelectedIds(new Set()),

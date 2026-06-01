@@ -10,14 +10,14 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import type { SecretFile } from "@/types/api/secret-file";
+import type { SecretFileDto } from "@/types/api/secret-file";
 import { SecretFileRow } from "./secret-file-row";
 
 interface SecretFileTableProps {
   projectId: string;
-  files: SecretFile[];
+  files: SecretFileDto[];
   canEdit: boolean;
-  onEdit: (file: SecretFile) => void;
+  onEdit: (file: SecretFileDto) => void;
 }
 
 export function SecretFileTable(props: SecretFileTableProps): ReactElement {

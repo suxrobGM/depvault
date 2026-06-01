@@ -18,16 +18,17 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
 import { encryptBinary } from "@/lib/crypto";
-import type { SecretFile } from "@/types/api/secret-file";
-import type { Vault } from "@/types/api/vault";
+import { queryKeys } from "@/lib/query-keys";
+import type { SecretFileDto } from "@/types/api/secret-file";
+import type { VaultDto } from "@/types/api/vault";
 import { editSecretFileSchema } from "./schemas";
 
 interface EditSecretFileDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
-  file: SecretFile;
-  vaults: Vault[];
+  file: SecretFileDto;
+  vaults: VaultDto[];
 }
 
 export function EditSecretFileDialog(props: EditSecretFileDialogProps): ReactElement {
@@ -41,7 +42,10 @@ export function EditSecretFileDialog(props: EditSecretFileDialogProps): ReactEle
   const metadataMutation = useApiMutation(
     (values: { name?: string; description?: string; vaultId?: string }) =>
       client.api.projects({ id: projectId }).secrets({ fileId: file.id }).put(values),
-    { invalidateKeys: [["secret-files", projectId]], successMessage: "File updated" },
+    {
+      invalidateKeys: [queryKeys.secretFiles.byProject(projectId)],
+      successMessage: "File updated",
+    },
   );
 
   const contentMutation = useApiMutation(
@@ -55,8 +59,8 @@ export function EditSecretFileDialog(props: EditSecretFileDialogProps): ReactEle
     }) => client.api.projects({ id: projectId }).secrets({ fileId: file.id }).content.post(values),
     {
       invalidateKeys: [
-        ["secret-files", projectId],
-        ["secret-file-versions", projectId, file.id],
+        queryKeys.secretFiles.byProject(projectId),
+        queryKeys.secretFiles.versions(projectId, file.id),
       ],
       successMessage: "New version uploaded",
     },
@@ -121,7 +125,7 @@ export function EditSecretFileDialog(props: EditSecretFileDialogProps): ReactEle
             <FormSelectField
               form={form}
               name="vaultId"
-              label="Move to Vault"
+              label="Move to VaultDto"
               items={vaultItems}
               optional
               emptyLabel="Keep current"

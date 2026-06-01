@@ -24,7 +24,8 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useConfirm } from "@/hooks/use-confirm";
 import { client } from "@/lib/api";
-import type { LicenseRuleListResponse } from "@/types/api/license-rule";
+import { queryKeys } from "@/lib/query-keys";
+import type { LicenseRuleListResponseDto } from "@/types/api/license-rule";
 
 interface LicenseRulesTableProps {
   projectId: string;
@@ -45,15 +46,16 @@ export function LicenseRulesTable(props: LicenseRulesTableProps): ReactElement {
   const [newLicenseId, setNewLicenseId] = useState("");
   const [newPolicy, setNewPolicy] = useState<(typeof POLICY_OPTIONS)[number]>("WARN");
 
-  const { data } = useApiQuery<LicenseRuleListResponse>(["license-rules", projectId], () =>
-    client.api.projects({ id: projectId })["license-rules"].get(),
+  const { data } = useApiQuery<LicenseRuleListResponseDto>(
+    queryKeys.licenses.rules(projectId),
+    () => client.api.projects({ id: projectId })["license-rules"].get(),
   );
 
   const createMutation = useApiMutation(
     (body: { licenseId: string; policy: (typeof POLICY_OPTIONS)[number] }) =>
       client.api.projects({ id: projectId })["license-rules"].post(body),
     {
-      invalidateKeys: [["license-rules", projectId]],
+      invalidateKeys: [queryKeys.licenses.rules(projectId)],
       successMessage: "License rule created",
     },
   );
@@ -62,7 +64,7 @@ export function LicenseRulesTable(props: LicenseRulesTableProps): ReactElement {
     ({ ruleId, policy }: { ruleId: string; policy: (typeof POLICY_OPTIONS)[number] }) =>
       client.api.projects({ id: projectId })["license-rules"]({ ruleId }).put({ policy }),
     {
-      invalidateKeys: [["license-rules", projectId]],
+      invalidateKeys: [queryKeys.licenses.rules(projectId)],
       successMessage: "License rule updated",
     },
   );
@@ -71,7 +73,7 @@ export function LicenseRulesTable(props: LicenseRulesTableProps): ReactElement {
     (ruleId: string) =>
       client.api.projects({ id: projectId })["license-rules"]({ ruleId }).delete(),
     {
-      invalidateKeys: [["license-rules", projectId]],
+      invalidateKeys: [queryKeys.licenses.rules(projectId)],
       successMessage: "License rule deleted",
     },
   );

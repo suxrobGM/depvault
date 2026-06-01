@@ -11,7 +11,8 @@ import { Button, CardContent, CardHeader, Stack, Typography } from "@mui/materia
 import { Surface } from "@/components/ui/cards";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
-import type { ProjectResponse } from "@/types/api/project";
+import { queryKeys } from "@/lib/query-keys";
+import type { ProjectDetailDto } from "@/types/api/project";
 
 interface AboutCardProps {
   projectId: string;
@@ -20,8 +21,9 @@ interface AboutCardProps {
 export function AboutCard(props: AboutCardProps): ReactElement {
   const { projectId } = props;
 
-  const { data: project } = useApiQuery<ProjectResponse>(["projects", projectId], () =>
-    client.api.projects({ id: projectId }).get(),
+  const { data: project } = useApiQuery<ProjectDetailDto>(
+    queryKeys.projects.detail(projectId),
+    () => client.api.projects({ id: projectId }).get(),
   );
 
   if (!project) {

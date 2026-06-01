@@ -10,14 +10,15 @@ import { useToast } from "@/hooks/use-toast";
 import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
 import { encryptBinary } from "@/lib/crypto";
-import type { Vault } from "@/types/api/vault";
+import { queryKeys } from "@/lib/query-keys";
+import type { VaultDto } from "@/types/api/vault";
 import { uploadSecretFileSchema } from "./schemas";
 
 interface UploadSecretFileDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
-  vaults: Vault[];
+  vaults: VaultDto[];
 }
 
 export function UploadSecretFileDialog(props: UploadSecretFileDialogProps): ReactElement {
@@ -39,7 +40,7 @@ export function UploadSecretFileDialog(props: UploadSecretFileDialogProps): Reac
       description?: string;
     }) => client.api.projects({ id: projectId }).secrets.post(values),
     {
-      invalidateKeys: [["secret-files", projectId]],
+      invalidateKeys: [queryKeys.secretFiles.byProject(projectId)],
       successMessage: "File uploaded successfully",
       onSuccess: () => handleClose(),
     },
@@ -100,7 +101,7 @@ export function UploadSecretFileDialog(props: UploadSecretFileDialogProps): Reac
             <FormSelectField
               form={form}
               name="vaultId"
-              label="Vault"
+              label="VaultDto"
               items={vaultItems}
               emptyLabel="Select a vault"
               emptyMessage="No vaults found. Create a vault in the Variables tab first."

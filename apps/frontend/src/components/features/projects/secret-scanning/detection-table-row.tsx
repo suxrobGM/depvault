@@ -19,7 +19,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import type { DetectionResponse } from "@/types/api/secret-scan";
+import type { DetectionDto } from "@/types/api/secret-scan";
 
 const SEVERITY_COLORS: Record<string, "error" | "warning" | "info" | "success"> = {
   CRITICAL: "error",
@@ -35,7 +35,7 @@ const STATUS_COLORS: Record<string, "error" | "success" | "default"> = {
 };
 
 interface DetectionTableRowProps {
-  detection: DetectionResponse;
+  detection: DetectionDto;
   expanded: boolean;
   onToggle: () => void;
   onResolve: () => void;

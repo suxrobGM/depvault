@@ -1,22 +1,24 @@
 import type { client } from "@/lib/api";
 import type { Data } from "./utils";
 
-type ProjectById = ReturnType<(typeof client)["api"]["projects"]>;
+type Projects = typeof client.api.projects;
+type ProjectById = ReturnType<Projects>;
+type Invitations = typeof client.api.invitations;
+type InvitationById = ReturnType<Invitations>;
 
-export type ProjectListResponse = Data<(typeof client)["api"]["projects"]["get"]>;
-export type Project = ProjectListResponse["items"][number];
+export type ProjectListResponseDto = Data<Projects["get"]>;
+export type ProjectDto = ProjectListResponseDto["items"][number];
 
-export type ProjectResponse = Data<ProjectById["get"]>;
+export type ProjectDetailDto = Data<ProjectById["get"]>;
 
-export type MemberListResponse = Data<ProjectById["members"]["get"]>;
-export type Member = MemberListResponse["items"][number];
+export type MemberListResponseDto = Data<ProjectById["members"]["get"]>;
+export type MemberDto = MemberListResponseDto["items"][number];
 
-export type ProjectStatsResponse = Data<(typeof client)["api"]["projects"]["stats"]["get"]>;
+export type ProjectStatsDto = Data<Projects["stats"]["get"]>;
 
-export type InvitationListResponse = Data<ProjectById["invitations"]["get"]>;
-export type Invitation = InvitationListResponse["items"][number];
+export type InvitationListResponseDto = Data<ProjectById["invitations"]["get"]>;
+export type InvitationDto = InvitationListResponseDto["items"][number];
 
-export type InvitationInfo = Data<ReturnType<(typeof client)["api"]["invitations"]>["info"]["get"]>;
+export type InvitationInfoDto = Data<InvitationById["info"]["get"]>;
 
-type InvitationsByUser = (typeof client)["api"]["invitations"];
-export type PendingInvitationListResponse = Data<InvitationsByUser["pending"]["get"]>;
+export type PendingInvitationListResponseDto = Data<Invitations["pending"]["get"]>;

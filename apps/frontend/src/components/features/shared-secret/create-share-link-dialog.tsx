@@ -26,7 +26,7 @@ import {
   generateShareKey,
   shareKeyToFragment,
 } from "@/lib/crypto";
-import type { EnvVariable } from "@/types/api/env-variable";
+import type { EnvVariableDto } from "@/types/api/env-variable";
 
 const EXPIRY_OPTIONS = [
   { label: "1 hour", value: 3600 },
@@ -38,7 +38,7 @@ interface CreateShareLinkDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
-  variables: EnvVariable[];
+  variables: EnvVariableDto[];
 }
 
 export function CreateShareLinkDialog(props: CreateShareLinkDialogProps): ReactElement {

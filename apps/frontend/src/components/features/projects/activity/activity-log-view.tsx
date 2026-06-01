@@ -8,7 +8,8 @@ import { PaginationBar, SkeletonList } from "@/components/ui/data-display";
 import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
-import type { AuditLogListResponse } from "@/types/api/audit-log";
+import { queryKeys } from "@/lib/query-keys";
+import type { AuditLogListResponseDto } from "@/types/api/audit-log";
 import { ActivityFilterBar, EMPTY_FILTERS, type ActivityFilters } from "./activity-filter-bar";
 import { ActivityLogEntry } from "./activity-log-entry";
 
@@ -23,9 +24,8 @@ export function ActivityLogView(props: ActivityLogViewProps): ReactElement {
   const [filters, setFilters] = useState<ActivityFilters>(EMPTY_FILTERS);
   const [page, setPage] = useState(1);
 
-  const { data, isLoading } = useApiQuery<AuditLogListResponse>(
-    [
-      "audit-log",
+  const { data, isLoading } = useApiQuery<AuditLogListResponseDto>(
+    queryKeys.auditLog.list(
       projectId,
       page,
       PAGE_SIZE,
@@ -34,7 +34,7 @@ export function ActivityLogView(props: ActivityLogViewProps): ReactElement {
       filters.from,
       filters.to,
       filters.userEmail,
-    ],
+    ),
     () =>
       client.api.projects({ id: projectId })["audit-log"].get({
         query: {

@@ -14,8 +14,9 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import type { ProjectResponse } from "@/types/api/project";
-import type { ScanResponse, ScanSummaryResponse } from "@/types/api/secret-scan";
+import { queryKeys } from "@/lib/query-keys";
+import type { ProjectDetailDto } from "@/types/api/project";
+import type { ScanDto, ScanSummaryDto } from "@/types/api/secret-scan";
 import { DetectionsTable } from "./detections-table";
 import { PatternManager } from "./pattern-manager";
 import { ScanHistory } from "./scan-history";
@@ -37,23 +38,24 @@ export function SecretScanningView(props: SecretScanningPageProps): ReactElement
     "detections",
   );
 
-  const { data: project } = useApiQuery<ProjectResponse>(["projects", projectId], () =>
-    client.api.projects({ id: projectId }).get(),
+  const { data: project } = useApiQuery<ProjectDetailDto>(
+    queryKeys.projects.detail(projectId),
+    () => client.api.projects({ id: projectId }).get(),
   );
 
-  const { data: summary, isLoading: summaryLoading } = useApiQuery<ScanSummaryResponse>(
-    ["scan-summary", projectId],
+  const { data: summary, isLoading: summaryLoading } = useApiQuery<ScanSummaryDto>(
+    queryKeys.scanning.summary(projectId),
     () => client.api.projects({ id: projectId })["scan-summary"].get(),
     { errorMessage: "Failed to load scan summary" },
   );
 
-  const triggerScan = useApiMutation<ScanResponse>(
+  const triggerScan = useApiMutation<ScanDto>(
     () => client.api.projects({ id: projectId }).scans.post(),
     {
       invalidateKeys: [
-        ["scan-summary", projectId],
-        ["scans", projectId],
-        ["detections", projectId],
+        queryKeys.scanning.summary(projectId),
+        queryKeys.scanning.scans(projectId),
+        queryKeys.scanning.detections(projectId),
       ],
       successMessage: "Scan started successfully",
       errorMessage: "Failed to start scan",

@@ -1,20 +1,20 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Treaty } from "@elysiajs/eden";
 
 /**
- * Extract the resolved data type from an Eden Treaty endpoint.
- * Usage: ExtractData<typeof client.api.projects, "get">
+ * Extract the resolved response data from an Eden Treaty endpoint method.
+ * Usage: `Data<typeof client.api.projects.get>`.
  */
-export type ExtractData<T, Method extends string> = Method extends keyof T
-  ? T[Method] extends (...args: never[]) => infer R
-    ? Awaited<R> extends { data: infer D }
-      ? NonNullable<D>
-      : never
-    : never
-  : never;
+export type Data<T extends (...args: any[]) => any> = NonNullable<Treaty.Data<T>>;
 
 /**
- * Shorthand for Treaty.Data — extracts data from an endpoint method reference.
- * Usage: Data<typeof client.api.auth.login.post>
+ * Extract the request body from an Eden Treaty POST/PATCH/PUT endpoint method.
+ * Usage: `Body<typeof client.api.projects.post>`.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Data<T extends (...args: any[]) => any> = NonNullable<Treaty.Data<T>>;
+export type Body<T extends (...args: any[]) => any> = NonNullable<Parameters<T>[0]>;
+
+/**
+ * Extract the query params from an Eden Treaty GET endpoint method.
+ * Usage: `Query<typeof client.api.activity.get>`.
+ */
+export type Query<T extends (...args: any[]) => any> = NonNullable<Parameters<T>[0]>["query"];

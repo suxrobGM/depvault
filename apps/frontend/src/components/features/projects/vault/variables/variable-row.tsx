@@ -13,18 +13,19 @@ import { ActionMenu, type ActionMenuItem } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useConfirm } from "@/hooks/use-confirm";
 import { client } from "@/lib/api";
-import type { EnvVariable } from "@/types/api/env-variable";
+import { queryKeys } from "@/lib/query-keys";
+import type { EnvVariableDto } from "@/types/api/env-variable";
 import { EncryptedValue } from "../encrypted-value";
 import { VariableHistory } from "./variable-history";
 
 export interface VaultVariableRowProps {
   projectId: string;
   vaultId: string;
-  variable: EnvVariable;
+  variable: EnvVariableDto;
   canEdit: boolean;
   selected: boolean;
   onToggleSelect?: () => void;
-  onEdit?: (variable: EnvVariable) => void;
+  onEdit?: (variable: EnvVariableDto) => void;
 }
 
 export function VariableRow(props: VaultVariableRowProps): ReactElement {
@@ -42,7 +43,7 @@ export function VariableRow(props: VaultVariableRowProps): ReactElement {
         .variables({ varId: variable.id })
         .delete(),
     {
-      invalidateKeys: [["vault-variables", projectId, vaultId]],
+      invalidateKeys: [queryKeys.vaults.variables(projectId, vaultId)],
       successMessage: "Variable deleted",
     },
   );

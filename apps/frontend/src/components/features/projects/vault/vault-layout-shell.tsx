@@ -7,7 +7,8 @@ import { PageHeader } from "@/components/ui/containers";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import type { ProjectResponse } from "@/types/api/project";
+import { queryKeys } from "@/lib/query-keys";
+import type { ProjectDetailDto } from "@/types/api/project";
 import { VaultTabs } from "./vault-tabs";
 
 interface VaultLayoutShellProps {
@@ -18,8 +19,9 @@ interface VaultLayoutShellProps {
 export function VaultLayoutShell(props: VaultLayoutShellProps): ReactElement {
   const { projectId, children } = props;
 
-  const { data: project } = useApiQuery<ProjectResponse>(["projects", projectId], () =>
-    client.api.projects({ id: projectId }).get(),
+  const { data: project } = useApiQuery<ProjectDetailDto>(
+    queryKeys.projects.detail(projectId),
+    () => client.api.projects({ id: projectId }).get(),
   );
 
   return (

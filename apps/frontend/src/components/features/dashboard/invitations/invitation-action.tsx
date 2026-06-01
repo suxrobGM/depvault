@@ -13,7 +13,8 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import type { PendingInvitationListResponse } from "@/types/api/project";
+import { queryKeys } from "@/lib/query-keys";
+import type { PendingInvitationListResponseDto } from "@/types/api/project";
 
 interface InvitationActionProps {
   token: string;
@@ -24,21 +25,21 @@ export function InvitationAction(props: InvitationActionProps): ReactElement {
   const router = useRouter();
   const [actionTaken, setActionTaken] = useState<"accepted" | "declined" | null>(null);
 
-  const { data, isLoading, error } = useApiQuery<PendingInvitationListResponse>(
-    ["invitations", "pending"],
+  const { data, isLoading, error } = useApiQuery<PendingInvitationListResponseDto>(
+    queryKeys.invitations.pending(),
     () => client.api.invitations.pending.get({ query: { page: 1, limit: 50 } }),
   );
 
   const invitation = data?.items.find((inv) => inv.token === token);
 
   const acceptMutation = useApiMutation(() => client.api.invitations({ token }).accept.post(), {
-    invalidateKeys: [["invitations", "pending"]],
+    invalidateKeys: [queryKeys.invitations.pending()],
     successMessage: "Invitation accepted",
     onSuccess: () => setActionTaken("accepted"),
   });
 
   const declineMutation = useApiMutation(() => client.api.invitations({ token }).decline.post(), {
-    invalidateKeys: [["invitations", "pending"]],
+    invalidateKeys: [queryKeys.invitations.pending()],
     successMessage: "Invitation declined",
     onSuccess: () => setActionTaken("declined"),
   });

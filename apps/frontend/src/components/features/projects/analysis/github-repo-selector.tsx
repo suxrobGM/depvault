@@ -5,13 +5,13 @@ import { GitHub as GitHubIcon, Search as SearchIcon } from "@mui/icons-material"
 import { Box, Chip, InputAdornment, Stack, TextField, Typography } from "@mui/material";
 import { Surface } from "@/components/ui/cards";
 import { LoadingSpinner } from "@/components/ui/feedback";
-import type { GitHubRepoListResponse } from "@/types/api/github";
+import type { GitHubRepoListResponseDto } from "@/types/api/github";
 
 interface GitHubRepoSelectorProps {
   search: string;
   onSearchChange: (value: string) => void;
   isLoading: boolean;
-  repos: GitHubRepoListResponse["items"] | undefined;
+  repos: GitHubRepoListResponseDto["items"] | undefined;
   onSelectRepo: (fullName: string) => void;
 }
 

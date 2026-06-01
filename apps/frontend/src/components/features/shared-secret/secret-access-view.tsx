@@ -31,12 +31,12 @@ import { FormSelectField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
 import { decryptBinary, decrypt as decryptText, shareKeyFromFragment } from "@/lib/crypto";
-import type { SharedSecretInfoResponse } from "@/types/api/shared-secret";
+import type { SharedSecretInfoDto } from "@/types/api/shared-secret";
 import { downloadFile } from "@/utils/download-file";
 
 interface SecretAccessViewProps {
   token: string;
-  info: SharedSecretInfoResponse;
+  info: SharedSecretInfoDto;
 }
 
 interface EnvVariable {

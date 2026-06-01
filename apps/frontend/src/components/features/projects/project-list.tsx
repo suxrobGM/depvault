@@ -15,13 +15,14 @@ import { EmptyState } from "@/components/ui/feedback";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import { PAGINATION_DEFAULTS, ROUTES } from "@/lib/constants";
-import type { ProjectListResponse } from "@/types/api/project";
+import { queryKeys } from "@/lib/query-keys";
+import type { ProjectListResponseDto } from "@/types/api/project";
 import { CreateProjectDialog } from "./create-project-dialog";
 
 export function ProjectList(): ReactElement {
   const [createOpen, setCreateOpen] = useState(false);
 
-  const { data, isLoading } = useApiQuery<ProjectListResponse>(["projects"], () =>
+  const { data, isLoading } = useApiQuery<ProjectListResponseDto>(queryKeys.projects.list(), () =>
     client.api.projects.get({ query: { page: 1, limit: PAGINATION_DEFAULTS.limit } }),
   );
 
