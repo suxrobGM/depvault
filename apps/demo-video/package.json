@@ -11,17 +11,17 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@remotion/cli": "^4.0.448",
-    "@remotion/tailwind-v4": "^4.0.448",
+    "@remotion/cli": "^4.0.470",
+    "@remotion/tailwind-v4": "^4.0.470",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "remotion": "^4.0.448",
-    "tailwindcss": "^4.2.2"
+    "remotion": "^4.0.470",
+    "tailwindcss": "^4.3.0"
   },
   "devDependencies": {
-    "@remotion/eslint-config-flat": "^4.0.448",
+    "@remotion/eslint-config-flat": "^4.0.470",
     "@types/react": "^19.2.7",
-    "eslint": "^10.2.1",
+    "eslint": "^10.4.1",
     "typescript": "^6.0.3"
   },
   "sideEffects": [
