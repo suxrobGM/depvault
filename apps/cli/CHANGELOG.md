@@ -5,6 +5,17 @@ All notable changes to the DepVault CLI are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-06-01
+
+- Encrypt secret files client-side on `push` and upload as JSON — fixes 400 errors and closes a zero-knowledge plaintext leak
+- `push`: aggregate stale-variable detection per vault to stop false "delete stale" prompts on first push
+- `push`: map directories to vaults by path + name only (drop greedy tag-match that merged unrelated folders)
+- `pull`: preserve blank lines between comment groups so `.env` files round-trip faithfully
+- Cancel selection and multi-select prompts on Esc; pre-select all choices by default (`push` selects all discovered files — deselect to skip)
+- Stale-variable deletion now defaults to No and is skipped in non-interactive mode
+- `auth`: clear vault keys on logout and give clearer locked-vault guidance
+- Update package references to latest versions
+
 ## [1.6.0] - 2026-04-22
 
 - Flatten vault model: drop the vault-group / environment abstraction so each vault is a single flat keyset, and retarget pull/push to a vault directly instead of selecting a group + environment
