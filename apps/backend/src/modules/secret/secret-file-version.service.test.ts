@@ -1,6 +1,8 @@
 import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { NotFoundError } from "@/common/errors";
+import { PrismaClient } from "@/generated/prisma";
+import type { DeepMockProxy } from "@/types/deep-mock";
 import { SecretFileVersionService } from "./secret-file-version.service";
 
 const now = new Date();
@@ -54,7 +56,7 @@ function createMockPrisma() {
       findMany: mock(() => Promise.resolve([mockVersion])),
       findFirst: mock(() => Promise.resolve(null)),
     },
-  } as any;
+  } as unknown as DeepMockProxy<PrismaClient>;
 }
 
 describe("SecretFileVersionService", () => {

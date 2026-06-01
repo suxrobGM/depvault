@@ -1,6 +1,11 @@
 import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { BadRequestError, NotFoundError } from "@/common/errors";
+import { PrismaClient } from "@/generated/prisma";
+import { AuditLogService } from "@/modules/audit-log";
+import { NotificationService } from "@/modules/notification/notification.service";
+import { PlanEnforcementService } from "@/modules/subscription/plan-enforcement.service";
+import type { DeepMockProxy } from "@/types/deep-mock";
 import { SecretFileService } from "./secret-file.service";
 
 const now = new Date();
@@ -50,13 +55,13 @@ function createMockPrisma() {
     vault: {
       findFirst: mock(() => Promise.resolve(mockVault)),
     },
-  } as any;
+  } as unknown as DeepMockProxy<PrismaClient>;
 }
 
 function createMockAuditLogService() {
   return {
     log: mock(() => Promise.resolve()),
-  } as any;
+  } as unknown as AuditLogService;
 }
 
 describe("SecretFileService", () => {
@@ -66,8 +71,12 @@ describe("SecretFileService", () => {
   beforeEach(() => {
     mock.restore();
     mockPrisma = createMockPrisma();
-    const mockNotificationService = { notify: mock(() => Promise.resolve()) } as any;
-    const mockPlanEnforcement = { enforceForProject: mock(() => Promise.resolve()) } as any;
+    const mockNotificationService = {
+      notify: mock(() => Promise.resolve()),
+    } as unknown as NotificationService;
+    const mockPlanEnforcement = {
+      enforceForProject: mock(() => Promise.resolve()),
+    } as unknown as PlanEnforcementService;
     service = new SecretFileService(
       mockPrisma,
       createMockAuditLogService(),

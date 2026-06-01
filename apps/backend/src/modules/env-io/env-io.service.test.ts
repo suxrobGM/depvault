@@ -1,7 +1,10 @@
 import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { NotFoundError } from "@/common/errors";
+import { PrismaClient } from "@/generated/prisma";
+import { AuditLogService } from "@/modules/audit-log";
 import { ProjectVaultRepository } from "@/modules/project-vault";
+import type { DeepMockProxy } from "@/types/deep-mock";
 import { EnvironmentIOService } from "./env-io.service";
 
 const now = new Date();
@@ -50,13 +53,13 @@ function createMockPrisma() {
       upsert: mock(() => Promise.resolve(mockVariable)),
       findMany: mock(() => Promise.resolve([mockVariable])),
     },
-  } as any;
+  } as unknown as DeepMockProxy<PrismaClient>;
 }
 
 function createMockAuditLogService() {
   return {
     log: mock(() => Promise.resolve()),
-  } as any;
+  } as unknown as AuditLogService;
 }
 
 describe("EnvironmentIOService", () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it, mock } from "bun:test";
 import type { GitHubApiService } from "@/modules/github/github-api.service";
-import { scanCommitHistory, type RawDetection } from "./secret-scan.engine";
+import { scanCommitHistory } from "./secret-scan.engine";
 
 function makeDiff(filePath: string, addedLines: string[]): string {
   const additions = addedLines.map((l) => `+${l}`).join("\n");

@@ -1,6 +1,9 @@
 import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { ForbiddenError, NotFoundError } from "@/common/errors";
+import { PrismaClient } from "@/generated/prisma";
+import { PlanEnforcementService } from "@/modules/subscription/plan-enforcement.service";
+import type { DeepMockProxy } from "@/types/deep-mock";
 import { ProjectService } from "./project.service";
 
 const now = new Date();
@@ -32,7 +35,7 @@ function createMockPrisma() {
     projectMember: {
       findUnique: mock(() => Promise.resolve(null)),
     },
-  } as any;
+  } as unknown as DeepMockProxy<PrismaClient>;
 }
 
 const mockPlanEnforcement = {
@@ -44,7 +47,7 @@ const mockPlanEnforcement = {
   enforceFeatureAccess: mock(() => Promise.resolve()),
   enforceForProject: mock(() => Promise.resolve()),
   enforceFeatureForProject: mock(() => Promise.resolve()),
-} as any;
+} as unknown as PlanEnforcementService;
 
 describe("ProjectService", () => {
   let service: ProjectService;

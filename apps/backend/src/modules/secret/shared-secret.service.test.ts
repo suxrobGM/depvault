@@ -2,6 +2,9 @@ import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock, spyOn } from "bun:test";
 import { BadRequestError, GoneError, NotFoundError } from "@/common/errors";
 import * as password from "@/common/utils/password";
+import { PrismaClient } from "@/generated/prisma";
+import { AuditLogService } from "@/modules/audit-log";
+import type { DeepMockProxy } from "@/types/deep-mock";
 import { SharedSecretService } from "./shared-secret.service";
 
 const now = new Date();
@@ -55,11 +58,11 @@ function createMockPrisma() {
       updateMany: mock(() => Promise.resolve({ count: 0 })),
       delete: mock(() => Promise.resolve(makeSharedSecret())),
     },
-  } as any;
+  } as unknown as DeepMockProxy<PrismaClient>;
 }
 
 function createMockAuditLogService() {
-  return { log: mock(() => Promise.resolve()) } as any;
+  return { log: mock(() => Promise.resolve()) } as unknown as AuditLogService;
 }
 
 describe("SharedSecretService", () => {

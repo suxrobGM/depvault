@@ -2,9 +2,21 @@ import "reflect-metadata";
 import { INFINITE_LIMIT } from "@depvault/shared/constants";
 import { describe, expect, it, mock } from "bun:test";
 import { ForbiddenError } from "@/common/errors";
+import { PrismaClient } from "@/generated/prisma";
 import { PlanEnforcementService } from "./plan-enforcement.service";
+import { SubscriptionService } from "./subscription.service";
 
-function createMockSubscriptionService(plan = "FREE", overrides: Record<string, any> = {}) {
+interface UsageOverrides {
+  projectCount?: number;
+  envVarCount?: number;
+  secretFileCount?: number;
+  analysisCount?: number;
+  memberCount?: number;
+  memberUserIds?: string[];
+  ciTokenCount?: number;
+}
+
+function createMockSubscriptionService(plan = "FREE", overrides: UsageOverrides = {}) {
   return {
     getUserPlan: mock(() =>
       Promise.resolve({
@@ -47,7 +59,7 @@ function createMockSubscriptionService(plan = "FREE", overrides: Record<string, 
       Promise.resolve(overrides.memberCount ?? (overrides.memberUserIds ?? []).length),
     ),
     countActiveCiTokens: mock(() => Promise.resolve(overrides.ciTokenCount ?? 0)),
-  } as any;
+  } as unknown as SubscriptionService;
 }
 
 function createMockPrisma() {
@@ -55,7 +67,7 @@ function createMockPrisma() {
     project: {
       findUniqueOrThrow: mock(() => Promise.resolve({ ownerId: "owner-1" })),
     },
-  } as any;
+  } as unknown as PrismaClient;
 }
 
 describe("PlanEnforcementService", () => {

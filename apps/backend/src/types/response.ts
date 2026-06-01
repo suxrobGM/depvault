@@ -83,7 +83,9 @@ export type ErrorResponse = Static<typeof ErrorResponseSchema>;
 export type MessageResponse = Static<typeof MessageResponseSchema>;
 export type Pagination = Static<typeof PaginationSchema>;
 
-const _PaginatedSchemaForType = PaginatedResponseSchema(t.Unknown());
-export type PaginatedResponse<T> = Omit<Static<typeof _PaginatedSchemaForType>, "items"> & {
+export type PaginatedResponse<T> = Omit<
+  Static<ReturnType<typeof PaginatedResponseSchema<ReturnType<typeof t.Unknown>>>>,
+  "items"
+> & {
   items: T[];
 };

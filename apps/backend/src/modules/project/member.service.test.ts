@@ -1,18 +1,13 @@
 import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { BadRequestError, ForbiddenError, NotFoundError } from "@/common/errors";
+import { EmailService } from "@/common/services/email.service";
+import { PrismaClient } from "@/generated/prisma";
+import { NotificationService } from "@/modules/notification/notification.service";
+import type { DeepMockProxy } from "@/types/deep-mock";
 import { MemberService } from "./member.service";
 
 const now = new Date();
-
-const mockUser = {
-  id: "invitee-uuid",
-  email: "invitee@example.com",
-  firstName: "Invitee",
-  lastName: "User",
-  avatarUrl: null,
-  deletedAt: null,
-};
 
 const mockMember = {
   id: "member-uuid",
@@ -59,15 +54,15 @@ function createMockPrisma() {
       count: mock(() => Promise.resolve(0)),
     },
     $transaction: mock((ops: Promise<unknown>[]) => Promise.all(ops)),
-  } as any;
+  } as unknown as DeepMockProxy<PrismaClient>;
 }
 
 function createMockEmailService() {
-  return { send: mock(() => Promise.resolve()) } as any;
+  return { send: mock(() => Promise.resolve()) } as unknown as EmailService;
 }
 
 function createMockNotificationService() {
-  return { notify: mock(() => Promise.resolve()) } as any;
+  return { notify: mock(() => Promise.resolve()) } as unknown as NotificationService;
 }
 
 describe("MemberService", () => {
