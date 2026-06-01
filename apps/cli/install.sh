@@ -8,6 +8,12 @@ REPO="suxrobGM/depvault"
 INSTALL_DIR="${DEPVAULT_INSTALL_DIR:-$HOME/.depvault/bin}"
 BINARY_NAME="depvault"
 
+# Temp dir cleaned up on exit. Global so the EXIT trap can see it after
+# download_and_install returns (a local would be unbound under `set -u`).
+TMP_DIR=""
+cleanup() { [ -n "$TMP_DIR" ] && rm -rf "$TMP_DIR"; }
+trap cleanup EXIT
+
 info() { printf "\033[0;32m%s\033[0m\n" "$1"; }
 error() { printf "\033[0;31mError: %s\033[0m\n" "$1" >&2; exit 1; }
 
@@ -60,19 +66,17 @@ download_and_install() {
   local tag="cli/${version}"
   local archive="depvault-${rid}.tar.gz"
   local url="https://github.com/${REPO}/releases/download/${tag}/${archive}"
-  local tmp_dir
 
-  tmp_dir="$(mktemp -d)"
-  trap 'rm -rf "$tmp_dir"' EXIT
+  TMP_DIR="$(mktemp -d)"
 
   info "Downloading DepVault CLI ${version} for ${rid}..."
-  if ! curl -fsSL -o "${tmp_dir}/${archive}" "$url"; then
+  if ! curl -fsSL -o "${TMP_DIR}/${archive}" "$url"; then
     error "Download failed. Check that the release exists: $url"
   fi
 
   info "Extracting to ${INSTALL_DIR}..."
   mkdir -p "$INSTALL_DIR"
-  tar -xzf "${tmp_dir}/${archive}" -C "$INSTALL_DIR"
+  tar -xzf "${TMP_DIR}/${archive}" -C "$INSTALL_DIR"
   chmod +x "${INSTALL_DIR}/${BINARY_NAME}"
 }
 
