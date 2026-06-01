@@ -7,6 +7,9 @@ import { extractPeriodDates } from "./stripe-utils";
 import type { CreateCheckoutBody } from "./subscription.schema";
 import { SubscriptionService } from "./subscription.service";
 
+/** The apiVersion literal the installed Stripe SDK accepts (derived so it tracks SDK upgrades). */
+type StripeApiVersion = NonNullable<ConstructorParameters<typeof Stripe>[1]>["apiVersion"];
+
 /** Handles Stripe billing operations: checkout sessions, portal, cancel, and resume. */
 @singleton()
 export class StripeBillingService {
@@ -24,7 +27,10 @@ export class StripeBillingService {
       if (!key) {
         throw new BadRequestError("Stripe is not configured");
       }
-      this.stripe = new Stripe(key);
+      // Match the version configured in the Stripe dashboard; override via STRIPE_API_VERSION.
+      const apiVersion = (process.env.STRIPE_API_VERSION ??
+        "2026-05-27.dahlia") as StripeApiVersion;
+      this.stripe = new Stripe(key, { apiVersion });
     }
     return this.stripe;
   }

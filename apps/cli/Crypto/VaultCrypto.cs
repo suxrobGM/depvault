@@ -14,13 +14,18 @@ public static class VaultCrypto
     /// <summary>AES-256-GCM encrypt a plaintext string, returning base64-encoded (ciphertext, iv, authTag).</summary>
     public static (string Ciphertext, string Iv, string AuthTag) Encrypt(string plaintext, byte[] key)
     {
+        return EncryptBytes(Encoding.UTF8.GetBytes(plaintext), key);
+    }
+
+    /// <summary>AES-256-GCM encrypt raw bytes (e.g. a binary secret file), returning base64-encoded (ciphertext, iv, authTag).</summary>
+    public static (string Ciphertext, string Iv, string AuthTag) EncryptBytes(byte[] plaintext, byte[] key)
+    {
         var iv = RandomNumberGenerator.GetBytes(IvBytes);
-        var plaintextBytes = Encoding.UTF8.GetBytes(plaintext);
-        var ciphertext = new byte[plaintextBytes.Length];
+        var ciphertext = new byte[plaintext.Length];
         var tag = new byte[TagBytes];
 
         using var aes = new AesGcm(key, TagBytes);
-        aes.Encrypt(iv, plaintextBytes, ciphertext, tag);
+        aes.Encrypt(iv, plaintext, ciphertext, tag);
 
         return (
             Convert.ToBase64String(ciphertext),

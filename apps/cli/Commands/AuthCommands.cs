@@ -2,6 +2,7 @@ using System.CommandLine;
 using System.Diagnostics;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Config;
+using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
 using DepVault.Cli.Utils;
 using Spectre.Console;
@@ -12,7 +13,8 @@ namespace DepVault.Cli.Commands;
 public sealed class AuthCommands(
     IApiClientFactory clientFactory,
     CommandContext ctx,
-    ICredentialStore credentialStore)
+    ICredentialStore credentialStore,
+    VaultState vaultState)
 {
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(5);
 
@@ -115,6 +117,7 @@ public sealed class AuthCommands(
         cmd.SetAction(parseResult =>
         {
             credentialStore.Delete();
+            vaultState.Lock();
             ctx.Output.PrintSuccess("Logged out.");
         });
         return cmd;

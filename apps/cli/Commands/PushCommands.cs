@@ -58,9 +58,12 @@ internal sealed class PushCommands(
                 return;
             }
 
-            // Resolve encryption key once before processing any env files
+            // Resolve the encryption key once up front for any files that need it. The env and
+            // secret-file paths share the VaultState DEK cache, so this prompts at most once.
             var hasEnvFiles = selected.Any(a => a.Category == FileCategory.Environment);
-            if (hasEnvFiles && !await envImporter.EnsureDekAsync(pc.ProjectId, ct))
+            var hasSecretFiles = selected.Any(a => a.Category != FileCategory.Environment);
+            if ((hasEnvFiles && !await envImporter.EnsureDekAsync(pc.ProjectId, ct)) ||
+                (hasSecretFiles && !await secretFileScanner.EnsureDekAsync(pc.ProjectId, ct)))
             {
                 ctx.Output.PrintError("Failed to resolve encryption key. Aborting push.");
                 Environment.ExitCode = 1;
@@ -69,7 +72,9 @@ internal sealed class PushCommands(
 
             var envImported = 0;
             var secretsUploaded = 0;
-            var importedVaults = new List<(string VaultId, HashSet<string> Keys)>();
+            // Aggregate imported keys per vault (multiple files can target one vault). Stale
+            // detection must compare against the UNION of all keys pushed to a vault, not per-file.
+            var importedVaults = new Dictionary<string, HashSet<string>>();
 
             foreach (var file in selected)
             {
@@ -87,7 +92,12 @@ internal sealed class PushCommands(
                         var result = await envImporter.ImportAsync(pc.ProjectId, file, vaultId, ct);
                         ctx.Output.PrintSuccess($"  {file.RelativePath}: {result.Imported} variables");
                         envImported += result.Imported;
-                        importedVaults.Add((vaultId, result.ImportedKeys));
+                        if (!importedVaults.TryGetValue(vaultId, out var vaultKeys))
+                        {
+                            vaultKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                            importedVaults[vaultId] = vaultKeys;
+                        }
+                        vaultKeys.UnionWith(result.ImportedKeys);
                     }
                     else
                     {

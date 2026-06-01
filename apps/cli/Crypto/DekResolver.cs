@@ -122,7 +122,8 @@ public sealed class DekResolver(
         {
             if (string.IsNullOrEmpty(password))
             {
-                AnsiConsole.MarkupLine("[red]Vault password is required.[/]");
+                AnsiConsole.MarkupLine(
+                    "[red]Vault password required. Run [bold]unlock[/] or set DEPVAULT_PASSWORD.[/]");
                 return null;
             }
 

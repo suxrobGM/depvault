@@ -32,7 +32,9 @@ internal static class EnvFileSerializer
 
         foreach (var line in block.Lines)
         {
-            lines.Add($"# {line}");
+            // A blank line between comment groups is stored as an empty entry — emit it as a
+            // true blank line, not "# " (otherwise the file no longer round-trips).
+            lines.Add(line.Length == 0 ? "" : $"# {line}");
         }
 
         if (block.BlankLineAfter)

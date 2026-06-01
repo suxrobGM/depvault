@@ -56,6 +56,8 @@ export function DeviceVerifyForm(): ReactElement {
   }
 
   const codeValue = form.state.values.userCode;
+  const verifyPath = codeValue ? `/cli/verify?code=${codeValue}` : "/cli/verify";
+  const signInHref = `${ROUTES.login}?${new URLSearchParams({ redirect: verifyPath })}`;
 
   return (
     <form
@@ -76,7 +78,7 @@ export function DeviceVerifyForm(): ReactElement {
             <Typography
               variant="label"
               component="a"
-              href={`${ROUTES.login}?redirect=/cli/verify${codeValue ? `?code=${codeValue}` : ""}`}
+              href={signInHref}
               sx={{ display: "block", mt: 0.5, color: "inherit" }}
             >
               Sign in now

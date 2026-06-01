@@ -74,7 +74,17 @@ export function VaultProvider(props: PropsWithChildren): ReactElement {
   const vaultInfoRef = useRef<VaultInfo | null>(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      // User logged out — clear all in-memory key material so it can't carry over to the next
+      // account on a shared browser. (Refs only; no setState in an effect body.)
+      kekRef.current = null;
+      privateKeyRef.current = null;
+      recoveryKeyRef.current = null;
+      dekCacheRef.current.clear();
+      vaultInfoRef.current = null;
+      return;
+    }
+
     let cancelled = false;
 
     fetchVaultInfo()
@@ -107,13 +117,23 @@ export function VaultProvider(props: PropsWithChildren): ReactElement {
   useIdleLock(vaultStatus === "unlocked", IDLE_TIMEOUT_MS, lockVault);
 
   const unlockVault = async (password: string) => {
-    if (!vaultInfoRef.current) throw new Error("Vault info not loaded");
+    // Re-fetch vault info so a password rotated on another device (new KEK salt) is picked up
+    // instead of deriving against a stale cached salt and failing to unlock.
+    const info = (await fetchVaultInfo()) ?? vaultInfoRef.current;
+    if (!info) throw new Error("Vault info not loaded");
+    vaultInfoRef.current = info;
 
-    const keys = await unlockVaultKeys(password, vaultInfoRef.current);
-    kekRef.current = keys.kek;
-    privateKeyRef.current = keys.privateKey;
-    recoveryKeyRef.current = keys.recoveryKey;
-    setVaultStatus("unlocked");
+    try {
+      const keys = await unlockVaultKeys(password, info);
+      kekRef.current = keys.kek;
+      privateKeyRef.current = keys.privateKey;
+      recoveryKeyRef.current = keys.recoveryKey;
+      setVaultStatus("unlocked");
+    } catch (err) {
+      // Never leave stale DEKs cached behind a failed unlock.
+      dekCacheRef.current.clear();
+      throw err;
+    }
   };
 
   const setupVault = async (password: string) => {

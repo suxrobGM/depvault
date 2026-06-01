@@ -72,6 +72,7 @@ export function VaultUnlockDialog(props: VaultUnlockDialogProps): ReactElement {
             {onForgotPassword && (
               <Link
                 component="button"
+                type="button"
                 variant="body2"
                 onClick={onForgotPassword}
                 sx={{ alignSelf: "flex-start" }}

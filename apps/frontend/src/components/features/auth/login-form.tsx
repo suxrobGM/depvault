@@ -5,15 +5,18 @@ import { UserRole } from "@depvault/shared/constants";
 import { GitHub as GitHubIcon } from "@mui/icons-material";
 import { Alert, Button, Divider, Stack, Typography } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
+import type { Route } from "next";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormTextField } from "@/components/ui/form";
 import { client } from "@/lib/api";
 import { API_BASE_URL, ROUTES } from "@/lib/constants";
+import { safeRedirect } from "@/utils/url";
 import { loginSchema } from "./schemas";
 
 export function LoginForm(): ReactElement {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm({
@@ -29,7 +32,10 @@ export function LoginForm(): ReactElement {
         return;
       }
 
-      if (role === UserRole.ADMIN || role === UserRole.SUPER_ADMIN) {
+      const redirectTo = safeRedirect(searchParams.get("redirect"));
+      if (redirectTo) {
+        router.push(redirectTo as Route);
+      } else if (role === UserRole.ADMIN || role === UserRole.SUPER_ADMIN) {
         router.push(ROUTES.admin);
       } else {
         router.push(ROUTES.overview);

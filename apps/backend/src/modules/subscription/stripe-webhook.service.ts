@@ -44,9 +44,15 @@ export class StripeWebhookService {
       case "customer.subscription.deleted":
         return this.onSubscriptionDeleted(event.data.object as Stripe.Subscription);
       case "invoice.paid":
-        return this.onInvoiceStatusChange(event.data.object, SubscriptionStatus.ACTIVE);
+        return this.onInvoiceStatusChange(
+          event.data.object as Stripe.Invoice,
+          SubscriptionStatus.ACTIVE,
+        );
       case "invoice.payment_failed":
-        return this.onInvoiceStatusChange(event.data.object, SubscriptionStatus.PAST_DUE);
+        return this.onInvoiceStatusChange(
+          event.data.object as Stripe.Invoice,
+          SubscriptionStatus.PAST_DUE,
+        );
       default:
         logger.debug({ type: event.type }, "Unhandled Stripe event type");
     }
@@ -85,19 +91,45 @@ export class StripeWebhookService {
   }
 
   private async onInvoiceStatusChange(
-    invoice: Stripe.Event.Data.Object,
+    invoice: Stripe.Invoice,
     status: SubscriptionStatus,
   ): Promise<void> {
-    const subscriptionId = (invoice as { subscription?: string }).subscription;
-    if (!subscriptionId) {
+    const subscriptionId = resolveInvoiceSubscriptionId(invoice);
+
+    if (subscriptionId) {
+      const result = await this.prisma.subscription.updateMany({
+        where: { stripeSubscriptionId: subscriptionId },
+        data: { status },
+      });
+      if (result.count === 0) {
+        logger.warn(
+          { subscriptionId, status },
+          "Invoice status change matched no local subscription",
+        );
+      } else {
+        logger.info({ subscriptionId, status }, "Invoice status updated subscription");
+      }
       return;
     }
 
-    await this.prisma.subscription.updateMany({
-      where: { stripeSubscriptionId: subscriptionId },
-      data: { status },
-    });
-    logger.info({ subscriptionId, status }, "Invoice status updated subscription");
+    // Some invoices omit the subscription reference; fall back to the Stripe customer id.
+    const customerId =
+      typeof invoice.customer === "string" ? invoice.customer : (invoice.customer?.id ?? null);
+    if (customerId) {
+      const result = await this.prisma.subscription.updateMany({
+        where: { stripeCustomerId: customerId },
+        data: { status },
+      });
+      if (result.count > 0) {
+        logger.info({ customerId, status }, "Invoice status updated subscription via customer");
+        return;
+      }
+    }
+
+    logger.warn(
+      { invoiceId: invoice.id, customerId, status },
+      "Invoice status change could not be matched to any subscription",
+    );
   }
 
   private async syncSubscription(stripeSubscription: Stripe.Subscription): Promise<void> {
@@ -150,6 +182,17 @@ export class StripeWebhookService {
   }
 }
 
+/**
+ * Extracts the subscription id from an invoice. There is no top-level `invoice.subscription`
+ * field; the reference lives at `invoice.parent.subscription_details.subscription`.
+ */
+function resolveInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
+  const subscription = invoice.parent?.subscription_details?.subscription;
+  if (typeof subscription === "string") return subscription;
+  if (subscription && typeof subscription === "object") return subscription.id;
+  return null;
+}
+
 function mapStripeStatus(status: Stripe.Subscription.Status): SubscriptionStatus {
   const mapping: Record<string, SubscriptionStatus> = {
     active: SubscriptionStatus.ACTIVE,
@@ -161,5 +204,11 @@ function mapStripeStatus(status: Stripe.Subscription.Status): SubscriptionStatus
     unpaid: SubscriptionStatus.UNPAID,
     paused: SubscriptionStatus.PAUSED,
   };
-  return mapping[status] ?? SubscriptionStatus.ACTIVE;
+  const mapped = mapping[status];
+  if (!mapped) {
+    // Unknown/new Stripe status — never silently grant ACTIVE access; flag for follow-up.
+    logger.warn({ status }, "Unmapped Stripe subscription status; defaulting to INCOMPLETE");
+    return SubscriptionStatus.INCOMPLETE;
+  }
+  return mapped;
 }

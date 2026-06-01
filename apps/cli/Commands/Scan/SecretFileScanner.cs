@@ -1,23 +1,27 @@
-using System.Net.Http.Headers;
-using System.Text;
+using DepVault.Cli.Auth;
 using DepVault.Cli.Commands.Push;
-using DepVault.Cli.Config;
+using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
+using SecretBody = DepVault.Cli.ApiClient.Api.Projects.Item.Secrets.SecretsPostRequestBody;
 
 namespace DepVault.Cli.Commands.Scan;
 
+/// <summary>
+/// Uploads secret files to a project. Each file is encrypted client-side (AES-256-GCM) with the
+/// project DEK before upload — the server is zero-knowledge and only ever stores ciphertext.
+/// </summary>
 internal sealed class SecretFileScanner(
     IOutputFormatter output,
     IConsolePrompter prompter,
     IFileScanner fileScanner,
-    IConfigService configService,
-    ICredentialStore credentialStore,
-    DirectoryVaultMapper vaultMapper)
+    DirectoryVaultMapper vaultMapper,
+    IApiClientFactory clientFactory,
+    DekResolver dekResolver)
 {
-    private HttpClient? httpClient;
+    private byte[]? cachedDek;
 
     public async Task RunAsync(string projectId, string repoPath, ScanResults results, CancellationToken ct)
     {
@@ -67,87 +71,52 @@ internal sealed class SecretFileScanner(
         }
     }
 
-    /// <summary>Uploads a single secret file via multipart/form-data.</summary>
+    /// <summary>Ensures the project DEK is resolved once and cached for the session.</summary>
+    public async Task<bool> EnsureDekAsync(string projectId, CancellationToken ct)
+    {
+        if (cachedDek is not null)
+        {
+            return true;
+        }
+
+        var password = dekResolver.CollectVaultPassword();
+        cachedDek = await AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .StartAsync("Resolving encryption key...", async _ =>
+                await dekResolver.ResolveAsync(projectId, password, ct));
+
+        return cachedDek is not null;
+    }
+
+    /// <summary>Encrypts a secret file client-side and uploads the ciphertext as JSON.</summary>
     public async Task UploadAsync(
         string projectId, DiscoveredFile file,
         string vaultId, CancellationToken ct)
     {
+        if (cachedDek is null && !await EnsureDekAsync(projectId, ct))
+        {
+            throw new InvalidOperationException("Failed to resolve encryption key.");
+        }
+
         var fileBytes = await File.ReadAllBytesAsync(file.FullPath, ct);
-        var baseUrl = configService.Load().Server.TrimEnd('/');
+        var (ciphertext, iv, authTag) = VaultCrypto.EncryptBytes(fileBytes, cachedDek!);
 
-        using var body = BuildMultipartBody(fileBytes, file.FileName, vaultId);
-        var http = GetHttpClient();
+        var body = new SecretBody
+        {
+            EncryptedContent = ciphertext,
+            Iv = iv,
+            AuthTag = authTag,
+            Name = file.FileName,
+            MimeType = GetMimeType(file.FileName),
+            FileSize = fileBytes.Length,
+            VaultId = vaultId,
+        };
 
+        var client = clientFactory.Create();
         await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .StartAsync($"Uploading {file.RelativePath}...", async _ =>
-            {
-                var response = await http.PostAsync(
-                    $"{baseUrl}/api/projects/{projectId}/secrets", body, ct);
-                response.EnsureSuccessStatusCode();
-            });
-    }
-
-    /// <summary>
-    /// Builds multipart/form-data manually to match browser format.
-    /// .NET's MultipartFormDataContent serializes headers in an order
-    /// that Bun's parser doesn't recognize as a file upload.
-    /// </summary>
-    private static ByteArrayContent BuildMultipartBody(
-        byte[] fileBytes, string fileName, string vaultId)
-    {
-        var boundary = "----FormBoundary" + Guid.NewGuid().ToString("N")[..16];
-        using var ms = new MemoryStream();
-
-        // File part — Content-Disposition must come before Content-Type
-        WritePart(ms, boundary);
-        WriteUtf8(ms, $"Content-Disposition: form-data; name=\"file\"; filename=\"{fileName}\"\r\n");
-        WriteUtf8(ms, $"Content-Type: {GetMimeType(fileName)}\r\n");
-        WriteUtf8(ms, "\r\n");
-        ms.Write(fileBytes);
-        WriteUtf8(ms, "\r\n");
-
-        WriteTextField(ms, boundary, "vaultId", vaultId);
-        WriteTextField(ms, boundary, "description", fileName);
-
-        WriteUtf8(ms, $"--{boundary}--\r\n");
-
-        var content = new ByteArrayContent(ms.ToArray());
-        content.Headers.ContentType = MediaTypeHeaderValue.Parse($"multipart/form-data; boundary={boundary}");
-        return content;
-    }
-
-    private static void WritePart(MemoryStream ms, string boundary)
-        => WriteUtf8(ms, $"--{boundary}\r\n");
-
-    private static void WriteTextField(MemoryStream ms, string boundary, string name, string value)
-    {
-        WritePart(ms, boundary);
-        WriteUtf8(ms, $"Content-Disposition: form-data; name=\"{name}\"\r\n");
-        WriteUtf8(ms, "\r\n");
-        WriteUtf8(ms, $"{value}\r\n");
-    }
-
-    private static void WriteUtf8(MemoryStream ms, string value)
-        => ms.Write(Encoding.UTF8.GetBytes(value));
-
-    private HttpClient GetHttpClient()
-    {
-        if (httpClient is not null)
-        {
-            return httpClient;
-        }
-
-        httpClient = new HttpClient();
-        var creds = credentialStore.Load();
-
-        if (creds?.AccessToken is not null)
-        {
-            httpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", creds.AccessToken);
-        }
-
-        return httpClient;
+                await client.Api.Projects[projectId].Secrets.PostAsync(body, cancellationToken: ct));
     }
 
     private static string GetMimeType(string fileName)

@@ -64,24 +64,14 @@ public sealed class DirectoryVaultMapper(
             var fileNames = string.Join(", ", dirGroup.Select(f => f.FileName));
             AnsiConsole.MarkupLine($"[cyan1]{Markup.Escape(dir)}/[/] [grey]({Markup.Escape(fileNames)})[/]");
 
-            // 1) directoryPath exact match
+            // 1) directoryPath exact match — the durable, unambiguous link for re-pushes.
             var match = existingVaults.FirstOrDefault(v =>
                 !string.IsNullOrEmpty(v.DirectoryPath) &&
                 string.Equals(v.DirectoryPath, dir, StringComparison.OrdinalIgnoreCase));
 
-            // 2) tag match (from filename → blessed tag)
-            if (match is null)
-            {
-                var fileTags = TagSuggester.SuggestForFiles(dirGroup);
-                if (fileTags.Count > 0)
-                {
-                    match = existingVaults.FirstOrDefault(v =>
-                        v.Tags is not null &&
-                        fileTags.All(t => v.Tags.Any(vt => string.Equals(vt, t, StringComparison.OrdinalIgnoreCase))));
-                }
-            }
-
-            // 3) name match (suggested from directory)
+            // 2) name match (suggested from directory). Tags (dev/prod) are stored as vault
+            //    metadata but deliberately NOT used for matching — they would collapse unrelated
+            //    directories (every .NET folder yields dev+prod) into the first such vault.
             match ??= existingVaults.FirstOrDefault(v =>
                 string.Equals(v.Name, SuggestName(dir), StringComparison.OrdinalIgnoreCase));
 
