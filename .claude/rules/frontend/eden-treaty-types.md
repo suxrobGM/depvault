@@ -5,45 +5,43 @@ paths: [apps/frontend/src/types/api/**]
 
 # Eden Treaty Type Aliases
 
-## Parameterized Routes
+## Dot notation
 
-Eden Treaty represents parameterized route segments (`:id`, `:projectId`, etc.) as **callable functions**, not indexable properties. You cannot use bracket notation like `[":id"]`.
-
-Use `ReturnType<>` to extract the sub-route type:
+Use dot notation, not bracket notation. Alias the endpoint, then derive:
 
 ```typescript
-// WRONG — will error with "Property ':id' does not exist"
-(typeof client)["api"]["projects"][":id"]["get"];
-
-// CORRECT — use ReturnType to unwrap the callable
-type ProjectById = ReturnType<(typeof client)["api"]["projects"]>;
-ProjectById["get"];
+type Projects = typeof client.api.projects;
+type ProjectById = ReturnType<Projects>; // unwrap parameterized (:id) routes
 ```
 
-For nested parameterized routes, chain `ReturnType`:
+Chain `ReturnType` for nested params: `ReturnType<ProjectById["analyses"]>`.
+
+## Utility types (`./utils`)
 
 ```typescript
-type AnalysesByProject = ReturnType<(typeof client)["api"]["analyses"]["project"]>;
-type AnalysisById = ReturnType<AnalysesByProject>;
-AnalysisById["get"];
+import type { Body, Data, Query } from "./utils";
+
+export type ProjectDetailDto = Data<ProjectById["get"]>; // response data
+export type CreateCiTokenBody = Body<ProjectById["ci-tokens"]["post"]>; // request body
+export type ActivityQueryDto = Query<typeof client.api.activity.get>; // query params
 ```
 
-## Data Utility Type
+Use `Body<T>`, never `Parameters<T>[0]`.
 
-Use the `Data<T>` helper from `./utils` to extract response data:
+## Naming
+
+`Dto` suffix on responses/items (`ProjectDto`, `ProjectDetailDto`, `XListResponseDto`,
+`XDto = XListResponseDto["items"][number]`). Keep `CreateXBody`/`UpdateXBody` and enum extracts
+(`AuditAction`, `NotificationType`) without the suffix.
+
+## Query keys
+
+Never hardcode key arrays — use the `@/lib/query-keys` factory:
 
 ```typescript
-import type { Data } from "./utils";
-
-export type ProjectResponse = Data<ProjectById["get"]>;
+useApiQuery(queryKeys.projects.detail(projectId), () =>
+  client.api.projects({ id: projectId }).get(),
+);
 ```
 
-The `Data<T>` type wraps `Treaty.Data<T>` with `NonNullable`. Its generic constraint is `T extends (...args: any[]) => any`.
-
-## Non-parameterized Routes
-
-Routes without parameters can use direct bracket notation:
-
-```typescript
-export type ProjectListResponse = Data<(typeof client)["api"]["projects"]["get"]>;
-```
+Factories return `as const` tuples with a stable root token, so prefix invalidation works.
