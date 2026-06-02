@@ -2,25 +2,10 @@
 
 import { useState, type ReactElement } from "react";
 import { decryptBinary, encrypt } from "@depvault/crypto";
-import {
-  Delete as DeleteIcon,
-  Download as DownloadIcon,
-  Save as SaveIcon,
-  Share as ShareIcon,
-} from "@mui/icons-material";
-import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Skeleton,
-  Stack,
-  Tab,
-  Tabs,
-  Typography,
-} from "@mui/material";
+import { Save as SaveIcon } from "@mui/icons-material";
+import { Alert, Button, Skeleton, Stack, Tab, Tabs } from "@mui/material";
 import { CreateFileShareDialog, type ShareableFile } from "@/components/features/share-link";
+import { RevealOverlay } from "@/components/ui/feedback";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useConfirm } from "@/hooks/use-confirm";
@@ -30,10 +15,11 @@ import { client } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import type { RepoFileContentDto, SaveRepoFileBody } from "@/types/api/repo";
 import { downloadFile } from "@/utils/download-file";
-import { formatBytes } from "@/utils/formatters";
 import { CodeEditorLazy } from "./code-editor-lazy";
+import { containsDetectedSecret } from "./detect-secret";
 import { EnvFormEditor } from "./env-form-editor";
-import { binaryPlaceholder, resolveLanguage, supportsKeyValueForm } from "./file-format";
+import { FileEditorToolbar } from "./file-editor-toolbar";
+import { basename, binaryPlaceholder, resolveLanguage, supportsKeyValueForm } from "./file-format";
 import { FileVersions } from "./file-versions";
 import { ReviewChangesDialog } from "./review-changes-dialog";
 import { useDecryptedText } from "./use-decrypted-text";
@@ -62,6 +48,7 @@ export function FileEditor(props: FileEditorProps): ReactElement {
   const [reviewOpen, setReviewOpen] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [shareFile, setShareFile] = useState<ShareableFile | null>(null);
+  const [revealed, setRevealed] = useState(false);
 
   const { data: content, isLoading } = useApiQuery<RepoFileContentDto>(
     queryKeys.repo.fileContent(projectId, fileId),
@@ -109,12 +96,13 @@ export function FileEditor(props: FileEditorProps): ReactElement {
   const currentText = draft ?? text ?? "";
   const isDirty = draft !== null && draft !== (text ?? "");
   const downloadMime = content.mimeType ?? "application/octet-stream";
+  const shouldBlur = isSecret || containsDetectedSecret(text ?? "", language);
 
   const handleDownload = async () => {
     setDownloading(true);
     try {
       const dek = await getProjectDEK(projectId);
-      const fileName = content.relativePath.split("/").pop() ?? content.relativePath;
+      const fileName = basename(content.relativePath);
       if (content.isBinary) {
         const buffer = await decryptBinary(
           content.encryptedContent,
@@ -135,7 +123,7 @@ export function FileEditor(props: FileEditorProps): ReactElement {
 
   const handleShare = async () => {
     try {
-      const fileName = content.relativePath.split("/").pop() ?? content.relativePath;
+      const fileName = basename(content.relativePath);
       if (content.isBinary) {
         const dek = await getProjectDEK(projectId);
         const buffer = await decryptBinary(
@@ -178,56 +166,16 @@ export function FileEditor(props: FileEditorProps): ReactElement {
 
   return (
     <Stack spacing={2}>
-      <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", rowGap: 1 }}>
-        <Typography variant="subtitle1" sx={{ fontFamily: "monospace", fontWeight: 600 }}>
-          {content.relativePath}
-        </Typography>
-        <Chip
-          size="small"
-          label={isSecret ? "Secret" : "Config"}
-          color={isSecret ? "warning" : "info"}
-          variant="outlined"
-        />
-        {content.environmentSlug && (
-          <Chip size="small" label={content.environmentSlug} variant="outlined" />
-        )}
-        <Chip
-          size="small"
-          label={isSecret ? (content.mimeType ?? "binary") : language.toUpperCase()}
-          variant="outlined"
-        />
-        <Box sx={{ flex: 1 }} />
-        <Typography variant="captionMuted">{formatBytes(content.fileSize)}</Typography>
-        <Button
-          size="small"
-          startIcon={
-            downloading ? <CircularProgress size={14} /> : <DownloadIcon fontSize="small" />
-          }
-          disabled={downloading}
-          onClick={handleDownload}
-        >
-          Download
-        </Button>
-        <Button
-          size="small"
-          startIcon={<ShareIcon fontSize="small" />}
-          disabled={!content.isBinary && (!!error || isDecrypting)}
-          onClick={handleShare}
-        >
-          Share via link
-        </Button>
-        {canEdit && (
-          <Button
-            size="small"
-            color="error"
-            startIcon={<DeleteIcon fontSize="small" />}
-            disabled={deleteMutation.isPending}
-            onClick={handleDelete}
-          >
-            Delete
-          </Button>
-        )}
-      </Stack>
+      <FileEditorToolbar
+        content={content}
+        canEdit={canEdit}
+        onDownload={handleDownload}
+        downloading={downloading}
+        onShare={handleShare}
+        shareDisabled={!content.isBinary && (!!error || isDecrypting)}
+        onDelete={handleDelete}
+        deleting={deleteMutation.isPending}
+      />
 
       {content.isBinary ? (
         <>
@@ -257,12 +205,18 @@ export function FileEditor(props: FileEditorProps): ReactElement {
           )}
 
           {tab === "raw" && (
-            <CodeEditorLazy
-              value={currentText}
-              language={language}
-              readOnly={!canEdit}
-              onChange={canEdit ? setDraft : undefined}
-            />
+            <RevealOverlay
+              blurred={!revealed && shouldBlur}
+              onReveal={() => setRevealed(true)}
+              label={isSecret ? "This file is a secret" : "Contains detected secrets"}
+            >
+              <CodeEditorLazy
+                value={currentText}
+                language={language}
+                readOnly={!canEdit}
+                onChange={canEdit ? setDraft : undefined}
+              />
+            </RevealOverlay>
           )}
 
           {tab === "history" && (

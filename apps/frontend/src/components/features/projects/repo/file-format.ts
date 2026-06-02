@@ -1,10 +1,27 @@
 /** File-format helpers shared across the repo browser editor + diff views. */
 
-export type EditorLanguage = "json" | "yaml" | "env" | "plain";
+export type EditorLanguage = "json" | "yaml" | "env" | "xml" | "plain";
 
-const JSON_FORMATS = new Set(["json", "appsettings", "jsonc"]);
-const YAML_FORMATS = new Set(["yaml", "yml"]);
-const ENV_FORMATS = new Set(["env", "dotenv"]);
+/**
+ * Maps both backend `format` values and file extensions (sans dot) to an editor
+ * language. The single source of truth for both resolution paths in
+ * `resolveLanguage` — add a new file type here once, not in two if-chains.
+ */
+const LANGUAGE_BY_TOKEN: Record<string, EditorLanguage> = {
+  json: "json",
+  appsettings: "json",
+  jsonc: "json",
+  yaml: "yaml",
+  yml: "yaml",
+  env: "env",
+  dotenv: "env",
+  xml: "xml",
+  csproj: "xml",
+  props: "xml",
+  targets: "xml",
+  plist: "xml",
+  config: "xml",
+};
 
 /**
  * Resolve a CodeMirror-friendly language from the backend `format` field,
@@ -12,16 +29,27 @@ const ENV_FORMATS = new Set(["env", "dotenv"]);
  * `format`, so they rely entirely on the extension fallback.
  */
 export function resolveLanguage(format: string | null, relativePath: string): EditorLanguage {
-  const fmt = format?.toLowerCase() ?? "";
-  if (JSON_FORMATS.has(fmt)) return "json";
-  if (YAML_FORMATS.has(fmt)) return "yaml";
-  if (ENV_FORMATS.has(fmt)) return "env";
+  const byFormat = LANGUAGE_BY_TOKEN[format?.toLowerCase() ?? ""];
+  if (byFormat) {
+    return byFormat;
+  }
 
   const lower = relativePath.toLowerCase();
-  if (lower.endsWith(".json")) return "json";
-  if (lower.endsWith(".yaml") || lower.endsWith(".yml")) return "yaml";
-  if (lower.includes(".env") || lower.endsWith("env")) return "env";
+  const ext = lower.includes(".") ? lower.slice(lower.lastIndexOf(".") + 1) : "";
+  const byExt = LANGUAGE_BY_TOKEN[ext];
+
+  if (byExt) {
+    return byExt;
+  }
+  if (lower.includes(".env") || lower.endsWith("env")) {
+    return "env";
+  }
   return "plain";
+}
+
+/** The final path segment of a relative path (e.g. `a/b/c.json` → `c.json`). */
+export function basename(relativePath: string): string {
+  return relativePath.split("/").pop() ?? relativePath;
 }
 
 /** Whether the decrypted text can be edited as structured key/value pairs. */

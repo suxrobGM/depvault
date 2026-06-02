@@ -3,9 +3,13 @@
 import { type ReactElement } from "react";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
+import { z } from "zod/v4";
 import { FormTextField } from "@/components/ui/form";
 import { FileDiffViewerLazy } from "./code-editor-lazy";
-import { saveFileSchema } from "./schemas";
+
+const saveFileSchema = z.object({
+  message: z.string().max(200, "Message must be 200 characters or fewer"),
+});
 
 interface ReviewChangesDialogProps {
   open: boolean;

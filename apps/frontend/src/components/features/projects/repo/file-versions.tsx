@@ -24,11 +24,7 @@ import { useApiQuery } from "@/hooks/use-api-query";
 import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
-import type {
-  RepoFileVersionContentDto,
-  RepoFileVersionDto,
-  RepoFileVersionListResponseDto,
-} from "@/types/api/repo";
+import type { RepoFileVersionDto, RepoFileVersionListResponseDto } from "@/types/api/repo";
 import { formatBytes, formatDateTime } from "@/utils/formatters";
 import { FileDiffViewerLazy } from "./code-editor-lazy";
 import { binaryPlaceholder } from "./file-format";
@@ -104,13 +100,7 @@ export function FileVersions(props: FileVersionsProps): ReactElement {
 
     try {
       const dek = await getProjectDEK(projectId);
-      const versionContent = content as RepoFileVersionContentDto;
-      const oldText = await decrypt(
-        versionContent.encryptedContent,
-        versionContent.iv,
-        versionContent.authTag,
-        dek,
-      );
+      const oldText = await decrypt(content.encryptedContent, content.iv, content.authTag, dek);
       setDiff({ versionLabel: label, oldText, newText: currentText ?? "" });
     } catch {
       // Decryption failures are surfaced silently here; the diff panel just won't open.

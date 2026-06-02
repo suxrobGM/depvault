@@ -5,3 +5,4 @@ export { SelectField, type SelectOption } from "./select-field";
 export { FileUploadButton, type FileUploadResult } from "./file-upload-button";
 export { LinkButton } from "./link-button";
 export { LinkTab } from "./link-tab";
+export { MaskedTextField } from "./masked-text-field";

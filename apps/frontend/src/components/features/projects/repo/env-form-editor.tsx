@@ -3,6 +3,8 @@
 import { type ReactElement } from "react";
 import { Add as AddIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { Box, Button, IconButton, Stack, TextField, Typography } from "@mui/material";
+import { MaskedTextField } from "@/components/ui/inputs";
+import { looksLikeSecret } from "@/utils/detect-secret";
 import { parseEnv, serializeEnv, type KeyValueRow } from "./file-format";
 
 interface EnvFormEditorProps {
@@ -55,13 +57,12 @@ export function EnvFormEditor(props: EnvFormEditorProps): ReactElement {
             sx={{ flex: "0 0 38%", "& input": { fontFamily: "monospace" } }}
           />
           <Box sx={{ color: "text.disabled", fontFamily: "monospace" }}>=</Box>
-          <TextField
-            size="small"
+          <MaskedTextField
             label="Value"
             value={row.value}
-            disabled={readOnly}
-            onChange={(e) => updateRow(index, { value: e.target.value })}
-            sx={{ flex: 1, "& input": { fontFamily: "monospace" } }}
+            readOnly={readOnly}
+            secret={looksLikeSecret(row.value, row.key)}
+            onChange={(value) => updateRow(index, { value })}
           />
           {!readOnly && (
             <IconButton size="small" aria-label="Remove pair" onClick={() => removeRow(index)}>

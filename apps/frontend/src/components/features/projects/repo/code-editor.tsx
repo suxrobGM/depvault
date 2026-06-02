@@ -2,10 +2,12 @@
 
 import { type ReactElement } from "react";
 import { json } from "@codemirror/lang-json";
+import { xml } from "@codemirror/lang-xml";
 import { yaml } from "@codemirror/lang-yaml";
 import { EditorView } from "@codemirror/view";
 import { useTheme } from "@mui/material";
 import CodeMirror, { type Extension } from "@uiw/react-codemirror";
+import { dotenvLanguage } from "./dotenv-language";
 import type { EditorLanguage } from "./file-format";
 
 interface CodeEditorProps {
@@ -31,6 +33,8 @@ export function CodeEditor(props: CodeEditorProps): ReactElement {
   const extensions: Extension[] = [EditorView.lineWrapping];
   if (language === "json") extensions.push(json());
   if (language === "yaml") extensions.push(yaml());
+  if (language === "xml") extensions.push(xml());
+  if (language === "env") extensions.push(dotenvLanguage);
 
   return (
     <CodeMirror
@@ -44,7 +48,7 @@ export function CodeEditor(props: CodeEditorProps): ReactElement {
       maxHeight={`${maxHeight}px`}
       basicSetup={{
         lineNumbers: true,
-        foldGutter: language === "json" || language === "yaml",
+        foldGutter: language === "json" || language === "yaml" || language === "xml",
         highlightActiveLine: !readOnly,
         autocompletion: false,
       }}
