@@ -14,6 +14,24 @@ paths: [apps/cli/**]
 - Spectre.Console for all UI rendering
 - REPL mode with persistent banner and vault status and non-interactive mode for CI/CD
 
+## Static vs DI
+
+A class is **static** only when it is pure: stateless, deterministic, and free of IO, network,
+subprocess, or rendering. Examples kept static: `VaultCrypto`, `AppRootResolver`, `EnvSlugResolver`,
+`EcosystemResolver`, `BinaryDetector`, `PlaceholderFilter`, `SecretPatterns`, `FormatUtils`,
+`RegexPatterns`, `Constants`, `ConsoleTheme`, `CommandUtils`.
+
+Anything with state, IO, network, a subprocess, or rendering is a **DI service** (interface +
+singleton registered in `Startup.cs`): e.g. `IRepositoryLocator`, `IProjectContextResolver`,
+`RepoFileUploadService`, `DekService`, `IConfigService`, `ICredentialStore`, `IFileScanner`.
+
+**Presentation boundary:** errors/success/structured output go through `IOutputFormatter` /
+`ConsoleRenderer`. Transient `AnsiConsole.Status` spinners and `IConsolePrompter` prompts may stay
+inline in command handlers (Spectre widgets can't be meaningfully abstracted), but services return
+results/errors rather than rendering them.
+
+**AOT:** constructor injection only — no new reflection and no new `JsonSerializerContext` entries.
+
 ## Auth Modes
 
 - JWT mode: credentials stored in `~/.depvault/credentials.json` (interactive users)

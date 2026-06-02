@@ -36,8 +36,8 @@ Recovery Key (random 256-bit, shown once at vault setup)
 | Backend  | `apps/backend/prisma/schema/repo-file.prisma`                | `RepoFile`/`RepoFileVersion` (encrypted blobs; `kind` = CONFIG \| SECRET; keyed by `(projectId, relativePath)`) |
 | Backend  | `apps/backend/prisma/schema/share-link.prisma`               | `ShareLink` (one-time encrypted file shares)                                                                    |
 | CLI      | `apps/cli/Crypto/VaultCrypto.cs`                             | .NET AES-256-GCM, PBKDF2, HKDF                                                                                  |
-| CLI      | `apps/cli/Crypto/DekResolver.cs`                             | Resolves project DEK for pull/push (vault password or CI token)                                                 |
-| CLI      | `apps/cli/Commands/Push/`, `apps/cli/Commands/Pull/`         | `RepoFilePusher`, `RepoFilePuller` (whole-file blobs, `kind`-aware)                                             |
+| CLI      | `apps/cli/Crypto/DekService.cs`                              | Resolves project DEK for pull/push (vault password or CI token)                                                 |
+| CLI      | `apps/cli/Services/RepoFileUploadService.cs`, `apps/cli/Commands/Pull/` | `RepoFileUploadService` (push), `RepoFilePuller` (pull) — whole-file blobs, `kind`-aware              |
 | CLI      | `apps/cli/Services/AppRootResolver.cs`, `EnvSlugResolver.cs` | Infer owning App (project-marker walk) and environment slug (filename)                                          |
 
 ## Data Flows

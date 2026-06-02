@@ -16,7 +16,7 @@ namespace DepVault.Cli.Commands;
 /// </summary>
 public sealed class PullCommands(
     CommandContext ctx,
-    DekResolver dekResolver,
+    DekService dekService,
     RepoFilePuller repoFilePuller)
 {
     private const string BaseSlug = "base";
@@ -98,11 +98,7 @@ public sealed class PullCommands(
                 return;
             }
 
-            var password = dekResolver.CollectVaultPassword();
-            var dek = await AnsiConsole.Status()
-                .Spinner(Spinner.Known.Dots)
-                .StartAsync("Resolving encryption key...", async _ =>
-                    await dekResolver.ResolveAsync(pc.ProjectId, password, ct));
+            var dek = await dekService.CollectPasswordAndResolveAsync(pc.ProjectId, ct);
 
             if (dek is null)
             {

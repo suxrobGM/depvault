@@ -11,7 +11,7 @@ using GrantType = DepVault.Cli.ApiClient.Api.Projects.Item.Keygrants.KeygrantsPo
 namespace DepVault.Cli.Crypto;
 
 /// <summary>Resolves the Data Encryption Key (DEK) for client-side vault crypto.</summary>
-public sealed class DekResolver(
+public sealed class DekService(
     IApiClientFactory clientFactory,
     ICredentialStore credentialStore,
     IConsolePrompter prompter,
@@ -49,6 +49,20 @@ public sealed class DekResolver(
         return prompter.AskSecret("Enter vault password");
     }
 
+    /// <summary>
+    /// Collects the vault password first (outside any Spectre <c>Status</c> — Spectre throws if a
+    /// prompt runs inside a live display), then resolves the DEK under a progress spinner. This is
+    /// the one-call entry point used by push, pull, and scan.
+    /// </summary>
+    public async Task<byte[]?> CollectPasswordAndResolveAsync(string projectId, CancellationToken ct)
+    {
+        var password = CollectVaultPassword();
+        return await AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .StartAsync("Resolving encryption key...", async _ =>
+                await ResolveAsync(projectId, password, ct));
+    }
+
     /// <summary>Resolves the DEK bytes by unwrapping from CI token or vault password.</summary>
     public async Task<byte[]?> ResolveAsync(string projectId, string? vaultPassword, CancellationToken ct)
     {
@@ -57,7 +71,8 @@ public sealed class DekResolver(
             : await ResolveJwtDekAsync(projectId, vaultPassword, ct);
     }
 
-    private async Task<byte[]?> ResolveCiDekAsync(CancellationToken ct)
+    /// <summary>Unwraps the project DEK from the CI secrets endpoint using the CI token wrap key.</summary>
+    public async Task<byte[]?> ResolveCiDekAsync(CancellationToken ct)
     {
         var rawToken = Environment.GetEnvironmentVariable(Constants.CiTokenEnvVar)!;
         var client = clientFactory.Create();
@@ -134,7 +149,9 @@ public sealed class DekResolver(
             // Verify the KEK by unwrapping the server-stored wrapped private key.
             // Without this, a wrong password silently produces a new SELF grant
             // wrapped with an unusable KEK, corrupting future decrypts.
-            if (!VerifyKek(kek, vaultStatus))
+            if (!VaultCrypto.VerifyKek(
+                    vaultStatus.WrappedPrivateKey ?? "", vaultStatus.WrappedPrivateKeyIv ?? "",
+                    vaultStatus.WrappedPrivateKeyTag ?? "", kek))
             {
                 CryptographicOperations.ZeroMemory(kek);
                 AnsiConsole.MarkupLine("[red]Incorrect vault password.[/]");
@@ -200,35 +217,6 @@ public sealed class DekResolver(
         {
             PrintKeyGrantError();
             return null;
-        }
-    }
-
-    /// <summary>
-    /// Verifies a candidate KEK by attempting to unwrap the server-stored wrapped private key.
-    /// A successful unwrap proves the KEK was derived from the correct password and salt; a
-    /// failed unwrap (AES-GCM auth tag mismatch) proves it was not. Returns true on success.
-    /// </summary>
-    private static bool VerifyKek(byte[] kek, ApiClient.Api.Vault.Status.StatusGetResponse status)
-    {
-        if (string.IsNullOrEmpty(status.WrappedPrivateKey) ||
-            string.IsNullOrEmpty(status.WrappedPrivateKeyIv) ||
-            string.IsNullOrEmpty(status.WrappedPrivateKeyTag))
-        {
-            // Vault has no wrapped private key yet — can't verify, but this shouldn't happen
-            // for a fully-initialized vault. Allow through rather than block on bad server state.
-            return true;
-        }
-
-        try
-        {
-            var raw = VaultCrypto.UnwrapKey(
-                status.WrappedPrivateKey, status.WrappedPrivateKeyIv, status.WrappedPrivateKeyTag, kek);
-            CryptographicOperations.ZeroMemory(raw);
-            return true;
-        }
-        catch (CryptographicException)
-        {
-            return false;
         }
     }
 

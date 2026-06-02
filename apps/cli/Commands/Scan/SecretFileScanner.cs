@@ -1,11 +1,7 @@
-using DepVault.Cli.Auth;
-using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
-using PushBody = DepVault.Cli.ApiClient.Api.Projects.Item.Files.Push.PushPostRequestBody;
-using RepoFileKind = DepVault.Cli.ApiClient.Api.Projects.Item.Files.Push.PushPostRequestBody_kind;
 
 namespace DepVault.Cli.Commands.Scan;
 
@@ -18,12 +14,16 @@ internal sealed class SecretFileScanner(
     IOutputFormatter output,
     IConsolePrompter prompter,
     IFileScanner fileScanner,
-    IApiClientFactory clientFactory,
-    DekResolver dekResolver)
+    RepoFileUploadService uploadService)
 {
-    private byte[]? cachedDek;
-
-    public async Task RunAsync(string projectId, string repoPath, ScanResults results, CancellationToken ct)
+    /// <summary>
+    /// Discovers and (after selection) uploads secret files. The DEK is supplied lazily so the
+    /// vault password is collected at most once per scan, and only when the user actually selects
+    /// files to upload.
+    /// </summary>
+    public async Task RunAsync(
+        string projectId, string repoPath, ScanResults results,
+        Lazy<Task<byte[]?>> dek, CancellationToken ct)
     {
         var files = fileScanner.FindSecretFiles(repoPath);
         if (files.Count == 0)
@@ -43,7 +43,8 @@ internal sealed class SecretFileScanner(
             return;
         }
 
-        if (!await EnsureDekAsync(projectId, ct))
+        var key = await dek.Value;
+        if (key is null)
         {
             return;
         }
@@ -52,7 +53,7 @@ internal sealed class SecretFileScanner(
         {
             try
             {
-                await UploadAsync(projectId, repoPath, file, ct);
+                await uploadService.UploadAsync(projectId, repoPath, file, key, ct);
                 results.SecretFilesUploaded++;
                 output.PrintSuccess($"Uploaded {file.RelativePath}");
             }
@@ -61,75 +62,6 @@ internal sealed class SecretFileScanner(
                 ApiErrorHandler.HandleError(ex, $"Failed to upload {file.RelativePath}");
             }
         }
-    }
-
-    /// <summary>Ensures the project DEK is resolved once and cached for the session.</summary>
-    public async Task<bool> EnsureDekAsync(string projectId, CancellationToken ct)
-    {
-        if (cachedDek is not null)
-        {
-            return true;
-        }
-
-        var password = dekResolver.CollectVaultPassword();
-        cachedDek = await AnsiConsole.Status()
-            .Spinner(Spinner.Known.Dots)
-            .StartAsync("Resolving encryption key...", async _ =>
-                await dekResolver.ResolveAsync(projectId, password, ct));
-
-        return cachedDek is not null;
-    }
-
-    /// <summary>Encrypts a secret file client-side and uploads the ciphertext as one blob.</summary>
-    public async Task UploadAsync(
-        string projectId, string repoPath, DiscoveredFile file, CancellationToken ct)
-    {
-        if (cachedDek is null && !await EnsureDekAsync(projectId, ct))
-        {
-            throw new InvalidOperationException("Failed to resolve encryption key.");
-        }
-
-        var fileBytes = await File.ReadAllBytesAsync(file.FullPath, ct);
-        var (appPath, appName) = AppRootResolver.Resolve(repoPath, file.RelativePath);
-        var envSlug = EnvSlugResolver.Resolve(file.FileName);
-        var isBinary = BinaryDetector.IsBinary(fileBytes);
-        var (ciphertext, iv, authTag) = VaultCrypto.EncryptBytes(fileBytes, cachedDek!);
-
-        var body = new PushBody
-        {
-            AppPath = appPath,
-            AppName = appName,
-            Kind = RepoFileKind.SECRET,
-            RelativePath = file.RelativePath,
-            EnvironmentSlug = envSlug,
-            EncryptedContent = ciphertext,
-            Iv = iv,
-            AuthTag = authTag,
-            MimeType = GetMimeType(file.FileName),
-            FileSize = fileBytes.Length,
-            IsBinary = isBinary,
-        };
-
-        var client = clientFactory.Create();
-        await AnsiConsole.Status()
-            .Spinner(Spinner.Known.Dots)
-            .StartAsync($"Uploading {file.RelativePath}...", async _ =>
-                await client.Api.Projects[projectId].Files.Push.PostAsync(body, cancellationToken: ct));
-    }
-
-    private static string GetMimeType(string fileName)
-    {
-        var ext = Path.GetExtension(fileName).ToLowerInvariant();
-        return ext switch
-        {
-            ".json" => "application/json",
-            ".plist" => "application/xml",
-            ".yaml" or ".yml" => "application/x-yaml",
-            ".pem" or ".key" => "application/x-pem-file",
-            ".p12" or ".pfx" => "application/x-pkcs12",
-            ".jks" or ".keystore" => "application/x-java-keystore",
-            _ => "application/octet-stream"
-        };
     }
 
     private static void PrintFileTree(List<DiscoveredFile> files)

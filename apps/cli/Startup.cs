@@ -3,7 +3,6 @@ using DepVault.Cli.Auth;
 using DepVault.Cli.Commands;
 using DepVault.Cli.Commands.Env;
 using DepVault.Cli.Commands.Pull;
-using DepVault.Cli.Commands.Push;
 using DepVault.Cli.Commands.Scan;
 using DepVault.Cli.Config;
 using DepVault.Cli.Crypto;
@@ -36,7 +35,7 @@ internal static class Startup
             .AddSingleton<ConsoleRenderer>()
             .AddSingleton<CommandContext>()
             .AddSingleton<VaultState>()
-            .AddSingleton<DekResolver>()
+            .AddSingleton<DekService>()
             .AddSingleton<AnalysisClient>()
             // Scan steps
             .AddSingleton<ProjectResolver>()
@@ -46,7 +45,7 @@ internal static class Startup
             .AddSingleton<SecretFileScanner>()
             // Shared resolvers
             .AddSingleton<VaultResolver>()
-            .AddSingleton<RepoFilePusher>()
+            .AddSingleton<RepoFileUploadService>()
             .AddSingleton<RepoFilePuller>()
             // Commands
             .AddSingleton<AuthCommands>()

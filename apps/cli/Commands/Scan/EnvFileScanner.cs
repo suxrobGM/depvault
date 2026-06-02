@@ -1,11 +1,7 @@
-using DepVault.Cli.Auth;
-using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
-using PushBody = DepVault.Cli.ApiClient.Api.Projects.Item.Files.Push.PushPostRequestBody;
-using RepoFileKind = DepVault.Cli.ApiClient.Api.Projects.Item.Files.Push.PushPostRequestBody_kind;
 
 namespace DepVault.Cli.Commands.Scan;
 
@@ -18,12 +14,16 @@ internal sealed class EnvFileScanner(
     IOutputFormatter output,
     IConsolePrompter prompter,
     IFileScanner fileScanner,
-    IApiClientFactory clientFactory,
-    DekResolver dekResolver)
+    RepoFileUploadService uploadService)
 {
-    private byte[]? cachedDek;
-
-    public async Task RunAsync(string projectId, string repoPath, ScanResults results, CancellationToken ct)
+    /// <summary>
+    /// Discovers and (after selection) uploads env/config files. The DEK is supplied lazily so the
+    /// vault password is collected at most once per scan, and only when the user actually selects
+    /// files to push.
+    /// </summary>
+    public async Task RunAsync(
+        string projectId, string repoPath, ScanResults results,
+        Lazy<Task<byte[]?>> dek, CancellationToken ct)
     {
         var files = fileScanner.FindEnvFiles(repoPath);
         if (files.Count == 0)
@@ -46,7 +46,8 @@ internal sealed class EnvFileScanner(
             return;
         }
 
-        if (!await EnsureDekAsync(projectId, ct))
+        var key = await dek.Value;
+        if (key is null)
         {
             return;
         }
@@ -57,7 +58,7 @@ internal sealed class EnvFileScanner(
         {
             try
             {
-                await UploadAsync(projectId, repoPath, file, ct);
+                await uploadService.UploadAsync(projectId, repoPath, file, key, ct);
                 results.ConfigFilesPushed++;
                 output.PrintSuccess($"Pushed {file.RelativePath}");
             }
@@ -66,80 +67,6 @@ internal sealed class EnvFileScanner(
                 ApiErrorHandler.HandleError(ex, $"Failed to push {file.RelativePath}");
             }
         }
-    }
-
-    /// <summary>Ensures the project DEK is resolved once and cached for the session.</summary>
-    public async Task<bool> EnsureDekAsync(string projectId, CancellationToken ct)
-    {
-        if (cachedDek is not null)
-        {
-            return true;
-        }
-
-        var password = dekResolver.CollectVaultPassword();
-        cachedDek = await AnsiConsole.Status()
-            .Spinner(Spinner.Known.Dots)
-            .StartAsync("Resolving encryption key...", async _ =>
-                await dekResolver.ResolveAsync(projectId, password, ct));
-
-        return cachedDek is not null;
-    }
-
-    /// <summary>Encrypts a config file client-side and uploads the ciphertext as one blob.</summary>
-    private async Task UploadAsync(
-        string projectId, string repoPath, DiscoveredFile file, CancellationToken ct)
-    {
-        if (cachedDek is null && !await EnsureDekAsync(projectId, ct))
-        {
-            throw new InvalidOperationException("Failed to resolve encryption key.");
-        }
-
-        var fileBytes = await File.ReadAllBytesAsync(file.FullPath, ct);
-        var (appPath, appName) = AppRootResolver.Resolve(repoPath, file.RelativePath);
-        var envSlug = EnvSlugResolver.Resolve(file.FileName);
-        var isBinary = BinaryDetector.IsBinary(fileBytes);
-        var (ciphertext, iv, authTag) = VaultCrypto.EncryptBytes(fileBytes, cachedDek!);
-
-        var body = new PushBody
-        {
-            AppPath = appPath,
-            AppName = appName,
-            Kind = RepoFileKind.CONFIG,
-            RelativePath = file.RelativePath,
-            Format = DetectFormat(file.FileName),
-            EnvironmentSlug = envSlug,
-            EncryptedContent = ciphertext,
-            Iv = iv,
-            AuthTag = authTag,
-            FileSize = fileBytes.Length,
-            IsBinary = isBinary,
-        };
-
-        var client = clientFactory.Create();
-        await AnsiConsole.Status()
-            .Spinner(Spinner.Known.Dots)
-            .StartAsync($"Pushing {file.RelativePath}...", async _ =>
-                await client.Api.Projects[projectId].Files.Push.PostAsync(body, cancellationToken: ct));
-    }
-
-    /// <summary>Infers a coarse config format slug from the file name extension.</summary>
-    internal static string DetectFormat(string fileName)
-    {
-        if (fileName.StartsWith(".env", StringComparison.OrdinalIgnoreCase))
-        {
-            return "env";
-        }
-
-        var ext = Path.GetExtension(fileName).ToLowerInvariant();
-        return ext switch
-        {
-            ".json" => "json",
-            ".yaml" or ".yml" => "yaml",
-            ".toml" => "toml",
-            ".xml" or ".config" => "xml",
-            ".ini" => "ini",
-            _ => "env"
-        };
     }
 
     private static void PrintFileTree(List<DiscoveredFile> files)

@@ -12,7 +12,8 @@ namespace DepVault.Cli.Commands;
 /// every config/secret blob to disk verbatim. All decryption happens client-side — the server
 /// only ever returns ciphertext.
 /// </summary>
-public sealed class CiCommands(IApiClientFactory clientFactory, CommandContext ctx)
+public sealed class CiCommands(
+    IApiClientFactory clientFactory, CommandContext ctx, DekService dekService)
 {
     public Command CreateCiCommand()
     {
@@ -55,18 +56,21 @@ public sealed class CiCommands(IApiClientFactory clientFactory, CommandContext c
                 return;
             }
 
-            byte[] dek;
+            byte[]? dek;
             try
             {
-                var rawToken = Environment.GetEnvironmentVariable(Constants.CiTokenEnvVar)!;
-                var ciWrapKey = VaultCrypto.DeriveCiWrapKey(rawToken);
-                dek = VaultCrypto.UnwrapKey(
-                    result.WrappedDek ?? "", result.WrappedDekIv ?? "",
-                    result.WrappedDekTag ?? "", ciWrapKey);
+                dek = await dekService.ResolveCiDekAsync(cancellationToken);
             }
             catch (Exception ex)
             {
                 ctx.Output.PrintError($"Failed to unwrap the project key: {ex.Message}");
+                Environment.ExitCode = 1;
+                return;
+            }
+
+            if (dek is null)
+            {
+                ctx.Output.PrintError("Failed to unwrap the project key.");
                 Environment.ExitCode = 1;
                 return;
             }

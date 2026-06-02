@@ -1,5 +1,4 @@
 using System.CommandLine;
-using DepVault.Cli.Commands.Push;
 using DepVault.Cli.Crypto;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
@@ -15,8 +14,8 @@ namespace DepVault.Cli.Commands;
 internal sealed class PushCommands(
     CommandContext ctx,
     IFileScanner fileScanner,
-    DekResolver dekResolver,
-    RepoFilePusher repoFilePusher)
+    DekService dekService,
+    RepoFileUploadService uploadService)
 {
     public Command CreatePushCommand()
     {
@@ -45,7 +44,7 @@ internal sealed class PushCommands(
 
             // Resolve the project DEK once up front. The same key encrypts every file, so this
             // prompts for the vault password (or reads DEPVAULT_PASSWORD / a CI token) at most once.
-            var dek = await ResolveDekAsync(pc.ProjectId, ct);
+            var dek = await dekService.CollectPasswordAndResolveAsync(pc.ProjectId, ct);
             if (dek is null)
             {
                 ctx.Output.PrintError("Failed to resolve encryption key. Aborting push.");
@@ -53,6 +52,7 @@ internal sealed class PushCommands(
                 return;
             }
 
+            var repoRoot = GitUtils.FindRepoRoot();
             var configPushed = 0;
             var secretsPushed = 0;
 
@@ -60,7 +60,7 @@ internal sealed class PushCommands(
             {
                 try
                 {
-                    await repoFilePusher.PushAsync(pc.ProjectId, file, dek, ct);
+                    await uploadService.UploadAsync(pc.ProjectId, repoRoot, file, dek, ct);
                     if (file.Category == FileCategory.Environment)
                     {
                         configPushed++;
@@ -84,16 +84,6 @@ internal sealed class PushCommands(
         });
 
         return cmd;
-    }
-
-    /// <summary>Resolves the project DEK once for the push, reusing the cached KEK/DEK when present.</summary>
-    private async Task<byte[]?> ResolveDekAsync(string projectId, CancellationToken ct)
-    {
-        var password = dekResolver.CollectVaultPassword();
-        return await AnsiConsole.Status()
-            .Spinner(Spinner.Known.Dots)
-            .StartAsync("Resolving encryption key...", async _ =>
-                await dekResolver.ResolveAsync(projectId, password, ct));
     }
 
     private List<DiscoveredFile> ResolveFiles(string? explicitFile)

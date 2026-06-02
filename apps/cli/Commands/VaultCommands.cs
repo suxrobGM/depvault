@@ -67,7 +67,9 @@ public sealed class VaultCommands(
                     var iterations = status.KekIterations > 0 ? status.KekIterations.Value : 600_000;
                     var kek = VaultCrypto.DeriveKek(password, salt, iterations);
 
-                    if (!TryVerifyKek(kek, status))
+                    if (!VaultCrypto.VerifyKek(
+                            status.WrappedPrivateKey ?? "", status.WrappedPrivateKeyIv ?? "",
+                            status.WrappedPrivateKeyTag ?? "", kek))
                     {
                         CryptographicOperations.ZeroMemory(kek);
                         AnsiConsole.MarkupLine("[red]Incorrect vault password.[/]");
@@ -85,33 +87,6 @@ public sealed class VaultCommands(
         });
 
         return cmd;
-    }
-
-    /// <summary>
-    /// Verifies a candidate KEK by unwrapping the server-stored wrapped private key.
-    /// Mirrors <c>DekResolver.VerifyKek</c> so any CLI entry point that caches a KEK
-    /// refuses to cache a wrong-password derivation.
-    /// </summary>
-    private static bool TryVerifyKek(byte[] kek, ApiClient.Api.Vault.Status.StatusGetResponse status)
-    {
-        if (string.IsNullOrEmpty(status.WrappedPrivateKey) ||
-            string.IsNullOrEmpty(status.WrappedPrivateKeyIv) ||
-            string.IsNullOrEmpty(status.WrappedPrivateKeyTag))
-        {
-            return true;
-        }
-
-        try
-        {
-            var raw = VaultCrypto.UnwrapKey(
-                status.WrappedPrivateKey, status.WrappedPrivateKeyIv, status.WrappedPrivateKeyTag, kek);
-            CryptographicOperations.ZeroMemory(raw);
-            return true;
-        }
-        catch (CryptographicException)
-        {
-            return false;
-        }
     }
 
     public Command CreateLockCommand()
