@@ -1,6 +1,9 @@
-/// Repo-native vault model: Project -> App -> ConfigFile / SecretFile.
-/// A config/secret file is stored as one encrypted blob (the source of truth for pull);
-/// the web parses it client-side. Environment is a column (open-set slug), not a table.
+/**
+ * Repo-native model: Project -> App -> ConfigFile / SecretFile.
+ * An App is one application/service root folder in the repo, identified by its
+ * repo-relative `appPath`. Config files live in config-file.prisma; secret files in
+ * secret.prisma. Environment is an open-set slug column on each file, not a table.
+ */
 
 model App {
   id        String   @id @default(uuid()) @db.Uuid
