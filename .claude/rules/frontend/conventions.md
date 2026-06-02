@@ -33,6 +33,7 @@ src/
 
 - **Named exports** for all components, hooks, providers: `export function Sidebar()`
 - **Default exports** only for Next.js pages and layouts (`page.tsx`, `layout.tsx`)
+- **Barrel exports**: each feature folder exposes an `index.ts` barrel. Import across features via the short folder path (`@/components/features/share-link`), not deep file paths (`.../share-link/share-access-view`). Sibling files inside the same folder still import each other relatively (`./file-editor`).
 
 ## Server Components by Default
 

@@ -28,6 +28,13 @@ export type ActivityQueryDto = Query<typeof client.api.activity.get>; // query p
 
 Use `Body<T>`, never `Parameters<T>[0]`.
 
+Never hand-write an interface that mirrors a request or response payload (e.g. a local
+`EncryptedAccessResult` duplicating an endpoint's JSON). Derive it with `Data`/`Body`/`Query`
+so it tracks the backend automatically. `useApiMutation`/`useApiQuery` already infer the
+response type from the Treaty call, so `onSuccess` data and `mutateAsync` return values are
+typed — no casts. Local view models that hold _post-processing_ state (e.g. decrypted
+plaintext that never crosses the wire) are fine; flag them as such.
+
 ## Naming
 
 `Dto` suffix on responses/items (`ProjectDto`, `ProjectDetailDto`, `XListResponseDto`,

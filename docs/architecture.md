@@ -49,7 +49,7 @@ depvault/
     └── deploy.yml       Build Docker images and deploy to VPS
 ```
 
-**apps/backend** -- Elysia.js API server. Handles authentication, project management, dependency analysis, repo-native config and secret file storage (apps, config files, secret files), client-side encryption key management, secret sharing, CI token management, secret scanning, and notifications. Uses Prisma 7 with PostgreSQL and tsyringe for dependency injection.
+**apps/backend** -- Elysia.js API server. Handles authentication, project management, dependency analysis, repo-native file storage (apps and config/secret files as one client-encrypted `RepoFile` model), client-side encryption key management, share links, CI token management, secret scanning, and notifications. Uses Prisma 7 with PostgreSQL and tsyringe for dependency injection.
 
 **apps/frontend** -- Next.js 16 App Router application. Uses React Server Components by default, MUI 9 for UI, TanStack Form + zod for form validation. TanStack Query for data fetching and caching. Auth state managed via React context with JWT stored in httpOnly cookies.
 
@@ -86,15 +86,12 @@ All modules are mounted under the `/api` group in `src/app.ts`:
 - `auth` -- registration, login, logout, refresh, GitHub OAuth, email verification, password reset
 - `project` -- CRUD, list with pagination
 - `app` -- app CRUD per project, repo map, repo export (encrypted blobs)
-- `configFile` -- push/save config-file blobs, list, get content, version history + restore
-- `secretFile` -- push/download secret-file blobs, list, version history + rollback
+- `repoFile` -- push/save file blobs (config + secret, discriminated by `kind`), list, get content, version history + restore
 - `vault` / `keyGrant` -- client-side encryption: UserVault setup/status, password change, recovery, and per-project DEK key grants (SELF / ECDH / RECOVERY)
-- `sharedSecret` -- one-time link generation (config or secret file)
-- `sharedSecretAccess` -- one-time link access
+- `shareLink` -- one-time link generation (any file) and public token access
 - `user` -- profile management
 - `auditLog` -- project and global activity log
 - `analysis` -- dependency file upload, parsing, vulnerability scanning
-- `convert` -- standalone format conversion between .env/json/yaml/toml
 - `githubApi` -- GitHub integration endpoints
 - `notification` -- user notification management
 - `secretScan` -- git repository secret scanning
@@ -142,16 +139,14 @@ User ──────────┬──── Account (auth providers: EMAI
                │
                ├──── Project (owner)  ── a repo
                │       ├──── ProjectMember (OWNER / EDITOR / VIEWER)
-               │       ├──── App (name, appPath)  ── a service root folder
-               │       │       ├──── ConfigFile (encrypted blob, environmentSlug)
-               │       │       │       └──── ConfigFileVersion
-               │       │       ├──── SecretFile (encrypted blob, environmentSlug?)
-               │       │       │       └──── SecretFileVersion
+               │       ├──── App (name, appPath)  ── a service root folder (grouping pointer)
                │       │       └──── CiToken (scoped to app + environmentSlug)
+               │       ├──── RepoFile (encrypted blob, kind CONFIG/SECRET, environmentSlug)
+               │       │       └──── RepoFileVersion
                │       ├──── Analysis
                │       │       └──── Dependency (self-referencing tree)
                │       │               └──── Vulnerability
-               │       ├──── SharedSecret
+               │       ├──── ShareLink
                │       ├──── AuditLog
                │       ├──── LicenseRule
                │       ├──── ScanPattern
@@ -165,30 +160,28 @@ User ──────────┬──── Account (auth providers: EMAI
 
 ### Key Models
 
-| Model                 | Purpose                                                                                                                                                                     |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **User**              | Email/password or GitHub OAuth accounts, soft-deletable                                                                                                                     |
-| **Account**           | Auth provider link (EMAIL or GITHUB) with refresh token family                                                                                                              |
-| **Project**           | Top-level container owned by a user; maps to a repo                                                                                                                         |
-| **App**               | One app/service root folder, unique per `(projectId, appPath)`; `appPath` is the repo-relative folder                                                                       |
-| **ProjectMember**     | Role-based membership (OWNER, EDITOR, VIEWER)                                                                                                                               |
-| **ConfigFile**        | One client-encrypted config blob per `(appId, relativePath)`; `encryptedContent` (Bytes) + `iv` + `authTag`; open-set `environmentSlug` string column; `format`, `isBinary` |
-| **ConfigFileVersion** | Immutable full-blob snapshot per push/save; supports restore-to-version                                                                                                     |
-| **SecretFile**        | One client-encrypted secret blob per `(appId, relativePath)` (certs, keys, keystores) with `mimeType`, nullable `environmentSlug`, and metadata                             |
-| **SecretFileVersion** | Immutable full-blob snapshot per push; supports rollback                                                                                                                    |
-| **UserVault**         | Per-user crypto root: KEK salt + iterations, ECDH public key, wrapped private key, recovery key hash + wrapped recovery key                                                 |
-| **ProjectKeyGrant**   | Wrapped project DEK per user, unique per `(projectId, userId, grantType)`; grant type SELF / ECDH / RECOVERY                                                                |
-| **SharedSecret**      | One-time encrypted share link for a CONFIG_FILE or SECRET_FILE (PENDING / VIEWED / EXPIRED)                                                                                 |
-| **Analysis**          | Dependency analysis run for a specific file and ecosystem                                                                                                                   |
-| **Dependency**        | Parsed package with version info, self-referencing tree for transitive deps                                                                                                 |
-| **Vulnerability**     | CVE record linked to a dependency (NONE through CRITICAL severity)                                                                                                          |
-| **LicenseRule**       | Per-project license policy (ALLOW / WARN / BLOCK)                                                                                                                           |
-| **AuditLog**          | Append-only log of file-related actions with IP address; resource type CONFIG_FILE / SECRET_FILE / SHARE_LINK / CI_TOKEN                                                    |
-| **CiToken**           | Scoped, short-lived CI/CD access token bound to `(appId, environmentSlug)` with IP allowlist and a client-wrapped DEK (`wrappedDek` / `wrappedDekIv` / `wrappedDekTag`)     |
-| **ScanPattern**       | Regex pattern for git secret detection (built-in or custom)                                                                                                                 |
-| **SecretScan**        | Git repository scan run with status tracking                                                                                                                                |
-| **SecretDetection**   | Individual secret found in a commit (OPEN / RESOLVED / FALSE_POSITIVE)                                                                                                      |
-| **Notification**      | User notification for various event types                                                                                                                                   |
+| Model               | Purpose                                                                                                                                                                                                                                                                                    |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **User**            | Email/password or GitHub OAuth accounts, soft-deletable                                                                                                                                                                                                                                    |
+| **Account**         | Auth provider link (EMAIL or GITHUB) with refresh token family                                                                                                                                                                                                                             |
+| **Project**         | Top-level container owned by a user; maps to a repo                                                                                                                                                                                                                                        |
+| **App**             | One app/service root folder, unique per `(projectId, appPath)`; `appPath` is the repo-relative folder. A mutable grouping pointer — re-parenting a file keeps the same row + history                                                                                                       |
+| **ProjectMember**   | Role-based membership (OWNER, EDITOR, VIEWER)                                                                                                                                                                                                                                              |
+| **RepoFile**        | One client-encrypted blob per `(projectId, relativePath)`, discriminated by `kind` (CONFIG/SECRET); `encryptedContent` (Bytes) + `iv` + `authTag`; open-set `environmentSlug` string column. CONFIG carries `format`, SECRET carries `mimeType`; `appId` is the (mutable) grouping pointer |
+| **RepoFileVersion** | Immutable full-blob snapshot per push/save; supports restore-to-version                                                                                                                                                                                                                    |
+| **UserVault**       | Per-user crypto root: KEK salt + iterations, ECDH public key, wrapped private key, recovery key hash + wrapped recovery key                                                                                                                                                                |
+| **ProjectKeyGrant** | Wrapped project DEK per user, unique per `(projectId, userId, grantType)`; grant type SELF / ECDH / RECOVERY                                                                                                                                                                               |
+| **ShareLink**       | One-time encrypted share link for a file (PENDING / VIEWED / EXPIRED)                                                                                                                                                                                                                      |
+| **Analysis**        | Dependency analysis run for a specific file and ecosystem                                                                                                                                                                                                                                  |
+| **Dependency**      | Parsed package with version info, self-referencing tree for transitive deps                                                                                                                                                                                                                |
+| **Vulnerability**   | CVE record linked to a dependency (NONE through CRITICAL severity)                                                                                                                                                                                                                         |
+| **LicenseRule**     | Per-project license policy (ALLOW / WARN / BLOCK)                                                                                                                                                                                                                                          |
+| **AuditLog**        | Append-only log of file-related actions with IP address; resource type REPO_FILE / SHARE_LINK / CI_TOKEN                                                                                                                                                                                   |
+| **CiToken**         | Scoped, short-lived CI/CD access token bound to `(appId, environmentSlug)` with IP allowlist and a client-wrapped DEK (`wrappedDek` / `wrappedDekIv` / `wrappedDekTag`)                                                                                                                    |
+| **ScanPattern**     | Regex pattern for git secret detection (built-in or custom)                                                                                                                                                                                                                                |
+| **SecretScan**      | Git repository scan run with status tracking                                                                                                                                                                                                                                               |
+| **SecretDetection** | Individual secret found in a commit (OPEN / RESOLVED / FALSE_POSITIVE)                                                                                                                                                                                                                     |
+| **Notification**    | User notification for various event types                                                                                                                                                                                                                                                  |
 
 ---
 

@@ -241,8 +241,9 @@ Click a node to open the detail panel on the right.
 ## Repo browser tab
 
 The Repo tab is a two-pane browser: the left pane lists apps grouped by path with an
-environment selector; the right pane shows the selected app's config files (in a Form/Raw
-editor) and secret files for that environment.
+environment selector; under each app every file is listed in one place with a Config/Secret
+badge. The right pane opens the selected file (a Form/Raw editor for config, metadata +
+download for binary secrets).
 
 ```text
 +--[ Shell ]--------------------------------------------------+
@@ -254,21 +255,22 @@ editor) and secret files for that environment.
 |------------------+------------------------------------------|
 | APPS             | api  >  appsettings.Production.json      |
 |                  |------------------------------------------|
-| > / (root)       | [ Form ] [*Raw*]   [History] [Download]  |
-| > api    (3)     |                                          |
-|   . appsettings  | +--------------------------------------+ |
-|   . appsettings  | | {                                    | |
-|   . .env.prod    | |   "ConnectionStrings": {             | |
-| > web    (4)     | |     "Default": "Server=db;..."       | |
-|   . .env         | |   },                                 | |
-|   . .env.prod    | |   "Jwt": { "Issuer": "depvault" }    | |
-|                  | | }                                    | |
-| SECRET FILES     | +--------------------------------------+ |
-|   . api/tls.pfx  |                                          | |
-|   . web/gsa.json |              [ Discard ]  [ Save ]       |
+| > Repository root| [ Form ] [*Raw*]   [History] [Download]  |
+| > api    (4)     |                                          |
+|   [C] appsettings| +--------------------------------------+ |
+|   [C] appsettings| | {                                    | |
+|   [C] .env.prod  | |   "ConnectionStrings": {             | |
+|   [S] tls.pfx    | |     "Default": "Server=db;..."       | |
+| > web    (3)     | |   },                                 | |
+|   [C] .env       | |   "Jwt": { "Issuer": "depvault" }    | |
+|   [C] .env.prod  | | }                                    | |
+|   [S] gsa.json   | +--------------------------------------+ |
+|                  |              [ Discard ]  [ Save ]       |
 +------------------+------------------------------------------+
 
-Left pane: apps grouped by appPath; (n) = config file count for the env.
+Left pane: apps grouped by appPath; (n) = file count for the env. Each row is
+badged [C] config or [S] secret — both kinds are one RepoFile model. Loose files
+in the repo root group under the "Repository root" app.
 Right pane: a config file opened in the Raw (CodeMirror) editor.
 Binary secret files (tls.pfx) are download-only — no editor.
 ```
@@ -351,7 +353,7 @@ Most users never open this — pushing from the CLI creates apps on the fly.
 
 ---
 
-## Secret sharing
+## Share links
 
 ```text
 +--[ Shell ]--------------------------------------------------+
@@ -543,37 +545,4 @@ Unread items have a colored left border.
 | +-------------------------------------------------------+  |
 |                                                             |
 +-------------------------------------------------------------+
-```
-
----
-
-## Format converter
-
-```text
-+--[ Shell ]--------------------------------------------------+
-| Format Converter                                            |
-|-------------------------------------------------------------|
-|                                                             |
-| Source format: [.env v]     Target format: [appsettings v]  |
-|                                                             |
-| Input:                         Output (preview):            |
-| +-------------------------+   +---------------------------+ |
-| | DATABASE_URL=postgres://|   | {                         | |
-| | JWT_SECRET=mysecret     |   |   "Database": {           | |
-| | PORT=4000               |   |     "Url": "postgres://"  | |
-| | DEBUG=true              |   |   },                      | |
-| |                         |   |   "Jwt": {                | |
-| |                         |   |     "Secret": "mysecret"  | |
-| |                         |   |   },                      | |
-| |                         |   |   "Port": 4000,           | |
-| |                         |   |   "Debug": true           | |
-| |                         |   | }                         | |
-| +-------------------------+   +---------------------------+ |
-|                                                             |
-|        [ Paste / Upload ]              [ Download ]         |
-|                                                             |
-+-------------------------------------------------------------+
-
-Side-by-side layout using Grid. Source is editable textarea,
-output is read-only with syntax highlighting.
 ```

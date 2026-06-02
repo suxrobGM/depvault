@@ -6,7 +6,6 @@ const navItems = [
   { id: "projects", label: "Projects", icon: "folder" },
   { id: "activity", label: "Activity", icon: "clock" },
   { id: "security", label: "Security", icon: "shield" },
-  { id: "converter", label: "Converter", icon: "swap" },
   { id: "settings", label: "Settings", icon: "gear" },
 ];
 

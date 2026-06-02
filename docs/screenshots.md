@@ -114,20 +114,10 @@ Token generation form with environment scope, expiration duration, and optional 
 
 ---
 
-## Tools
-
-### Format Converter
-
-Convert between .env, JSON, YAML, and TOML configuration formats with live preview.
-
-![Format Converter](images/converter.jpg)
-
----
-
 ## Activity
 
 ### Activity Log
 
-Chronological feed of project actions including variable changes, file uploads, secret shares, and member updates.
+Chronological feed of project actions including file edits, uploads, share-link activity, and member updates.
 
 ![Activity Log](images/activity-log.jpg)

@@ -40,10 +40,10 @@ paths: [apps/cli/**]
   - **JWT mode**: uses cached KEK from `VaultState`, or prompts for vault password (or reads `DEPVAULT_PASSWORD` env var), fetches KEK salt from `/api/vault/status`, derives KEK, fetches key grant from `/api/projects/:id/keygrants/my`, unwraps DEK
   - **Auto SELF grant**: on 404 key grant, generates DEK, wraps with KEK, POSTs to `/api/projects/:id/keygrants`
 - All encryption/decryption happens locally — backend returns only ciphertext
-- Files are encrypted as **whole-file blobs** (one ciphertext per config/secret file), never parsed into per-variable entries
-- Push (`Commands/Push/ConfigFilePusher.cs`, `SecretFilePusher.cs`): for each discovered file, infer the owning App via `AppRootResolver` (nearest-ancestor project-marker walk) and the environment slug via `EnvSlugResolver` (from the filename), read the whole file, encrypt the bytes with the project DEK, and upload the blob. No parsing into variables and no stale-variable pruning
-- Pull (`Commands/Pull/ConfigFilePuller.cs`, `SecretFilePuller.cs`): **byte-faithful** — fetch the repo map + blobs, unwrap DEK, decrypt, and write each file verbatim to its original repo-relative path (recreating directories). No re-serialization
-- CI pull: token scoped to `(app, environment)`; `GET /api/ci/secrets` returns `{ wrappedDek*, configFiles[], secretFiles[] }` (base + selected environment), decrypted client-side and written to exact paths
+- Files are encrypted as **whole-file blobs** (one ciphertext per file), never parsed into per-variable entries. Config files and secret files share one `RepoFile` model distinguished by a `kind` (`CONFIG` | `SECRET`)
+- Push (`Commands/Push/RepoFilePusher.cs`): for each discovered file, set `kind` from the scanner's classification, infer the owning App via `AppRootResolver` (nearest-ancestor project-marker walk; loose files fall back to the repo-root App) and the environment slug via `EnvSlugResolver` (from the filename), read the whole file, encrypt the bytes with the project DEK, and upload the blob to `POST /api/projects/:id/files/push`. No parsing into variables and no stale-variable pruning
+- Pull (`Commands/Pull/RepoFilePuller.cs`): **byte-faithful** — fetch the repo map + blobs, unwrap DEK, decrypt, and write each file verbatim to its original repo-relative path (recreating directories). No re-serialization
+- CI pull: token scoped to `(app, environment)`; `GET /api/ci/secrets` returns `{ wrappedDek*, files[] }` (base + selected environment, each entry carrying its `kind`), decrypted client-side and written to exact paths
 
 ## Regenerating API Client
 

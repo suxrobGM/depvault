@@ -16,7 +16,7 @@ paths: [apps/docs/**]
 - Pages under `src/app/` following Next.js App Router conventions
 - `_meta.ts` files control sidebar ordering and titles (keys = folder names)
 - Guides in `guides/`, CLI reference in `cli/`
-- CLI feature commands (env, analyze, convert, ci) are documented inline in their corresponding guide pages, not in the CLI section
+- CLI feature commands (env, secrets, analyze, ci) are documented inline in their corresponding guide pages, not in the CLI section
 
 ## Theme
 

@@ -1,6 +1,6 @@
 # DepVault CLI Reference
 
-The DepVault CLI is a .NET 10 command-line tool that provides the same core functionality as the web dashboard: authentication, repo-native config and secret file sync, dependency analysis, and config format conversion. It mirrors your repository — `push` uploads each config/secret file as a single client-encrypted blob, and `pull` restores every file byte-for-byte to its original repo-relative path. All encryption and decryption happen client-side; the server only ever sees ciphertext.
+The DepVault CLI is a .NET 10 command-line tool that provides the same core functionality as the web dashboard: authentication, repo-native config and secret file sync, and dependency analysis. It mirrors your repository — `push` uploads each config/secret file as a single client-encrypted blob, and `pull` restores every file byte-for-byte to its original repo-relative path. All encryption and decryption happen client-side; the server only ever sees ciphertext.
 
 ## Quick Install
 
@@ -111,7 +111,7 @@ The CLI auto-detects the active project from the git remote origin URL when run 
 
 ### Config & Secret Files
 
-DepVault stores each config and secret file as a single client-encrypted blob, organized as Project (repo) → App (service folder) → ConfigFile / SecretFile. The CLI infers the owning app and environment automatically — you never pass a vault, tag, or format.
+DepVault stores each config and secret file as a single client-encrypted blob in one `RepoFile` model, discriminated by a `kind` (`CONFIG` | `SECRET`) and organized as Project (repo) → App (service folder) → file. The CLI infers the owning app and environment automatically — you never pass a vault, tag, or format.
 
 ```bash
 # Push config & secret files as encrypted blobs.
@@ -137,7 +137,7 @@ depvault secrets list --environment prod
 
 **How `push` infers app and environment:**
 
-- **App** — walks up from each file toward the repo root and picks the nearest ancestor directory containing a project marker (`.sln`, `*.csproj`, `package.json`, `go.mod`, `Cargo.toml`, etc.). That directory's repo-relative path becomes the app's `appPath`. Files at the repo root map to the root app.
+- **App** — walks up from each file toward the repo root and picks the nearest ancestor directory containing a project marker (`.sln`, `*.csproj`, `package.json`, `go.mod`, `Cargo.toml`, etc.). That directory's repo-relative path becomes the app's `appPath`. Loose files in the repo root or in unmarked subfolders attach to a single App named "Repository root".
 - **Environment slug** — derived from the filename: `appsettings.json` / bare `.env` → `base`; `appsettings.Production.json` → `prod`, `.env.local` → `local`, `.env.development` → `dev`, etc. Unknown segments keep their own slug (e.g. `.env.qa` → `qa`) — they are never collapsed to `base`.
 
 The whole file is encrypted and uploaded verbatim — there is no parsing into individual variables and no stale-variable pruning. Each push snapshots the prior content as a version.

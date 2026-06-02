@@ -27,7 +27,7 @@
 
 ---
 
-DepVault is a full-stack web platform that scans dependencies across 8+ language ecosystems, detects vulnerabilities via OSV.dev, and provides an AES-256-GCM encrypted vault for environment variables and secret files - all from a single dashboard.
+DepVault is a full-stack web platform that scans dependencies across 8+ language ecosystems, detects vulnerabilities via OSV.dev, and provides an AES-256-GCM encrypted vault for config files and secret files - all from a single dashboard.
 
 > **Live at [depvault.com](https://depvault.com)** | **[Documentation](https://depvault.com/docs)** | **[API Docs (Swagger)](https://depvault.com/api/swagger)**
 
@@ -44,8 +44,8 @@ DepVault is a full-stack web platform that scans dependencies across 8+ language
 
 ### Encrypted Vault
 
-- **AES-256-GCM** encrypted storage for environment variables and secret files
-- Environment isolation (development, staging, production) with diff view
+- **AES-256-GCM** encrypted storage for config files and secret files, each as a single whole-file blob
+- Per-environment organization (base, dev, staging, prod, or custom) with diff view
 - Version history with append-only audit trail
 - Support for SSL certificates, private keys, keystores, and provisioning profiles
 
@@ -64,7 +64,6 @@ DepVault is a full-stack web platform that scans dependencies across 8+ language
 
 ### Developer Tools
 
-- Config format converter (`.env` ↔ JSON ↔ YAML ↔ TOML)
 - Environment templates for bootstrapping new stages
 - Onboarding checklist for new team members
 - Secret file bundler - download encrypted archives with one-time passwords
@@ -92,11 +91,11 @@ DepVault is a full-stack web platform that scans dependencies across 8+ language
   </tr>
   <tr>
     <td align="center"><strong>Security Dashboard</strong></td>
-    <td align="center"><strong>Config Converter</strong></td>
+    <td align="center"><strong>CI Integration</strong></td>
   </tr>
   <tr>
     <td><img src="docs/images/security-page.jpg" alt="Security Dashboard" width="100%" /></td>
-    <td><img src="docs/images/converter.jpg" alt="Config Converter" width="100%" /></td>
+    <td><img src="docs/images/ci-integration.jpg" alt="CI Integration" width="100%" /></td>
   </tr>
 </table>
 

@@ -2,7 +2,7 @@
 
 DepVault uses end-to-end encryption — your config and secret files are encrypted in your browser before they leave your device. The server stores only ciphertext and cannot read your data.
 
-Each config file and secret file is encrypted as a **single whole-file blob** (ciphertext, IV, and auth tag) — DepVault never parses files into individual variables, and the server never sees plaintext. The key hierarchy below is unchanged: one Data Encryption Key per project protects every blob in that project.
+Config files and secret files are stored the same way — as a **single whole-file blob** (ciphertext, IV, and auth tag) tagged with a kind (config or secret). DepVault never parses files into individual variables, and the server never sees plaintext. The key hierarchy below is unchanged: one Data Encryption Key per project protects every blob in that project.
 
 ---
 

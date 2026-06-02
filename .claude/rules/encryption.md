@@ -4,7 +4,7 @@ description: End-to-end encryption architecture and security rules
 
 # End-to-End Encryption
 
-All secrets (config files, secret files) are encrypted client-side. Each config/secret file is stored as one client-encrypted blob — the server stores only ciphertext and cannot decrypt user data.
+All user files (config files and secret files, unified as one `RepoFile` model distinguished by `kind`) are encrypted client-side. Each file is stored as one client-encrypted blob — the server stores only ciphertext and cannot decrypt user data.
 
 ## Key Hierarchy
 
@@ -24,26 +24,25 @@ Recovery Key (random 256-bit, shown once at vault setup)
 
 ## Key Files
 
-| Layer    | File                                                         | Purpose                                                                                         |
-| -------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
-| Frontend | `apps/frontend/src/lib/crypto/`                              | WebCrypto modules: encoding, keys, AES-GCM, ECDH, etc.                                          |
-| Frontend | `apps/frontend/src/lib/crypto/vault-*.ts`                    | Vault operations: lifecycle, grants, re-keying                                                  |
-| Frontend | `apps/frontend/src/providers/vault-provider.tsx`             | Vault state, DEK caching, key distribution                                                      |
-| Frontend | `apps/frontend/src/hooks/use-vault.ts`                       | `useVault()` hook for components                                                                |
-| Backend  | `apps/backend/src/modules/vault/`                            | Vault API: setup, status, password, recovery, key grants                                        |
-| Backend  | `apps/backend/prisma/schema/vault.prisma`                    | Crypto models only: `UserVault` + `ProjectKeyGrant`                                             |
-| Backend  | `apps/backend/prisma/schema/app.prisma`                      | `App` (service root, keyed by `appPath`)                                                        |
-| Backend  | `apps/backend/prisma/schema/config-file.prisma`              | `ConfigFile`/`ConfigFileVersion` (encrypted blobs)                                              |
-| Backend  | `apps/backend/prisma/schema/secret.prisma`                   | `SecretFile`/`SecretFileVersion` keyed by `(appId, relativePath)`                               |
-| CLI      | `apps/cli/Crypto/VaultCrypto.cs`                             | .NET AES-256-GCM, PBKDF2, HKDF                                                                  |
-| CLI      | `apps/cli/Crypto/DekResolver.cs`                             | Resolves project DEK for pull/push (vault password or CI token)                                 |
-| CLI      | `apps/cli/Commands/Push/`, `apps/cli/Commands/Pull/`         | `ConfigFilePusher`/`SecretFilePusher`, `ConfigFilePuller`/`SecretFilePuller` (whole-file blobs) |
-| CLI      | `apps/cli/Services/AppRootResolver.cs`, `EnvSlugResolver.cs` | Infer owning App (project-marker walk) and environment slug (filename)                          |
+| Layer    | File                                                         | Purpose                                                                                                         |
+| -------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| Frontend | `apps/frontend/src/lib/crypto/`                              | WebCrypto modules: encoding, keys, AES-GCM, ECDH, etc.                                                          |
+| Frontend | `apps/frontend/src/lib/crypto/vault-*.ts`                    | Vault operations: lifecycle, grants, re-keying                                                                  |
+| Frontend | `apps/frontend/src/providers/vault-provider.tsx`             | Vault state, DEK caching, key distribution                                                                      |
+| Frontend | `apps/frontend/src/hooks/use-vault.ts`                       | `useVault()` hook for components                                                                                |
+| Backend  | `apps/backend/src/modules/vault/`                            | Vault API: setup, status, password, recovery, key grants                                                        |
+| Backend  | `apps/backend/prisma/schema/vault.prisma`                    | Crypto models only: `UserVault` + `ProjectKeyGrant`                                                             |
+| Backend  | `apps/backend/prisma/schema/app.prisma`                      | `App` (service root, keyed by `appPath`)                                                                        |
+| Backend  | `apps/backend/prisma/schema/repo-file.prisma`                | `RepoFile`/`RepoFileVersion` (encrypted blobs; `kind` = CONFIG \| SECRET; keyed by `(projectId, relativePath)`) |
+| Backend  | `apps/backend/prisma/schema/share-link.prisma`               | `ShareLink` (one-time encrypted file shares)                                                                    |
+| CLI      | `apps/cli/Crypto/VaultCrypto.cs`                             | .NET AES-256-GCM, PBKDF2, HKDF                                                                                  |
+| CLI      | `apps/cli/Crypto/DekResolver.cs`                             | Resolves project DEK for pull/push (vault password or CI token)                                                 |
+| CLI      | `apps/cli/Commands/Push/`, `apps/cli/Commands/Pull/`         | `RepoFilePusher`, `RepoFilePuller` (whole-file blobs, `kind`-aware)                                             |
+| CLI      | `apps/cli/Services/AppRootResolver.cs`, `EnvSlugResolver.cs` | Infer owning App (project-marker walk) and environment slug (filename)                                          |
 
 ## Data Flows
 
-- **Config files**: Client encrypts the whole file → sends base64 `{encryptedContent, iv, authTag}` → backend stores the blob as-is (no parsing into variables). Each push/save snapshots a `ConfigFileVersion`
-- **Secret files**: Client encrypts the whole file → sends base64 `{encryptedContent, iv, authTag}` → backend stores as bytes; each push/save snapshots a `SecretFileVersion`
+- **Repo files** (config & secret): Client encrypts the whole file → sends base64 `{encryptedContent, iv, authTag}` plus `kind` → backend stores the blob as-is (no parsing into variables). Each push/save snapshots a `RepoFileVersion`
 - **Share links**: Client encrypts with ephemeral key → key in URL fragment (`#key=`) never reaches server
 - **CI tokens**: Client wraps DEK with HKDF-derived key from token → CLI/CI unwraps and decrypts locally
 - **Team sharing**: ECDH P-256 key agreement → granter wraps DEK with shared secret → recipient unwraps

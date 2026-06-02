@@ -60,10 +60,6 @@ It runs on a schedule and flags anything it finds. Better to catch a leaked key 
 
 A few utilities that turned out to be more useful than I expected:
 
-**Config converter.** Paste an `appsettings.json`, get back a `.env` file. Or convert `.env` to YAML, YAML to TOML, TOML to JSON. I built this because I kept doing it by hand when switching between projects.
-
-![Config Converter](./images/converter.jpg)
-
 **Repo export.** Pull down the encrypted config and secret blobs for a single file, a whole environment, one app, or the entire repo - decrypted client-side. Handy for backups and for re-hydrating a fresh clone.
 
 **Download bundles.** Select the config and secret files you need, download them as an encrypted zip with a one-time password. Handy for setting up a new machine or sharing a complete app's environment with a teammate.

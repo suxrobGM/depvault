@@ -5,7 +5,7 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from
 import { useForm } from "@tanstack/react-form";
 import { FormTextField } from "@/components/ui/form";
 import { FileDiffViewerLazy } from "./code-editor-lazy";
-import { saveConfigFileSchema } from "./schemas";
+import { saveFileSchema } from "./schemas";
 
 interface ReviewChangesDialogProps {
   open: boolean;
@@ -22,7 +22,7 @@ export function ReviewChangesDialog(props: ReviewChangesDialogProps): ReactEleme
 
   const form = useForm({
     defaultValues: { message: "" },
-    validators: { onSubmit: saveConfigFileSchema },
+    validators: { onSubmit: saveFileSchema },
     onSubmit: async ({ value }) => {
       await onConfirm(value.message);
     },

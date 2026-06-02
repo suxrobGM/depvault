@@ -7,7 +7,6 @@ const meta: MetaRecord = {
   "environment-vault": "Config & Secret Files",
   "secret-files": "Secret Files",
   "secret-sharing": "Secret Sharing",
-  "config-converter": "Config Converter",
   "license-compliance": "License Compliance",
   encryption: "Encryption & Security",
   "secret-scanning": "Secret Scanning",

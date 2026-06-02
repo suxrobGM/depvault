@@ -95,7 +95,7 @@ Developers working across multiple projects and tech stacks waste time switching
 
 ### Repo-Native Config File Manager
 
-- Repo-native hierarchy: **Project** (a repo) → **App** (one app/service root folder, identified by its repo-relative `appPath`) → **ConfigFile** / **SecretFile**
+- Repo-native hierarchy: **Project** (a repo) → **App** (one app/service root folder, identified by its repo-relative `appPath`) → **RepoFile** (one model for both config and secret files, discriminated by a `kind` of `CONFIG` or `SECRET`)
 - Each config file is stored as a single **client-encrypted blob** (base64 ciphertext + IV + auth tag) — the server is zero-knowledge and never parses or decrypts it
 - Environment is an **open-set string slug** column on each file (`base`, `dev`, `prod`, `staging`, `local`, `test`, or any custom slug like `qa`) — not a tag, not a separate table
 - Supported config files: `.env` and its variants, `appsettings.json` / `appsettings.<Env>.json`, and any other plaintext config file pushed from the repo
@@ -234,7 +234,7 @@ Developers working across multiple projects and tech stacks waste time switching
   - **Frontend security:** Decrypted file content is never stored in React state longer than the active view session. Sensitive content is masked by default in the UI, revealed only on explicit user action. Clipboard operations for secrets use the Clipboard API and clear after 30 seconds. One-time share-link keys live only in the URL fragment and never reach the server.
   - **Dependency security:** Lockfile pinned dependencies. Regular `bun audit` in CI. No secrets in source code — enforced via pre-commit hooks and CI secret scanning.
 - **Performance:** Dashboard loads in under 2 seconds. Dependency analysis completes within 10 seconds for files with up to 500 packages.
-- **Scalability:** Support up to 50 projects per user, with plan-based limits on config files (`maxConfigFiles`) and secret files (`maxSecretFiles`) per project — e.g. 100 config files and 10 secret files on FREE, 1000 / 100 on PRO, unlimited on TEAM (secret files up to 25 MB each).
+- **Scalability:** Support up to 50 projects per user, with a plan-based limit on the total number of files (`maxRepoFiles`, counting config and secret files together) per project — 100 on FREE, 1000 on PRO, unlimited on TEAM (secret files up to 25 MB each). The usage metric is `repoFiles`.
 - **Accessibility:** WCAG 2.1 AA compliance via MUI 9's built-in accessibility features.
 - **Browser Support:** Latest versions of Chrome, Firefox, Safari, and Edge.
 
@@ -257,7 +257,7 @@ Developers working across multiple projects and tech stacks waste time switching
 - One-time share links are destroyed server-side after first read — no second access possible even with the same token
 - File pushes reject executable types and validate against path traversal
 - JWT refresh tokens are rotated on every use; old tokens cannot be replayed
-- All file access events (read, update, delete, download, share) are recorded in an append-only audit log with resource type `CONFIG_FILE` or `SECRET_FILE`
+- All file access events (read, update, delete, download, share) are recorded in an append-only audit log with resource type `REPO_FILE`
 - CI pipeline includes secret scanning (no hardcoded secrets in source) and dependency auditing
 
 ### US-01: Register and Login with Email
@@ -327,7 +327,7 @@ Developers working across multiple projects and tech stacks waste time switching
 
 **Acceptance Criteria:**
 
-- Files are organized as Project (repo) → App (service folder) → ConfigFile / SecretFile; an app is identified by its repo-relative `appPath`
+- Files are organized as Project (repo) → App (service folder) → RepoFile (one model for both config and secret files, discriminated by a `kind`); an app is identified by its repo-relative `appPath`
 - User can push, edit, and delete config files (`.env`, `appsettings.json`, etc.) and secret files (SSL certs, private keys, keystores, provisioning profiles, cloud credentials, etc.) per app
 - Each file carries an open-set environment slug (`base`, `dev`, `prod`, `staging`, `local`, `test`, or any custom slug)
 - Every file is stored as a single end-to-end-encrypted blob; all encryption/decryption happens client-side
@@ -371,16 +371,9 @@ Developers working across multiple projects and tech stacks waste time switching
 - Pull can be scoped with `--app` and `--environment` (with `--include-base`) when only one service's files are needed
 - Files that already exist are overwritten only after confirmation (or with `--force`)
 
-### US-10: Convert Between Config Formats
+### US-10: _(removed)_
 
-**As a** developer, **I want to** convert my .env file to appsettings.json or vice versa **so that** I can switch formats without manual rewriting.
-
-**Acceptance Criteria:**
-
-- User can select source and target format from all supported types
-- Conversion preserves all key-value pairs and handles nested structures
-- Preview is shown before download
-- Edge cases (comments, multiline values, special characters) are handled or flagged
+The standalone format-conversion feature was dropped. DepVault stores and restores each file byte-for-byte as a single encrypted blob; it does not convert between config formats. This story number is retained to keep the numbering of later stories stable.
 
 ### US-11: Detect Secrets Leaked in Git Repositories
 
@@ -471,9 +464,8 @@ Developers working across multiple projects and tech stacks waste time switching
 | Repo browser + file editor         | Left pane of apps grouped by path, environment selector, Form (key/value) + Raw (CodeMirror) editors for plaintext config, download-only for binary files                    |
 | Version diff                       | Client-side git-style diff between any two versions of a config or secret file after decrypt                                                                                 |
 | CLI push/pull                      | Byte-faithful push (whole-file blob, app + env inferred from path/filename) and pull (restore each file verbatim to its original repo-relative path)                         |
-| Format converter                   | Convert between all supported config formats with preview (standalone utility)                                                                                               |
-| Secret sharing                     | One-time encrypted links for a config or secret file with password protection and auto-expiration; key in URL fragment                                                       |
-| Audit log                          | Track file read/update/delete/download/share events with resource type `CONFIG_FILE` / `SECRET_FILE`                                                                         |
+| Share links                        | One-time encrypted links for a file with password protection and auto-expiration; key in URL fragment                                                                        |
+| Audit log                          | Track file read/update/delete/download/share events with resource type `REPO_FILE`                                                                                           |
 | File age alerts                    | Stale-file age indicators and email reminders                                                                                                                                |
 | Dependency tree visualization      | Interactive graph with search, zoom, and color-coded nodes                                                                                                                   |
 | License detection                  | Detect license per dependency, configurable policy, compliance summary                                                                                                       |
