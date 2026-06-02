@@ -112,6 +112,9 @@ public sealed class PullCommands(
                 return;
             }
 
+            // Preview the manifest before any crypto; the overwrite confirm below gates the write.
+            PrintManifest(files);
+
             if (!force && !ConfirmOverwrite(outputDir, files))
             {
                 return;
@@ -140,6 +143,19 @@ public sealed class PullCommands(
     private static string? NormalizeEnv(string? environment)
     {
         return string.IsNullOrWhiteSpace(environment) ? null : environment.Trim().ToLowerInvariant();
+    }
+
+    /// <summary>Renders the restore manifest (file, env, kind) before any decryption happens.</summary>
+    private void PrintManifest(IReadOnlyList<FileEntry> files)
+    {
+        var rows = files.Select(f => new[]
+        {
+            f.RelativePath ?? "",
+            f.EnvironmentSlug ?? BaseSlug,
+            f.Kind == RepoFileKind.SECRET ? "secret" : "config"
+        }).ToList();
+
+        ctx.Output.PrintTable(["FILE", "ENV", "KIND"], rows);
     }
 
     /// <summary>

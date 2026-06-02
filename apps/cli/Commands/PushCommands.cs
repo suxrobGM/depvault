@@ -59,6 +59,15 @@ internal sealed class PushCommands(
                 return;
             }
 
+            // Preview the manifest (no file bytes read) and confirm before any crypto. CI mode
+            // auto-confirms because Confirm returns its default in non-interactive mode.
+            var repoRoot = repositoryLocator.FindRepoRoot();
+            PrintManifest(selected, repoRoot);
+            if (!ctx.Prompter.Confirm($"Push {selected.Count} file(s)?"))
+            {
+                return;
+            }
+
             // Resolve the project DEK once up front. The same key encrypts every file, so this
             // prompts for the vault password (or reads DEPVAULT_PASSWORD / a CI token) at most once.
             var dek = await dekService.CollectPasswordAndResolveAsync(projectId, ct);
@@ -69,7 +78,6 @@ internal sealed class PushCommands(
                 return;
             }
 
-            var repoRoot = repositoryLocator.FindRepoRoot();
             var configPushed = 0;
             var secretsPushed = 0;
 
@@ -105,6 +113,38 @@ internal sealed class PushCommands(
         });
 
         return cmd;
+    }
+
+    /// <summary>
+    /// Renders the push manifest (file, app, env, size, kind) without reading file contents.
+    /// App and environment are resolved with the pure path helpers; size comes from file metadata.
+    /// </summary>
+    private void PrintManifest(List<DiscoveredFile> files, string repoRoot)
+    {
+        var rows = files.Select(f =>
+        {
+            var (_, appName) = AppRootResolver.Resolve(repoRoot, f.RelativePath);
+            long size;
+            try
+            {
+                size = new FileInfo(f.FullPath).Length;
+            }
+            catch
+            {
+                size = 0;
+            }
+
+            return new[]
+            {
+                f.RelativePath,
+                appName,
+                EnvSlugResolver.Resolve(f.FileName),
+                FormatUtils.FileSize(size),
+                f.Category == FileCategory.Environment ? "config" : "secret"
+            };
+        }).ToList();
+
+        ctx.Output.PrintTable(["FILE", "APP", "ENV", "SIZE", "KIND"], rows);
     }
 
     private List<DiscoveredFile> ResolveFiles(string? explicitFile)
