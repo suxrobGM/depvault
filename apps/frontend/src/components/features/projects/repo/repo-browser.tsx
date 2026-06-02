@@ -11,9 +11,8 @@ import { queryKeys } from "@/lib/query-keys";
 import type { MemberListResponseDto } from "@/types/api/project";
 import type { RepoMapAppDto, RepoMapResponseDto } from "@/types/api/repo";
 import { AppsSidebar } from "./apps-sidebar";
-import { ConfigFileEditor } from "./config-file-editor";
-import { ConfigFileList } from "./config-file-list";
-import { SecretFilesPanel } from "./secret-files-panel";
+import { FileEditor } from "./file-editor";
+import { FileList } from "./file-list";
 
 interface RepoBrowserProps {
   projectId: string;
@@ -63,16 +62,11 @@ export function RepoBrowser(props: RepoBrowserProps): ReactElement {
   const environments = selectedApp.environments;
   const activeEnv = selectedEnv === ALL_ENVIRONMENTS ? null : selectedEnv;
 
-  const configFiles = selectedApp.configFiles.filter(
-    (f) => !activeEnv || f.environmentSlug === activeEnv,
-  );
-  const secretFiles = selectedApp.secretFiles.filter(
-    (f) => !activeEnv || f.environmentSlug === activeEnv,
-  );
+  const files = selectedApp.files.filter((f) => !activeEnv || f.environmentSlug === activeEnv);
 
-  const activeFileId = configFiles.some((f) => f.id === selectedFileId)
+  const activeFileId = files.some((f) => f.id === selectedFileId)
     ? selectedFileId
-    : (configFiles[0]?.id ?? null);
+    : (files[0]?.id ?? null);
 
   const handleSelectApp = (appId: string) => {
     setSelectedAppId(appId);
@@ -109,15 +103,11 @@ export function RepoBrowser(props: RepoBrowserProps): ReactElement {
 
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 4 }}>
-              <ConfigFileList
-                files={configFiles}
-                selectedFileId={activeFileId}
-                onSelect={setSelectedFileId}
-              />
+              <FileList files={files} selectedFileId={activeFileId} onSelect={setSelectedFileId} />
             </Grid>
             <Grid size={{ xs: 12, md: 8 }}>
               {activeFileId ? (
-                <ConfigFileEditor
+                <FileEditor
                   key={activeFileId}
                   projectId={projectId}
                   fileId={activeFileId}
@@ -125,23 +115,11 @@ export function RepoBrowser(props: RepoBrowserProps): ReactElement {
                 />
               ) : (
                 <Box sx={{ p: 3 }}>
-                  <Typography variant="body2Muted">No config file selected.</Typography>
+                  <Typography variant="body2Muted">No file selected.</Typography>
                 </Box>
               )}
             </Grid>
           </Grid>
-
-          <Box>
-            <Typography variant="subtitle1" gutterBottom>
-              Secret files
-            </Typography>
-            <SecretFilesPanel
-              projectId={projectId}
-              app={selectedApp}
-              files={secretFiles}
-              canEdit={canEdit ?? false}
-            />
-          </Box>
         </Stack>
       </Grid>
     </Grid>

@@ -3,14 +3,17 @@
 import type { ReactElement } from "react";
 import {
   Security as AnalysisIcon,
+  ArrowForward as ArrowForwardIcon,
   Inventory2 as DepsIcon,
   Group as GroupIcon,
   TrendingUp as HealthIcon,
 } from "@mui/icons-material";
-import { Box, CardContent, CardHeader, Grid, Stack, Typography } from "@mui/material";
+import { Box, CardActions, CardContent, CardHeader, Grid, Stack, Typography } from "@mui/material";
 import { IconBox, Surface } from "@/components/ui/cards";
+import { LinkButton } from "@/components/ui/inputs";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
+import { ROUTES } from "@/lib/constants";
 import { queryKeys } from "@/lib/query-keys";
 import type { AnalysisListResponseDto } from "@/types/api/analysis";
 import type { MemberListResponseDto } from "@/types/api/project";
@@ -110,6 +113,16 @@ export function QuickStatsCard(props: QuickStatsCardProps): ReactElement {
           ))}
         </Grid>
       </CardContent>
+      <CardActions>
+        <LinkButton
+          href={ROUTES.projectAnalysis(projectId)}
+          variant="outlined"
+          size="small"
+          endIcon={<ArrowForwardIcon />}
+        >
+          Go to Analysis
+        </LinkButton>
+      </CardActions>
     </Surface>
   );
 }

@@ -21,22 +21,15 @@ import {
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
 import { decryptBinary, decrypt as decryptText, shareKeyFromFragment } from "@/lib/crypto";
-import type { SharedSecretInfoDto } from "@/types/api/shared-secret";
+import type { AccessShareBody, ShareLinkInfoDto } from "@/types/api/share-link";
 import { downloadFile } from "@/utils/download-file";
 
-interface SecretAccessViewProps {
+interface ShareAccessViewProps {
   token: string;
-  info: SharedSecretInfoDto;
+  info: ShareLinkInfoDto;
 }
 
-interface EncryptedAccessResult {
-  encryptedPayload: string;
-  iv: string;
-  authTag: string;
-  fileName: string | null;
-  mimeType: string | null;
-}
-
+/** Local view model after client-side decryption — `text` is never sent by the server. */
 interface AccessResult {
   fileName: string;
   mimeType: string;
@@ -57,45 +50,38 @@ function isTextMimeType(mimeType: string): boolean {
   );
 }
 
-export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
+export function ShareAccessView(props: ShareAccessViewProps): ReactElement {
   const { token, info } = props;
 
   const [password, setPassword] = useState("");
   const [result, setResult] = useState<AccessResult | null>(null);
 
   const mutation = useApiMutation(
-    (body: { password?: string }) => client.api.secrets.shared({ token }).post(body),
+    (body: AccessShareBody) => client.api.shares({ token }).post(body),
     {
       onSuccess: async (data) => {
-        const encrypted = data as unknown as EncryptedAccessResult;
-
         // Derive the share key from the URL fragment (never sent to the server).
         const fragment = window.location.hash.slice(1);
         const shareKey = await shareKeyFromFragment(fragment);
 
-        const fileName = encrypted.fileName ?? "secret-file";
-        const mimeType = encrypted.mimeType ?? "application/octet-stream";
+        const fileName = data.fileName ?? "shared-file";
+        const mimeType = data.mimeType ?? "application/octet-stream";
 
         if (isTextMimeType(mimeType)) {
-          const text = await decryptText(
-            encrypted.encryptedPayload,
-            encrypted.iv,
-            encrypted.authTag,
-            shareKey,
-          );
+          const text = await decryptText(data.encryptedPayload, data.iv, data.authTag, shareKey);
           setResult({ fileName, mimeType, text });
         } else {
           const fileBuffer = await decryptBinary(
-            encrypted.encryptedPayload,
-            encrypted.iv,
-            encrypted.authTag,
+            data.encryptedPayload,
+            data.iv,
+            data.authTag,
             shareKey,
           );
           downloadFile(fileBuffer, fileName, mimeType);
           setResult({ fileName, mimeType, text: null });
         }
       },
-      errorMessage: (err) => err.message ?? "Failed to access secret",
+      errorMessage: (err) => err.message ?? "Failed to access file",
     },
   );
 

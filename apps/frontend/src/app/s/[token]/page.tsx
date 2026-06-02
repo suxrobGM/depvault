@@ -1,18 +1,18 @@
 import type { ReactElement } from "react";
 import { Lock as LockIcon } from "@mui/icons-material";
 import { Box, Container, Paper, Typography } from "@mui/material";
-import { SecretAccessView } from "@/components/features/shared-secret/secret-access-view";
+import { ShareAccessView } from "@/components/features/share-link";
 import { getServerClient } from "@/lib/api-server";
 
 interface PageProps {
   params: Promise<{ token: string }>;
 }
 
-export default async function SharedSecretPage(props: PageProps): Promise<ReactElement> {
+export default async function ShareLinkPage(props: PageProps): Promise<ReactElement> {
   const { token } = await props.params;
 
   const apiClient = await getServerClient({ auth: false });
-  const { data: info, error } = await apiClient.api.secrets.shared({ token }).info.get();
+  const { data: info, error } = await apiClient.api.shares({ token }).info.get();
   const errorMessage = error?.value.message;
 
   return (
@@ -22,7 +22,7 @@ export default async function SharedSecretPage(props: PageProps): Promise<ReactE
         <Typography variant="h5" sx={{ fontWeight: 700 }}>
           DepVault — Secure Share
         </Typography>
-        <Typography variant="body2Muted">One-time encrypted secret delivery</Typography>
+        <Typography variant="body2Muted">One-time encrypted file delivery</Typography>
       </Box>
       <Paper variant="outlined" sx={{ p: 3 }}>
         {errorMessage ? (
@@ -33,7 +33,7 @@ export default async function SharedSecretPage(props: PageProps): Promise<ReactE
             <Typography variant="body2Muted">{errorMessage}</Typography>
           </Box>
         ) : (
-          <SecretAccessView token={token} info={info!} />
+          <ShareAccessView token={token} info={info!} />
         )}
       </Paper>
     </Container>

@@ -3,7 +3,6 @@
 import { useState, type ReactElement } from "react";
 import {
   CheckCircle as CheckIcon,
-  Download as DownloadIcon,
   CreateNewFolder as ProjectIcon,
   Share as ShareIcon,
   RadioButtonUnchecked as UncheckedIcon,
@@ -26,32 +25,27 @@ const steps: OnboardingStep[] = [
     id: "create-project",
     icon: <ProjectIcon sx={{ fontSize: 20 }} />,
     title: "Create your first project",
-    description: "Set up a project to organize dependencies, secrets, and secure files",
+    description: "Set up a project to organize dependencies, config files, and secret files",
   },
   {
     id: "upload-deps",
     icon: <UploadIcon sx={{ fontSize: 20 }} />,
-    title: "Upload a dependency file",
-    description: "Scan package.json, requirements.txt, or any supported dependency file",
+    title: "Connect a repo or upload dependencies",
+    description:
+      "Scan package.json, requirements.txt, or any supported manifest for vulnerabilities",
   },
   {
     id: "setup-vault",
     icon: <VaultIcon sx={{ fontSize: 20 }} />,
-    title: "Set up your environment vault",
+    title: "Set up your vault & push files",
     description:
-      "Store encrypted environment variables and secret files (certs, keys, credentials)",
+      "Unlock your encrypted vault, then run depvault push to store config and secret files",
   },
   {
-    id: "download-env",
-    icon: <DownloadIcon sx={{ fontSize: 20 }} />,
-    title: "Download .env.example",
-    description: "Generate a template with placeholders for required variables",
-  },
-  {
-    id: "share-secret",
+    id: "share-invite",
     icon: <ShareIcon sx={{ fontSize: 20 }} />,
-    title: "Share a secret",
-    description: "Generate a one-time encrypted link to securely share credentials",
+    title: "Invite your team or share a file",
+    description: "Add members with role-based access, or generate a one-time encrypted share link",
   },
 ];
 

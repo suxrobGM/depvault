@@ -45,7 +45,7 @@ export function Greeting(): ReactElement {
         </Stack>
         <Typography variant="body2Muted">{today}</Typography>
       </Box>
-      <LinkButton href={ROUTES.overview} variant="contained" startIcon={<AddIcon />} size="small">
+      <LinkButton href={ROUTES.projects} variant="contained" startIcon={<AddIcon />} size="small">
         New Project
       </LinkButton>
     </Box>

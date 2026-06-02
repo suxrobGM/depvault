@@ -25,10 +25,7 @@ import { useApiQuery } from "@/hooks/use-api-query";
 import { useConfirm } from "@/hooks/use-confirm";
 import { client } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
-import type {
-  SharedSecretAuditItemDto,
-  SharedSecretAuditListResponseDto,
-} from "@/types/api/shared-secret";
+import type { ShareLinkItemDto, ShareLinkListResponseDto } from "@/types/api/share-link";
 import { formatDate } from "@/utils/formatters";
 
 const STATUS_COLOR: Record<string, "warning" | "success" | "error" | "default"> = {
@@ -37,32 +34,31 @@ const STATUS_COLOR: Record<string, "warning" | "success" | "error" | "default"> 
   EXPIRED: "error",
 };
 
-interface SharedLinksDialogProps {
+interface ShareLinksDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
 }
 
-export function SharedLinksDialog(props: SharedLinksDialogProps): ReactElement {
+export function ShareLinksDialog(props: ShareLinksDialogProps): ReactElement {
   const { open, onClose, projectId } = props;
   const confirm = useConfirm();
 
-  const { data, isLoading } = useApiQuery<SharedSecretAuditListResponseDto>(
-    queryKeys.sharedSecrets.byProject(projectId),
-    () => client.api.projects({ id: projectId })["secrets"]["shared"].get(),
+  const { data, isLoading } = useApiQuery<ShareLinkListResponseDto>(
+    queryKeys.shareLinks.byProject(projectId),
+    () => client.api.projects({ id: projectId }).shares.get(),
     { enabled: open },
   );
 
   const revokeMutation = useApiMutation(
-    (secretId: string) =>
-      client.api.projects({ id: projectId })["secrets"]["shared"]({ secretId }).delete(),
+    (shareId: string) => client.api.projects({ id: projectId }).shares({ shareId }).delete(),
     {
-      invalidateKeys: [queryKeys.sharedSecrets.byProject(projectId)],
+      invalidateKeys: [queryKeys.shareLinks.byProject(projectId)],
       successMessage: "Link revoked",
     },
   );
 
-  const handleRevoke = async (item: SharedSecretAuditItemDto) => {
+  const handleRevoke = async (item: ShareLinkItemDto) => {
     const ok = await confirm({
       title: "Revoke Share Link",
       description:

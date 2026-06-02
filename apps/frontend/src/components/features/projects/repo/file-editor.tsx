@@ -19,10 +19,7 @@ import {
   Tabs,
   Typography,
 } from "@mui/material";
-import {
-  CreateFileShareDialog,
-  type ShareableFile,
-} from "@/components/features/shared-secret/create-file-share-dialog";
+import { CreateFileShareDialog, type ShareableFile } from "@/components/features/share-link";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useConfirm } from "@/hooks/use-confirm";
@@ -31,17 +28,17 @@ import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
 import { decryptBinary, encrypt } from "@/lib/crypto";
 import { queryKeys } from "@/lib/query-keys";
-import type { ConfigFileContentDto } from "@/types/api/repo";
+import type { RepoFileContentDto, SaveRepoFileBody } from "@/types/api/repo";
 import { downloadFile } from "@/utils/download-file";
 import { formatBytes } from "@/utils/formatters";
 import { CodeEditorLazy } from "./code-editor-lazy";
-import { ConfigFileVersions } from "./config-file-versions";
 import { EnvFormEditor } from "./env-form-editor";
 import { binaryPlaceholder, resolveLanguage, supportsKeyValueForm } from "./file-format";
+import { FileVersions } from "./file-versions";
 import { ReviewChangesDialog } from "./review-changes-dialog";
 import { useDecryptedText } from "./use-decrypted-text";
 
-interface ConfigFileEditorProps {
+interface FileEditorProps {
   projectId: string;
   fileId: string;
   canEdit: boolean;
@@ -49,7 +46,12 @@ interface ConfigFileEditorProps {
 
 type EditorTab = "form" | "raw" | "history";
 
-export function ConfigFileEditor(props: ConfigFileEditorProps): ReactElement {
+/**
+ * Inline editor for a single repo file. Behavior branches on `kind` + `isBinary`:
+ * CONFIG text → Form (key/value) + Raw + History; SECRET text → Raw + History;
+ * either kind, binary → download-only + History.
+ */
+export function FileEditor(props: FileEditorProps): ReactElement {
   const { projectId, fileId, canEdit } = props;
   const { getProjectDEK } = useVault();
   const toast = useToast();
@@ -61,27 +63,20 @@ export function ConfigFileEditor(props: ConfigFileEditorProps): ReactElement {
   const [downloading, setDownloading] = useState(false);
   const [shareFile, setShareFile] = useState<ShareableFile | null>(null);
 
-  const { data: content, isLoading } = useApiQuery<ConfigFileContentDto>(
-    queryKeys.repo.configFileContent(projectId, fileId),
-    () => client.api.projects({ id: projectId })["config-files"]({ fileId }).get(),
+  const { data: content, isLoading } = useApiQuery<RepoFileContentDto>(
+    queryKeys.repo.fileContent(projectId, fileId),
+    () => client.api.projects({ id: projectId }).files({ fileId }).get(),
   );
 
   const { text, isDecrypting, error } = useDecryptedText(projectId, content);
 
   const saveMutation = useApiMutation(
-    (body: {
-      encryptedContent: string;
-      iv: string;
-      authTag: string;
-      fileSize: number;
-      isBinary: boolean;
-      message?: string;
-    }) => client.api.projects({ id: projectId })["config-files"]({ fileId }).put(body),
+    (body: SaveRepoFileBody) => client.api.projects({ id: projectId }).files({ fileId }).put(body),
     {
       invalidateKeys: [
-        queryKeys.repo.configFile(projectId, fileId),
-        queryKeys.repo.configFileContent(projectId, fileId),
-        queryKeys.repo.configFileVersions(projectId, fileId),
+        queryKeys.repo.file(projectId, fileId),
+        queryKeys.repo.fileContent(projectId, fileId),
+        queryKeys.repo.fileVersions(projectId, fileId),
         queryKeys.repo.map(projectId),
       ],
       successMessage: "File saved",
@@ -93,7 +88,7 @@ export function ConfigFileEditor(props: ConfigFileEditorProps): ReactElement {
   );
 
   const deleteMutation = useApiMutation(
-    () => client.api.projects({ id: projectId })["config-files"]({ fileId }).delete(),
+    () => client.api.projects({ id: projectId }).files({ fileId }).delete(),
     {
       invalidateKeys: [queryKeys.repo.map(projectId), queryKeys.repo.apps(projectId)],
       successMessage: "File deleted",
@@ -108,10 +103,12 @@ export function ConfigFileEditor(props: ConfigFileEditorProps): ReactElement {
     return <Alert severity="error">File not found.</Alert>;
   }
 
+  const isSecret = content.kind === "SECRET";
   const language = resolveLanguage(content.format, content.relativePath);
-  const canUseForm = supportsKeyValueForm(language);
+  const canUseForm = !isSecret && supportsKeyValueForm(language);
   const currentText = draft ?? text ?? "";
   const isDirty = draft !== null && draft !== (text ?? "");
+  const downloadMime = content.mimeType ?? "application/octet-stream";
 
   const handleDownload = async () => {
     setDownloading(true);
@@ -125,7 +122,7 @@ export function ConfigFileEditor(props: ConfigFileEditorProps): ReactElement {
           content.authTag,
           dek,
         );
-        downloadFile(buffer, fileName, "application/octet-stream");
+        downloadFile(buffer, fileName, downloadMime);
       } else {
         downloadFile(text ?? "", fileName);
       }
@@ -147,9 +144,9 @@ export function ConfigFileEditor(props: ConfigFileEditorProps): ReactElement {
           content.authTag,
           dek,
         );
-        setShareFile({ fileName, mimeType: "application/octet-stream", content: buffer });
+        setShareFile({ fileName, mimeType: downloadMime, content: buffer });
       } else {
-        setShareFile({ fileName, mimeType: "text/plain", content: text ?? "" });
+        setShareFile({ fileName, mimeType: content.mimeType ?? "text/plain", content: text ?? "" });
       }
     } catch {
       toast.error("Failed to prepare file for sharing");
@@ -171,7 +168,7 @@ export function ConfigFileEditor(props: ConfigFileEditorProps): ReactElement {
 
   const handleDelete = async () => {
     const ok = await confirm({
-      title: "Delete config file",
+      title: "Delete file",
       description: `Permanently delete "${content.relativePath}" and all its version history?`,
       confirmLabel: "Delete",
       destructive: true,
@@ -185,8 +182,20 @@ export function ConfigFileEditor(props: ConfigFileEditorProps): ReactElement {
         <Typography variant="subtitle1" sx={{ fontFamily: "monospace", fontWeight: 600 }}>
           {content.relativePath}
         </Typography>
-        <Chip size="small" label={content.environmentSlug} variant="outlined" />
-        <Chip size="small" label={language.toUpperCase()} variant="outlined" />
+        <Chip
+          size="small"
+          label={isSecret ? "Secret" : "Config"}
+          color={isSecret ? "warning" : "info"}
+          variant="outlined"
+        />
+        {content.environmentSlug && (
+          <Chip size="small" label={content.environmentSlug} variant="outlined" />
+        )}
+        <Chip
+          size="small"
+          label={isSecret ? (content.mimeType ?? "binary") : language.toUpperCase()}
+          variant="outlined"
+        />
         <Box sx={{ flex: 1 }} />
         <Typography variant="captionMuted">{formatBytes(content.fileSize)}</Typography>
         <Button
@@ -221,7 +230,16 @@ export function ConfigFileEditor(props: ConfigFileEditorProps): ReactElement {
       </Stack>
 
       {content.isBinary ? (
-        <Alert severity="info">{binaryPlaceholder(content.fileSize)} — download-only.</Alert>
+        <>
+          <Alert severity="info">{binaryPlaceholder(content.fileSize)} — download-only.</Alert>
+          <FileVersions
+            projectId={projectId}
+            fileId={fileId}
+            currentText={null}
+            currentIsBinary
+            canEdit={canEdit}
+          />
+        </>
       ) : error ? (
         <Alert severity="error">{error}</Alert>
       ) : isDecrypting ? (
@@ -248,7 +266,7 @@ export function ConfigFileEditor(props: ConfigFileEditorProps): ReactElement {
           )}
 
           {tab === "history" && (
-            <ConfigFileVersions
+            <FileVersions
               projectId={projectId}
               fileId={fileId}
               currentText={text}

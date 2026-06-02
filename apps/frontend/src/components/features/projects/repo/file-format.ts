@@ -8,10 +8,11 @@ const ENV_FORMATS = new Set(["env", "dotenv"]);
 
 /**
  * Resolve a CodeMirror-friendly language from the backend `format` field,
- * falling back to the file extension in `relativePath`.
+ * falling back to the file extension in `relativePath`. Secret files carry no
+ * `format`, so they rely entirely on the extension fallback.
  */
-export function resolveLanguage(format: string, relativePath: string): EditorLanguage {
-  const fmt = format.toLowerCase();
+export function resolveLanguage(format: string | null, relativePath: string): EditorLanguage {
+  const fmt = format?.toLowerCase() ?? "";
   if (JSON_FORMATS.has(fmt)) return "json";
   if (YAML_FORMATS.has(fmt)) return "yaml";
   if (ENV_FORMATS.has(fmt)) return "env";

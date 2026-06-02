@@ -25,15 +25,15 @@ import { client } from "@/lib/api";
 import { decrypt } from "@/lib/crypto";
 import { queryKeys } from "@/lib/query-keys";
 import type {
-  ConfigFileVersionContentDto,
-  ConfigFileVersionDto,
-  ConfigFileVersionListResponseDto,
+  RepoFileVersionContentDto,
+  RepoFileVersionDto,
+  RepoFileVersionListResponseDto,
 } from "@/types/api/repo";
 import { formatBytes, formatDateTime } from "@/utils/formatters";
 import { FileDiffViewerLazy } from "./code-editor-lazy";
 import { binaryPlaceholder } from "./file-format";
 
-interface ConfigFileVersionsProps {
+interface FileVersionsProps {
   projectId: string;
   fileId: string;
   /** Current decrypted text, used as the right-hand side of a "compare with current" diff. */
@@ -48,39 +48,39 @@ interface DiffState {
   newText: string;
 }
 
-export function ConfigFileVersions(props: ConfigFileVersionsProps): ReactElement {
+export function FileVersions(props: FileVersionsProps): ReactElement {
   const { projectId, fileId, currentText, currentIsBinary, canEdit } = props;
   const { getProjectDEK } = useVault();
 
   const [diff, setDiff] = useState<DiffState | null>(null);
   const [loadingVersionId, setLoadingVersionId] = useState<string | null>(null);
 
-  const { data, isLoading } = useApiQuery<ConfigFileVersionListResponseDto>(
-    queryKeys.repo.configFileVersions(projectId, fileId),
-    () => client.api.projects({ id: projectId })["config-files"]({ fileId }).versions.get(),
+  const { data, isLoading } = useApiQuery<RepoFileVersionListResponseDto>(
+    queryKeys.repo.fileVersions(projectId, fileId),
+    () => client.api.projects({ id: projectId }).files({ fileId }).versions.get(),
   );
 
   const restoreMutation = useApiMutation(
     (versionId: string) =>
       client.api
         .projects({ id: projectId })
-        ["config-files"]({ fileId })
+        .files({ fileId })
         .versions({ versionId })
         .restore.post(),
     {
       invalidateKeys: [
-        queryKeys.repo.configFile(projectId, fileId),
-        queryKeys.repo.configFileContent(projectId, fileId),
-        queryKeys.repo.configFileVersions(projectId, fileId),
+        queryKeys.repo.file(projectId, fileId),
+        queryKeys.repo.fileContent(projectId, fileId),
+        queryKeys.repo.fileVersions(projectId, fileId),
         queryKeys.repo.map(projectId),
       ],
       successMessage: "File restored to selected version",
     },
   );
 
-  const versions: ConfigFileVersionDto[] = data?.items ?? [];
+  const versions: RepoFileVersionDto[] = data?.items ?? [];
 
-  const handleCompare = async (version: ConfigFileVersionDto, label: string) => {
+  const handleCompare = async (version: RepoFileVersionDto, label: string) => {
     if (version.isBinary || currentIsBinary) {
       setDiff({
         versionLabel: label,
@@ -93,7 +93,7 @@ export function ConfigFileVersions(props: ConfigFileVersionsProps): ReactElement
     setLoadingVersionId(version.id);
     const { data: content, error } = await client.api
       .projects({ id: projectId })
-      ["config-files"]({ fileId })
+      .files({ fileId })
       .versions({ versionId: version.id })
       .get();
 
@@ -104,7 +104,7 @@ export function ConfigFileVersions(props: ConfigFileVersionsProps): ReactElement
 
     try {
       const dek = await getProjectDEK(projectId);
-      const versionContent = content as ConfigFileVersionContentDto;
+      const versionContent = content as RepoFileVersionContentDto;
       const oldText = await decrypt(
         versionContent.encryptedContent,
         versionContent.iv,

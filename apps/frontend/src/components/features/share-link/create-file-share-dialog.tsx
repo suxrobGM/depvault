@@ -20,6 +20,7 @@ import { CopyButton } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
 import { encryptBinary, generateShareKey, shareKeyToFragment } from "@/lib/crypto";
+import type { CreateShareBody } from "@/types/api/share-link";
 
 const EXPIRY_OPTIONS = [
   { label: "1 hour", value: 3600 },
@@ -47,15 +48,7 @@ export function CreateFileShareDialog(props: CreateFileShareDialogProps): ReactE
   const [showPassword, setShowPassword] = useState(false);
 
   const mutation = useApiMutation(
-    (values: {
-      fileName: string;
-      encryptedPayload: string;
-      iv: string;
-      authTag: string;
-      mimeType: string;
-      expiresIn: number;
-      password?: string;
-    }) => client.api.projects({ id: projectId }).secrets.shared.file.post(values),
+    (values: CreateShareBody) => client.api.projects({ id: projectId }).shares.post(values),
     {
       errorMessage: "Failed to create share link",
     },
@@ -87,9 +80,8 @@ export function CreateFileShareDialog(props: CreateFileShareDialogProps): ReactE
         password: value.usePassword && value.password ? value.password : undefined,
       });
 
-      const data = result as { shareUrl: string; token: string };
       const fragment = shareKeyToFragment(shareKey.raw);
-      setShareUrl(`${data.shareUrl}#${fragment}`);
+      setShareUrl(`${result.shareUrl}#${fragment}`);
     },
   });
 

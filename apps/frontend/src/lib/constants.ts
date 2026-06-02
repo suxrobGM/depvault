@@ -10,7 +10,6 @@ export const ROUTES = {
   overview: "/overview",
   profileGeneral: "/profile/general",
   profileSecurity: "/profile/security",
-  converter: "/converter",
   pricing: "/pricing",
   terms: "/terms",
   privacy: "/privacy",
@@ -33,7 +32,7 @@ export const ROUTES = {
   admin: "/admin",
   adminUsers: "/admin/users",
   adminSubscriptions: "/admin/subscriptions",
-  secrets: "/secrets",
+  share: "/s",
   notifications: "/notifications",
   docs: "/docs" as Route,
 } as const;

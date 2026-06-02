@@ -50,7 +50,7 @@ export function AppsSidebar(props: AppsSidebarProps): ReactElement {
               {dir}
             </Typography>
             {groupApps.map((app) => {
-              const fileCount = app.configFiles.length + app.secretFiles.length;
+              const fileCount = app.files.length;
               return (
                 <ListItemButton
                   key={app.id}

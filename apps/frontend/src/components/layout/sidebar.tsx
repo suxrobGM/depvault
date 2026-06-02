@@ -12,7 +12,6 @@ import {
   History as HistoryIcon,
   Security as SecurityNavIcon,
   Settings as SettingsIcon,
-  SwapHoriz as SwapHorizIcon,
 } from "@mui/icons-material";
 import {
   Box,
@@ -54,7 +53,6 @@ const navItems = [
   { label: "Projects", icon: <FolderIcon />, href: ROUTES.projects },
   { label: "Activity", icon: <HistoryIcon />, href: ROUTES.activity },
   { label: "Security", icon: <SecurityNavIcon />, href: ROUTES.security },
-  { label: "Converter", icon: <SwapHorizIcon />, href: ROUTES.converter },
   { label: "Billing", icon: <CreditCardIcon />, href: ROUTES.billing },
   { label: "Settings", icon: <SettingsIcon />, href: ROUTES.settings },
 ];

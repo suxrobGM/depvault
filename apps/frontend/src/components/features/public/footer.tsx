@@ -21,7 +21,6 @@ const footerLinks: Record<string, FooterLink[]> = {
     { label: "Dependency Analysis", href: "/docs/guides/dependency-analysis" },
     { label: "Environment Vault", href: "/docs/guides/environment-vault" },
     { label: "Secret Sharing", href: "/docs/guides/secret-sharing" },
-    { label: "Format Converter", href: ROUTES.converter },
   ],
   Developers: [
     { label: "CLI Reference", href: "/docs/cli" },

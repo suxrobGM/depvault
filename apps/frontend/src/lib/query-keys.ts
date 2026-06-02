@@ -67,18 +67,11 @@ export const queryKeys = {
   repo: {
     map: (projectId: string) => ["repo-map", projectId] as const,
     apps: (projectId: string) => ["apps", projectId] as const,
-    configFile: (projectId: string, fileId: string) => ["config-file", projectId, fileId] as const,
-    configFileContent: (projectId: string, fileId: string) =>
-      ["config-file-content", projectId, fileId] as const,
-    configFileVersions: (projectId: string, fileId: string) =>
-      ["config-file-versions", projectId, fileId] as const,
-  },
-
-  secretFiles: {
-    byProject: (projectId: string) => ["secret-files", projectId] as const,
-    overview: (projectId: string) => ["secret-files", projectId, "overview"] as const,
-    versions: (projectId: string, fileId: string) =>
-      ["secret-file-versions", projectId, fileId] as const,
+    file: (projectId: string, fileId: string) => ["repo-file", projectId, fileId] as const,
+    fileContent: (projectId: string, fileId: string) =>
+      ["repo-file-content", projectId, fileId] as const,
+    fileVersions: (projectId: string, fileId: string) =>
+      ["repo-file-versions", projectId, fileId] as const,
   },
 
   ciTokens: {
@@ -102,8 +95,8 @@ export const queryKeys = {
     patterns: (projectId: string) => ["scan-patterns", projectId] as const,
   },
 
-  sharedSecrets: {
-    byProject: (projectId: string) => ["shared-secrets", projectId] as const,
+  shareLinks: {
+    byProject: (projectId: string) => ["share-links", projectId] as const,
   },
 
   github: {

@@ -3,7 +3,6 @@ import {
   FolderZip as BundlerIcon,
   Rocket as CiCdIcon,
   Terminal as CliIcon,
-  SwapHoriz as ConverterIcon,
   GitHub as GitIcon,
   Description as LicenseIcon,
   ContentCopy as TemplateIcon,
@@ -43,13 +42,6 @@ const moreFeatures: MoreFeature[] = [
     description:
       "Generate scoped, short-lived tokens for pipelines to pull end-to-end encrypted secrets at build time — no .env files in CI.",
     color: "var(--mui-palette-info-light)",
-  },
-  {
-    icon: <ConverterIcon />,
-    title: "Format Converter",
-    description:
-      "Convert between .env, appsettings.json, YAML, TOML, and more with preview before download.",
-    color: "#a78bfa",
   },
   {
     icon: <TemplateIcon />,

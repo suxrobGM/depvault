@@ -2,10 +2,10 @@
 
 import type { ReactElement, ReactNode } from "react";
 import {
+  Apps as AppsIcon,
   BugReport as BugIcon,
+  Description as FilesIcon,
   Folder as FolderIcon,
-  Inventory as InventoryIcon,
-  VpnKey as SecretIcon,
 } from "@mui/icons-material";
 import { Box, CardContent, Grid, Skeleton, Stack, Typography } from "@mui/material";
 import { IconBox, Surface, type SurfaceAccent } from "@/components/ui/cards";
@@ -34,9 +34,15 @@ export function Stats(): ReactElement {
       accent: "primary",
     },
     {
-      icon: <InventoryIcon sx={{ fontSize: 22 }} />,
-      label: "Dependencies",
-      value: data?.dependencyCount ?? 0,
+      icon: <AppsIcon sx={{ fontSize: 22 }} />,
+      label: "Apps",
+      value: data?.appCount ?? 0,
+      accent: "primary",
+    },
+    {
+      icon: <FilesIcon sx={{ fontSize: 22 }} />,
+      label: "Files",
+      value: data?.repoFileCount ?? 0,
       accent: "primary",
     },
     {
@@ -44,12 +50,6 @@ export function Stats(): ReactElement {
       label: "Vulnerabilities",
       value: data?.vulnerabilityCount ?? 0,
       accent: "error",
-    },
-    {
-      icon: <SecretIcon sx={{ fontSize: 22 }} />,
-      label: "Config Files",
-      value: data?.configFileCount ?? 0,
-      accent: "primary",
     },
   ];
 
