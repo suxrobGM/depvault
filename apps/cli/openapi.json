@@ -2665,7 +2665,10 @@
                     "vulnerabilityCount": {
                       "type": "number"
                     },
-                    "configFileCount": {
+                    "repoFileCount": {
+                      "type": "number"
+                    },
+                    "appCount": {
                       "type": "number"
                     }
                   },
@@ -2673,7 +2676,8 @@
                     "projectCount",
                     "dependencyCount",
                     "vulnerabilityCount",
-                    "configFileCount"
+                    "repoFileCount",
+                    "appCount"
                   ]
                 }
               }
@@ -5930,8 +5934,7 @@
                       "projectId",
                       "name",
                       "appPath",
-                      "configFileCount",
-                      "secretFileCount",
+                      "fileCount",
                       "environments",
                       "createdAt",
                       "updatedAt"
@@ -5949,10 +5952,7 @@
                       "appPath": {
                         "type": "string"
                       },
-                      "configFileCount": {
-                        "type": "number"
-                      },
-                      "secretFileCount": {
+                      "fileCount": {
                         "type": "number"
                       },
                       "environments": {
@@ -6134,10 +6134,7 @@
                     "appPath": {
                       "type": "string"
                     },
-                    "configFileCount": {
-                      "type": "number"
-                    },
-                    "secretFileCount": {
+                    "fileCount": {
                       "type": "number"
                     },
                     "environments": {
@@ -6160,8 +6157,7 @@
                     "projectId",
                     "name",
                     "appPath",
-                    "configFileCount",
-                    "secretFileCount",
+                    "fileCount",
                     "environments",
                     "createdAt",
                     "updatedAt"
@@ -6365,10 +6361,7 @@
                     "appPath": {
                       "type": "string"
                     },
-                    "configFileCount": {
-                      "type": "number"
-                    },
-                    "secretFileCount": {
+                    "fileCount": {
                       "type": "number"
                     },
                     "environments": {
@@ -6391,8 +6384,7 @@
                     "projectId",
                     "name",
                     "appPath",
-                    "configFileCount",
-                    "secretFileCount",
+                    "fileCount",
                     "environments",
                     "createdAt",
                     "updatedAt"
@@ -6568,10 +6560,7 @@
                     "appPath": {
                       "type": "string"
                     },
-                    "configFileCount": {
-                      "type": "number"
-                    },
-                    "secretFileCount": {
+                    "fileCount": {
                       "type": "number"
                     },
                     "environments": {
@@ -6594,8 +6583,7 @@
                     "projectId",
                     "name",
                     "appPath",
-                    "configFileCount",
-                    "secretFileCount",
+                    "fileCount",
                     "environments",
                     "createdAt",
                     "updatedAt"
@@ -6945,8 +6933,7 @@
                           "name",
                           "appPath",
                           "environments",
-                          "configFiles",
-                          "secretFiles"
+                          "files"
                         ],
                         "properties": {
                           "id": {
@@ -6964,53 +6951,16 @@
                               "type": "string"
                             }
                           },
-                          "configFiles": {
+                          "files": {
                             "type": "array",
                             "items": {
                               "type": "object",
                               "required": [
                                 "id",
+                                "kind",
                                 "relativePath",
+                                "environmentSlug",
                                 "format",
-                                "environmentSlug",
-                                "fileSize",
-                                "isBinary",
-                                "updatedAt"
-                              ],
-                              "properties": {
-                                "id": {
-                                  "type": "string"
-                                },
-                                "relativePath": {
-                                  "type": "string"
-                                },
-                                "format": {
-                                  "type": "string"
-                                },
-                                "environmentSlug": {
-                                  "type": "string"
-                                },
-                                "fileSize": {
-                                  "type": "number"
-                                },
-                                "isBinary": {
-                                  "type": "boolean"
-                                },
-                                "updatedAt": {
-                                  "type": "string",
-                                  "format": "date-time"
-                                }
-                              }
-                            }
-                          },
-                          "secretFiles": {
-                            "type": "array",
-                            "items": {
-                              "type": "object",
-                              "required": [
-                                "id",
-                                "relativePath",
-                                "environmentSlug",
                                 "mimeType",
                                 "fileSize",
                                 "isBinary",
@@ -7020,6 +6970,13 @@
                                 "id": {
                                   "type": "string"
                                 },
+                                "kind": {
+                                  "type": "string",
+                                  "enum": [
+                                    "CONFIG",
+                                    "SECRET"
+                                  ]
+                                },
                                 "relativePath": {
                                   "type": "string"
                                 },
@@ -7027,7 +6984,12 @@
                                   "nullable": true,
                                   "type": "string"
                                 },
+                                "format": {
+                                  "nullable": true,
+                                  "type": "string"
+                                },
                                 "mimeType": {
+                                  "nullable": true,
                                   "type": "string"
                                 },
                                 "fileSize": {
@@ -7203,52 +7165,15 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "configFiles": {
+                    "files": {
                       "type": "array",
                       "items": {
                         "type": "object",
                         "required": [
+                          "kind",
                           "relativePath",
+                          "environmentSlug",
                           "format",
-                          "environmentSlug",
-                          "encryptedContent",
-                          "iv",
-                          "authTag",
-                          "isBinary"
-                        ],
-                        "properties": {
-                          "relativePath": {
-                            "type": "string"
-                          },
-                          "format": {
-                            "type": "string"
-                          },
-                          "environmentSlug": {
-                            "type": "string"
-                          },
-                          "encryptedContent": {
-                            "description": "Base64-encoded encrypted file content",
-                            "type": "string"
-                          },
-                          "iv": {
-                            "type": "string"
-                          },
-                          "authTag": {
-                            "type": "string"
-                          },
-                          "isBinary": {
-                            "type": "boolean"
-                          }
-                        }
-                      }
-                    },
-                    "secretFiles": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "required": [
-                          "relativePath",
-                          "environmentSlug",
                           "mimeType",
                           "encryptedContent",
                           "iv",
@@ -7256,6 +7181,13 @@
                           "isBinary"
                         ],
                         "properties": {
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "CONFIG",
+                              "SECRET"
+                            ]
+                          },
                           "relativePath": {
                             "type": "string"
                           },
@@ -7263,7 +7195,12 @@
                             "nullable": true,
                             "type": "string"
                           },
+                          "format": {
+                            "nullable": true,
+                            "type": "string"
+                          },
                           "mimeType": {
+                            "nullable": true,
                             "type": "string"
                           },
                           "encryptedContent": {
@@ -7284,8 +7221,7 @@
                     }
                   },
                   "required": [
-                    "configFiles",
-                    "secretFiles"
+                    "files"
                   ]
                 }
               }
@@ -7442,7 +7378,7 @@
         }
       }
     },
-    "/api/projects/{id}/config-files/{fileId}": {
+    "/api/projects/{id}/files/{fileId}": {
       "get": {
         "parameters": [
           {
@@ -7475,13 +7411,36 @@
                     "appId": {
                       "type": "string"
                     },
+                    "appName": {
+                      "type": "string"
+                    },
+                    "appPath": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "CONFIG",
+                        "SECRET"
+                      ]
+                    },
                     "relativePath": {
                       "type": "string"
                     },
-                    "format": {
+                    "environmentSlug": {
+                      "nullable": true,
                       "type": "string"
                     },
-                    "environmentSlug": {
+                    "format": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "mimeType": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "description": {
+                      "nullable": true,
                       "type": "string"
                     },
                     "fileSize": {
@@ -7489,6 +7448,9 @@
                     },
                     "isBinary": {
                       "type": "boolean"
+                    },
+                    "createdBy": {
+                      "type": "string"
                     },
                     "createdAt": {
                       "type": "string",
@@ -7512,11 +7474,17 @@
                   "required": [
                     "id",
                     "appId",
+                    "appName",
+                    "appPath",
+                    "kind",
                     "relativePath",
-                    "format",
                     "environmentSlug",
+                    "format",
+                    "mimeType",
+                    "description",
                     "fileSize",
                     "isBinary",
+                    "createdBy",
                     "createdAt",
                     "updatedAt",
                     "encryptedContent",
@@ -7644,17 +7612,17 @@
             }
           }
         },
-        "operationId": "getConfigFile",
+        "operationId": "getRepoFile",
         "tags": [
-          "Config Files"
+          "Files"
         ],
         "security": [
           {
             "bearerAuth": []
           }
         ],
-        "summary": "Get a config file",
-        "description": "Return a config file's client-encrypted content (base64) plus its crypto params and metadata. Decryption happens client-side; the server never decrypts."
+        "summary": "Get a repo file",
+        "description": "Return a file's client-encrypted content (base64) plus its crypto params and metadata. Decryption happens client-side; the server never decrypts."
       },
       "put": {
         "parameters": [
@@ -7688,13 +7656,36 @@
                     "appId": {
                       "type": "string"
                     },
+                    "appName": {
+                      "type": "string"
+                    },
+                    "appPath": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "CONFIG",
+                        "SECRET"
+                      ]
+                    },
                     "relativePath": {
                       "type": "string"
                     },
-                    "format": {
+                    "environmentSlug": {
+                      "nullable": true,
                       "type": "string"
                     },
-                    "environmentSlug": {
+                    "format": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "mimeType": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "description": {
+                      "nullable": true,
                       "type": "string"
                     },
                     "fileSize": {
@@ -7702,6 +7693,9 @@
                     },
                     "isBinary": {
                       "type": "boolean"
+                    },
+                    "createdBy": {
+                      "type": "string"
                     },
                     "createdAt": {
                       "type": "string",
@@ -7715,11 +7709,17 @@
                   "required": [
                     "id",
                     "appId",
+                    "appName",
+                    "appPath",
+                    "kind",
                     "relativePath",
-                    "format",
                     "environmentSlug",
+                    "format",
+                    "mimeType",
+                    "description",
                     "fileSize",
                     "isBinary",
+                    "createdBy",
                     "createdAt",
                     "updatedAt"
                   ]
@@ -7844,17 +7844,17 @@
             }
           }
         },
-        "operationId": "saveConfigFile",
+        "operationId": "saveRepoFile",
         "tags": [
-          "Config Files"
+          "Files"
         ],
         "security": [
           {
             "bearerAuth": []
           }
         ],
-        "summary": "Save a config file",
-        "description": "Replace a config file's content with a new client-encrypted blob from the web editor. The current content is saved as a version before being replaced. Only owners and editors can save.",
+        "summary": "Save a repo file",
+        "description": "Replace a file's content with a new client-encrypted blob from the web editor. The current content is saved as a version before being replaced. Only owners and editors can save.",
         "requestBody": {
           "required": true,
           "content": {
@@ -7881,7 +7881,7 @@
                   },
                   "fileSize": {
                     "minimum": 0,
-                    "maximum": 5242880,
+                    "maximum": 26214400,
                     "type": "number"
                   },
                   "isBinary": {
@@ -7897,1740 +7897,7 @@
           }
         }
       },
-      "delete": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "fileId",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "message"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "deleteConfigFile",
-        "tags": [
-          "Config Files"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Delete a config file",
-        "description": "Permanently delete a config file and all of its version history. Only owners and editors can delete."
-      }
-    },
-    "/api/projects/{id}/config-files/{fileId}/versions": {
-      "get": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "fileId",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "required": [
-                          "id",
-                          "fileSize",
-                          "isBinary",
-                          "changedBy",
-                          "message",
-                          "createdAt"
-                        ],
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "fileSize": {
-                            "type": "number"
-                          },
-                          "isBinary": {
-                            "type": "boolean"
-                          },
-                          "changedBy": {
-                            "type": "string"
-                          },
-                          "message": {
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          "createdAt": {
-                            "type": "string",
-                            "format": "date-time"
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "required": [
-                    "items"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "listConfigFileVersions",
-        "tags": [
-          "Config Files"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "List config file versions",
-        "description": "List version history metadata for a config file, newest first. Any project member can view version metadata."
-      }
-    },
-    "/api/projects/{id}/config-files/{fileId}/versions/{versionId}": {
-      "get": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "fileId",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "versionId",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "appId": {
-                      "type": "string"
-                    },
-                    "relativePath": {
-                      "type": "string"
-                    },
-                    "format": {
-                      "type": "string"
-                    },
-                    "environmentSlug": {
-                      "type": "string"
-                    },
-                    "fileSize": {
-                      "type": "number"
-                    },
-                    "isBinary": {
-                      "type": "boolean"
-                    },
-                    "createdAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "updatedAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "encryptedContent": {
-                      "description": "Base64-encoded encrypted file content",
-                      "type": "string"
-                    },
-                    "iv": {
-                      "type": "string"
-                    },
-                    "authTag": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "appId",
-                    "relativePath",
-                    "format",
-                    "environmentSlug",
-                    "fileSize",
-                    "isBinary",
-                    "createdAt",
-                    "updatedAt",
-                    "encryptedContent",
-                    "iv",
-                    "authTag"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "getConfigFileVersion",
-        "tags": [
-          "Config Files"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Get a config file version",
-        "description": "Return the client-encrypted content of a specific config file version, for diffing or restoring. Decryption happens client-side."
-      }
-    },
-    "/api/projects/{id}/config-files/push": {
-      "post": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "appId": {
-                      "type": "string"
-                    },
-                    "relativePath": {
-                      "type": "string"
-                    },
-                    "format": {
-                      "type": "string"
-                    },
-                    "environmentSlug": {
-                      "type": "string"
-                    },
-                    "fileSize": {
-                      "type": "number"
-                    },
-                    "isBinary": {
-                      "type": "boolean"
-                    },
-                    "createdAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "updatedAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "appId",
-                    "relativePath",
-                    "format",
-                    "environmentSlug",
-                    "fileSize",
-                    "isBinary",
-                    "createdAt",
-                    "updatedAt"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "pushConfigFile",
-        "tags": [
-          "Config Files"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Push a config file",
-        "description": "Push a client-encrypted config file from the CLI. Upserts the owning app by path, then creates the file or replaces an existing one (saving the prior content as a version). Only owners and editors can push.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "appPath",
-                  "appName",
-                  "relativePath",
-                  "format",
-                  "environmentSlug",
-                  "encryptedContent",
-                  "iv",
-                  "authTag",
-                  "fileSize",
-                  "isBinary"
-                ],
-                "properties": {
-                  "appPath": {
-                    "minLength": 1,
-                    "maxLength": 1024,
-                    "type": "string"
-                  },
-                  "appName": {
-                    "minLength": 1,
-                    "maxLength": 255,
-                    "type": "string"
-                  },
-                  "relativePath": {
-                    "minLength": 1,
-                    "maxLength": 1024,
-                    "type": "string"
-                  },
-                  "format": {
-                    "minLength": 1,
-                    "maxLength": 64,
-                    "type": "string"
-                  },
-                  "environmentSlug": {
-                    "minLength": 1,
-                    "maxLength": 128,
-                    "type": "string"
-                  },
-                  "encryptedContent": {
-                    "description": "Base64-encoded encrypted file content",
-                    "type": "string"
-                  },
-                  "iv": {
-                    "type": "string"
-                  },
-                  "authTag": {
-                    "type": "string"
-                  },
-                  "fileSize": {
-                    "minimum": 0,
-                    "maximum": 5242880,
-                    "type": "number"
-                  },
-                  "isBinary": {
-                    "type": "boolean"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/projects/{id}/config-files/{fileId}/versions/{versionId}/restore": {
-      "post": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "fileId",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "versionId",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "appId": {
-                      "type": "string"
-                    },
-                    "relativePath": {
-                      "type": "string"
-                    },
-                    "format": {
-                      "type": "string"
-                    },
-                    "environmentSlug": {
-                      "type": "string"
-                    },
-                    "fileSize": {
-                      "type": "number"
-                    },
-                    "isBinary": {
-                      "type": "boolean"
-                    },
-                    "createdAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "updatedAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "appId",
-                    "relativePath",
-                    "format",
-                    "environmentSlug",
-                    "fileSize",
-                    "isBinary",
-                    "createdAt",
-                    "updatedAt"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "restoreConfigFileVersion",
-        "tags": [
-          "Config Files"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Restore a config file version",
-        "description": "Restore a config file to a previous version. The current content is saved as a new version before restoring. Only owners and editors can restore."
-      }
-    },
-    "/api/projects/{id}/secrets/{fileId}/versions": {
-      "get": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "fileId",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "required": [
-                          "id",
-                          "secretFileId",
-                          "fileSize",
-                          "isBinary",
-                          "changedBy",
-                          "message",
-                          "createdAt"
-                        ],
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "secretFileId": {
-                            "type": "string"
-                          },
-                          "fileSize": {
-                            "type": "number"
-                          },
-                          "isBinary": {
-                            "type": "boolean"
-                          },
-                          "changedBy": {
-                            "type": "string"
-                          },
-                          "message": {
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          "createdAt": {
-                            "type": "string",
-                            "format": "date-time"
-                          }
-                        }
-                      }
-                    }
-                  },
-                  "required": [
-                    "items"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "listSecretFileVersions",
-        "tags": [
-          "Secret Files"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "List secret file versions",
-        "description": "List all version history entries for a secret file. Any project member can view version metadata."
-      }
-    },
-    "/api/projects/{id}/secrets/push": {
-      "post": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "appId": {
-                      "type": "string"
-                    },
-                    "appName": {
-                      "type": "string"
-                    },
-                    "appPath": {
-                      "type": "string"
-                    },
-                    "relativePath": {
-                      "type": "string"
-                    },
-                    "environmentSlug": {
-                      "nullable": true,
-                      "type": "string"
-                    },
-                    "description": {
-                      "nullable": true,
-                      "type": "string"
-                    },
-                    "mimeType": {
-                      "type": "string"
-                    },
-                    "fileSize": {
-                      "type": "number"
-                    },
-                    "isBinary": {
-                      "type": "boolean"
-                    },
-                    "uploadedBy": {
-                      "type": "string"
-                    },
-                    "createdAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "updatedAt": {
-                      "type": "string",
-                      "format": "date-time"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "appId",
-                    "appName",
-                    "appPath",
-                    "relativePath",
-                    "environmentSlug",
-                    "description",
-                    "mimeType",
-                    "fileSize",
-                    "isBinary",
-                    "uploadedBy",
-                    "createdAt",
-                    "updatedAt"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "pushSecretFile",
-        "tags": [
-          "Secret Files"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Push a secret file",
-        "description": "Upsert a client-encrypted secret file at its repo-relative path under an app. The app is resolved by appPath. If the file already exists, its previous content is snapshotted as a version before being replaced. Executable file types (.exe, .sh, .bat, .cmd, .ps1) are rejected. Max file size is 25 MB. Only owners and editors can push.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "appPath",
-                  "appName",
-                  "relativePath",
-                  "encryptedContent",
-                  "iv",
-                  "authTag",
-                  "mimeType",
-                  "fileSize",
-                  "isBinary"
-                ],
-                "properties": {
-                  "appPath": {
-                    "minLength": 1,
-                    "maxLength": 1024,
-                    "type": "string"
-                  },
-                  "appName": {
-                    "minLength": 1,
-                    "maxLength": 255,
-                    "type": "string"
-                  },
-                  "relativePath": {
-                    "minLength": 1,
-                    "maxLength": 1024,
-                    "type": "string"
-                  },
-                  "environmentSlug": {
-                    "maxLength": 255,
-                    "type": "string"
-                  },
-                  "encryptedContent": {
-                    "description": "Base64-encoded encrypted file content",
-                    "type": "string"
-                  },
-                  "iv": {
-                    "type": "string"
-                  },
-                  "authTag": {
-                    "type": "string"
-                  },
-                  "mimeType": {
-                    "maxLength": 255,
-                    "type": "string"
-                  },
-                  "fileSize": {
-                    "minimum": 1,
-                    "maximum": 26214400,
-                    "type": "number"
-                  },
-                  "isBinary": {
-                    "type": "boolean"
-                  },
-                  "description": {
-                    "maxLength": 500,
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/projects/{id}/secrets/{fileId}/download": {
-      "get": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "fileId",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "encryptedContent": {
-                      "description": "Base64-encoded encrypted file content",
-                      "type": "string"
-                    },
-                    "iv": {
-                      "type": "string"
-                    },
-                    "authTag": {
-                      "type": "string"
-                    },
-                    "relativePath": {
-                      "type": "string"
-                    },
-                    "mimeType": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "encryptedContent",
-                    "iv",
-                    "authTag",
-                    "relativePath",
-                    "mimeType"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "downloadSecretFile",
-        "tags": [
-          "Secret Files"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Download a secret file",
-        "description": "Download an encrypted secret file. Decryption happens client-side. Only owners and editors can download file contents. Viewers can only see metadata via the list endpoint."
-      }
-    },
-    "/api/projects/{id}/secrets/{fileId}": {
-      "put": {
+      "patch": {
         "parameters": [
           {
             "schema": {
@@ -9668,6 +7935,13 @@
                     "appPath": {
                       "type": "string"
                     },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "CONFIG",
+                        "SECRET"
+                      ]
+                    },
                     "relativePath": {
                       "type": "string"
                     },
@@ -9675,11 +7949,16 @@
                       "nullable": true,
                       "type": "string"
                     },
-                    "description": {
+                    "format": {
                       "nullable": true,
                       "type": "string"
                     },
                     "mimeType": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "description": {
+                      "nullable": true,
                       "type": "string"
                     },
                     "fileSize": {
@@ -9688,7 +7967,7 @@
                     "isBinary": {
                       "type": "boolean"
                     },
-                    "uploadedBy": {
+                    "createdBy": {
                       "type": "string"
                     },
                     "createdAt": {
@@ -9705,13 +7984,15 @@
                     "appId",
                     "appName",
                     "appPath",
+                    "kind",
                     "relativePath",
                     "environmentSlug",
-                    "description",
+                    "format",
                     "mimeType",
+                    "description",
                     "fileSize",
                     "isBinary",
-                    "uploadedBy",
+                    "createdBy",
                     "createdAt",
                     "updatedAt"
                   ]
@@ -9836,17 +8117,17 @@
             }
           }
         },
-        "operationId": "updateSecretFile",
+        "operationId": "updateRepoFile",
         "tags": [
-          "Secret Files"
+          "Files"
         ],
         "security": [
           {
             "bearerAuth": []
           }
         ],
-        "summary": "Update secret file metadata",
-        "description": "Update the description or environment of a secret file. The file's app and path cannot be changed — re-push to a new path instead. Only owners and editors can update.",
+        "summary": "Update repo file metadata",
+        "description": "Update the description or environment of a file. The file's app and path cannot be changed — re-push to a new path instead. Only owners and editors can update.",
         "requestBody": {
           "required": true,
           "content": {
@@ -9855,10 +8136,12 @@
                 "type": "object",
                 "properties": {
                   "description": {
+                    "nullable": true,
                     "maxLength": 500,
                     "type": "string"
                   },
                   "environmentSlug": {
+                    "nullable": true,
                     "maxLength": 255,
                     "type": "string"
                   }
@@ -10022,20 +8305,20 @@
             }
           }
         },
-        "operationId": "deleteSecretFile",
+        "operationId": "deleteRepoFile",
         "tags": [
-          "Secret Files"
+          "Files"
         ],
         "security": [
           {
             "bearerAuth": []
           }
         ],
-        "summary": "Delete a secret file",
-        "description": "Permanently delete a secret file and all its version history. Only owners and editors can delete."
+        "summary": "Delete a repo file",
+        "description": "Permanently delete a file and all of its version history. Only owners and editors can delete."
       }
     },
-    "/api/projects/{id}/secrets/{fileId}/versions/{versionId}/download": {
+    "/api/projects/{id}/files/{fileId}/versions": {
       "get": {
         "parameters": [
           {
@@ -10053,14 +8336,6 @@
             "in": "path",
             "name": "fileId",
             "required": true
-          },
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "versionId",
-            "required": true
           }
         ],
         "responses": {
@@ -10070,29 +8345,45 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "encryptedContent": {
-                      "description": "Base64-encoded encrypted file content",
-                      "type": "string"
-                    },
-                    "iv": {
-                      "type": "string"
-                    },
-                    "authTag": {
-                      "type": "string"
-                    },
-                    "relativePath": {
-                      "type": "string"
-                    },
-                    "mimeType": {
-                      "type": "string"
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "id",
+                          "fileSize",
+                          "isBinary",
+                          "changedBy",
+                          "message",
+                          "createdAt"
+                        ],
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "fileSize": {
+                            "type": "number"
+                          },
+                          "isBinary": {
+                            "type": "boolean"
+                          },
+                          "changedBy": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
                     }
                   },
                   "required": [
-                    "encryptedContent",
-                    "iv",
-                    "authTag",
-                    "relativePath",
-                    "mimeType"
+                    "items"
                   ]
                 }
               }
@@ -10215,21 +8506,21 @@
             }
           }
         },
-        "operationId": "downloadSecretFileVersion",
+        "operationId": "listRepoFileVersions",
         "tags": [
-          "Secret Files"
+          "Files"
         ],
         "security": [
           {
             "bearerAuth": []
           }
         ],
-        "summary": "Download a specific version of a secret file",
-        "description": "Download an encrypted previous version of a secret file. Decryption happens client-side. Only owners and editors can download."
+        "summary": "List repo file versions",
+        "description": "List version history metadata for a file, newest first. Any project member can view version metadata."
       }
     },
-    "/api/projects/{id}/secrets/{fileId}/rollback/{versionId}": {
-      "post": {
+    "/api/projects/{id}/files/{fileId}/versions/{versionId}": {
+      "get": {
         "parameters": [
           {
             "schema": {
@@ -10275,6 +8566,13 @@
                     "appPath": {
                       "type": "string"
                     },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "CONFIG",
+                        "SECRET"
+                      ]
+                    },
                     "relativePath": {
                       "type": "string"
                     },
@@ -10282,11 +8580,16 @@
                       "nullable": true,
                       "type": "string"
                     },
-                    "description": {
+                    "format": {
                       "nullable": true,
                       "type": "string"
                     },
                     "mimeType": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "description": {
+                      "nullable": true,
                       "type": "string"
                     },
                     "fileSize": {
@@ -10295,7 +8598,246 @@
                     "isBinary": {
                       "type": "boolean"
                     },
-                    "uploadedBy": {
+                    "createdBy": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "encryptedContent": {
+                      "description": "Base64-encoded encrypted file content",
+                      "type": "string"
+                    },
+                    "iv": {
+                      "type": "string"
+                    },
+                    "authTag": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "appId",
+                    "appName",
+                    "appPath",
+                    "kind",
+                    "relativePath",
+                    "environmentSlug",
+                    "format",
+                    "mimeType",
+                    "description",
+                    "fileSize",
+                    "isBinary",
+                    "createdBy",
+                    "createdAt",
+                    "updatedAt",
+                    "encryptedContent",
+                    "iv",
+                    "authTag"
+                  ]
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "getRepoFileVersion",
+        "tags": [
+          "Files"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get a repo file version",
+        "description": "Return the client-encrypted content of a specific file version, for diffing or restoring. Decryption happens client-side."
+      }
+    },
+    "/api/projects/{id}/files/push": {
+      "post": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "appId": {
+                      "type": "string"
+                    },
+                    "appName": {
+                      "type": "string"
+                    },
+                    "appPath": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "CONFIG",
+                        "SECRET"
+                      ]
+                    },
+                    "relativePath": {
+                      "type": "string"
+                    },
+                    "environmentSlug": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "format": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "mimeType": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "description": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "fileSize": {
+                      "type": "number"
+                    },
+                    "isBinary": {
+                      "type": "boolean"
+                    },
+                    "createdBy": {
                       "type": "string"
                     },
                     "createdAt": {
@@ -10312,13 +8854,15 @@
                     "appId",
                     "appName",
                     "appPath",
+                    "kind",
                     "relativePath",
                     "environmentSlug",
-                    "description",
+                    "format",
                     "mimeType",
+                    "description",
                     "fileSize",
                     "isBinary",
-                    "uploadedBy",
+                    "createdBy",
                     "createdAt",
                     "updatedAt"
                   ]
@@ -10443,20 +8987,345 @@
             }
           }
         },
-        "operationId": "rollbackSecretFile",
+        "operationId": "pushRepoFile",
         "tags": [
-          "Secret Files"
+          "Files"
         ],
         "security": [
           {
             "bearerAuth": []
           }
         ],
-        "summary": "Rollback to a previous version",
-        "description": "Rollback a secret file to a previous version. The current content is saved as a new version before restoring. Only owners and editors can rollback."
+        "summary": "Push a repo file",
+        "description": "Push a client-encrypted file from the CLI. Upserts the owning app by path, then creates the file or replaces an existing one (saving the prior content as a version). `kind` is CONFIG or SECRET. Executable file types (.exe, .sh, .bat, .cmd, .ps1) are rejected. Only owners and editors can push.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "appPath",
+                  "appName",
+                  "kind",
+                  "relativePath",
+                  "encryptedContent",
+                  "iv",
+                  "authTag",
+                  "fileSize",
+                  "isBinary"
+                ],
+                "properties": {
+                  "appPath": {
+                    "minLength": 1,
+                    "maxLength": 1024,
+                    "type": "string"
+                  },
+                  "appName": {
+                    "minLength": 1,
+                    "maxLength": 255,
+                    "type": "string"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "CONFIG",
+                      "SECRET"
+                    ]
+                  },
+                  "relativePath": {
+                    "minLength": 1,
+                    "maxLength": 1024,
+                    "type": "string"
+                  },
+                  "environmentSlug": {
+                    "nullable": true,
+                    "maxLength": 255,
+                    "type": "string"
+                  },
+                  "format": {
+                    "nullable": true,
+                    "maxLength": 64,
+                    "type": "string"
+                  },
+                  "mimeType": {
+                    "nullable": true,
+                    "maxLength": 255,
+                    "type": "string"
+                  },
+                  "description": {
+                    "nullable": true,
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  "encryptedContent": {
+                    "description": "Base64-encoded encrypted file content",
+                    "type": "string"
+                  },
+                  "iv": {
+                    "type": "string"
+                  },
+                  "authTag": {
+                    "type": "string"
+                  },
+                  "fileSize": {
+                    "minimum": 0,
+                    "maximum": 26214400,
+                    "type": "number"
+                  },
+                  "isBinary": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     },
-    "/api/secrets/shared/{token}/info": {
+    "/api/projects/{id}/files/{fileId}/versions/{versionId}/restore": {
+      "post": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "fileId",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "versionId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "appId": {
+                      "type": "string"
+                    },
+                    "appName": {
+                      "type": "string"
+                    },
+                    "appPath": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "CONFIG",
+                        "SECRET"
+                      ]
+                    },
+                    "relativePath": {
+                      "type": "string"
+                    },
+                    "environmentSlug": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "format": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "mimeType": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "description": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "fileSize": {
+                      "type": "number"
+                    },
+                    "isBinary": {
+                      "type": "boolean"
+                    },
+                    "createdBy": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "appId",
+                    "appName",
+                    "appPath",
+                    "kind",
+                    "relativePath",
+                    "environmentSlug",
+                    "format",
+                    "mimeType",
+                    "description",
+                    "fileSize",
+                    "isBinary",
+                    "createdBy",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "restoreRepoFileVersion",
+        "tags": [
+          "Files"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Restore a repo file version",
+        "description": "Restore a file to a previous version. The current content is saved as a new version before restoring. Only owners and editors can restore."
+      }
+    },
+    "/api/shares/{token}/info": {
       "get": {
         "parameters": [
           {
@@ -10664,15 +9533,15 @@
             }
           }
         },
-        "operationId": "getSharedSecretInfo",
+        "operationId": "getShareLinkInfo",
         "tags": [
-          "Shared Secrets"
+          "Share Links"
         ],
-        "summary": "Check shared secret info",
-        "description": "Returns metadata (type, password-protected, expiry) without consuming the secret."
+        "summary": "Check share link info",
+        "description": "Returns metadata (file name, password-protected, expiry) without consuming the share link."
       }
     },
-    "/api/secrets/shared/{token}": {
+    "/api/shares/{token}": {
       "post": {
         "parameters": [
           {
@@ -10883,12 +9752,12 @@
             }
           }
         },
-        "operationId": "accessSharedSecret",
+        "operationId": "accessShareLink",
         "tags": [
-          "Shared Secrets"
+          "Share Links"
         ],
-        "summary": "Access a one-time shared secret",
-        "description": "Retrieve and permanently consume a shared secret. Content is destroyed after this call — no second access is possible.",
+        "summary": "Access a one-time share link",
+        "description": "Retrieve and permanently consume a share link. Content is destroyed after this call — no second access is possible.",
         "requestBody": {
           "required": true,
           "content": {
@@ -10906,217 +9775,7 @@
         }
       }
     },
-    "/api/projects/{id}/secrets/shared/file": {
-      "post": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "token": {
-                      "type": "string"
-                    },
-                    "shareUrl": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "token",
-                    "shareUrl"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "shareFile",
-        "tags": [
-          "Shared Secrets"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Create a share link for a file",
-        "description": "Generate a one-time shareable link for a client-encrypted file (config or secret). Optional password and expiry supported.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "encryptedPayload",
-                  "iv",
-                  "authTag",
-                  "fileName",
-                  "mimeType",
-                  "expiresIn"
-                ],
-                "properties": {
-                  "encryptedPayload": {
-                    "description": "Client-encrypted payload",
-                    "type": "string"
-                  },
-                  "iv": {
-                    "type": "string"
-                  },
-                  "authTag": {
-                    "type": "string"
-                  },
-                  "fileName": {
-                    "type": "string"
-                  },
-                  "mimeType": {
-                    "type": "string"
-                  },
-                  "expiresIn": {
-                    "minimum": 3600,
-                    "maximum": 2592000,
-                    "type": "integer"
-                  },
-                  "password": {
-                    "minLength": 1,
-                    "maxLength": 128,
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/projects/{id}/secrets/shared/{secretId}": {
+    "/api/projects/{id}/shares/{shareId}": {
       "delete": {
         "parameters": [
           {
@@ -11132,7 +9791,7 @@
               "type": "string"
             },
             "in": "path",
-            "name": "secretId",
+            "name": "shareId",
             "required": true
           }
         ],
@@ -11271,9 +9930,9 @@
             }
           }
         },
-        "operationId": "revokeSharedSecret",
+        "operationId": "revokeShareLink",
         "tags": [
-          "Shared Secrets"
+          "Share Links"
         ],
         "security": [
           {
@@ -18464,8 +17123,7 @@
                         "required": [
                           "maxUsers",
                           "maxProjects",
-                          "maxConfigFiles",
-                          "maxSecretFiles",
+                          "maxRepoFiles",
                           "maxAnalysesPerMonth",
                           "maxCiTokens",
                           "auditLogRetentionDays",
@@ -18481,10 +17139,7 @@
                           "maxProjects": {
                             "type": "number"
                           },
-                          "maxConfigFiles": {
-                            "type": "number"
-                          },
-                          "maxSecretFiles": {
+                          "maxRepoFiles": {
                             "type": "number"
                           },
                           "maxAnalysesPerMonth": {
@@ -22053,8 +20708,7 @@
                       "type": "object",
                       "required": [
                         "projects",
-                        "configFiles",
-                        "secretFiles",
+                        "repoFiles",
                         "analyses",
                         "members",
                         "ciTokens"
@@ -22063,10 +20717,7 @@
                         "projects": {
                           "type": "number"
                         },
-                        "configFiles": {
-                          "type": "number"
-                        },
-                        "secretFiles": {
+                        "repoFiles": {
                           "type": "number"
                         },
                         "analyses": {
@@ -23303,7 +21954,7 @@
         "description": "Return a paginated list of projects where the authenticated user is a member (owner, editor, or viewer)."
       }
     },
-    "/api/projects/{id}/config-files": {
+    "/api/projects/{id}/files": {
       "get": {
         "parameters": [
           {
@@ -23348,254 +21999,18 @@
             "in": "query",
             "name": "environmentSlug",
             "required": false
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "items": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "required": [
-                          "id",
-                          "appId",
-                          "relativePath",
-                          "format",
-                          "environmentSlug",
-                          "fileSize",
-                          "isBinary",
-                          "createdAt",
-                          "updatedAt"
-                        ],
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "appId": {
-                            "type": "string"
-                          },
-                          "relativePath": {
-                            "type": "string"
-                          },
-                          "format": {
-                            "type": "string"
-                          },
-                          "environmentSlug": {
-                            "type": "string"
-                          },
-                          "fileSize": {
-                            "type": "number"
-                          },
-                          "isBinary": {
-                            "type": "boolean"
-                          },
-                          "createdAt": {
-                            "type": "string",
-                            "format": "date-time"
-                          },
-                          "updatedAt": {
-                            "type": "string",
-                            "format": "date-time"
-                          }
-                        }
-                      }
-                    },
-                    "pagination": {
-                      "type": "object",
-                      "required": [
-                        "page",
-                        "limit",
-                        "total",
-                        "totalPages"
-                      ],
-                      "properties": {
-                        "page": {
-                          "type": "number"
-                        },
-                        "limit": {
-                          "type": "number"
-                        },
-                        "total": {
-                          "type": "number"
-                        },
-                        "totalPages": {
-                          "type": "number"
-                        }
-                      }
-                    }
-                  },
-                  "required": [
-                    "items",
-                    "pagination"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "listConfigFiles",
-        "tags": [
-          "Config Files"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "List config files",
-        "description": "List config file metadata for a project, optionally filtered by app or environment. Encrypted contents are not included — use the get endpoint to retrieve a file's ciphertext."
-      }
-    },
-    "/api/projects/{id}/secrets": {
-      "get": {
-        "parameters": [
-          {
-            "schema": {
-              "type": "string"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
           },
           {
             "schema": {
-              "minimum": 1,
-              "type": "integer"
+              "type": "string",
+              "enum": [
+                "CONFIG",
+                "SECRET"
+              ]
             },
             "in": "query",
-            "name": "page",
-            "required": true
-          },
-          {
-            "schema": {
-              "minimum": 1,
-              "maximum": 100,
-              "type": "integer"
-            },
-            "in": "query",
-            "name": "limit",
-            "required": true
+            "name": "kind",
+            "required": false
           }
         ],
         "responses": {
@@ -23614,13 +22029,15 @@
                           "appId",
                           "appName",
                           "appPath",
+                          "kind",
                           "relativePath",
                           "environmentSlug",
-                          "description",
+                          "format",
                           "mimeType",
+                          "description",
                           "fileSize",
                           "isBinary",
-                          "uploadedBy",
+                          "createdBy",
                           "createdAt",
                           "updatedAt"
                         ],
@@ -23637,6 +22054,13 @@
                           "appPath": {
                             "type": "string"
                           },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "CONFIG",
+                              "SECRET"
+                            ]
+                          },
                           "relativePath": {
                             "type": "string"
                           },
@@ -23644,11 +22068,16 @@
                             "nullable": true,
                             "type": "string"
                           },
-                          "description": {
+                          "format": {
                             "nullable": true,
                             "type": "string"
                           },
                           "mimeType": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "description": {
+                            "nullable": true,
                             "type": "string"
                           },
                           "fileSize": {
@@ -23657,7 +22086,7 @@
                           "isBinary": {
                             "type": "boolean"
                           },
-                          "uploadedBy": {
+                          "createdBy": {
                             "type": "string"
                           },
                           "createdAt": {
@@ -23820,20 +22249,228 @@
             }
           }
         },
-        "operationId": "listSecretFiles",
+        "operationId": "listRepoFiles",
         "tags": [
-          "Secret Files"
+          "Files"
         ],
         "security": [
           {
             "bearerAuth": []
           }
         ],
-        "summary": "List secret files",
-        "description": "List secret file metadata for a project. File contents are not included — use the download endpoint to retrieve encrypted content."
+        "summary": "List repo files",
+        "description": "List file metadata for a project, optionally filtered by app, environment, or kind (CONFIG/SECRET). Encrypted contents are not included — use the get endpoint to retrieve a file's ciphertext."
       }
     },
-    "/api/projects/{id}/secrets/shared": {
+    "/api/projects/{id}/shares": {
+      "post": {
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string"
+                    },
+                    "shareUrl": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "token",
+                    "shareUrl"
+                  ]
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "details": {}
+                  },
+                  "required": [
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "createShareLink",
+        "tags": [
+          "Share Links"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create a share link for a file",
+        "description": "Generate a one-time shareable link for a client-encrypted file. Optional password and expiry supported.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "encryptedPayload",
+                  "iv",
+                  "authTag",
+                  "fileName",
+                  "mimeType",
+                  "expiresIn"
+                ],
+                "properties": {
+                  "encryptedPayload": {
+                    "description": "Client-encrypted payload",
+                    "type": "string"
+                  },
+                  "iv": {
+                    "type": "string"
+                  },
+                  "authTag": {
+                    "type": "string"
+                  },
+                  "fileName": {
+                    "type": "string"
+                  },
+                  "mimeType": {
+                    "type": "string"
+                  },
+                  "expiresIn": {
+                    "minimum": 3600,
+                    "maximum": 2592000,
+                    "type": "integer"
+                  },
+                  "password": {
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "get": {
         "parameters": [
           {
@@ -24029,16 +22666,16 @@
             }
           }
         },
-        "operationId": "listSharedSecrets",
+        "operationId": "listShareLinks",
         "tags": [
-          "Shared Secrets"
+          "Share Links"
         ],
         "security": [
           {
             "bearerAuth": []
           }
         ],
-        "summary": "List shared secret links",
+        "summary": "List share links",
         "description": "List all share links created for this project with their status (PENDING, VIEWED, EXPIRED)."
       }
     },
@@ -24115,8 +22752,7 @@
             "schema": {
               "type": "string",
               "enum": [
-                "CONFIG_FILE",
-                "SECRET_FILE",
+                "REPO_FILE",
                 "SHARE_LINK",
                 "CI_TOKEN"
               ]
@@ -24188,8 +22824,7 @@
                           "resourceType": {
                             "type": "string",
                             "enum": [
-                              "CONFIG_FILE",
-                              "SECRET_FILE",
+                              "REPO_FILE",
                               "SHARE_LINK",
                               "CI_TOKEN"
                             ]
@@ -25008,220 +23643,6 @@
                       "KOTLIN",
                       "RUBY",
                       "PHP"
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/convert": {
-      "post": {
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "content": {
-                      "type": "string"
-                    },
-                    "fromFormat": {
-                      "type": "string",
-                      "enum": [
-                        "env",
-                        "appsettings.json",
-                        "secrets.yaml",
-                        "config.toml"
-                      ]
-                    },
-                    "toFormat": {
-                      "type": "string",
-                      "enum": [
-                        "env",
-                        "appsettings.json",
-                        "secrets.yaml",
-                        "config.toml"
-                      ]
-                    },
-                    "entryCount": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "content",
-                    "fromFormat",
-                    "toFormat",
-                    "entryCount"
-                  ]
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "number"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "details": {}
-                  },
-                  "required": [
-                    "code",
-                    "message"
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "operationId": "convertConfigFormat",
-        "tags": [
-          "Convert"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Convert between config formats",
-        "description": "Convert configuration content between supported formats (.env, appsettings.json, secrets.yaml, config.toml). No project needed — standalone conversion with preview.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "content",
-                  "fromFormat",
-                  "toFormat"
-                ],
-                "properties": {
-                  "content": {
-                    "minLength": 1,
-                    "type": "string"
-                  },
-                  "fromFormat": {
-                    "type": "string",
-                    "enum": [
-                      "env",
-                      "appsettings.json",
-                      "secrets.yaml",
-                      "config.toml"
-                    ]
-                  },
-                  "toFormat": {
-                    "type": "string",
-                    "enum": [
-                      "env",
-                      "appsettings.json",
-                      "secrets.yaml",
-                      "config.toml"
                     ]
                   }
                 }
@@ -26457,53 +24878,16 @@
                       "nullable": true,
                       "type": "string"
                     },
-                    "configFiles": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "required": [
-                          "relativePath",
-                          "format",
-                          "environmentSlug",
-                          "encryptedContent",
-                          "iv",
-                          "authTag",
-                          "isBinary"
-                        ],
-                        "properties": {
-                          "relativePath": {
-                            "type": "string"
-                          },
-                          "format": {
-                            "type": "string"
-                          },
-                          "environmentSlug": {
-                            "type": "string"
-                          },
-                          "encryptedContent": {
-                            "description": "Base64-encoded encrypted content",
-                            "type": "string"
-                          },
-                          "iv": {
-                            "type": "string"
-                          },
-                          "authTag": {
-                            "type": "string"
-                          },
-                          "isBinary": {
-                            "type": "boolean"
-                          }
-                        }
-                      }
-                    },
-                    "secretFiles": {
+                    "files": {
                       "type": "array",
                       "items": {
                         "type": "object",
                         "required": [
                           "id",
+                          "kind",
                           "relativePath",
                           "environmentSlug",
+                          "format",
                           "mimeType",
                           "encryptedContent",
                           "iv",
@@ -26514,6 +24898,13 @@
                           "id": {
                             "type": "string"
                           },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "CONFIG",
+                              "SECRET"
+                            ]
+                          },
                           "relativePath": {
                             "type": "string"
                           },
@@ -26521,7 +24912,12 @@
                             "nullable": true,
                             "type": "string"
                           },
+                          "format": {
+                            "nullable": true,
+                            "type": "string"
+                          },
                           "mimeType": {
+                            "nullable": true,
                             "type": "string"
                           },
                           "encryptedContent": {
@@ -26545,8 +24941,7 @@
                     "wrappedDek",
                     "wrappedDekIv",
                     "wrappedDekTag",
-                    "configFiles",
-                    "secretFiles"
+                    "files"
                   ]
                 }
               }
@@ -27161,8 +25556,7 @@
             "schema": {
               "type": "string",
               "enum": [
-                "CONFIG_FILE",
-                "SECRET_FILE",
+                "REPO_FILE",
                 "SHARE_LINK",
                 "CI_TOKEN"
               ]
@@ -27227,8 +25621,7 @@
                           "resourceType": {
                             "type": "string",
                             "enum": [
-                              "CONFIG_FILE",
-                              "SECRET_FILE",
+                              "REPO_FILE",
                               "SHARE_LINK",
                               "CI_TOKEN"
                             ]
@@ -27480,8 +25873,7 @@
                       "required": [
                         "maxUsers",
                         "maxProjects",
-                        "maxConfigFiles",
-                        "maxSecretFiles",
+                        "maxRepoFiles",
                         "maxAnalysesPerMonth",
                         "maxCiTokens",
                         "auditLogRetentionDays",
@@ -27497,10 +25889,7 @@
                         "maxProjects": {
                           "type": "number"
                         },
-                        "maxConfigFiles": {
-                          "type": "number"
-                        },
-                        "maxSecretFiles": {
+                        "maxRepoFiles": {
                           "type": "number"
                         },
                         "maxAnalysesPerMonth": {
@@ -27530,8 +25919,7 @@
                       "type": "object",
                       "required": [
                         "projects",
-                        "configFiles",
-                        "secretFiles",
+                        "repoFiles",
                         "analyses",
                         "members",
                         "ciTokens"
@@ -27540,10 +25928,7 @@
                         "projects": {
                           "type": "number"
                         },
-                        "configFiles": {
-                          "type": "number"
-                        },
-                        "secretFiles": {
+                        "repoFiles": {
                           "type": "number"
                         },
                         "analyses": {

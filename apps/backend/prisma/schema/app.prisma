@@ -1,8 +1,9 @@
 /**
- * Repo-native model: Project -> App -> ConfigFile / SecretFile.
+ * Repo-native model: Project -> App -> RepoFile.
  * An App is one application/service root folder in the repo, identified by its
- * repo-relative `appPath`. Config files live in config-file.prisma; secret files in
- * secret.prisma. Environment is an open-set slug column on each file, not a table.
+ * repo-relative `appPath` (not the same as DepVault's own `apps/` workspace folder).
+ * Files live in repo-file.prisma as encrypted blobs tagged with a `kind` (CONFIG or
+ * SECRET). Environment is an open-set slug column on each file, not a table.
  */
 
 model App {
@@ -13,10 +14,9 @@ model App {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  configFiles ConfigFile[]
-  secretFiles SecretFile[]
-  ciTokens    CiToken[]
+  project  Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  files    RepoFile[]
+  ciTokens CiToken[]
 
   @@unique([projectId, appPath])
   @@map("apps")

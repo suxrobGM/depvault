@@ -75,21 +75,7 @@ public sealed class CiCommands(IApiClientFactory clientFactory, CommandContext c
             var written = new List<string>();
             var failed = 0;
 
-            foreach (var file in result.ConfigFiles ?? [])
-            {
-                if (TryRestore(
-                        file.RelativePath, file.EncryptedContent, file.Iv, file.AuthTag,
-                        dek, outputDir, out var path))
-                {
-                    written.Add(path);
-                }
-                else
-                {
-                    failed++;
-                }
-            }
-
-            foreach (var file in result.SecretFiles ?? [])
+            foreach (var file in result.Files ?? [])
             {
                 if (TryRestore(
                         file.RelativePath, file.EncryptedContent, file.Iv, file.AuthTag,

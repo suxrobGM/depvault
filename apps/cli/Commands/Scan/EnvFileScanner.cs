@@ -4,7 +4,8 @@ using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
-using ConfigBody = DepVault.Cli.ApiClient.Api.Projects.Item.ConfigFiles.Push.PushPostRequestBody;
+using PushBody = DepVault.Cli.ApiClient.Api.Projects.Item.Files.Push.PushPostRequestBody;
+using RepoFileKind = DepVault.Cli.ApiClient.Api.Projects.Item.Files.Push.PushPostRequestBody_kind;
 
 namespace DepVault.Cli.Commands.Scan;
 
@@ -99,10 +100,11 @@ internal sealed class EnvFileScanner(
         var isBinary = BinaryDetector.IsBinary(fileBytes);
         var (ciphertext, iv, authTag) = VaultCrypto.EncryptBytes(fileBytes, cachedDek!);
 
-        var body = new ConfigBody
+        var body = new PushBody
         {
             AppPath = appPath,
             AppName = appName,
+            Kind = RepoFileKind.CONFIG,
             RelativePath = file.RelativePath,
             Format = DetectFormat(file.FileName),
             EnvironmentSlug = envSlug,
@@ -117,7 +119,7 @@ internal sealed class EnvFileScanner(
         await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .StartAsync($"Pushing {file.RelativePath}...", async _ =>
-                await client.Api.Projects[projectId].ConfigFiles.Push.PostAsync(body, cancellationToken: ct));
+                await client.Api.Projects[projectId].Files.Push.PostAsync(body, cancellationToken: ct));
     }
 
     /// <summary>Infers a coarse config format slug from the file name extension.</summary>

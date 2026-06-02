@@ -1,6 +1,7 @@
 using System.CommandLine;
 using DepVault.Cli.Utils;
 using Spectre.Console;
+using GetKind = DepVault.Cli.ApiClient.Api.Projects.Item.Files.GetKindQueryParameterType;
 
 namespace DepVault.Cli.Commands;
 
@@ -39,11 +40,12 @@ public sealed class EnvCommands(CommandContext ctx)
 
             try
             {
-                var result = await pc.Client.Api.Projects[pc.ProjectId].ConfigFiles
+                var result = await pc.Client.Api.Projects[pc.ProjectId].Files
                     .GetAsync(config =>
                     {
                         config.QueryParameters.Page = 1;
                         config.QueryParameters.Limit = 100;
+                        config.QueryParameters.Kind = GetKind.CONFIG;
                         if (!string.IsNullOrEmpty(appId))
                         {
                             config.QueryParameters.AppId = appId;

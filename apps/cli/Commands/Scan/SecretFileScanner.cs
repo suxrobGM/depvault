@@ -4,7 +4,8 @@ using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
-using SecretBody = DepVault.Cli.ApiClient.Api.Projects.Item.Secrets.Push.PushPostRequestBody;
+using PushBody = DepVault.Cli.ApiClient.Api.Projects.Item.Files.Push.PushPostRequestBody;
+using RepoFileKind = DepVault.Cli.ApiClient.Api.Projects.Item.Files.Push.PushPostRequestBody_kind;
 
 namespace DepVault.Cli.Commands.Scan;
 
@@ -94,10 +95,11 @@ internal sealed class SecretFileScanner(
         var isBinary = BinaryDetector.IsBinary(fileBytes);
         var (ciphertext, iv, authTag) = VaultCrypto.EncryptBytes(fileBytes, cachedDek!);
 
-        var body = new SecretBody
+        var body = new PushBody
         {
             AppPath = appPath,
             AppName = appName,
+            Kind = RepoFileKind.SECRET,
             RelativePath = file.RelativePath,
             EnvironmentSlug = envSlug,
             EncryptedContent = ciphertext,
@@ -112,7 +114,7 @@ internal sealed class SecretFileScanner(
         await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .StartAsync($"Uploading {file.RelativePath}...", async _ =>
-                await client.Api.Projects[projectId].Secrets.Push.PostAsync(body, cancellationToken: ct));
+                await client.Api.Projects[projectId].Files.Push.PostAsync(body, cancellationToken: ct));
     }
 
     private static string GetMimeType(string fileName)

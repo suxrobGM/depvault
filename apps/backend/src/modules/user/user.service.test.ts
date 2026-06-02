@@ -45,10 +45,10 @@ function createMockPrisma() {
     auditLog: {
       deleteMany: mock(() => Promise.resolve({ count: 0 })),
     },
-    sharedSecret: {
+    shareLink: {
       deleteMany: mock(() => Promise.resolve({ count: 0 })),
     },
-    secretFile: {
+    repoFile: {
       deleteMany: mock(() => Promise.resolve({ count: 0 })),
     },
     analysis: {
@@ -261,11 +261,11 @@ describe("UserService", () => {
       expect(mockPrisma.auditLog.deleteMany).toHaveBeenCalledWith({
         where: { userId: "user-uuid" },
       });
-      expect(mockPrisma.sharedSecret.deleteMany).toHaveBeenCalledWith({
+      expect(mockPrisma.shareLink.deleteMany).toHaveBeenCalledWith({
         where: { creatorId: "user-uuid" },
       });
-      expect(mockPrisma.secretFile.deleteMany).toHaveBeenCalledWith({
-        where: { uploadedBy: "user-uuid" },
+      expect(mockPrisma.repoFile.deleteMany).toHaveBeenCalledWith({
+        where: { createdBy: "user-uuid" },
       });
       expect(mockPrisma.analysis.deleteMany).toHaveBeenCalledWith({
         where: { userId: "user-uuid" },

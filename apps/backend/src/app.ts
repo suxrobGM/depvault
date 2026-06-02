@@ -13,21 +13,16 @@ import { appController } from "@/modules/app";
 import { activityController, auditLogController } from "@/modules/audit-log";
 import { authController } from "@/modules/auth";
 import { ciAccessController, ciTokenController } from "@/modules/ci-token";
-import { configFileController } from "@/modules/config-file";
-import { convertController } from "@/modules/convert";
 import { githubApiController } from "@/modules/github";
 import { invitationController, projectInvitationController } from "@/modules/invitation";
 import { licenseRuleController } from "@/modules/license-rule";
 import { notificationController } from "@/modules/notification";
 import { projectController } from "@/modules/project";
+import { repoFileController } from "@/modules/repo-file";
 import { scanPatternController } from "@/modules/scan-pattern";
-import {
-  secretFileController,
-  sharedSecretAccessController,
-  sharedSecretController,
-} from "@/modules/secret";
 import { secretScanController } from "@/modules/secret-scan";
 import { securityController } from "@/modules/security/security.controller";
+import { shareLinkAccessController, shareLinkController } from "@/modules/share-link";
 import { subscriptionController, subscriptionWebhookController } from "@/modules/subscription";
 import { userController } from "@/modules/user";
 import { keyGrantController, vaultController } from "@/modules/vault";
@@ -57,14 +52,12 @@ const app = new Elysia()
       .use(invitationController)
       .use(projectInvitationController)
       .use(appController)
-      .use(configFileController)
-      .use(secretFileController)
-      .use(sharedSecretAccessController)
-      .use(sharedSecretController)
+      .use(repoFileController)
+      .use(shareLinkAccessController)
+      .use(shareLinkController)
       .use(userController)
       .use(auditLogController)
       .use(analysisController)
-      .use(convertController)
       .use(githubApiController)
       .use(notificationController)
       .use(secretScanController)

@@ -46,10 +46,8 @@ internal static class Startup
             .AddSingleton<SecretFileScanner>()
             // Shared resolvers
             .AddSingleton<VaultResolver>()
-            .AddSingleton<ConfigFilePusher>()
-            .AddSingleton<SecretFilePusher>()
-            .AddSingleton<ConfigFilePuller>()
-            .AddSingleton<SecretFilePuller>()
+            .AddSingleton<RepoFilePusher>()
+            .AddSingleton<RepoFilePuller>()
             // Commands
             .AddSingleton<AuthCommands>()
             .AddSingleton<ConfigCommands>()

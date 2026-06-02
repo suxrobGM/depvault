@@ -30,17 +30,10 @@ export class SubscriptionService {
     return this.prisma.project.count({ where: { ownerId: userId } });
   }
 
-  /** Count config files across all owned projects. */
-  async countDistinctConfigFiles(userId: string): Promise<number> {
-    return this.prisma.configFile.count({
-      where: { app: { project: { ownerId: userId } } },
-    });
-  }
-
-  /** Count secret files across all owned projects. */
-  async countDistinctSecretFiles(userId: string): Promise<number> {
-    return this.prisma.secretFile.count({
-      where: { app: { project: { ownerId: userId } } },
+  /** Count repo files (config + secret) across all owned projects. */
+  async countDistinctRepoFiles(userId: string): Promise<number> {
+    return this.prisma.repoFile.count({
+      where: { project: { ownerId: userId } },
     });
   }
 
@@ -70,16 +63,15 @@ export class SubscriptionService {
   }
 
   async getUsage(userId: string) {
-    const [projects, configFiles, secretFiles, analyses, members, ciTokens] = await Promise.all([
+    const [projects, repoFiles, analyses, members, ciTokens] = await Promise.all([
       this.countProjects(userId),
-      this.countDistinctConfigFiles(userId),
-      this.countDistinctSecretFiles(userId),
+      this.countDistinctRepoFiles(userId),
       this.countAnalysesThisMonth(userId),
       this.countDistinctMembers(userId),
       this.countActiveCiTokens(userId),
     ]);
 
-    return { projects, configFiles, secretFiles, analyses, members, ciTokens };
+    return { projects, repoFiles, analyses, members, ciTokens };
   }
 
   async getSubscriptionResponse(userId: string): Promise<SubscriptionResponse> {

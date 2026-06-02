@@ -75,10 +75,7 @@ function createMockPrisma() {
       delete: mock(() => Promise.resolve({ ...baseCiToken })),
       count: mock(() => Promise.resolve(0)),
     },
-    configFile: {
-      findMany: mock(() => Promise.resolve([])),
-    },
-    secretFile: {
+    repoFile: {
       findMany: mock(() => Promise.resolve([])),
       findFirst: mock(() => Promise.resolve(null)),
     },
@@ -241,25 +238,27 @@ describe("CiTokenService", () => {
   });
 
   describe("fetchSecrets", () => {
-    it("should return base + environment config and secret files", async () => {
-      mockPrisma.configFile.findMany.mockResolvedValueOnce([
+    it("should return base + environment files (config and secret) for the token's app", async () => {
+      mockPrisma.repoFile.findMany.mockResolvedValueOnce([
         {
           id: "cfg-1",
           appId: "app-uuid",
+          kind: "CONFIG",
           relativePath: "src/Presentation/Logistics.API/appsettings.Production.json",
           format: "appsettings.json",
+          mimeType: null,
           environmentSlug: "prod",
           encryptedContent: Buffer.from("enc"),
           iv: "civ",
           authTag: "ctag",
           isBinary: false,
         },
-      ]);
-      mockPrisma.secretFile.findMany.mockResolvedValueOnce([
         {
           id: "file-1",
           appId: "app-uuid",
+          kind: "SECRET",
           relativePath: "src/Presentation/Logistics.API/signing.pfx",
+          format: null,
           environmentSlug: null,
           mimeType: "application/x-pkcs12",
           encryptedContent: Buffer.from("enc"),
@@ -276,20 +275,18 @@ describe("CiTokenService", () => {
         "127.0.0.1",
       );
 
-      expect(result.configFiles).toHaveLength(1);
-      expect(result.configFiles[0]!.relativePath).toContain("appsettings.Production.json");
-      expect(result.configFiles[0]!.encryptedContent).toBeDefined();
-      expect(result.secretFiles).toHaveLength(1);
-      expect(result.secretFiles[0]!.relativePath).toContain("signing.pfx");
-      expect(result.secretFiles[0]!.iv).toBe("fiv");
+      expect(result.files).toHaveLength(2);
+      expect(result.files[0]!.kind).toBe("CONFIG");
+      expect(result.files[1]!.kind).toBe("SECRET");
+      expect(result.files[1]!.iv).toBe("fiv");
       expect(result.wrappedDek).toBe("wrapped-dek");
       expect(mockAudit.log).toHaveBeenCalled();
     });
   });
 
   describe("downloadFile", () => {
-    it("should return the encrypted secret file by relative path", async () => {
-      mockPrisma.secretFile.findFirst.mockResolvedValueOnce({
+    it("should return the encrypted file by id", async () => {
+      mockPrisma.repoFile.findFirst.mockResolvedValueOnce({
         id: "file-1",
         appId: "app-uuid",
         relativePath: "config/app.pfx",
@@ -307,7 +304,7 @@ describe("CiTokenService", () => {
     });
 
     it("should throw NotFoundError when file not in app", async () => {
-      mockPrisma.secretFile.findFirst.mockResolvedValueOnce(null);
+      mockPrisma.repoFile.findFirst.mockResolvedValueOnce(null);
 
       expect(
         service.downloadFile(baseCiToken as unknown as CiToken, "bad-id"),

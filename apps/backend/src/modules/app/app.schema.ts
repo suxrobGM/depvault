@@ -1,12 +1,13 @@
 import { t, type Static } from "elysia";
 
+export const RepoFileKindSchema = t.UnionEnum(["CONFIG", "SECRET"] as const);
+
 export const AppResponseSchema = t.Object({
   id: t.String(),
   projectId: t.String(),
   name: t.String(),
   appPath: t.String(),
-  configFileCount: t.Number(),
-  secretFileCount: t.Number(),
+  fileCount: t.Number(),
   environments: t.Array(t.String()),
   createdAt: t.Date(),
   updatedAt: t.Date(),
@@ -28,21 +29,13 @@ export const AppParamsSchema = t.Object({
   appId: t.String(),
 });
 
-export const RepoMapConfigFileSchema = t.Object({
+export const RepoMapFileSchema = t.Object({
   id: t.String(),
-  relativePath: t.String(),
-  format: t.String(),
-  environmentSlug: t.String(),
-  fileSize: t.Number(),
-  isBinary: t.Boolean(),
-  updatedAt: t.Date(),
-});
-
-export const RepoMapSecretFileSchema = t.Object({
-  id: t.String(),
+  kind: RepoFileKindSchema,
   relativePath: t.String(),
   environmentSlug: t.Nullable(t.String()),
-  mimeType: t.String(),
+  format: t.Nullable(t.String()),
+  mimeType: t.Nullable(t.String()),
   fileSize: t.Number(),
   isBinary: t.Boolean(),
   updatedAt: t.Date(),
@@ -53,8 +46,7 @@ export const RepoMapAppSchema = t.Object({
   name: t.String(),
   appPath: t.String(),
   environments: t.Array(t.String()),
-  configFiles: t.Array(RepoMapConfigFileSchema),
-  secretFiles: t.Array(RepoMapSecretFileSchema),
+  files: t.Array(RepoMapFileSchema),
 });
 
 export const RepoMapResponseSchema = t.Object({
@@ -67,20 +59,12 @@ export const ExportBodySchema = t.Object({
   fileId: t.Optional(t.String()),
 });
 
-export const ExportConfigFileSchema = t.Object({
-  relativePath: t.String(),
-  format: t.String(),
-  environmentSlug: t.String(),
-  encryptedContent: t.String({ description: "Base64-encoded encrypted file content" }),
-  iv: t.String(),
-  authTag: t.String(),
-  isBinary: t.Boolean(),
-});
-
-export const ExportSecretFileSchema = t.Object({
+export const ExportFileSchema = t.Object({
+  kind: RepoFileKindSchema,
   relativePath: t.String(),
   environmentSlug: t.Nullable(t.String()),
-  mimeType: t.String(),
+  format: t.Nullable(t.String()),
+  mimeType: t.Nullable(t.String()),
   encryptedContent: t.String({ description: "Base64-encoded encrypted file content" }),
   iv: t.String(),
   authTag: t.String(),
@@ -88,8 +72,7 @@ export const ExportSecretFileSchema = t.Object({
 });
 
 export const ExportResponseSchema = t.Object({
-  configFiles: t.Array(ExportConfigFileSchema),
-  secretFiles: t.Array(ExportSecretFileSchema),
+  files: t.Array(ExportFileSchema),
 });
 
 export type AppResponse = Static<typeof AppResponseSchema>;
@@ -97,11 +80,9 @@ export type AppListResponse = Static<typeof AppListResponseSchema>;
 export type CreateAppBody = Static<typeof CreateAppBodySchema>;
 export type UpdateAppBody = Static<typeof UpdateAppBodySchema>;
 export type AppParams = Static<typeof AppParamsSchema>;
-export type RepoMapConfigFile = Static<typeof RepoMapConfigFileSchema>;
-export type RepoMapSecretFile = Static<typeof RepoMapSecretFileSchema>;
+export type RepoMapFile = Static<typeof RepoMapFileSchema>;
 export type RepoMapApp = Static<typeof RepoMapAppSchema>;
 export type RepoMapResponse = Static<typeof RepoMapResponseSchema>;
 export type ExportBody = Static<typeof ExportBodySchema>;
-export type ExportConfigFile = Static<typeof ExportConfigFileSchema>;
-export type ExportSecretFile = Static<typeof ExportSecretFileSchema>;
+export type ExportFile = Static<typeof ExportFileSchema>;
 export type ExportResponse = Static<typeof ExportResponseSchema>;

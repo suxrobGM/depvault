@@ -1,6 +1,8 @@
 using System.CommandLine;
 using DepVault.Cli.Utils;
 using Spectre.Console;
+using GetKind = DepVault.Cli.ApiClient.Api.Projects.Item.Files.GetKindQueryParameterType;
+using SecretItem = DepVault.Cli.ApiClient.Api.Projects.Item.Files.FilesGetResponse_items;
 
 namespace DepVault.Cli.Commands;
 
@@ -89,20 +91,21 @@ public sealed class SecretsCommands(CommandContext ctx)
         return cmd;
     }
 
-    private static async Task<List<ApiClient.Api.Projects.Item.Secrets.SecretsGetResponse_items>> CollectAllAsync(
+    private static async Task<List<SecretItem>> CollectAllAsync(
         ProjectContext pc, CancellationToken ct)
     {
-        var all = new List<ApiClient.Api.Projects.Item.Secrets.SecretsGetResponse_items>();
+        var all = new List<SecretItem>();
         var page = 1;
 
         while (true)
         {
             var currentPage = page;
-            var result = await pc.Client.Api.Projects[pc.ProjectId].Secrets
+            var result = await pc.Client.Api.Projects[pc.ProjectId].Files
                 .GetAsync(config =>
                 {
                     config.QueryParameters.Page = currentPage;
                     config.QueryParameters.Limit = 100;
+                    config.QueryParameters.Kind = GetKind.SECRET;
                 }, ct);
 
             if (result?.Items is { Count: > 0 } items)

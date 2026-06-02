@@ -1,0 +1,28 @@
+enum ShareLinkStatus {
+  PENDING
+  VIEWED
+  EXPIRED
+}
+
+model ShareLink {
+  id               String          @id @default(uuid()) @db.Uuid
+  creatorId        String          @map("creator_id") @db.Uuid
+  projectId        String          @map("project_id") @db.Uuid
+  token            String          @unique
+  encryptedPayload String          @map("encrypted_payload")
+  iv               String
+  authTag          String          @map("auth_tag")
+  passwordHash     String?         @map("password_hash")
+  fileName         String?         @map("file_name")
+  mimeType         String?         @map("mime_type")
+  status           ShareLinkStatus @default(PENDING)
+  expiresAt        DateTime        @map("expires_at")
+  viewedAt         DateTime?       @map("viewed_at")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+
+  creator User    @relation(fields: [creatorId], references: [id])
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("share_links")
+}

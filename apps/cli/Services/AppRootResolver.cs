@@ -15,7 +15,7 @@ internal static class AppRootResolver
     /// <returns>
     /// <c>appPath</c>: the marker directory's repo-relative path using '/' separators
     /// ("" for the repo root); <c>appName</c>: the last path segment of that directory
-    /// (or the repo folder name when the marker is at the repo root).
+    /// (or "Repository root" when the file groups under the repo root).
     /// </returns>
     public static (string appPath, string appName) Resolve(string repoRoot, string fileRelativePath)
     {
@@ -45,8 +45,11 @@ internal static class AppRootResolver
             dir = dir.Parent;
         }
 
-        // No marker found anywhere up to the repo root → fall back to the file's own directory.
-        var chosen = markerDir ?? fileDir;
+        // No marker found anywhere up to the repo root → group the file under the repo-root App.
+        // Falling back to the file's own directory would mint a pseudo-app for unmarked folders
+        // (e.g. `config/`, `infra/`); attaching loose files to the root keeps the app list clean
+        // and loses nothing, since `relativePath` already preserves the full path.
+        var chosen = markerDir ?? rootDir;
 
         return BuildResult(rootDir.FullName, chosen.FullName);
     }
@@ -57,8 +60,9 @@ internal static class AppRootResolver
 
         if (relative is "." or "")
         {
-            var rootName = new DirectoryInfo(repoRoot).Name;
-            return ("", rootName);
+            // The repo root is named deterministically rather than after the local checkout folder,
+            // whose name varies per clone and would churn the App's display name across developers.
+            return ("", "Repository root");
         }
 
         relative = relative.Trim('/');

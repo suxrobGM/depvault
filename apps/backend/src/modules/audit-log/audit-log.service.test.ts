@@ -14,7 +14,7 @@ const mockAuditLog = {
   userId,
   projectId,
   action: "READ" as const,
-  resourceType: "CONFIG_FILE" as const,
+  resourceType: "REPO_FILE" as const,
   resourceId,
   ipAddress: "127.0.0.1",
   metadata: null,
@@ -50,7 +50,7 @@ describe("AuditLogService", () => {
         userId,
         projectId,
         action: "READ",
-        resourceType: "CONFIG_FILE",
+        resourceType: "REPO_FILE",
         resourceId,
         ipAddress: "127.0.0.1",
       });
@@ -60,7 +60,7 @@ describe("AuditLogService", () => {
           userId,
           projectId,
           action: "READ",
-          resourceType: "CONFIG_FILE",
+          resourceType: "REPO_FILE",
           resourceId,
           ipAddress: "127.0.0.1",
         }),
@@ -75,7 +75,7 @@ describe("AuditLogService", () => {
           userId,
           projectId,
           action: "READ",
-          resourceType: "CONFIG_FILE",
+          resourceType: "REPO_FILE",
           resourceId,
           ipAddress: "127.0.0.1",
         }),
@@ -87,7 +87,7 @@ describe("AuditLogService", () => {
         userId,
         projectId,
         action: "UPDATE",
-        resourceType: "CONFIG_FILE",
+        resourceType: "REPO_FILE",
         resourceId,
         ipAddress: "192.168.1.1",
         metadata: { key: "DATABASE_URL" },
@@ -136,11 +136,11 @@ describe("AuditLogService", () => {
     it("should filter by resourceType", async () => {
       mockPrisma.projectMember.findUnique.mockResolvedValueOnce({ role: "OWNER" });
 
-      await service.list(projectId, userId, { resourceType: "SECRET_FILE" }, 1, 20);
+      await service.list(projectId, userId, { resourceType: "REPO_FILE" }, 1, 20);
 
       expect(mockPrisma.auditLog.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: expect.objectContaining({ resourceType: "SECRET_FILE" }),
+          where: expect.objectContaining({ resourceType: "REPO_FILE" }),
         }),
       );
     });

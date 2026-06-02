@@ -16,8 +16,7 @@ internal sealed class PushCommands(
     CommandContext ctx,
     IFileScanner fileScanner,
     DekResolver dekResolver,
-    ConfigFilePusher configFilePusher,
-    SecretFilePusher secretFilePusher)
+    RepoFilePusher repoFilePusher)
 {
     public Command CreatePushCommand()
     {
@@ -61,14 +60,13 @@ internal sealed class PushCommands(
             {
                 try
                 {
+                    await repoFilePusher.PushAsync(pc.ProjectId, file, dek, ct);
                     if (file.Category == FileCategory.Environment)
                     {
-                        await configFilePusher.PushAsync(pc.ProjectId, file, dek, ct);
                         configPushed++;
                     }
                     else
                     {
-                        await secretFilePusher.PushAsync(pc.ProjectId, file, dek, ct);
                         secretsPushed++;
                     }
 

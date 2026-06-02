@@ -4,21 +4,20 @@ using DepVault.Cli.Crypto;
 using DepVault.Cli.Utils;
 using Spectre.Console;
 using AppEntry = DepVault.Cli.ApiClient.Api.Projects.Item.RepoMap.RepoMapGetResponse_apps;
-using ConfigFileEntry = DepVault.Cli.ApiClient.Api.Projects.Item.RepoMap.RepoMapGetResponse_apps_configFiles;
-using SecretFileEntry = DepVault.Cli.ApiClient.Api.Projects.Item.RepoMap.RepoMapGetResponse_apps_secretFiles;
+using FileEntry = DepVault.Cli.ApiClient.Api.Projects.Item.RepoMap.RepoMapGetResponse_apps_files;
+using RepoFileKind = DepVault.Cli.ApiClient.Api.Projects.Item.RepoMap.RepoMapGetResponse_apps_files_kind;
 
 namespace DepVault.Cli.Commands;
 
 /// <summary>
-/// Pulls a project's encrypted config and secret files and restores each one byte-for-byte to
-/// its original relative path. The server is zero-knowledge: blobs are decrypted client-side with
-/// the project DEK and written verbatim — no re-serialization, no format conversion.
+/// Pulls a project's encrypted files (config and secret) and restores each one byte-for-byte to its
+/// original relative path. The server is zero-knowledge: blobs are decrypted client-side with the
+/// project DEK and written verbatim — no re-serialization, no format conversion.
 /// </summary>
 public sealed class PullCommands(
     CommandContext ctx,
     DekResolver dekResolver,
-    ConfigFilePuller configFilePuller,
-    SecretFilePuller secretFilePuller)
+    RepoFilePuller repoFilePuller)
 {
     private const string BaseSlug = "base";
 
@@ -35,7 +34,7 @@ public sealed class PullCommands(
             DefaultValueFactory = _ => true
         };
         var includeSecretsOpt = new Option<bool>("--include-secrets")
-        { Description = "Also download secret files", DefaultValueFactory = _ => true };
+        { Description = "Also restore secret files", DefaultValueFactory = _ => true };
         var outputDirOpt = new Option<string?>("--output-dir")
         { Description = "Base output directory (defaults to repo root)" };
         var forceOpt = new Option<bool>("--force") { Description = "Overwrite existing files without prompting" };
@@ -86,16 +85,15 @@ public sealed class PullCommands(
                 return;
             }
 
-            var configFiles = CollectConfigFiles(apps, envFilter, includeBase);
-            var secretFiles = includeSecrets ? CollectSecretFiles(apps, envFilter, includeBase) : [];
+            var files = CollectFiles(apps, envFilter, includeBase, includeSecrets);
 
-            if (configFiles.Count == 0 && secretFiles.Count == 0)
+            if (files.Count == 0)
             {
                 AnsiConsole.MarkupLine("[grey]No files match the requested filters.[/]");
                 return;
             }
 
-            if (!force && !ConfirmOverwrite(outputDir, configFiles, secretFiles))
+            if (!force && !ConfirmOverwrite(outputDir, files))
             {
                 return;
             }
@@ -113,15 +111,12 @@ public sealed class PullCommands(
                 return;
             }
 
-            AnsiConsole.MarkupLine(
-                $"[cyan1]Restoring {configFiles.Count} config file(s) and {secretFiles.Count} secret file(s)...[/]");
+            AnsiConsole.MarkupLine($"[cyan1]Restoring {files.Count} file(s)...[/]");
 
-            var configCount = await configFilePuller.PullAsync(pc.ProjectId, configFiles, outputDir, dek, ct);
-            var secretCount = await secretFilePuller.PullAsync(pc.ProjectId, secretFiles, outputDir, dek, ct);
+            var pulled = await repoFilePuller.PullAsync(pc.ProjectId, files, outputDir, dek, ct);
 
             AnsiConsole.WriteLine();
-            ctx.Output.PrintSuccess(
-                $"Pulled {configCount} config file(s) and {secretCount} secret file(s).");
+            ctx.Output.PrintSuccess($"Pulled {pulled} file(s).");
         });
 
         return cmd;
@@ -164,20 +159,12 @@ public sealed class PullCommands(
         return matched;
     }
 
-    private static List<ConfigFileEntry> CollectConfigFiles(
-        IEnumerable<AppEntry> apps, string? envFilter, bool includeBase)
+    private static List<FileEntry> CollectFiles(
+        IEnumerable<AppEntry> apps, string? envFilter, bool includeBase, bool includeSecrets)
     {
         return apps
-            .SelectMany(a => a.ConfigFiles ?? [])
-            .Where(f => MatchesEnvironment(f.EnvironmentSlug, envFilter, includeBase))
-            .ToList();
-    }
-
-    private static List<SecretFileEntry> CollectSecretFiles(
-        IEnumerable<AppEntry> apps, string? envFilter, bool includeBase)
-    {
-        return apps
-            .SelectMany(a => a.SecretFiles ?? [])
+            .SelectMany(a => a.Files ?? [])
+            .Where(f => includeSecrets || f.Kind != RepoFileKind.SECRET)
             .Where(f => MatchesEnvironment(f.EnvironmentSlug, envFilter, includeBase))
             .ToList();
     }
@@ -204,22 +191,17 @@ public sealed class PullCommands(
         return includeBase && string.Equals(normalized, BaseSlug, StringComparison.Ordinal);
     }
 
-    private bool ConfirmOverwrite(
-        string outputDir,
-        IReadOnlyList<ConfigFileEntry> configFiles,
-        IReadOnlyList<SecretFileEntry> secretFiles)
+    private bool ConfirmOverwrite(string outputDir, IReadOnlyList<FileEntry> files)
     {
         if (!ctx.Prompter.IsInteractive)
         {
             return true;
         }
 
-        var targets = configFiles.Select(f => f.RelativePath)
-            .Concat(secretFiles.Select(f => f.RelativePath))
-            .Where(p => !string.IsNullOrEmpty(p));
-
-        var hasExisting = targets.Any(p =>
-            File.Exists(Path.Combine(outputDir, p!.Replace('\\', '/').TrimStart('/'))));
+        var hasExisting = files
+            .Select(f => f.RelativePath)
+            .Where(p => !string.IsNullOrEmpty(p))
+            .Any(p => File.Exists(Path.Combine(outputDir, p!.Replace('\\', '/').TrimStart('/'))));
 
         if (hasExisting)
         {

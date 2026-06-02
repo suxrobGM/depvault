@@ -14,13 +14,11 @@ import type {
 } from "./app.schema";
 
 /** Derive a sorted, de-duplicated list of environment slugs, dropping nulls. */
-function deriveEnvironments(...sources: { environmentSlug: string | null }[][]): string[] {
+function deriveEnvironments(files: { environmentSlug: string | null }[]): string[] {
   const slugs = new Set<string>();
-  for (const list of sources) {
-    for (const item of list) {
-      if (item.environmentSlug) {
-        slugs.add(item.environmentSlug);
-      }
+  for (const file of files) {
+    if (file.environmentSlug) {
+      slugs.add(file.environmentSlug);
     }
   }
   return [...slugs].sort();
@@ -40,9 +38,8 @@ export class AppService {
       where: { projectId },
       orderBy: { createdAt: "asc" },
       include: {
-        _count: { select: { configFiles: true, secretFiles: true } },
-        configFiles: { select: { environmentSlug: true } },
-        secretFiles: { select: { environmentSlug: true } },
+        _count: { select: { files: true } },
+        files: { select: { environmentSlug: true } },
       },
     });
 
@@ -51,9 +48,8 @@ export class AppService {
       projectId: app.projectId,
       name: app.name,
       appPath: app.appPath,
-      configFileCount: app._count.configFiles,
-      secretFileCount: app._count.secretFiles,
-      environments: deriveEnvironments(app.configFiles, app.secretFiles),
+      fileCount: app._count.files,
+      environments: deriveEnvironments(app.files),
       createdAt: app.createdAt,
       updatedAt: app.updatedAt,
     }));
@@ -77,8 +73,7 @@ export class AppService {
       projectId: app.projectId,
       name: app.name,
       appPath: app.appPath,
-      configFileCount: 0,
-      secretFileCount: 0,
+      fileCount: 0,
       environments: [],
       createdAt: app.createdAt,
       updatedAt: app.updatedAt,
@@ -110,32 +105,22 @@ export class AppService {
   }
 
   /**
-   * Return the full repo map for a project: every app with config/secret file
-   * metadata. Encrypted content is never included here.
+   * Return the full repo map for a project: every app with its file metadata.
+   * Encrypted content is never included here.
    */
   async repoMap(projectId: string): Promise<RepoMapResponse> {
     const apps = await this.prisma.app.findMany({
       where: { projectId },
       orderBy: { createdAt: "asc" },
       include: {
-        configFiles: {
+        files: {
           orderBy: { relativePath: "asc" },
           select: {
             id: true,
+            kind: true,
             relativePath: true,
+            environmentSlug: true,
             format: true,
-            environmentSlug: true,
-            fileSize: true,
-            isBinary: true,
-            updatedAt: true,
-          },
-        },
-        secretFiles: {
-          orderBy: { relativePath: "asc" },
-          select: {
-            id: true,
-            relativePath: true,
-            environmentSlug: true,
             mimeType: true,
             fileSize: true,
             isBinary: true,
@@ -150,17 +135,15 @@ export class AppService {
         id: app.id,
         name: app.name,
         appPath: app.appPath,
-        environments: deriveEnvironments(app.configFiles, app.secretFiles),
-        configFiles: app.configFiles,
-        secretFiles: app.secretFiles,
+        environments: deriveEnvironments(app.files),
+        files: app.files,
       })),
     };
   }
 
   /**
-   * Export encrypted config + secret blobs for a single file, a single
-   * environment, a single app, or the whole repo. Server returns ciphertext
-   * as-is; decryption happens client-side.
+   * Export encrypted file blobs for a single file, a single environment, a single app,
+   * or the whole repo. Server returns ciphertext as-is; decryption happens client-side.
    */
   async exportFiles(
     projectId: string,
@@ -172,20 +155,10 @@ export class AppService {
       await this.appRepository.requireApp(projectId, body.appId);
     }
 
-    const appFilter = { app: { projectId, ...(body.appId && { id: body.appId }) } };
-
-    const configFiles = await this.prisma.configFile.findMany({
+    const files = await this.prisma.repoFile.findMany({
       where: {
-        ...appFilter,
-        ...(body.fileId && { id: body.fileId }),
-        ...(body.environmentSlug && { environmentSlug: body.environmentSlug }),
-      },
-      orderBy: { relativePath: "asc" },
-    });
-
-    const secretFiles = await this.prisma.secretFile.findMany({
-      where: {
-        ...appFilter,
+        projectId,
+        ...(body.appId && { appId: body.appId }),
         ...(body.fileId && { id: body.fileId }),
         ...(body.environmentSlug && { environmentSlug: body.environmentSlug }),
       },
@@ -196,31 +169,23 @@ export class AppService {
       userId,
       projectId,
       action: "DOWNLOAD",
-      resourceType: "CONFIG_FILE",
+      resourceType: "REPO_FILE",
       resourceId: body.fileId ?? body.appId ?? projectId,
       ipAddress,
       metadata: {
         appId: body.appId ?? null,
         environmentSlug: body.environmentSlug ?? null,
         fileId: body.fileId ?? null,
-        configFileCount: configFiles.length,
-        secretFileCount: secretFiles.length,
+        fileCount: files.length,
       },
     });
 
     return {
-      configFiles: configFiles.map((file) => ({
+      files: files.map((file) => ({
+        kind: file.kind,
         relativePath: file.relativePath,
+        environmentSlug: file.environmentSlug,
         format: file.format,
-        environmentSlug: file.environmentSlug,
-        encryptedContent: Buffer.from(file.encryptedContent).toString("base64"),
-        iv: file.iv,
-        authTag: file.authTag,
-        isBinary: file.isBinary,
-      })),
-      secretFiles: secretFiles.map((file) => ({
-        relativePath: file.relativePath,
-        environmentSlug: file.environmentSlug,
         mimeType: file.mimeType,
         encryptedContent: Buffer.from(file.encryptedContent).toString("base64"),
         iv: file.iv,
@@ -234,9 +199,8 @@ export class AppService {
     const app = await this.prisma.app.findUniqueOrThrow({
       where: { id: appId },
       include: {
-        _count: { select: { configFiles: true, secretFiles: true } },
-        configFiles: { select: { environmentSlug: true } },
-        secretFiles: { select: { environmentSlug: true } },
+        _count: { select: { files: true } },
+        files: { select: { environmentSlug: true } },
       },
     });
 
@@ -245,9 +209,8 @@ export class AppService {
       projectId: app.projectId,
       name: app.name,
       appPath: app.appPath,
-      configFileCount: app._count.configFiles,
-      secretFileCount: app._count.secretFiles,
-      environments: deriveEnvironments(app.configFiles, app.secretFiles),
+      fileCount: app._count.files,
+      environments: deriveEnvironments(app.files),
       createdAt: app.createdAt,
       updatedAt: app.updatedAt,
     };

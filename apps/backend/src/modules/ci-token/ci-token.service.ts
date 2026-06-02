@@ -8,9 +8,8 @@ import { AuditLogService } from "@/modules/audit-log";
 import { PlanEnforcementService } from "@/modules/subscription/plan-enforcement.service";
 import type { MessageResponse, PaginatedResponse } from "@/types/response";
 import type {
-  CiConfigFile,
+  CiFile,
   CiFileDownloadResponse,
-  CiSecretFile,
   CiSecretsResponse,
   CiTokenCreatedResponse,
   CiTokenResponse,
@@ -199,45 +198,32 @@ export class CiTokenService {
     return ciToken;
   }
 
-  /** Return base + token-environment config and secret file ciphertext for the token's app. */
+  /**
+   * Return base + token-environment file ciphertext for the token's app (config and secret).
+   * Config files always carry an environment; secret files may be environment-neutral (null).
+   */
   async fetchSecrets(
     ciToken: CiToken,
     rawToken: string,
     pipelineRunId: string | null,
     clientIp: string,
   ): Promise<CiSecretsResponse> {
-    const [configFiles, secretFiles] = await Promise.all([
-      this.prisma.configFile.findMany({
-        where: {
-          appId: ciToken.appId,
-          environmentSlug: { in: [BASE_ENVIRONMENT, ciToken.environmentSlug] },
-        },
-      }),
-      this.prisma.secretFile.findMany({
-        where: {
-          appId: ciToken.appId,
-          OR: [
-            { environmentSlug: null },
-            { environmentSlug: { in: [BASE_ENVIRONMENT, ciToken.environmentSlug] } },
-          ],
-        },
-      }),
-    ]);
+    const files = await this.prisma.repoFile.findMany({
+      where: {
+        appId: ciToken.appId,
+        OR: [
+          { environmentSlug: null },
+          { environmentSlug: { in: [BASE_ENVIRONMENT, ciToken.environmentSlug] } },
+        ],
+      },
+    });
 
-    const configFileList: CiConfigFile[] = configFiles.map((f) => ({
-      relativePath: f.relativePath,
-      format: f.format,
-      environmentSlug: f.environmentSlug,
-      encryptedContent: Buffer.from(f.encryptedContent).toString("base64"),
-      iv: f.iv,
-      authTag: f.authTag,
-      isBinary: f.isBinary,
-    }));
-
-    const secretFileList: CiSecretFile[] = secretFiles.map((f) => ({
+    const fileList: CiFile[] = files.map((f) => ({
       id: f.id,
+      kind: f.kind,
       relativePath: f.relativePath,
       environmentSlug: f.environmentSlug,
+      format: f.format,
       mimeType: f.mimeType,
       encryptedContent: Buffer.from(f.encryptedContent).toString("base64"),
       iv: f.iv,
@@ -251,29 +237,24 @@ export class CiTokenService {
       resourceType: "CI_TOKEN",
       resourceId: ciToken.id,
       ipAddress: clientIp,
-      metadata: {
-        pipelineRunId: pipelineRunId ?? null,
-        configFileCount: configFileList.length,
-        secretFileCount: secretFileList.length,
-      },
+      metadata: { pipelineRunId: pipelineRunId ?? null, fileCount: fileList.length },
     });
 
     return {
       wrappedDek: ciToken.wrappedDek,
       wrappedDekIv: ciToken.wrappedDekIv,
       wrappedDekTag: ciToken.wrappedDekTag,
-      configFiles: configFileList,
-      secretFiles: secretFileList,
+      files: fileList,
     };
   }
 
   async downloadFile(ciToken: CiToken, fileId: string): Promise<CiFileDownloadResponse> {
-    const file = await this.prisma.secretFile.findFirst({
+    const file = await this.prisma.repoFile.findFirst({
       where: { id: fileId, appId: ciToken.appId },
     });
 
     if (!file) {
-      throw new NotFoundError("Secret file not found");
+      throw new NotFoundError("File not found");
     }
 
     return {
@@ -281,7 +262,7 @@ export class CiTokenService {
       iv: file.iv,
       authTag: file.authTag,
       relativePath: file.relativePath,
-      mimeType: file.mimeType,
+      mimeType: file.mimeType ?? "application/octet-stream",
     };
   }
 }

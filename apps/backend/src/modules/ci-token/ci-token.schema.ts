@@ -53,21 +53,13 @@ export const CiTokenParamsSchema = t.Object({
   tokenId: t.String(),
 });
 
-export const CiConfigFileSchema = t.Object({
-  relativePath: t.String(),
-  format: t.String(),
-  environmentSlug: t.String(),
-  encryptedContent: t.String({ description: "Base64-encoded encrypted content" }),
-  iv: t.String(),
-  authTag: t.String(),
-  isBinary: t.Boolean(),
-});
-
-export const CiSecretFileSchema = t.Object({
+export const CiFileSchema = t.Object({
   id: t.String(),
+  kind: t.UnionEnum(["CONFIG", "SECRET"] as const),
   relativePath: t.String(),
   environmentSlug: t.Nullable(t.String()),
-  mimeType: t.String(),
+  format: t.Nullable(t.String()),
+  mimeType: t.Nullable(t.String()),
   encryptedContent: t.String({ description: "Base64-encoded encrypted content" }),
   iv: t.String(),
   authTag: t.String(),
@@ -78,8 +70,7 @@ export const CiSecretsResponseSchema = t.Object({
   wrappedDek: t.Nullable(t.String()),
   wrappedDekIv: t.Nullable(t.String()),
   wrappedDekTag: t.Nullable(t.String()),
-  configFiles: t.Array(CiConfigFileSchema),
-  secretFiles: t.Array(CiSecretFileSchema),
+  files: t.Array(CiFileSchema),
 });
 
 export const CiFileParamsSchema = t.Object({
@@ -101,7 +92,6 @@ export const CiFileDownloadResponseSchema = t.Object({
 export type CreateCiTokenBody = Static<typeof CreateCiTokenBodySchema>;
 export type CiTokenResponse = Static<typeof CiTokenResponseSchema>;
 export type CiTokenCreatedResponse = Static<typeof CiTokenCreatedResponseSchema>;
-export type CiConfigFile = Static<typeof CiConfigFileSchema>;
-export type CiSecretFile = Static<typeof CiSecretFileSchema>;
+export type CiFile = Static<typeof CiFileSchema>;
 export type CiSecretsResponse = Static<typeof CiSecretsResponseSchema>;
 export type CiFileDownloadResponse = Static<typeof CiFileDownloadResponseSchema>;
