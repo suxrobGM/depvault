@@ -1,4 +1,6 @@
 using System.CommandLine;
+using DepVault.Cli.Auth;
+using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
 using GetKind = DepVault.Cli.ApiClient.Api.Projects.Item.Files.GetKindQueryParameterType;
@@ -6,7 +8,10 @@ using GetKind = DepVault.Cli.ApiClient.Api.Projects.Item.Files.GetKindQueryParam
 namespace DepVault.Cli.Commands;
 
 /// <summary>Lists config files (env/appsettings/etc.) stored for a project.</summary>
-public sealed class EnvCommands(CommandContext ctx)
+public sealed class EnvCommands(
+    CommandContext ctx,
+    IProjectContextResolver projectContextResolver,
+    IApiClientFactory clientFactory)
 {
     public Command CreateEnvCommand()
     {
@@ -29,18 +34,30 @@ public sealed class EnvCommands(CommandContext ctx)
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
-            var pc = await ctx.RequireProjectContextAsync(parseResult, projectOpt, cancellationToken);
-            if (pc is null)
+            if (!ctx.RequireAuth())
             {
                 return;
             }
+
+            var resolution = await projectContextResolver.ResolveAsync(
+                parseResult.GetValue(projectOpt),
+                ResolutionPolicy.AllowAutoDetect | ResolutionPolicy.AllowInteractive,
+                cancellationToken);
+            if (resolution is null)
+            {
+                return;
+            }
+
+            ctx.PrintProjectBanner();
+            var projectId = resolution.ProjectId;
+            var client = clientFactory.Create();
 
             var appId = parseResult.GetValue(appOpt);
             var envSlug = parseResult.GetValue(envOpt);
 
             try
             {
-                var result = await pc.Client.Api.Projects[pc.ProjectId].Files
+                var result = await client.Api.Projects[projectId].Files
                     .GetAsync(config =>
                     {
                         config.QueryParameters.Page = 1;

@@ -10,7 +10,8 @@ public sealed class AnalysisCommands(
     CommandContext ctx,
     IFileScanner fileScanner,
     AnalysisClient analysisClient,
-    IRepositoryLocator repositoryLocator)
+    IRepositoryLocator repositoryLocator,
+    IProjectContextResolver projectContextResolver)
 {
     public Command CreateAnalyzeCommand()
     {
@@ -27,11 +28,21 @@ public sealed class AnalysisCommands(
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
-            var pc = await ctx.RequireProjectContextAsync(parseResult, projectOpt, cancellationToken);
-            if (pc is null)
+            if (!ctx.RequireAuth())
             {
                 return;
             }
+
+            var resolution = await projectContextResolver.ResolveAsync(
+                parseResult.GetValue(projectOpt),
+                ResolutionPolicy.AllowAutoDetect | ResolutionPolicy.AllowInteractive,
+                cancellationToken);
+            if (resolution is null)
+            {
+                return;
+            }
+
+            ctx.PrintProjectBanner();
 
             var filePath = ctx.ResolveFileInteractive(
                 parseResult, fileOpt,
@@ -58,7 +69,7 @@ public sealed class AnalysisCommands(
                 var result = await AnsiConsole.Status()
                     .Spinner(Spinner.Known.Dots)
                     .StartAsync($"Analyzing {fileName} ({ecosystem})...", async _ =>
-                        await analysisClient.AnalyzeFileAsync(pc.ProjectId, fileName, relativePath, content,
+                        await analysisClient.AnalyzeFileAsync(resolution.ProjectId, fileName, relativePath, content,
                             ecosystem, cancellationToken));
 
                 if (result is null)

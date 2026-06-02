@@ -1,5 +1,4 @@
 using System.CommandLine;
-using DepVault.Cli.Auth;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
@@ -14,43 +13,16 @@ public enum AuthMode
     Jwt
 }
 
-/// <summary>Auth + project ID + API client resolved in one step.</summary>
-public sealed record ProjectContext(string ProjectId, ApiClient.ApiClient Client);
-
 /// <summary>Bundles the shared deps that every command needs (auth, config, output, prompter).</summary>
 public sealed class CommandContext(
     ICredentialStore credentialStore,
     IConfigService configService,
     IOutputFormatter output,
-    IConsolePrompter prompter,
-    IApiClientFactory clientFactory,
-    IRepositoryLocator repositoryLocator)
+    IConsolePrompter prompter)
 {
     public IOutputFormatter Output => output;
     public IConsolePrompter Prompter => prompter;
     public IConfigService Config => configService;
-
-    /// <summary>
-    /// One-call guard: checks auth, resolves project ID (with folder auto-detection), prints
-    /// the project banner, and creates the API client. Returns null when any step fails.
-    /// </summary>
-    public async Task<ProjectContext?> RequireProjectContextAsync(
-        ParseResult parseResult, Option<string?> projectOpt, CancellationToken ct = default)
-    {
-        if (!RequireAuth())
-        {
-            return null;
-        }
-
-        var projectId = await RequireProjectIdAsync(parseResult, projectOpt, ct);
-        if (projectId is null)
-        {
-            return null;
-        }
-
-        PrintProjectBanner();
-        return new ProjectContext(projectId, clientFactory.Create());
-    }
 
     public AuthMode GetAuthMode()
     {
@@ -75,42 +47,6 @@ public sealed class CommandContext(
 
     public bool IsCiMode() => GetAuthMode() == AuthMode.CiToken;
 
-    /// <summary>Resolves project ID from the CLI option, active config, or folder-name auto-detection.</summary>
-    public Task<string?> RequireProjectIdAsync(
-        ParseResult parseResult, Option<string?> projectOpt, CancellationToken ct = default)
-    {
-        var explicit_ = parseResult.GetValue(projectOpt);
-        if (!string.IsNullOrEmpty(explicit_))
-        {
-            return Task.FromResult<string?>(explicit_);
-        }
-
-        return RequireProjectIdAsync(ct);
-    }
-
-    /// <summary>Resolves project ID from active config or folder-name auto-detection.</summary>
-    public async Task<string?> RequireProjectIdAsync(CancellationToken ct = default)
-    {
-        var config = configService.Load();
-        if (!string.IsNullOrEmpty(config.ActiveProjectId))
-        {
-            return config.ActiveProjectId;
-        }
-
-        // Auto-detect from folder name
-        if (GetAuthMode() != AuthMode.None)
-        {
-            var resolved = await ResolveProjectFromDirectoryAsync(ct);
-            if (resolved is not null)
-            {
-                return resolved;
-            }
-        }
-
-        output.PrintError("No project specified. Use --project or 'depvault project select <id>'.");
-        return null;
-    }
-
     /// <summary>Prints a compact one-liner showing the active project name and ID.</summary>
     public void PrintProjectBanner()
     {
@@ -128,46 +64,6 @@ public sealed class CommandContext(
         else
         {
             AnsiConsole.MarkupLine($"[cyan1]Project:[/] {Markup.Escape(config.ActiveProjectId)}");
-        }
-    }
-
-    private async Task<string?> ResolveProjectFromDirectoryAsync(CancellationToken ct)
-    {
-        try
-        {
-            var repoName = repositoryLocator.GetRepoName();
-            if (repoName is null)
-            {
-                return null;
-            }
-
-            var apiClient = clientFactory.Create();
-            var result = await apiClient.Api.Projects.GetAsync(config =>
-            {
-                config.QueryParameters.Page = 1;
-                config.QueryParameters.Limit = 100;
-            }, ct);
-
-            var match = result?.Items?.FirstOrDefault(p =>
-                string.Equals(p.Name, repoName, StringComparison.OrdinalIgnoreCase));
-
-            if (match?.Id is null)
-            {
-                return null;
-            }
-
-            var config = configService.Load();
-            config.ActiveProjectId = match.Id;
-            config.ActiveProjectName = match.Name;
-            configService.Save(config);
-
-            AnsiConsole.MarkupLine(
-                $"[green]Auto-detected project:[/] {Markup.Escape(match.Name ?? match.Id)} [grey](from git remote \"{Markup.Escape(repoName)}\")[/]");
-            return match.Id;
-        }
-        catch
-        {
-            return null;
         }
     }
 

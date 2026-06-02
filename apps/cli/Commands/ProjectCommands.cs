@@ -1,5 +1,6 @@
 using System.CommandLine;
 using DepVault.Cli.Auth;
+using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using CreateProjectBody = DepVault.Cli.ApiClient.Api.Projects.ProjectsPostRequestBody;
 
@@ -7,7 +8,8 @@ namespace DepVault.Cli.Commands;
 
 public sealed class ProjectCommands(
     IApiClientFactory clientFactory,
-    CommandContext ctx)
+    CommandContext ctx,
+    IProjectContextResolver projectContextResolver)
 {
     public Command CreateProjectCommand()
     {
@@ -206,15 +208,26 @@ public sealed class ProjectCommands(
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
-            var pc = await ctx.RequireProjectContextAsync(parseResult, projectOpt, cancellationToken);
-            if (pc is null)
+            if (!ctx.RequireAuth())
             {
                 return;
             }
 
+            var resolution = await projectContextResolver.ResolveAsync(
+                parseResult.GetValue(projectOpt),
+                ResolutionPolicy.AllowAutoDetect | ResolutionPolicy.AllowInteractive,
+                cancellationToken);
+            if (resolution is null)
+            {
+                return;
+            }
+
+            ctx.PrintProjectBanner();
+            var client = clientFactory.Create();
+
             try
             {
-                var project = await pc.Client.Api.Projects[pc.ProjectId]
+                var project = await client.Api.Projects[resolution.ProjectId]
                     .GetAsync(cancellationToken: cancellationToken);
 
                 ctx.Output.PrintKeyValue("ID", project?.Id);

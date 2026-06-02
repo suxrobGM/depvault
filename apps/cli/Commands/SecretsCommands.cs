@@ -1,4 +1,6 @@
 using System.CommandLine;
+using DepVault.Cli.Auth;
+using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
 using GetKind = DepVault.Cli.ApiClient.Api.Projects.Item.Files.GetKindQueryParameterType;
@@ -7,7 +9,10 @@ using SecretItem = DepVault.Cli.ApiClient.Api.Projects.Item.Files.FilesGetRespon
 namespace DepVault.Cli.Commands;
 
 /// <summary>Lists secret file metadata stored for a project.</summary>
-public sealed class SecretsCommands(CommandContext ctx)
+public sealed class SecretsCommands(
+    CommandContext ctx,
+    IProjectContextResolver projectContextResolver,
+    IApiClientFactory clientFactory)
 {
     public Command CreateSecretsCommand()
     {
@@ -29,17 +34,27 @@ public sealed class SecretsCommands(CommandContext ctx)
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
-            var pc = await ctx.RequireProjectContextAsync(parseResult, projectOpt, cancellationToken);
-            if (pc is null)
+            if (!ctx.RequireAuth())
             {
                 return;
             }
 
+            var resolution = await projectContextResolver.ResolveAsync(
+                parseResult.GetValue(projectOpt),
+                ResolutionPolicy.AllowAutoDetect | ResolutionPolicy.AllowInteractive,
+                cancellationToken);
+            if (resolution is null)
+            {
+                return;
+            }
+
+            ctx.PrintProjectBanner();
+            var client = clientFactory.Create();
             var envSlug = parseResult.GetValue(envOpt);
 
             try
             {
-                var items = await CollectAllAsync(pc, cancellationToken);
+                var items = await CollectAllAsync(client, resolution.ProjectId, cancellationToken);
 
                 if (!string.IsNullOrEmpty(envSlug))
                 {
@@ -92,7 +107,7 @@ public sealed class SecretsCommands(CommandContext ctx)
     }
 
     private static async Task<List<SecretItem>> CollectAllAsync(
-        ProjectContext pc, CancellationToken ct)
+        ApiClient.ApiClient client, string projectId, CancellationToken ct)
     {
         var all = new List<SecretItem>();
         var page = 1;
@@ -100,7 +115,7 @@ public sealed class SecretsCommands(CommandContext ctx)
         while (true)
         {
             var currentPage = page;
-            var result = await pc.Client.Api.Projects[pc.ProjectId].Files
+            var result = await client.Api.Projects[projectId].Files
                 .GetAsync(config =>
                 {
                     config.QueryParameters.Page = currentPage;
