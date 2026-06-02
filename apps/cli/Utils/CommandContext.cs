@@ -1,7 +1,5 @@
-using System.CommandLine;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
-using DepVault.Cli.Services;
 using Spectre.Console;
 
 namespace DepVault.Cli.Utils;
@@ -65,53 +63,5 @@ public sealed class CommandContext(
         {
             AnsiConsole.MarkupLine($"[cyan1]Project:[/] {Markup.Escape(config.ActiveProjectId)}");
         }
-    }
-
-    /// <summary>Checks file exists and prints error if not.</summary>
-    public bool RequireFile(string path)
-    {
-        if (File.Exists(path))
-        {
-            return true;
-        }
-
-        output.PrintError($"File not found: {path}");
-        return false;
-    }
-
-    /// <summary>Resolves a file path from CLI option or interactive file discovery.</summary>
-    public string? ResolveFileInteractive(
-        ParseResult parseResult, Option<string?> fileOpt,
-        Func<List<DiscoveredFile>> discoverFiles, string fileTypeLabel)
-    {
-        var filePath = parseResult.GetValue(fileOpt);
-
-        if (!string.IsNullOrEmpty(filePath))
-        {
-            return RequireFile(filePath) ? filePath : null;
-        }
-
-        if (!prompter.IsInteractive)
-        {
-            output.PrintError("--file is required in non-interactive mode.");
-            return null;
-        }
-
-        var discovered = discoverFiles();
-        if (discovered.Count == 0)
-        {
-            output.PrintError($"No {fileTypeLabel} files found in current directory.");
-            return null;
-        }
-
-        if (discovered.Count == 1)
-        {
-            return prompter.Confirm($"Use [cyan1]{Markup.Escape(discovered[0].RelativePath)}[/]?")
-                ? discovered[0].FullPath
-                : null;
-        }
-
-        var selected = prompter.Select($"Select a {fileTypeLabel} file", discovered, f => f.RelativePath);
-        return selected.FullPath;
     }
 }

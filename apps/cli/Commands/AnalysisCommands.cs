@@ -13,7 +13,8 @@ public sealed class AnalysisCommands(
     AnalysisClient analysisClient,
     IRepositoryLocator repositoryLocator,
     IProjectContextResolver projectContextResolver,
-    IErrorHandler errorHandler)
+    IErrorHandler errorHandler,
+    IFileArgResolver fileArgResolver)
 {
     public Command CreateAnalyzeCommand()
     {
@@ -46,7 +47,7 @@ public sealed class AnalysisCommands(
 
             ctx.PrintProjectBanner();
 
-            var filePath = ctx.ResolveFileInteractive(
+            var filePath = fileArgResolver.ResolveFileInteractive(
                 parseResult, fileOpt,
                 () => fileScanner.FindDependencyFiles(repositoryLocator.FindRepoRoot()),
                 "dependency");

@@ -30,6 +30,7 @@ internal static class Startup
             .AddSingleton<IConsolePrompter, ConsolePrompter>()
             .AddSingleton<IFileScanner, FileScanner>()
             .AddSingleton<IRepositoryLocator, RepositoryLocator>()
+            .AddSingleton<IFileArgResolver, FileArgResolver>()
             .AddSingleton<IProjectContextResolver, ProjectContextResolver>()
             .AddSingleton<ISecretDetector, SecretDetector>()
             .AddSingleton<IGitHubReleaseClient, GitHubReleaseClient>()

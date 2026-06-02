@@ -19,7 +19,8 @@ internal sealed class PushCommands(
     RepoFileUploadService uploadService,
     IRepositoryLocator repositoryLocator,
     IProjectContextResolver projectContextResolver,
-    IErrorHandler errorHandler)
+    IErrorHandler errorHandler,
+    IFileArgResolver fileArgResolver)
 {
     public Command CreatePushCommand()
     {
@@ -109,7 +110,7 @@ internal sealed class PushCommands(
     {
         if (!string.IsNullOrEmpty(explicitFile))
         {
-            if (!ctx.RequireFile(explicitFile))
+            if (!fileArgResolver.RequireFile(explicitFile))
             {
                 return [];
             }

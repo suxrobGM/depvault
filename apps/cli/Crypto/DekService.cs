@@ -16,7 +16,9 @@ public sealed class DekService(
     ICredentialStore credentialStore,
     IConsolePrompter prompter,
     CommandContext commandContext,
-    VaultState vaultState)
+    VaultState vaultState,
+    IOutputFormatter output,
+    ConsoleRenderer renderer)
 {
     /// <summary>
     /// Collects the vault password interactively if needed. Returns null when the KEK is
@@ -42,7 +44,7 @@ public sealed class DekService(
 
         if (!prompter.IsInteractive)
         {
-            AnsiConsole.MarkupLine("[red]DEPVAULT_PASSWORD is required in non-interactive mode.[/]");
+            output.PrintError("DEPVAULT_PASSWORD is required in non-interactive mode.");
             return null;
         }
 
@@ -81,7 +83,7 @@ public sealed class DekService(
 
         if (ciSecrets is null)
         {
-            AnsiConsole.MarkupLine("[red]Failed to fetch CI secrets metadata.[/]");
+            output.PrintError("Failed to fetch CI secrets metadata.");
             return null;
         }
 
@@ -105,7 +107,7 @@ public sealed class DekService(
         var token = credentialStore.Load()?.AccessToken;
         if (string.IsNullOrEmpty(token))
         {
-            AnsiConsole.MarkupLine("[red]Not authenticated. Run 'depvault login' first.[/]");
+            output.PrintError("Not authenticated. Run 'depvault login' first.");
             return null;
         }
 
@@ -114,7 +116,7 @@ public sealed class DekService(
 
         if (vaultStatus is null || string.IsNullOrEmpty(vaultStatus.KekSalt))
         {
-            AnsiConsole.MarkupLine("[red]Failed to fetch vault status. Ensure vault is initialized.[/]");
+            output.PrintError("Failed to fetch vault status. Ensure vault is initialized.");
             return null;
         }
 
@@ -137,8 +139,7 @@ public sealed class DekService(
         {
             if (string.IsNullOrEmpty(password))
             {
-                AnsiConsole.MarkupLine(
-                    "[red]Vault password required. Run [bold]unlock[/] or set DEPVAULT_PASSWORD.[/]");
+                output.PrintError("Vault password required. Run 'unlock' or set DEPVAULT_PASSWORD.");
                 return null;
             }
 
@@ -154,7 +155,7 @@ public sealed class DekService(
                     vaultStatus.WrappedPrivateKeyTag ?? "", kek))
             {
                 CryptographicOperations.ZeroMemory(kek);
-                AnsiConsole.MarkupLine("[red]Incorrect vault password.[/]");
+                output.PrintError("Incorrect vault password.");
                 return null;
             }
 
@@ -190,7 +191,7 @@ public sealed class DekService(
         var creds = credentialStore.Load();
         if (creds?.UserId is null)
         {
-            PrintKeyGrantError();
+            renderer.PrintKeyGrantError();
             return null;
         }
 
@@ -210,37 +211,13 @@ public sealed class DekService(
             }, cancellationToken: ct);
 
             vaultState.CacheDek(projectId, dek);
-            AnsiConsole.MarkupLine("[green]Created encryption key for this project.[/]");
+            output.PrintSuccess("Created encryption key for this project.");
             return dek;
         }
         catch
         {
-            PrintKeyGrantError();
+            renderer.PrintKeyGrantError();
             return null;
         }
-    }
-
-    private static void PrintKeyGrantError()
-    {
-        AnsiConsole.WriteLine();
-        AnsiConsole.Write(new Panel(
-                new Rows(
-                    new Markup("[red]No encryption key grant found for this project.[/]"),
-                    new Markup(""),
-                    new Markup("[grey]Key grants are created when you first open a project's vault[/]"),
-                    new Markup("[grey]in the web dashboard. To fix this:[/]"),
-                    new Markup(""),
-                    new Markup("  [cyan1]1.[/] [grey]Open the DepVault web dashboard[/]"),
-                    new Markup("  [cyan1]2.[/] [grey]Navigate to this project → [bold]Vault[/] tab[/]"),
-                    new Markup("  [cyan1]3.[/] [grey]Unlock the vault with your password[/]"),
-                    new Markup("  [cyan1]4.[/] [grey]Run this CLI command again[/]"),
-                    new Markup(""),
-                    new Markup("[grey]If you are a team member, ask the project owner to grant[/]"),
-                    new Markup("[grey]you access from the [bold]Team[/] settings page.[/]")))
-            .Header("[red]Key Grant Missing[/]")
-            .Border(BoxBorder.Rounded)
-            .BorderStyle(new Style(Color.Red))
-            .Padding(1, 0));
-        AnsiConsole.WriteLine();
     }
 }
