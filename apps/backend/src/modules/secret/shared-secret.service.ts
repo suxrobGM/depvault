@@ -5,7 +5,6 @@ import { PrismaClient } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import type {
   AccessSecretResponse,
-  CreateEnvShareBody,
   CreateFileShareBody,
   CreateShareResponse,
   SharedSecretAuditItem,
@@ -20,46 +19,6 @@ export class SharedSecretService {
     private readonly prisma: PrismaClient,
     private readonly auditLogService: AuditLogService,
   ) {}
-
-  async createForEnvVariables(
-    projectId: string,
-    userId: string,
-    body: CreateEnvShareBody,
-    ipAddress = "unknown",
-  ): Promise<CreateShareResponse> {
-    const token = createRandomToken();
-    const passwordHash = body.password ? await hashPassword(body.password) : null;
-    const expiresAt = new Date(Date.now() + body.expiresIn * 1000);
-
-    const secret = await this.prisma.sharedSecret.create({
-      data: {
-        creatorId: userId,
-        projectId,
-        token,
-        encryptedPayload: body.encryptedPayload,
-        iv: body.iv,
-        authTag: body.authTag,
-        passwordHash,
-        payloadType: "CONFIG_FILE",
-        expiresAt,
-      },
-    });
-
-    await this.auditLogService.log({
-      userId,
-      projectId,
-      action: "SHARE",
-      resourceType: "SHARE_LINK",
-      resourceId: secret.id,
-      ipAddress,
-      metadata: {
-        payloadType: "CONFIG_FILE",
-        variableCount: body.variableIds?.length ?? 0,
-      },
-    });
-
-    return { token, shareUrl: `${SHARE_URL_BASE}/s/${token}` };
-  }
 
   async createForFile(
     projectId: string,
@@ -80,7 +39,6 @@ export class SharedSecretService {
         iv: body.iv,
         authTag: body.authTag,
         passwordHash,
-        payloadType: "SECRET_FILE",
         fileName: body.fileName,
         mimeType: body.mimeType,
         expiresAt,
@@ -94,7 +52,7 @@ export class SharedSecretService {
       resourceType: "SHARE_LINK",
       resourceId: secret.id,
       ipAddress,
-      metadata: { payloadType: "SECRET_FILE", fileName: body.fileName },
+      metadata: { fileName: body.fileName },
     });
 
     return { token, shareUrl: `${SHARE_URL_BASE}/s/${token}` };
@@ -120,7 +78,6 @@ export class SharedSecretService {
     }
 
     return {
-      payloadType: secret.payloadType as "CONFIG_FILE" | "SECRET_FILE",
       hasPassword: secret.passwordHash !== null,
       fileName: secret.fileName,
       mimeType: secret.mimeType,
@@ -140,7 +97,6 @@ export class SharedSecretService {
       encryptedPayload: secret.encryptedPayload,
       iv: secret.iv,
       authTag: secret.authTag,
-      payloadType: secret.payloadType as "CONFIG_FILE" | "SECRET_FILE",
       fileName: secret.fileName,
       mimeType: secret.mimeType,
     };
@@ -153,7 +109,6 @@ export class SharedSecretService {
       resourceType: "SHARE_LINK",
       resourceId: secret.id,
       ipAddress,
-      metadata: { payloadType: secret.payloadType },
     });
 
     return response;
@@ -174,7 +129,6 @@ export class SharedSecretService {
       items: secrets.map((s) => ({
         id: s.id,
         token: s.token,
-        payloadType: s.payloadType as "CONFIG_FILE" | "SECRET_FILE",
         status: s.status as "PENDING" | "VIEWED" | "EXPIRED",
         hasPassword: s.passwordHash !== null,
         fileName: s.fileName,

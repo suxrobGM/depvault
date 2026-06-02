@@ -1,14 +1,5 @@
 import { t, type Static } from "elysia";
 
-export const CreateEnvShareBodySchema = t.Object({
-  encryptedPayload: t.String({ description: "Client-encrypted payload" }),
-  iv: t.String(),
-  authTag: t.String(),
-  variableIds: t.Optional(t.Array(t.String(), { maxItems: 100, description: "For audit trail" })),
-  expiresIn: t.Integer({ minimum: 3600, maximum: 2592000 }),
-  password: t.Optional(t.String({ minLength: 1, maxLength: 128 })),
-});
-
 export const CreateFileShareBodySchema = t.Object({
   encryptedPayload: t.String({ description: "Client-encrypted payload" }),
   iv: t.String(),
@@ -24,7 +15,6 @@ export const AccessSecretBodySchema = t.Object({
 });
 
 export const SharedSecretInfoResponseSchema = t.Object({
-  payloadType: t.UnionEnum(["CONFIG_FILE", "SECRET_FILE"] as const),
   hasPassword: t.Boolean(),
   fileName: t.Nullable(t.String()),
   mimeType: t.Nullable(t.String()),
@@ -35,7 +25,6 @@ export const AccessSecretResponseSchema = t.Object({
   encryptedPayload: t.String(),
   iv: t.String(),
   authTag: t.String(),
-  payloadType: t.UnionEnum(["CONFIG_FILE", "SECRET_FILE"] as const),
   fileName: t.Nullable(t.String()),
   mimeType: t.Nullable(t.String()),
 });
@@ -48,7 +37,6 @@ export const CreateShareResponseSchema = t.Object({
 export const SharedSecretAuditItemSchema = t.Object({
   id: t.String(),
   token: t.String(),
-  payloadType: t.UnionEnum(["CONFIG_FILE", "SECRET_FILE"] as const),
   status: t.UnionEnum(["PENDING", "VIEWED", "EXPIRED"] as const),
   hasPassword: t.Boolean(),
   fileName: t.Nullable(t.String()),
@@ -73,7 +61,6 @@ export const SharedSecretFileParamsSchema = t.Object({
 
 export const TokenParamSchema = t.Object({ token: t.String() });
 
-export type CreateEnvShareBody = Static<typeof CreateEnvShareBodySchema>;
 export type CreateFileShareBody = Static<typeof CreateFileShareBodySchema>;
 export type AccessSecretBody = Static<typeof AccessSecretBodySchema>;
 export type SharedSecretInfoResponse = Static<typeof SharedSecretInfoResponseSchema>;

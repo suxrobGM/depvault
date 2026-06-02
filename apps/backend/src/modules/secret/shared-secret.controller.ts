@@ -6,7 +6,6 @@ import { getClientIp } from "@/common/utils/ip";
 import { StringIdParamSchema } from "@/types/request";
 import { MessageResponseSchema } from "@/types/response";
 import {
-  CreateEnvShareBodySchema,
   CreateFileShareBodySchema,
   CreateShareResponseSchema,
   SharedSecretAuditListResponseSchema,
@@ -23,27 +22,6 @@ export const sharedSecretController = new Elysia({
   .use(projectGuard("EDITOR"))
   .use(rateLimiter({ max: 30, windowMs: 60 * 1000 }))
   .post(
-    "/env",
-    ({ params, body, projectMember, request, server }) =>
-      sharedSecretService.createForEnvVariables(
-        params.id,
-        projectMember.userId,
-        body,
-        getClientIp(request, server),
-      ),
-    {
-      params: StringIdParamSchema,
-      body: CreateEnvShareBodySchema,
-      response: CreateShareResponseSchema,
-      detail: {
-        operationId: "shareEnvVariables",
-        summary: "Create a share link for environment variables",
-        description:
-          "Generate a one-time shareable link for one or more environment variables. Optional password and expiry supported.",
-      },
-    },
-  )
-  .post(
     "/file",
     ({ params, body, projectMember, request, server }) =>
       sharedSecretService.createForFile(
@@ -57,10 +35,10 @@ export const sharedSecretController = new Elysia({
       body: CreateFileShareBodySchema,
       response: CreateShareResponseSchema,
       detail: {
-        operationId: "shareSecretFile",
-        summary: "Create a share link for a secret file",
+        operationId: "shareFile",
+        summary: "Create a share link for a file",
         description:
-          "Generate a one-time shareable link for a client-encrypted secret file. Optional password and expiry supported.",
+          "Generate a one-time shareable link for a client-encrypted file (config or secret). Optional password and expiry supported.",
       },
     },
   )
