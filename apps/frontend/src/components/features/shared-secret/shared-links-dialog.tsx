@@ -100,8 +100,7 @@ export function SharedLinksDialog(props: SharedLinksDialogProps): ReactElement {
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Type</TableCell>
-                <TableCell>Name / Token</TableCell>
+                <TableCell>File / Token</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell>Protected</TableCell>
                 <TableCell>Expires</TableCell>
@@ -113,14 +112,6 @@ export function SharedLinksDialog(props: SharedLinksDialogProps): ReactElement {
             <TableBody>
               {items.map((item) => (
                 <TableRow key={item.id}>
-                  <TableCell>
-                    <Chip
-                      label={item.payloadType === "ENV_VARIABLES" ? "ENV" : "FILE"}
-                      size="small"
-                      variant="outlined"
-                      color={item.payloadType === "ENV_VARIABLES" ? "primary" : "secondary"}
-                    />
-                  </TableCell>
                   <TableCell>
                     <Typography
                       variant="body2"

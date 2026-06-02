@@ -64,21 +64,19 @@ export const queryKeys = {
       ["license-compliance", projectId, page, pageSize, search] as const,
   },
 
-  vaults: {
-    byProject: (projectId: string) => ["vaults", projectId] as const,
-    overview: (projectId: string) => ["vaults", projectId, "overview"] as const,
-    tags: (projectId: string) => ["vault-tags", projectId] as const,
-    variables: (projectId: string, vaultId: string | null) =>
-      ["vault-variables", projectId, vaultId] as const,
-    export: (projectId: string, vaultId: string) => ["env-export", projectId, vaultId] as const,
-    variableVersions: (projectId: string, variableId: string) =>
-      ["env-variable-versions", projectId, variableId] as const,
+  repo: {
+    map: (projectId: string) => ["repo-map", projectId] as const,
+    apps: (projectId: string) => ["apps", projectId] as const,
+    configFile: (projectId: string, fileId: string) => ["config-file", projectId, fileId] as const,
+    configFileContent: (projectId: string, fileId: string) =>
+      ["config-file-content", projectId, fileId] as const,
+    configFileVersions: (projectId: string, fileId: string) =>
+      ["config-file-versions", projectId, fileId] as const,
   },
 
   secretFiles: {
     byProject: (projectId: string) => ["secret-files", projectId] as const,
     overview: (projectId: string) => ["secret-files", projectId, "overview"] as const,
-    bundle: (projectId: string) => ["secret-files", projectId, "bundle"] as const,
     versions: (projectId: string, fileId: string) =>
       ["secret-file-versions", projectId, fileId] as const,
   },

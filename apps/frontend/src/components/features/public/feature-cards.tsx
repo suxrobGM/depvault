@@ -55,7 +55,7 @@ const moreFeatures: MoreFeature[] = [
     icon: <TemplateIcon />,
     title: "Environment Templates",
     description:
-      "Clone an environment's variable structure to bootstrap new stages. Diff templates against live environments.",
+      "Clone an environment's config files to bootstrap new stages. Diff templates against live environments.",
     color: "#fb923c",
   },
   {
@@ -69,7 +69,7 @@ const moreFeatures: MoreFeature[] = [
     icon: <BundlerIcon />,
     title: "Secret File Bundler",
     description:
-      "Download all required env variables and secret files for an environment as a single encrypted archive with a one-time password.",
+      "Download all config files and secret files for an environment as a single encrypted archive with a one-time password.",
     color: "#e879f9",
   },
 ];
@@ -91,7 +91,8 @@ export function FeatureCards(): ReactElement {
             mx: "auto",
           }}
         >
-          Dependency analysis, encrypted vaults, secret sharing, and more — one unified platform
+          Dependency analysis, encrypted config &amp; secret storage, secret sharing, and more — one
+          unified platform
         </Typography>
         <Stack spacing={8}>
           <Box className="vault-fade-up vault-delay-2">

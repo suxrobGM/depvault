@@ -29,7 +29,7 @@ const steps = [
     icon: <PushIcon sx={{ fontSize: 28 }} />,
     title: "Push",
     description:
-      "Push .env files and secret keys to the encrypted vault. Pick environments per file — development, staging, production — in one interactive flow.",
+      "Push your config and secret files — each encrypted as a whole-file blob. Environments are inferred per file — development, staging, production — in one interactive flow.",
   },
   {
     number: "04",

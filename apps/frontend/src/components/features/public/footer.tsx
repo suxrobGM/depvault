@@ -79,8 +79,8 @@ export function Footer(): ReactElement {
                 mb: 2,
               }}
             >
-              Analyze dependencies, detect vulnerabilities, and securely store environment variables
-              and secret files across any tech stack.
+              Analyze dependencies, detect vulnerabilities, and securely store config files and
+              secret files across any tech stack.
             </Typography>
             <IconButton
               component="a"

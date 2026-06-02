@@ -18,10 +18,8 @@ import { useForm } from "@tanstack/react-form";
 import { FormCheckboxField, FormSelectField, FormTextField } from "@/components/ui/form";
 import { CopyButton } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
-import { decryptBinary, encryptBinary, generateShareKey, shareKeyToFragment } from "@/lib/crypto";
-import type { SecretFileDto } from "@/types/api/secret-file";
+import { encryptBinary, generateShareKey, shareKeyToFragment } from "@/lib/crypto";
 
 const EXPIRY_OPTIONS = [
   { label: "1 hour", value: 3600 },
@@ -29,16 +27,22 @@ const EXPIRY_OPTIONS = [
   { label: "7 days", value: 604800 },
 ];
 
+/** The plaintext file the caller has already decrypted with the project DEK. */
+export interface ShareableFile {
+  fileName: string;
+  mimeType: string;
+  content: string | ArrayBuffer;
+}
+
 interface CreateFileShareDialogProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
-  file: SecretFileDto;
+  file: ShareableFile;
 }
 
 export function CreateFileShareDialog(props: CreateFileShareDialogProps): ReactElement {
   const { open, onClose, projectId, file } = props;
-  const { getProjectDEK } = useVault();
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -51,7 +55,7 @@ export function CreateFileShareDialog(props: CreateFileShareDialogProps): ReactE
       mimeType: string;
       expiresIn: number;
       password?: string;
-    }) => client.api.projects({ id: projectId })["secrets"]["shared"]["file"].post(values),
+    }) => client.api.projects({ id: projectId }).secrets.shared.file.post(values),
     {
       errorMessage: "Failed to create share link",
     },
@@ -64,28 +68,17 @@ export function CreateFileShareDialog(props: CreateFileShareDialogProps): ReactE
       usePassword: false,
     },
     onSubmit: async ({ value }) => {
-      const dek = await getProjectDEK(projectId);
-
-      // Download the encrypted file content, decrypt with project DEK,
-      // then re-encrypt with an ephemeral share key
-      const downloadResult = await client.api
-        .projects({ id: projectId })
-        .secrets({ fileId: file.id })
-        .download.get();
-      const downloaded = downloadResult.data!;
-
-      const fileData = await decryptBinary(
-        downloaded.encryptedContent,
-        downloaded.iv,
-        downloaded.authTag,
-        dek,
-      );
+      // Encrypt the already-decrypted file content with a fresh ephemeral key.
+      const fileData =
+        typeof file.content === "string"
+          ? (new TextEncoder().encode(file.content).buffer as ArrayBuffer)
+          : file.content;
 
       const shareKey = await generateShareKey();
       const encrypted = await encryptBinary(fileData, shareKey.key);
 
       const result = await mutation.mutateAsync({
-        fileName: file.name,
+        fileName: file.fileName,
         encryptedPayload: encrypted.ciphertext,
         iv: encrypted.iv,
         authTag: encrypted.authTag,
@@ -120,7 +113,7 @@ export function CreateFileShareDialog(props: CreateFileShareDialogProps): ReactE
               Link created! Share it with the recipient. This link can only be accessed once.
             </Alert>
             <Alert severity="warning" sx={{ fontSize: "0.8rem" }}>
-              The file will be permanently inaccessible via this link after first download.
+              The file will be permanently inaccessible via this link after first access.
             </Alert>
             <Box
               sx={{
@@ -161,7 +154,7 @@ export function CreateFileShareDialog(props: CreateFileShareDialogProps): ReactE
                 }}
               >
                 <Typography variant="captionMuted">Sharing file</Typography>
-                <Typography variant="label">{file.name}</Typography>
+                <Typography variant="label">{file.fileName}</Typography>
               </Box>
 
               <FormSelectField
@@ -195,7 +188,7 @@ export function CreateFileShareDialog(props: CreateFileShareDialogProps): ReactE
               )}
 
               <Alert severity="info" sx={{ fontSize: "0.8rem" }}>
-                Recipient downloads the file once. The link self-destructs after access.
+                Recipient accesses the file once. The link self-destructs after access.
               </Alert>
             </Stack>
             <DialogActions sx={{ px: 0, pb: 0, pt: 2 }}>

@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactElement, ReactNode } from "react";
+import { type ReactElement } from "react";
 import { Box } from "@mui/material";
 import { VaultGate } from "@/components/features/vault";
 import { PageHeader } from "@/components/ui/containers";
@@ -9,15 +9,15 @@ import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 import { queryKeys } from "@/lib/query-keys";
 import type { ProjectDetailDto } from "@/types/api/project";
-import { VaultTabs } from "./vault-tabs";
+import { RepoBrowser } from "./repo-browser";
 
-interface VaultLayoutShellProps {
+interface RepoPageShellProps {
   projectId: string;
-  children: ReactNode;
 }
 
-export function VaultLayoutShell(props: VaultLayoutShellProps): ReactElement {
-  const { projectId, children } = props;
+/** Repository browser page: header + vault unlock gate + the app/file browser. */
+export function RepoPageShell(props: RepoPageShellProps): ReactElement {
+  const { projectId } = props;
 
   const { data: project } = useApiQuery<ProjectDetailDto>(
     queryKeys.projects.detail(projectId),
@@ -28,7 +28,7 @@ export function VaultLayoutShell(props: VaultLayoutShellProps): ReactElement {
     <Box>
       <PageHeader
         title="Vault"
-        subtitle={project ? `Secure storage for ${project.name}` : undefined}
+        subtitle={project ? `Encrypted config & secret files for ${project.name}` : undefined}
         breadcrumbs={[
           { label: "Overview", href: ROUTES.overview },
           { label: "Projects", href: ROUTES.projects },
@@ -36,8 +36,9 @@ export function VaultLayoutShell(props: VaultLayoutShellProps): ReactElement {
           { label: "Vault" },
         ]}
       />
-      <VaultTabs projectId={projectId} />
-      <VaultGate>{children}</VaultGate>
+      <VaultGate>
+        <RepoBrowser projectId={projectId} />
+      </VaultGate>
     </Box>
   );
 }

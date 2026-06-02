@@ -113,6 +113,7 @@ export function CiTokensSection(props: CiTokensSectionProps): ReactElement {
                   <TableRow>
                     <TableCell>Name</TableCell>
                     <TableCell>Token</TableCell>
+                    <TableCell>App</TableCell>
                     <TableCell>Environment</TableCell>
                     <TableCell>Expires</TableCell>
                     <TableCell>Last Used</TableCell>
@@ -136,7 +137,15 @@ export function CiTokensSection(props: CiTokensSectionProps): ReactElement {
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2">{token.vaultName}</Typography>
+                          <Typography variant="body2">{token.appName}</Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={token.environmentSlug}
+                            size="small"
+                            variant="outlined"
+                            sx={{ fontFamily: "monospace" }}
+                          />
                         </TableCell>
                         <TableCell>
                           <Typography variant="body2">{formatDateTime(token.expiresAt)}</Typography>

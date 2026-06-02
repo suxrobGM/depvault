@@ -24,7 +24,7 @@ import { client } from "@/lib/api";
 import { deriveCIWrapKey, exportDEK, wrapKey } from "@/lib/crypto";
 import { queryKeys } from "@/lib/query-keys";
 import type { CiTokenCreatedDto, CreateCiTokenBody } from "@/types/api/ci-token";
-import type { VaultListResponseDto } from "@/types/api/vault";
+import type { AppListResponseDto } from "@/types/api/repo";
 import { CiTokenUsageSnippets } from "./ci-token-usage-snippets";
 
 const CUSTOM_VALUE = -1;
@@ -63,14 +63,13 @@ export function CreateCiTokenDialog(props: CreateCiTokenDialogProps): ReactEleme
   const [createdToken, setCreatedToken] = useState<CiTokenCreatedDto | null>(null);
   const [showSnippets, setShowSnippets] = useState(false);
 
-  const { data: vaults } = useApiQuery<VaultListResponseDto>(
-    queryKeys.vaults.byProject(projectId),
-    () => client.api.projects({ id: projectId }).vaults.get(),
+  const { data: apps } = useApiQuery<AppListResponseDto>(queryKeys.repo.apps(projectId), () =>
+    client.api.projects({ id: projectId }).apps.get(),
   );
 
-  const vaultItems = (vaults ?? []).map((vault) => ({
-    value: vault.id,
-    label: vault.name,
+  const appItems = (apps ?? []).map((app) => ({
+    value: app.id,
+    label: app.name,
   }));
 
   const mutation = useApiMutation(
@@ -84,7 +83,8 @@ export function CreateCiTokenDialog(props: CreateCiTokenDialogProps): ReactEleme
   const form = useForm({
     defaultValues: {
       name: "",
-      vaultId: "",
+      appId: "",
+      environmentSlug: "",
       expiresIn: 86400 as number,
       customDate: "",
       ipAllowlistText: "",
@@ -111,7 +111,8 @@ export function CreateCiTokenDialog(props: CreateCiTokenDialogProps): ReactEleme
 
       const created = await mutation.mutateAsync({
         name: value.name,
-        vaultId: value.vaultId,
+        appId: value.appId,
+        environmentSlug: value.environmentSlug,
         expiresIn,
         wrappedDek: wrapped.wrapped,
         wrappedDekIv: wrapped.iv,
@@ -191,11 +192,29 @@ export function CreateCiTokenDialog(props: CreateCiTokenDialogProps): ReactEleme
               <FormTextField form={form} name="name" label="Token Name" autoFocus />
               <FormSelectField
                 form={form}
-                name="vaultId"
-                label="Vault"
-                items={vaultItems}
-                emptyMessage="No vaults found. Create a vault first."
+                name="appId"
+                label="App"
+                items={appItems}
+                emptyMessage="No apps found. Push config files from the CLI first."
               />
+              <form.Subscribe selector={(state) => state.values.appId}>
+                {(appId) => {
+                  const selectedApp = (apps ?? []).find((app) => app.id === appId);
+                  const environmentItems = (selectedApp?.environments ?? []).map((slug) => ({
+                    value: slug,
+                    label: slug,
+                  }));
+                  return (
+                    <FormSelectField
+                      form={form}
+                      name="environmentSlug"
+                      label="Environment"
+                      items={environmentItems}
+                      emptyMessage="Select an app first."
+                    />
+                  );
+                }}
+              </form.Subscribe>
               <FormSelectField
                 form={form}
                 name="expiresIn"

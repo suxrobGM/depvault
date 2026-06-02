@@ -23,8 +23,6 @@ export const ROUTES = {
   projectAnalysisDetail: (id: string, analysisId: string) =>
     `/projects/${id}/analysis/${analysisId}` as Route,
   projectVault: (id: string) => `/projects/${id}/vault` as Route,
-  projectVaultVariables: (id: string) => `/projects/${id}/vault/variables` as Route,
-  projectVaultSecretFiles: (id: string) => `/projects/${id}/vault/secret-files` as Route,
   projectActivity: (id: string) => `/projects/${id}/activity` as Route,
   projectSecretScanning: (id: string) => `/projects/${id}/secret-scanning` as Route,
   projectLicenses: (id: string) => `/projects/${id}/licenses` as Route,

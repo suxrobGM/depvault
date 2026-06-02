@@ -1,13 +1,10 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import { CONFIG_FORMATS, type ConfigFormat } from "@depvault/shared/constants";
-import { getConfigFileName, serializeConfig } from "@depvault/shared/serializers";
 import {
   CheckCircle as CheckCircleIcon,
   Download as DownloadIcon,
   Lock as LockIcon,
-  Visibility as VisibilityIcon,
 } from "@mui/icons-material";
 import {
   Alert,
@@ -18,16 +15,9 @@ import {
   InputAdornment,
   Paper,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
   TextField,
   Typography,
 } from "@mui/material";
-import { useForm } from "@tanstack/react-form";
-import { FormSelectField } from "@/components/ui/form";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
 import { decryptBinary, decrypt as decryptText, shareKeyFromFragment } from "@/lib/crypto";
@@ -39,13 +29,7 @@ interface SecretAccessViewProps {
   info: SharedSecretInfoDto;
 }
 
-interface EnvVariable {
-  key: string;
-  value: string;
-}
-
 interface EncryptedAccessResult {
-  payloadType: "ENV_VARIABLES" | "SECRET_FILE";
   encryptedPayload: string;
   iv: string;
   authTag: string;
@@ -53,20 +37,31 @@ interface EncryptedAccessResult {
   mimeType: string | null;
 }
 
-type AccessResult =
-  | { payloadType: "ENV_VARIABLES"; variables: EnvVariable[] }
-  | { payloadType: "SECRET_FILE"; fileName: string; mimeType: string; content: string };
+interface AccessResult {
+  fileName: string;
+  mimeType: string;
+  /** Decoded text content when the mime type is text-like, otherwise null. */
+  text: string | null;
+}
+
+/** Text-like mime types are shown inline; everything else is download-only. */
+function isTextMimeType(mimeType: string): boolean {
+  return (
+    mimeType.startsWith("text/") ||
+    mimeType === "application/json" ||
+    mimeType === "application/xml" ||
+    mimeType === "application/x-yaml" ||
+    mimeType === "application/yaml" ||
+    mimeType.endsWith("+json") ||
+    mimeType.endsWith("+xml")
+  );
+}
 
 export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
   const { token, info } = props;
 
   const [password, setPassword] = useState("");
   const [result, setResult] = useState<AccessResult | null>(null);
-  const [consumed, setConsumed] = useState(false);
-
-  const downloadForm = useForm({
-    defaultValues: { format: "env" as ConfigFormat },
-  });
 
   const mutation = useApiMutation(
     (body: { password?: string }) => client.api.secrets.shared({ token }).post(body),
@@ -74,19 +69,21 @@ export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
       onSuccess: async (data) => {
         const encrypted = data as unknown as EncryptedAccessResult;
 
-        // Derive the share key from the URL fragment
+        // Derive the share key from the URL fragment (never sent to the server).
         const fragment = window.location.hash.slice(1);
         const shareKey = await shareKeyFromFragment(fragment);
 
-        if (encrypted.payloadType === "ENV_VARIABLES") {
-          const json = await decryptText(
+        const fileName = encrypted.fileName ?? "secret-file";
+        const mimeType = encrypted.mimeType ?? "application/octet-stream";
+
+        if (isTextMimeType(mimeType)) {
+          const text = await decryptText(
             encrypted.encryptedPayload,
             encrypted.iv,
             encrypted.authTag,
             shareKey,
           );
-          const variables: EnvVariable[] = JSON.parse(json);
-          setResult({ payloadType: "ENV_VARIABLES", variables });
+          setResult({ fileName, mimeType, text });
         } else {
           const fileBuffer = await decryptBinary(
             encrypted.encryptedPayload,
@@ -94,15 +91,9 @@ export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
             encrypted.authTag,
             shareKey,
           );
-          downloadFile(fileBuffer, encrypted.fileName ?? "secret-file");
-          setResult({
-            payloadType: "SECRET_FILE",
-            fileName: encrypted.fileName ?? "secret-file",
-            mimeType: encrypted.mimeType ?? "application/octet-stream",
-            content: "",
-          });
+          downloadFile(fileBuffer, fileName, mimeType);
+          setResult({ fileName, mimeType, text: null });
         }
-        setConsumed(true);
       },
       errorMessage: (err) => err.message ?? "Failed to access secret",
     },
@@ -112,18 +103,14 @@ export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
     mutation.mutate(info.hasPassword ? { password } : {});
   };
 
-  const handleDownload = () => {
-    if (result?.payloadType !== "ENV_VARIABLES") {
+  const handleDownloadText = () => {
+    if (!result?.text) {
       return;
     }
-
-    const format = downloadForm.getFieldValue("format") as ConfigFormat;
-    const text = serializeConfig(format, result.variables);
-    const fileName = getConfigFileName(format);
-    downloadFile(text, fileName, "text/plain");
+    downloadFile(result.text, result.fileName, result.mimeType);
   };
 
-  if (consumed && result?.payloadType === "SECRET_FILE") {
+  if (result && result.text === null) {
     return (
       <Box sx={{ textAlign: "center" }}>
         <CheckCircleIcon color="success" sx={{ fontSize: 48, mb: 2 }} />
@@ -137,67 +124,49 @@ export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
     );
   }
 
-  if (consumed && result?.payloadType === "ENV_VARIABLES") {
+  if (result && result.text !== null) {
     return (
       <Stack spacing={2}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <CheckCircleIcon color="success" />
-          <Typography variant="h6">Secret accessed</Typography>
+          <Typography variant="h6">File accessed</Typography>
         </Box>
         <Alert severity="warning">
-          Save these values now — this link has been destroyed and cannot be accessed again.
+          Save this content now — this link has been destroyed and cannot be accessed again.
         </Alert>
-        <Paper variant="outlined" sx={{ overflow: "hidden" }}>
-          <Table size="small" sx={{ tableLayout: "fixed" }}>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ width: "35%" }}>Key</TableCell>
-                <TableCell sx={{ width: "65%" }}>Value</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {result.variables.map((v) => (
-                <TableRow key={v.key}>
-                  <TableCell>
-                    <Typography variant="label" noWrap sx={{ fontFamily: "monospace" }}>
-                      {v.key}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontFamily: "monospace",
-                        wordBreak: "break-all",
-                      }}
-                    >
-                      {v.value}
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Paper>
-        <Stack
-          direction="row"
-          spacing={1}
+        <Typography variant="body2Muted" sx={{ fontFamily: "monospace" }}>
+          {result.fileName}
+        </Typography>
+        <Paper
+          variant="outlined"
           sx={{
-            alignItems: "center",
+            p: 1.5,
+            maxHeight: 360,
+            overflow: "auto",
+            bgcolor: "action.hover",
           }}
         >
-          <Box sx={{ minWidth: 180 }}>
-            <FormSelectField
-              form={downloadForm}
-              name="format"
-              label="Format"
-              items={CONFIG_FORMATS}
-            />
-          </Box>
-          <Button variant="outlined" startIcon={<DownloadIcon />} onClick={handleDownload}>
-            Download
-          </Button>
-        </Stack>
+          <Typography
+            component="pre"
+            variant="body2"
+            sx={{
+              fontFamily: "monospace",
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-all",
+              m: 0,
+            }}
+          >
+            {result.text}
+          </Typography>
+        </Paper>
+        <Button
+          variant="outlined"
+          startIcon={<DownloadIcon />}
+          onClick={handleDownloadText}
+          sx={{ alignSelf: "flex-start" }}
+        >
+          Download
+        </Button>
       </Stack>
     );
   }
@@ -205,15 +174,14 @@ export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
   return (
     <Stack spacing={3}>
       <Box>
-        <Typography variant="body2Muted">
-          Type:{" "}
-          <strong>
-            {info.payloadType === "ENV_VARIABLES" ? "Environment Variables" : "Secret File"}
-          </strong>
-        </Typography>
         {info.fileName && (
           <Typography variant="body2Muted">
             File: <strong>{info.fileName}</strong>
+          </Typography>
+        )}
+        {info.mimeType && (
+          <Typography variant="body2Muted">
+            Type: <strong>{info.mimeType}</strong>
           </Typography>
         )}
         <Typography variant="body2Muted">
@@ -262,20 +230,10 @@ export function SecretAccessView(props: SecretAccessViewProps): ReactElement {
         disabled={mutation.isPending || (info.hasPassword && !password)}
         onClick={handleAccess}
         startIcon={
-          mutation.isPending ? (
-            <CircularProgress size={16} color="inherit" />
-          ) : info.payloadType === "SECRET_FILE" ? (
-            <DownloadIcon />
-          ) : (
-            <VisibilityIcon />
-          )
+          mutation.isPending ? <CircularProgress size={16} color="inherit" /> : <DownloadIcon />
         }
       >
-        {mutation.isPending
-          ? "Accessing..."
-          : info.payloadType === "SECRET_FILE"
-            ? "Download File"
-            : "View Secret"}
+        {mutation.isPending ? "Accessing..." : "Access File"}
       </Button>
     </Stack>
   );

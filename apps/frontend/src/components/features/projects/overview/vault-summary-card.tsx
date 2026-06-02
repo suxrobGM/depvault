@@ -9,8 +9,8 @@ import { useApiQuery } from "@/hooks/use-api-query";
 import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 import { queryKeys } from "@/lib/query-keys";
+import type { RepoMapResponseDto } from "@/types/api/repo";
 import type { SecretFileListResponseDto } from "@/types/api/secret-file";
-import type { VaultListResponseDto } from "@/types/api/vault";
 
 interface VaultSummaryCardProps {
   projectId: string;
@@ -19,9 +19,8 @@ interface VaultSummaryCardProps {
 export function VaultSummaryCard(props: VaultSummaryCardProps): ReactElement {
   const { projectId } = props;
 
-  const { data: vaults } = useApiQuery<VaultListResponseDto>(
-    queryKeys.vaults.overview(projectId),
-    () => client.api.projects({ id: projectId }).vaults.get(),
+  const { data: repoMap } = useApiQuery<RepoMapResponseDto>(queryKeys.repo.map(projectId), () =>
+    client.api.projects({ id: projectId })["repo-map"].get(),
   );
 
   const { data: secretFilesData } = useApiQuery<SecretFileListResponseDto>(
@@ -29,9 +28,9 @@ export function VaultSummaryCard(props: VaultSummaryCardProps): ReactElement {
     () => client.api.projects({ id: projectId }).secrets.get({ query: { page: 1, limit: 1 } }),
   );
 
-  const vaultCount = vaults?.length ?? 0;
-  const variableCount =
-    vaults?.reduce((sum: number, v) => sum + Number(v.variableCount ?? 0), 0) ?? 0;
+  const apps = repoMap?.apps ?? [];
+  const appCount = apps.length;
+  const configFileCount = apps.reduce((sum, app) => sum + app.configFiles.length, 0);
   const secretFileCount = secretFilesData?.pagination.total ?? 0;
 
   return (
@@ -47,15 +46,15 @@ export function VaultSummaryCard(props: VaultSummaryCardProps): ReactElement {
       <CardContent sx={{ p: 3 }}>
         <Grid container spacing={2}>
           <Grid size={4}>
-            <Typography variant="captionMuted">Vaults</Typography>
+            <Typography variant="captionMuted">Apps</Typography>
             <Typography variant="statValue" sx={{ fontSize: "1rem" }}>
-              {vaultCount}
+              {appCount}
             </Typography>
           </Grid>
           <Grid size={4}>
-            <Typography variant="captionMuted">Variables</Typography>
+            <Typography variant="captionMuted">Config Files</Typography>
             <Typography variant="statValue" sx={{ fontSize: "1rem" }}>
-              {variableCount}
+              {configFileCount}
             </Typography>
           </Grid>
           <Grid size={4}>

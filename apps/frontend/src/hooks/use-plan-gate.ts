@@ -7,7 +7,13 @@ import {
 } from "@depvault/shared/constants";
 import { useSubscription } from "./use-subscription";
 
-type ResourceType = "projects" | "envVars" | "secretFiles" | "analyses" | "members" | "ciTokens";
+type ResourceType =
+  | "projects"
+  | "configFiles"
+  | "secretFiles"
+  | "analyses"
+  | "members"
+  | "ciTokens";
 
 interface PlanGateResult {
   allowed: boolean;
@@ -18,7 +24,7 @@ interface PlanGateResult {
 
 const LIMIT_MAP: Record<ResourceType, string> = {
   projects: "maxProjects",
-  envVars: "maxEnvVars",
+  configFiles: "maxConfigFiles",
   secretFiles: "maxSecretFiles",
   analyses: "maxAnalysesPerMonth",
   members: "maxUsers",

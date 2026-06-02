@@ -145,9 +145,9 @@ export function BillingOverview(): ReactElement {
           <Stack spacing={2} sx={{ mb: 3 }}>
             <UsageMeter label="Projects" current={usage.projects} limit={limits.maxProjects} />
             <UsageMeter
-              label="Environment Variables"
-              current={usage.envVars}
-              limit={limits.maxEnvVars}
+              label="Config Files"
+              current={usage.configFiles}
+              limit={limits.maxConfigFiles}
             />
             <UsageMeter
               label="Secret Files"

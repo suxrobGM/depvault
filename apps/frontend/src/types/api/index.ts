@@ -2,8 +2,6 @@ export type * from "./utils";
 export type * from "./auth";
 export type * from "./project";
 export type * from "./analysis";
-export type * from "./env-variable";
-export type * from "./vault";
 export type * from "./secret-file";
 export type * from "./audit-log";
 export type * from "./convert";

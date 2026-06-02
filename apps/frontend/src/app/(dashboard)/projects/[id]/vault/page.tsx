@@ -1,11 +1,11 @@
-import { redirect } from "next/navigation";
-import { ROUTES } from "@/lib/constants";
+import type { ReactElement } from "react";
+import { RepoPageShell } from "@/components/features/projects/repo";
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function ProjectVaultPage(props: PageProps) {
+export default async function ProjectVaultPage(props: PageProps): Promise<ReactElement> {
   const { id } = await props.params;
-  redirect(ROUTES.projectVaultVariables(id));
+  return <RepoPageShell projectId={id} />;
 }

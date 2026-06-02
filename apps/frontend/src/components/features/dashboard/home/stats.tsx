@@ -47,8 +47,8 @@ export function Stats(): ReactElement {
     },
     {
       icon: <SecretIcon sx={{ fontSize: 22 }} />,
-      label: "Env Variables",
-      value: data?.envVariableCount ?? 0,
+      label: "Config Files",
+      value: data?.configFileCount ?? 0,
       accent: "primary",
     },
   ];
