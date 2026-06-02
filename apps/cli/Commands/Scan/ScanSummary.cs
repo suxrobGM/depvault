@@ -20,7 +20,7 @@ internal static class ScanSummary
         table.AddRow("Vulnerabilities found", results.TotalVulnerabilities > 0
             ? $"[red]{results.TotalVulnerabilities}[/]"
             : "[green]0[/]");
-        table.AddRow("Env variables pushed", ColorCount(results.EnvVariablesPushed, results.EnvVariablesPushed > 0));
+        table.AddRow("Config files pushed", ColorCount(results.ConfigFilesPushed, results.ConfigFilesPushed > 0));
         table.AddRow("Secret leaks detected", results.SecretLeaksFound > 0
             ? $"[red]{results.SecretLeaksFound}[/]"
             : "[green]0[/]");

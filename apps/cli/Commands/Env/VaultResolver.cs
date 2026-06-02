@@ -1,58 +1,64 @@
-using DepVault.Cli.ApiClient.Api.Projects.Item.Vaults;
+using DepVault.Cli.ApiClient.Api.Projects.Item.Apps;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Output;
 using Spectre.Console;
 
 namespace DepVault.Cli.Commands.Env;
 
-/// <summary>Interactively picks an existing vault or creates a new one.</summary>
+/// <summary>
+/// Interactively picks an existing app or creates a new one. (Formerly resolved vaults — the
+/// blob-only model groups files under apps instead.) The class name is preserved so DI wiring
+/// remains stable.
+/// </summary>
 public sealed class VaultResolver(
     IApiClientFactory clientFactory,
     IOutputFormatter output,
     IConsolePrompter prompter)
 {
+    /// <summary>Resolves an app ID, prompting the user to pick an existing app or create one.</summary>
     public async Task<string?> ResolveAsync(string projectId, CancellationToken ct)
     {
         var client = clientFactory.Create();
 
-        var vaults = await AnsiConsole.Status()
+        var apps = await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
-            .StartAsync("Fetching vaults...", async _ =>
-                await client.Api.Projects[projectId].Vaults.GetAsync(cancellationToken: ct));
+            .StartAsync("Fetching apps...", async _ =>
+                await client.Api.Projects[projectId].Apps.GetAsync(cancellationToken: ct));
 
-        const string createLabel = "+ Create new vault";
+        const string createLabel = "+ Create new app";
 
-        if (vaults is not null && vaults.Count > 0)
+        if (apps is not null && apps.Count > 0)
         {
-            var choices = vaults
-                .Select(v => v.Name ?? v.Id ?? "Unknown")
+            var choices = apps
+                .Select(a => a.Name ?? a.AppPath ?? a.Id ?? "Unknown")
                 .Append(createLabel)
                 .ToList();
 
-            var selected = prompter.Select("Select vault", choices, c => c);
+            var selected = prompter.Select("Select app", choices, c => c);
 
             if (selected != createLabel)
             {
-                var match = vaults.FirstOrDefault(v => (v.Name ?? v.Id) == selected);
+                var match = apps.FirstOrDefault(a => (a.Name ?? a.AppPath ?? a.Id) == selected);
                 return match?.Id;
             }
         }
 
-        var name = prompter.Ask("Vault name", "default");
+        var name = prompter.Ask("App name", "default");
+        var appPath = prompter.Ask("App path (repo-relative)", name);
 
         var created = await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
-            .StartAsync("Creating vault...", async _ =>
-                await client.Api.Projects[projectId].Vaults.PostAsync(
-                    new VaultsPostRequestBody { Name = name }, cancellationToken: ct));
+            .StartAsync("Creating app...", async _ =>
+                await client.Api.Projects[projectId].Apps.PostAsync(
+                    new AppsPostRequestBody { Name = name, AppPath = appPath }, cancellationToken: ct));
 
         if (created?.Id is null)
         {
-            output.PrintError("Failed to create vault.");
+            output.PrintError("Failed to create app.");
             return null;
         }
 
-        output.PrintSuccess($"Created vault '{name}'");
+        output.PrintSuccess($"Created app '{name}'");
         return created.Id;
     }
 }

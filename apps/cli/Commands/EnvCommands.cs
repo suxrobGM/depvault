@@ -4,11 +4,12 @@ using Spectre.Console;
 
 namespace DepVault.Cli.Commands;
 
+/// <summary>Lists config files (env/appsettings/etc.) stored for a project.</summary>
 public sealed class EnvCommands(CommandContext ctx)
 {
     public Command CreateEnvCommand()
     {
-        return new Command("env", "Manage environment variables")
+        return new Command("env", "Manage environment & config files")
         {
             CreateListCommand()
         };
@@ -17,13 +18,13 @@ public sealed class EnvCommands(CommandContext ctx)
     private Command CreateListCommand()
     {
         var projectOpt = new Option<string?>("--project") { Description = "Project ID" };
-        var vaultIdOpt = new Option<string>("--vault-id")
-        { Description = "Vault ID to list variables from" };
+        var appOpt = new Option<string?>("--app") { Description = "Filter by app ID" };
+        var envOpt = new Option<string?>("--environment") { Description = "Filter by environment slug" };
         var outputOpt = new Option<string>("--output")
         { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
 
-        var cmd = new Command("list", "List environment variables in a vault")
-            { projectOpt, vaultIdOpt, outputOpt };
+        var cmd = new Command("list", "List config files in a project")
+            { projectOpt, appOpt, envOpt, outputOpt };
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
@@ -33,48 +34,63 @@ public sealed class EnvCommands(CommandContext ctx)
                 return;
             }
 
-            var vaultId = parseResult.GetValue(vaultIdOpt);
-            if (string.IsNullOrEmpty(vaultId))
-            {
-                ctx.Output.PrintError("--vault-id is required.");
-                return;
-            }
+            var appId = parseResult.GetValue(appOpt);
+            var envSlug = parseResult.GetValue(envOpt);
 
             try
             {
-                var result = await pc.Client.Api.Projects[pc.ProjectId].Vaults[vaultId].Variables
+                var result = await pc.Client.Api.Projects[pc.ProjectId].ConfigFiles
                     .GetAsync(config =>
                     {
                         config.QueryParameters.Page = 1;
                         config.QueryParameters.Limit = 100;
+                        if (!string.IsNullOrEmpty(appId))
+                        {
+                            config.QueryParameters.AppId = appId;
+                        }
+
+                        if (!string.IsNullOrEmpty(envSlug))
+                        {
+                            config.QueryParameters.EnvironmentSlug = envSlug;
+                        }
                     }, cancellationToken);
 
                 var items = result?.Items;
                 if (items is null || items.Count == 0)
                 {
-                    AnsiConsole.MarkupLine("[grey]No variables found.[/]");
+                    AnsiConsole.MarkupLine("[grey]No config files found.[/]");
                     return;
                 }
 
                 if (parseResult.GetValue(outputOpt) == "json")
                 {
-                    ctx.Output.PrintJson(items.Select(v => new
-                        { key = v.Key, vaultId = v.VaultId, isRequired = v.IsRequired }));
+                    ctx.Output.PrintJson(items.Select(f => new
+                    {
+                        id = f.Id,
+                        appId = f.AppId,
+                        relativePath = f.RelativePath,
+                        environment = f.EnvironmentSlug,
+                        format = f.Format,
+                        fileSize = f.FileSize,
+                        isBinary = f.IsBinary
+                    }));
                     return;
                 }
 
                 ctx.Output.PrintTable(
-                    ["KEY", "REQUIRED", "UPDATED"],
-                    items.Select(v => new[]
+                    ["PATH", "ENVIRONMENT", "FORMAT", "SIZE", "UPDATED"],
+                    items.Select(f => new[]
                     {
-                        v.Key ?? "",
-                        v.IsRequired == true ? "yes" : "",
-                        v.UpdatedAt?.ToString("yyyy-MM-dd") ?? ""
+                        f.RelativePath ?? "",
+                        f.EnvironmentSlug ?? "",
+                        f.Format ?? "",
+                        FormatUtils.FileSize(f.FileSize),
+                        f.UpdatedAt?.ToString("yyyy-MM-dd") ?? ""
                     }).ToList());
             }
             catch (Exception ex)
             {
-                ctx.Output.PrintError($"Failed to list env vars: {ex.Message}");
+                ctx.Output.PrintError($"Failed to list config files: {ex.Message}");
             }
         });
 

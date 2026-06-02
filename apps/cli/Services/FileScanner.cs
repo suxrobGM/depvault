@@ -33,7 +33,8 @@ public sealed class FileScanner : IFileScanner
 
     private static readonly HashSet<string> SecretFileExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".pem", ".key", ".p12", ".pfx", ".jks", ".keystore"
+        ".pem", ".key", ".p12", ".pfx", ".jks", ".keystore",
+        ".crt", ".cer", ".der", ".p8"
     };
 
     private static readonly HashSet<string> SecretFileNames = new(StringComparer.OrdinalIgnoreCase)
@@ -43,7 +44,33 @@ public sealed class FileScanner : IFileScanner
         "GoogleService-Info.plist"
     };
 
-    private static readonly string[] SecretFileNamePatterns = ["firebase-adminsdk"];
+    private static readonly string[] SecretFileNamePatterns =
+    [
+        "firebase-adminsdk", "signing", "private-key", "serviceaccount",
+        "aws-credentials"
+    ];
+
+    /// <summary>Maximum file size (1 MB) considered for secret-file classification.</summary>
+    private const long MaxSecretFileSize = 1024 * 1024;
+
+    /// <summary>
+    /// Source-code extensions that must never be treated as secrets even when their
+    /// extension collides with a secret extension (e.g. a CSS-module <c>foo.key.ts</c>).
+    /// </summary>
+    private static readonly HashSet<string> SourceCodeExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs",
+        ".cs", ".go", ".rs", ".py", ".java", ".kt", ".rb", ".php"
+    };
+
+    /// <summary>Directory names that hold fixtures/sample data rather than real secrets.</summary>
+    private static readonly HashSet<string> SecretExcludedDirs = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "fixtures", "testdata", "tests", "__tests__", "docs"
+    };
+
+    /// <summary>Suffixes marking placeholder/sample files that never contain real secrets.</summary>
+    private static readonly string[] SampleSuffixes = [".example", ".sample", ".template"];
 
     public List<DiscoveredFile> FindDependencyFiles(string rootPath)
     {
@@ -58,7 +85,9 @@ public sealed class FileScanner : IFileScanner
 
     public List<DiscoveredFile> FindSecretFiles(string rootPath)
     {
-        return ScanFiles(rootPath, FileCategory.SecretFile, IsSecretFile);
+        return ScanFiles(rootPath, FileCategory.SecretFile, IsSecretFile)
+            .Where(PassesSecretPathGuards)
+            .ToList();
     }
 
     public List<DiscoveredFile> FindAllPushableFiles(string rootPath)
@@ -168,8 +197,7 @@ public sealed class FileScanner : IFileScanner
         }
 
         if (fileName.StartsWith("appsettings.", StringComparison.OrdinalIgnoreCase) &&
-            fileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase) &&
-            fileName.Count(c => c == '.') == 2)
+            fileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }
@@ -181,7 +209,21 @@ public sealed class FileScanner : IFileScanner
 
     private static bool IsSecretFile(string fileName)
     {
+        // Placeholder/sample files never carry real secrets.
+        if (SampleSuffixes.Any(s => fileName.EndsWith(s, StringComparison.OrdinalIgnoreCase)))
+        {
+            return false;
+        }
+
         var ext = Path.GetExtension(fileName);
+
+        // Source-code files are never secrets even if an inner segment matches a secret
+        // extension (e.g. a CSS-module `theme.key.ts`).
+        if (SourceCodeExtensions.Contains(ext))
+        {
+            return false;
+        }
+
         if (SecretFileExtensions.Contains(ext))
         {
             return true;
@@ -193,6 +235,41 @@ public sealed class FileScanner : IFileScanner
         }
 
         return SecretFileNamePatterns.Any(p => fileName.Contains(p, StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// Path-aware guards for secret-file candidates: skips oversized files (&gt; 1 MB) and
+    /// files living under fixture/test/docs directories. Name-based guards (samples,
+    /// source-code extensions) are enforced in <see cref="IsSecretFile"/>.
+    /// </summary>
+    private static bool PassesSecretPathGuards(DiscoveredFile file)
+    {
+        var parts = file.RelativePath.Split('/');
+        for (var i = 0; i < parts.Length - 1; i++)
+        {
+            if (SecretExcludedDirs.Contains(parts[i]))
+            {
+                return false;
+            }
+        }
+
+        try
+        {
+            if (new FileInfo(file.FullPath).Length > MaxSecretFileSize)
+            {
+                return false;
+            }
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     /// <summary>

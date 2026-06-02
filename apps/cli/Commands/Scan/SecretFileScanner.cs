@@ -1,23 +1,22 @@
 using DepVault.Cli.Auth;
-using DepVault.Cli.Commands.Push;
 using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
-using SecretBody = DepVault.Cli.ApiClient.Api.Projects.Item.Secrets.SecretsPostRequestBody;
+using SecretBody = DepVault.Cli.ApiClient.Api.Projects.Item.Secrets.Push.PushPostRequestBody;
 
 namespace DepVault.Cli.Commands.Scan;
 
 /// <summary>
-/// Uploads secret files to a project. Each file is encrypted client-side (AES-256-GCM) with the
-/// project DEK before upload — the server is zero-knowledge and only ever stores ciphertext.
+/// Uploads secret files to a project as encrypted blobs. Each file is encrypted client-side
+/// (AES-256-GCM) with the project DEK before upload — the server is zero-knowledge and only ever
+/// stores ciphertext. App + environment are inferred from the file's location and name.
 /// </summary>
 internal sealed class SecretFileScanner(
     IOutputFormatter output,
     IConsolePrompter prompter,
     IFileScanner fileScanner,
-    DirectoryVaultMapper vaultMapper,
     IApiClientFactory clientFactory,
     DekResolver dekResolver)
 {
@@ -43,24 +42,16 @@ internal sealed class SecretFileScanner(
             return;
         }
 
-        var dirMap = await vaultMapper.MapAsync(projectId, selected, null, false, ct);
-        if (dirMap is null)
+        if (!await EnsureDekAsync(projectId, ct))
         {
             return;
         }
 
         foreach (var file in selected)
         {
-            var dir = Path.GetDirectoryName(file.RelativePath)?.Replace('\\', '/') ?? ".";
-            if (!dirMap.TryGetValue(dir, out var vaultId))
-            {
-                AnsiConsole.MarkupLine($"[grey]Skipped {Markup.Escape(file.RelativePath)} (no vault)[/]");
-                continue;
-            }
-
             try
             {
-                await UploadAsync(projectId, file, vaultId, ct);
+                await UploadAsync(projectId, repoPath, file, ct);
                 results.SecretFilesUploaded++;
                 output.PrintSuccess($"Uploaded {file.RelativePath}");
             }
@@ -88,10 +79,9 @@ internal sealed class SecretFileScanner(
         return cachedDek is not null;
     }
 
-    /// <summary>Encrypts a secret file client-side and uploads the ciphertext as JSON.</summary>
+    /// <summary>Encrypts a secret file client-side and uploads the ciphertext as one blob.</summary>
     public async Task UploadAsync(
-        string projectId, DiscoveredFile file,
-        string vaultId, CancellationToken ct)
+        string projectId, string repoPath, DiscoveredFile file, CancellationToken ct)
     {
         if (cachedDek is null && !await EnsureDekAsync(projectId, ct))
         {
@@ -99,24 +89,30 @@ internal sealed class SecretFileScanner(
         }
 
         var fileBytes = await File.ReadAllBytesAsync(file.FullPath, ct);
+        var (appPath, appName) = AppRootResolver.Resolve(repoPath, file.RelativePath);
+        var envSlug = EnvSlugResolver.Resolve(file.FileName);
+        var isBinary = BinaryDetector.IsBinary(fileBytes);
         var (ciphertext, iv, authTag) = VaultCrypto.EncryptBytes(fileBytes, cachedDek!);
 
         var body = new SecretBody
         {
+            AppPath = appPath,
+            AppName = appName,
+            RelativePath = file.RelativePath,
+            EnvironmentSlug = envSlug,
             EncryptedContent = ciphertext,
             Iv = iv,
             AuthTag = authTag,
-            Name = file.FileName,
             MimeType = GetMimeType(file.FileName),
             FileSize = fileBytes.Length,
-            VaultId = vaultId,
+            IsBinary = isBinary,
         };
 
         var client = clientFactory.Create();
         await AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .StartAsync($"Uploading {file.RelativePath}...", async _ =>
-                await client.Api.Projects[projectId].Secrets.PostAsync(body, cancellationToken: ct));
+                await client.Api.Projects[projectId].Secrets.Push.PostAsync(body, cancellationToken: ct));
     }
 
     private static string GetMimeType(string fileName)

@@ -1,19 +1,27 @@
-using DepVault.Cli.Commands.Push;
-using DepVault.Cli.EnvFiles;
+using DepVault.Cli.Auth;
+using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
+using ConfigBody = DepVault.Cli.ApiClient.Api.Projects.Item.ConfigFiles.Push.PushPostRequestBody;
 
 namespace DepVault.Cli.Commands.Scan;
 
+/// <summary>
+/// Uploads environment/config files to a project as encrypted blobs. Each file is encrypted
+/// client-side (AES-256-GCM) with the project DEK before upload — the server is zero-knowledge and
+/// only ever stores ciphertext. App + environment are inferred from the file's location and name.
+/// </summary>
 internal sealed class EnvFileScanner(
     IOutputFormatter output,
     IConsolePrompter prompter,
     IFileScanner fileScanner,
-    DirectoryVaultMapper vaultMapper,
-    EnvImporter envImporter)
+    IApiClientFactory clientFactory,
+    DekResolver dekResolver)
 {
+    private byte[]? cachedDek;
+
     public async Task RunAsync(string projectId, string repoPath, ScanResults results, CancellationToken ct)
     {
         var files = fileScanner.FindEnvFiles(repoPath);
@@ -37,40 +45,99 @@ internal sealed class EnvFileScanner(
             return;
         }
 
-        var dirVaultMap = await vaultMapper.MapAsync(projectId, selected, null, false, ct);
-        if (dirVaultMap is null)
+        if (!await EnsureDekAsync(projectId, ct))
         {
             return;
         }
 
         AnsiConsole.WriteLine();
-        await PushFilesAsync(projectId, selected, dirVaultMap, results, ct);
-    }
 
-    private async Task PushFilesAsync(
-        string projectId, List<DiscoveredFile> files,
-        Dictionary<string, string> dirVaultMap, ScanResults results, CancellationToken ct)
-    {
-        foreach (var file in files)
+        foreach (var file in selected)
         {
-            var dir = Path.GetDirectoryName(file.RelativePath)?.Replace('\\', '/') ?? ".";
-            if (!dirVaultMap.TryGetValue(dir, out var vaultId))
-            {
-                AnsiConsole.MarkupLine($"[grey]Skipped {Markup.Escape(file.RelativePath)} (no vault)[/]");
-                continue;
-            }
-
             try
             {
-                var result = await envImporter.ImportAsync(projectId, file, vaultId, ct);
-                results.EnvVariablesPushed += result.Imported;
-                output.PrintSuccess($"Imported {result.Imported} variables from {file.RelativePath}");
+                await UploadAsync(projectId, repoPath, file, ct);
+                results.ConfigFilesPushed++;
+                output.PrintSuccess($"Pushed {file.RelativePath}");
             }
             catch (Exception ex)
             {
                 ApiErrorHandler.HandleError(ex, $"Failed to push {file.RelativePath}");
             }
         }
+    }
+
+    /// <summary>Ensures the project DEK is resolved once and cached for the session.</summary>
+    public async Task<bool> EnsureDekAsync(string projectId, CancellationToken ct)
+    {
+        if (cachedDek is not null)
+        {
+            return true;
+        }
+
+        var password = dekResolver.CollectVaultPassword();
+        cachedDek = await AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .StartAsync("Resolving encryption key...", async _ =>
+                await dekResolver.ResolveAsync(projectId, password, ct));
+
+        return cachedDek is not null;
+    }
+
+    /// <summary>Encrypts a config file client-side and uploads the ciphertext as one blob.</summary>
+    private async Task UploadAsync(
+        string projectId, string repoPath, DiscoveredFile file, CancellationToken ct)
+    {
+        if (cachedDek is null && !await EnsureDekAsync(projectId, ct))
+        {
+            throw new InvalidOperationException("Failed to resolve encryption key.");
+        }
+
+        var fileBytes = await File.ReadAllBytesAsync(file.FullPath, ct);
+        var (appPath, appName) = AppRootResolver.Resolve(repoPath, file.RelativePath);
+        var envSlug = EnvSlugResolver.Resolve(file.FileName);
+        var isBinary = BinaryDetector.IsBinary(fileBytes);
+        var (ciphertext, iv, authTag) = VaultCrypto.EncryptBytes(fileBytes, cachedDek!);
+
+        var body = new ConfigBody
+        {
+            AppPath = appPath,
+            AppName = appName,
+            RelativePath = file.RelativePath,
+            Format = DetectFormat(file.FileName),
+            EnvironmentSlug = envSlug,
+            EncryptedContent = ciphertext,
+            Iv = iv,
+            AuthTag = authTag,
+            FileSize = fileBytes.Length,
+            IsBinary = isBinary,
+        };
+
+        var client = clientFactory.Create();
+        await AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .StartAsync($"Pushing {file.RelativePath}...", async _ =>
+                await client.Api.Projects[projectId].ConfigFiles.Push.PostAsync(body, cancellationToken: ct));
+    }
+
+    /// <summary>Infers a coarse config format slug from the file name extension.</summary>
+    internal static string DetectFormat(string fileName)
+    {
+        if (fileName.StartsWith(".env", StringComparison.OrdinalIgnoreCase))
+        {
+            return "env";
+        }
+
+        var ext = Path.GetExtension(fileName).ToLowerInvariant();
+        return ext switch
+        {
+            ".json" => "json",
+            ".yaml" or ".yml" => "yaml",
+            ".toml" => "toml",
+            ".xml" or ".config" => "xml",
+            ".ini" => "ini",
+            _ => "env"
+        };
     }
 
     private static void PrintFileTree(List<DiscoveredFile> files)
@@ -84,7 +151,4 @@ internal sealed class EnvFileScanner(
         AnsiConsole.Write(tree);
         AnsiConsole.WriteLine();
     }
-
-    internal static EnvFileFormat DetectEnvFormat(string fileName) =>
-        EnvFormat.Detect(fileName);
 }
