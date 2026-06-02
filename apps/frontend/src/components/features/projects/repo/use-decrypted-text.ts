@@ -1,8 +1,8 @@
 "use client";
 
+import { decrypt } from "@depvault/crypto";
 import { useEffect, useState } from "react";
 import { useVault } from "@/hooks/use-vault";
-import { decrypt } from "@/lib/crypto";
 
 interface EncryptedBlob {
   encryptedContent: string;

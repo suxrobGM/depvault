@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
+import { decryptBinary, decrypt as decryptText, shareKeyFromFragment } from "@depvault/crypto";
 import {
   CheckCircle as CheckCircleIcon,
   Download as DownloadIcon,
@@ -20,7 +21,6 @@ import {
 } from "@mui/material";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
-import { decryptBinary, decrypt as decryptText, shareKeyFromFragment } from "@/lib/crypto";
 import type { AccessShareBody, ShareLinkInfoDto } from "@/types/api/share-link";
 import { downloadFile } from "@/utils/download-file";
 

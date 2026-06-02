@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
+import { decrypt } from "@depvault/crypto";
 import {
   CompareArrows as CompareIcon,
   History as HistoryIcon,
@@ -22,7 +23,6 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
-import { decrypt } from "@/lib/crypto";
 import { queryKeys } from "@/lib/query-keys";
 import type {
   RepoFileVersionContentDto,

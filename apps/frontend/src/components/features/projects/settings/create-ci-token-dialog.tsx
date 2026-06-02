@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
+import { deriveCIWrapKey, exportDEK, wrapKey } from "@depvault/crypto";
 import { Key as KeyIcon } from "@mui/icons-material";
 import {
   Alert,
@@ -21,7 +22,6 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
-import { deriveCIWrapKey, exportDEK, wrapKey } from "@/lib/crypto";
 import { queryKeys } from "@/lib/query-keys";
 import type { CiTokenCreatedDto, CreateCiTokenBody } from "@/types/api/ci-token";
 import type { AppListResponseDto } from "@/types/api/repo";

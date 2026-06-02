@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
+import { encryptBinary, generateShareKey, shareKeyToFragment } from "@depvault/crypto";
 import { Share as ShareIcon } from "@mui/icons-material";
 import {
   Alert,
@@ -19,7 +20,6 @@ import { FormCheckboxField, FormSelectField, FormTextField } from "@/components/
 import { CopyButton } from "@/components/ui/inputs";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { client } from "@/lib/api";
-import { encryptBinary, generateShareKey, shareKeyToFragment } from "@/lib/crypto";
 import type { CreateShareBody } from "@/types/api/share-link";
 
 const EXPIRY_OPTIONS = [

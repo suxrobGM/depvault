@@ -8,6 +8,7 @@ import {
   type PropsWithChildren,
   type ReactElement,
 } from "react";
+import type { VaultInfo } from "@depvault/crypto";
 import { useAuth } from "@/hooks/use-auth";
 import { useIdleLock } from "@/hooks/use-idle-lock";
 import {
@@ -21,7 +22,6 @@ import {
   regenerateRecoveryKeyOps,
   resolveProjectDEK,
   unlockVaultKeys,
-  type VaultInfo,
 } from "@/lib/crypto";
 
 const IDLE_TIMEOUT_MS = 30 * 60 * 1000;

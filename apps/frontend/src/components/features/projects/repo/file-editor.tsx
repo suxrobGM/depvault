@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
+import { decryptBinary, encrypt } from "@depvault/crypto";
 import {
   Delete as DeleteIcon,
   Download as DownloadIcon,
@@ -26,7 +27,6 @@ import { useConfirm } from "@/hooks/use-confirm";
 import { useToast } from "@/hooks/use-toast";
 import { useVault } from "@/hooks/use-vault";
 import { client } from "@/lib/api";
-import { decryptBinary, encrypt } from "@/lib/crypto";
 import { queryKeys } from "@/lib/query-keys";
 import type { RepoFileContentDto, SaveRepoFileBody } from "@/types/api/repo";
 import { downloadFile } from "@/utils/download-file";
