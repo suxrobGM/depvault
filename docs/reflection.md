@@ -1,6 +1,6 @@
 # Reflection: Context engineering for AI-assisted development
 
-DepVault is a dependency analysis and env variable management dashboard. I started this assignment with PRD, a partial CLAUDE.md, and no actual code. I setup a Scrum board with AI and tested the first issue with or without CLAUDE.md rules to see the difference.
+DepVault is a dependency analysis and repo-native config/secret file management dashboard. I started this assignment with PRD, a partial CLAUDE.md, and no actual code. I setup a Scrum board with AI and tested the first issue with or without CLAUDE.md rules to see the difference.
 
 ## What I added to CLAUDE.md
 

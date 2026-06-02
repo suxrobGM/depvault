@@ -1,150 +1,111 @@
 # Pull & Push
 
-The `depvault pull` and `depvault push` commands sync environment variables and secret files between the vault and your local repository. Files are routed to the correct folder using each vault group's **Directory Path** setting.
+The `depvault pull` and `depvault push` commands sync config and secret **files** between your project and your local repository. Each file is handled as a single client-encrypted blob — the CLI never parses files into variables. App ownership and the environment slug are inferred from each file's path and name.
+
+All commands default to the active project (set with `depvault project select`). Override with `--project`.
 
 ---
 
-## pull
+## push
 
-Pull all environment variables and secret files for the active project.
-
-```bash
-depvault pull
-```
-
-| Flag | Description | Default |
-| --- | --- | --- |
-| `--project` | Project ID. Uses active project if omitted. | Active project |
-| `--environment` | Environment type: `DEVELOPMENT`, `STAGING`, `PRODUCTION`, `GLOBAL`. | `DEVELOPMENT` |
-| `--vault-groups` | Comma-separated vault group names. Prompts interactively if omitted. | All |
-| `--include-secrets` | Also download secret files. | `true` |
-| `--output-dir` | Base directory for output files. | `.` |
-| `--force` | Overwrite existing files without prompting. | `false` |
-
-### Output structure
-
-Each vault group's `directoryPath` determines where its `.env` file is written. Secret files go into a `.secrets/` subfolder.
-
-```text
-./
-├── apps/backend/.env              # vault group with directoryPath="apps/backend"
-├── apps/frontend/.env             # vault group with directoryPath="apps/frontend"
-├── .env.shared                    # vault group with no directoryPath set
-└── apps/backend/.secrets/
-    └── firebase-config.json
-```
-
-### Examples
-
-Pull everything for development:
+Push config and secret files as encrypted blobs. The CLI reads each file, encrypts the whole file with the project DEK (AES-256-GCM), and uploads the ciphertext. No parsing into variables, no stale-variable pruning.
 
 ```bash
-depvault pull
+depvault push
 ```
 
-Pull only the backend vault group for production:
-
-```bash
-depvault pull --vault-groups backend --environment PRODUCTION
-```
-
-Pull without secret files:
-
-```bash
-depvault pull --include-secrets false
-```
-
----
-
-## pull env
-
-Pull only environment variables (no secret files).
-
-```bash
-depvault pull env
-```
-
-Supports the same flags as `pull`, plus:
-
-| Flag | Description | Default |
-| --- | --- | --- |
-| `--format` | Export format: `env`, `appsettings.json`, `secrets.yaml`, `config.toml`. | `env` |
-
----
-
-## pull secrets
-
-Pull only secret files (no environment variables).
-
-```bash
-depvault pull secrets
-```
-
-Supports `--project`, `--environment`, `--vault-groups`, `--output-dir`, and `--force`.
-
----
-
-## push env
-
-Push environment variables from local files. When `--file` is omitted, the CLI discovers `.env` files in the current directory and prompts you to multi-select which ones to push.
-
-Files are automatically grouped by directory and matched to vault groups by `directoryPath` or name. If no vault group exists for a directory, you're prompted to create one.
-
-When filenames are ambiguous (plain `.env` without environment hint), the CLI prompts you to select the target environment type.
-
-```bash
-depvault push env
-```
+When `--file` is omitted in interactive mode, the CLI discovers pushable config and secret files in the repository and prompts you to multi-select which to push (all selected by default). In non-interactive mode, `--file` is required.
 
 | Flag | Description | Default |
 | --- | --- | --- |
 | `--project` | Project ID. | Active project |
-| `--environment` | Target environment type. Prompts if not set and filename is ambiguous. | Prompts |
-| `--format` | Import format: `env`, `appsettings.json`, `secrets.yaml`, `config.toml`. | `env` |
-| `--file` | Single file to import. Discovers and multi-selects if omitted. | Auto-discover |
+| `--file` | Single file to push. Auto-discovers and multi-selects if omitted. | Auto-discover |
+
+### App and environment inference
+
+For each file, the CLI infers:
+
+- **App** — by walking up from the file to the nearest ancestor directory that contains a project marker (`*.sln`, `*.csproj`, `package.json`, `go.mod`, `Cargo.toml`, `pom.xml`, etc.). The app is identified by that directory's repo-relative path (`""` for the repo root).
+- **Environment slug** — from the filename: `appsettings.json` / bare `.env` → `base`; `appsettings.Production.json` → `prod`; `.env.local` → `local`; `.env.staging` → `staging`. Unknown segments keep their own slug (e.g. `.env.qa` → `qa`) and are never collapsed to `base`.
+
+There are no `--vault` or `--tag` flags — apps and environments are derived from the repository layout.
 
 ### Examples
 
-Push with auto-discovery and directory mapping:
+Push everything with auto-discovery:
 
 ```bash
-depvault push env
+depvault push
 ```
 
 Push a single file explicitly:
 
 ```bash
-depvault push env --file apps/backend/.env --environment PRODUCTION
+depvault push --file apps/backend/.env
 ```
 
 ---
 
-## push secrets
+## pull
 
-Upload secret files. When `--file` is omitted, the CLI discovers secret files (`.pem`, `.key`, `.pfx`, `credentials.json`, etc.) and prompts you to multi-select which ones to upload.
-
-Files are grouped by directory and matched to vault groups, just like `push env`.
+Pull a project's encrypted config and secret files and restore each one **byte-for-byte** to its original repo-relative path. The CLI fetches the repository map and blobs, decrypts them client-side with the project DEK, and writes each file verbatim — no re-serialization, no format conversion. Intermediate directories are recreated as needed.
 
 ```bash
-depvault push secrets
+depvault pull
 ```
 
 | Flag | Description | Default |
 | --- | --- | --- |
 | `--project` | Project ID. | Active project |
-| `--environment` | Target environment type. Prompts if not set. | Prompts |
-| `--file` | Single file to upload. Discovers and multi-selects if omitted. | Auto-discover |
+| `--app` | Only pull files for this app (matches app name or repo-relative path). | All apps |
+| `--environment` | Only pull files for this environment slug (e.g. `dev`, `prod`, `staging`). | All environments |
+| `--include-base` | Include `base`-environment files when filtering by `--environment`. | `true` |
+| `--include-secrets` | Also download secret files. | `true` |
+| `--output-dir` | Base directory for restored files. | Repo root |
+| `--force` | Overwrite existing files without prompting. | `false` |
+
+### Output structure
+
+Files are restored to the exact `relativePath` they were pushed from. For a repo with two apps:
+
+```text
+./
+├── apps/backend/.env                  # config file, environment "base"
+├── apps/backend/appsettings.Production.json
+├── apps/backend/certs/server.pem      # secret file
+└── apps/frontend/.env.local
+```
 
 ### Examples
 
-Upload with auto-discovery:
+Restore everything for the active project:
 
 ```bash
-depvault push secrets
+depvault pull
 ```
 
-Upload a single file:
+Restore only the backend app's production files (plus shared `base` files):
 
 ```bash
-depvault push secrets --file certs/server.pem --environment PRODUCTION
+depvault pull --app apps/backend --environment prod
 ```
+
+Restore production files without including `base`:
+
+```bash
+depvault pull --environment prod --include-base false
+```
+
+Restore without secret files:
+
+```bash
+depvault pull --include-secrets false
+```
+
+> The `--format` export flag is reserved for a future convert-on-pull mode and is not yet implemented. A normal pull always restores files verbatim.
+
+---
+
+## Listing files
+
+Use [`depvault env list`](/cli/env) to list stored config files and [`depvault secrets list`](/cli/secrets) to list secret file metadata. For CI pipelines, see [`depvault ci pull`](/guides/ci-cd-integration).

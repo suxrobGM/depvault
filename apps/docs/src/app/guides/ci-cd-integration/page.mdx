@@ -1,55 +1,56 @@
 # CI/CD Integration
 
-Automate environment variable injection in your build and deployment pipelines using scoped CI tokens.
+Restore your app's config and secret files in build and deployment pipelines using scoped CI tokens.
 
 ---
 
 ## CI Tokens
 
-Secrets are end-to-end encrypted. When you create a CI token, the project encryption key is securely wrapped with the token. The CLI uses the token to decrypt secrets locally — the server never sees plaintext.
+Files are end-to-end encrypted. When you create a CI token, the project encryption key (DEK) is securely wrapped so only that token can unwrap it. In the pipeline the CLI uses the token to unwrap the DEK and decrypt files locally — the server never sees plaintext.
 
-CI tokens are long-lived, non-interactive API tokens scoped to a specific project, environment, and vault group.
+CI tokens are long-lived, non-interactive API tokens scoped to a specific **app** and **environment** within a project.
 
 ### Generating a Token
 
-1. Open your project and go to **Settings** > **CI Tokens**.
+1. Open your project and go to **Settings** > **CI/CD Tokens**.
 2. Click **Generate Token** and configure:
 
-| Setting          | Description                                        |
-| ---------------- | -------------------------------------------------- |
-| **Name**         | Descriptive name (e.g., `github-actions-prod`).    |
-| **Environment**  | The environment tier this token can access.        |
-| **Vault Group**  | The vault group this token is scoped to.           |
-| **Expiration**   | 30 days, 90 days, 1 year, or custom date.          |
-| **IP Allowlist** | Optional. Restrict to specific IPs or CIDR ranges. |
+| Setting          | Description                                                                 |
+| ---------------- | --------------------------------------------------------------------------- |
+| **Name**         | Descriptive name (e.g., `github-actions-prod`).                             |
+| **App**          | The app this token can read. Apps come from files you've pushed.            |
+| **Environment**  | The environment slug this token can read (e.g., `prod`, `staging`).         |
+| **Expires after**| 1 hour, 24 hours, 7 days, 30 days, 90 days, 1 year, or a custom date.       |
+| **IP Allowlist** | Optional. Restrict to specific IPs or CIDR ranges.                          |
 
-3. Click **Create** and copy the token — it is shown only once.
+3. Unlock your vault (required to wrap the project key), click **Generate Token**, and copy it — it is shown only once.
 
 ### Token Scoping
 
-Each token is bound to a single project, environment, and vault group. A compromised token has minimal blast radius. Generate separate tokens per pipeline/environment.
+Each token is bound to one app and one environment. A `ci pull` with that token returns the app's **`base`** files plus the files for the token's selected environment. A compromised token has minimal blast radius — generate separate tokens per app/environment.
 
-### Deletion
+### Revoking
 
-Delete tokens at any time from the CI Tokens settings page. Deleted tokens are permanently removed and rejected immediately. Token usage is logged for auditing (timestamp, IP, action, status).
+Revoke tokens at any time from the CI/CD Tokens settings page. Revoked tokens are rejected immediately. Token usage is logged for auditing (timestamp, IP, last used).
 
 ---
 
 ## CLI Usage
 
-Set `DEPVAULT_TOKEN` as an environment variable in your CI provider, then pull secrets:
+Set `DEPVAULT_TOKEN` as an environment variable in your CI provider, then run `ci pull`. The CLI fetches the encrypted blobs, decrypts them client-side, and **writes each file to its original repo-relative path**, recreating directories:
 
 ```bash
-depvault ci pull --format env --output .env
+depvault ci pull
 ```
 
-| Flag       | Description                   | Default |
-| ---------- | ----------------------------- | ------- |
-| `--format` | Output format: `env`, `json`. | `env`   |
-| `--output` | File path. Omit for stdout.   | stdout  |
+| Flag       | Description                                                            | Default            |
+| ---------- | --------------------------------------------------------------------- | ------------------ |
+| `--output` | Directory to restore files into.                                      | Current directory  |
+| `--format` | Summary format for the list of written files: `text`, `json`.         | `text`             |
 
-The token determines which project, environment, and vault group to pull from — no additional flags needed.
-If you need secrets from multiple vault groups in the same pipeline, generate a separate token for each and run `ci pull` once per token.
+The token alone determines the project, app, and environment — no project, app, or environment flags are needed. Because files are restored verbatim to their paths, your pipeline reads them exactly where your app already expects them (e.g. `apps/backend/.env`, `apps/backend/appsettings.Production.json`).
+
+If you need files for multiple apps or environments in the same pipeline, generate a separate token for each and run `ci pull` once per token.
 
 ---
 
@@ -76,10 +77,8 @@ jobs:
         with:
           token: ${{ secrets.DEPVAULT_TOKEN }}
 
-      - name: Pull secrets
-        run: |
-          depvault ci pull --format env --output .env
-          cat .env >> $GITHUB_ENV
+      - name: Restore config & secret files
+        run: depvault ci pull
 
       - name: Build and deploy
         run: |
@@ -87,21 +86,25 @@ jobs:
           npm run build
 ```
 
-The `cat .env >> $GITHUB_ENV` line makes all pulled variables available as environment variables in subsequent steps (e.g. `${{ env.DATABASE_URL }}`).
-Without it, the `.env` file exists on disk but variables aren't injected into the GitHub Actions environment.
-
-To pull from multiple vault groups, use separate tokens:
+`ci pull` writes each file back to its original path, so build and deploy steps find `.env`, `appsettings.*.json`, and secret files exactly where the app expects them. If you need a specific `.env` exported into the GitHub Actions environment, source it explicitly after the pull:
 
 ```yaml
-- name: Pull API secrets
-  env:
-    DEPVAULT_TOKEN: ${{ secrets.DEPVAULT_API_TOKEN }}
-  run: depvault ci pull --format env --output api.env
+      - name: Export backend env
+        run: cat apps/backend/.env >> $GITHUB_ENV
+```
 
-- name: Pull deploy secrets
+To restore files for multiple apps or environments, use separate tokens:
+
+```yaml
+- name: Restore backend (prod)
   env:
-    DEPVAULT_TOKEN: ${{ secrets.DEPVAULT_DEPLOY_TOKEN }}
-  run: depvault ci pull --format env --output deploy.env
+    DEPVAULT_TOKEN: ${{ secrets.DEPVAULT_BACKEND_PROD_TOKEN }}
+  run: depvault ci pull
+
+- name: Restore worker (prod)
+  env:
+    DEPVAULT_TOKEN: ${{ secrets.DEPVAULT_WORKER_PROD_TOKEN }}
+  run: depvault ci pull
 ```
 
 The action accepts these inputs:
@@ -122,7 +125,7 @@ deploy:
   before_script:
     - curl -fsSL https://get.depvault.com | bash
   script:
-    - depvault ci pull --format env --output .env
+    - depvault ci pull
     - npm ci
     - npm run build
   variables:
@@ -147,8 +150,8 @@ steps:
   - script: curl -fsSL https://get.depvault.com | bash
     displayName: Install DepVault CLI
 
-  - script: depvault ci pull --format env --output .env
-    displayName: Pull secrets
+  - script: depvault ci pull
+    displayName: Restore config & secret files
     env:
       DEPVAULT_TOKEN: $(DEPVAULT_TOKEN)
 
@@ -158,12 +161,12 @@ steps:
 
 ### Docker Build
 
-Inject secrets at build time without baking them into the image:
+Restore files into the build context, then mount the one you need as a build secret without baking it into the image:
 
 ```bash
-depvault ci pull --format env --output .env
-docker build --secret id=env,src=.env -t myapp .
-rm .env
+depvault ci pull --output .
+docker build --secret id=env,src=apps/backend/.env -t myapp .
+rm apps/backend/.env
 ```
 
 ```dockerfile
@@ -182,10 +185,10 @@ CMD ["node", "dist/index.js"]
 
 ## Troubleshooting
 
-| Error                       | Cause                                                     |
-| --------------------------- | --------------------------------------------------------- |
-| `DEPVAULT_TOKEN is not set` | Set the environment variable in your CI config.           |
-| `401 Unauthorized`          | Token is expired, deleted, or invalid.                    |
-| `403 Forbidden`             | IP not in allowlist or scope mismatch.                    |
-| Empty output                | No variables in the scoped vault group/environment.       |
-| CLI not found               | Verify installation step completed and binary is on PATH. |
+| Error                       | Cause                                                          |
+| --------------------------- | -------------------------------------------------------------- |
+| `DEPVAULT_TOKEN is not set` | Set the environment variable in your CI config.                |
+| `401 Unauthorized`          | Token is expired, revoked, or invalid.                         |
+| `403 Forbidden`             | IP not in allowlist or scope mismatch.                         |
+| `Restored 0 file(s)`        | No files in the token's scoped app/environment (plus `base`).  |
+| CLI not found               | Verify the installation step completed and the binary is on PATH. |

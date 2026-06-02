@@ -34,14 +34,16 @@ paths: [apps/cli/**]
 
 ## Client-Side Encryption (`Crypto/`)
 
-- `VaultCrypto.cs` — static methods: `Encrypt`, `Decrypt`, `DeriveKek` (PBKDF2), `DeriveCiWrapKey` (HKDF), `UnwrapKey`, `WrapKey`, `DecryptBytes`
+- `VaultCrypto.cs` — static methods: `Encrypt`, `Decrypt`, `EncryptBytes`, `DecryptBytes`, `DeriveKek` (PBKDF2), `DeriveCiWrapKey` (HKDF), `UnwrapKey`, `WrapKey`
 - `DekResolver.cs` — DI-injectable service that resolves the project DEK:
   - **CI token mode**: fetches `/api/ci/secrets`, derives CI wrap key via HKDF, unwraps DEK
   - **JWT mode**: uses cached KEK from `VaultState`, or prompts for vault password (or reads `DEPVAULT_PASSWORD` env var), fetches KEK salt from `/api/vault/status`, derives KEK, fetches key grant from `/api/projects/:id/keygrants/my`, unwraps DEK
   - **Auto SELF grant**: on 404 key grant, generates DEK, wraps with KEK, POSTs to `/api/projects/:id/keygrants`
 - All encryption/decryption happens locally — backend returns only ciphertext
-- Pull: fetch encrypted entries → unwrap DEK → decrypt each value → serialize → write to disk
-- Push: parse local file → encrypt each value → send encrypted entries to import endpoint
+- Files are encrypted as **whole-file blobs** (one ciphertext per config/secret file), never parsed into per-variable entries
+- Push (`Commands/Push/ConfigFilePusher.cs`, `SecretFilePusher.cs`): for each discovered file, infer the owning App via `AppRootResolver` (nearest-ancestor project-marker walk) and the environment slug via `EnvSlugResolver` (from the filename), read the whole file, encrypt the bytes with the project DEK, and upload the blob. No parsing into variables and no stale-variable pruning
+- Pull (`Commands/Pull/ConfigFilePuller.cs`, `SecretFilePuller.cs`): **byte-faithful** — fetch the repo map + blobs, unwrap DEK, decrypt, and write each file verbatim to its original repo-relative path (recreating directories). No re-serialization
+- CI pull: token scoped to `(app, environment)`; `GET /api/ci/secrets` returns `{ wrappedDek*, configFiles[], secretFiles[] }` (base + selected environment), decrypted client-side and written to exact paths
 
 ## Regenerating API Client
 

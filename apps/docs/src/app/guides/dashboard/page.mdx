@@ -1,6 +1,6 @@
 # Dashboard
 
-The dashboard is your home screen after logging in — a summary of all projects with health indicators, vulnerability counts, and environment variable status.
+The dashboard is your home screen after logging in — a summary of all projects with health indicators, vulnerability counts, and config/secret file status.
 
 ---
 
@@ -11,10 +11,10 @@ Each project is displayed as a card showing:
 - **Health Score** — A 0–100 percentage reflecting overall project hygiene.
 - **Vulnerability Count** — Total known vulnerabilities from the latest analysis.
 - **Outdated Count** — Dependencies with newer versions available.
-- **Env Var Count** — Total environment variables across all environments.
+- **Config File Count** — Total config files stored across the project's apps and environments.
 - **Last Analyzed** — Timestamp of the most recent scan.
 
-Click a card to open the project detail view with tabs for Analysis, Vault, Members, and Settings. The context menu (three-dot icon) provides quick actions: View, Run Analysis, Open Vault, and Settings.
+Click a card to open the project detail view with tabs for Analysis, Repository, Members, and Settings. The context menu (three-dot icon) provides quick actions: View, Run Analysis, Open Repository, and Settings.
 
 ---
 
@@ -26,7 +26,7 @@ The health score is computed from three weighted factors:
 | --- | --- |
 | **Dependency Freshness** | How up-to-date packages are. Major version gaps reduce the score more than minor or patch gaps. |
 | **Vulnerability Count** | Fewer vulnerabilities = higher score. Critical/high severity has greater impact. |
-| **Environment Hygiene** | Whether required variables are set, rotation policies are followed, and descriptions are defined. |
+| **Config Coverage** | Whether the project's apps have config and secret files stored across their environments. |
 
 | Range | Color | Meaning |
 | --- | --- | --- |
@@ -44,4 +44,4 @@ Sort projects by name, health score, last analyzed date, vulnerability count, or
 
 ## Quick Stats
 
-A summary bar at the top shows aggregate counts across all projects: total projects, total vulnerabilities, outdated packages, and environment variables.
+A summary bar at the top shows aggregate counts across all projects: total projects, total vulnerabilities, outdated packages, and config files.

@@ -1,6 +1,6 @@
 # DepVault Platform
 
-DepVault is a web dashboard that analyzes dependencies, detects vulnerabilities, and securely stores environment variables across any tech stack — from package.json to .env to appsettings.json — all in one place. All secrets are **end-to-end encrypted** client-side; the server is zero-knowledge.
+DepVault is a web dashboard that analyzes dependencies, detects vulnerabilities, and securely stores config and secret files across any tech stack — from package.json to .env to appsettings.json — all in one place. Storage is **repo-native**: a Project (a repo) contains Apps (service roots), and each App holds config files and secret files. Every file is stored as a single client-encrypted blob (ciphertext + iv + authTag) with an open-set environment slug (base, dev, prod, staging, local, test, or custom) and full file-level version history. All secrets are **end-to-end encrypted** client-side; the server is zero-knowledge and never decrypts.
 
 ## Tech Stack
 

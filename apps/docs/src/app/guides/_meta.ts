@@ -4,7 +4,7 @@ const meta: MetaRecord = {
   dashboard: "Dashboard",
   "dependency-analysis": "Dependency Analysis",
   "dependency-tree": "Dependency Tree",
-  "environment-vault": "Environment Vault",
+  "environment-vault": "Config & Secret Files",
   "secret-files": "Secret Files",
   "secret-sharing": "Secret Sharing",
   "config-converter": "Config Converter",

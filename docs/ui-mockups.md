@@ -117,7 +117,7 @@ Sidebar items: Dashboard, Projects, Settings
 | |                   | |                   | |             | |
 | | 3 vulnerabilities | | 12 vulnerabilities| | 0 vulns     | |
 | | 8 outdated        | | 24 outdated       | | 2 outdated  | |
-| | 15 env vars       | | 42 env vars       | | 8 env vars  | |
+| | 9 config files    | | 18 config files   | | 4 cfg files | |
 | |                   | |                   | |             | |
 | | Updated 2h ago    | | Updated 1d ago    | | Updated 5m  | |
 | +-------------------+ +-------------------+ +-------------+ |
@@ -136,7 +136,7 @@ Grid layout: 3 columns on desktop, 2 on tablet, 1 on mobile.
 +--[ Shell ]--------------------------------------------------+
 | < Back    my-api                     [Settings] [Members]   |
 |-------------------------------------------------------------|
-| [ Overview ]  [ Analysis ]  [ Env Vault ]  [ Secrets ]      |
+| [ Overview ]  [ Analysis ]  [ Repo ]  [ Secrets ]           |
 |=============================================================|
 |                                                             |
 | OVERVIEW TAB:                                               |
@@ -146,14 +146,15 @@ Grid layout: 3 columns on desktop, 2 on tablet, 1 on mobile.
 | |                  |     | Dependencies:  142           |    |
 | |    87 / 100      |     | Vulnerabilities: 3 (1 high) |    |
 | |   [circular]     |     | Outdated: 8                  |    |
-| |                  |     | Env variables: 15            |    |
-| +------------------+     | Environments: 3              |    |
+| |                  |     | Apps: 3                      |    |
+| +------------------+     | Config files: 9              |    |
+|                          | Environments: base,dev,prod  |    |
 |                          +-----------------------------+    |
 |                                                             |
 | Recent Activity                                             |
 | +-------------------------------------------------------+  |
 | | 2h ago  - Analysis ran on package.json (3 new vulns)  |  |
-| | 1d ago  - DB_PASSWORD rotated in production           |  |
+| | 1d ago  - appsettings.Production.json saved (api)     |  |
 | | 3d ago  - @alice invited as editor                    |  |
 | +-------------------------------------------------------+  |
 |                                                             |
@@ -168,7 +169,7 @@ Grid layout: 3 columns on desktop, 2 on tablet, 1 on mobile.
 +--[ Shell ]--------------------------------------------------+
 | my-api > Analysis                                           |
 |-------------------------------------------------------------|
-| [ Overview ]  [*Analysis*]  [ Env Vault ]  [ Secrets ]      |
+| [ Overview ]  [*Analysis*]  [ Repo ]  [ Secrets ]           |
 |=============================================================|
 |                                                             |
 | Upload: [ Drop file or click ] [paste]   Ecosystem: auto   |
@@ -237,103 +238,115 @@ Click a node to open the detail panel on the right.
 
 ---
 
-## Env vault tab
+## Repo browser tab
+
+The Repo tab is a two-pane browser: the left pane lists apps grouped by path with an
+environment selector; the right pane shows the selected app's config files (in a Form/Raw
+editor) and secret files for that environment.
 
 ```text
 +--[ Shell ]--------------------------------------------------+
-| my-api > Env Vault                                          |
+| my-api > Repo                                               |
 |-------------------------------------------------------------|
-| [ Overview ]  [ Analysis ]  [*Env Vault*]  [ Secrets ]      |
+| [ Overview ]  [ Analysis ]  [*Repo*]  [ Secrets ]           |
 |=============================================================|
-|                                                             |
-| Environment: [Development v]  [+ Add Variable]  [Import]   |
-|                                        [Export]  [Diff]     |
-|                                                             |
-| Search: [___________]    Show values: [ ] (toggle)          |
-|                                                             |
-| +---+--------------+--------------+------+-------+-------+ |
-| |   | Key          | Value        | Req? | Age   | Acts  | |
-| +---+--------------+--------------+------+-------+-------+ |
-| |   | DATABASE_URL | ************ | Yes  | 12d   | [E][D]| |
-| | ! | JWT_SECRET   | ************ | Yes  | 95d   | [E][D]| |
-| |   | PORT         | 4000         | No   |  2d   | [E][D]| |
-| |   | CORS_ORIGINS | ************ | No   | 30d   | [E][D]| |
-| | ! | API_KEY      | ************ | Yes  | 120d  | [E][D]| |
-| +---+--------------+--------------+------+-------+-------+ |
-|                                                             |
-| ! = rotation overdue (red age indicator)                    |
-| [E] = edit   [D] = delete                                  |
-|                                                             |
-+-------------------------------------------------------------+
+| Environment: [ prod v ]   (base / dev / prod / staging ...) |
+|------------------+------------------------------------------|
+| APPS             | api  >  appsettings.Production.json      |
+|                  |------------------------------------------|
+| > / (root)       | [ Form ] [*Raw*]   [History] [Download]  |
+| > api    (3)     |                                          |
+|   . appsettings  | +--------------------------------------+ |
+|   . appsettings  | | {                                    | |
+|   . .env.prod    | |   "ConnectionStrings": {             | |
+| > web    (4)     | |     "Default": "Server=db;..."       | |
+|   . .env         | |   },                                 | |
+|   . .env.prod    | |   "Jwt": { "Issuer": "depvault" }    | |
+|                  | | }                                    | |
+| SECRET FILES     | +--------------------------------------+ |
+|   . api/tls.pfx  |                                          | |
+|   . web/gsa.json |              [ Discard ]  [ Save ]       |
++------------------+------------------------------------------+
 
-Values masked by default. Toggle reveals decrypted values.
-Age column: green (<30d), yellow (30-90d), red (>90d).
+Left pane: apps grouped by appPath; (n) = config file count for the env.
+Right pane: a config file opened in the Raw (CodeMirror) editor.
+Binary secret files (tls.pfx) are download-only — no editor.
+```
+
+Form view of the same file (key/value table, used for .env-style files):
+
+```text
++------------------------------------------+----------------+
+| api  >  .env.prod    [*Form*] [ Raw ]    | [History]      |
+|----------------------------------------------------------|
+| Show values: [ ] (toggle)                                |
+|                                                          |
+| +--------------+--------------------------+-----------+   |
+| | Key          | Value                    | Acts      |   |
+| +--------------+--------------------------+-----------+   |
+| | DATABASE_URL | ************************ | [reveal]  |   |
+| | JWT_SECRET   | ************************ | [reveal]  |   |
+| | PORT         | 4000                     | [reveal]  |   |
+| | CORS_ORIGINS | ************************ | [reveal]  |   |
+| +--------------+--------------------------+-----------+   |
+| [ + Add row ]                                            |
+|                                  [ Discard ]  [ Save ]   |
++----------------------------------------------------------+
+
+The whole file is one encrypted blob. The Form editor parses it client-side
+into rows; Save re-serializes, re-encrypts, and PUTs a new blob (snapshotting
+the prior version). Values masked by default; reveal decrypts in-memory only.
 ```
 
 ---
 
-## Environment diff view
+## Version history + diff view
+
+Opened from the [History] button on any config/secret file. Pick two versions to see a
+git-style line diff, computed client-side after both blobs are decrypted.
 
 ```text
 +--[ Shell ]--------------------------------------------------+
-| my-api > Env Vault > Diff                                   |
+| my-api > Repo > api/.env.prod > History                     |
 |-------------------------------------------------------------|
+| Versions                  Diff:  [v3 (now) v]  vs  [v2 v]   |
+| +----------------------+ +---------------------------------+ |
+| | * v3  now   @you     | |   DATABASE_URL=postgres://db... | |
+| |   v2  2d    @alice   | | - PORT=8080                     | |
+| |   v1  9d    @you     | | + PORT=4000                     | |
+| |                      | |   CORS_ORIGINS=app.depvault.com | |
+| | [ Restore selected ] | | + SENTRY_DSN=https://...        | |
+| +----------------------+ +---------------------------------+ |
 |                                                             |
-| Compare: [Development v]  vs  [Staging v]  vs  [Prod v]    |
-|                                                             |
-| [ Export diff as CSV ]  [ Export diff as Markdown ]          |
-|                                                             |
-| +--------------+---------------+-----------+--------------+ |
-| | Key          | Development   | Staging   | Production   | |
-| +--------------+---------------+-----------+--------------+ |
-| | DATABASE_URL | postgres://.. | postgres..| postgres://..| |
-| | JWT_SECRET   | dev-secret-.. | stg-secr..| prod-secr....| |
-| | PORT         | 4000          | 4000      | 4000         | |
-| | CORS_ORIGINS | localhost:4001| staging.. | app.depv..   | |
-| | SENTRY_DSN   | --MISSING--   | https://..| https://..   | |
-| | DEBUG        | true          | false     | --MISSING--  | |
-| +--------------+---------------+-----------+--------------+ |
-|                                                             |
-| --MISSING-- cells are highlighted red.                      |
-| Differing values across envs are highlighted yellow.        |
-| Identical values have no highlight.                         |
-|                                                             |
+| Removed lines red (-), added lines green (+), context grey. |
+| [ Restore selected ] replaces current content with that     |
+| version (saving current as a new version first).            |
 +-------------------------------------------------------------+
 ```
 
 ---
 
-## Add/edit variable dialog
+## New app / push hint
+
+Apps are created automatically when you `depvault push` a file (the owning app is inferred
+from the nearest project marker). You can also create one manually from the Repo tab.
 
 ```text
 +-----------------------------------------------+
-| Add environment variable              [x]     |
+| New app                               [x]     |
 |-----------------------------------------------|
 |                                               |
-| Key                                           |
-| [____________________________________]        |
+| Display name                                  |
+| [api___________________________________]      |
 |                                               |
-| Value                                         |
-| [____________________________________]        |
+| App path (repo-relative)                      |
+| [apps/api______________________________]      |
+| Must be unique within the project.            |
 |                                               |
-| Description (optional)                        |
-| [____________________________________]        |
-|                                               |
-| Validation rule (optional)                    |
-| [____________________________________]        |
-| e.g. "url", "email", "number"                |
-|                                               |
-| [ ] Required for local setup                  |
-|                                               |
-| Rotation policy                               |
-| [None v]  (None / 30d / 60d / 90d / Custom)  |
-|                                               |
-|                        [ Cancel ] [ Save ]    |
+|                        [ Cancel ] [ Create ]  |
 +-----------------------------------------------+
 
-MUI Dialog with TextField inputs.
-Checkbox for isRequired flag.
-Select for rotation policy.
+Most users never open this — pushing from the CLI creates apps on the fly.
 ```
 
 ---
@@ -344,32 +357,28 @@ Select for rotation policy.
 +--[ Shell ]--------------------------------------------------+
 | my-api > Secrets                                            |
 |-------------------------------------------------------------|
-| [ Overview ]  [ Analysis ]  [ Env Vault ]  [*Secrets*]      |
+| [ Overview ]  [ Analysis ]  [ Repo ]  [*Secrets*]           |
 |=============================================================|
 |                                                             |
 | [ + Generate Share Link ]                                   |
 |                                                             |
 | Active links:                                               |
-| +--+------------+----------+--------+--------+----------+  |
-| |  | Created    | Variables| Expires| Status | Actions  |  |
-| +--+------------+----------+--------+--------+----------+  |
-| |  | 2h ago     | 3 vars   | 22h    | Pending| [Copy]   |  |
-| |  | 1d ago     | 1 var    | --     | Viewed | --       |  |
-| |  | 5d ago     | 5 vars   | --     | Expired| --       |  |
-| +--+------------+----------+--------+--------+----------+  |
+| +--+------------+----------------+--------+--------+------+  |
+| |  | Created    | File           | Expires| Status | Acts |  |
+| +--+------------+----------------+--------+--------+------+  |
+| |  | 2h ago     | api/.env.prod  | 22h    | Pending| [Copy]| |
+| |  | 1d ago     | api/tls.pfx    | --     | Viewed | --   |  |
+| |  | 5d ago     | web/.env.prod  | --     | Expired| --   |  |
+| +--+------------+----------------+--------+--------+------+  |
 |                                                             |
 +-------------------------------------------------------------+
 
-Generate dialog:
+Generate dialog (launched from a config or secret file):
 +-----------------------------------------------+
-| Share secrets                         [x]     |
+| Share file                            [x]     |
 |-----------------------------------------------|
 |                                               |
-| Select variables to share:                    |
-| [x] DATABASE_URL                              |
-| [x] JWT_SECRET                                |
-| [ ] PORT                                      |
-| [x] API_KEY                                   |
+| Sharing:  api/.env.prod  (config file)        |
 |                                               |
 | Password protect: [ ] (optional)              |
 | Password: [____________________]              |
@@ -380,12 +389,12 @@ Generate dialog:
 |                  [ Cancel ] [ Generate Link ]  |
 +-----------------------------------------------+
 
-After generation:
+After generation (decryption key lives only in the URL #fragment):
 +-----------------------------------------------+
 | Link generated                        [x]     |
 |-----------------------------------------------|
 |                                               |
-| https://depvault.com/s/a8f3k2...     [Copy]  |
+| https://depvault.com/s/a8f3k2...#key=...  [Copy]|
 |                                               |
 | This link can only be viewed once.            |
 | It expires in 24 hours.                       |
@@ -482,10 +491,10 @@ Appears as a dropdown/popover anchored to the bell.
 | [!] HIGH vuln found in lodash            |
 |     my-api - 2 hours ago                 |
 |------------------------------------------|
-| [~] JWT_SECRET rotation overdue          |
-|     my-api - 1 day ago                   |
+| [~] api/.env.prod not updated in 95d     |
+|     my-api - 1 day ago                    |
 |------------------------------------------|
-| [i] SENTRY_DSN missing in production     |
+| [i] CI token for api/prod expires soon   |
 |     my-api - 3 days ago                  |
 |------------------------------------------|
 | [+] alice@email.com joined as editor     |
@@ -494,7 +503,7 @@ Appears as a dropdown/popover anchored to the bell.
 |              [ View all notifications ]  |
 +------------------------------------------+
 
-Icons: [!] = vulnerability, [~] = rotation, [i] = drift, [+] = team
+Icons: [!] = vulnerability, [~] = stale file, [i] = CI token, [+] = team
 Unread items have a colored left border.
 ```
 

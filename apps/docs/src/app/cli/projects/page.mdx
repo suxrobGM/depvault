@@ -31,7 +31,7 @@ Set the active project. The ID is persisted to `~/.depvault/config.json`.
 depvault project select <id>
 ```
 
-After selecting a project, commands like `env list`, `env pull`, and `analyze` operate on it automatically.
+After selecting a project, commands like `push`, `pull`, `env list`, and `analyze` operate on it automatically.
 
 ---
 
@@ -44,14 +44,9 @@ depvault project info [id]
 ```
 
 ```
-Project:       my-web-app
-ID:            b3f1a2c4-5678-9def-0123-456789abcdef
-Description:   Main web application frontend and API
-Created:       2025-11-20T14:30:00Z
-Members:       4
-Vault Groups:  2
-Analyses:      12
-Your Role:     OWNER
+ID:        b3f1a2c4-5678-9def-0123-456789abcdef
+Name:      my-web-app
+Created:   2025-11-20T14:30:00Z
 ```
 
 Use `--project <id>` to query a specific project without changing the active selection.

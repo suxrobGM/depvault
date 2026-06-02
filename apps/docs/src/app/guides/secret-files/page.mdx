@@ -1,12 +1,12 @@
 # Secret Files
 
-Upload and manage sensitive configuration files like certificates, keys, and credentials within the encrypted vault.
+Store sensitive non-config files — certificates, keys, credentials, keystores — alongside your repository. Each file is end-to-end encrypted and stored as a single blob. See [Encryption & Security](/guides/encryption) for details.
 
 ---
 
 ## Supported File Types
 
-Any non-executable file up to **25 MB**. Common examples:
+Any file up to **25 MB**. Common examples:
 
 | File Type | Examples |
 | --- | --- |
@@ -15,42 +15,58 @@ Any non-executable file up to **25 MB**. Common examples:
 | **Keystores** | `.jks`, `.keystore`, `.p12` |
 | **Cloud Credentials** | `credentials.json`, `serviceAccountKey.json` |
 | **SSH/GPG Keys** | `id_rsa`, `id_ed25519`, `.gpg`, `.asc` |
-| **Config Files** | `.yaml`, `.toml`, `.xml`, `.conf` |
 
-Executables (`.exe`, `.sh`, `.bat`, `.dll`, etc.) are rejected.
+Both text and binary files are supported. Text files can be edited in the browser; binary files are download-only.
+
+---
+
+## How Secret Files Are Stored
+
+Each secret file is encrypted in your browser (or the CLI) and uploaded as one blob — ciphertext, IV, and auth tag. The server stores only the blob and metadata (the file's repo-relative path, owning app, environment slug, MIME type, and size). It never decrypts the contents.
+
+Files belong to an **app** and carry an **environment slug** (`base`, `dev`, `prod`, …), exactly like config files. Switch apps and environment tabs in the repository view to see each file list.
 
 ---
 
 ## Uploading a File
 
-1. Open the **Vault** tab and select the target environment.
-2. Go to the **Files** section and click **Upload File**.
-3. Select a file and optionally add a description.
+The simplest path is the CLI, which discovers secret files and uploads them in one step:
 
-Files are end-to-end encrypted in your browser before upload. The server stores only ciphertext.
+```bash
+depvault push
+```
+
+Each file's app and environment slug are inferred from its path and name. You can also upload from the repository view in the web app, where new secret files are attached to the selected app and environment.
 
 ---
 
-## Per-Environment Organization
+## Editing and Downloading
 
-Files are organized by environment, just like variables. Switch environments in the Vault tab to see each environment's file list.
+- **Download** decrypts the blob in your browser and saves the original bytes verbatim — binary files are restored byte-for-byte.
+- **Edit** is available for plaintext secret files via a raw text dialog. Binary files are download-only.
+- **Delete** permanently removes the file and its version history.
+
+| Role | Upload | Download | Edit / Delete |
+| --- | --- | --- | --- |
+| **Owner / Editor** | Yes | Yes | Yes |
+| **Viewer** | No | No | No |
+
+Viewers can see file names and metadata but cannot decrypt contents.
 
 ---
 
 ## Version History
 
-Re-uploading a file with the same name creates a new version rather than overwriting. Open a file's **History** tab to browse versions. Click **Restore** on any version to make it current — previous versions are retained.
+Every push or web save snapshots the full encrypted blob as a new version. Open a file's history to browse versions and **restore** any one to make it current — previous versions are retained.
 
 ---
 
-## Downloading Files
+## Restoring to Disk
 
-Click a file and then **Download**. The file is decrypted on the server and streamed over HTTPS.
+Run `depvault pull` to restore secret files. Each file is decrypted client-side and written **byte-for-byte to its original `relativePath`**, recreating any intermediate directories:
 
-| Role | Upload | Download | Delete |
-| --- | --- | --- | --- |
-| **Owner** | Yes | Yes | Yes |
-| **Editor** | Yes | Yes | No |
-| **Viewer** | No | No | No |
+```bash
+depvault pull
+```
 
-Viewers can see file names and metadata but cannot access contents.
+To skip secret files and restore only config files, use `depvault pull --include-secrets false`. See the [Pull & Push](/cli/pull) reference for all options.

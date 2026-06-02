@@ -44,25 +44,25 @@ Expanded view with vulnerability severity ratings, CVE IDs, license information,
 
 ---
 
-## Environment Vault
+## Repo Browser
 
-### Environment Variables
+### Config Files
 
-Encrypted variable list for a selected environment with masked values, descriptions, and bulk actions.
+Repo browser for a selected app and environment: config files shown in the Form (key/value) or Raw (CodeMirror) editor, with values masked by default. Each file is one client-encrypted blob.
 
-![Environment Variables](images/project-env-vars.jpg)
+![Config Files](images/project-env-vars.jpg)
 
-### Variable Version History
+### File Version History & Diff
 
-Change history for an environment variable showing previous values, timestamps, and who made each change.
+Version history for a config file with a git-style diff between any two versions, computed client-side after decrypt, plus restore-to-version.
 
-![Variable Version History](images/project-env-vars-history.jpg)
+![File Version History](images/project-env-vars-history.jpg)
 
-### Environment Templates
+### Environment Selector
 
-Create and manage reusable environment templates to bootstrap new environments with predefined variable structures.
+Switch between environment slugs (base, dev, prod, staging, or custom) to browse each app's files for that environment.
 
-![Environment Templates](images/env-template.jpg)
+![Environment Selector](images/env-template.jpg)
 
 ---
 
@@ -70,19 +70,19 @@ Create and manage reusable environment templates to bootstrap new environments w
 
 ### Secret Files
 
-Encrypted file storage showing uploaded certificates, keys, and credentials with metadata and download options.
+Encrypted file storage showing pushed certificates, keys, and credentials per app at their repo-relative paths, with metadata and download options.
 
 ![Secret Files](images/project-secret-files.jpg)
 
-### Share Secret
+### Share File
 
-One-time encrypted link generation with configurable expiration and optional password protection.
+One-time encrypted link generation for a config or secret file with configurable expiration and optional password protection; the decryption key lives only in the URL fragment.
 
-![Share Secret](images/share-secret.jpg)
+![Share File](images/share-secret.jpg)
 
 ### Download Bundle
 
-Encrypted archive download of selected environment variables and secret files as a single .zip bundle.
+Encrypted archive download of selected config and secret files for an app + environment as a single .zip bundle.
 
 ![Download Bundle](images/download-bundle.jpg)
 
