@@ -19,19 +19,19 @@ paths: [apps/backend/prisma/**, apps/backend/src/**]
 
 ## Storage Models (repo-native)
 
-Hierarchy: `Project` (a repo) → `App` (a service root) → `RepoFile`. There is no `Vault` or `EnvVariable` model — files are stored as whole encrypted blobs, not per-variable rows. Config files and secret files share one `RepoFile` model.
+Hierarchy: `Project` (a repo) → `App` (a service root) → `RepoFile`. Files are whole encrypted blobs, not per-variable rows — there is no `Vault` or `EnvVariable` model. Config and secret files share one `RepoFile`.
 
 - `App` — one service root per `(projectId, appPath)`; `appPath` is the repo-relative folder
-- `RepoFile` — one encrypted blob per `(projectId, relativePath)` (the identity anchor; `appId` is a mutable grouping pointer, so re-parenting a file keeps the same row + history). `kind` is `CONFIG` or `SECRET`. `environmentSlug` is an open-set string column (`base`, `dev`, `prod`, `staging`, `local`, `test`, or custom), not a separate table. CONFIG rows carry `format` (parse hint), SECRET rows carry `mimeType` (serve hint)
+- `RepoFile` — one blob per `(projectId, relativePath)` (the identity anchor; `appId` is a mutable grouping pointer, so re-parenting keeps the same row + history). `kind` = `CONFIG` | `SECRET`. `environmentSlug` is an open-set string column (`base`/`dev`/`prod`/`staging`/`local`/`test`/custom), not a table. CONFIG rows carry `format` (parse hint); SECRET rows carry `mimeType` (serve hint)
 - `RepoFileVersion` — full-blob snapshot per push/save; supports restore-to-version
 
 ## Encryption Models
 
-- `UserVault` — stores user's KEK salt, ECDH public key, wrapped private key, recovery key hash
-- `ProjectKeyGrant` — stores wrapped DEK per user per project, with grant type (`SELF`, `ECDH`, `RECOVERY`)
-- `CiToken` — scoped to `(appId, environmentSlug)`; includes `wrappedDek`/`wrappedDekIv`/`wrappedDekTag` for CI pipeline decryption
-- `ShareLink` — one-time encrypted file share; stores the client-encrypted payload and auto-expires/consumes on access (the ephemeral decryption key lives in the URL fragment, never sent to the server)
-- Encrypted data fields (`encryptedContent`, `iv`, `authTag`) store client-encrypted ciphertext as-is
+- `UserVault` — KEK salt, ECDH public key, wrapped private key, recovery key hash
+- `ProjectKeyGrant` — wrapped DEK per user per project; grant type `SELF` | `ECDH` | `RECOVERY`
+- `CiToken` — scoped to `(appId, environmentSlug)`; carries `wrappedDek`/`wrappedDekIv`/`wrappedDekTag` for CI decryption
+- `ShareLink` — one-time encrypted share; auto-expires/consumes on access (ephemeral key in URL fragment, never sent to server)
+- `encryptedContent`/`iv`/`authTag` fields store client ciphertext as-is
 
 ## Workflow
 

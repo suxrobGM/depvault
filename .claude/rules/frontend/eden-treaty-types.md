@@ -28,18 +28,11 @@ export type ActivityQueryDto = Query<typeof client.api.activity.get>; // query p
 
 Use `Body<T>`, never `Parameters<T>[0]`.
 
-Never hand-write an interface that mirrors a request or response payload (e.g. a local
-`EncryptedAccessResult` duplicating an endpoint's JSON). Derive it with `Data`/`Body`/`Query`
-so it tracks the backend automatically. `useApiMutation`/`useApiQuery` already infer the
-response type from the Treaty call, so `onSuccess` data and `mutateAsync` return values are
-typed — no casts. Local view models that hold _post-processing_ state (e.g. decrypted
-plaintext that never crosses the wire) are fine; flag them as such.
+Never hand-write an interface mirroring a request/response payload — derive it with `Data`/`Body`/`Query` so it tracks the backend. `useApiMutation`/`useApiQuery` already infer the response type (no casts on `onSuccess` data or `mutateAsync` returns). Local view models for _post-processing_ state (e.g. decrypted plaintext that never crosses the wire) are fine — flag them as such.
 
 ## Naming
 
-`Dto` suffix on responses/items (`ProjectDto`, `ProjectDetailDto`, `XListResponseDto`,
-`XDto = XListResponseDto["items"][number]`). Keep `CreateXBody`/`UpdateXBody` and enum extracts
-(`AuditAction`, `NotificationType`) without the suffix.
+`Dto` suffix on responses/items (`ProjectDto`, `XListResponseDto`, `XDto = XListResponseDto["items"][number]`). No suffix on `CreateXBody`/`UpdateXBody` or enum extracts (`AuditAction`, `NotificationType`).
 
 ## Query keys
 

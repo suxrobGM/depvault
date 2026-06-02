@@ -52,14 +52,11 @@ src/
 
 ## Schemas
 
-- Use TypeBox (`t.*`) for all request/response validation
-- Group type aliases at end of schema file
-- All return types from service methods must be declared in `.schema.ts` — no inline object types
+- TypeBox (`t.*`) for all request/response validation; group type aliases at end of file
+- All service return types declared in `.schema.ts` — no inline object types
 
 ## Testing
 
-- **Framework**: Bun's built-in test runner (`bun test`)
-- **Unit tests**: Service methods with mocked PrismaClient
-- **Integration tests**: API endpoints using Elysia's `.handle()` method
-- **Location**: Co-locate as `{module}.service.test.ts`, `{module}.controller.test.ts`
-- **Naming**: `describe("ServiceName")` → `describe("methodName")` → `it("should ...")`
+- Bun's test runner (`bun test`). Unit-test services with a mocked PrismaClient; integration-test endpoints via Elysia's `.handle()`
+- Co-locate as `{module}.service.test.ts` / `{module}.controller.test.ts`
+- Naming: `describe("ServiceName")` → `describe("methodName")` → `it("should ...")`

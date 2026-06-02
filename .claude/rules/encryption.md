@@ -4,7 +4,7 @@ description: End-to-end encryption architecture and security rules
 
 # End-to-End Encryption
 
-All user files (config files and secret files, unified as one `RepoFile` model distinguished by `kind`) are encrypted client-side. Each file is stored as one client-encrypted blob — the server stores only ciphertext and cannot decrypt user data.
+All files (`RepoFile`, both `kind`s) are encrypted client-side and stored as one ciphertext blob per file. The server stores only ciphertext and never decrypts.
 
 ## Key Hierarchy
 
@@ -42,12 +42,12 @@ Recovery Key (random 256-bit, shown once at vault setup)
 
 ## Data Flows
 
-- **Repo files** (config & secret): Client encrypts the whole file → sends base64 `{encryptedContent, iv, authTag}` plus `kind` → backend stores the blob as-is (no parsing into variables). Each push/save snapshots a `RepoFileVersion`
-- **Share links**: Client encrypts with ephemeral key → key in URL fragment (`#key=`) never reaches server
-- **CI tokens**: Client wraps DEK with HKDF-derived key from token → CLI/CI unwraps and decrypts locally
-- **Team sharing**: ECDH P-256 key agreement → granter wraps DEK with shared secret → recipient unwraps
-- **Recovery**: User provides recovery key → unwraps all RECOVERY grants → re-wraps DEKs under new KEK
-- **Password change**: Fetches all SELF grants → re-wraps DEKs + private key + recovery key under new KEK
+- **Repo files**: client encrypts whole file → sends base64 `{encryptedContent, iv, authTag}` + `kind` → backend stores blob as-is (no variable parsing). Each push/save snapshots a `RepoFileVersion`
+- **Share links**: ephemeral key, passed in URL fragment (`#key=`), never reaches the server
+- **CI tokens**: DEK wrapped with an HKDF-derived key from the token; CLI/CI unwraps and decrypts locally
+- **Team sharing**: ECDH P-256 agreement → granter wraps DEK with shared secret → recipient unwraps
+- **Recovery**: recovery key unwraps all RECOVERY grants → re-wraps DEKs under new KEK
+- **Password change**: re-wraps all SELF grants (DEKs + private key + recovery key) under new KEK
 
 ## Security Rules
 
