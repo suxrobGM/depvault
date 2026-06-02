@@ -1,5 +1,3 @@
-using DepVault.Cli.Utils;
-
 namespace DepVault.Cli.Output;
 
 /// <summary>Whether the caller (typically a per-file loop) should keep going or abort.</summary>

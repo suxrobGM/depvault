@@ -2,7 +2,6 @@ using System.CommandLine;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
-using DepVault.Cli.Utils;
 using Spectre.Console;
 
 namespace DepVault.Cli.Commands;
@@ -13,7 +12,7 @@ namespace DepVault.Cli.Commands;
 /// only ever returns ciphertext.
 /// </summary>
 public sealed class CiCommands(
-    IApiClientFactory clientFactory, CommandContext ctx, DekService dekService)
+    IApiClientFactory clientFactory, AuthContext ctx, DekService dekService)
 {
     public Command CreateCiCommand()
     {

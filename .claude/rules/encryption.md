@@ -24,21 +24,21 @@ Recovery Key (random 256-bit, shown once at vault setup)
 
 ## Key Files
 
-| Layer    | File                                                         | Purpose                                                                                                         |
-| -------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| Frontend | `apps/frontend/src/lib/crypto/`                              | WebCrypto modules: encoding, keys, AES-GCM, ECDH, etc.                                                          |
-| Frontend | `apps/frontend/src/lib/crypto/vault-*.ts`                    | Vault operations: lifecycle, grants, re-keying                                                                  |
-| Frontend | `apps/frontend/src/providers/vault-provider.tsx`             | Vault state, DEK caching, key distribution                                                                      |
-| Frontend | `apps/frontend/src/hooks/use-vault.ts`                       | `useVault()` hook for components                                                                                |
-| Backend  | `apps/backend/src/modules/vault/`                            | Vault API: setup, status, password, recovery, key grants                                                        |
-| Backend  | `apps/backend/prisma/schema/vault.prisma`                    | Crypto models only: `UserVault` + `ProjectKeyGrant`                                                             |
-| Backend  | `apps/backend/prisma/schema/app.prisma`                      | `App` (service root, keyed by `appPath`)                                                                        |
-| Backend  | `apps/backend/prisma/schema/repo-file.prisma`                | `RepoFile`/`RepoFileVersion` (encrypted blobs; `kind` = CONFIG \| SECRET; keyed by `(projectId, relativePath)`) |
-| Backend  | `apps/backend/prisma/schema/share-link.prisma`               | `ShareLink` (one-time encrypted file shares)                                                                    |
-| CLI      | `apps/cli/Crypto/VaultCrypto.cs`                             | .NET AES-256-GCM, PBKDF2, HKDF                                                                                  |
-| CLI      | `apps/cli/Crypto/DekService.cs`                              | Resolves project DEK for pull/push (vault password or CI token)                                                 |
-| CLI      | `apps/cli/Services/RepoFileUploadService.cs`, `apps/cli/Commands/Pull/` | `RepoFileUploadService` (push), `RepoFilePuller` (pull) — whole-file blobs, `kind`-aware              |
-| CLI      | `apps/cli/Services/AppRootResolver.cs`, `EnvSlugResolver.cs` | Infer owning App (project-marker walk) and environment slug (filename)                                          |
+| Layer    | File                                                                                | Purpose                                                                                                         |
+| -------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Frontend | `apps/frontend/src/lib/crypto/`                                                     | WebCrypto modules: encoding, keys, AES-GCM, ECDH, etc.                                                          |
+| Frontend | `apps/frontend/src/lib/crypto/vault-*.ts`                                           | Vault operations: lifecycle, grants, re-keying                                                                  |
+| Frontend | `apps/frontend/src/providers/vault-provider.tsx`                                    | Vault state, DEK caching, key distribution                                                                      |
+| Frontend | `apps/frontend/src/hooks/use-vault.ts`                                              | `useVault()` hook for components                                                                                |
+| Backend  | `apps/backend/src/modules/vault/`                                                   | Vault API: setup, status, password, recovery, key grants                                                        |
+| Backend  | `apps/backend/prisma/schema/vault.prisma`                                           | Crypto models only: `UserVault` + `ProjectKeyGrant`                                                             |
+| Backend  | `apps/backend/prisma/schema/app.prisma`                                             | `App` (service root, keyed by `appPath`)                                                                        |
+| Backend  | `apps/backend/prisma/schema/repo-file.prisma`                                       | `RepoFile`/`RepoFileVersion` (encrypted blobs; `kind` = CONFIG \| SECRET; keyed by `(projectId, relativePath)`) |
+| Backend  | `apps/backend/prisma/schema/share-link.prisma`                                      | `ShareLink` (one-time encrypted file shares)                                                                    |
+| CLI      | `apps/cli/Crypto/VaultCrypto.cs`                                                    | .NET AES-256-GCM, PBKDF2, HKDF                                                                                  |
+| CLI      | `apps/cli/Crypto/DekService.cs`                                                     | Resolves project DEK for pull/push (vault password or CI token)                                                 |
+| CLI      | `apps/cli/Services/RepoFileUploadService.cs`, `apps/cli/Services/RepoFilePuller.cs` | `RepoFileUploadService` (push), `RepoFilePuller` (pull) — whole-file blobs, `kind`-aware                        |
+| CLI      | `apps/cli/Services/AppRootResolver.cs`, `EnvSlugResolver.cs`                        | Infer owning App (project-marker walk) and environment slug (filename)                                          |
 
 ## Data Flows
 

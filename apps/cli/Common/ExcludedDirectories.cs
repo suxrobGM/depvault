@@ -1,4 +1,4 @@
-namespace DepVault.Cli.Utils;
+namespace DepVault.Cli.Common;
 
 /// <summary>Shared set of directory names to skip during file scanning.</summary>
 internal static class ExcludedDirectories

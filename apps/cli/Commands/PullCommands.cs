@@ -1,10 +1,8 @@
 using System.CommandLine;
 using DepVault.Cli.Auth;
-using DepVault.Cli.Commands.Pull;
 using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
-using DepVault.Cli.Utils;
 using Spectre.Console;
 using AppEntry = DepVault.Cli.ApiClient.Api.Projects.Item.RepoMap.RepoMapGetResponse_apps;
 using FileEntry = DepVault.Cli.ApiClient.Api.Projects.Item.RepoMap.RepoMapGetResponse_apps_files;
@@ -18,7 +16,7 @@ namespace DepVault.Cli.Commands;
 /// project DEK and written verbatim — no re-serialization, no format conversion.
 /// </summary>
 public sealed class PullCommands(
-    CommandContext ctx,
+    AuthContext ctx,
     DekService dekService,
     RepoFilePuller repoFilePuller,
     IRepositoryLocator repositoryLocator,

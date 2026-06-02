@@ -2,13 +2,13 @@ using System.CommandLine;
 using DepVault.Cli.ApiClient.Api.Projects.Item.Analyses;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
-using DepVault.Cli.Utils;
+using DepVault.Cli.Auth;
 using Spectre.Console;
 
 namespace DepVault.Cli.Commands;
 
 public sealed class AnalysisCommands(
-    CommandContext ctx,
+    AuthContext ctx,
     IFileScanner fileScanner,
     AnalysisClient analysisClient,
     IRepositoryLocator repositoryLocator,

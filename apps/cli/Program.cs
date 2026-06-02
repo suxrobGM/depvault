@@ -2,7 +2,6 @@ using DepVault.Cli;
 using DepVault.Cli.Output;
 using DepVault.Cli.Repl;
 using DepVault.Cli.Services;
-using DepVault.Cli.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Kiota.Abstractions;
 using Spectre.Console;

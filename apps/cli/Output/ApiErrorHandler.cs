@@ -1,7 +1,7 @@
 using Microsoft.Kiota.Abstractions;
 using Spectre.Console;
 
-namespace DepVault.Cli.Utils;
+namespace DepVault.Cli.Output;
 
 /// <summary>
 /// Classifies API exceptions (auth / plan-limit) and renders their rich panels. Used by

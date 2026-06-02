@@ -2,7 +2,6 @@ using System.CommandLine;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
-using DepVault.Cli.Utils;
 
 namespace DepVault.Cli.Commands;
 
@@ -10,7 +9,7 @@ namespace DepVault.Cli.Commands;
 /// Handles the root command (no subcommand) — prints banner with active project context.
 /// </summary>
 public sealed class RootHandler(
-    CommandContext ctx,
+    AuthContext ctx,
     IApiClientFactory clientFactory,
     ConsoleRenderer renderer)
 {

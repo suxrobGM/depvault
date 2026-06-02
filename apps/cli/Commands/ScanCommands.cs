@@ -1,15 +1,15 @@
 using System.CommandLine;
-using DepVault.Cli.Commands.Scan;
+using DepVault.Cli.Services.Scan;
 using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
-using DepVault.Cli.Utils;
+using DepVault.Cli.Auth;
 using Spectre.Console;
 
 namespace DepVault.Cli.Commands;
 
 internal sealed class ScanCommands(
-    CommandContext ctx,
+    AuthContext ctx,
     ConsoleRenderer renderer,
     IProjectContextResolver projectContextResolver,
     DependencyScanner dependencyScanner,

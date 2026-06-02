@@ -2,7 +2,7 @@ using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using Spectre.Console;
 
-namespace DepVault.Cli.Commands.Scan;
+namespace DepVault.Cli.Services.Scan;
 
 /// <summary>
 /// Uploads secret files to a project as encrypted blobs. Each file is encrypted client-side

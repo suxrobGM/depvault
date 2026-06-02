@@ -3,13 +3,12 @@ using System.Security.Cryptography;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
-using DepVault.Cli.Utils;
 using Spectre.Console;
 
 namespace DepVault.Cli.Commands;
 
 public sealed class VaultCommands(
-    CommandContext ctx,
+    AuthContext ctx,
     IApiClientFactory clientFactory,
     IConsolePrompter prompter,
     VaultState vaultState)

@@ -3,7 +3,7 @@ using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
 using FileEntry = DepVault.Cli.ApiClient.Api.Projects.Item.RepoMap.RepoMapGetResponse_apps_files;
 
-namespace DepVault.Cli.Commands.Pull;
+namespace DepVault.Cli.Services;
 
 /// <summary>
 /// Fetches each file's encrypted blob, decrypts it with the project DEK, and writes the plaintext

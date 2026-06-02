@@ -1,4 +1,4 @@
-namespace DepVault.Cli.Utils;
+namespace DepVault.Cli.Common;
 
 public static class FormatUtils
 {

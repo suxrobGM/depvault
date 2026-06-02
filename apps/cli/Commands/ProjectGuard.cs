@@ -1,6 +1,7 @@
+using DepVault.Cli.Auth;
 using Spectre.Console;
 
-namespace DepVault.Cli.Utils;
+namespace DepVault.Cli.Commands;
 
 /// <summary>
 /// Strict mismatch guard for write commands (push/pull): when an explicit <c>--project</c> differs
@@ -9,7 +10,7 @@ namespace DepVault.Cli.Utils;
 /// </summary>
 internal static class ProjectGuard
 {
-    public static bool ConfirmOverride(CommandContext ctx, string? explicitId)
+    public static bool ConfirmOverride(AuthContext ctx, string? explicitId)
     {
         if (string.IsNullOrEmpty(explicitId) || ctx.IsCiMode())
         {

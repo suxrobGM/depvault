@@ -1,15 +1,12 @@
 using System.CommandLine;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Commands;
-using DepVault.Cli.Commands.Env;
-using DepVault.Cli.Commands.Pull;
-using DepVault.Cli.Commands.Scan;
 using DepVault.Cli.Config;
 using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
 using DepVault.Cli.Repl;
 using DepVault.Cli.Services;
-using DepVault.Cli.Utils;
+using DepVault.Cli.Services.Scan;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Kiota.Abstractions.Authentication;
 
@@ -37,7 +34,7 @@ internal static class Startup
             .AddSingleton<IVersionChecker, VersionChecker>()
             .AddSingleton<IUpdateService, UpdateService>()
             .AddSingleton<ConsoleRenderer>()
-            .AddSingleton<CommandContext>()
+            .AddSingleton<AuthContext>()
             .AddSingleton<VaultState>()
             .AddSingleton<DekService>()
             .AddSingleton<AnalysisClient>()
@@ -47,7 +44,7 @@ internal static class Startup
             .AddSingleton<SecretLeakScanner>()
             .AddSingleton<SecretFileScanner>()
             // Shared resolvers
-            .AddSingleton<VaultResolver>()
+            .AddSingleton<AppResolver>()
             .AddSingleton<RepoFileUploadService>()
             .AddSingleton<RepoFilePuller>()
             // Commands

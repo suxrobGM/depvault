@@ -2,7 +2,6 @@ using System.Security.Cryptography;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
-using DepVault.Cli.Utils;
 using Microsoft.Kiota.Abstractions;
 using Spectre.Console;
 using KeygrantBody = DepVault.Cli.ApiClient.Api.Projects.Item.Keygrants.KeygrantsPostRequestBody;
@@ -15,7 +14,7 @@ public sealed class DekService(
     IApiClientFactory clientFactory,
     ICredentialStore credentialStore,
     IConsolePrompter prompter,
-    CommandContext commandContext,
+    AuthContext commandContext,
     VaultState vaultState,
     IOutputFormatter output,
     ConsoleRenderer renderer)

@@ -2,7 +2,7 @@ using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using Spectre.Console;
 
-namespace DepVault.Cli.Commands.Scan;
+namespace DepVault.Cli.Services.Scan;
 
 internal sealed class DependencyScanner(
     IConsolePrompter prompter,

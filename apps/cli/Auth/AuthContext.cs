@@ -1,7 +1,7 @@
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
 
-namespace DepVault.Cli.Utils;
+namespace DepVault.Cli.Auth;
 
 public enum AuthMode
 {
@@ -11,7 +11,7 @@ public enum AuthMode
 }
 
 /// <summary>Bundles the shared deps that every command needs (auth, config, output, prompter).</summary>
-public sealed class CommandContext(
+public sealed class AuthContext(
     ICredentialStore credentialStore,
     IConfigService configService,
     IOutputFormatter output,

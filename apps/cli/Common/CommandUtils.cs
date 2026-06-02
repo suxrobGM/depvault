@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Runtime.Serialization;
 
-namespace DepVault.Cli.Utils;
+namespace DepVault.Cli.Common;
 
 /// <summary>Pure utility methods for command-line parsing (no DI deps).</summary>
 internal static class CommandUtils

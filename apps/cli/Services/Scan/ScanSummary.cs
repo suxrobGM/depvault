@@ -1,7 +1,7 @@
 using DepVault.Cli.Output;
 using Spectre.Console;
 
-namespace DepVault.Cli.Commands.Scan;
+namespace DepVault.Cli.Services.Scan;
 
 internal static class ScanSummary
 {

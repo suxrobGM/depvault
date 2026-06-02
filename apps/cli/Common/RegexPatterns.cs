@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace DepVault.Cli.Utils;
+namespace DepVault.Cli.Common;
 
 /// <summary>AOT-safe source-generated regex patterns used across the CLI.</summary>
 public static partial class RegexPatterns

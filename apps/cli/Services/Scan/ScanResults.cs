@@ -1,4 +1,4 @@
-namespace DepVault.Cli.Commands.Scan;
+namespace DepVault.Cli.Services.Scan;
 
 internal sealed class ScanResults
 {

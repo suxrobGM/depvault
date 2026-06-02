@@ -2,7 +2,7 @@ using System.CommandLine;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
-using DepVault.Cli.Utils;
+using DepVault.Cli.Common;
 using Spectre.Console;
 using GetKind = DepVault.Cli.ApiClient.Api.Projects.Item.Files.GetKindQueryParameterType;
 
@@ -10,7 +10,7 @@ namespace DepVault.Cli.Commands;
 
 /// <summary>Lists config files (env/appsettings/etc.) stored for a project.</summary>
 public sealed class EnvCommands(
-    CommandContext ctx,
+    AuthContext ctx,
     IProjectContextResolver projectContextResolver,
     IApiClientFactory clientFactory,
     ConsoleRenderer renderer)

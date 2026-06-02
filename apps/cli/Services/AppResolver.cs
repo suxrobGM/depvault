@@ -3,14 +3,13 @@ using DepVault.Cli.Auth;
 using DepVault.Cli.Output;
 using Spectre.Console;
 
-namespace DepVault.Cli.Commands.Env;
+namespace DepVault.Cli.Services;
 
 /// <summary>
-/// Interactively picks an existing app or creates a new one. (Formerly resolved vaults — the
-/// blob-only model groups files under apps instead.) The class name is preserved so DI wiring
-/// remains stable.
+/// Interactively picks an existing app or creates a new one (the blob-only model groups files
+/// under apps rather than vaults).
 /// </summary>
-public sealed class VaultResolver(
+public sealed class AppResolver(
     IApiClientFactory clientFactory,
     IOutputFormatter output,
     IConsolePrompter prompter)

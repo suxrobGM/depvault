@@ -2,7 +2,8 @@ using System.CommandLine;
 using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
-using DepVault.Cli.Utils;
+using DepVault.Cli.Auth;
+using DepVault.Cli.Common;
 using Spectre.Console;
 
 namespace DepVault.Cli.Commands;
@@ -13,7 +14,7 @@ namespace DepVault.Cli.Commands;
 /// no stale-variable pruning. App ownership and environment slug are inferred from the file path.
 /// </summary>
 internal sealed class PushCommands(
-    CommandContext ctx,
+    AuthContext ctx,
     IFileScanner fileScanner,
     DekService dekService,
     RepoFileUploadService uploadService,
