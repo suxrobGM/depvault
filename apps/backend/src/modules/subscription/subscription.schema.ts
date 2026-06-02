@@ -23,7 +23,7 @@ export const PortalSessionResponseSchema = t.Object({
 export const PlanLimitsSchema = t.Object({
   maxUsers: t.Number(),
   maxProjects: t.Number(),
-  maxEnvVars: t.Number(),
+  maxConfigFiles: t.Number(),
   maxSecretFiles: t.Number(),
   maxAnalysesPerMonth: t.Number(),
   maxCiTokens: t.Number(),
@@ -36,7 +36,7 @@ export const PlanLimitsSchema = t.Object({
 
 export const UsageSchema = t.Object({
   projects: t.Number(),
-  envVars: t.Number(),
+  configFiles: t.Number(),
   secretFiles: t.Number(),
   analyses: t.Number(),
   members: t.Number(),

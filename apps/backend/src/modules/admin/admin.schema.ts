@@ -98,7 +98,7 @@ export const AdminUserDetailResponseSchema = t.Object({
   ),
   usage: t.Object({
     projects: t.Number(),
-    envVars: t.Number(),
+    configFiles: t.Number(),
     secretFiles: t.Number(),
     analyses: t.Number(),
     members: t.Number(),

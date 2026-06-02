@@ -30,22 +30,18 @@ export class SubscriptionService {
     return this.prisma.project.count({ where: { ownerId: userId } });
   }
 
-  /** Count distinct env variable keys per vault across all owned projects. */
-  async countDistinctEnvVars(userId: string): Promise<number> {
-    const rows = await this.prisma.envVariable.findMany({
-      where: { vault: { project: { ownerId: userId } } },
-      select: { key: true, vaultId: true },
+  /** Count config files across all owned projects. */
+  async countDistinctConfigFiles(userId: string): Promise<number> {
+    return this.prisma.configFile.count({
+      where: { app: { project: { ownerId: userId } } },
     });
-    return new Set(rows.map((v) => `${v.vaultId}:${v.key}`)).size;
   }
 
-  /** Count distinct secret file names per vault across all owned projects. */
+  /** Count secret files across all owned projects. */
   async countDistinctSecretFiles(userId: string): Promise<number> {
-    const rows = await this.prisma.secretFile.findMany({
-      where: { vault: { project: { ownerId: userId } } },
-      select: { name: true, vaultId: true },
+    return this.prisma.secretFile.count({
+      where: { app: { project: { ownerId: userId } } },
     });
-    return new Set(rows.map((f) => `${f.vaultId}:${f.name}`)).size;
   }
 
   async countAnalysesThisMonth(userId: string): Promise<number> {
@@ -74,16 +70,16 @@ export class SubscriptionService {
   }
 
   async getUsage(userId: string) {
-    const [projects, envVars, secretFiles, analyses, members, ciTokens] = await Promise.all([
+    const [projects, configFiles, secretFiles, analyses, members, ciTokens] = await Promise.all([
       this.countProjects(userId),
-      this.countDistinctEnvVars(userId),
+      this.countDistinctConfigFiles(userId),
       this.countDistinctSecretFiles(userId),
       this.countAnalysesThisMonth(userId),
       this.countDistinctMembers(userId),
       this.countActiveCiTokens(userId),
     ]);
 
-    return { projects, envVars, secretFiles, analyses, members, ciTokens };
+    return { projects, configFiles, secretFiles, analyses, members, ciTokens };
   }
 
   async getSubscriptionResponse(userId: string): Promise<SubscriptionResponse> {

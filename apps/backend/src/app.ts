@@ -9,19 +9,17 @@ import { validateEnv } from "@/env";
 import { secretScanCron } from "@/jobs/secret-scan.job";
 import { adminController } from "@/modules/admin";
 import { analysisController } from "@/modules/analysis";
+import { appController } from "@/modules/app";
 import { activityController, auditLogController } from "@/modules/audit-log";
 import { authController } from "@/modules/auth";
 import { ciAccessController, ciTokenController } from "@/modules/ci-token";
+import { configFileController } from "@/modules/config-file";
 import { convertController } from "@/modules/convert";
-import { envBundleController } from "@/modules/env-bundle";
-import { envIOController } from "@/modules/env-io";
-import { envVariableController } from "@/modules/env-variable";
 import { githubApiController } from "@/modules/github";
 import { invitationController, projectInvitationController } from "@/modules/invitation";
 import { licenseRuleController } from "@/modules/license-rule";
 import { notificationController } from "@/modules/notification";
 import { projectController } from "@/modules/project";
-import { projectVaultController } from "@/modules/project-vault";
 import { scanPatternController } from "@/modules/scan-pattern";
 import {
   secretFileController,
@@ -58,10 +56,8 @@ const app = new Elysia()
       .use(projectController)
       .use(invitationController)
       .use(projectInvitationController)
-      .use(projectVaultController)
-      .use(envVariableController)
-      .use(envIOController)
-      .use(envBundleController)
+      .use(appController)
+      .use(configFileController)
       .use(secretFileController)
       .use(sharedSecretAccessController)
       .use(sharedSecretController)

@@ -33,7 +33,7 @@ export const ProjectStatsResponseSchema = t.Object({
   projectCount: t.Number(),
   dependencyCount: t.Number(),
   vulnerabilityCount: t.Number(),
-  envVariableCount: t.Number(),
+  configFileCount: t.Number(),
 });
 
 export type CreateProjectBody = Static<typeof CreateProjectBodySchema>;

@@ -26,7 +26,7 @@ function makeSharedSecret(overrides: Record<string, unknown> = {}) {
     iv: "iv-val",
     authTag: "tag-val",
     passwordHash: null,
-    payloadType: "ENV_VARIABLES",
+    payloadType: "CONFIG_FILE",
     fileName: null,
     mimeType: null,
     status: "PENDING",
@@ -102,7 +102,7 @@ describe("SharedSecretService", () => {
       expect(result.shareUrl).toContain(`/s/${token}`);
       expect(mockPrisma.sharedSecret.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.objectContaining({ payloadType: "ENV_VARIABLES", token }),
+          data: expect.objectContaining({ payloadType: "CONFIG_FILE", token }),
         }),
       );
       expect(mockAuditLog.log).toHaveBeenCalledWith(
@@ -228,7 +228,7 @@ describe("SharedSecretService", () => {
 
       const info = await service.getInfo(token);
 
-      expect(info.payloadType).toBe("ENV_VARIABLES");
+      expect(info.payloadType).toBe("CONFIG_FILE");
       expect(info.hasPassword).toBe(false);
       expect(info.expiresAt).toEqual(futureDate);
     });
@@ -284,7 +284,7 @@ describe("SharedSecretService", () => {
 
       const result = await service.access(token, undefined, "1.2.3.4");
 
-      expect(result.payloadType).toBe("ENV_VARIABLES");
+      expect(result.payloadType).toBe("CONFIG_FILE");
       expect(result.encryptedPayload).toBe("cipher");
       expect(result.iv).toBe("iv-val");
       expect(result.authTag).toBe("tag-val");
@@ -328,7 +328,7 @@ describe("SharedSecretService", () => {
 
       const result = await service.access(token, "correct-password");
 
-      expect(result.payloadType).toBe("ENV_VARIABLES");
+      expect(result.payloadType).toBe("CONFIG_FILE");
     });
 
     it("should throw BadRequestError when password is required but not provided", async () => {

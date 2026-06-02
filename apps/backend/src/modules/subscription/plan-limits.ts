@@ -4,7 +4,7 @@ import type { SubscriptionPlan } from "@/generated/prisma";
 export interface PlanLimits {
   maxUsers: number;
   maxProjects: number;
-  maxEnvVars: number;
+  maxConfigFiles: number;
   maxSecretFiles: number;
   maxAnalysesPerMonth: number;
   maxCiTokens: number;
@@ -19,7 +19,7 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
   FREE: {
     maxUsers: 1,
     maxProjects: 3,
-    maxEnvVars: 100,
+    maxConfigFiles: 100,
     maxSecretFiles: 10,
     maxAnalysesPerMonth: 30,
     maxCiTokens: 5,
@@ -32,7 +32,7 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
   PRO: {
     maxUsers: 10,
     maxProjects: 20,
-    maxEnvVars: 1000,
+    maxConfigFiles: 1000,
     maxSecretFiles: 100,
     maxAnalysesPerMonth: 200,
     maxCiTokens: 20,
@@ -45,7 +45,7 @@ export const PLAN_LIMITS: Record<SubscriptionPlan, PlanLimits> = {
   TEAM: {
     maxUsers: INFINITE_LIMIT,
     maxProjects: INFINITE_LIMIT,
-    maxEnvVars: INFINITE_LIMIT,
+    maxConfigFiles: INFINITE_LIMIT,
     maxSecretFiles: INFINITE_LIMIT,
     maxAnalysesPerMonth: INFINITE_LIMIT,
     maxCiTokens: INFINITE_LIMIT,

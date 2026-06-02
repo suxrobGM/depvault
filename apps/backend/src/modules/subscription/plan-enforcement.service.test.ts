@@ -8,7 +8,7 @@ import { SubscriptionService } from "./subscription.service";
 
 interface UsageOverrides {
   projectCount?: number;
-  envVarCount?: number;
+  configFileCount?: number;
   secretFileCount?: number;
   analysisCount?: number;
   memberCount?: number;
@@ -26,7 +26,7 @@ function createMockSubscriptionService(plan = "FREE", overrides: UsageOverrides 
             ? {
                 maxUsers: 1,
                 maxProjects: 3,
-                maxEnvVars: 100,
+                maxConfigFiles: 100,
                 maxSecretFiles: 10,
                 maxAnalysesPerMonth: 30,
                 maxCiTokens: 5,
@@ -39,7 +39,7 @@ function createMockSubscriptionService(plan = "FREE", overrides: UsageOverrides 
             : {
                 maxUsers: INFINITE_LIMIT,
                 maxProjects: INFINITE_LIMIT,
-                maxEnvVars: INFINITE_LIMIT,
+                maxConfigFiles: INFINITE_LIMIT,
                 maxSecretFiles: INFINITE_LIMIT,
                 maxAnalysesPerMonth: INFINITE_LIMIT,
                 maxCiTokens: INFINITE_LIMIT,
@@ -52,7 +52,7 @@ function createMockSubscriptionService(plan = "FREE", overrides: UsageOverrides 
       }),
     ),
     countProjects: mock(() => Promise.resolve(overrides.projectCount ?? 0)),
-    countDistinctEnvVars: mock(() => Promise.resolve(overrides.envVarCount ?? 0)),
+    countDistinctConfigFiles: mock(() => Promise.resolve(overrides.configFileCount ?? 0)),
     countDistinctSecretFiles: mock(() => Promise.resolve(overrides.secretFileCount ?? 0)),
     countAnalysesThisMonth: mock(() => Promise.resolve(overrides.analysisCount ?? 0)),
     countDistinctMembers: mock(() =>
@@ -102,29 +102,29 @@ describe("PlanEnforcementService", () => {
     });
   });
 
-  describe("enforceEnvVarLimit", () => {
+  describe("enforceConfigFileLimit", () => {
     it("should allow when under limit (100 for free)", async () => {
       const prisma = createMockPrisma();
-      const subService = createMockSubscriptionService("FREE", { envVarCount: 99 });
+      const subService = createMockSubscriptionService("FREE", { configFileCount: 99 });
       const service = new PlanEnforcementService(prisma, subService);
-      expect(service.enforceEnvVarLimit("owner-1")).resolves.toBeUndefined();
+      expect(service.enforceConfigFileLimit("owner-1")).resolves.toBeUndefined();
     });
 
     it("should throw when at limit", async () => {
       const prisma = createMockPrisma();
-      const subService = createMockSubscriptionService("FREE", { envVarCount: 100 });
+      const subService = createMockSubscriptionService("FREE", { configFileCount: 100 });
       const service = new PlanEnforcementService(prisma, subService);
-      expect(service.enforceEnvVarLimit("owner-1")).rejects.toThrow(
-        "Environment variable limit reached (100/100)",
+      expect(service.enforceConfigFileLimit("owner-1")).rejects.toThrow(
+        "Config file limit reached (100/100)",
       );
     });
 
     it("should delegate counting to subscriptionService", async () => {
       const prisma = createMockPrisma();
-      const subService = createMockSubscriptionService("FREE", { envVarCount: 0 });
+      const subService = createMockSubscriptionService("FREE", { configFileCount: 0 });
       const service = new PlanEnforcementService(prisma, subService);
-      await service.enforceEnvVarLimit("owner-1");
-      expect(subService.countDistinctEnvVars).toHaveBeenCalled();
+      await service.enforceConfigFileLimit("owner-1");
+      expect(subService.countDistinctConfigFiles).toHaveBeenCalled();
       expect(subService.countDistinctSecretFiles).not.toHaveBeenCalled();
     });
   });
@@ -152,7 +152,7 @@ describe("PlanEnforcementService", () => {
       const service = new PlanEnforcementService(prisma, subService);
       await service.enforceSecretFileLimit("owner-1");
       expect(subService.countDistinctSecretFiles).toHaveBeenCalled();
-      expect(subService.countDistinctEnvVars).not.toHaveBeenCalled();
+      expect(subService.countDistinctConfigFiles).not.toHaveBeenCalled();
     });
   });
 
@@ -287,12 +287,12 @@ describe("PlanEnforcementService", () => {
       });
     });
 
-    it("should route envVar to enforceEnvVarLimit", async () => {
+    it("should route configFile to enforceConfigFileLimit", async () => {
       const prisma = createMockPrisma();
-      const subService = createMockSubscriptionService("FREE", { envVarCount: 0 });
+      const subService = createMockSubscriptionService("FREE", { configFileCount: 0 });
       const service = new PlanEnforcementService(prisma, subService);
-      await service.enforceForProject("project-1", "envVar");
-      expect(subService.countDistinctEnvVars).toHaveBeenCalled();
+      await service.enforceForProject("project-1", "configFile");
+      expect(subService.countDistinctConfigFiles).toHaveBeenCalled();
     });
 
     it("should route secretFile to enforceSecretFileLimit", async () => {
@@ -323,12 +323,12 @@ describe("PlanEnforcementService", () => {
     it("should throw at exactly the limit boundary", async () => {
       const prisma = createMockPrisma();
       const subService = createMockSubscriptionService("FREE", {
-        envVarCount: 100,
+        configFileCount: 100,
         secretFileCount: 10,
         analysisCount: 30,
       });
       const service = new PlanEnforcementService(prisma, subService);
-      expect(service.enforceEnvVarLimit("owner-1")).rejects.toBeInstanceOf(ForbiddenError);
+      expect(service.enforceConfigFileLimit("owner-1")).rejects.toBeInstanceOf(ForbiddenError);
       expect(service.enforceSecretFileLimit("owner-1")).rejects.toBeInstanceOf(ForbiddenError);
       expect(service.enforceAnalysisLimit("owner-1")).rejects.toBeInstanceOf(ForbiddenError);
     });

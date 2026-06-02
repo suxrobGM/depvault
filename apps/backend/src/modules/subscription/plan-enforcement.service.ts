@@ -9,7 +9,7 @@ type BooleanFeature = keyof {
   [K in keyof PlanLimits as PlanLimits[K] extends boolean ? K : never]: PlanLimits[K];
 };
 
-type LimitType = "project" | "envVar" | "secretFile" | "analysis" | "ciToken" | "member";
+type LimitType = "project" | "configFile" | "secretFile" | "analysis" | "ciToken" | "member";
 
 @singleton()
 export class PlanEnforcementService {
@@ -30,14 +30,14 @@ export class PlanEnforcementService {
     }
   }
 
-  async enforceEnvVarLimit(userId: string): Promise<void> {
+  async enforceConfigFileLimit(userId: string): Promise<void> {
     const { limits } = await this.subscriptionService.getUserPlan(userId);
-    if (limits.maxEnvVars === INFINITE_LIMIT) return;
+    if (limits.maxConfigFiles === INFINITE_LIMIT) return;
 
-    const count = await this.subscriptionService.countDistinctEnvVars(userId);
-    if (count >= limits.maxEnvVars) {
+    const count = await this.subscriptionService.countDistinctConfigFiles(userId);
+    if (count >= limits.maxConfigFiles) {
       throw new ForbiddenError(
-        `Environment variable limit reached (${count}/${limits.maxEnvVars}). Upgrade your plan to store more variables.`,
+        `Config file limit reached (${count}/${limits.maxConfigFiles}). Upgrade your plan to store more config files.`,
       );
     }
   }
@@ -109,8 +109,8 @@ export class PlanEnforcementService {
     switch (limitType) {
       case "project":
         return this.enforceProjectLimit(project.ownerId);
-      case "envVar":
-        return this.enforceEnvVarLimit(project.ownerId);
+      case "configFile":
+        return this.enforceConfigFileLimit(project.ownerId);
       case "secretFile":
         return this.enforceSecretFileLimit(project.ownerId);
       case "analysis":
