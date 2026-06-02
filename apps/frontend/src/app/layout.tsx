@@ -96,7 +96,9 @@ export default function RootLayout(props: PropsWithChildren): ReactElement {
   const { children } = props;
   return (
     <html lang="en">
+      {/* Browser extensions (e.g. Grammarly) inject attributes on <body> before hydration */}
       <body
+        suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} ${jetbrainsMono.variable} ${syne.variable}`}
       >
         <AppRouterCacheProvider>
