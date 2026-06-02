@@ -1,5 +1,6 @@
 using System.CommandLine;
 using DepVault.Cli.Crypto;
+using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
@@ -17,7 +18,8 @@ internal sealed class PushCommands(
     DekService dekService,
     RepoFileUploadService uploadService,
     IRepositoryLocator repositoryLocator,
-    IProjectContextResolver projectContextResolver)
+    IProjectContextResolver projectContextResolver,
+    IErrorHandler errorHandler)
 {
     public Command CreatePushCommand()
     {
@@ -87,7 +89,11 @@ internal sealed class PushCommands(
                 }
                 catch (Exception ex)
                 {
-                    ApiErrorHandler.HandleError(ex, $"Failed to push {file.RelativePath}");
+                    if (errorHandler.Handle(ex, $"Failed to push {file.RelativePath}") == ErrorDisposition.Abort)
+                    {
+                        Environment.ExitCode = 1;
+                        break;
+                    }
                 }
             }
 

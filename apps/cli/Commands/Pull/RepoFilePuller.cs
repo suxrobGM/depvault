@@ -1,7 +1,6 @@
 using DepVault.Cli.Auth;
 using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
-using DepVault.Cli.Utils;
 using FileEntry = DepVault.Cli.ApiClient.Api.Projects.Item.RepoMap.RepoMapGetResponse_apps_files;
 
 namespace DepVault.Cli.Commands.Pull;
@@ -13,7 +12,8 @@ namespace DepVault.Cli.Commands.Pull;
 /// </summary>
 public sealed class RepoFilePuller(
     IApiClientFactory clientFactory,
-    IOutputFormatter output)
+    IOutputFormatter output,
+    IErrorHandler errorHandler)
 {
     /// <summary>
     /// Pulls the given file entries for a project and writes them to disk. Returns the number of
@@ -63,7 +63,10 @@ public sealed class RepoFilePuller(
             }
             catch (Exception ex)
             {
-                ApiErrorHandler.HandleError(ex, $"Failed to pull {entry.RelativePath}");
+                if (errorHandler.Handle(ex, $"Failed to pull {entry.RelativePath}") == ErrorDisposition.Abort)
+                {
+                    break;
+                }
             }
         }
 

@@ -1,5 +1,6 @@
 using System.CommandLine;
 using DepVault.Cli.ApiClient.Api.Projects.Item.Analyses;
+using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
@@ -11,7 +12,8 @@ public sealed class AnalysisCommands(
     IFileScanner fileScanner,
     AnalysisClient analysisClient,
     IRepositoryLocator repositoryLocator,
-    IProjectContextResolver projectContextResolver)
+    IProjectContextResolver projectContextResolver,
+    IErrorHandler errorHandler)
 {
     public Command CreateAnalyzeCommand()
     {
@@ -83,7 +85,7 @@ public sealed class AnalysisCommands(
             }
             catch (Exception ex)
             {
-                ApiErrorHandler.HandleError(ex, "Analysis failed");
+                errorHandler.Handle(ex, "Analysis failed");
             }
         });
 

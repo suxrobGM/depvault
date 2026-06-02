@@ -1,6 +1,5 @@
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
-using DepVault.Cli.Utils;
 using Spectre.Console;
 
 namespace DepVault.Cli.Commands.Scan;
@@ -14,7 +13,8 @@ internal sealed class SecretFileScanner(
     IOutputFormatter output,
     IConsolePrompter prompter,
     IFileScanner fileScanner,
-    RepoFileUploadService uploadService)
+    RepoFileUploadService uploadService,
+    IErrorHandler errorHandler)
 {
     /// <summary>
     /// Discovers and (after selection) uploads secret files. The DEK is supplied lazily so the
@@ -59,7 +59,10 @@ internal sealed class SecretFileScanner(
             }
             catch (Exception ex)
             {
-                ApiErrorHandler.HandleError(ex, $"Failed to upload {file.RelativePath}");
+                if (errorHandler.Handle(ex, $"Failed to upload {file.RelativePath}") == ErrorDisposition.Abort)
+                {
+                    break;
+                }
             }
         }
     }

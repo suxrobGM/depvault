@@ -1,12 +1,12 @@
-using System.Runtime.ExceptionServices;
 using Microsoft.Kiota.Abstractions;
 using Spectre.Console;
 
 namespace DepVault.Cli.Utils;
 
 /// <summary>
-/// Detects plan limit errors from API responses and renders appropriate CLI output.
-/// Plan limit errors are 403 responses with messages containing "limit reached".
+/// Classifies API exceptions (auth / plan-limit) and renders their rich panels. Used by
+/// <c>Program.cs</c> at the top level (before/around the DI container) and composed by the injectable
+/// <c>IErrorHandler</c> for in-command error handling.
 /// </summary>
 public static class ApiErrorHandler
 {
@@ -32,30 +32,6 @@ public static class ApiErrorHandler
                || ex.GetType().Name.Contains("401Error", StringComparison.Ordinal);
     }
 
-    /// <summary>
-    /// Renders a plan limit error with upgrade guidance, an auth error with login guidance,
-    /// or a generic error message.
-    /// </summary>
-    /// <summary>
-    /// Handles API errors with friendly output. Auth errors are re-thrown so they
-    /// bubble up to the top-level handler instead of being swallowed in per-file loops.
-    /// </summary>
-    public static void HandleError(Exception ex, string fallbackMessage)
-    {
-        if (IsAuthError(ex))
-        {
-            ExceptionDispatchInfo.Capture(ex).Throw();
-        }
-
-        if (IsPlanLimitError(ex))
-        {
-            PrintPlanLimitError(ex.Message);
-            return;
-        }
-
-        AnsiConsole.MarkupLine($"[red]Error: {Markup.Escape(fallbackMessage)}: {Markup.Escape(ex.Message)}[/]");
-    }
-
     internal static void PrintAuthError()
     {
         AnsiConsole.WriteLine();
@@ -71,7 +47,7 @@ public static class ApiErrorHandler
         AnsiConsole.WriteLine();
     }
 
-    private static void PrintPlanLimitError(string message)
+    internal static void PrintPlanLimitError(string message)
     {
         AnsiConsole.WriteLine();
         AnsiConsole.Write(new Panel(

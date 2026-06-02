@@ -42,7 +42,7 @@ catch (Exception ex) when (ApiErrorHandler.IsAuthError(ex))
 }
 catch (ApiException ex)
 {
-    ApiErrorHandler.HandleError(ex, "API request failed");
+    services.GetRequiredService<IErrorHandler>().Handle(ex, "API request failed");
     return 1;
 }
 

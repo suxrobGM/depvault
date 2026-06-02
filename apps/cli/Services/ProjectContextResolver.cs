@@ -2,7 +2,6 @@ using DepVault.Cli.ApiClient.Api.Projects;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Config;
 using DepVault.Cli.Output;
-using DepVault.Cli.Utils;
 using Microsoft.Kiota.Abstractions;
 using Spectre.Console;
 
@@ -59,7 +58,8 @@ public sealed class ProjectContextResolver(
     IConfigService configService,
     IOutputFormatter output,
     IConsolePrompter prompter,
-    IRepositoryLocator repositoryLocator) : IProjectContextResolver
+    IRepositoryLocator repositoryLocator,
+    IErrorHandler errorHandler) : IProjectContextResolver
 {
     private const string CreateNewLabel = "+ Create new project";
 
@@ -240,7 +240,7 @@ public sealed class ProjectContextResolver(
         }
         catch (Exception ex)
         {
-            ApiErrorHandler.HandleError(ex, "Failed to create project");
+            errorHandler.Handle(ex, "Failed to create project");
             return null;
         }
 

@@ -26,6 +26,7 @@ internal static class Startup
             .AddSingleton<IAuthenticationProvider, TokenAuthProvider>()
             .AddSingleton<IApiClientFactory, ApiClientFactory>()
             .AddSingleton<IOutputFormatter, OutputFormatter>()
+            .AddSingleton<IErrorHandler, ErrorHandler>()
             .AddSingleton<IConsolePrompter, ConsolePrompter>()
             .AddSingleton<IFileScanner, FileScanner>()
             .AddSingleton<IRepositoryLocator, RepositoryLocator>()
