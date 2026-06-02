@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { BadRequestError, NotFoundError } from "@/common/errors";
 import { PrismaClient } from "@/generated/prisma";
+import { AppRepository } from "@/modules/app";
 import { AuditLogService } from "@/modules/audit-log";
 import { NotificationService } from "@/modules/notification/notification.service";
 import { PlanEnforcementService } from "@/modules/subscription/plan-enforcement.service";
@@ -12,31 +13,30 @@ const now = new Date();
 const projectId = "project-uuid";
 const userId = "user-uuid";
 const fileId = "file-uuid";
-const vaultId = "vault-uuid";
+const appId = "app-uuid";
 
-const mockVault = { id: vaultId, name: "api-prod", projectId };
+const mockApp = { id: appId, name: "api", appPath: "services/api", projectId };
 
 const mockSecretFile = {
   id: fileId,
-  vaultId,
-  name: "config.json",
+  appId,
+  relativePath: ".env.local",
+  environmentSlug: "production",
   description: "Config file",
   encryptedContent: Buffer.from("encrypted-content"),
   iv: "iv-base64",
   authTag: "tag-base64",
   mimeType: "application/json",
   fileSize: 1024,
+  isBinary: false,
   uploadedBy: userId,
   createdAt: now,
   updatedAt: now,
-  vault: { id: vaultId, name: "api-prod" },
+  app: { id: appId, name: "api", appPath: "services/api" },
 };
 
 function createMockPrisma() {
   return {
-    projectMember: {
-      findUnique: mock(() => Promise.resolve(null)),
-    },
     secretFile: {
       create: mock(() => Promise.resolve(mockSecretFile)),
       findMany: mock(() => Promise.resolve([mockSecretFile])),
@@ -49,12 +49,6 @@ function createMockPrisma() {
     secretFileVersion: {
       create: mock(() => Promise.resolve({})),
     },
-    secretFileAuditLog: {
-      create: mock(() => Promise.resolve({})),
-    },
-    vault: {
-      findFirst: mock(() => Promise.resolve(mockVault)),
-    },
   } as unknown as DeepMockProxy<PrismaClient>;
 }
 
@@ -62,6 +56,28 @@ function createMockAuditLogService() {
   return {
     log: mock(() => Promise.resolve()),
   } as unknown as AuditLogService;
+}
+
+function createMockAppRepository() {
+  return {
+    upsertByPath: mock(() => Promise.resolve(mockApp)),
+    requireApp: mock(() => Promise.resolve(mockApp)),
+  } as unknown as AppRepository;
+}
+
+function basePushBody() {
+  return {
+    appPath: "services/api",
+    appName: "api",
+    relativePath: ".env.local",
+    environmentSlug: "production",
+    encryptedContent: Buffer.from("encrypted-data").toString("base64"),
+    iv: "iv-base64",
+    authTag: "tag-base64",
+    mimeType: "application/json",
+    fileSize: 100,
+    isBinary: false,
+  };
 }
 
 describe("SecretFileService", () => {
@@ -82,69 +98,51 @@ describe("SecretFileService", () => {
       createMockAuditLogService(),
       mockNotificationService,
       mockPlanEnforcement,
+      createMockAppRepository(),
     );
-
-    // No encryption mocks needed — server no longer encrypts/decrypts
   });
 
-  describe("upload", () => {
-    it("should upload a pre-encrypted file", async () => {
-      const body = {
-        name: "config.json",
-        encryptedContent: Buffer.from("encrypted-data").toString("base64"),
-        iv: "iv-base64",
-        authTag: "tag-base64",
-        mimeType: "application/json",
-        fileSize: 100,
-        vaultId,
-        description: "Config file",
-      };
-      const result = await service.upload(projectId, userId, body);
+  describe("push", () => {
+    it("should push a pre-encrypted file and create a new record", async () => {
+      const result = await service.push(projectId, userId, basePushBody());
 
       expect(result.id).toBe(fileId);
-      expect(result.name).toBe("config.json");
+      expect(result.relativePath).toBe(".env.local");
+      expect(result.appName).toBe("api");
       expect(mockPrisma.secretFile.create).toHaveBeenCalled();
+    });
+
+    it("should snapshot a version and update when the file already exists", async () => {
+      mockPrisma.secretFile.findUnique.mockResolvedValueOnce(mockSecretFile);
+
+      await service.push(projectId, userId, basePushBody());
+
+      expect(mockPrisma.secretFileVersion.create).toHaveBeenCalled();
+      expect(mockPrisma.secretFile.update).toHaveBeenCalled();
+      expect(mockPrisma.secretFile.create).not.toHaveBeenCalled();
     });
 
     it("should reject executable file types", async () => {
       for (const ext of [".exe", ".sh", ".bat", ".cmd", ".ps1"]) {
-        const body = {
-          name: `script${ext}`,
-          encryptedContent: "base64data",
-          iv: "iv",
-          authTag: "tag",
-          mimeType: "application/octet-stream",
-          fileSize: 100,
-          vaultId,
-        };
-        expect(service.upload(projectId, userId, body)).rejects.toBeInstanceOf(BadRequestError);
+        const body = { ...basePushBody(), relativePath: `scripts/script${ext}` };
+        expect(service.push(projectId, userId, body)).rejects.toBeInstanceOf(BadRequestError);
       }
     });
 
-    it("should reject files with path traversal patterns", async () => {
-      const body = {
-        name: "../etc/passwd",
-        encryptedContent: "base64data",
-        iv: "iv",
-        authTag: "tag",
-        mimeType: "text/plain",
-        fileSize: 100,
-        vaultId,
-      };
-      expect(service.upload(projectId, userId, body)).rejects.toBeInstanceOf(BadRequestError);
+    it("should reject paths with traversal segments", async () => {
+      const body = { ...basePushBody(), relativePath: "../etc/passwd" };
+      expect(service.push(projectId, userId, body)).rejects.toBeInstanceOf(BadRequestError);
+    });
+
+    it("should accept forward-slash nested relative paths", async () => {
+      const body = { ...basePushBody(), relativePath: "src/config/.env.local" };
+      await service.push(projectId, userId, body);
+      expect(mockPrisma.secretFile.create).toHaveBeenCalled();
     });
 
     it("should store fileSize from body in the created record", async () => {
-      const body = {
-        name: "small.json",
-        encryptedContent: Buffer.from("data").toString("base64"),
-        iv: "iv",
-        authTag: "tag",
-        mimeType: "application/json",
-        fileSize: 512,
-        vaultId,
-      };
-      await service.upload(projectId, userId, body);
+      const body = { ...basePushBody(), fileSize: 512 };
+      await service.push(projectId, userId, body);
 
       expect(mockPrisma.secretFile.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -159,31 +157,22 @@ describe("SecretFileService", () => {
       const result = await service.list(projectId);
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0]!.name).toBe("config.json");
+      expect(result.items[0]!.relativePath).toBe(".env.local");
       expect(mockPrisma.secretFile.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          include: { vault: true },
+          include: { app: { select: { id: true, name: true, appPath: true } } },
         }),
       );
-    });
-
-    it("should allow VIEWER to list files", async () => {
-      const result = await service.list(projectId);
-
-      expect(result.items).toHaveLength(1);
     });
   });
 
   describe("download", () => {
-    it("should return encrypted content and metadata for OWNER", async () => {
-      mockPrisma.secretFile.findFirst.mockResolvedValueOnce({
-        ...mockSecretFile,
-        vault: { id: vaultId, name: "api-prod" },
-      });
+    it("should return encrypted content and metadata", async () => {
+      mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
 
       const result = await service.download(projectId, fileId, userId);
 
-      expect(result.name).toBe("config.json");
+      expect(result.relativePath).toBe(".env.local");
       expect(result.mimeType).toBe("application/json");
       expect(result.encryptedContent).toBeDefined();
       expect(result.iv).toBe("iv-base64");
@@ -215,65 +204,32 @@ describe("SecretFileService", () => {
   });
 
   describe("update", () => {
-    it("should update file name and description", async () => {
+    it("should update description and environment metadata only", async () => {
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
       mockPrisma.secretFile.update.mockResolvedValueOnce({
         ...mockSecretFile,
-        name: "updated.json",
         description: "Updated desc",
+        environmentSlug: "staging",
       });
 
       const result = await service.update(projectId, fileId, {
-        name: "updated.json",
         description: "Updated desc",
+        environmentSlug: "staging",
       });
 
-      expect(result.name).toBe("updated.json");
       expect(result.description).toBe("Updated desc");
+      expect(result.environmentSlug).toBe("staging");
       expect(mockPrisma.secretFile.update).toHaveBeenCalledWith({
         where: { id: fileId },
-        data: { name: "updated.json", description: "Updated desc" },
-        include: { vault: true },
+        data: { description: "Updated desc", environmentSlug: "staging" },
+        include: { app: { select: { id: true, name: true, appPath: true } } },
       });
-    });
-
-    it("should move file to a different vault", async () => {
-      const newVaultId = "new-vault-id";
-      mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
-      mockPrisma.secretFile.update.mockResolvedValueOnce({
-        ...mockSecretFile,
-        vaultId: newVaultId,
-      });
-
-      await service.update(projectId, fileId, { vaultId: newVaultId });
-
-      expect(mockPrisma.secretFile.update).toHaveBeenCalledWith({
-        where: { id: fileId },
-        data: { vaultId: newVaultId },
-        include: { vault: true },
-      });
-    });
-
-    it("should reject path traversal in new name", async () => {
-      mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
-
-      expect(service.update(projectId, fileId, { name: "../etc/passwd" })).rejects.toBeInstanceOf(
-        BadRequestError,
-      );
-    });
-
-    it("should reject executable extension in new name", async () => {
-      mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
-
-      expect(service.update(projectId, fileId, { name: "script.exe" })).rejects.toBeInstanceOf(
-        BadRequestError,
-      );
     });
 
     it("should throw NotFoundError when file doesn't exist", async () => {
       mockPrisma.secretFile.findFirst.mockResolvedValueOnce(null);
 
-      expect(service.update(projectId, fileId, { name: "new.json" })).rejects.toBeInstanceOf(
+      expect(service.update(projectId, fileId, { description: "x" })).rejects.toBeInstanceOf(
         NotFoundError,
       );
     });

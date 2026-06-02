@@ -24,7 +24,7 @@ export const AccessSecretBodySchema = t.Object({
 });
 
 export const SharedSecretInfoResponseSchema = t.Object({
-  payloadType: t.UnionEnum(["ENV_VARIABLES", "SECRET_FILE"] as const),
+  payloadType: t.UnionEnum(["CONFIG_FILE", "SECRET_FILE"] as const),
   hasPassword: t.Boolean(),
   fileName: t.Nullable(t.String()),
   mimeType: t.Nullable(t.String()),
@@ -35,7 +35,7 @@ export const AccessSecretResponseSchema = t.Object({
   encryptedPayload: t.String(),
   iv: t.String(),
   authTag: t.String(),
-  payloadType: t.UnionEnum(["ENV_VARIABLES", "SECRET_FILE"] as const),
+  payloadType: t.UnionEnum(["CONFIG_FILE", "SECRET_FILE"] as const),
   fileName: t.Nullable(t.String()),
   mimeType: t.Nullable(t.String()),
 });
@@ -48,7 +48,7 @@ export const CreateShareResponseSchema = t.Object({
 export const SharedSecretAuditItemSchema = t.Object({
   id: t.String(),
   token: t.String(),
-  payloadType: t.UnionEnum(["ENV_VARIABLES", "SECRET_FILE"] as const),
+  payloadType: t.UnionEnum(["CONFIG_FILE", "SECRET_FILE"] as const),
   status: t.UnionEnum(["PENDING", "VIEWED", "EXPIRED"] as const),
   hasPassword: t.Boolean(),
   fileName: t.Nullable(t.String()),

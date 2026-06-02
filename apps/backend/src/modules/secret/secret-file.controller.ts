@@ -7,6 +7,7 @@ import { StringIdParamSchema } from "@/types/request";
 import { MessageResponseSchema } from "@/types/response";
 import { SecretFileVersionService } from "./secret-file-version.service";
 import {
+  PushSecretFileBodySchema,
   SecretFileDownloadResponseSchema,
   SecretFileListQuerySchema,
   SecretFileListResponseSchema,
@@ -15,8 +16,6 @@ import {
   SecretFileRollbackParamsSchema,
   SecretFileVersionListResponseSchema,
   UpdateSecretFileBodySchema,
-  UploadNewVersionBodySchema,
-  UploadSecretFileBodySchema,
 } from "./secret-file.schema";
 import { SecretFileService } from "./secret-file.service";
 
@@ -37,7 +36,7 @@ export const secretFileController = new Elysia({
       operationId: "listSecretFiles",
       summary: "List secret files",
       description:
-        "List secret file metadata for a project. File contents are not included — use the download endpoint to retrieve decrypted content.",
+        "List secret file metadata for a project. File contents are not included — use the download endpoint to retrieve encrypted content.",
     },
   })
   .get(
@@ -56,24 +55,18 @@ export const secretFileController = new Elysia({
   )
   .use(projectGuard("EDITOR"))
   .post(
-    "/",
-    async ({ params, body, projectMember, request, server }) => {
-      return secretFileService.upload(
-        params.id,
-        projectMember.userId,
-        body,
-        getClientIp(request, server),
-      );
-    },
+    "/push",
+    async ({ params, body, projectMember, request, server }) =>
+      secretFileService.push(params.id, projectMember.userId, body, getClientIp(request, server)),
     {
       params: StringIdParamSchema,
-      body: UploadSecretFileBodySchema,
+      body: PushSecretFileBodySchema,
       response: SecretFileResponseSchema,
       detail: {
-        operationId: "uploadSecretFile",
-        summary: "Upload a secret file",
+        operationId: "pushSecretFile",
+        summary: "Push a secret file",
         description:
-          "Upload a client-encrypted secret file for the project. Executable file types (.exe, .sh, .bat, .cmd, .ps1) are rejected. Max file size is 25 MB. Only owners and editors can upload.",
+          "Upsert a client-encrypted secret file at its repo-relative path under an app. The app is resolved by appPath. If the file already exists, its previous content is snapshotted as a version before being replaced. Executable file types (.exe, .sh, .bat, .cmd, .ps1) are rejected. Max file size is 25 MB. Only owners and editors can push.",
       },
     },
   )
@@ -105,7 +98,7 @@ export const secretFileController = new Elysia({
       operationId: "updateSecretFile",
       summary: "Update secret file metadata",
       description:
-        "Update the name, description, or vault group of a secret file. Only owners and editors can update.",
+        "Update the description or environment of a secret file. The file's app and path cannot be changed — re-push to a new path instead. Only owners and editors can update.",
     },
   })
   .delete(
@@ -125,28 +118,6 @@ export const secretFileController = new Elysia({
         summary: "Delete a secret file",
         description:
           "Permanently delete a secret file and all its version history. Only owners and editors can delete.",
-      },
-    },
-  )
-  .post(
-    "/:fileId/content",
-    async ({ params, body, projectMember, request, server }) =>
-      secretFileService.uploadNewVersion(
-        params.id,
-        params.fileId,
-        projectMember.userId,
-        body,
-        getClientIp(request, server),
-      ),
-    {
-      params: SecretFileParamsSchema,
-      body: UploadNewVersionBodySchema,
-      response: SecretFileResponseSchema,
-      detail: {
-        operationId: "uploadSecretFileVersion",
-        summary: "Upload a new version of a secret file",
-        description:
-          "Replace a secret file's content with a new client-encrypted upload. The current content is saved as a version before being replaced. Only owners and editors can upload new versions.",
       },
     },
   )

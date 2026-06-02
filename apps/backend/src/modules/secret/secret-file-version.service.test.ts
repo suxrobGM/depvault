@@ -10,25 +10,26 @@ const projectId = "project-uuid";
 const userId = "user-uuid";
 const fileId = "file-uuid";
 const versionId = "version-uuid";
+const appId = "app-uuid";
 
 const fakeEncryptedContent = Buffer.from("encrypted-content");
 
-const vaultId = "vault-uuid";
-
 const mockSecretFile = {
   id: fileId,
-  vaultId,
-  name: "config.json",
+  appId,
+  relativePath: ".env.local",
+  environmentSlug: "production",
   description: "Config file",
   encryptedContent: fakeEncryptedContent,
   iv: "iv-base64",
   authTag: "tag-base64",
   mimeType: "application/json",
   fileSize: 1024,
+  isBinary: false,
   uploadedBy: userId,
   createdAt: now,
   updatedAt: now,
-  vault: { id: vaultId, name: "api-prod" },
+  app: { id: appId, name: "api", appPath: "services/api" },
 };
 
 const mockVersion = {
@@ -38,15 +39,14 @@ const mockVersion = {
   iv: "old-iv",
   authTag: "old-tag",
   fileSize: 512,
+  isBinary: false,
   changedBy: userId,
+  message: null,
   createdAt: now,
 };
 
 function createMockPrisma() {
   return {
-    projectMember: {
-      findUnique: mock(() => Promise.resolve(null)),
-    },
     secretFile: {
       findFirst: mock(() => Promise.resolve(null)),
       update: mock(() => Promise.resolve(mockSecretFile)),
@@ -99,6 +99,7 @@ describe("SecretFileVersionService", () => {
           iv: mockSecretFile.iv,
           authTag: mockSecretFile.authTag,
           fileSize: mockSecretFile.fileSize,
+          isBinary: mockSecretFile.isBinary,
           changedBy: userId,
         },
       });
@@ -109,8 +110,9 @@ describe("SecretFileVersionService", () => {
           iv: mockVersion.iv,
           authTag: mockVersion.authTag,
           fileSize: mockVersion.fileSize,
+          isBinary: mockVersion.isBinary,
         },
-        include: { vault: true },
+        include: { app: { select: { id: true, name: true, appPath: true } } },
       });
     });
 
@@ -119,6 +121,29 @@ describe("SecretFileVersionService", () => {
       mockPrisma.secretFileVersion.findFirst.mockResolvedValueOnce(null);
 
       expect(service.rollback(projectId, fileId, versionId, userId)).rejects.toBeInstanceOf(
+        NotFoundError,
+      );
+    });
+  });
+
+  describe("downloadVersion", () => {
+    it("should return previous-version content with file metadata", async () => {
+      mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
+      mockPrisma.secretFileVersion.findFirst.mockResolvedValueOnce(mockVersion);
+
+      const result = await service.downloadVersion(projectId, fileId, versionId);
+
+      expect(result.relativePath).toBe(".env.local");
+      expect(result.mimeType).toBe("application/json");
+      expect(result.iv).toBe("old-iv");
+      expect(result.authTag).toBe("old-tag");
+    });
+
+    it("should throw NotFoundError when version doesn't exist", async () => {
+      mockPrisma.secretFile.findFirst.mockResolvedValueOnce(mockSecretFile);
+      mockPrisma.secretFileVersion.findFirst.mockResolvedValueOnce(null);
+
+      expect(service.downloadVersion(projectId, fileId, versionId)).rejects.toBeInstanceOf(
         NotFoundError,
       );
     });

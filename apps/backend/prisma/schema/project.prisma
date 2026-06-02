@@ -17,7 +17,7 @@ model Project {
   members          ProjectMember[]
   invitations      ProjectInvitation[]
   analyses         Analysis[]
-  vaults           Vault[]
+  apps             App[]
   auditLogs        AuditLog[]
   sharedSecrets    SharedSecret[]
   scanPatterns     ScanPattern[]

@@ -40,7 +40,7 @@ export class SharedSecretService {
         iv: body.iv,
         authTag: body.authTag,
         passwordHash,
-        payloadType: "ENV_VARIABLES",
+        payloadType: "CONFIG_FILE",
         expiresAt,
       },
     });
@@ -53,7 +53,7 @@ export class SharedSecretService {
       resourceId: secret.id,
       ipAddress,
       metadata: {
-        payloadType: "ENV_VARIABLES",
+        payloadType: "CONFIG_FILE",
         variableCount: body.variableIds?.length ?? 0,
       },
     });
@@ -120,7 +120,7 @@ export class SharedSecretService {
     }
 
     return {
-      payloadType: secret.payloadType as "ENV_VARIABLES" | "SECRET_FILE",
+      payloadType: secret.payloadType as "CONFIG_FILE" | "SECRET_FILE",
       hasPassword: secret.passwordHash !== null,
       fileName: secret.fileName,
       mimeType: secret.mimeType,
@@ -140,7 +140,7 @@ export class SharedSecretService {
       encryptedPayload: secret.encryptedPayload,
       iv: secret.iv,
       authTag: secret.authTag,
-      payloadType: secret.payloadType as "ENV_VARIABLES" | "SECRET_FILE",
+      payloadType: secret.payloadType as "CONFIG_FILE" | "SECRET_FILE",
       fileName: secret.fileName,
       mimeType: secret.mimeType,
     };
@@ -174,7 +174,7 @@ export class SharedSecretService {
       items: secrets.map((s) => ({
         id: s.id,
         token: s.token,
-        payloadType: s.payloadType as "ENV_VARIABLES" | "SECRET_FILE",
+        payloadType: s.payloadType as "CONFIG_FILE" | "SECRET_FILE",
         status: s.status as "PENDING" | "VIEWED" | "EXPIRED",
         hasPassword: s.passwordHash !== null,
         fileName: s.fileName,

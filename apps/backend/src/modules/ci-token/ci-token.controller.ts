@@ -54,7 +54,7 @@ const ciTokenWriteController = new Elysia({
       detail: {
         operationId: "createCiToken",
         summary: "Create CI token",
-        description: "Generate a scoped CI/CD token bound to a specific environment.",
+        description: "Generate a scoped CI/CD token bound to a specific app and environment.",
       },
     },
   )
@@ -101,7 +101,7 @@ export const ciAccessController = new Elysia({
         operationId: "fetchCiSecrets",
         summary: "Fetch secrets",
         description:
-          "Fetch all environment variables and secret file metadata for the token's bound environment.",
+          "Fetch base and environment-scoped config and secret file ciphertext for the token's app.",
       },
     },
   )

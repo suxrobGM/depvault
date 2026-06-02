@@ -18,7 +18,9 @@ export class SecretFileVersionService {
         id: true,
         secretFileId: true,
         fileSize: true,
+        isBinary: true,
         changedBy: true,
+        message: true,
         createdAt: true,
       },
     });
@@ -49,6 +51,7 @@ export class SecretFileVersionService {
         iv: file.iv,
         authTag: file.authTag,
         fileSize: file.fileSize,
+        isBinary: file.isBinary,
         changedBy: userId,
       },
     });
@@ -60,11 +63,12 @@ export class SecretFileVersionService {
         iv: version.iv,
         authTag: version.authTag,
         fileSize: version.fileSize,
+        isBinary: version.isBinary,
       },
-      include: { vault: true },
+      include: { app: { select: { id: true, name: true, appPath: true } } },
     });
 
-    return toSecretFileResponse(updated, updated.vault);
+    return toSecretFileResponse(updated, updated.app);
   }
 
   async downloadVersion(
@@ -86,14 +90,14 @@ export class SecretFileVersionService {
       encryptedContent: Buffer.from(version.encryptedContent).toString("base64"),
       iv: version.iv,
       authTag: version.authTag,
-      name: file.name,
+      relativePath: file.relativePath,
       mimeType: file.mimeType,
     };
   }
 
   private async findFileOrThrow(projectId: string, fileId: string) {
     const file = await this.prisma.secretFile.findFirst({
-      where: { id: fileId, vault: { projectId } },
+      where: { id: fileId, app: { projectId } },
     });
 
     if (!file) {

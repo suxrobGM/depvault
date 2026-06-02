@@ -3,25 +3,29 @@ import type { SecretFileResponse } from "./secret-file.schema";
 export function toSecretFileResponse(
   file: {
     id: string;
-    vaultId: string;
-    name: string;
+    relativePath: string;
+    environmentSlug: string | null;
     description: string | null;
     mimeType: string;
     fileSize: number;
+    isBinary: boolean;
     uploadedBy: string;
     createdAt: Date;
     updatedAt: Date;
   },
-  vault: { id: string; name: string },
+  app: { id: string; name: string; appPath: string },
 ): SecretFileResponse {
   return {
     id: file.id,
-    vaultId: vault.id,
-    vaultName: vault.name,
-    name: file.name,
+    appId: app.id,
+    appName: app.name,
+    appPath: app.appPath,
+    relativePath: file.relativePath,
+    environmentSlug: file.environmentSlug,
     description: file.description,
     mimeType: file.mimeType,
     fileSize: file.fileSize,
+    isBinary: file.isBinary,
     uploadedBy: file.uploadedBy,
     createdAt: file.createdAt,
     updatedAt: file.updatedAt,

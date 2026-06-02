@@ -8,7 +8,9 @@ import { AuditLogService } from "@/modules/audit-log";
 import { PlanEnforcementService } from "@/modules/subscription/plan-enforcement.service";
 import type { PaginatedResponse } from "@/types/response";
 import type {
+  CiConfigFile,
   CiFileDownloadResponse,
+  CiSecretFile,
   CiSecretsResponse,
   CiTokenCreatedResponse,
   CiTokenResponse,
@@ -17,6 +19,7 @@ import type {
 
 const TOKEN_PREFIX = "dvci_";
 const MAX_EXPIRY_SECONDS = 31536000; // 1 year
+const BASE_ENVIRONMENT = "base";
 
 @singleton()
 export class CiTokenService {
@@ -26,6 +29,7 @@ export class CiTokenService {
     private readonly planEnforcement: PlanEnforcementService,
   ) {}
 
+  /** Generate a CI token scoped to an app + environment, re-wrapping the client DEK under the token key. */
   async create(
     projectId: string,
     userId: string,
@@ -34,11 +38,11 @@ export class CiTokenService {
   ): Promise<CiTokenCreatedResponse> {
     await this.planEnforcement.enforceForProject(projectId, "ciToken");
 
-    const vault = await this.prisma.vault.findFirst({
-      where: { id: body.vaultId, projectId },
+    const app = await this.prisma.app.findFirst({
+      where: { id: body.appId, projectId },
     });
-    if (!vault) {
-      throw new NotFoundError("Vault not found in this project");
+    if (!app) {
+      throw new NotFoundError("App not found in this project");
     }
 
     const ipAllowlist = body.ipAllowlist ?? [];
@@ -71,7 +75,8 @@ export class CiTokenService {
     const ciToken = await this.prisma.ciToken.create({
       data: {
         projectId,
-        vaultId: body.vaultId,
+        appId: body.appId,
+        environmentSlug: body.environmentSlug,
         createdBy: userId,
         name: body.name,
         tokenHash,
@@ -91,7 +96,7 @@ export class CiTokenService {
       resourceType: "CI_TOKEN",
       resourceId: ciToken.id,
       ipAddress,
-      metadata: { name: body.name, vaultName: vault.name },
+      metadata: { name: body.name, appName: app.name, environmentSlug: body.environmentSlug },
     });
 
     return {
@@ -109,7 +114,7 @@ export class CiTokenService {
         where,
         include: {
           creator: { select: { email: true } },
-          vault: { select: { name: true } },
+          app: { select: { name: true } },
         },
         skip: (page - 1) * limit,
         take: limit,
@@ -123,8 +128,9 @@ export class CiTokenService {
       name: token.name,
       tokenPrefix: token.tokenPrefix,
       projectId: token.projectId,
-      vaultId: token.vaultId,
-      vaultName: token.vault.name,
+      appId: token.appId,
+      appName: token.app.name,
+      environmentSlug: token.environmentSlug,
       ipAllowlist: token.ipAllowlist,
       expiresAt: token.expiresAt,
       lastUsedAt: token.lastUsedAt,
@@ -193,35 +199,50 @@ export class CiTokenService {
     return ciToken;
   }
 
+  /** Return base + token-environment config and secret file ciphertext for the token's app. */
   async fetchSecrets(
     ciToken: CiToken,
     rawToken: string,
     pipelineRunId: string | null,
     clientIp: string,
   ): Promise<CiSecretsResponse> {
-    const [variables, files] = await Promise.all([
-      this.prisma.envVariable.findMany({
-        where: { vaultId: ciToken.vaultId },
+    const [configFiles, secretFiles] = await Promise.all([
+      this.prisma.configFile.findMany({
+        where: {
+          appId: ciToken.appId,
+          environmentSlug: { in: [BASE_ENVIRONMENT, ciToken.environmentSlug] },
+        },
       }),
       this.prisma.secretFile.findMany({
-        where: { vaultId: ciToken.vaultId },
-        select: { id: true, name: true, encryptedContent: true, iv: true, authTag: true },
+        where: {
+          appId: ciToken.appId,
+          OR: [
+            { environmentSlug: null },
+            { environmentSlug: { in: [BASE_ENVIRONMENT, ciToken.environmentSlug] } },
+          ],
+        },
       }),
     ]);
 
-    const encryptedVariables = variables.map((v) => ({
-      key: v.key,
-      encryptedValue: v.encryptedValue,
-      iv: v.iv,
-      authTag: v.authTag,
-    }));
-
-    const fileList = files.map((f) => ({
-      id: f.id,
-      name: f.name,
+    const configFileList: CiConfigFile[] = configFiles.map((f) => ({
+      relativePath: f.relativePath,
+      format: f.format,
+      environmentSlug: f.environmentSlug,
       encryptedContent: Buffer.from(f.encryptedContent).toString("base64"),
       iv: f.iv,
       authTag: f.authTag,
+      isBinary: f.isBinary,
+    }));
+
+    const secretFileList: CiSecretFile[] = secretFiles.map((f) => ({
+      id: f.id,
+      relativePath: f.relativePath,
+      environmentSlug: f.environmentSlug,
+      mimeType: f.mimeType,
+      encryptedContent: Buffer.from(f.encryptedContent).toString("base64"),
+      iv: f.iv,
+      authTag: f.authTag,
+      isBinary: f.isBinary,
     }));
 
     await this.auditLogService.log({
@@ -232,8 +253,8 @@ export class CiTokenService {
       ipAddress: clientIp,
       metadata: {
         pipelineRunId: pipelineRunId ?? null,
-        variableCount: encryptedVariables.length,
-        fileCount: fileList.length,
+        configFileCount: configFileList.length,
+        secretFileCount: secretFileList.length,
       },
     });
 
@@ -241,14 +262,14 @@ export class CiTokenService {
       wrappedDek: ciToken.wrappedDek,
       wrappedDekIv: ciToken.wrappedDekIv,
       wrappedDekTag: ciToken.wrappedDekTag,
-      variables: encryptedVariables,
-      files: fileList,
+      configFiles: configFileList,
+      secretFiles: secretFileList,
     };
   }
 
   async downloadFile(ciToken: CiToken, fileId: string): Promise<CiFileDownloadResponse> {
     const file = await this.prisma.secretFile.findFirst({
-      where: { id: fileId, vaultId: ciToken.vaultId },
+      where: { id: fileId, appId: ciToken.appId },
     });
 
     if (!file) {
@@ -259,7 +280,7 @@ export class CiTokenService {
       encryptedContent: Buffer.from(file.encryptedContent).toString("base64"),
       iv: file.iv,
       authTag: file.authTag,
-      name: file.name,
+      relativePath: file.relativePath,
       mimeType: file.mimeType,
     };
   }
