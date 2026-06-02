@@ -6,7 +6,7 @@ import { createRandomToken, hashToken } from "@/common/utils/password";
 import { PrismaClient, type CiToken } from "@/generated/prisma";
 import { AuditLogService } from "@/modules/audit-log";
 import { PlanEnforcementService } from "@/modules/subscription/plan-enforcement.service";
-import type { PaginatedResponse } from "@/types/response";
+import type { MessageResponse, PaginatedResponse } from "@/types/response";
 import type {
   CiConfigFile,
   CiFileDownloadResponse,
@@ -149,7 +149,7 @@ export class CiTokenService {
     tokenId: string,
     userId: string,
     ipAddress: string,
-  ): Promise<{ message: string }> {
+  ): Promise<MessageResponse> {
     const ciToken = await this.prisma.ciToken.findFirst({
       where: { id: tokenId, projectId },
     });

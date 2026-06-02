@@ -5,7 +5,7 @@ import { AppRepository } from "@/modules/app";
 import { AuditLogService } from "@/modules/audit-log";
 import { NotificationService } from "@/modules/notification/notification.service";
 import { PlanEnforcementService } from "@/modules/subscription/plan-enforcement.service";
-import type { PaginatedResponse } from "@/types/response";
+import type { MessageResponse, PaginatedResponse } from "@/types/response";
 import { toSecretFileResponse } from "./secret-file.mapper";
 import type {
   PushSecretFileBody,
@@ -200,7 +200,7 @@ export class SecretFileService {
     fileId: string,
     userId: string,
     ipAddress = "unknown",
-  ): Promise<{ message: string }> {
+  ): Promise<MessageResponse> {
     const file = await this.findFileOrThrow(projectId, fileId);
     await this.prisma.secretFile.delete({ where: { id: fileId } });
 
