@@ -15,7 +15,8 @@ internal sealed class PushCommands(
     CommandContext ctx,
     IFileScanner fileScanner,
     DekService dekService,
-    RepoFileUploadService uploadService)
+    RepoFileUploadService uploadService,
+    IRepositoryLocator repositoryLocator)
 {
     public Command CreatePushCommand()
     {
@@ -52,7 +53,7 @@ internal sealed class PushCommands(
                 return;
             }
 
-            var repoRoot = GitUtils.FindRepoRoot();
+            var repoRoot = repositoryLocator.FindRepoRoot();
             var configPushed = 0;
             var secretsPushed = 0;
 
@@ -96,7 +97,7 @@ internal sealed class PushCommands(
             }
 
             var fullPath = Path.GetFullPath(explicitFile);
-            var relativePath = Path.GetRelativePath(GitUtils.FindRepoRoot(), fullPath).Replace('\\', '/');
+            var relativePath = Path.GetRelativePath(repositoryLocator.FindRepoRoot(), fullPath).Replace('\\', '/');
             var fileName = Path.GetFileName(fullPath);
             var category = fileScanner.ClassifyFile(fileName);
             return [new DiscoveredFile(fullPath, relativePath, fileName, category)];
@@ -108,7 +109,7 @@ internal sealed class PushCommands(
             return [];
         }
 
-        var discovered = fileScanner.FindAllPushableFiles(GitUtils.FindRepoRoot());
+        var discovered = fileScanner.FindAllPushableFiles(repositoryLocator.FindRepoRoot());
         if (discovered.Count == 0)
         {
             ctx.Output.PrintError("No config or secret files found in repository.");

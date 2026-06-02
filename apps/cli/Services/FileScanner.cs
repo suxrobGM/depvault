@@ -63,12 +63,6 @@ public sealed class FileScanner : IFileScanner
         ".cs", ".go", ".rs", ".py", ".java", ".kt", ".rb", ".php"
     };
 
-    /// <summary>Directory names that hold fixtures/sample data rather than real secrets.</summary>
-    private static readonly HashSet<string> SecretExcludedDirs = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "fixtures", "testdata", "tests", "__tests__", "docs"
-    };
-
     /// <summary>Suffixes marking placeholder/sample files that never contain real secrets.</summary>
     private static readonly string[] SampleSuffixes = [".example", ".sample", ".template"];
 
@@ -247,7 +241,7 @@ public sealed class FileScanner : IFileScanner
         var parts = file.RelativePath.Split('/');
         for (var i = 0; i < parts.Length - 1; i++)
         {
-            if (SecretExcludedDirs.Contains(parts[i]))
+            if (ExcludedDirectories.FixtureDirs.Contains(parts[i]))
             {
                 return false;
             }

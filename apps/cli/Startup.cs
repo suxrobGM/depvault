@@ -28,6 +28,7 @@ internal static class Startup
             .AddSingleton<IOutputFormatter, OutputFormatter>()
             .AddSingleton<IConsolePrompter, ConsolePrompter>()
             .AddSingleton<IFileScanner, FileScanner>()
+            .AddSingleton<IRepositoryLocator, RepositoryLocator>()
             .AddSingleton<ISecretDetector, SecretDetector>()
             .AddSingleton<IGitHubReleaseClient, GitHubReleaseClient>()
             .AddSingleton<IVersionChecker, VersionChecker>()

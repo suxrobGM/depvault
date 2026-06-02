@@ -23,7 +23,8 @@ public sealed class CommandContext(
     IConfigService configService,
     IOutputFormatter output,
     IConsolePrompter prompter,
-    IApiClientFactory clientFactory)
+    IApiClientFactory clientFactory,
+    IRepositoryLocator repositoryLocator)
 {
     public IOutputFormatter Output => output;
     public IConsolePrompter Prompter => prompter;
@@ -134,7 +135,7 @@ public sealed class CommandContext(
     {
         try
         {
-            var repoName = GitUtils.GetRepoName();
+            var repoName = repositoryLocator.GetRepoName();
             if (repoName is null)
             {
                 return null;

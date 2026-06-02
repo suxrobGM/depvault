@@ -9,7 +9,8 @@ namespace DepVault.Cli.Commands;
 public sealed class AnalysisCommands(
     CommandContext ctx,
     IFileScanner fileScanner,
-    AnalysisClient analysisClient)
+    AnalysisClient analysisClient,
+    IRepositoryLocator repositoryLocator)
 {
     public Command CreateAnalyzeCommand()
     {
@@ -34,7 +35,7 @@ public sealed class AnalysisCommands(
 
             var filePath = ctx.ResolveFileInteractive(
                 parseResult, fileOpt,
-                () => fileScanner.FindDependencyFiles(GitUtils.FindRepoRoot()),
+                () => fileScanner.FindDependencyFiles(repositoryLocator.FindRepoRoot()),
                 "dependency");
 
             if (filePath is null)
@@ -52,7 +53,7 @@ public sealed class AnalysisCommands(
             {
                 var content = await File.ReadAllTextAsync(filePath, cancellationToken);
                 var fileName = Path.GetFileName(filePath);
-                var relativePath = Path.GetRelativePath(GitUtils.FindRepoRoot(), Path.GetFullPath(filePath));
+                var relativePath = Path.GetRelativePath(repositoryLocator.FindRepoRoot(), Path.GetFullPath(filePath));
 
                 var result = await AnsiConsole.Status()
                     .Spinner(Spinner.Known.Dots)

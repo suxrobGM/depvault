@@ -1,6 +1,7 @@
 using System.CommandLine;
 using DepVault.Cli.Commands.Pull;
 using DepVault.Cli.Crypto;
+using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
 using AppEntry = DepVault.Cli.ApiClient.Api.Projects.Item.RepoMap.RepoMapGetResponse_apps;
@@ -17,7 +18,8 @@ namespace DepVault.Cli.Commands;
 public sealed class PullCommands(
     CommandContext ctx,
     DekService dekService,
-    RepoFilePuller repoFilePuller)
+    RepoFilePuller repoFilePuller,
+    IRepositoryLocator repositoryLocator)
 {
     private const string BaseSlug = "base";
 
@@ -70,7 +72,7 @@ public sealed class PullCommands(
             var envFilter = NormalizeEnv(parseResult.GetValue(environmentOpt));
             var includeBase = parseResult.GetValue(includeBaseOpt);
             var includeSecrets = parseResult.GetValue(includeSecretsOpt);
-            var outputDir = Path.GetFullPath(parseResult.GetValue(outputDirOpt) ?? GitUtils.FindRepoRoot());
+            var outputDir = Path.GetFullPath(parseResult.GetValue(outputDirOpt) ?? repositoryLocator.FindRepoRoot());
             var force = parseResult.GetValue(forceOpt);
 
             var repoMap = await AnsiConsole.Status()

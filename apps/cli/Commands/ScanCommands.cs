@@ -2,6 +2,7 @@ using System.CommandLine;
 using DepVault.Cli.Commands.Scan;
 using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
+using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
 
@@ -15,7 +16,8 @@ internal sealed class ScanCommands(
     EnvFileScanner envFileScanner,
     SecretLeakScanner secretLeakScanner,
     SecretFileScanner secretFileScanner,
-    DekService dekService)
+    DekService dekService,
+    IRepositoryLocator repositoryLocator)
 {
     public Command CreateScanCommand()
     {
@@ -44,7 +46,7 @@ internal sealed class ScanCommands(
             }
 
             renderer.PrintBanner();
-            var repoPath = Path.GetFullPath(parseResult.GetValue(pathOpt) ?? GitUtils.FindRepoRoot());
+            var repoPath = Path.GetFullPath(parseResult.GetValue(pathOpt) ?? repositoryLocator.FindRepoRoot());
 
             if (!Directory.Exists(repoPath))
             {
