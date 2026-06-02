@@ -29,6 +29,7 @@ internal static class Startup
             .AddSingleton<IConsolePrompter, ConsolePrompter>()
             .AddSingleton<IFileScanner, FileScanner>()
             .AddSingleton<IRepositoryLocator, RepositoryLocator>()
+            .AddSingleton<IProjectContextResolver, ProjectContextResolver>()
             .AddSingleton<ISecretDetector, SecretDetector>()
             .AddSingleton<IGitHubReleaseClient, GitHubReleaseClient>()
             .AddSingleton<IVersionChecker, VersionChecker>()
@@ -39,7 +40,6 @@ internal static class Startup
             .AddSingleton<DekService>()
             .AddSingleton<AnalysisClient>()
             // Scan steps
-            .AddSingleton<ProjectResolver>()
             .AddSingleton<DependencyScanner>()
             .AddSingleton<EnvFileScanner>()
             .AddSingleton<SecretLeakScanner>()

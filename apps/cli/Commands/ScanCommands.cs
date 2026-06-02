@@ -11,7 +11,7 @@ namespace DepVault.Cli.Commands;
 internal sealed class ScanCommands(
     CommandContext ctx,
     ConsoleRenderer renderer,
-    ProjectResolver projectResolver,
+    IProjectContextResolver projectContextResolver,
     DependencyScanner dependencyScanner,
     EnvFileScanner envFileScanner,
     SecretLeakScanner secretLeakScanner,
@@ -57,12 +57,16 @@ internal sealed class ScanCommands(
             AnsiConsole.MarkupLine($"[cyan1]Scanning:[/] {Markup.Escape(repoPath)}");
             AnsiConsole.WriteLine();
 
-            var projectId = await projectResolver.ResolveAsync(
-                parseResult.GetValue(projectOpt), repoPath, cancellationToken);
-            if (projectId is null)
+            var resolution = await projectContextResolver.ResolveAsync(
+                parseResult.GetValue(projectOpt),
+                ResolutionPolicy.AllowInteractive | ResolutionPolicy.AllowCreate | ResolutionPolicy.ConfirmActive,
+                cancellationToken);
+            if (resolution is null)
             {
                 return;
             }
+
+            var projectId = resolution.ProjectId;
 
             var results = new ScanResults();
 
