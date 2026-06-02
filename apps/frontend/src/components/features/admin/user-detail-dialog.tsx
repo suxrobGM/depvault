@@ -129,9 +129,9 @@ export function UserDetailDialog(props: UserDetailDialogProps): ReactElement {
                 </Box>
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    {user.usage.secretFiles}
+                    {user.usage.repoFiles}
                   </Typography>
-                  <Typography variant="captionMuted">Secret Files</Typography>
+                  <Typography variant="captionMuted">Files</Typography>
                 </Box>
               </Stack>
             </Box>

@@ -4,7 +4,7 @@ description: End-to-end encryption architecture and security rules
 
 # End-to-End Encryption
 
-All secrets (env variables, secret files) are encrypted client-side. The server stores only ciphertext and cannot decrypt user data.
+All files (`RepoFile`, both `kind`s) are encrypted client-side and stored as one ciphertext blob per file. The server stores only ciphertext and never decrypts.
 
 ## Key Hierarchy
 
@@ -24,26 +24,30 @@ Recovery Key (random 256-bit, shown once at vault setup)
 
 ## Key Files
 
-| Layer    | File                                             | Purpose                                                  |
-| -------- | ------------------------------------------------ | -------------------------------------------------------- |
-| Frontend | `apps/frontend/src/lib/crypto/`                  | WebCrypto modules: encoding, keys, AES-GCM, ECDH, etc.   |
-| Frontend | `apps/frontend/src/lib/crypto/vault-*.ts`        | Vault operations: lifecycle, grants, re-keying           |
-| Frontend | `apps/frontend/src/providers/vault-provider.tsx` | Vault state, DEK caching, key distribution               |
-| Frontend | `apps/frontend/src/hooks/use-vault.ts`           | `useVault()` hook for components                         |
-| Backend  | `apps/backend/src/modules/vault/`                | Vault API: setup, status, password, recovery, key grants |
-| Backend  | `apps/backend/prisma/schema/vault.prisma`        | `UserVault` + `ProjectKeyGrant` models                   |
-| CLI      | `apps/cli/Crypto/VaultCrypto.cs`                 | .NET AES-256-GCM, PBKDF2, HKDF                           |
-| CLI      | `apps/cli/Crypto/DekResolver.cs`                 | Resolves DEK for pull/push (vault password or CI token)  |
+| Layer    | File                                                                                | Purpose                                                                                                         |
+| -------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Frontend | `apps/frontend/src/lib/crypto/`                                                     | WebCrypto modules: encoding, keys, AES-GCM, ECDH, etc.                                                          |
+| Frontend | `apps/frontend/src/lib/crypto/vault-*.ts`                                           | Vault operations: lifecycle, grants, re-keying                                                                  |
+| Frontend | `apps/frontend/src/providers/vault-provider.tsx`                                    | Vault state, DEK caching, key distribution                                                                      |
+| Frontend | `apps/frontend/src/hooks/use-vault.ts`                                              | `useVault()` hook for components                                                                                |
+| Backend  | `apps/backend/src/modules/vault/`                                                   | Vault API: setup, status, password, recovery, key grants                                                        |
+| Backend  | `apps/backend/prisma/schema/vault.prisma`                                           | Crypto models only: `UserVault` + `ProjectKeyGrant`                                                             |
+| Backend  | `apps/backend/prisma/schema/app.prisma`                                             | `App` (service root, keyed by `appPath`)                                                                        |
+| Backend  | `apps/backend/prisma/schema/repo-file.prisma`                                       | `RepoFile`/`RepoFileVersion` (encrypted blobs; `kind` = CONFIG \| SECRET; keyed by `(projectId, relativePath)`) |
+| Backend  | `apps/backend/prisma/schema/share-link.prisma`                                      | `ShareLink` (one-time encrypted file shares)                                                                    |
+| CLI      | `apps/cli/Crypto/VaultCrypto.cs`                                                    | .NET AES-256-GCM, PBKDF2, HKDF                                                                                  |
+| CLI      | `apps/cli/Crypto/DekService.cs`                                                     | Resolves project DEK for pull/push (vault password or CI token)                                                 |
+| CLI      | `apps/cli/Services/RepoFileUploadService.cs`, `apps/cli/Services/RepoFilePuller.cs` | `RepoFileUploadService` (push), `RepoFilePuller` (pull) — whole-file blobs, `kind`-aware                        |
+| CLI      | `apps/cli/Services/AppRootResolver.cs`, `EnvSlugResolver.cs`                        | Infer owning App (project-marker walk) and environment slug (filename)                                          |
 
 ## Data Flows
 
-- **Env variables**: Client encrypts value → sends `{encryptedValue, iv, authTag}` → backend stores as-is
-- **Secret files**: Client encrypts file → sends base64 `{encryptedContent, iv, authTag}` → backend stores as bytes
-- **Share links**: Client encrypts with ephemeral key → key in URL fragment (`#key=`) never reaches server
-- **CI tokens**: Client wraps DEK with HKDF-derived key from token → CLI/CI unwraps and decrypts locally
-- **Team sharing**: ECDH P-256 key agreement → granter wraps DEK with shared secret → recipient unwraps
-- **Recovery**: User provides recovery key → unwraps all RECOVERY grants → re-wraps DEKs under new KEK
-- **Password change**: Fetches all SELF grants → re-wraps DEKs + private key + recovery key under new KEK
+- **Repo files**: client encrypts whole file → sends base64 `{encryptedContent, iv, authTag}` + `kind` → backend stores blob as-is (no variable parsing). Each push/save snapshots a `RepoFileVersion`
+- **Share links**: ephemeral key, passed in URL fragment (`#key=`), never reaches the server
+- **CI tokens**: DEK wrapped with an HKDF-derived key from the token; CLI/CI unwraps and decrypts locally
+- **Team sharing**: ECDH P-256 agreement → granter wraps DEK with shared secret → recipient unwraps
+- **Recovery**: recovery key unwraps all RECOVERY grants → re-wraps DEKs under new KEK
+- **Password change**: re-wraps all SELF grants (DEKs + private key + recovery key) under new KEK
 
 ## Security Rules
 

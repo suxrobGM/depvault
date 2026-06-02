@@ -1,49 +1,58 @@
 using System.CommandLine;
-using DepVault.Cli.Commands.Push;
-using DepVault.Cli.Commands.Scan;
+using DepVault.Cli.Crypto;
+using DepVault.Cli.Output;
 using DepVault.Cli.Services;
-using DepVault.Cli.Utils;
+using DepVault.Cli.Auth;
+using DepVault.Cli.Common;
 using Spectre.Console;
 
 namespace DepVault.Cli.Commands;
 
+/// <summary>
+/// Pushes whole config and secret files to a project as client-encrypted blobs. Each file is read,
+/// encrypted with the project DEK (AES-256-GCM), and uploaded verbatim — no parsing into entries and
+/// no stale-variable pruning. App ownership and environment slug are inferred from the file path.
+/// </summary>
 internal sealed class PushCommands(
-    CommandContext ctx,
+    AuthContext ctx,
     IFileScanner fileScanner,
-    DirectoryVaultMapper vaultMapper,
-    EnvImporter envImporter,
-    SecretFileScanner secretFileScanner,
-    StaleVariableCleaner staleVariableCleaner)
+    DekService dekService,
+    RepoFileUploadService uploadService,
+    IRepositoryLocator repositoryLocator,
+    IProjectContextResolver projectContextResolver,
+    IErrorHandler errorHandler,
+    IFileArgResolver fileArgResolver,
+    ConsoleRenderer renderer)
 {
     public Command CreatePushCommand()
     {
         var projectOpt = new Option<string?>("--project") { Description = "Project ID (defaults to active)" };
-        var vaultOpt = new Option<string?>("--vault")
-        { Description = "Vault name (creates it if missing). All files push into this vault." };
         var fileOpt = new Option<string?>("--file")
         { Description = "Single file to push (auto-discovers if omitted)" };
-        var formatOpt = new Option<string>("--format")
-        { Description = "Import format for env files", DefaultValueFactory = _ => "env" };
-        var noSyncOpt = new Option<bool>("--no-sync")
-        { Description = "Skip removing stale variables that are no longer in the pushed file" };
-        var createMissingOpt = new Option<bool>("--create-missing")
-        { Description = "Auto-create missing vaults without prompting (non-interactive)" };
 
-        var cmd = new Command("push", "Push environment variables and secret files")
-            { projectOpt, vaultOpt, fileOpt, formatOpt, noSyncOpt, createMissingOpt };
+        var cmd = new Command("push", "Push config and secret files as encrypted blobs")
+            { projectOpt, fileOpt };
 
         cmd.SetAction(async (parseResult, ct) =>
         {
-            var pc = await ctx.RequireProjectContextAsync(parseResult, projectOpt, ct);
-            if (pc is null)
+            if (!ctx.RequireAuth())
             {
                 Environment.ExitCode = 1;
                 return;
             }
 
-            var explicitVault = parseResult.GetValue(vaultOpt);
-            var noSync = parseResult.GetValue(noSyncOpt);
-            var createMissing = parseResult.GetValue(createMissingOpt);
+            var explicitId = parseResult.GetValue(projectOpt);
+            var resolution = await projectContextResolver.ResolveAsync(
+                explicitId, ResolutionPolicy.Interactive, ct);
+            if (resolution is null || !ProjectGuard.ConfirmOverride(ctx, explicitId))
+            {
+                Environment.ExitCode = 1;
+                return;
+            }
+
+            renderer.PrintStatusLine();
+            var projectId = resolution.ProjectId;
+
             var selected = ResolveFiles(parseResult.GetValue(fileOpt));
             if (selected.Count == 0)
             {
@@ -51,110 +60,105 @@ internal sealed class PushCommands(
                 return;
             }
 
-            var dirMap = await vaultMapper.MapAsync(pc.ProjectId, selected, explicitVault, createMissing, ct);
-            if (dirMap is null)
+            // Preview the manifest (no file bytes read) and confirm before any crypto. CI mode
+            // auto-confirms because Confirm returns its default in non-interactive mode.
+            var repoRoot = repositoryLocator.FindRepoRoot();
+            PrintManifest(selected, repoRoot);
+            if (!ctx.Prompter.Confirm($"Push {selected.Count} file(s)?"))
             {
-                Environment.ExitCode = 1;
                 return;
             }
 
-            // Resolve the encryption key once up front for any files that need it. The env and
-            // secret-file paths share the VaultState DEK cache, so this prompts at most once.
-            var hasEnvFiles = selected.Any(a => a.Category == FileCategory.Environment);
-            var hasSecretFiles = selected.Any(a => a.Category != FileCategory.Environment);
-            if ((hasEnvFiles && !await envImporter.EnsureDekAsync(pc.ProjectId, ct)) ||
-                (hasSecretFiles && !await secretFileScanner.EnsureDekAsync(pc.ProjectId, ct)))
+            // Resolve the project DEK once up front. The same key encrypts every file, so this
+            // prompts for the vault password (or reads DEPVAULT_PASSWORD / a CI token) at most once.
+            var dek = await dekService.CollectPasswordAndResolveAsync(projectId, ct);
+            if (dek is null)
             {
                 ctx.Output.PrintError("Failed to resolve encryption key. Aborting push.");
                 Environment.ExitCode = 1;
                 return;
             }
 
-            var envImported = 0;
-            var secretsUploaded = 0;
-            // Aggregate imported keys per vault (multiple files can target one vault). Stale
-            // detection must compare against the UNION of all keys pushed to a vault, not per-file.
-            var importedVaults = new Dictionary<string, HashSet<string>>();
+            var configPushed = 0;
+            var secretsPushed = 0;
 
             foreach (var file in selected)
             {
-                var dir = Path.GetDirectoryName(file.RelativePath)?.Replace('\\', '/') ?? ".";
-                if (!dirMap.TryGetValue(dir, out var vaultId))
-                {
-                    AnsiConsole.MarkupLine($"[grey]Skipped {Markup.Escape(file.RelativePath)} (no vault)[/]");
-                    continue;
-                }
-
                 try
                 {
+                    await uploadService.UploadAsync(projectId, repoRoot, file, dek, ct);
                     if (file.Category == FileCategory.Environment)
                     {
-                        var result = await envImporter.ImportAsync(pc.ProjectId, file, vaultId, ct);
-                        ctx.Output.PrintSuccess($"  {file.RelativePath}: {result.Imported} variables");
-                        envImported += result.Imported;
-                        if (!importedVaults.TryGetValue(vaultId, out var vaultKeys))
-                        {
-                            vaultKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                            importedVaults[vaultId] = vaultKeys;
-                        }
-                        vaultKeys.UnionWith(result.ImportedKeys);
+                        configPushed++;
                     }
                     else
                     {
-                        await secretFileScanner.UploadAsync(pc.ProjectId, file, vaultId, ct);
-                        ctx.Output.PrintSuccess($"  {file.RelativePath}");
-                        secretsUploaded++;
+                        secretsPushed++;
                     }
+
+                    ctx.Output.PrintSuccess($"  {file.RelativePath}");
                 }
                 catch (Exception ex)
                 {
-                    ApiErrorHandler.HandleError(ex, $"Failed to push {file.RelativePath}");
-                }
-            }
-
-            // Sync: remove stale variables not present in pushed files
-            var totalDeleted = 0;
-            if (!noSync && importedVaults.Count > 0)
-            {
-                AnsiConsole.WriteLine();
-                foreach (var (vaultId, keys) in importedVaults)
-                {
-                    try
+                    if (errorHandler.Handle(ex, $"Failed to push {file.RelativePath}") == ErrorDisposition.Abort)
                     {
-                        var deleted = await staleVariableCleaner.CleanAsync(pc.ProjectId, vaultId, keys, ct);
-                        totalDeleted += deleted;
-                    }
-                    catch (Exception ex)
-                    {
-                        ApiErrorHandler.HandleError(ex, "Failed to clean stale variables");
+                        Environment.ExitCode = 1;
+                        break;
                     }
                 }
             }
 
             AnsiConsole.WriteLine();
-            var summary = $"Imported {envImported} variables from env files, uploaded {secretsUploaded} secret file(s).";
-            if (totalDeleted > 0)
-            {
-                summary += $" Removed {totalDeleted} stale variable(s).";
-            }
-
-            ctx.Output.PrintSuccess(summary);
+            ctx.Output.PrintSuccess(
+                $"Pushed {configPushed} config file(s) and {secretsPushed} secret file(s).");
         });
 
         return cmd;
+    }
+
+    /// <summary>
+    /// Renders the push manifest (file, app, env, size, kind) without reading file contents.
+    /// App and environment are resolved with the pure path helpers; size comes from file metadata.
+    /// </summary>
+    private void PrintManifest(List<DiscoveredFile> files, string repoRoot)
+    {
+        var rows = files.Select(f =>
+        {
+            var (_, appName) = AppRootResolver.Resolve(repoRoot, f.RelativePath);
+            long size;
+            try
+            {
+                size = new FileInfo(f.FullPath).Length;
+            }
+            catch
+            {
+                size = 0;
+            }
+
+            return new[]
+            {
+                f.RelativePath,
+                appName,
+                EnvSlugResolver.Resolve(f.FileName),
+                FormatUtils.FileSize(size),
+                f.Category == FileCategory.Environment ? "config" : "secret"
+            };
+        }).ToList();
+
+        ctx.Output.PrintTable(["FILE", "APP", "ENV", "SIZE", "KIND"], rows);
     }
 
     private List<DiscoveredFile> ResolveFiles(string? explicitFile)
     {
         if (!string.IsNullOrEmpty(explicitFile))
         {
-            if (!ctx.RequireFile(explicitFile))
+            if (!fileArgResolver.RequireFile(explicitFile))
             {
                 return [];
             }
 
             var fullPath = Path.GetFullPath(explicitFile);
-            var relativePath = Path.GetRelativePath(GitUtils.FindRepoRoot(), fullPath);
+            var relativePath = Path.GetRelativePath(repositoryLocator.FindRepoRoot(), fullPath).Replace('\\', '/');
             var fileName = Path.GetFileName(fullPath);
             var category = fileScanner.ClassifyFile(fileName);
             return [new DiscoveredFile(fullPath, relativePath, fileName, category)];
@@ -166,15 +170,15 @@ internal sealed class PushCommands(
             return [];
         }
 
-        var discovered = fileScanner.FindAllPushableFiles(GitUtils.FindRepoRoot());
+        var discovered = fileScanner.FindAllPushableFiles(repositoryLocator.FindRepoRoot());
         if (discovered.Count == 0)
         {
-            ctx.Output.PrintError("No environment or secret files found in repository.");
+            ctx.Output.PrintError("No config or secret files found in repository.");
             return [];
         }
 
         // Default to all files selected so "push everything" is one keystroke; deselect to skip.
         return ctx.Prompter.MultiSelect("Select files to push", discovered,
-            f => $"[grey]{(f.Category == FileCategory.Environment ? "env" : "secret")}[/] {Markup.Escape(f.RelativePath)}");
+            f => $"[grey]{(f.Category == FileCategory.Environment ? "config" : "secret")}[/] {Markup.Escape(f.RelativePath)}");
     }
 }

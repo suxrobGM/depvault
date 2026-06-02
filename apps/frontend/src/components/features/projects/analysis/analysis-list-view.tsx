@@ -48,13 +48,13 @@ function AnalysisRow(props: AnalysisRowProps): ReactElement {
       client.api.projects({ id: projectId }).analyses({ analysisId }).delete(),
     {
       invalidateKeys: [queryKeys.analyses.byProject(projectId)],
-      successMessage: "AnalysisDto deleted",
+      successMessage: "Analysis deleted",
     },
   );
 
   const handleDelete = async () => {
     const confirmed = await confirm({
-      title: "Delete AnalysisDto",
+      title: "Delete Analysis",
       description: `Delete "${item.filePath ?? item.fileName}" and all its dependency data? This cannot be undone.`,
       confirmLabel: "Delete",
       destructive: true,
@@ -196,12 +196,12 @@ export function AnalysisListView(props: AnalysisListViewProps): ReactElement {
   return (
     <Box>
       <PageHeader
-        title="AnalysisDto"
+        title="Analysis"
         breadcrumbs={[
           { label: "Overview", href: ROUTES.overview as Route },
           { label: "Projects", href: ROUTES.projects as Route },
           { label: project?.name ?? "Project", href: ROUTES.project(projectId) as Route },
-          { label: "AnalysisDto" },
+          { label: "Analysis" },
         ]}
         actions={
           canEdit ? (
@@ -210,7 +210,7 @@ export function AnalysisListView(props: AnalysisListViewProps): ReactElement {
               startIcon={<AddIcon />}
               onClick={() => setCreateDialogOpen(true)}
             >
-              New AnalysisDto
+              New Analysis
             </Button>
           ) : null
         }
@@ -221,7 +221,7 @@ export function AnalysisListView(props: AnalysisListViewProps): ReactElement {
           icon={<SecurityIcon />}
           title="No analyses yet"
           description="Upload a dependency file or import from GitHub to analyze your project's dependencies."
-          actionLabel={canEdit ? "New AnalysisDto" : undefined}
+          actionLabel={canEdit ? "New Analysis" : undefined}
           onAction={canEdit ? () => setCreateDialogOpen(true) : undefined}
         />
       ) : (

@@ -2,7 +2,6 @@ using DepVault.Cli;
 using DepVault.Cli.Output;
 using DepVault.Cli.Repl;
 using DepVault.Cli.Services;
-using DepVault.Cli.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Kiota.Abstractions;
 using Spectre.Console;
@@ -42,7 +41,7 @@ catch (Exception ex) when (ApiErrorHandler.IsAuthError(ex))
 }
 catch (ApiException ex)
 {
-    ApiErrorHandler.HandleError(ex, "API request failed");
+    services.GetRequiredService<IErrorHandler>().Handle(ex, "API request failed");
     return 1;
 }
 

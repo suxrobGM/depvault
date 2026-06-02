@@ -1,14 +1,14 @@
 # DepVault Documentation
 
-DepVault helps developers manage dependencies and secrets in one place. Scan for vulnerabilities, store environment variables with end-to-end encryption, and share secrets securely — across any tech stack.
+DepVault helps developers manage dependencies and secrets in one place. Scan for vulnerabilities, store your repo's config and secret files with end-to-end encryption, and share secrets securely — across any tech stack.
 
 ## What is DepVault?
 
 DepVault provides three core tools in one unified platform:
 
 - **Dependency Analysis** — Scan dependency files from 9+ ecosystems (Node.js, Python, .NET, Rust, Go, Java, Kotlin, Ruby, PHP) and get instant reports on outdated packages, known CVEs, and license conflicts.
-- **Encrypted Vault** — Store environment variables and secret files with zero-knowledge encryption. Your vault password never leaves your device — secrets are encrypted with AES-256-GCM in your browser before they reach the server.
-- **Secret Sharing & CI/CD** — Share secrets via one-time encrypted links, inject secrets into CI/CD pipelines with scoped tokens, and scan git repos for accidentally committed credentials.
+- **Encrypted Config & Secret Files** — Store your repository's config files (`.env`, `appsettings.json`, …) and secret files (certificates, keys, credentials) with zero-knowledge encryption. Your vault password never leaves your device — each file is encrypted with AES-256-GCM in your browser before it reaches the server.
+- **Secret Sharing & CI/CD** — Share secrets via one-time encrypted links, restore files into CI/CD pipelines with scoped tokens, and scan git repos for accidentally committed credentials.
 
 ## Why DepVault?
 
@@ -44,7 +44,7 @@ The server stores only ciphertext and can never decrypt your data. The full code
 
 ## Supported Config Formats
 
-DepVault can import, export, and convert between:
+DepVault stores any plaintext config file as a client-encrypted blob, including:
 
 - `.env` (dotenv)
 - `appsettings.json` (ASP.NET)

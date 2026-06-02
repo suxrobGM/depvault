@@ -9,7 +9,7 @@ type BooleanFeature = keyof {
   [K in keyof PlanLimits as PlanLimits[K] extends boolean ? K : never]: PlanLimits[K];
 };
 
-type LimitType = "project" | "envVar" | "secretFile" | "analysis" | "ciToken" | "member";
+type LimitType = "project" | "repoFile" | "analysis" | "ciToken" | "member";
 
 @singleton()
 export class PlanEnforcementService {
@@ -30,26 +30,14 @@ export class PlanEnforcementService {
     }
   }
 
-  async enforceEnvVarLimit(userId: string): Promise<void> {
+  async enforceRepoFileLimit(userId: string): Promise<void> {
     const { limits } = await this.subscriptionService.getUserPlan(userId);
-    if (limits.maxEnvVars === INFINITE_LIMIT) return;
+    if (limits.maxRepoFiles === INFINITE_LIMIT) return;
 
-    const count = await this.subscriptionService.countDistinctEnvVars(userId);
-    if (count >= limits.maxEnvVars) {
+    const count = await this.subscriptionService.countDistinctRepoFiles(userId);
+    if (count >= limits.maxRepoFiles) {
       throw new ForbiddenError(
-        `Environment variable limit reached (${count}/${limits.maxEnvVars}). Upgrade your plan to store more variables.`,
-      );
-    }
-  }
-
-  async enforceSecretFileLimit(userId: string): Promise<void> {
-    const { limits } = await this.subscriptionService.getUserPlan(userId);
-    if (limits.maxSecretFiles === INFINITE_LIMIT) return;
-
-    const count = await this.subscriptionService.countDistinctSecretFiles(userId);
-    if (count >= limits.maxSecretFiles) {
-      throw new ForbiddenError(
-        `Secret file limit reached (${count}/${limits.maxSecretFiles}). Upgrade your plan to store more secret files.`,
+        `File limit reached (${count}/${limits.maxRepoFiles}). Upgrade your plan to store more files.`,
       );
     }
   }
@@ -109,10 +97,8 @@ export class PlanEnforcementService {
     switch (limitType) {
       case "project":
         return this.enforceProjectLimit(project.ownerId);
-      case "envVar":
-        return this.enforceEnvVarLimit(project.ownerId);
-      case "secretFile":
-        return this.enforceSecretFileLimit(project.ownerId);
+      case "repoFile":
+        return this.enforceRepoFileLimit(project.ownerId);
       case "analysis":
         return this.enforceAnalysisLimit(project.ownerId);
       case "ciToken":

@@ -238,11 +238,11 @@ export class UserService {
     // Delete entities that don't cascade from User
     // Order matters: delete children before parents
     await this.prisma.auditLog.deleteMany({ where: { userId } });
-    await this.prisma.sharedSecret.deleteMany({ where: { creatorId: userId } });
-    await this.prisma.secretFile.deleteMany({ where: { uploadedBy: userId } });
+    await this.prisma.shareLink.deleteMany({ where: { creatorId: userId } });
+    await this.prisma.repoFile.deleteMany({ where: { createdBy: userId } });
     await this.prisma.analysis.deleteMany({ where: { userId } });
 
-    // Delete owned projects (cascades: environments, env vars, analyses, members, audit logs)
+    // Delete owned projects (cascades: apps, repo files, analyses, members, audit logs)
     const ownedProjects = await this.prisma.project.findMany({
       where: { ownerId: userId },
       select: { id: true },

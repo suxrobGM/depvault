@@ -141,8 +141,8 @@ export class ProjectService {
   async getStats(userId: string): Promise<ProjectStatsResponse> {
     const memberFilter = { members: { some: { userId } } };
 
-    const [projectCount, dependencyCount, vulnerabilityCount, envVariableCount] = await Promise.all(
-      [
+    const [projectCount, dependencyCount, vulnerabilityCount, repoFileCount, appCount] =
+      await Promise.all([
         this.prisma.project.count({ where: memberFilter }),
         this.prisma.dependency.count({
           where: { analysis: { project: memberFilter } },
@@ -150,17 +150,20 @@ export class ProjectService {
         this.prisma.vulnerability.count({
           where: { dependency: { analysis: { project: memberFilter } } },
         }),
-        this.prisma.envVariable.count({
-          where: { vault: { project: memberFilter } },
+        this.prisma.repoFile.count({
+          where: { project: memberFilter },
         }),
-      ],
-    );
+        this.prisma.app.count({
+          where: { project: memberFilter },
+        }),
+      ]);
 
     return {
       projectCount,
       dependencyCount,
       vulnerabilityCount,
-      envVariableCount,
+      repoFileCount,
+      appCount,
     };
   }
 }

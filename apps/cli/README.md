@@ -1,6 +1,6 @@
 # DepVault CLI
 
-A .NET 10 command-line tool for DepVault — dependency analysis, environment variable management, and secret sharing. Compiled with Native AOT for fast startup and small binary size.
+A .NET 10 command-line tool for DepVault — dependency analysis, repo-native config and secret file sync, and share links. Compiled with Native AOT for fast startup and small binary size.
 
 ## Prerequisites
 
@@ -56,9 +56,9 @@ apps/cli/
 │   ├── AuthCommands.cs      # login, logout, whoami
 │   ├── ConfigCommands.cs    # config set/get
 │   ├── ProjectCommands.cs   # project list/select/info
-│   ├── EnvCommands.cs       # env pull/push/list/diff
+│   ├── Push/                # RepoFilePusher — push config & secret files as blobs
+│   ├── Pull/                # RepoFilePuller — byte-faithful restore of all files
 │   ├── AnalysisCommands.cs  # analyze
-│   ├── ConvertCommands.cs   # convert
 │   └── CiCommands.cs        # ci pull
 ├── Config/
 │   ├── AppConfig.cs         # ~/.depvault/config.json management
@@ -80,13 +80,12 @@ depvault config get <key>
 depvault project list [--output table|json]
 depvault project select <id>
 depvault project info [--project <id>]
-depvault env pull [--project] [--vault-group] [--environment] [--format] [--output]
-depvault env push --vault-group <id> --file <path> [--project] [--environment] [--format]
-depvault env list [--project] [--vault-group] [--environment] [--output]
-depvault env diff --vault-group <id> --environments <DEVELOPMENT,PRODUCTION> [--project]
+depvault push [--project] [--file <path>]
+depvault pull [--project] [--app] [--environment] [--include-base] [--include-secrets] [--output-dir] [--force]
+depvault env list [--project] [--app] [--environment] [--output]
+depvault secrets list [--project] [--app] [--environment] [--output]
 depvault analyze --file <path> [--project] [--ecosystem] [--output]
-depvault convert --file <path> --from <format> --to <format> [--output]
-depvault ci pull [--format env|json] [--output]
+depvault ci pull [--output] [--format text|json]
 depvault version
 ```
 
@@ -101,8 +100,8 @@ depvault login
 **CI/CD mode** uses the `DEPVAULT_TOKEN` environment variable (generated from the web dashboard):
 
 ```bash
-export DEPVAULT_TOKEN=dvt_abc123...
-depvault ci pull --output .env
+export DEPVAULT_TOKEN=dvci_abc123...
+depvault ci pull --output ./app
 ```
 
 ## Regenerating the API Client

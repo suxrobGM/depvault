@@ -82,7 +82,7 @@ export function RecentProjects(props: DashboardRecentProjectsProps): ReactElemen
             icon={<FolderOpenIcon />}
             title="No projects yet"
             description="Create your first project to analyze dependencies, manage secrets, and store encrypted files."
-            actionLabel="Create ProjectDto"
+            actionLabel="Create Project"
             actionHref={ROUTES.projects as Route}
           />
         )}

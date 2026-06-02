@@ -1,10 +1,20 @@
 using System.CommandLine;
-using DepVault.Cli.Utils;
+using DepVault.Cli.Auth;
+using DepVault.Cli.Output;
+using DepVault.Cli.Services;
+using DepVault.Cli.Common;
 using Spectre.Console;
+using GetKind = DepVault.Cli.ApiClient.Api.Projects.Item.Files.GetKindQueryParameterType;
+using SecretItem = DepVault.Cli.ApiClient.Api.Projects.Item.Files.FilesGetResponse_items;
 
 namespace DepVault.Cli.Commands;
 
-public sealed class SecretsCommands(CommandContext ctx)
+/// <summary>Lists secret file metadata stored for a project.</summary>
+public sealed class SecretsCommands(
+    AuthContext ctx,
+    IProjectContextResolver projectContextResolver,
+    IApiClientFactory clientFactory,
+    ConsoleRenderer renderer)
 {
     public Command CreateSecretsCommand()
     {
@@ -17,7 +27,7 @@ public sealed class SecretsCommands(CommandContext ctx)
     private Command CreateListCommand()
     {
         var projectOpt = new Option<string?>("--project") { Description = "Project ID" };
-        var envOpt = new Option<string?>("--environment") { Description = "Environment type filter" };
+        var envOpt = new Option<string?>("--environment") { Description = "Filter by environment slug" };
         var outputOpt = new Option<string>("--output")
         { Description = "Output format (table, json)", DefaultValueFactory = _ => "table" };
 
@@ -26,23 +36,36 @@ public sealed class SecretsCommands(CommandContext ctx)
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
-            var pc = await ctx.RequireProjectContextAsync(parseResult, projectOpt, cancellationToken);
-            if (pc is null)
+            if (!ctx.RequireAuth())
             {
                 return;
             }
 
+            var resolution = await projectContextResolver.ResolveAsync(
+                parseResult.GetValue(projectOpt),
+                ResolutionPolicy.AllowAutoDetect | ResolutionPolicy.AllowInteractive,
+                cancellationToken);
+            if (resolution is null)
+            {
+                return;
+            }
+
+            renderer.PrintStatusLine();
+            var client = clientFactory.Create();
+            var envSlug = parseResult.GetValue(envOpt);
+
             try
             {
-                var result = await pc.Client.Api.Projects[pc.ProjectId].Secrets
-                    .GetAsync(config =>
-                    {
-                        config.QueryParameters.Page = 1;
-                        config.QueryParameters.Limit = 100;
-                    }, cancellationToken);
+                var items = await CollectAllAsync(client, resolution.ProjectId, cancellationToken);
 
-                var items = result?.Items;
-                if (items is null || items.Count == 0)
+                if (!string.IsNullOrEmpty(envSlug))
+                {
+                    items = items
+                        .Where(f => string.Equals(f.EnvironmentSlug, envSlug, StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+                }
+
+                if (items.Count == 0)
                 {
                     AnsiConsole.MarkupLine("[grey]No secret files found.[/]");
                     return;
@@ -53,20 +76,24 @@ public sealed class SecretsCommands(CommandContext ctx)
                     ctx.Output.PrintJson(items.Select(f => new
                     {
                         id = f.Id,
-                        name = f.Name,
-                        vault = f.VaultName,
+                        appId = f.AppId,
+                        app = f.AppName,
+                        relativePath = f.RelativePath,
+                        environment = f.EnvironmentSlug,
                         mimeType = f.MimeType,
-                        fileSize = f.FileSize
+                        fileSize = f.FileSize,
+                        isBinary = f.IsBinary
                     }));
                     return;
                 }
 
                 ctx.Output.PrintTable(
-                    ["NAME", "VAULT", "TYPE", "SIZE", "UPDATED"],
+                    ["PATH", "ENVIRONMENT", "APP", "TYPE", "SIZE", "UPDATED"],
                     items.Select(f => new[]
                     {
-                        f.Name ?? "",
-                        f.VaultName ?? "",
+                        f.RelativePath ?? "",
+                        f.EnvironmentSlug ?? "",
+                        f.AppName ?? "",
                         f.MimeType ?? "",
                         FormatUtils.FileSize(f.FileSize),
                         f.UpdatedAt?.ToString("yyyy-MM-dd") ?? ""
@@ -79,5 +106,43 @@ public sealed class SecretsCommands(CommandContext ctx)
         });
 
         return cmd;
+    }
+
+    private static async Task<List<SecretItem>> CollectAllAsync(
+        ApiClient.ApiClient client, string projectId, CancellationToken ct)
+    {
+        var all = new List<SecretItem>();
+        var page = 1;
+
+        while (true)
+        {
+            var currentPage = page;
+            var result = await client.Api.Projects[projectId].Files
+                .GetAsync(config =>
+                {
+                    config.QueryParameters.Page = currentPage;
+                    config.QueryParameters.Limit = 100;
+                    config.QueryParameters.Kind = GetKind.SECRET;
+                }, ct);
+
+            if (result?.Items is { Count: > 0 } items)
+            {
+                all.AddRange(items);
+            }
+            else
+            {
+                break;
+            }
+
+            var totalPages = result.Pagination?.TotalPages ?? 1;
+            if (page >= totalPages)
+            {
+                break;
+            }
+
+            page++;
+        }
+
+        return all;
     }
 }

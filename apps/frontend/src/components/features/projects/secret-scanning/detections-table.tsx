@@ -8,6 +8,7 @@ import {
 import {
   Box,
   Button,
+  CardContent,
   Checkbox,
   MenuItem,
   Stack,
@@ -121,125 +122,127 @@ export function DetectionsTable(props: DetectionsTableProps): ReactElement {
   };
 
   return (
-    <Surface sx={{ p: 2 }}>
-      <Stack direction="row" spacing={2} sx={{ alignItems: "center", mb: 2 }}>
-        <TextField
-          select
-          size="small"
-          label="Status"
-          value={statusFilter}
-          onChange={(e) => {
-            setStatusFilter(e.target.value);
-            setPage(1);
-          }}
-          sx={{ minWidth: 140 }}
-        >
-          <MenuItem value="">All</MenuItem>
-          <MenuItem value="OPEN">Open</MenuItem>
-          <MenuItem value="RESOLVED">Resolved</MenuItem>
-          <MenuItem value="FALSE_POSITIVE">False Positive</MenuItem>
-        </TextField>
-        <TextField
-          select
-          size="small"
-          label="Severity"
-          value={severityFilter}
-          onChange={(e) => {
-            setSeverityFilter(e.target.value);
-            setPage(1);
-          }}
-          sx={{ minWidth: 140 }}
-        >
-          <MenuItem value="">All</MenuItem>
-          <MenuItem value="CRITICAL">Critical</MenuItem>
-          <MenuItem value="HIGH">High</MenuItem>
-          <MenuItem value="MEDIUM">Medium</MenuItem>
-          <MenuItem value="LOW">Low</MenuItem>
-        </TextField>
+    <Surface>
+      <CardContent>
+        <Stack direction="row" spacing={2} sx={{ alignItems: "center", mb: 2 }}>
+          <TextField
+            select
+            size="small"
+            label="Status"
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
+            sx={{ minWidth: 140 }}
+          >
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="OPEN">Open</MenuItem>
+            <MenuItem value="RESOLVED">Resolved</MenuItem>
+            <MenuItem value="FALSE_POSITIVE">False Positive</MenuItem>
+          </TextField>
+          <TextField
+            select
+            size="small"
+            label="Severity"
+            value={severityFilter}
+            onChange={(e) => {
+              setSeverityFilter(e.target.value);
+              setPage(1);
+            }}
+            sx={{ minWidth: 140 }}
+          >
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="CRITICAL">Critical</MenuItem>
+            <MenuItem value="HIGH">High</MenuItem>
+            <MenuItem value="MEDIUM">Medium</MenuItem>
+            <MenuItem value="LOW">Low</MenuItem>
+          </TextField>
 
-        {someSelected && (
-          <>
-            <Box sx={{ flex: 1 }} />
-            <Typography variant="body2Muted">{selectedIds.size} selected</Typography>
-            <Button
-              size="small"
-              variant="outlined"
-              color="success"
-              startIcon={<ResolveIcon />}
-              onClick={() => handleBatchAction("RESOLVED")}
-              disabled={batchUpdate.isPending}
-            >
-              Resolve
-            </Button>
-            <Button
-              size="small"
-              variant="outlined"
-              startIcon={<FalsePositiveIcon />}
-              onClick={() => handleBatchAction("FALSE_POSITIVE")}
-              disabled={batchUpdate.isPending}
-            >
-              False Positive
-            </Button>
-          </>
-        )}
-      </Stack>
-      {detections.length === 0 && !isLoading ? (
-        <EmptyState
-          title="No detections found"
-          description="No secret detections match your current filters."
-        />
-      ) : (
-        <TableContainer>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell padding="checkbox">
-                  <Checkbox
-                    size="small"
-                    checked={allOpenSelected}
-                    indeterminate={someSelected && !allOpenSelected}
-                    onChange={(e) => handleSelectAll(e.target.checked)}
+          {someSelected && (
+            <>
+              <Box sx={{ flex: 1 }} />
+              <Typography variant="body2Muted">{selectedIds.size} selected</Typography>
+              <Button
+                size="small"
+                variant="outlined"
+                color="success"
+                startIcon={<ResolveIcon />}
+                onClick={() => handleBatchAction("RESOLVED")}
+                disabled={batchUpdate.isPending}
+              >
+                Resolve
+              </Button>
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<FalsePositiveIcon />}
+                onClick={() => handleBatchAction("FALSE_POSITIVE")}
+                disabled={batchUpdate.isPending}
+              >
+                False Positive
+              </Button>
+            </>
+          )}
+        </Stack>
+        {detections.length === 0 && !isLoading ? (
+          <EmptyState
+            title="No detections found"
+            description="No secret detections match your current filters."
+          />
+        ) : (
+          <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      size="small"
+                      checked={allOpenSelected}
+                      indeterminate={someSelected && !allOpenSelected}
+                      onChange={(e) => handleSelectAll(e.target.checked)}
+                    />
+                  </TableCell>
+                  <TableCell width={40} />
+                  <TableCell>Commit</TableCell>
+                  <TableCell>File</TableCell>
+                  <TableCell>Pattern</TableCell>
+                  <TableCell>Severity</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell align="right">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {detections.map((d) => (
+                  <DetectionTableRow
+                    key={d.id}
+                    detection={d}
+                    expanded={expandedId === d.id}
+                    onToggle={() => setExpandedId(expandedId === d.id ? null : d.id)}
+                    onResolve={() => updateStatus.mutate({ detectionId: d.id, status: "RESOLVED" })}
+                    onFalsePositive={() =>
+                      updateStatus.mutate({ detectionId: d.id, status: "FALSE_POSITIVE" })
+                    }
+                    isUpdating={updateStatus.isPending}
+                    selected={selectedIds.has(d.id)}
+                    onSelect={(checked) => handleSelect(d.id, checked)}
                   />
-                </TableCell>
-                <TableCell width={40} />
-                <TableCell>Commit</TableCell>
-                <TableCell>File</TableCell>
-                <TableCell>Pattern</TableCell>
-                <TableCell>Severity</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell align="right">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {detections.map((d) => (
-                <DetectionTableRow
-                  key={d.id}
-                  detection={d}
-                  expanded={expandedId === d.id}
-                  onToggle={() => setExpandedId(expandedId === d.id ? null : d.id)}
-                  onResolve={() => updateStatus.mutate({ detectionId: d.id, status: "RESOLVED" })}
-                  onFalsePositive={() =>
-                    updateStatus.mutate({ detectionId: d.id, status: "FALSE_POSITIVE" })
-                  }
-                  isUpdating={updateStatus.isPending}
-                  selected={selectedIds.has(d.id)}
-                  onSelect={(checked) => handleSelect(d.id, checked)}
-                />
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
-      {data && (
-        <PaginationBar
-          page={page}
-          count={data.pagination.totalPages}
-          onChange={setPage}
-          total={data.pagination.total}
-          pageSize={pageSize}
-          onPageSizeChange={setPageSize}
-        />
-      )}
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+        {data && (
+          <PaginationBar
+            page={page}
+            count={data.pagination.totalPages}
+            onChange={setPage}
+            total={data.pagination.total}
+            pageSize={pageSize}
+            onPageSizeChange={setPageSize}
+          />
+        )}
+      </CardContent>
     </Surface>
   );
 }

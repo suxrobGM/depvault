@@ -11,8 +11,7 @@ enum AuditAction {
 }
 
 enum AuditResourceType {
-  ENV_VARIABLE
-  SECRET_FILE
+  REPO_FILE
   SHARE_LINK
   CI_TOKEN
 }

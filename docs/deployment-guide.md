@@ -32,9 +32,7 @@ Create a `.env` file based on the root `.env.example`. All variables are listed 
 
 ### Encryption
 
-| Variable                | Required | Default | Description                                                      |
-| ----------------------- | -------- | ------- | ---------------------------------------------------------------- |
-| `MASTER_ENCRYPTION_KEY` | Yes      | --      | 256-bit key (64 hex chars) for AES-256-GCM encryption of secrets |
+DepVault is **zero-knowledge**: all config and secret file contents are encrypted client-side, so the server needs **no encryption key** to operate. There is no `MASTER_ENCRYPTION_KEY` — each user's vault password derives a KEK (PBKDF2) in the browser/CLI that wraps a per-project DEK, and the server only ever stores ciphertext.
 
 ### Server
 
@@ -128,7 +126,7 @@ cp .env.example .env
 # Edit .env with production values
 ```
 
-Generate secure values for `JWT_SECRET` and `MASTER_ENCRYPTION_KEY`:
+Generate a secure value for `JWT_SECRET`:
 
 ```bash
 # 256-bit random hex string

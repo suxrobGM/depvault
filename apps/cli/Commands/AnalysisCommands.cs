@@ -1,15 +1,21 @@
 using System.CommandLine;
 using DepVault.Cli.ApiClient.Api.Projects.Item.Analyses;
+using DepVault.Cli.Output;
 using DepVault.Cli.Services;
-using DepVault.Cli.Utils;
+using DepVault.Cli.Auth;
 using Spectre.Console;
 
 namespace DepVault.Cli.Commands;
 
 public sealed class AnalysisCommands(
-    CommandContext ctx,
+    AuthContext ctx,
     IFileScanner fileScanner,
-    AnalysisClient analysisClient)
+    AnalysisClient analysisClient,
+    IRepositoryLocator repositoryLocator,
+    IProjectContextResolver projectContextResolver,
+    IErrorHandler errorHandler,
+    IFileArgResolver fileArgResolver,
+    ConsoleRenderer renderer)
 {
     public Command CreateAnalyzeCommand()
     {
@@ -26,15 +32,25 @@ public sealed class AnalysisCommands(
 
         cmd.SetAction(async (parseResult, cancellationToken) =>
         {
-            var pc = await ctx.RequireProjectContextAsync(parseResult, projectOpt, cancellationToken);
-            if (pc is null)
+            if (!ctx.RequireAuth())
             {
                 return;
             }
 
-            var filePath = ctx.ResolveFileInteractive(
+            var resolution = await projectContextResolver.ResolveAsync(
+                parseResult.GetValue(projectOpt),
+                ResolutionPolicy.AllowAutoDetect | ResolutionPolicy.AllowInteractive,
+                cancellationToken);
+            if (resolution is null)
+            {
+                return;
+            }
+
+            renderer.PrintStatusLine();
+
+            var filePath = fileArgResolver.ResolveFileInteractive(
                 parseResult, fileOpt,
-                () => fileScanner.FindDependencyFiles(GitUtils.FindRepoRoot()),
+                () => fileScanner.FindDependencyFiles(repositoryLocator.FindRepoRoot()),
                 "dependency");
 
             if (filePath is null)
@@ -52,12 +68,12 @@ public sealed class AnalysisCommands(
             {
                 var content = await File.ReadAllTextAsync(filePath, cancellationToken);
                 var fileName = Path.GetFileName(filePath);
-                var relativePath = Path.GetRelativePath(GitUtils.FindRepoRoot(), Path.GetFullPath(filePath));
+                var relativePath = Path.GetRelativePath(repositoryLocator.FindRepoRoot(), Path.GetFullPath(filePath));
 
                 var result = await AnsiConsole.Status()
                     .Spinner(Spinner.Known.Dots)
                     .StartAsync($"Analyzing {fileName} ({ecosystem})...", async _ =>
-                        await analysisClient.AnalyzeFileAsync(pc.ProjectId, fileName, relativePath, content,
+                        await analysisClient.AnalyzeFileAsync(resolution.ProjectId, fileName, relativePath, content,
                             ecosystem, cancellationToken));
 
                 if (result is null)
@@ -71,7 +87,7 @@ public sealed class AnalysisCommands(
             }
             catch (Exception ex)
             {
-                ApiErrorHandler.HandleError(ex, "Analysis failed");
+                errorHandler.Handle(ex, "Analysis failed");
             }
         });
 

@@ -15,7 +15,7 @@ const quickActions = [
   {
     icon: <AddIcon sx={{ fontSize: 28 }} />,
     title: "Create Project",
-    description: "Set up a project to organize dependencies, secrets, and secure files",
+    description: "Set up a project to organize dependencies, config files, and secret files",
     color: "var(--mui-palette-primary-main)",
     href: ROUTES.projects,
   },

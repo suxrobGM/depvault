@@ -1,6 +1,6 @@
-# Environment Variables
+# Environment & Config Files
 
-The `depvault env` command group lists environment variables. For pulling and pushing, see [`depvault pull`](/cli/pull) and [`depvault push`](/cli/pull#push-env).
+The `depvault env` command group lists the config files stored for a project. For pushing and restoring files, see [`depvault push`](/cli/pull#push) and [`depvault pull`](/cli/pull).
 
 All commands default to the active project (set with `depvault project select`). Override with `--project`.
 
@@ -8,29 +8,31 @@ All commands default to the active project (set with `depvault project select`).
 
 ## env list
 
-List environment variables for a project.
+List config files for a project. Each entry is a whole stored file (a `.env`, `appsettings.json`, etc.), not a per-variable row.
 
 ```bash
-depvault env list --vault-group <id> --environment DEVELOPMENT
+depvault env list --app <appId> --environment prod
 ```
 
 | Flag | Description | Default |
 | --- | --- | --- |
 | `--project` | Project ID. | Active project |
-| `--vault-group` | Vault group ID. | All vault groups |
-| `--environment` | Environment type. | All |
+| `--app` | Filter by app ID. | All apps |
+| `--environment` | Filter by environment slug (e.g. `base`, `dev`, `prod`). | All |
 | `--output` | Output format: `table`, `json`. | `table` |
+
+The table shows each file's path, environment slug, format, size, and last-updated date.
 
 ### Examples
 
-List all variables as a table:
+List all config files as a table:
 
 ```bash
 depvault env list
 ```
 
-List variables for a specific vault group as JSON:
+List production config files for a specific app as JSON:
 
 ```bash
-depvault env list --vault-group abc123 --output json
+depvault env list --app abc123 --environment prod --output json
 ```

@@ -155,8 +155,8 @@ export function SettingsTab(props: SettingsTabProps): ReactElement {
             />
             <CardContent sx={{ p: 3 }}>
               <Typography variant="body2Muted">
-                Permanently delete this project and all associated data including analyses,
-                environments, and variables. This action cannot be undone.
+                Permanently delete this project and all associated data including analyses, apps,
+                config files, and secret files. This action cannot be undone.
               </Typography>
             </CardContent>
             <CardActions>

@@ -21,7 +21,6 @@ const footerLinks: Record<string, FooterLink[]> = {
     { label: "Dependency Analysis", href: "/docs/guides/dependency-analysis" },
     { label: "Environment Vault", href: "/docs/guides/environment-vault" },
     { label: "Secret Sharing", href: "/docs/guides/secret-sharing" },
-    { label: "Format Converter", href: ROUTES.converter },
   ],
   Developers: [
     { label: "CLI Reference", href: "/docs/cli" },
@@ -79,8 +78,8 @@ export function Footer(): ReactElement {
                 mb: 2,
               }}
             >
-              Analyze dependencies, detect vulnerabilities, and securely store environment variables
-              and secret files across any tech stack.
+              Analyze dependencies, detect vulnerabilities, and securely store config files and
+              secret files across any tech stack.
             </Typography>
             <IconButton
               component="a"

@@ -31,9 +31,10 @@ export function FeatureVault(): ReactElement {
           </GradientText>
         </Box>
         <Typography variant="body1Muted" sx={{ lineHeight: 1.8, mb: 2 }}>
-          End-to-end encrypt environment variables and secret files — SSL certificates, private
-          keys, keystores, cloud credentials — with AES-256-GCM. Secrets are encrypted in your
-          browser before they reach the server. Even we can&apos;t read them.
+          End-to-end encrypt config files and secret files — .env, appsettings.json, SSL
+          certificates, private keys, keystores, cloud credentials — with AES-256-GCM. Each file is
+          stored per environment with full version history. Secrets are encrypted in your browser
+          before they reach the server. Even we can&apos;t read them.
         </Typography>
         <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
           <Chip label="Zero-Knowledge" size="small" variant="outlined" color="secondary" />

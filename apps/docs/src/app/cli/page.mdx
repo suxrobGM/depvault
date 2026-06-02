@@ -123,16 +123,13 @@ The CLI automatically detects the active project by reading the remote origin UR
 
 | Command | Description | Details |
 | --- | --- | --- |
-| `depvault scan` | Scan repo: analyze deps, push env, detect secrets | [Scanning](/cli/scanning) |
-| `depvault pull` | Pull env vars and secret files to local folders | [Pull & Push](/cli/pull) |
-| `depvault pull env` | Pull only environment variables | [Pull & Push](/cli/pull#pull-env) |
-| `depvault pull secrets` | Pull only secret files | [Pull & Push](/cli/pull#pull-secrets) |
-| `depvault push env` | Push env vars from local files | [Pull & Push](/cli/pull#push-env) |
-| `depvault push secrets` | Upload secret files | [Pull & Push](/cli/pull#push-secrets) |
-| `depvault env list` | List environment variables | [Env](/cli/env#env-list) |
+| `depvault scan` | Scan repo: analyze deps, push files, detect secrets | [Scanning](/cli/scanning) |
+| `depvault push` | Push config & secret files as encrypted blobs | [Pull & Push](/cli/pull#push) |
+| `depvault pull` | Restore config & secret files byte-for-byte | [Pull & Push](/cli/pull) |
+| `depvault env list` | List stored config files | [Env](/cli/env#env-list) |
 | `depvault secrets list` | List secret file metadata | [Secret Files](/cli/secrets) |
 | `depvault analyze` | Analyze a dependency file | [Analysis](/guides/dependency-analysis) |
-| `depvault ci pull` | Fetch secrets with CI token | [CI/CD](/guides/ci-cd-integration) |
+| `depvault ci pull` | Restore files with a CI token | [CI/CD](/guides/ci-cd-integration) |
 | `depvault login` | Authenticate with email/password | [Auth](/cli/authentication) |
 | `depvault logout` | Clear stored credentials | [Auth](/cli/authentication) |
 | `depvault whoami` | Show current user | [Auth](/cli/authentication) |

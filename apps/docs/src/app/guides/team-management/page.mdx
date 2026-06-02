@@ -10,9 +10,9 @@ Invite members, assign roles, and manage access permissions for your projects.
 | --- | --- | --- | --- |
 | View dashboard and analysis results | Yes | Yes | Yes |
 | Run dependency analysis | Yes | Yes | No |
-| View variable names | Yes | Yes | Yes |
-| Read/write variable values | Yes | Yes | No |
-| Upload and download secret files | Yes | Yes | No |
+| View config/secret file list | Yes | Yes | Yes |
+| Decrypt, edit, and download files | Yes | Yes | No |
+| Push and upload files | Yes | Yes | No |
 | Generate sharing links | Yes | Yes | No |
 | Manage scan results | Yes | Yes | No |
 | Invite/remove members | Yes | No | No |
@@ -22,7 +22,7 @@ Invite members, assign roles, and manage access permissions for your projects.
 
 - **Owner** — Full administrative control. One per project. Automatically assigned to the project creator.
 - **Editor** — Full contributor access (read/write data, run analyses). No administrative actions.
-- **Viewer** — Read-only. Cannot decrypt values, download files, or modify data. Useful for stakeholders and auditors.
+- **Viewer** — Read-only. Cannot decrypt file contents, download files, or modify data. Useful for stakeholders and auditors.
 
 ---
 
@@ -46,4 +46,4 @@ Open the **Members** tab, click **Transfer Ownership**, and select an existing m
 
 ## Project Deletion
 
-Only the Owner can delete a project. Navigate to **Settings** > **Danger Zone** > **Delete Project** and confirm by typing the project name. This removes all data (analyses, vault entries, files, scan results) and is irreversible.
+Only the Owner can delete a project. Navigate to **Settings** > **Danger Zone** > **Delete Project** and confirm by typing the project name. This removes all data (analyses, config and secret files, scan results) and is irreversible.

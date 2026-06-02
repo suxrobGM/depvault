@@ -1,129 +1,108 @@
-# Environment Vault
+# Config & Secret Files
 
-Store, organize, and manage environment variables per project. All values are end-to-end encrypted — encrypted in your browser before they reach the server, and decrypted only on your device. See [Encryption & Security](/guides/encryption) for details.
+Store and manage your repository's configuration and secret files per project. Every file is stored as a single end-to-end encrypted blob — encrypted in your browser before it reaches the server, and decrypted only on your device. See [Encryption & Security](/guides/encryption) for details.
 
-You'll need to enter your vault password to view or edit encrypted values. The vault locks automatically after 30 minutes of inactivity.
-
----
-
-## Vaults
-
-A vault is a named container for environment variables and secret files inside a project. Name it however fits your repo — `api-prod`, `api-dev`, `worker`, `eu-west-1`, etc. — and organize by service, region, deployment target, or a single flat namespace if you prefer.
-
-| Field | Required | Description |
-| --- | --- | --- |
-| **Name** | Yes | Unique within the project. |
-| **Directory path** | No | Where `depvault pull` writes `.env` and `.secrets/` for this vault. |
-| **Tags** | No | Freeform labels. Blessed tags (`prod`, `staging`, `dev`, `preview`) get colored chips. Use tags to filter pulls (`depvault pull --tag prod`). |
-
-### Creating a Vault
-
-Open the **Vault** tab, click **New Vault**, and fill in the name, optional directory path, and any tags. Tag suggestions autocomplete from tags already used on the same project.
-
-### Duplicating a Vault
-
-Open the vault's menu → **Duplicate**. This creates a full copy of the vault — same keys, values, descriptions, required flags, directory path, and tags. Secret files are not copied. Useful for bootstrapping a new environment (e.g., duplicate `api-prod` → `api-staging`) when you want a working baseline to edit down from.
+You'll need to unlock your vault (enter your vault password) to view or edit encrypted file contents. The vault locks automatically after 30 minutes of inactivity.
 
 ---
 
-## Managing Variables
+## How Files Are Organized
 
-### Adding a Variable
+DepVault mirrors your repository instead of a flat list of variables. The hierarchy is:
 
-Select a vault, click **Add Variable**, and fill in:
+```text
+Project (your repo)
+└── App (one app/service root, identified by its repo-relative path)
+    ├── Config files   (.env, appsettings.json, secrets.yaml, config.toml, …)
+    └── Secret files   (.pem, .key, credentials.json, keystores, …)
+```
 
-| Field | Required | Description |
-| --- | --- | --- |
-| **Key** | Yes | Variable name (e.g., `DATABASE_URL`). Must be unique within the vault. |
-| **Value** | Yes | Encrypted immediately upon save. |
-| **Description** | No | What this variable is for. |
-| **Required for Local Setup** | No | Counted by the vault's "N of M required filled" progress indicator and included in `.env.example`. |
+- **Project** — A single repository.
+- **App** — A folder within the repo that holds an app or service, identified by its repo-relative path (`apps/backend`, `services/worker`, or `""` for the repo root). Apps are discovered automatically when you push files from the CLI — DepVault walks up from each file to the nearest project marker (`.sln`, `*.csproj`, `package.json`, `go.mod`, etc.).
+- **Config / Secret file** — Each file is stored as one client-encrypted blob (ciphertext + IV + auth tag). The server never parses files into variables and never sees plaintext.
 
-### Editing and Deleting
+### Environments
 
-Click a variable row to edit. Each save creates a new version automatically. To delete, click the delete icon and confirm — deletion is permanent.
+Every file carries an **environment slug** — an open-set string such as `base`, `dev`, `prod`, `staging`, `local`, `test`, or any custom value you like (`qa`, `eu-west-1`, …). The slug is inferred from the filename when you push (`appsettings.Production.json` → `prod`, `.env.local` → `local`, a bare `.env` → `base`). It is a plain column on the file, not a tag and not a separate record.
 
 ---
 
-## Required-Filled Progress
+## Repository Browser
 
-Each vault card shows `N of M required filled` with a progress bar. Variables flagged **Required for Local Setup** count toward `M`; variables with a non-empty encrypted value count toward `N`. Clone-created blanks start at 0 of M; the bar turns green when all required keys have values.
+Open a project and go to the repository view. The layout has three regions:
+
+1. **Apps sidebar** — Lists every app, grouped by repo path. Select one to view its files.
+2. **Environment selector** — Tabs across the top: **All environments** plus one tab per environment slug present in the app. Filters the file lists below.
+3. **File panels** — Config files (with an editor) and secret files (as a table) for the selected app and environment.
+
+If a project has no apps yet, the view prompts you to push config and secret files with the [DepVault CLI](/cli/pull#push).
+
+---
+
+## Editing Config Files
+
+Select a config file to open it in the editor. Plaintext files are editable in-browser, GitHub-style, with two views:
+
+| View | What it shows |
+| --- | --- |
+| **Form** | A key/value table for dotenv-style files. Edit values inline without touching syntax. Available for `.env`-style formats. |
+| **Raw** | A CodeMirror code editor with syntax highlighting. Available for every text file (the only view for JSON/YAML/TOML). |
+
+Edits in either view update the same underlying text. When you have unsaved changes, click **Review & Save** to see a git-style diff of your edit before committing it, then save. Each save snapshots a new version.
+
+**Binary files** are download-only — they cannot be edited in the browser. Use the **Download** button to decrypt and save the file locally.
+
+---
+
+## Secret Files
+
+Secret files (certificates, keys, credentials, keystores) appear in a table below the config editor, showing path, environment, MIME type, size, and last-updated date. See the [Secret Files](/guides/secret-files) guide for the full workflow.
+
+- **Download** decrypts the blob in your browser and saves the original bytes.
+- Plaintext secret files can be edited in a raw text dialog; binary secret files are download-only.
+- Deleting a file permanently removes it and its version history.
+
+---
+
+## Version History & Diff
+
+Every push or web save snapshots the full encrypted blob as a new version. Open a config file's **History** tab to:
+
+- **Compare** any version against the current contents. DepVault decrypts both blobs in your browser and renders a git-style side-by-side diff — the server never sees plaintext.
+- **Restore** any version to make it the current file. The restored content becomes a new version; nothing is lost.
+
+Binary files are versioned too, but show a placeholder instead of a text diff.
 
 ---
 
 ## Role-Based Access
 
-| Role | View keys | Decrypt values | Edit variables |
+| Role | View file list | Decrypt & download | Edit / delete files |
 | --- | --- | --- | --- |
 | **Owner / Editor** | Yes | Yes | Yes |
 | **Viewer** | Yes | No | No |
 
 ---
 
-## Version History
+## CLI
 
-Every value update creates a version entry with the previous value, timestamp, and author. Open a variable's **History** tab to browse versions. Click **Rollback** on any version to restore it as the current value.
-
----
-
-## Bulk Import and Export
-
-### Supported Formats
-
-`.env`, `appsettings.json`, `secrets.yaml`, `config.toml`
-
-### Web UI
-
-Use the **Import** and **Export** buttons in the Vault tab. On import, review parsed key-value pairs and choose to skip or overwrite existing keys.
-
-### CLI
+The CLI treats files as whole blobs — it never parses them into variables.
 
 ```bash
-# Pull every vault in the project
+# Push all discovered config & secret files (interactive multi-select)
+depvault push
+
+# Push a single file
+depvault push --file apps/backend/.env
+
+# Restore every file byte-for-byte to its original path
 depvault pull
 
-# Pull specific vaults by name
-depvault pull --vault api-prod,web-prod
+# List config files stored for the active project
+depvault env list
 
-# Pull vaults matching a tag (intersection for comma-separated tags)
-depvault pull --tag prod
-
-# Push a file into a specific vault
-depvault push --vault api-prod --file .env
+# List secret file metadata
+depvault secrets list
 ```
 
-#### Pull Flags
-
-| Flag | Description | Default |
-| --- | --- | --- |
-| `--vault` | Comma-separated vault names. Prompts interactively when omitted. | Interactive |
-| `--tag` | Comma-separated tags; matches vaults carrying **all** listed tags. | — |
-| `--format` | `env`, `appsettings.json`, `secrets.yaml`, `config.toml`. | `env` |
-| `--output-dir` | Base directory for written files. | Repo root |
-| `--include-secrets` | Also download secret files. | `true` |
-| `--force` | Skip overwrite confirmation. | `false` |
-
-#### Push Flags
-
-| Flag | Description | Default |
-| --- | --- | --- |
-| `--vault` | Target vault name. Creates the vault if it doesn't exist. | Auto-matched from directory |
-| `--file` | Path to the file to import. Auto-discovers env files when omitted. | Interactive |
-| `--create-missing` | Auto-create suggested vaults in non-interactive mode. | `false` |
-| `--no-sync` | Skip removing stale variables not present in the pushed file. | `false` |
-
-Without `--vault`, push matches files to vaults by directory path or blessed tag inferred from the filename (`.env.production` → `prod` tag). If no match exists, interactive mode prompts to create a new vault.
-
-### List Variables
-
-```bash
-depvault env list --vault-id <id>
-```
-
-Values are masked by default. Use `--output json` for full decrypted values (use with caution).
-
----
-
-## Generate .env.example
-
-Click **Generate .env.example** in the Vault tab to create a file with keys and placeholders — no real secrets. Variables flagged as **Required for Local Setup** are included automatically. Safe to commit to version control.
+`push` infers each file's app (nearest project marker) and environment slug (from the filename) automatically — there are no `--vault` or `--tag` flags. `pull` is byte-faithful: it writes each file verbatim to its original repo-relative path, recreating directories as needed. See the [Pull & Push](/cli/pull) reference for all flags.

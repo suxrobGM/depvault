@@ -146,7 +146,7 @@ const summaryRows = [
   { cells: ["Dependencies analyzed", "47"], colors: [colors.textSecondary, cli.text] },
   { cells: ["Files analyzed", "3"], colors: [colors.textSecondary, cli.text] },
   { cells: ["Vulnerabilities found", "2"], colors: [colors.textSecondary, "#f7768e"] },
-  { cells: ["Env variables pushed", "12"], colors: [colors.textSecondary, "#9ece6a"] },
+  { cells: ["Config files pushed", "12"], colors: [colors.textSecondary, "#9ece6a"] },
   { cells: ["Secret leaks detected", "0"], colors: [colors.textSecondary, "#9ece6a"] },
   { cells: ["Secret files uploaded", "1"], colors: [colors.textSecondary, cli.text] },
 ];

@@ -18,20 +18,9 @@ public sealed class ReplHost(VaultState vaultState, ConsoleRenderer renderer)
         renderer.PrintBanner();
         PrintHelp(rootCommand);
 
-        var firstIteration = true;
-
         while (true)
         {
             vaultState.CheckAutoLock(AutoLockTimeout);
-
-            // Clear and reprint banner before each prompt (skip the first time — banner already shown)
-            if (!firstIteration)
-            {
-                AnsiConsole.Clear();
-                renderer.PrintBanner();
-            }
-
-            firstIteration = false;
 
             var prompt = vaultState.IsUnlocked
                 ? $"[{ConsoleTheme.BrandMarkup}]depvault[/][grey]>[/] "
@@ -73,11 +62,18 @@ public sealed class ReplHost(VaultState vaultState, ConsoleRenderer renderer)
             }
             else
             {
-                // Delegate to System.CommandLine
                 try
                 {
                     var parseResult = rootCommand.Parse(parts);
-                    await parseResult.InvokeAsync();
+                    if (parseResult.Errors.Count > 0)
+                    {
+                        AnsiConsole.MarkupLine(
+                            $"[yellow]Unknown command '{Markup.Escape(command)}'. Type help for commands.[/]");
+                    }
+                    else
+                    {
+                        await parseResult.InvokeAsync();
+                    }
                 }
                 catch (PromptCanceledException)
                 {
@@ -89,10 +85,8 @@ public sealed class ReplHost(VaultState vaultState, ConsoleRenderer renderer)
                 }
             }
 
-            // Pause so user can read output before the screen clears
-            AnsiConsole.WriteLine();
-            AnsiConsole.MarkupLine("[grey]Press Enter to continue...[/]");
-            Console.ReadLine();
+            // Thin separator between commands; scrollback is preserved (no clear, no "press enter").
+            AnsiConsole.Write(new Rule { Style = new Style(Color.Grey) });
         }
 
         return 0;

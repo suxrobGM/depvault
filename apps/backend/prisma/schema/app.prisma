@@ -1,0 +1,23 @@
+/**
+ * Repo-native model: Project -> App -> RepoFile.
+ * An App is one application/service root folder in the repo, identified by its
+ * repo-relative `appPath` (not the same as DepVault's own `apps/` workspace folder).
+ * Files live in repo-file.prisma as encrypted blobs tagged with a `kind` (CONFIG or
+ * SECRET). Environment is an open-set slug column on each file, not a table.
+ */
+
+model App {
+  id        String   @id @default(uuid()) @db.Uuid
+  projectId String   @map("project_id") @db.Uuid
+  name      String
+  appPath   String   @map("app_path")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  project  Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  files    RepoFile[]
+  ciTokens CiToken[]
+
+  @@unique([projectId, appPath])
+  @@map("apps")
+}

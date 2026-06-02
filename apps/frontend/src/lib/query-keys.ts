@@ -64,23 +64,14 @@ export const queryKeys = {
       ["license-compliance", projectId, page, pageSize, search] as const,
   },
 
-  vaults: {
-    byProject: (projectId: string) => ["vaults", projectId] as const,
-    overview: (projectId: string) => ["vaults", projectId, "overview"] as const,
-    tags: (projectId: string) => ["vault-tags", projectId] as const,
-    variables: (projectId: string, vaultId: string | null) =>
-      ["vault-variables", projectId, vaultId] as const,
-    export: (projectId: string, vaultId: string) => ["env-export", projectId, vaultId] as const,
-    variableVersions: (projectId: string, variableId: string) =>
-      ["env-variable-versions", projectId, variableId] as const,
-  },
-
-  secretFiles: {
-    byProject: (projectId: string) => ["secret-files", projectId] as const,
-    overview: (projectId: string) => ["secret-files", projectId, "overview"] as const,
-    bundle: (projectId: string) => ["secret-files", projectId, "bundle"] as const,
-    versions: (projectId: string, fileId: string) =>
-      ["secret-file-versions", projectId, fileId] as const,
+  repo: {
+    map: (projectId: string) => ["repo-map", projectId] as const,
+    apps: (projectId: string) => ["apps", projectId] as const,
+    file: (projectId: string, fileId: string) => ["repo-file", projectId, fileId] as const,
+    fileContent: (projectId: string, fileId: string) =>
+      ["repo-file-content", projectId, fileId] as const,
+    fileVersions: (projectId: string, fileId: string) =>
+      ["repo-file-versions", projectId, fileId] as const,
   },
 
   ciTokens: {
@@ -104,8 +95,8 @@ export const queryKeys = {
     patterns: (projectId: string) => ["scan-patterns", projectId] as const,
   },
 
-  sharedSecrets: {
-    byProject: (projectId: string) => ["shared-secrets", projectId] as const,
+  shareLinks: {
+    byProject: (projectId: string) => ["share-links", projectId] as const,
   },
 
   github: {

@@ -1,19 +1,23 @@
 using System.CommandLine;
-using DepVault.Cli.Commands.Scan;
+using DepVault.Cli.Services.Scan;
+using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
-using DepVault.Cli.Utils;
+using DepVault.Cli.Services;
+using DepVault.Cli.Auth;
 using Spectre.Console;
 
 namespace DepVault.Cli.Commands;
 
 internal sealed class ScanCommands(
-    CommandContext ctx,
+    AuthContext ctx,
     ConsoleRenderer renderer,
-    ProjectResolver projectResolver,
+    IProjectContextResolver projectContextResolver,
     DependencyScanner dependencyScanner,
     EnvFileScanner envFileScanner,
     SecretLeakScanner secretLeakScanner,
-    SecretFileScanner secretFileScanner)
+    SecretFileScanner secretFileScanner,
+    DekService dekService,
+    IRepositoryLocator repositoryLocator)
 {
     public Command CreateScanCommand()
     {
@@ -42,7 +46,7 @@ internal sealed class ScanCommands(
             }
 
             renderer.PrintBanner();
-            var repoPath = Path.GetFullPath(parseResult.GetValue(pathOpt) ?? GitUtils.FindRepoRoot());
+            var repoPath = Path.GetFullPath(parseResult.GetValue(pathOpt) ?? repositoryLocator.FindRepoRoot());
 
             if (!Directory.Exists(repoPath))
             {
@@ -53,21 +57,31 @@ internal sealed class ScanCommands(
             AnsiConsole.MarkupLine($"[cyan1]Scanning:[/] {Markup.Escape(repoPath)}");
             AnsiConsole.WriteLine();
 
-            var projectId = await projectResolver.ResolveAsync(
-                parseResult.GetValue(projectOpt), repoPath, cancellationToken);
-            if (projectId is null)
+            var resolution = await projectContextResolver.ResolveAsync(
+                parseResult.GetValue(projectOpt),
+                ResolutionPolicy.AllowInteractive | ResolutionPolicy.AllowCreate | ResolutionPolicy.ConfirmActive,
+                cancellationToken);
+            if (resolution is null)
             {
                 return;
             }
 
+            var projectId = resolution.ProjectId;
+
             var results = new ScanResults();
+
+            // Resolve the project DEK at most once for the whole scan, and only when a scanner
+            // actually needs it (after file selection). The same key encrypts every file, so this
+            // collects the vault password a single time across the env + secret sections.
+            var dek = new Lazy<Task<byte[]?>>(
+                () => dekService.CollectPasswordAndResolveAsync(projectId, cancellationToken));
 
             renderer.PrintRule("Dependency Analysis");
             await dependencyScanner.RunAsync(projectId, repoPath, results, cancellationToken);
 
             AnsiConsole.WriteLine();
             renderer.PrintRule("Environment Files");
-            await envFileScanner.RunAsync(projectId, repoPath, results, cancellationToken);
+            await envFileScanner.RunAsync(projectId, repoPath, results, dek, cancellationToken);
 
             AnsiConsole.WriteLine();
             renderer.PrintRule("Secret Leak Detection");
@@ -75,7 +89,7 @@ internal sealed class ScanCommands(
 
             AnsiConsole.WriteLine();
             renderer.PrintRule("Secret Files");
-            await secretFileScanner.RunAsync(projectId, repoPath, results, cancellationToken);
+            await secretFileScanner.RunAsync(projectId, repoPath, results, dek, cancellationToken);
 
             AnsiConsole.WriteLine();
             ScanSummary.Print(results, projectId, ctx.Config.Load().Server);

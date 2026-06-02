@@ -4,7 +4,6 @@ using DepVault.Cli.Auth;
 using DepVault.Cli.Config;
 using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
-using DepVault.Cli.Utils;
 using Spectre.Console;
 using TokenNs = DepVault.Cli.ApiClient.Api.Auth.Device.Token;
 
@@ -12,7 +11,7 @@ namespace DepVault.Cli.Commands;
 
 public sealed class AuthCommands(
     IApiClientFactory clientFactory,
-    CommandContext ctx,
+    AuthContext ctx,
     ICredentialStore credentialStore,
     VaultState vaultState)
 {

@@ -32,9 +32,9 @@ model User {
   ownedProjects       Project[]
   projectMemberships  ProjectMember[]
   analyses            Analysis[]
-  sharedSecrets       SharedSecret[]
+  shareLinks          ShareLink[]
   notifications       Notification[]
-  uploadedFiles       SecretFile[]
+  repoFiles           RepoFile[]
   auditLogs           AuditLog[]
   triggeredScans      SecretScan[]        @relation("scanTriggeredBy")
   resolvedDetections  SecretDetection[]   @relation("detectionResolvedBy")

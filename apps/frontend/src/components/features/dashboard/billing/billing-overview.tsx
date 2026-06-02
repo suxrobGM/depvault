@@ -144,16 +144,7 @@ export function BillingOverview(): ReactElement {
         {limits && usage && (
           <Stack spacing={2} sx={{ mb: 3 }}>
             <UsageMeter label="Projects" current={usage.projects} limit={limits.maxProjects} />
-            <UsageMeter
-              label="Environment Variables"
-              current={usage.envVars}
-              limit={limits.maxEnvVars}
-            />
-            <UsageMeter
-              label="Secret Files"
-              current={usage.secretFiles}
-              limit={limits.maxSecretFiles}
-            />
+            <UsageMeter label="Files" current={usage.repoFiles} limit={limits.maxRepoFiles} />
             <UsageMeter
               label="Analyses (this month)"
               current={usage.analyses}

@@ -24,47 +24,37 @@ src/
 └── types/               # Frontend-specific TypeScript types
 ```
 
-## File Naming
+## Naming & Exports
 
-- **Kebab-case** for all files: `app-shell.tsx`, `use-auth.ts`, `auth-card.tsx`
-- No PascalCase filenames
-
-## Exports
-
-- **Named exports** for all components, hooks, providers: `export function Sidebar()`
-- **Default exports** only for Next.js pages and layouts (`page.tsx`, `layout.tsx`)
+- **Kebab-case** filenames only (`app-shell.tsx`, `use-auth.ts`) — no PascalCase
+- **Named exports** for components/hooks/providers; **default exports** only for `page.tsx`/`layout.tsx`
+- **Barrels**: each feature folder has an `index.ts`. Import across features via the folder path (`@/components/features/share-link`), not deep file paths. Siblings in the same folder import relatively (`./file-editor`)
+- Path alias `"@/*": ["./src/*"]` — import with `@/`, never `src/`
 
 ## Server Components by Default
 
-- **Never** add `"use client"` to `page.tsx` or `layout.tsx` files
+- **Never** add `"use client"` to `page.tsx` / `layout.tsx`
 - Extract interactive logic into `"use client"` feature components under `src/components/features/`
 
 ## Component Props
 
-Destructure props inside the function body, not in parameters:
+Destructure inside the function body, not in parameters:
 
 ```typescript
-// CORRECT
 function Sidebar(props: SidebarProps): ReactElement {
   const { open, onToggle } = props;
 }
 ```
 
-## MUI Imports
+## React 19
 
-Use consolidated barrel imports, never deep imports:
-
-```typescript
-import { Alert, Button, TextField } from "@mui/material";
-```
-
-## Path Aliases
-
-tsconfig uses `"@/*": ["./src/*"]`. Imports use `@/` without `src/`.
+- Use the `use()` hook for async data in client components, not `useEffect` + `useState`
+- **Never** use `useCallback`/`useMemo`/`memo` — the compiler handles memoization
+- **Never** call `setState` synchronously in a `useEffect` body — derive from existing values, or set state only in async callbacks (`.then()`, event handlers)
 
 ## Forms
 
-Use TanStack Form with Zod v4 validators:
+TanStack Form with Zod v4 validators; use reusable components (`FormTextField`, etc.) from `components/ui/form/`:
 
 ```typescript
 import { z } from "zod/v4";
@@ -76,33 +66,22 @@ const form = useForm({
 });
 ```
 
-Use `FormTextField` and other reusable form components from `components/ui/form/`.
-
-## React 19
-
-- Use `use()` hook for async data in client components instead of `useEffect` + `useState` pattern
-- **Never** use `useCallback`, `useMemo`, or `memo` — the React 19 compiler handles memoization
-- **Never** call `setState` synchronously inside a `useEffect` body — derive state from existing values, or call `setState` only inside async callbacks (`.then()`, event handlers)
-
 ## Encryption in Components
 
-- Components that read/write encrypted data must call `useVault()` to get `getProjectDEK(projectId)`
-- Encrypt before API calls: `const encrypted = await encrypt(value, dek)` → send `{encryptedValue, iv, authTag}`
-- Decrypt after fetching: `const plaintext = await decrypt(data.encryptedValue, data.iv, data.authTag, dek)`
-- For async decrypt-on-load patterns, use `useEffect` with a cancellation flag — set state only in the `.then()` callback
-- For share links, embed the ephemeral key in the URL fragment: `url + '#key=' + shareKeyToFragment(raw)`
+- Call `useVault()` to get `getProjectDEK(projectId)` for any read/write of encrypted data
+- Encrypt before sending: `const enc = await encrypt(value, dek)` → `{encryptedValue, iv, authTag}`
+- Decrypt after fetching: `await decrypt(data.encryptedValue, data.iv, data.authTag, dek)`
+- Decrypt-on-load: `useEffect` with a cancellation flag; set state only in the `.then()` callback
+- Share links: embed the ephemeral key in the URL fragment — `url + '#key=' + shareKeyToFragment(raw)`
 
-## UI Components
+## UI (MUI 9)
 
-- **Component library**: MUI 9 — prefer MUI components over custom HTML elements
-- **Styling**: MUI `sx` prop for all styling. System props (e.g. `mt`, `alignItems`) are removed in v9 — always pass layout/spacing through `sx`. Custom CSS utility classes in `globals.css` for animations
-- **Data tables**: Custom table components or MUI Table. MUI DataGrid for complex grids with sorting/filtering
-- **Layout**: MUI Box, Stack, Grid (use `size={{ xs, sm, md }}`, not the v5-era `item` + `xs`/`sm` props). App shell uses persistent sidebar + top app bar
-- **Typography**: MUI Typography with semantic variants (h1–h6, body1, body2, caption)
+- Prefer MUI components over raw HTML; import from the barrel — `import { Button } from "@mui/material"`, never deep imports
+- All styling via the `sx` prop — system props (`mt`, `alignItems`) are gone in v9. Animations via CSS utility classes in `globals.css`
+- Layout with Box/Stack/Grid (`size={{ xs, sm, md }}`, not v5 `item` + `xs`). App shell = persistent sidebar + top app bar
+- MUI Table / DataGrid (DataGrid for sort/filter grids); Typography with semantic variants
 
 ## Testing
 
-- **Framework**: Vitest + React Testing Library
-- **Unit tests**: Utility functions, custom hooks, crypto module (`lib/crypto.test.ts`)
-- **Component tests**: User interactions and rendered output
-- **Location**: Co-locate as `{component}.test.tsx`
+- Vitest + React Testing Library; co-locate as `{component}.test.tsx`
+- Test utils, hooks, crypto module (`lib/crypto.test.ts`), and component interactions/output

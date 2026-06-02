@@ -1,16 +1,12 @@
 using System.CommandLine;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Commands;
-using DepVault.Cli.Commands.Env;
-using DepVault.Cli.Commands.Pull;
-using DepVault.Cli.Commands.Push;
-using DepVault.Cli.Commands.Scan;
 using DepVault.Cli.Config;
 using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
 using DepVault.Cli.Repl;
 using DepVault.Cli.Services;
-using DepVault.Cli.Utils;
+using DepVault.Cli.Services.Scan;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Kiota.Abstractions.Authentication;
 
@@ -27,31 +23,30 @@ internal static class Startup
             .AddSingleton<IAuthenticationProvider, TokenAuthProvider>()
             .AddSingleton<IApiClientFactory, ApiClientFactory>()
             .AddSingleton<IOutputFormatter, OutputFormatter>()
+            .AddSingleton<IErrorHandler, ErrorHandler>()
             .AddSingleton<IConsolePrompter, ConsolePrompter>()
             .AddSingleton<IFileScanner, FileScanner>()
+            .AddSingleton<IRepositoryLocator, RepositoryLocator>()
+            .AddSingleton<IFileArgResolver, FileArgResolver>()
+            .AddSingleton<IProjectContextResolver, ProjectContextResolver>()
             .AddSingleton<ISecretDetector, SecretDetector>()
             .AddSingleton<IGitHubReleaseClient, GitHubReleaseClient>()
             .AddSingleton<IVersionChecker, VersionChecker>()
             .AddSingleton<IUpdateService, UpdateService>()
             .AddSingleton<ConsoleRenderer>()
-            .AddSingleton<CommandContext>()
+            .AddSingleton<AuthContext>()
             .AddSingleton<VaultState>()
-            .AddSingleton<DekResolver>()
+            .AddSingleton<DekService>()
             .AddSingleton<AnalysisClient>()
             // Scan steps
-            .AddSingleton<ProjectResolver>()
             .AddSingleton<DependencyScanner>()
             .AddSingleton<EnvFileScanner>()
             .AddSingleton<SecretLeakScanner>()
             .AddSingleton<SecretFileScanner>()
             // Shared resolvers
-            .AddSingleton<VaultResolver>()
-            .AddSingleton<VaultSelector>()
-            .AddSingleton<DirectoryVaultMapper>()
-            .AddSingleton<EnvPuller>()
-            .AddSingleton<SecretsPuller>()
-            .AddSingleton<EnvImporter>()
-            .AddSingleton<StaleVariableCleaner>()
+            .AddSingleton<AppResolver>()
+            .AddSingleton<RepoFileUploadService>()
+            .AddSingleton<RepoFilePuller>()
             // Commands
             .AddSingleton<AuthCommands>()
             .AddSingleton<ConfigCommands>()

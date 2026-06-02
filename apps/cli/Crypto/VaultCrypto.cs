@@ -92,6 +92,31 @@ public static class VaultCrypto
         );
     }
 
+    /// <summary>
+    /// Verifies a candidate KEK by attempting to unwrap the server-stored wrapped private key.
+    /// A successful unwrap proves the KEK was derived from the correct password and salt; an
+    /// AES-GCM auth-tag mismatch proves it was not. Returns true when the wrapped key material is
+    /// absent (can't verify against bad server state — allow through rather than block).
+    /// </summary>
+    public static bool VerifyKek(string wrappedKey, string iv, string tag, byte[] kek)
+    {
+        if (string.IsNullOrEmpty(wrappedKey) || string.IsNullOrEmpty(iv) || string.IsNullOrEmpty(tag))
+        {
+            return true;
+        }
+
+        try
+        {
+            var raw = UnwrapKey(wrappedKey, iv, tag, kek);
+            CryptographicOperations.ZeroMemory(raw);
+            return true;
+        }
+        catch (CryptographicException)
+        {
+            return false;
+        }
+    }
+
     /// <summary>Unwrap (AES-GCM decrypt) a wrapped DEK, returning the raw key bytes.</summary>
     public static byte[] UnwrapKey(string wrappedDek, string iv, string tag, byte[] wrappingKey)
     {

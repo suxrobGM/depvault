@@ -1,8 +1,8 @@
-# I got tired of passing .env files in my Telegram, so I built a vault platform for env vars, secrets, and dependency analysis
+# I got tired of passing .env files in my Telegram, so I built an end-to-end-encrypted home for config files, secrets, and dependency analysis
 
 If you've worked on a team where `.env` files get passed around in Slack DMs, you know the problem. I've been there. Three repos, three different stacks, and I'm running `npm audit`, `pip-audit`, and `dotnet list package --vulnerable` one after another just to get a rough picture of where things stand. Then there's the secrets side: someone pastes a database password in a group chat, it sits in the scroll history forever, and six months later nobody remembers which values are current.
 
-I wanted one place for all of it. That became DepVault: a web dashboard for analyzing dependencies across 8+ ecosystems and storing secrets in an encrypted vault. It started as a class project, but I built it around a problem I actually had.
+I wanted one place for all of it. That became DepVault: a web dashboard for analyzing dependencies across 8+ ecosystems and storing your config and secret files end-to-end encrypted, mirroring your repo. It started as a class project, but I built it around a problem I actually had.
 
 Live app: [depvault.com](https://depvault.com) | Source: [github.com/suxrobgm/depvault](https://github.com/suxrobGM/depvault)
 
@@ -20,15 +20,15 @@ The vulnerability data comes from OSV.dev, which aggregates advisories from the 
 
 ## Your secrets, actually encrypted
 
-Each project in DepVault has a vault. You create environments (development, staging, production), add your variables, and they're encrypted with AES-256-GCM before anything touches the database. Not "encrypted in transit." Encrypted at rest, per value, with unique IVs.
+DepVault mirrors your repo. A project is a repo, each app/service folder is an "app," and every config file (`.env`, `appsettings.json`, whatever) and secret file lives under it - stored exactly where it sits in your tree. The key part: each file is encrypted in your browser (or in the CLI) with AES-256-GCM _before_ it ever leaves your machine. The server is zero-knowledge - it stores ciphertext and literally cannot decrypt your data. No master key on the server, no "trust us."
 
-![Environment Vault](./images/project-env-vars.jpg)
+![Repo Browser](./images/project-env-vars.jpg)
 
-There's version history for every variable. Changed a database URL three weeks ago and need the old one? It's there. Want to compare what's different between staging and production? The diff view puts them side by side.
+Files are grouped by app and environment (base, dev, prod, staging, or any custom slug you push). Plaintext config files you can edit right in the browser - a key/value form for `.env`, or a raw code editor for everything else - and every save snapshots the full file. There's version history for every file, and a git-style diff between any two versions (computed client-side after decrypt). Changed a database URL three weeks ago and need the old one? It's there.
 
-![Variable History](./images/project-env-vars-history.jpg)
+![File History & Diff](./images/project-env-vars-history.jpg)
 
-You can also store secret files: SSL certificates, private keys, provisioning profiles, keystores. Same encryption, same versioning.
+You can also store secret files: SSL certificates, private keys, provisioning profiles, keystores. Same end-to-end encryption, same versioning. And when you `depvault pull`, every file is written back byte-for-byte to its original path - no reformatting, no surprises.
 
 ## Stop pasting passwords in Slack
 
@@ -40,11 +40,11 @@ You can set an expiration window and add optional password protection. For teams
 
 ## CI/CD without .env files
 
-One of the more practical features: generate scoped tokens that your CI pipeline uses to pull secrets at build time. Your GitHub Actions job authenticates with a short-lived token, fetches the variables it needs, and nothing gets committed to the repo.
+One of the more practical features: generate scoped tokens that your CI pipeline uses to pull config and secret files at build time. Your GitHub Actions job runs `depvault ci pull`, authenticates with a short-lived token, and DepVault restores the app's files straight to their real paths - decrypted client-side in the runner, nothing committed to the repo.
 
 ![CI Integration](./images/ci-integration.jpg)
 
-No more `.env` files checked into private repos "just for CI." No more secret values hardcoded in pipeline YAML. The token is scoped to a specific project and environment, so a staging token can't read production secrets.
+No more `.env` files checked into private repos "just for CI." No more secret values hardcoded in pipeline YAML. The token is scoped to a specific app and environment, so a staging token can't read production secrets. The token even carries a wrapped copy of the project key, so the server never has to hold an unwrapped one.
 
 ![CI Token Generation](./images/generate-ci-token.jpg)
 
@@ -60,15 +60,11 @@ It runs on a schedule and flags anything it finds. Better to catch a leaked key 
 
 A few utilities that turned out to be more useful than I expected:
 
-**Config converter.** Paste an `appsettings.json`, get back a `.env` file. Or convert `.env` to YAML, YAML to TOML, TOML to JSON. I built this because I kept doing it by hand when switching between projects.
+**Repo export.** Pull down the encrypted config and secret blobs for a single file, a whole environment, one app, or the entire repo - decrypted client-side. Handy for backups and for re-hydrating a fresh clone.
 
-![Config Converter](./images/converter.jpg)
+**Download bundles.** Select the config and secret files you need, download them as an encrypted zip with a one-time password. Handy for setting up a new machine or sharing a complete app's environment with a teammate.
 
-**Environment templates.** Create a template with all the variables a new environment needs (keys, descriptions, required flags) and stamp out new environments from it. Useful for onboarding and for keeping staging and production consistent.
-
-**Download bundles.** Select the variables and secret files you need, download them as an encrypted zip with a one-time password. Handy for setting up a new machine or sharing a complete environment with a teammate.
-
-**Activity logs.** Every vault operation is logged: who changed what, when, from where. The audit trail is append-only - nothing gets edited or removed.
+**Activity logs.** Every file operation is logged: who changed what, when, from where. The audit trail is append-only - nothing gets edited or removed.
 
 ![Activity Log](./images/activity-log.jpg)
 

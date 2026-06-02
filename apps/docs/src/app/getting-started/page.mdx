@@ -22,7 +22,7 @@ Click **Continue with GitHub** on the login page and authorize DepVault. Your ac
 2. Enter a project name and optional description.
 3. Click **Create**.
 
-Your project appears as a card on the dashboard, ready for dependency scans and secret management.
+Your project appears as a card on the dashboard, ready for dependency scans and config/secret file management.
 
 ---
 
@@ -48,33 +48,31 @@ irm https://get.depvault.com | iex
 
 ---
 
-## Set Up Your Environment
+## Push Your Config & Secret Files
 
-Scan your repository to discover environment files and push them to the vault:
+Push your repository's config and secret files to DepVault. Each file is encrypted in your browser/CLI and uploaded as a single blob:
 
 ```bash
 depvault login
-depvault scan
+depvault push
 ```
 
-The scan command detects `.env` files, maps each directory to a vault group, and uploads variables. Each vault group stores the directory path so pull knows where to write files.
+`push` discovers config files (`.env`, `appsettings.json`, …) and secret files (`.pem`, `.key`, `credentials.json`, …), infers each file's app and environment slug from its path and name, and uploads the encrypted blobs. No `--vault` or `--tag` flags needed.
 
-Pull environment variables and secret files back to the correct folders:
+Pull everything back, restored byte-for-byte to its original repo-relative path:
 
 ```bash
 depvault pull
 ```
 
-This writes `.env` files to each vault group's configured directory and downloads secret files to `.secrets/` folders. See the [Pull & Push](/cli/pull) reference for all options.
+This recreates each file exactly where it was pushed from, recreating directories as needed. See the [Pull & Push](/cli/pull) reference for all options.
 
 ---
 
-## Store Your First Secret
+## Edit a File in the Browser
 
-1. Open your project and go to the **Vault** tab.
-2. Select an environment (**DEVELOPMENT**, **STAGING**, **PRODUCTION**, or **GLOBAL**).
-3. Click **Add Variable**, enter the key (e.g., `DATABASE_URL`) and value, then click **Save**.
+1. Open your project and go to the repository view.
+2. Pick an app in the sidebar and an environment tab, then select a config file.
+3. Edit it in the **Form** (key/value table for `.env`) or **Raw** (code editor) view, click **Review & Save** to preview a git-style diff, and save.
 
-Values are encrypted with AES-256-GCM immediately upon storage.
-
-To bulk-import from an existing `.env` file, use the **Import** button in the Vault tab or `depvault push env` from the CLI. See the [Environment Vault](/guides/environment-vault) guide for details.
+Every save snapshots a new encrypted version. See the [Config & Secret Files](/guides/environment-vault) guide for details.

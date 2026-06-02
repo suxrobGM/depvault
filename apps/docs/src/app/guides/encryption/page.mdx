@@ -1,6 +1,8 @@
 # Encryption & Security
 
-DepVault uses end-to-end encryption — secrets are encrypted in your browser before they leave your device. The server stores only ciphertext and cannot read your data.
+DepVault uses end-to-end encryption — your config and secret files are encrypted in your browser before they leave your device. The server stores only ciphertext and cannot read your data.
+
+Config files and secret files are stored the same way — as a **single whole-file blob** (ciphertext, IV, and auth tag) tagged with a kind (config or secret). DepVault never parses files into individual variables, and the server never sees plaintext. The key hierarchy below is unchanged: one Data Encryption Key per project protects every blob in that project.
 
 ---
 
@@ -9,7 +11,7 @@ DepVault uses end-to-end encryption — secrets are encrypted in your browser be
 1. You set a **vault password**, separate from your login password. This password is never sent to the server.
 2. A cryptographic key is derived from your vault password using PBKDF2 with 600,000 iterations. This derived key is your Key Encryption Key (KEK).
 3. Each project has its own randomly generated Data Encryption Key (DEK).
-4. Your secrets are encrypted with the project's DEK using AES-256-GCM before leaving your browser.
+4. Your config and secret files are encrypted with the project's DEK using AES-256-GCM before leaving your browser.
 5. The server stores only encrypted ciphertext. Decryption happens exclusively on your device.
 
 ---
@@ -88,7 +90,7 @@ Store your recovery key in a secure offline location (password manager, printed 
 
 Even with full server access, DepVault cannot read:
 
-- Plaintext variable values or file contents
+- Plaintext config or secret file contents
 - Your vault password
 - Your recovery key
 - Decrypted project keys (DEKs)

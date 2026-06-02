@@ -11,7 +11,7 @@ const AUTH_ROUTES = [
 
 const PUBLIC_ROUTES = [
   ROUTES.home,
-  ROUTES.secrets,
+  ROUTES.share,
   ROUTES.pricing,
   ROUTES.terms,
   ROUTES.privacy,

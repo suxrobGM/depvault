@@ -35,11 +35,10 @@ const TIERS: PricingTier[] = [
     description: "For individual developers getting started",
     features: [
       "3 projects",
-      "100 env variables",
-      "10 secret files",
+      "100 config & secret files",
       "30 analyses / month",
       "1 user",
-      "Secret sharing links",
+      "Share links",
       "5 active CI/CD tokens",
       "CLI access",
     ],
@@ -53,8 +52,7 @@ const TIERS: PricingTier[] = [
     description: "For developers and small teams shipping fast",
     features: [
       "20 projects",
-      "1,000 env variables",
-      "100 secret files",
+      "1,000 config & secret files",
       "200 analyses / month",
       "Up to 10 users",
       "20 active CI/CD tokens",

@@ -1,4 +1,4 @@
-using DepVault.Cli.Utils;
+using DepVault.Cli.Common;
 
 namespace DepVault.Cli.Services.SecretScanning;
 
@@ -9,10 +9,7 @@ internal static class FileFilter
 
     private static readonly IReadOnlySet<string> ExcludedDirs = ExcludedDirectories.Names;
 
-    private static readonly HashSet<string> ExtraExcludedDirs = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "fixtures", "testdata", "tests", "docs", "__tests__"
-    };
+    private static readonly IReadOnlySet<string> ExtraExcludedDirs = ExcludedDirectories.FixtureDirs;
 
     private static readonly HashSet<string> ExcludedExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
