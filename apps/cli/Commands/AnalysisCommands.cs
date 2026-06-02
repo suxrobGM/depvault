@@ -14,7 +14,8 @@ public sealed class AnalysisCommands(
     IRepositoryLocator repositoryLocator,
     IProjectContextResolver projectContextResolver,
     IErrorHandler errorHandler,
-    IFileArgResolver fileArgResolver)
+    IFileArgResolver fileArgResolver,
+    ConsoleRenderer renderer)
 {
     public Command CreateAnalyzeCommand()
     {
@@ -45,7 +46,7 @@ public sealed class AnalysisCommands(
                 return;
             }
 
-            ctx.PrintProjectBanner();
+            renderer.PrintStatusLine();
 
             var filePath = fileArgResolver.ResolveFileInteractive(
                 parseResult, fileOpt,

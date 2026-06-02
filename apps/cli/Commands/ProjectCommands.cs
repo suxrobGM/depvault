@@ -1,5 +1,6 @@
 using System.CommandLine;
 using DepVault.Cli.Auth;
+using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using CreateProjectBody = DepVault.Cli.ApiClient.Api.Projects.ProjectsPostRequestBody;
@@ -9,7 +10,8 @@ namespace DepVault.Cli.Commands;
 public sealed class ProjectCommands(
     IApiClientFactory clientFactory,
     CommandContext ctx,
-    IProjectContextResolver projectContextResolver)
+    IProjectContextResolver projectContextResolver,
+    ConsoleRenderer renderer)
 {
     public Command CreateProjectCommand()
     {
@@ -222,7 +224,7 @@ public sealed class ProjectCommands(
                 return;
             }
 
-            ctx.PrintProjectBanner();
+            renderer.PrintStatusLine();
             var client = clientFactory.Create();
 
             try

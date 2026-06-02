@@ -1,5 +1,6 @@
 using System.CommandLine;
 using DepVault.Cli.Auth;
+using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
@@ -11,7 +12,8 @@ namespace DepVault.Cli.Commands;
 public sealed class EnvCommands(
     CommandContext ctx,
     IProjectContextResolver projectContextResolver,
-    IApiClientFactory clientFactory)
+    IApiClientFactory clientFactory,
+    ConsoleRenderer renderer)
 {
     public Command CreateEnvCommand()
     {
@@ -48,7 +50,7 @@ public sealed class EnvCommands(
                 return;
             }
 
-            ctx.PrintProjectBanner();
+            renderer.PrintStatusLine();
             var projectId = resolution.ProjectId;
             var client = clientFactory.Create();
 

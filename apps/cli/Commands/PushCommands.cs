@@ -20,7 +20,8 @@ internal sealed class PushCommands(
     IRepositoryLocator repositoryLocator,
     IProjectContextResolver projectContextResolver,
     IErrorHandler errorHandler,
-    IFileArgResolver fileArgResolver)
+    IFileArgResolver fileArgResolver,
+    ConsoleRenderer renderer)
 {
     public Command CreatePushCommand()
     {
@@ -48,7 +49,7 @@ internal sealed class PushCommands(
                 return;
             }
 
-            ctx.PrintProjectBanner();
+            renderer.PrintStatusLine();
             var projectId = resolution.ProjectId;
 
             var selected = ResolveFiles(parseResult.GetValue(fileOpt));

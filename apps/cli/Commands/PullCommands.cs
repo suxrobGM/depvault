@@ -2,6 +2,7 @@ using System.CommandLine;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Commands.Pull;
 using DepVault.Cli.Crypto;
+using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
@@ -22,7 +23,8 @@ public sealed class PullCommands(
     RepoFilePuller repoFilePuller,
     IRepositoryLocator repositoryLocator,
     IProjectContextResolver projectContextResolver,
-    IApiClientFactory clientFactory)
+    IApiClientFactory clientFactory,
+    ConsoleRenderer renderer)
 {
     private const string BaseSlug = "base";
 
@@ -69,7 +71,7 @@ public sealed class PullCommands(
                 return;
             }
 
-            ctx.PrintProjectBanner();
+            renderer.PrintStatusLine();
             var projectId = resolution.ProjectId;
             var client = clientFactory.Create();
 

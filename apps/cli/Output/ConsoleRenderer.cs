@@ -1,5 +1,6 @@
 using DepVault.Cli.Config;
 using DepVault.Cli.Crypto;
+using DepVault.Cli.Services;
 using Spectre.Console;
 
 namespace DepVault.Cli.Output;
@@ -8,7 +9,8 @@ namespace DepVault.Cli.Output;
 public sealed class ConsoleRenderer(
     VaultState vaultState,
     ICredentialStore credentialStore,
-    IConfigService configService)
+    IConfigService configService,
+    IRepositoryLocator repositoryLocator)
 {
     private static readonly string[] DepLines =
     [
@@ -49,7 +51,7 @@ public sealed class ConsoleRenderer(
         AnsiConsole.WriteLine();
     }
 
-    /// <summary>Print the status line: email · vault lock status · project name.</summary>
+    /// <summary>Print the status line: cwd · repo · email · vault lock status · project name.</summary>
     public void PrintStatusLine()
     {
         var email = credentialStore.Load()?.Email;
@@ -57,12 +59,19 @@ public sealed class ConsoleRenderer(
         var projectName = config.ActiveProjectName;
         var projectId = config.ActiveProjectId;
 
-        if (email is null && projectId is null)
+        var parts = new List<string>();
+
+        var cwd = CollapseHome(Directory.GetCurrentDirectory());
+        if (!string.IsNullOrEmpty(cwd))
         {
-            return;
+            parts.Add($"[grey]{Markup.Escape(cwd)}[/]");
         }
 
-        var parts = new List<string>();
+        var repoName = repositoryLocator.GetRepoName();
+        if (!string.IsNullOrEmpty(repoName))
+        {
+            parts.Add($"[white]{Markup.Escape(repoName)}[/]");
+        }
 
         if (email is not null)
         {
@@ -82,7 +91,31 @@ public sealed class ConsoleRenderer(
             parts.Add($"[grey]{Markup.Escape(projectId)}[/]");
         }
 
+        if (parts.Count == 0)
+        {
+            return;
+        }
+
         AnsiConsole.MarkupLine($"  {string.Join(" [grey]·[/] ", parts)}");
+    }
+
+    /// <summary>Collapses the user's home directory prefix to <c>~</c> for a compact path display.</summary>
+    private static string? CollapseHome(string? path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            return path;
+        }
+
+        var home = Environment.GetEnvironmentVariable("HOME");
+        if (string.IsNullOrEmpty(home))
+        {
+            home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        }
+
+        return !string.IsNullOrEmpty(home) && path.StartsWith(home, StringComparison.Ordinal)
+            ? "~" + path[home.Length..]
+            : path;
     }
 
     /// <summary>Renders the "key grant missing" guidance panel shown when a project has no SELF grant.</summary>

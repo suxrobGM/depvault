@@ -1,5 +1,6 @@
 using System.CommandLine;
 using DepVault.Cli.Auth;
+using DepVault.Cli.Output;
 using DepVault.Cli.Services;
 using DepVault.Cli.Utils;
 using Spectre.Console;
@@ -12,7 +13,8 @@ namespace DepVault.Cli.Commands;
 public sealed class SecretsCommands(
     CommandContext ctx,
     IProjectContextResolver projectContextResolver,
-    IApiClientFactory clientFactory)
+    IApiClientFactory clientFactory,
+    ConsoleRenderer renderer)
 {
     public Command CreateSecretsCommand()
     {
@@ -48,7 +50,7 @@ public sealed class SecretsCommands(
                 return;
             }
 
-            ctx.PrintProjectBanner();
+            renderer.PrintStatusLine();
             var client = clientFactory.Create();
             var envSlug = parseResult.GetValue(envOpt);
 
