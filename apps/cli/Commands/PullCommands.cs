@@ -1,4 +1,5 @@
 using System.CommandLine;
+using DepVault.Cli.Auth;
 using DepVault.Cli.Commands.Pull;
 using DepVault.Cli.Crypto;
 using DepVault.Cli.Services;
@@ -19,7 +20,9 @@ public sealed class PullCommands(
     CommandContext ctx,
     DekService dekService,
     RepoFilePuller repoFilePuller,
-    IRepositoryLocator repositoryLocator)
+    IRepositoryLocator repositoryLocator,
+    IProjectContextResolver projectContextResolver,
+    IApiClientFactory clientFactory)
 {
     private const string BaseSlug = "base";
 
@@ -51,12 +54,24 @@ public sealed class PullCommands(
 
         cmd.SetAction(async (parseResult, ct) =>
         {
-            var pc = await ctx.RequireProjectContextAsync(parseResult, projectOpt, ct);
-            if (pc is null)
+            if (!ctx.RequireAuth())
             {
                 Environment.ExitCode = 1;
                 return;
             }
+
+            var explicitId = parseResult.GetValue(projectOpt);
+            var resolution = await projectContextResolver.ResolveAsync(
+                explicitId, ResolutionPolicy.Interactive, ct);
+            if (resolution is null || !ProjectGuard.ConfirmOverride(ctx, explicitId))
+            {
+                Environment.ExitCode = 1;
+                return;
+            }
+
+            ctx.PrintProjectBanner();
+            var projectId = resolution.ProjectId;
+            var client = clientFactory.Create();
 
             // --format is reserved for an explicit export/convert mode. Normal pull restores
             // blobs verbatim, so a format selector here is intentionally a no-op for now.
@@ -78,7 +93,7 @@ public sealed class PullCommands(
             var repoMap = await AnsiConsole.Status()
                 .Spinner(Spinner.Known.Dots)
                 .StartAsync("Fetching repository map...", async _ =>
-                    await pc.Client.Api.Projects[pc.ProjectId].RepoMap.GetAsync(cancellationToken: ct));
+                    await client.Api.Projects[projectId].RepoMap.GetAsync(cancellationToken: ct));
 
             var apps = FilterApps(repoMap?.Apps, appFilter);
             if (apps is null)
@@ -100,7 +115,7 @@ public sealed class PullCommands(
                 return;
             }
 
-            var dek = await dekService.CollectPasswordAndResolveAsync(pc.ProjectId, ct);
+            var dek = await dekService.CollectPasswordAndResolveAsync(projectId, ct);
 
             if (dek is null)
             {
@@ -111,7 +126,7 @@ public sealed class PullCommands(
 
             AnsiConsole.MarkupLine($"[cyan1]Restoring {files.Count} file(s)...[/]");
 
-            var pulled = await repoFilePuller.PullAsync(pc.ProjectId, files, outputDir, dek, ct);
+            var pulled = await repoFilePuller.PullAsync(projectId, files, outputDir, dek, ct);
 
             AnsiConsole.WriteLine();
             ctx.Output.PrintSuccess($"Pulled {pulled} file(s).");

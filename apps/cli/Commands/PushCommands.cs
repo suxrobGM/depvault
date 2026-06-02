@@ -16,7 +16,8 @@ internal sealed class PushCommands(
     IFileScanner fileScanner,
     DekService dekService,
     RepoFileUploadService uploadService,
-    IRepositoryLocator repositoryLocator)
+    IRepositoryLocator repositoryLocator,
+    IProjectContextResolver projectContextResolver)
 {
     public Command CreatePushCommand()
     {
@@ -29,12 +30,23 @@ internal sealed class PushCommands(
 
         cmd.SetAction(async (parseResult, ct) =>
         {
-            var pc = await ctx.RequireProjectContextAsync(parseResult, projectOpt, ct);
-            if (pc is null)
+            if (!ctx.RequireAuth())
             {
                 Environment.ExitCode = 1;
                 return;
             }
+
+            var explicitId = parseResult.GetValue(projectOpt);
+            var resolution = await projectContextResolver.ResolveAsync(
+                explicitId, ResolutionPolicy.Interactive, ct);
+            if (resolution is null || !ProjectGuard.ConfirmOverride(ctx, explicitId))
+            {
+                Environment.ExitCode = 1;
+                return;
+            }
+
+            ctx.PrintProjectBanner();
+            var projectId = resolution.ProjectId;
 
             var selected = ResolveFiles(parseResult.GetValue(fileOpt));
             if (selected.Count == 0)
@@ -45,7 +57,7 @@ internal sealed class PushCommands(
 
             // Resolve the project DEK once up front. The same key encrypts every file, so this
             // prompts for the vault password (or reads DEPVAULT_PASSWORD / a CI token) at most once.
-            var dek = await dekService.CollectPasswordAndResolveAsync(pc.ProjectId, ct);
+            var dek = await dekService.CollectPasswordAndResolveAsync(projectId, ct);
             if (dek is null)
             {
                 ctx.Output.PrintError("Failed to resolve encryption key. Aborting push.");
@@ -61,7 +73,7 @@ internal sealed class PushCommands(
             {
                 try
                 {
-                    await uploadService.UploadAsync(pc.ProjectId, repoRoot, file, dek, ct);
+                    await uploadService.UploadAsync(projectId, repoRoot, file, dek, ct);
                     if (file.Category == FileCategory.Environment)
                     {
                         configPushed++;
