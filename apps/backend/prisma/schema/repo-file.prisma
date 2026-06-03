@@ -26,6 +26,9 @@ model RepoFile {
   authTag          String       @map("auth_tag")
   fileSize         Int          @map("file_size")
   isBinary         Boolean      @default(false) @map("is_binary")
+  // Keyed HMAC of the plaintext (key derived from the project DEK) used to detect a no-op push
+  // and skip snapshotting a redundant version. Opaque to the server; null = unknown (never skip).
+  contentHash      String?      @map("content_hash")
   createdBy        String       @map("created_by") @db.Uuid
   createdAt        DateTime     @default(now()) @map("created_at")
   updatedAt        DateTime     @updatedAt @map("updated_at")

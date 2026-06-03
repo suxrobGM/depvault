@@ -17,7 +17,9 @@ public sealed class RepoFileUploadService(IApiClientFactory clientFactory)
     /// <summary>
     /// Reads, encrypts, and uploads a single file as one blob. App ownership is inferred from the
     /// file's path relative to <paramref name="repoRoot"/>; config files additionally infer an
-    /// environment slug and format from the name, secret files a MIME type.
+    /// environment slug and format from the name, secret files a MIME type. A keyed content tag
+    /// (HMAC over the plaintext, see <see cref="VaultCrypto.ComputeContentTag"/>) accompanies the
+    /// push so the server can skip snapshotting a new version when the content is unchanged.
     /// </summary>
     /// <remarks>
     /// The DEK is passed per call and never retained as instance state — it is owned by
@@ -47,6 +49,7 @@ public sealed class RepoFileUploadService(IApiClientFactory clientFactory)
             AuthTag = authTag,
             FileSize = bytes.Length,
             IsBinary = isBinary,
+            ContentHash = VaultCrypto.ComputeContentTag(bytes, dek),
         };
 
         var verb = isConfig ? "Pushing" : "Uploading";

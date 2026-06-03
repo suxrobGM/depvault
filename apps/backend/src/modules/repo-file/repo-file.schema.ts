@@ -92,6 +92,15 @@ export const PushRepoFileBodySchema = t.Object({
   authTag: t.String(),
   fileSize: t.Number({ minimum: 0, maximum: MAX_SECRET_FILE_SIZE }),
   isBinary: t.Boolean({ default: false }),
+  contentHash: t.Optional(
+    t.Nullable(
+      t.String({
+        maxLength: 64,
+        description:
+          "Keyed HMAC of the plaintext (base64). When it matches the stored file's hash, the push is a no-op and no new version is snapshotted.",
+      }),
+    ),
+  ),
 });
 
 /** Save an edited file from the web app: replaces content, snapshotting the prior version. */

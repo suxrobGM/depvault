@@ -1,11 +1,11 @@
 import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { BadRequestError, NotFoundError } from "@/common/errors";
-import { PrismaClient } from "@/generated/prisma";
 import { AppRepository } from "@/modules/app";
 import { AuditLogService } from "@/modules/audit-log";
 import { PlanEnforcementService } from "@/modules/subscription/plan-enforcement.service";
 import type { DeepMockProxy } from "@/types/deep-mock";
+import { RepoFileRepository } from "./repo-file.repository";
 import { RepoFileService } from "./repo-file.service";
 
 const now = new Date();
@@ -31,29 +31,25 @@ const mockRepoFile = {
   authTag: "tag-base64",
   fileSize: 1024,
   isBinary: false,
+  contentHash: null as string | null,
   createdBy: userId,
   createdAt: now,
   updatedAt: now,
   app: { id: appId, name: "api", appPath: "services/api" },
 };
 
-function createMockPrisma() {
+function createMockRepository() {
   return {
-    repoFile: {
-      create: mock(() => Promise.resolve(mockRepoFile)),
-      findMany: mock(() => Promise.resolve([mockRepoFile])),
-      findFirst: mock(() => Promise.resolve(null)),
-      findUnique: mock(() => Promise.resolve(null)),
-      count: mock(() => Promise.resolve(1)),
-      update: mock(() => Promise.resolve(mockRepoFile)),
-      delete: mock(() => Promise.resolve(mockRepoFile)),
-    },
-    repoFileVersion: {
-      create: mock(() => Promise.resolve({})),
-      findFirst: mock(() => Promise.resolve(null)),
-      findMany: mock(() => Promise.resolve([])),
-    },
-  } as unknown as DeepMockProxy<PrismaClient>;
+    findByPath: mock(() => Promise.resolve(null)),
+    requireFile: mock(() => Promise.resolve(mockRepoFile)),
+    create: mock(() => Promise.resolve(mockRepoFile)),
+    update: mock(() => Promise.resolve(mockRepoFile)),
+    delete: mock(() => Promise.resolve(mockRepoFile)),
+    listWithCount: mock(() => Promise.resolve([[mockRepoFile], 1])),
+    snapshotVersion: mock(() => Promise.resolve({})),
+    listVersions: mock(() => Promise.resolve([])),
+    requireVersion: mock(() => Promise.resolve(null)),
+  } as unknown as DeepMockProxy<RepoFileRepository>;
 }
 
 function createMockAppRepository(app = mockApp) {
@@ -63,12 +59,20 @@ function createMockAppRepository(app = mockApp) {
   } as unknown as AppRepository;
 }
 
-function createService(prisma: DeepMockProxy<PrismaClient>, appRepo = createMockAppRepository()) {
+function createService(
+  repository: ReturnType<typeof createMockRepository>,
+  appRepo = createMockAppRepository(),
+) {
   const mockAuditLog = { log: mock(() => Promise.resolve()) } as unknown as AuditLogService;
   const mockPlanEnforcement = {
     enforceForProject: mock(() => Promise.resolve()),
   } as unknown as PlanEnforcementService;
-  return new RepoFileService(prisma, mockAuditLog, appRepo, mockPlanEnforcement);
+  return new RepoFileService(
+    repository as unknown as RepoFileRepository,
+    appRepo,
+    mockAuditLog,
+    mockPlanEnforcement,
+  );
 }
 
 function configPushBody(overrides: Record<string, unknown> = {}) {
@@ -90,12 +94,12 @@ function configPushBody(overrides: Record<string, unknown> = {}) {
 
 describe("RepoFileService", () => {
   let service: RepoFileService;
-  let mockPrisma: ReturnType<typeof createMockPrisma>;
+  let repository: ReturnType<typeof createMockRepository>;
 
   beforeEach(() => {
     mock.restore();
-    mockPrisma = createMockPrisma();
-    service = createService(mockPrisma);
+    repository = createMockRepository();
+    service = createService(repository);
   });
 
   describe("push", () => {
@@ -106,11 +110,11 @@ describe("RepoFileService", () => {
       expect(result.kind).toBe("CONFIG");
       expect(result.relativePath).toBe(".env.local");
       expect(result.appName).toBe("api");
-      expect(mockPrisma.repoFile.create).toHaveBeenCalled();
+      expect(repository.create).toHaveBeenCalled();
     });
 
     it("should create a new SECRET file with a mimeType", async () => {
-      mockPrisma.repoFile.create.mockResolvedValueOnce({
+      repository.create.mockResolvedValueOnce({
         ...mockRepoFile,
         kind: "SECRET",
         format: null,
@@ -134,21 +138,59 @@ describe("RepoFileService", () => {
     });
 
     it("should snapshot a version and update when the file already exists", async () => {
-      mockPrisma.repoFile.findUnique.mockResolvedValueOnce(mockRepoFile);
+      repository.findByPath.mockResolvedValueOnce(mockRepoFile);
 
       await service.push(projectId, userId, configPushBody());
 
-      expect(mockPrisma.repoFileVersion.create).toHaveBeenCalled();
-      expect(mockPrisma.repoFile.update).toHaveBeenCalled();
-      expect(mockPrisma.repoFile.create).not.toHaveBeenCalled();
+      expect(repository.snapshotVersion).toHaveBeenCalled();
+      expect(repository.update).toHaveBeenCalled();
+      expect(repository.create).not.toHaveBeenCalled();
+    });
+
+    it("should skip the version snapshot when the content hash is unchanged", async () => {
+      repository.findByPath.mockResolvedValueOnce({ ...mockRepoFile, contentHash: "same-hash" });
+
+      const result = await service.push(
+        projectId,
+        userId,
+        configPushBody({ contentHash: "same-hash" }),
+      );
+
+      expect(result.id).toBe(fileId);
+      expect(repository.snapshotVersion).not.toHaveBeenCalled();
+      expect(repository.update).not.toHaveBeenCalled();
+      expect(repository.create).not.toHaveBeenCalled();
+    });
+
+    it("should snapshot a version when the content hash differs", async () => {
+      repository.findByPath.mockResolvedValueOnce({ ...mockRepoFile, contentHash: "old-hash" });
+
+      await service.push(projectId, userId, configPushBody({ contentHash: "new-hash" }));
+
+      expect(repository.snapshotVersion).toHaveBeenCalled();
+      expect(repository.update).toHaveBeenCalledWith(
+        fileId,
+        expect.objectContaining({ contentHash: "new-hash" }),
+      );
+    });
+
+    it("should snapshot a version when the stored hash is null even if content matches", async () => {
+      // Pre-existing rows (and rows touched by web save/restore) have a null hash; we can't prove
+      // a no-op without it, so the push proceeds and backfills the hash.
+      repository.findByPath.mockResolvedValueOnce({ ...mockRepoFile, contentHash: null });
+
+      await service.push(projectId, userId, configPushBody({ contentHash: "some-hash" }));
+
+      expect(repository.snapshotVersion).toHaveBeenCalled();
+      expect(repository.update).toHaveBeenCalled();
     });
 
     it("should re-group the same file row under a new app without creating a duplicate", async () => {
       // File already exists under the old app; the marker layout changed so it now
       // resolves to a different app. Identity is (projectId, relativePath) → same row.
-      mockPrisma.repoFile.findUnique.mockResolvedValueOnce({ ...mockRepoFile, appId: "old-app" });
+      repository.findByPath.mockResolvedValueOnce({ ...mockRepoFile, appId: "old-app" });
       const newApp = { id: "new-app-uuid", name: "web", appPath: "apps/web", projectId };
-      service = createService(mockPrisma, createMockAppRepository(newApp));
+      service = createService(repository, createMockAppRepository(newApp));
 
       await service.push(
         projectId,
@@ -156,12 +198,10 @@ describe("RepoFileService", () => {
         configPushBody({ appPath: "apps/web", appName: "web" }),
       );
 
-      expect(mockPrisma.repoFile.create).not.toHaveBeenCalled();
-      expect(mockPrisma.repoFile.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { id: fileId },
-          data: expect.objectContaining({ appId: "new-app-uuid" }),
-        }),
+      expect(repository.create).not.toHaveBeenCalled();
+      expect(repository.update).toHaveBeenCalledWith(
+        fileId,
+        expect.objectContaining({ appId: "new-app-uuid" }),
       );
     });
 
@@ -180,7 +220,7 @@ describe("RepoFileService", () => {
     it("should accept forward-slash nested relative paths", async () => {
       const body = configPushBody({ relativePath: "src/config/.env.local" });
       await service.push(projectId, userId, body);
-      expect(mockPrisma.repoFile.create).toHaveBeenCalled();
+      expect(repository.create).toHaveBeenCalled();
     });
 
     it("should reject a CONFIG file larger than the 5 MB config cap", async () => {
@@ -195,19 +235,16 @@ describe("RepoFileService", () => {
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0]!.kind).toBe("CONFIG");
-      expect(mockPrisma.repoFile.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({ projectId }),
-          include: { app: { select: { id: true, name: true, appPath: true } } },
-        }),
+      expect(repository.listWithCount).toHaveBeenCalledWith(
+        expect.objectContaining({ projectId }),
+        0,
+        20,
       );
     });
   });
 
   describe("getContent", () => {
     it("should return encrypted content and log a download", async () => {
-      mockPrisma.repoFile.findFirst.mockResolvedValueOnce(mockRepoFile);
-
       const result = await service.getContent(projectId, fileId, userId);
 
       expect(result.encryptedContent).toBeDefined();
@@ -216,7 +253,7 @@ describe("RepoFileService", () => {
     });
 
     it("should throw NotFoundError when the file does not exist", async () => {
-      mockPrisma.repoFile.findFirst.mockResolvedValueOnce(null);
+      repository.requireFile.mockRejectedValueOnce(new NotFoundError("File not found"));
 
       expect(service.getContent(projectId, fileId, userId)).rejects.toBeInstanceOf(NotFoundError);
     });
@@ -224,8 +261,7 @@ describe("RepoFileService", () => {
 
   describe("restoreVersion", () => {
     it("should snapshot the current content then restore the chosen version", async () => {
-      mockPrisma.repoFile.findFirst.mockResolvedValueOnce(mockRepoFile);
-      mockPrisma.repoFileVersion.findFirst.mockResolvedValueOnce({
+      repository.requireVersion.mockResolvedValueOnce({
         id: "version-uuid",
         repoFileId: fileId,
         encryptedContent: Buffer.from("old"),
@@ -240,23 +276,24 @@ describe("RepoFileService", () => {
 
       await service.restoreVersion(projectId, fileId, "version-uuid", userId);
 
-      expect(mockPrisma.repoFileVersion.create).toHaveBeenCalled();
-      expect(mockPrisma.repoFile.update).toHaveBeenCalled();
+      expect(repository.snapshotVersion).toHaveBeenCalled();
+      expect(repository.update).toHaveBeenCalledWith(
+        fileId,
+        expect.objectContaining({ contentHash: null }),
+      );
     });
   });
 
   describe("delete", () => {
     it("should delete the file and log the audit event", async () => {
-      mockPrisma.repoFile.findFirst.mockResolvedValueOnce(mockRepoFile);
-
       const result = await service.delete(projectId, fileId, userId);
 
       expect(result.message).toBe("File deleted successfully");
-      expect(mockPrisma.repoFile.delete).toHaveBeenCalledWith({ where: { id: fileId } });
+      expect(repository.delete).toHaveBeenCalledWith(fileId);
     });
 
     it("should throw NotFoundError when the file does not exist", async () => {
-      mockPrisma.repoFile.findFirst.mockResolvedValueOnce(null);
+      repository.requireFile.mockRejectedValueOnce(new NotFoundError("File not found"));
 
       expect(service.delete(projectId, fileId, userId)).rejects.toBeInstanceOf(NotFoundError);
     });
@@ -264,8 +301,7 @@ describe("RepoFileService", () => {
 
   describe("update", () => {
     it("should update description and environment metadata only", async () => {
-      mockPrisma.repoFile.findFirst.mockResolvedValueOnce(mockRepoFile);
-      mockPrisma.repoFile.update.mockResolvedValueOnce({
+      repository.update.mockResolvedValueOnce({
         ...mockRepoFile,
         description: "Updated desc",
         environmentSlug: "staging",

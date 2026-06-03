@@ -10,6 +10,7 @@ public static class VaultCrypto
     private const int TagBytes = 16;
     private const int KeyBytes = 32;
     private static readonly byte[] HkdfInfo = "depvault-ci-wrap"u8.ToArray();
+    private static readonly byte[] ContentTagInfo = "depvault-content-tag"u8.ToArray();
 
     /// <summary>AES-256-GCM encrypt a plaintext string, returning base64-encoded (ciphertext, iv, authTag).</summary>
     public static (string Ciphertext, string Iv, string AuthTag) Encrypt(string plaintext, byte[] key)
@@ -73,6 +74,26 @@ public static class VaultCrypto
     {
         var ikm = Encoding.UTF8.GetBytes(rawToken);
         return HKDF.DeriveKey(HashAlgorithmName.SHA256, ikm, KeyBytes, salt: [], info: HkdfInfo);
+    }
+
+    /// <summary>
+    /// Computes a deterministic, keyed content tag for a file's plaintext: HMAC-SHA256 over the
+    /// bytes with a tag key derived from the project DEK via HKDF (info "depvault-content-tag"). The
+    /// tag is stable for identical content yet opaque to the server (which never holds the DEK), so
+    /// the backend can detect an unchanged re-push without learning anything about the plaintext.
+    /// Returns the base64-encoded tag.
+    /// </summary>
+    public static string ComputeContentTag(byte[] plaintext, byte[] dek)
+    {
+        var tagKey = HKDF.DeriveKey(HashAlgorithmName.SHA256, dek, KeyBytes, salt: [], info: ContentTagInfo);
+        try
+        {
+            return Convert.ToBase64String(HMACSHA256.HashData(tagKey, plaintext));
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(tagKey);
+        }
     }
 
     /// <summary>Wrap (AES-GCM encrypt) a raw DEK with a wrapping key, returning base64-encoded values.</summary>
