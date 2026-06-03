@@ -5,6 +5,15 @@ All notable changes to the DepVault CLI are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-06-03
+
+- Unify config and secret files under one `RepoFile` model with a `kind` discriminator (`CONFIG` | `SECRET`), replacing the separate config-file/secret-file uploaders and pullers
+- `push`: infer the owning App (nearest project-marker walk via `AppRootResolver`) and environment slug (filename pattern via `EnvSlugResolver`) automatically; show a manifest table before encrypting and prompt for confirmation
+- `pull`: restore files byte-faithful to their repo-relative paths; show a restore manifest before decryption
+- REPL: simplified line editor, status footer showing cwd/repo/project/vault lock, and interactive `config` command; removed tab autocompletion
+- Drop the legacy `env` and `secrets` list commands (superseded by the unified file model)
+- Clean-architecture refactor: injectable `IRepositoryLocator`, `IProjectContextResolver`, `IErrorHandler`, and `IFileArgResolver`; folders reorganized to match the static-vs-DI convention
+
 ## [1.7.0] - 2026-06-01
 
 - Encrypt secret files client-side on `push` and upload as JSON — fixes 400 errors and closes a zero-knowledge plaintext leak
