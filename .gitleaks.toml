@@ -1,0 +1,16 @@
+# gitleaks configuration.
+#
+# Extends the full default ruleset (so real credentials are still caught) and
+# allowlists the client-side secret detector's own test fixtures. Those files
+# (`detect-secret.test.ts`) intentionally contain secret-SHAPED strings to
+# verify the detector — they are synthetic, not real credentials.
+title = "DepVault gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Synthetic fixtures for the secret detector under test"
+paths = [
+  '''apps/frontend/src/.*detect-secret\.test\.ts''',
+]
