@@ -18,7 +18,7 @@ public sealed class ReplHost(VaultState vaultState, ConsoleRenderer renderer)
         renderer.PrintBanner();
         PrintHelp(rootCommand);
 
-        var lineEditor = new ReplLineEditor(rootCommand, HiddenCommands);
+        var lineEditor = new ReplLineEditor();
 
         while (true)
         {

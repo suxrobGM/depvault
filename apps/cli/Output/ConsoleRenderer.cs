@@ -144,7 +144,7 @@ public sealed class ConsoleRenderer(
     /// <summary>Print the REPL key-hint bar shown beneath the status line.</summary>
     public void PrintReplHints()
     {
-        AnsiConsole.MarkupLine("  [grey]Tab complete · Enter run · Esc clear · help · exit[/]");
+        AnsiConsole.MarkupLine("  [grey]Enter run · Esc clear · help · exit[/]");
     }
 
     /// <summary>Print a titled section rule.</summary>
