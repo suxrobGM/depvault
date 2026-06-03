@@ -55,7 +55,7 @@ Run `depvault` with no arguments to enter an interactive session:
 depvault
 ```
 
-The REPL displays a banner with your authentication status, vault lock state, and active project. Type commands directly (with or without a leading `/`) and press Enter. The screen refreshes between commands to show updated status.
+The REPL displays a banner with your authentication status, vault lock state, and active project. Type commands directly (with or without a leading `/`) and press Enter. Press `Tab` to autocomplete command and subcommand names. The screen refreshes between commands to show updated status.
 
 Built-in REPL commands:
 
@@ -126,9 +126,7 @@ The CLI automatically detects the active project by reading the remote origin UR
 | `depvault scan` | Scan repo: analyze deps, push files, detect secrets | [Scanning](/cli/scanning) |
 | `depvault push` | Push config & secret files as encrypted blobs | [Pull & Push](/cli/pull#push) |
 | `depvault pull` | Restore config & secret files byte-for-byte | [Pull & Push](/cli/pull) |
-| `depvault env list` | List stored config files | [Env](/cli/env#env-list) |
-| `depvault secrets list` | List secret file metadata | [Secret Files](/cli/secrets) |
-| `depvault analyze` | Analyze a dependency file | [Analysis](/guides/dependency-analysis) |
+| `depvault analyze` | Analyze dependency files | [Analysis](/guides/dependency-analysis) |
 | `depvault ci pull` | Restore files with a CI token | [CI/CD](/guides/ci-cd-integration) |
 | `depvault login` | Authenticate with email/password | [Auth](/cli/authentication) |
 | `depvault logout` | Clear stored credentials | [Auth](/cli/authentication) |

@@ -82,9 +82,7 @@ depvault project select <id>
 depvault project info [--project <id>]
 depvault push [--project] [--file <path>]
 depvault pull [--project] [--app] [--environment] [--include-base] [--include-secrets] [--output-dir] [--force]
-depvault env list [--project] [--app] [--environment] [--output]
-depvault secrets list [--project] [--app] [--environment] [--output]
-depvault analyze --file <path> [--project] [--ecosystem] [--output]
+depvault analyze [--file <path>] [--project] [--ecosystem] [--output]
 depvault ci pull [--output] [--format text|json]
 depvault version
 ```

@@ -97,12 +97,6 @@ depvault push --file apps/backend/.env
 
 # Restore every file byte-for-byte to its original path
 depvault pull
-
-# List config files stored for the active project
-depvault env list
-
-# List secret file metadata
-depvault secrets list
 ```
 
 `push` infers each file's app (nearest project marker) and environment slug (from the filename) automatically — there are no `--vault` or `--tag` flags. `pull` is byte-faithful: it writes each file verbatim to its original repo-relative path, recreating directories as needed. See the [Pull & Push](/cli/pull) reference for all flags.

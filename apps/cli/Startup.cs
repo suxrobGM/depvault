@@ -51,12 +51,10 @@ internal static class Startup
             .AddSingleton<AuthCommands>()
             .AddSingleton<ConfigCommands>()
             .AddSingleton<ProjectCommands>()
-            .AddSingleton<EnvCommands>()
             .AddSingleton<AnalysisCommands>()
             .AddSingleton<CiCommands>()
             .AddSingleton<PullCommands>()
             .AddSingleton<PushCommands>()
-            .AddSingleton<SecretsCommands>()
             .AddSingleton<ScanCommands>()
             .AddSingleton<UpdateCommands>()
             .AddSingleton<VaultCommands>()
@@ -71,12 +69,10 @@ internal static class Startup
         var auth = services.GetRequiredService<AuthCommands>();
         var config = services.GetRequiredService<ConfigCommands>();
         var project = services.GetRequiredService<ProjectCommands>();
-        var env = services.GetRequiredService<EnvCommands>();
         var analysis = services.GetRequiredService<AnalysisCommands>();
         var ci = services.GetRequiredService<CiCommands>();
         var pull = services.GetRequiredService<PullCommands>();
         var push = services.GetRequiredService<PushCommands>();
-        var secrets = services.GetRequiredService<SecretsCommands>();
         var scan = services.GetRequiredService<ScanCommands>();
         var update = services.GetRequiredService<UpdateCommands>();
         var vault = services.GetRequiredService<VaultCommands>();
@@ -90,8 +86,6 @@ internal static class Startup
             project.CreateProjectCommand(),
             pull.CreatePullCommand(),
             push.CreatePushCommand(),
-            env.CreateEnvCommand(),
-            secrets.CreateSecretsCommand(),
             analysis.CreateAnalyzeCommand(),
             ci.CreateCiCommand(),
             scan.CreateScanCommand(),

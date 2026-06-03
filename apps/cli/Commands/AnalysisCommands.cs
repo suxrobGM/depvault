@@ -48,50 +48,68 @@ public sealed class AnalysisCommands(
 
             renderer.PrintStatusLine();
 
-            var filePath = fileArgResolver.ResolveFileInteractive(
+            var files = fileArgResolver.ResolveFilesInteractive(
                 parseResult, fileOpt,
                 () => fileScanner.FindDependencyFiles(repositoryLocator.FindRepoRoot()),
                 "dependency");
 
-            if (filePath is null)
+            if (files.Count == 0)
             {
                 return;
             }
 
-            var ecosystem = ResolveEcosystem(filePath, parseResult.GetValue(ecosystemOpt));
-            if (ecosystem is null)
+            var explicitEcosystem = parseResult.GetValue(ecosystemOpt);
+            var outputFmt = parseResult.GetValue(outputOpt);
+
+            foreach (var file in files)
             {
-                return;
-            }
-
-            try
-            {
-                var content = await File.ReadAllTextAsync(filePath, cancellationToken);
-                var fileName = Path.GetFileName(filePath);
-                var relativePath = Path.GetRelativePath(repositoryLocator.FindRepoRoot(), Path.GetFullPath(filePath));
-
-                var result = await AnsiConsole.Status()
-                    .Spinner(Spinner.Known.Dots)
-                    .StartAsync($"Analyzing {fileName} ({ecosystem})...", async _ =>
-                        await analysisClient.AnalyzeFileAsync(resolution.ProjectId, fileName, relativePath, content,
-                            ecosystem, cancellationToken));
-
-                if (result is null)
+                if (files.Count > 1)
                 {
-                    ctx.Output.PrintError("Analysis returned no results.");
-                    return;
+                    AnsiConsole.MarkupLine($"[grey]── {Markup.Escape(file.RelativePath)} ──[/]");
                 }
 
-                ctx.Output.PrintSuccess($"Analysis complete. Health score: {result.HealthScore:F0}");
-                PrintDependencies(result.Dependencies, parseResult.GetValue(outputOpt));
-            }
-            catch (Exception ex)
-            {
-                errorHandler.Handle(ex, "Analysis failed");
+                await AnalyzeOneAsync(file.FullPath, resolution.ProjectId, explicitEcosystem, outputFmt,
+                    cancellationToken);
             }
         });
 
         return cmd;
+    }
+
+    private async Task AnalyzeOneAsync(
+        string filePath, string projectId, string? explicitEcosystem, string? outputFmt, CancellationToken ct)
+    {
+        var ecosystem = ResolveEcosystem(filePath, explicitEcosystem);
+        if (ecosystem is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var content = await File.ReadAllTextAsync(filePath, ct);
+            var fileName = Path.GetFileName(filePath);
+            var relativePath = Path.GetRelativePath(repositoryLocator.FindRepoRoot(), Path.GetFullPath(filePath));
+
+            var result = await AnsiConsole.Status()
+                .Spinner(Spinner.Known.Dots)
+                .StartAsync($"Analyzing {fileName} ({ecosystem})...", async _ =>
+                    await analysisClient.AnalyzeFileAsync(projectId, fileName, relativePath, content,
+                        ecosystem, ct));
+
+            if (result is null)
+            {
+                ctx.Output.PrintError("Analysis returned no results.");
+                return;
+            }
+
+            ctx.Output.PrintSuccess($"Analysis complete. Health score: {result.HealthScore:F0}");
+            PrintDependencies(result.Dependencies, outputFmt);
+        }
+        catch (Exception ex)
+        {
+            errorHandler.Handle(ex, "Analysis failed");
+        }
     }
 
     private AnalysesPostRequestBody_ecosystem? ResolveEcosystem(string filePath, string? explicitEcosystem)

@@ -18,6 +18,8 @@ public sealed class ReplHost(VaultState vaultState, ConsoleRenderer renderer)
         renderer.PrintBanner();
         PrintHelp(rootCommand);
 
+        var lineEditor = new ReplLineEditor(rootCommand, HiddenCommands);
+
         while (true)
         {
             vaultState.CheckAutoLock(AutoLockTimeout);
@@ -26,17 +28,13 @@ public sealed class ReplHost(VaultState vaultState, ConsoleRenderer renderer)
                 ? $"[{ConsoleTheme.BrandMarkup}]depvault[/][grey]>[/] "
                 : "[grey]depvault>[/] ";
 
-            string input;
-            try
-            {
-                input = AnsiConsole.Prompt(new TextPrompt<string>(prompt).AllowEmpty());
-            }
-            catch (InvalidOperationException)
+            var line = lineEditor.ReadLine(prompt);
+            if (line is null)
             {
                 break;
             }
 
-            input = input.Trim();
+            var input = line.Trim();
             if (string.IsNullOrEmpty(input))
             {
                 continue;

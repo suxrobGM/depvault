@@ -5,8 +5,6 @@ const meta: MetaRecord = {
   authentication: "Authentication",
   projects: "Projects",
   pull: "Pull & Push",
-  secrets: "Secret Files",
-  env: "Environment Variables",
 };
 
 export default meta;

@@ -40,7 +40,7 @@ The compiled binary is in `apps/cli/bin/Release/net10.0/<rid>/publish/depvault`.
 
 ## Interactive Mode (REPL)
 
-Run `depvault` with no arguments to enter an interactive session with a persistent banner, vault status, and command prompt. The vault auto-locks after 30 minutes of idle time.
+Run `depvault` with no arguments to enter an interactive session with a persistent banner, vault status, and command prompt. Press `Tab` to autocomplete command and subcommand names. The vault auto-locks after 30 minutes of idle time.
 
 ```bash
 depvault
@@ -127,12 +127,6 @@ depvault pull
 # Restore only one app's prod files (base files are included unless you opt out)
 depvault pull --app api --environment prod
 depvault pull --app api --environment prod --include-base=false
-
-# List stored config files (optionally filter by app or environment slug)
-depvault env list --app <appId> --environment staging
-
-# List stored secret file metadata
-depvault secrets list --environment prod
 ```
 
 **How `push` infers app and environment:**
@@ -166,6 +160,8 @@ depvault analyze --file package.json
 depvault analyze --file deps.txt --ecosystem PYTHON
 ```
 
+With no `--file`, `analyze` discovers dependency files in the repo and opens a multi-select (space to toggle, enter to confirm); every selected file is analyzed in turn.
+
 Supported ecosystems: `NODEJS`, `PYTHON`, `DOTNET`, `RUST`, `GO`, `KOTLIN`, `JAVA`, `RUBY`, `PHP`
 
 ### CI/CD Secrets
@@ -189,7 +185,7 @@ No plaintext is ever written to the server, and no `.env` file is committed in C
 
 ### Output Formats
 
-List commands (`env list`, `secrets list`, `project list`) support `--output table` (default) or `--output json` for machine-readable output. Note that for `pull` and `ci pull`, `--output` / `--output-dir` instead set the directory files are restored into.
+List commands like `project list` support `--output table` (default) or `--output json` for machine-readable output. Note that for `pull` and `ci pull`, `--output` / `--output-dir` instead set the directory files are restored into.
 
 ## Regenerating the API Client
 

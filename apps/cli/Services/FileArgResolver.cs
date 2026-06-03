@@ -11,10 +11,11 @@ public interface IFileArgResolver
     bool RequireFile(string path);
 
     /// <summary>
-    /// Returns the explicit <c>--file</c> value if given (validated), otherwise discovers candidate
-    /// files and prompts the user to pick one. Returns null when nothing usable is resolved.
+    /// Returns the explicit <c>--file</c> value if given (validated) as a single-item list, otherwise
+    /// discovers candidate files and prompts the user to multi-select. Returns an empty list when
+    /// nothing usable is resolved.
     /// </summary>
-    string? ResolveFileInteractive(
+    List<DiscoveredFile> ResolveFilesInteractive(
         ParseResult parseResult, Option<string?> fileOpt,
         Func<List<DiscoveredFile>> discoverFiles, string fileTypeLabel);
 }
@@ -32,7 +33,7 @@ public sealed class FileArgResolver(IOutputFormatter output, IConsolePrompter pr
         return false;
     }
 
-    public string? ResolveFileInteractive(
+    public List<DiscoveredFile> ResolveFilesInteractive(
         ParseResult parseResult, Option<string?> fileOpt,
         Func<List<DiscoveredFile>> discoverFiles, string fileTypeLabel)
     {
@@ -40,30 +41,29 @@ public sealed class FileArgResolver(IOutputFormatter output, IConsolePrompter pr
 
         if (!string.IsNullOrEmpty(filePath))
         {
-            return RequireFile(filePath) ? filePath : null;
+            if (!RequireFile(filePath))
+            {
+                return [];
+            }
+
+            var fullPath = Path.GetFullPath(filePath);
+            return [new DiscoveredFile(fullPath, filePath, Path.GetFileName(fullPath), FileCategory.Dependency)];
         }
 
         if (!prompter.IsInteractive)
         {
             output.PrintError("--file is required in non-interactive mode.");
-            return null;
+            return [];
         }
 
         var discovered = discoverFiles();
         if (discovered.Count == 0)
         {
             output.PrintError($"No {fileTypeLabel} files found in current directory.");
-            return null;
+            return [];
         }
 
-        if (discovered.Count == 1)
-        {
-            return prompter.Confirm($"Use [cyan1]{Markup.Escape(discovered[0].RelativePath)}[/]?")
-                ? discovered[0].FullPath
-                : null;
-        }
-
-        var selected = prompter.Select($"Select a {fileTypeLabel} file", discovered, f => f.RelativePath);
-        return selected.FullPath;
+        return prompter.MultiSelect($"Select {fileTypeLabel} files", discovered,
+            f => Markup.Escape(f.RelativePath));
     }
 }
