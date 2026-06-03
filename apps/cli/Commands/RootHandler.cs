@@ -21,6 +21,8 @@ public sealed class RootHandler(
             await ResolveActiveProjectNameAsync(config, cancellationToken);
 
             renderer.PrintBanner();
+            renderer.PrintStatusLine();
+            Console.WriteLine();
             Console.WriteLine(rootCommand.Description);
             Console.WriteLine();
             Console.WriteLine("Usage: depvault [command] [options]");

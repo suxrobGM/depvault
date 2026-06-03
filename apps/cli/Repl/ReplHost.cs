@@ -23,6 +23,8 @@ public sealed class ReplHost(VaultState vaultState, ConsoleRenderer renderer)
         while (true)
         {
             vaultState.CheckAutoLock(AutoLockTimeout);
+            renderer.PrintStatusLine();
+            renderer.PrintReplHints();
 
             var prompt = vaultState.IsUnlocked
                 ? $"[{ConsoleTheme.BrandMarkup}]depvault[/][grey]>[/] "
@@ -63,6 +65,11 @@ public sealed class ReplHost(VaultState vaultState, ConsoleRenderer renderer)
                 try
                 {
                     var parseResult = rootCommand.Parse(parts);
+
+                    // Let exceptions (e.g. Esc → PromptCanceledException) reach the catch blocks below
+                    // instead of System.CommandLine printing its own "Unhandled exception" stack trace.
+                    parseResult.InvocationConfiguration.EnableDefaultExceptionHandler = false;
+
                     if (parseResult.Errors.Count > 0)
                     {
                         AnsiConsole.MarkupLine(

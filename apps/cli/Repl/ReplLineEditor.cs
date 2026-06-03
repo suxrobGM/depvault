@@ -7,7 +7,7 @@ namespace DepVault.Cli.Repl;
 /// <summary>
 /// Minimal keystroke-based line reader for the REPL. Adds Tab autocompletion of command and
 /// subcommand names (Spectre's <c>TextPrompt</c> cannot intercept Tab). Line editing is intentionally
-/// basic: typing appends, Backspace deletes the last character, Enter submits.
+/// basic: typing appends, Backspace deletes the last character, Esc clears the line, Enter submits.
 /// </summary>
 internal sealed class ReplLineEditor(RootCommand rootCommand, ISet<string> hiddenCommands)
 {
@@ -47,6 +47,15 @@ internal sealed class ReplLineEditor(RootCommand rootCommand, ISet<string> hidde
                         buffer.Length--;
                         Console.Write("\b \b");
                     }
+                    break;
+
+                case ConsoleKey.Escape:
+                    for (var i = 0; i < buffer.Length; i++)
+                    {
+                        Console.Write("\b \b");
+                    }
+
+                    buffer.Clear();
                     break;
 
                 case ConsoleKey.Tab:
@@ -118,7 +127,9 @@ internal sealed class ReplLineEditor(RootCommand rootCommand, ISet<string> hidde
 
     /// <summary>
     /// Resolves the command whose children should be suggested by walking the tree along the already
-    /// completed tokens, then returns its visible subcommand names (plus REPL builtins at the root).
+    /// completed tokens (stopping at the first option or value), then returns its visible subcommand
+    /// names. The root adds the REPL builtins; deeper commands add their option names so option-only
+    /// commands (e.g. <c>pull</c>) still complete.
     /// </summary>
     private IEnumerable<string> Candidates(string[] completed)
     {
@@ -130,7 +141,7 @@ internal sealed class ReplLineEditor(RootCommand rootCommand, ISet<string> hidde
                 c => string.Equals(c.Name, token, StringComparison.OrdinalIgnoreCase));
             if (match is null)
             {
-                return [];
+                break;
             }
 
             current = match;
@@ -140,7 +151,25 @@ internal sealed class ReplLineEditor(RootCommand rootCommand, ISet<string> hidde
             .Select(c => c.Name)
             .Where(name => !hiddenCommands.Contains(name));
 
-        return current == rootCommand ? names.Concat(ReplBuiltins) : names;
+        if (current == rootCommand)
+        {
+            return names.Concat(ReplBuiltins);
+        }
+
+        var options = current.Options.Select(OptionName).OfType<string>();
+        return names.Concat(options);
+    }
+
+    /// <summary>Returns an option's primary name normalized to its <c>--</c> form, or null if empty.</summary>
+    private static string? OptionName(Option option)
+    {
+        var name = option.Name;
+        if (string.IsNullOrEmpty(name))
+        {
+            return null;
+        }
+
+        return name.StartsWith('-') ? name : "--" + name;
     }
 
     private static string LongestCommonPrefix(List<string> values)

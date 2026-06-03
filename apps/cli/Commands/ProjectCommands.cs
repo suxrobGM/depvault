@@ -10,6 +10,7 @@ public sealed class ProjectCommands(
     IApiClientFactory clientFactory,
     AuthContext ctx,
     IProjectContextResolver projectContextResolver,
+    IProjectPicker projectPicker,
     ConsoleRenderer renderer)
 {
     public Command CreateProjectCommand()
@@ -37,44 +38,27 @@ public sealed class ProjectCommands(
 
             try
             {
-                var apiClient = clientFactory.Create();
-                var result = await apiClient.Api.Projects.GetAsync(config =>
-                {
-                    config.QueryParameters.Page = 1;
-                    config.QueryParameters.Limit = 100;
-                }, cancellationToken);
+                var pick = await projectPicker.PickActiveAsync(includeCreateNew: true, cancellationToken);
 
-                var items = result?.Items ?? [];
-                var appConfig = ctx.Config.Load();
-
-                var choices = new List<ProjectChoice> { ProjectChoice.CreateNew() };
-                choices.AddRange(items.Select(p => new ProjectChoice(p.Id, p.Name)));
-
-                var selected = ctx.Prompter.Select(
-                    "Select active project",
-                    choices,
-                    p =>
-                    {
-                        if (p.IsCreateNew)
-                        {
-                            return "[cyan1]+ Create new project[/]";
-                        }
-
-                        var marker = p.Id == appConfig.ActiveProjectId ? " [green]*[/]" : "";
-                        return $"{p.Name}{marker}";
-                    });
-
-                if (selected.IsCreateNew)
+                if (pick is ProjectCreateNew)
                 {
                     var name = ctx.Prompter.Ask("Project name");
-                    await CreateProjectAsync(apiClient, name, null, null, true, cancellationToken);
+                    await CreateProjectAsync(clientFactory.Create(), name, null, null, true, cancellationToken);
                     return;
                 }
 
-                appConfig.ActiveProjectId = selected.Id;
-                appConfig.ActiveProjectName = selected.Name;
-                ctx.Config.Save(appConfig);
-                ctx.Output.PrintSuccess($"Active project set to {selected.Name} ({selected.Id})");
+                if (pick is ProjectSelected selected)
+                {
+                    var appConfig = ctx.Config.Load();
+                    appConfig.ActiveProjectId = selected.Id;
+                    appConfig.ActiveProjectName = selected.Name;
+                    ctx.Config.Save(appConfig);
+                    ctx.Output.PrintSuccess($"Active project set to {selected.Name} ({selected.Id})");
+                }
+            }
+            catch (PromptCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -284,11 +268,5 @@ public sealed class ProjectCommands(
         {
             ctx.Output.PrintError($"Failed to create project: {ex.Message}");
         }
-    }
-
-    private sealed record ProjectChoice(string? Id, string? Name)
-    {
-        public bool IsCreateNew => Id is null;
-        public static ProjectChoice CreateNew() => new(null, null);
     }
 }

@@ -46,8 +46,6 @@ public sealed class ConsoleRenderer(
         var version = typeof(Program).Assembly.GetName().Version?.ToString(3);
         AnsiConsole.MarkupLine($"  [grey]Secure your stack. Analyze. Vault. Ship.[/]  [grey]v{version}[/]");
         AnsiConsole.MarkupLine($"  [grey]{new string('─', 65)}[/]");
-
-        PrintStatusLine();
         AnsiConsole.WriteLine();
     }
 
@@ -141,6 +139,12 @@ public sealed class ConsoleRenderer(
             .BorderStyle(new Style(Color.Red))
             .Padding(1, 0));
         AnsiConsole.WriteLine();
+    }
+
+    /// <summary>Print the REPL key-hint bar shown beneath the status line.</summary>
+    public void PrintReplHints()
+    {
+        AnsiConsole.MarkupLine("  [grey]Tab complete · Enter run · Esc clear · help · exit[/]");
     }
 
     /// <summary>Print a titled section rule.</summary>
