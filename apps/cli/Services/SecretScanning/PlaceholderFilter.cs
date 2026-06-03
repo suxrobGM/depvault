@@ -33,7 +33,9 @@ internal static partial class PlaceholderFilter
             return true;
         }
 
-        return VarRefRegex().IsMatch(trimmed) || EmptyValueRegex().IsMatch(trimmed);
+        return VarRefRegex().IsMatch(trimmed)
+            || EmptyValueRegex().IsMatch(trimmed)
+            || LocalhostConnStringRegex().IsMatch(trimmed);
     }
 
     [GeneratedRegex(@"=\s*\$\{[A-Z_]+\}", RegexOptions.Compiled)]
@@ -41,4 +43,8 @@ internal static partial class PlaceholderFilter
 
     [GeneratedRegex(@"=\s*['""]?\s*['""]?\s*$", RegexOptions.Compiled)]
     private static partial Regex EmptyValueRegex();
+
+    [GeneratedRegex(@"(?:Host|Server|Data\s+Source)\s*=\s*(localhost|127\.0\.0\.1)\b",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase)]
+    private static partial Regex LocalhostConnStringRegex();
 }
