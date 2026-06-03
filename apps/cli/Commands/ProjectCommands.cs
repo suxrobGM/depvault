@@ -11,6 +11,7 @@ public sealed class ProjectCommands(
     AuthContext ctx,
     IProjectContextResolver projectContextResolver,
     IProjectPicker projectPicker,
+    IRepositoryLocator repositoryLocator,
     ConsoleRenderer renderer)
 {
     public Command CreateProjectCommand()
@@ -42,8 +43,11 @@ public sealed class ProjectCommands(
 
                 if (pick is ProjectCreateNew)
                 {
-                    var name = ctx.Prompter.Ask("Project name");
-                    await CreateProjectAsync(clientFactory.Create(), name, null, null, true, cancellationToken);
+                    var repoRoot = repositoryLocator.FindRepoRoot();
+                    var defaultName = new DirectoryInfo(repoRoot).Name;
+                    var name = ctx.Prompter.Ask("Project name", defaultName);
+                    var repoUrl = await repositoryLocator.GetRemoteUrlAsync(repoRoot, cancellationToken);
+                    await CreateProjectAsync(clientFactory.Create(), name, null, repoUrl, true, cancellationToken);
                     return;
                 }
 

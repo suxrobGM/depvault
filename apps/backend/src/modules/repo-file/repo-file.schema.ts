@@ -79,7 +79,7 @@ export const RepoFileVersionParamsSchema = t.Object({
  * decides which optional metadata applies — `format` for CONFIG, `mimeType` for SECRET.
  */
 export const PushRepoFileBodySchema = t.Object({
-  appPath: t.String({ minLength: 1, maxLength: 1024 }),
+  appPath: t.String({ minLength: 0, maxLength: 1024 }),
   appName: t.String({ minLength: 1, maxLength: 255 }),
   kind: RepoFileKindSchema,
   relativePath: t.String({ minLength: 1, maxLength: 1024 }),

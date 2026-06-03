@@ -86,6 +86,11 @@ public sealed class ProjectContextResolver(
             }
             else
             {
+                if (policy.HasFlag(ResolutionPolicy.AllowAutoDetect))
+                {
+                    WarnIfProjectMismatch(config.ActiveProjectName);
+                }
+
                 return new ProjectResolution(
                     config.ActiveProjectId, ResolutionSource.Config, config.ActiveProjectName);
             }
@@ -294,6 +299,29 @@ public sealed class ProjectContextResolver(
 
         output.PrintError($"A project named '{name}' already exists.");
         return null;
+    }
+
+    /// <summary>
+    /// Emits a yellow warning when the active project name doesn't match the current repo directory,
+    /// so users who switch repos without updating their active project get an early signal.
+    /// </summary>
+    private void WarnIfProjectMismatch(string? activeProjectName)
+    {
+        if (string.IsNullOrEmpty(activeProjectName))
+        {
+            return;
+        }
+
+        var repoName = repositoryLocator.GetRepoName()
+            ?? new DirectoryInfo(repositoryLocator.FindRepoRoot()).Name;
+
+        if (!string.Equals(repoName, activeProjectName, StringComparison.OrdinalIgnoreCase))
+        {
+            AnsiConsole.MarkupLine(
+                $"[yellow]Warning:[/] active project is [cyan1]{Markup.Escape(activeProjectName)}[/] " +
+                $"but the current repo is [grey]{Markup.Escape(repoName)}[/]. " +
+                $"Run [grey]depvault project[/] to switch.");
+        }
     }
 
     private void Persist(string projectId, string? projectName)
