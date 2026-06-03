@@ -6,6 +6,7 @@ using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
 using DepVault.Cli.Repl;
 using DepVault.Cli.Services;
+using DepVault.Cli.Services.ProjectResolution;
 using DepVault.Cli.Services.Scan;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Kiota.Abstractions.Authentication;
@@ -30,6 +31,9 @@ internal static class Startup
             .AddSingleton<IFileArgResolver, FileArgResolver>()
             .AddSingleton<IProjectPicker, ProjectPicker>()
             .AddSingleton<IProjectContextResolver, ProjectContextResolver>()
+            .AddSingleton<IActiveProjectResolver, ActiveProjectResolver>()
+            .AddSingleton<IProjectAutoDetector, ProjectAutoDetector>()
+            .AddSingleton<IInteractiveProjectResolver, InteractiveProjectResolver>()
             .AddSingleton<ISecretDetector, SecretDetector>()
             .AddSingleton<IGitHubReleaseClient, GitHubReleaseClient>()
             .AddSingleton<IVersionChecker, VersionChecker>()

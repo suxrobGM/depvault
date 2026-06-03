@@ -32,7 +32,7 @@ public interface IConfigService
 
 public sealed class ConfigService : IConfigService
 {
-    private static readonly string configPath = Path.Combine(Constants.ConfigDir, "config.json");
+    private static readonly string ConfigPath = Path.Combine(Constants.ConfigDir, "config.json");
 
     private AppConfigData? cached;
 
@@ -43,13 +43,13 @@ public sealed class ConfigService : IConfigService
             return cached;
         }
 
-        if (!File.Exists(configPath))
+        if (!File.Exists(ConfigPath))
         {
             cached = new AppConfigData();
             return cached;
         }
 
-        var json = File.ReadAllText(configPath);
+        var json = File.ReadAllText(ConfigPath);
         cached = JsonSerializer.Deserialize(json, ConfigJsonContext.Default.AppConfigData) ?? new AppConfigData();
         return cached;
     }
@@ -58,7 +58,7 @@ public sealed class ConfigService : IConfigService
     {
         Directory.CreateDirectory(Constants.ConfigDir);
         var json = JsonSerializer.Serialize(config, ConfigJsonContext.Default.AppConfigData);
-        File.WriteAllText(configPath, json);
+        File.WriteAllText(ConfigPath, json);
         cached = config;
     }
 

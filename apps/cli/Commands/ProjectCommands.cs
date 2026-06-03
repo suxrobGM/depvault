@@ -2,6 +2,7 @@ using System.CommandLine;
 using DepVault.Cli.Auth;
 using DepVault.Cli.Output;
 using DepVault.Cli.Services;
+using DepVault.Cli.Services.ProjectResolution;
 using CreateProjectBody = DepVault.Cli.ApiClient.Api.Projects.ProjectsPostRequestBody;
 
 namespace DepVault.Cli.Commands;
