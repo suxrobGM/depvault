@@ -5,6 +5,10 @@ All notable changes to the DepVault CLI are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.3] - 2026-06-03
+
+- `push`: skip re-uploading a file whose contents haven't changed, so repeated pushes no longer create redundant version-history entries (the CLI now sends a keyed content hash the server uses to detect no-op pushes)
+
 ## [1.8.2] - 2026-06-03
 
 - `project` create: default the new-project name to the current repo's directory and auto-fill the repository URL from `git remote origin`
