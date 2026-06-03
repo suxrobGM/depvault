@@ -24,7 +24,7 @@ export function SecretScanningCard(props: SecretScanningCardProps): ReactElement
   );
 
   return (
-    <Surface accent="primary" sx={{ height: "100%" }}>
+    <Surface accent="primary" sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <CardHeader
         avatar={
           <IconBox color="var(--mui-palette-primary-main)" size={40}>
@@ -33,7 +33,7 @@ export function SecretScanningCard(props: SecretScanningCardProps): ReactElement
         }
         title="Secret Scanning"
       />
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: 3, flex: 1 }}>
         {scanSummary?.lastScan ? (
           <>
             <Grid container spacing={2} sx={{ mb: 2.5 }}>

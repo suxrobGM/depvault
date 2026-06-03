@@ -137,7 +137,7 @@ export function RegisterForm(props: RegisterFormProps): ReactElement {
             disabled={!!invitedEmail}
           />
 
-          <Stack direction="row" spacing={2}>
+          <Stack direction="column" spacing={2}>
             <FormTextField
               form={form}
               name="firstName"

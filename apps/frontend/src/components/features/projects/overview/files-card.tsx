@@ -37,7 +37,7 @@ export function FilesCard(props: FilesCardProps): ReactElement {
   ];
 
   return (
-    <Surface accent="success" sx={{ height: "100%" }}>
+    <Surface accent="success" sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <CardHeader
         avatar={
           <IconBox color="var(--mui-palette-success-main)" size={40}>
@@ -47,7 +47,7 @@ export function FilesCard(props: FilesCardProps): ReactElement {
         title="Files"
         subheader={`${configCount} config · ${secretCount} secret`}
       />
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: 3, flex: 1 }}>
         <Grid container spacing={2}>
           {stats.map((stat) => (
             <Grid size={4} key={stat.label}>

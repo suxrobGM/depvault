@@ -32,7 +32,7 @@ export function LicenseComplianceCard(props: LicenseComplianceCardProps): ReactE
   const blocked = data?.blocked ?? 0;
 
   return (
-    <Surface accent="primary" sx={{ height: "100%" }}>
+    <Surface accent="primary" sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <CardHeader
         avatar={
           <IconBox color="var(--mui-palette-primary-main)" size={40}>
@@ -41,7 +41,7 @@ export function LicenseComplianceCard(props: LicenseComplianceCardProps): ReactE
         }
         title="License Compliance"
       />
-      <CardContent sx={{ p: 3 }}>
+      <CardContent sx={{ p: 3, flex: 1 }}>
         <Grid container spacing={2}>
           <Grid size={3}>
             <Typography variant="captionMuted">Total</Typography>
