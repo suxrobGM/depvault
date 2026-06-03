@@ -5,6 +5,11 @@ All notable changes to the DepVault CLI are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.2] - 2026-06-03
+
+- `project` create: default the new-project name to the current repo's directory and auto-fill the repository URL from `git remote origin`
+- Warn when the active project doesn't match the current repository, giving an early signal to switch projects
+
 ## [1.8.1] - 2026-06-03
 
 - Fix `scan` secret leak detection incorrectly flagging gitignored files: replace the custom gitignore parser with `git check-ignore --stdin` (the authoritative source), with the parser as a fallback when git is unavailable
