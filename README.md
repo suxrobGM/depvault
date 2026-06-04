@@ -64,7 +64,6 @@ DepVault is a full-stack web platform that scans dependencies across 8+ language
 
 ### Developer Tools
 
-- Environment templates for bootstrapping new stages
 - Onboarding checklist for new team members
 - Secret file bundler - download encrypted archives with one-time passwords
 

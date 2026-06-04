@@ -5,7 +5,6 @@ import {
   Terminal as CliIcon,
   GitHub as GitIcon,
   Description as LicenseIcon,
-  ContentCopy as TemplateIcon,
 } from "@mui/icons-material";
 import { Box, CardContent, Grid, Stack, Typography } from "@mui/material";
 import { IconBox, Surface } from "@/components/ui/cards";
@@ -42,13 +41,6 @@ const moreFeatures: MoreFeature[] = [
     description:
       "Generate scoped, short-lived tokens for pipelines to pull end-to-end encrypted secrets at build time — no .env files in CI.",
     color: "var(--mui-palette-info-light)",
-  },
-  {
-    icon: <TemplateIcon />,
-    title: "Environment Templates",
-    description:
-      "Clone an environment's config files to bootstrap new stages. Diff templates against live environments.",
-    color: "#fb923c",
   },
   {
     icon: <LicenseIcon />,
