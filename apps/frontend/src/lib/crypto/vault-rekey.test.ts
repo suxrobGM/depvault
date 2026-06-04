@@ -237,9 +237,9 @@ describe("changeVaultPasswordOps", () => {
     const result = await changeVaultPasswordOps("new-pw", kek, vaultInfo, new Map());
 
     const raw = await unwrapKey(
-      result.wrappedPrivateKey,
-      result.wrappedPrivateKeyIv,
-      result.wrappedPrivateKeyTag,
+      result.vaultInfo.wrappedPrivateKey,
+      result.vaultInfo.wrappedPrivateKeyIv,
+      result.vaultInfo.wrappedPrivateKeyTag,
       result.kek,
     );
     expect(raw).toEqual(keyPair.privateKeyRaw);
@@ -250,9 +250,9 @@ describe("changeVaultPasswordOps", () => {
     const result = await changeVaultPasswordOps("new-pw", kek, vaultInfo, new Map());
 
     const raw = await unwrapKey(
-      result.wrappedRecoveryKey,
-      result.wrappedRecoveryKeyIv,
-      result.wrappedRecoveryKeyTag,
+      result.vaultInfo.wrappedRecoveryKey,
+      result.vaultInfo.wrappedRecoveryKeyIv,
+      result.vaultInfo.wrappedRecoveryKeyTag,
       result.kek,
     );
     expect(raw).toEqual(recoveryBytes);
@@ -261,7 +261,7 @@ describe("changeVaultPasswordOps", () => {
   it("a new random salt is generated each call — never reuses the server's old salt", async () => {
     const { kek, vaultInfo } = await buildVault("old-pw");
     const r1 = await changeVaultPasswordOps("new-pw", kek, vaultInfo, new Map());
-    expect(r1.kekSalt).not.toBe(vaultInfo.kekSalt);
+    expect(r1.vaultInfo.kekSalt).not.toBe(vaultInfo.kekSalt);
   });
 
   it("the newly derived KEK is NOT interchangeable with the old KEK", async () => {

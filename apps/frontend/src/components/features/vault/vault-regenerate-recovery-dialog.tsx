@@ -12,7 +12,9 @@ import {
   Typography,
 } from "@mui/material";
 import { useVault } from "@/hooks/use-vault";
+import { VaultReauthRequiredError } from "@/lib/crypto";
 import { RecoveryKeyDisplay } from "./recovery-key-display";
+import { VaultUnlockDialog } from "./vault-unlock-dialog";
 
 interface DialogProps {
   open: boolean;
@@ -26,6 +28,7 @@ export function VaultRegenerateRecoveryDialog(props: DialogProps): ReactElement 
   const [recoveryKey, setRecoveryKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [needsReauth, setNeedsReauth] = useState(false);
 
   const handleRegenerate = async () => {
     setError(null);
@@ -34,11 +37,28 @@ export function VaultRegenerateRecoveryDialog(props: DialogProps): ReactElement 
       const result = await regenerateRecoveryKey();
       setRecoveryKey(result.recoveryKey);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to regenerate recovery key");
+      if (err instanceof VaultReauthRequiredError) {
+        setNeedsReauth(true);
+      } else {
+        setError(err instanceof Error ? err.message : "Failed to regenerate recovery key");
+      }
     } finally {
       setIsRegenerating(false);
     }
   };
+
+  if (needsReauth) {
+    return (
+      <VaultUnlockDialog
+        open={open}
+        onClose={() => setNeedsReauth(false)}
+        onUnlocked={() => {
+          setNeedsReauth(false);
+          void handleRegenerate();
+        }}
+      />
+    );
+  }
 
   const handleFinish = () => {
     setRecoveryKey(null);

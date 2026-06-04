@@ -1,4 +1,6 @@
-const PBKDF2_ITERATIONS = 600_000;
+/** PBKDF2 iteration count for KEK derivation. Exported so callers building vault payloads
+ * reference one source of truth instead of repeating the literal. */
+export const PBKDF2_ITERATIONS = 600_000;
 const AES_KEY_LENGTH = 256;
 const IV_LENGTH = 12;
 const HKDF_CI_INFO = "depvault-ci-wrap";

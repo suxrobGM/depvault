@@ -9,6 +9,7 @@ import {
   importDEK,
   importPrivateKey,
   importRecoveryKey,
+  PBKDF2_ITERATIONS,
   recoveryKeyToBytes,
   toBase64,
   unwrapKey,
@@ -19,6 +20,60 @@ import {
   type VaultInfo,
 } from "@depvault/crypto";
 import { client } from "@/api/client";
+
+interface GrantPayload {
+  projectId: string;
+  wrappedDek: string;
+  wrappedDekIv: string;
+  wrappedDekTag: string;
+}
+
+/**
+ * Re-wrap every project DEK under a new key. Collects DEKs from the in-memory cache first, then
+ * unwraps any server grants not already cached using the old key, and finally wraps each DEK with
+ * the new key. Shared by the password-change (SELF grants under the KEK) and recovery-key
+ * regeneration (RECOVERY grants under the recovery key) flows, which differ only in which key
+ * the grants are wrapped under and which endpoint lists them.
+ */
+async function rewrapGrants(args: {
+  cachedDeks: ReadonlyMap<string, CryptoKey>;
+  oldKey: CryptoKey;
+  newKey: CryptoKey;
+  fetchGrants: () => Promise<GrantPayload[] | null | undefined>;
+}): Promise<GrantPayload[]> {
+  const { cachedDeks, oldKey, newKey, fetchGrants } = args;
+
+  const projectDeks = new Map<string, CryptoKey>(cachedDeks);
+
+  const grants = await fetchGrants();
+  if (grants) {
+    for (const grant of grants) {
+      if (!projectDeks.has(grant.projectId)) {
+        const dekRaw = await unwrapKey(
+          grant.wrappedDek,
+          grant.wrappedDekIv,
+          grant.wrappedDekTag,
+          oldKey,
+        );
+        projectDeks.set(grant.projectId, await importDEK(dekRaw));
+      }
+    }
+  }
+
+  const updatedGrants: GrantPayload[] = [];
+  for (const [projectId, dek] of projectDeks.entries()) {
+    const dekRaw = await exportDEK(dek);
+    const wrapped = await wrapKey(dekRaw, newKey);
+    updatedGrants.push({
+      projectId,
+      wrappedDek: wrapped.wrapped,
+      wrappedDekIv: wrapped.iv,
+      wrappedDekTag: wrapped.tag,
+    });
+  }
+
+  return updatedGrants;
+}
 
 /**
  * Re-wraps the private key, recovery key, and all project DEKs with a new KEK.
@@ -56,47 +111,18 @@ export async function changeVaultPasswordOps(
 
   const wrappedRecovery = await wrapKey(recoveryRaw, newKek);
 
-  // Collect all project DEKs: from cache + from SELF grants not yet cached
-  const projectDeks = new Map<string, CryptoKey>(cachedDeks);
-
-  const { data: selfGrants } = await client.api.vault.keygrants.self.get();
-  if (selfGrants) {
-    for (const grant of selfGrants) {
-      if (!projectDeks.has(grant.projectId)) {
-        const dekRaw = await unwrapKey(
-          grant.wrappedDek,
-          grant.wrappedDekIv,
-          grant.wrappedDekTag,
-          oldKek,
-        );
-        projectDeks.set(grant.projectId, await importDEK(dekRaw));
-      }
-    }
-  }
-
-  const updatedGrants: Array<{
-    projectId: string;
-    wrappedDek: string;
-    wrappedDekIv: string;
-    wrappedDekTag: string;
-  }> = [];
-
-  for (const [projectId, dek] of projectDeks.entries()) {
-    const dekRaw = await exportDEK(dek);
-    const wrapped = await wrapKey(dekRaw, newKek);
-    updatedGrants.push({
-      projectId,
-      wrappedDek: wrapped.wrapped,
-      wrappedDekIv: wrapped.iv,
-      wrappedDekTag: wrapped.tag,
-    });
-  }
+  const updatedGrants = await rewrapGrants({
+    cachedDeks,
+    oldKey: oldKek,
+    newKey: newKek,
+    fetchGrants: async () => (await client.api.vault.keygrants.self.get()).data,
+  });
 
   const kekSalt = toBase64(newSalt.buffer as ArrayBuffer);
 
   await client.api.vault.password.put({
     newKekSalt: kekSalt,
-    newKekIterations: 600_000,
+    newKekIterations: PBKDF2_ITERATIONS,
     newWrappedPrivateKey: newWrappedPrivate.wrapped,
     newWrappedPrivateKeyIv: newWrappedPrivate.iv,
     newWrappedPrivateKeyTag: newWrappedPrivate.tag,
@@ -108,14 +134,17 @@ export async function changeVaultPasswordOps(
 
   return {
     kek: newKek,
-    kekSalt,
-    kekIterations: 600_000,
-    wrappedPrivateKey: newWrappedPrivate.wrapped,
-    wrappedPrivateKeyIv: newWrappedPrivate.iv,
-    wrappedPrivateKeyTag: newWrappedPrivate.tag,
-    wrappedRecoveryKey: wrappedRecovery.wrapped,
-    wrappedRecoveryKeyIv: wrappedRecovery.iv,
-    wrappedRecoveryKeyTag: wrappedRecovery.tag,
+    vaultInfo: {
+      ...vaultInfo,
+      kekSalt,
+      kekIterations: PBKDF2_ITERATIONS,
+      wrappedPrivateKey: newWrappedPrivate.wrapped,
+      wrappedPrivateKeyIv: newWrappedPrivate.iv,
+      wrappedPrivateKeyTag: newWrappedPrivate.tag,
+      wrappedRecoveryKey: wrappedRecovery.wrapped,
+      wrappedRecoveryKeyIv: wrappedRecovery.iv,
+      wrappedRecoveryKeyTag: wrappedRecovery.tag,
+    },
   };
 }
 
@@ -189,7 +218,7 @@ export async function recoverVaultOps(
 
   await client.api.vault.recover.post({
     newKekSalt: kekSalt,
-    newKekIterations: 600_000,
+    newKekIterations: PBKDF2_ITERATIONS,
     newPublicKey: newKeyPair.publicKey,
     newWrappedPrivateKey: newWrappedPrivate.wrapped,
     newWrappedPrivateKeyIv: newWrappedPrivate.iv,
@@ -205,7 +234,7 @@ export async function recoverVaultOps(
     keys: { kek: newKek, privateKey: newPrivateKey, recoveryKey: recoveryKeyCryptoKey },
     vaultInfo: {
       kekSalt,
-      kekIterations: 600_000,
+      kekIterations: PBKDF2_ITERATIONS,
       publicKey: newKeyPair.publicKey,
       wrappedPrivateKey: newWrappedPrivate.wrapped,
       wrappedPrivateKeyIv: newWrappedPrivate.iv,
@@ -232,44 +261,12 @@ export async function regenerateRecoveryKeyOps(
   const newRecoveryKey = await importRecoveryKey(newRecoveryBytes);
   const newWrappedRecovery = await wrapKey(newRecoveryBytes, kek);
 
-  // Collect all project DEKs: from cache + from existing RECOVERY grants
-  const projectDeks = new Map<string, CryptoKey>();
-  for (const [projectId, dek] of cachedDeks.entries()) {
-    projectDeks.set(projectId, dek);
-  }
-
-  const { data: existingGrants } = await client.api.vault.keygrants.recovery.get();
-  if (existingGrants) {
-    for (const grant of existingGrants) {
-      if (!projectDeks.has(grant.projectId)) {
-        const dekRaw = await unwrapKey(
-          grant.wrappedDek,
-          grant.wrappedDekIv,
-          grant.wrappedDekTag,
-          oldRecoveryKey,
-        );
-        projectDeks.set(grant.projectId, await importDEK(dekRaw));
-      }
-    }
-  }
-
-  const updatedGrants: Array<{
-    projectId: string;
-    wrappedDek: string;
-    wrappedDekIv: string;
-    wrappedDekTag: string;
-  }> = [];
-
-  for (const [projectId, dek] of projectDeks.entries()) {
-    const dekRaw = await exportDEK(dek);
-    const wrapped = await wrapKey(dekRaw, newRecoveryKey);
-    updatedGrants.push({
-      projectId,
-      wrappedDek: wrapped.wrapped,
-      wrappedDekIv: wrapped.iv,
-      wrappedDekTag: wrapped.tag,
-    });
-  }
+  const updatedGrants = await rewrapGrants({
+    cachedDeks,
+    oldKey: oldRecoveryKey,
+    newKey: newRecoveryKey,
+    fetchGrants: async () => (await client.api.vault.keygrants.recovery.get()).data,
+  });
 
   await client.api.vault.recoverykey.put({
     newRecoveryKeyHash: newRecoveryHash,

@@ -49,3 +49,7 @@ export const PAGINATION_DEFAULTS = {
 } as const;
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+
+/** How long an opt-in "keep unlocked on this device" vault session persists before expiring. */
+export const REMEMBER_DEVICE_DAYS = 7;
+export const REMEMBER_DEVICE_MS = REMEMBER_DEVICE_DAYS * 24 * 60 * 60 * 1000;

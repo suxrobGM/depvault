@@ -20,3 +20,15 @@ export class KeyGrantMismatchError extends Error {
     this.name = "KeyGrantMismatchError";
   }
 }
+
+/**
+ * Thrown when an operation needs the recovery key, but the vault was unlocked from a persisted
+ * session that intentionally omits it (the recovery key is never written to disk). Callers catch
+ * this to prompt for the vault password, which re-derives the full key set.
+ */
+export class VaultReauthRequiredError extends Error {
+  constructor() {
+    super("Re-enter your vault password to perform this action.");
+    this.name = "VaultReauthRequiredError";
+  }
+}

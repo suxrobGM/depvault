@@ -13,31 +13,42 @@ import {
   Typography,
 } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
-import { FormTextField } from "@/components/ui/form";
+import { FormCheckboxField, FormTextField } from "@/components/ui/form";
 import { useVault } from "@/hooks/use-vault";
+import { REMEMBER_DEVICE_DAYS } from "@/lib/constants";
 import { vaultUnlockSchema } from "./schemas";
 
 interface VaultUnlockDialogProps {
   open: boolean;
   onClose?: () => void;
   onForgotPassword?: () => void;
+  /**
+   * Fired on a successful unlock. When provided, it replaces onClose on the success path (onClose
+   * still fires when the dialog is dismissed without unlocking) — used to re-auth and retry an
+   * action that needs the recovery key.
+   */
+  onUnlocked?: () => void;
 }
 
 export function VaultUnlockDialog(props: VaultUnlockDialogProps): ReactElement {
-  const { open, onClose, onForgotPassword } = props;
+  const { open, onClose, onForgotPassword, onUnlocked } = props;
   const { unlockVault } = useVault();
 
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm({
-    defaultValues: { password: "" },
+    defaultValues: { password: "", keepUnlocked: false },
     validators: { onSubmit: vaultUnlockSchema },
     onSubmit: async ({ value }) => {
       setError(null);
       try {
-        await unlockVault(value.password);
+        await unlockVault(value.password, value.keepUnlocked);
         form.reset();
-        onClose?.();
+        if (onUnlocked) {
+          onUnlocked();
+        } else {
+          onClose?.();
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to unlock vault");
       }
@@ -65,6 +76,12 @@ export function VaultUnlockDialog(props: VaultUnlockDialogProps): ReactElement {
               label="Vault Password"
               type="password"
               autoFocus
+            />
+
+            <FormCheckboxField
+              form={form}
+              name="keepUnlocked"
+              label={`Keep this vault unlocked on this device for ${REMEMBER_DEVICE_DAYS} days`}
             />
 
             {error && <Alert severity="error">{error}</Alert>}

@@ -8,6 +8,7 @@ import {
   generateSalt,
   importPrivateKey,
   importRecoveryKey,
+  PBKDF2_ITERATIONS,
   recoveryKeyToBytes,
   toBase64,
   unwrapKey,
@@ -85,7 +86,7 @@ export async function createVault(password: string): Promise<VaultSetupResult> {
 
   await client.api.vault.setup.post({
     kekSalt,
-    kekIterations: 600_000,
+    kekIterations: PBKDF2_ITERATIONS,
     publicKey: keyPair.publicKey,
     wrappedPrivateKey: wrappedPrivate.wrapped,
     wrappedPrivateKeyIv: wrappedPrivate.iv,
@@ -102,7 +103,7 @@ export async function createVault(password: string): Promise<VaultSetupResult> {
     keys: { kek, privateKey, recoveryKey: recoveryKeyCryptoKey },
     vaultInfo: {
       kekSalt,
-      kekIterations: 600_000,
+      kekIterations: PBKDF2_ITERATIONS,
       publicKey: keyPair.publicKey,
       wrappedPrivateKey: wrappedPrivate.wrapped,
       wrappedPrivateKeyIv: wrappedPrivate.iv,

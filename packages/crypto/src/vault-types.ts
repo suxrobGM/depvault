@@ -25,14 +25,7 @@ export interface VaultSetupResult {
 
 export interface PasswordChangeResult {
   kek: CryptoKey;
-  kekSalt: string;
-  kekIterations: number;
-  wrappedPrivateKey: string;
-  wrappedPrivateKeyIv: string;
-  wrappedPrivateKeyTag: string;
-  wrappedRecoveryKey: string;
-  wrappedRecoveryKeyIv: string;
-  wrappedRecoveryKeyTag: string;
+  vaultInfo: VaultInfo;
 }
 
 export interface RecoverVaultResult {

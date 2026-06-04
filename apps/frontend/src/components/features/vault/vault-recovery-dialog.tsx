@@ -12,8 +12,9 @@ import {
   Typography,
 } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
-import { FormTextField } from "@/components/ui/form";
+import { FormCheckboxField, FormTextField } from "@/components/ui/form";
 import { useVault } from "@/hooks/use-vault";
+import { REMEMBER_DEVICE_DAYS } from "@/lib/constants";
 import { vaultRecoverySchema } from "./schemas";
 
 interface VaultRecoveryDialogProps {
@@ -32,12 +33,13 @@ export function VaultRecoveryDialog(props: VaultRecoveryDialogProps): ReactEleme
       recoveryKey: "",
       newPassword: "",
       confirmPassword: "",
+      keepUnlocked: false,
     },
     validators: { onSubmit: vaultRecoverySchema },
     onSubmit: async ({ value }) => {
       setError(null);
       try {
-        await recoverVault(value.recoveryKey, value.newPassword);
+        await recoverVault(value.recoveryKey, value.newPassword, value.keepUnlocked);
         form.reset();
         onClose();
       } catch (err) {
@@ -88,6 +90,12 @@ export function VaultRecoveryDialog(props: VaultRecoveryDialogProps): ReactEleme
               name="confirmPassword"
               label="Confirm New Password"
               type="password"
+            />
+
+            <FormCheckboxField
+              form={form}
+              name="keepUnlocked"
+              label={`Keep this vault unlocked on this device for ${REMEMBER_DEVICE_DAYS} days`}
             />
 
             {error && <Alert severity="error">{error}</Alert>}
