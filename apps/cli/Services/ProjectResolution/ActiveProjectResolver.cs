@@ -18,21 +18,16 @@ public interface IActiveProjectResolver
 
 public sealed class ActiveProjectResolver(
     IApiClientFactory clientFactory,
-    IConsolePrompter prompter,
-    IRepositoryLocator repositoryLocator) : IActiveProjectResolver
+    IConsolePrompter prompter) : IActiveProjectResolver
 {
     public async Task<ProjectResolution?> ResolveAsync(
         string activeId, string? activeName, ResolutionPolicy policy, CancellationToken ct)
     {
         // Scan confirms the active project before using it; every other command uses it directly.
+        // Mismatch with the current repo is reconciled by the orchestrator (auto-switch).
         if (policy.HasFlag(ResolutionPolicy.ConfirmActive) && prompter.IsInteractive)
         {
             return await TryConfirmAsync(activeId, ct);
-        }
-
-        if (policy.HasFlag(ResolutionPolicy.AllowAutoDetect))
-        {
-            WarnIfMismatch(activeName);
         }
 
         return new ProjectResolution(activeId, activeName);
@@ -61,28 +56,5 @@ public sealed class ActiveProjectResolver(
         }
 
         return null;
-    }
-
-    /// <summary>
-    /// Emits a yellow warning when the active project name doesn't match the current repo directory,
-    /// so users who switch repos without updating their active project get an early signal.
-    /// </summary>
-    private void WarnIfMismatch(string? activeProjectName)
-    {
-        if (string.IsNullOrEmpty(activeProjectName))
-        {
-            return;
-        }
-
-        var repoName = repositoryLocator.GetRepoName()
-            ?? new DirectoryInfo(repositoryLocator.FindRepoRoot()).Name;
-
-        if (!string.Equals(repoName, activeProjectName, StringComparison.OrdinalIgnoreCase))
-        {
-            AnsiConsole.MarkupLine(
-                $"[yellow]Warning:[/] active project is [cyan1]{Markup.Escape(activeProjectName)}[/] " +
-                $"but the current repo is [grey]{Markup.Escape(repoName)}[/]. " +
-                $"Run [grey]depvault project[/] to switch.");
-        }
     }
 }

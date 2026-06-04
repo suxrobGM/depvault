@@ -106,6 +106,10 @@ internal static class Startup
         versionCmd.SetAction(_ => renderer.PrintBanner());
         rootCommand.Add(versionCmd);
 
+        var clearCmd = new Command("clear", "Clear the screen");
+        clearCmd.SetAction(_ => renderer.Clear());
+        rootCommand.Add(clearCmd);
+
         return rootCommand;
     }
 

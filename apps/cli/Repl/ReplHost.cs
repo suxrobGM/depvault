@@ -56,6 +56,12 @@ public sealed class ReplHost(VaultState vaultState, ConsoleRenderer renderer)
                 return 0;
             }
 
+            if (command is "clear" or "cls")
+            {
+                renderer.Clear();
+                continue; // skip the trailing rule; the loop redraws status line, hints, and prompt
+            }
+
             if (command is "help" or "?")
             {
                 PrintHelp(rootCommand);

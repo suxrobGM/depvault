@@ -49,6 +49,27 @@ public sealed class ConsoleRenderer(
         AnsiConsole.WriteLine();
     }
 
+    /// <summary>
+    /// Clears the terminal screen. No-ops when output is redirected or no console buffer is attached
+    /// (piped/CI), where the underlying clear would throw <see cref="IOException"/>.
+    /// </summary>
+    public void Clear()
+    {
+        if (Console.IsOutputRedirected)
+        {
+            return;
+        }
+
+        try
+        {
+            AnsiConsole.Clear();
+        }
+        catch (IOException)
+        {
+            // No usable console buffer — nothing to clear.
+        }
+    }
+
     /// <summary>Print the status line: cwd · repo · email · vault lock status · project name.</summary>
     public void PrintStatusLine()
     {

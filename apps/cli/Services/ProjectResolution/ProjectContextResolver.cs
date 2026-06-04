@@ -32,6 +32,12 @@ public sealed class ProjectContextResolver(
                 config.ActiveProjectId, config.ActiveProjectName, policy, ct);
             if (active is not null)
             {
+                // Auto-switch to the project matching the current repo when it diverges from active.
+                if (policy.HasFlag(ResolutionPolicy.AllowAutoDetect))
+                {
+                    return await autoDetector.ReconcileAsync(active, ct) ?? active;
+                }
+
                 return active;
             }
         }
