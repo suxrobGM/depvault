@@ -30,7 +30,7 @@ export default async function ProjectVaultPage(props: PageProps): Promise<ReactE
         ]}
       />
       <VaultGate>
-        <RepoBrowser projectId={id} />
+        <RepoBrowser projectId={id} projectName={project?.name ?? ""} />
       </VaultGate>
     </Box>
   );

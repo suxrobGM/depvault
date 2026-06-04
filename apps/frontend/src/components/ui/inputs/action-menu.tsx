@@ -2,7 +2,15 @@
 
 import { useState, type ReactElement } from "react";
 import { MoreVert as MoreVertIcon } from "@mui/icons-material";
-import { Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
+import {
+  Divider,
+  IconButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Tooltip,
+} from "@mui/material";
 
 /** A single entry in an ActionMenu. Set `hidden: true` to conditionally exclude an item. */
 export interface ActionMenuItem {
@@ -21,22 +29,41 @@ interface ActionMenuProps {
   items: ActionMenuItem[];
   /** Disables the trigger button. */
   disabled?: boolean;
+  /** Custom trigger icon; defaults to a MoreVert "⋮". */
+  icon?: ReactElement;
+  /** Tooltip text, also used as the trigger's accessible label. */
+  tooltip?: string;
 }
 
-/** A MoreVert icon button that opens a dropdown menu built from a declarative items array. */
+/** An icon button that opens a dropdown menu built from a declarative items array. */
 export function ActionMenu(props: ActionMenuProps): ReactElement {
-  const { items, disabled } = props;
+  const { items, disabled, icon, tooltip } = props;
   const [anchor, setAnchor] = useState<null | HTMLElement>(null);
 
   const close = () => setAnchor(null);
 
   const visible = items.filter((item) => !item.hidden);
 
+  const trigger = (
+    <IconButton
+      size="small"
+      disabled={disabled}
+      aria-label={tooltip}
+      onClick={(e) => setAnchor(e.currentTarget)}
+    >
+      {icon ?? <MoreVertIcon fontSize="small" />}
+    </IconButton>
+  );
+
   return (
     <>
-      <IconButton size="small" disabled={disabled} onClick={(e) => setAnchor(e.currentTarget)}>
-        <MoreVertIcon fontSize="small" />
-      </IconButton>
+      {tooltip ? (
+        <Tooltip title={tooltip}>
+          <span>{trigger}</span>
+        </Tooltip>
+      ) : (
+        trigger
+      )}
       <Menu anchorEl={anchor} open={!!anchor} onClose={close}>
         {visible.map((item) => [
           item.dividerBefore && <Divider key={`${item.label}-divider`} />,

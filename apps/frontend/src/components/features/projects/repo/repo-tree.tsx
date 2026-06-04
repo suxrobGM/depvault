@@ -28,17 +28,22 @@ interface RepoTreeProps {
   apps: RepoMapAppDto[];
   selectedFileId: string | null;
   onSelectFile: (fileId: string) => void;
+  /** Force every folder open (e.g. while a search/env filter is active). */
+  expandAll?: boolean;
 }
 
 /**
  * Collapsible directory → app → file explorer. Replaces the old apps sidebar +
  * file list. Apps are grouped by their `appPath` directory; each app row expands
  * to reveal its (already env/search-filtered) files. Collapse state is tracked
- * locally so it survives re-filtering — apps are expanded unless explicitly closed.
+ * locally so it survives re-filtering — every folder starts collapsed except the
+ * first, and a folder stays in whatever state the user last toggled it to.
  */
 export function RepoTree(props: RepoTreeProps): ReactElement {
-  const { apps, selectedFileId, onSelectFile } = props;
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const { apps, selectedFileId, onSelectFile, expandAll = false } = props;
+  const [collapsed, setCollapsed] = useState<Set<string>>(
+    () => new Set(apps.slice(1).map((app) => app.id)),
+  );
 
   const toggle = (appId: string) => {
     setCollapsed((prev) => {
@@ -77,7 +82,7 @@ export function RepoTree(props: RepoTreeProps): ReactElement {
           </Typography>
 
           {groupApps.map((app) => {
-            const isOpen = !collapsed.has(app.id);
+            const isOpen = expandAll || !collapsed.has(app.id);
             return (
               <Box key={app.id}>
                 <ListItemButton onClick={() => toggle(app.id)} sx={{ pr: 1 }}>

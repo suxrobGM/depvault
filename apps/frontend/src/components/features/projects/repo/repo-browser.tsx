@@ -16,13 +16,15 @@ import { RepoExplorerToolbar } from "./repo-explorer-toolbar";
 import { ALL_ENVIRONMENTS, filterApps } from "./repo-filter";
 import { RepoSummaryStrip } from "./repo-summary-strip";
 import { RepoTree } from "./repo-tree";
+import { VaultExportMenu } from "./vault-export-menu";
 
 interface RepoBrowserProps {
   projectId: string;
+  projectName: string;
 }
 
 export function RepoBrowser(props: RepoBrowserProps): ReactElement {
-  const { projectId } = props;
+  const { projectId, projectName } = props;
   const { user } = useAuth();
 
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
@@ -62,6 +64,7 @@ export function RepoBrowser(props: RepoBrowserProps): ReactElement {
   const environments = [...new Set(apps.flatMap((app) => app.environments))].sort();
   const filteredApps = filterApps(apps, envFilter, debouncedSearch);
   const visibleFiles = filteredApps.flatMap((app) => app.files);
+  const isFiltered = debouncedSearch.trim().length > 0 || envFilter !== ALL_ENVIRONMENTS;
 
   const activeFileId = visibleFiles.some((f) => f.id === selectedFileId)
     ? selectedFileId
@@ -80,11 +83,15 @@ export function RepoBrowser(props: RepoBrowserProps): ReactElement {
               environments={environments}
               envFilter={envFilter}
               onEnvFilterChange={setEnvFilter}
+              actions={
+                <VaultExportMenu projectId={projectId} projectName={projectName} apps={apps} />
+              }
             />
             <RepoTree
               apps={filteredApps}
               selectedFileId={activeFileId}
               onSelectFile={setSelectedFileId}
+              expandAll={isFiltered}
             />
           </Paper>
         </Grid>
