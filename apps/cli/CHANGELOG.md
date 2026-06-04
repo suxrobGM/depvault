@@ -5,6 +5,11 @@ All notable changes to the DepVault CLI are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.4] - 2026-06-04
+
+- Auto-switch the active project to the one matching the current repository (by remote URL, then name) when they diverge, instead of only printing a warning — supersedes the v1.8.2 mismatch warning, which now appears only when no project matches the repo
+- Add a `clear` command (and REPL `clear`/`cls`) to clear the terminal screen
+
 ## [1.8.3] - 2026-06-03
 
 - `push`: skip re-uploading a file whose contents haven't changed, so repeated pushes no longer create redundant version-history entries (the CLI now sends a keyed content hash the server uses to detect no-op pushes)
