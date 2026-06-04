@@ -18,7 +18,7 @@ import {
   type RegenerateRecoveryKeyResult,
   type VaultInfo,
 } from "@depvault/crypto";
-import { client } from "@/lib/api";
+import { client } from "@/api/client";
 
 /**
  * Re-wraps the private key, recovery key, and all project DEKs with a new KEK.

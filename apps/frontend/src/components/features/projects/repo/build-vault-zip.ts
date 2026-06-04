@@ -1,7 +1,7 @@
 import { decryptBinary, decrypt as decryptText } from "@depvault/crypto";
 import { zip, type Zippable } from "fflate";
-import { client } from "@/lib/api";
-import type { RepoMapFileDto } from "@/types/api/repo";
+import { client } from "@/api/client";
+import type { RepoMapFileDto } from "@/api/types/repo";
 
 /**
  * Fetches every repo file's encrypted blob, decrypts it client-side with the

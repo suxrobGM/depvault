@@ -8,11 +8,11 @@ import {
   Folder as FolderIcon,
 } from "@mui/icons-material";
 import { Box, CardContent, Grid, Skeleton, Stack, Typography } from "@mui/material";
+import { client } from "@/api/client";
+import { useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { ProjectStatsDto } from "@/api/types/project";
 import { IconBox, Surface, type SurfaceAccent } from "@/components/ui/cards";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { client } from "@/lib/api";
-import { queryKeys } from "@/lib/query-keys";
-import type { ProjectStatsDto } from "@/types/api/project";
 
 interface StatCard {
   icon: ReactNode;

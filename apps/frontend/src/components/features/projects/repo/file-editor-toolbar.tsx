@@ -7,8 +7,8 @@ import {
   Share as ShareIcon,
 } from "@mui/icons-material";
 import { Box, Chip, Stack, Typography } from "@mui/material";
+import type { RepoFileContentDto } from "@/api/types/repo";
 import { ActionMenu, type ActionMenuItem } from "@/components/ui/inputs";
-import type { RepoFileContentDto } from "@/types/api/repo";
 import { formatBytes, formatRelativeTime } from "@/utils/formatters";
 import { resolveLanguage } from "./file-format";
 

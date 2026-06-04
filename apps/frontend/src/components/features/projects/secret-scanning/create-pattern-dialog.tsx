@@ -16,11 +16,11 @@ import {
 } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod/v4";
+import { client } from "@/api/client";
+import { useApiMutation } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { PatternDto } from "@/api/types/secret-scan";
 import { FormSelectField, FormTextField } from "@/components/ui/form";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { client } from "@/lib/api";
-import { queryKeys } from "@/lib/query-keys";
-import type { PatternDto } from "@/types/api/secret-scan";
 
 interface CreatePatternDialogProps {
   open: boolean;

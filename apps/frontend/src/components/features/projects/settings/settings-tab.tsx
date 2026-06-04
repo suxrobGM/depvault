@@ -14,16 +14,15 @@ import {
 import { useForm } from "@tanstack/react-form";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
+import { client } from "@/api/client";
+import { useApiMutation, useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { MemberListResponseDto, ProjectDetailDto } from "@/api/types/project";
+import { useAuth } from "@/auth/use-auth";
 import { Surface } from "@/components/ui/cards";
 import { FormTextField } from "@/components/ui/form";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { useAuth } from "@/hooks/use-auth";
 import { useConfirm } from "@/hooks/use-confirm";
-import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import { queryKeys } from "@/lib/query-keys";
-import type { MemberListResponseDto, ProjectDetailDto } from "@/types/api/project";
 import { updateProjectSchema } from "../schemas";
 import { CiTokensSection } from "./ci-tokens-section";
 

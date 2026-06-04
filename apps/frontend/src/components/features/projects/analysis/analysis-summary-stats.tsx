@@ -8,9 +8,9 @@ import {
   Update as UpdateIcon,
 } from "@mui/icons-material";
 import { CardContent, Grid, Typography } from "@mui/material";
+import type { DependencyDto } from "@/api/types/analysis";
 import { IconBox, Surface, type SurfaceAccent } from "@/components/ui/cards";
 import { StatusBadge } from "@/components/ui/data-display";
-import type { DependencyDto } from "@/types/api/analysis";
 import { getHealthColor } from "./utils";
 
 interface AnalysisSummaryStatsProps {

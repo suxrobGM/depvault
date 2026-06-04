@@ -3,13 +3,13 @@
 import { useState, type ReactElement } from "react";
 import { History as HistoryIcon } from "@mui/icons-material";
 import { Box } from "@mui/material";
+import { client } from "@/api/client";
+import { useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { GlobalActivityListResponseDto } from "@/api/types/activity";
 import { ActivityLogEntry } from "@/components/features/projects/activity/activity-log-entry";
 import { PaginationBar, SkeletonList } from "@/components/ui/data-display";
 import { EmptyState } from "@/components/ui/feedback";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { client } from "@/lib/api";
-import { queryKeys } from "@/lib/query-keys";
-import type { GlobalActivityListResponseDto } from "@/types/api/activity";
 import { ActivityUpgradeGate } from "./activity-upgrade-gate";
 import {
   EMPTY_FILTERS,

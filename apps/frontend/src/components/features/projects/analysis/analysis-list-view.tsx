@@ -10,19 +10,18 @@ import {
 import { Box, Button, Chip, IconButton, Skeleton, Stack, Tooltip, Typography } from "@mui/material";
 import type { Route } from "next";
 import Link from "next/link";
+import { client } from "@/api/client";
+import { useApiMutation, useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { AnalysisDto, AnalysisListResponseDto } from "@/api/types/analysis";
+import type { MemberListResponseDto, ProjectDetailDto } from "@/api/types/project";
+import { useAuth } from "@/auth/use-auth";
 import { Surface } from "@/components/ui/cards";
 import { PageHeader } from "@/components/ui/containers";
 import { HealthArc, PaginationBar, SkeletonList } from "@/components/ui/data-display";
 import { EmptyState } from "@/components/ui/feedback";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { useAuth } from "@/hooks/use-auth";
 import { useConfirm } from "@/hooks/use-confirm";
-import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import { queryKeys } from "@/lib/query-keys";
-import type { AnalysisDto, AnalysisListResponseDto } from "@/types/api/analysis";
-import type { MemberListResponseDto, ProjectDetailDto } from "@/types/api/project";
 import { CreateAnalysisDialog } from "./create-analysis-dialog";
 import { getEcosystemLabel } from "./utils";
 

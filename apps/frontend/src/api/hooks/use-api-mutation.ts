@@ -1,8 +1,8 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 import { useSubscriptionPlanLimit } from "@/providers/subscription-provider";
-import { useToast } from "./use-toast";
 
 type MutationFn<TData, TVariables> = (variables: TVariables) => Promise<{
   data: TData | null;

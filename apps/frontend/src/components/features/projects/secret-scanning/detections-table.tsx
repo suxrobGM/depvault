@@ -21,19 +21,18 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Surface } from "@/components/ui/cards";
-import { PaginationBar } from "@/components/ui/data-display";
-import { EmptyState } from "@/components/ui/feedback";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { client } from "@/lib/api";
-import { queryKeys } from "@/lib/query-keys";
+import { client } from "@/api/client";
+import { useApiMutation, useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
 import type {
   BatchUpdateDetectionsBody,
   BatchUpdateDetectionsDto,
   DetectionDto,
   DetectionListResponseDto,
-} from "@/types/api/secret-scan";
+} from "@/api/types/secret-scan";
+import { Surface } from "@/components/ui/cards";
+import { PaginationBar } from "@/components/ui/data-display";
+import { EmptyState } from "@/components/ui/feedback";
 import { DetectionTableRow } from "./detection-table-row";
 
 interface DetectionsTableProps {

@@ -1,5 +1,5 @@
-import type { client } from "@/lib/api";
-import type { Body, Data } from "./utils";
+import type { Body, Data } from "@depvault/shared/api";
+import type { client } from "@/api/client";
 
 type Subscription = typeof client.api.subscription;
 

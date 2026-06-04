@@ -16,16 +16,16 @@ import {
   TableRow,
   TextField,
 } from "@mui/material";
+import { client } from "@/api/client";
+import { useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { AdminUserListResponseDto } from "@/api/types";
 import { PaginationBar } from "@/components/ui/data-display/pagination-bar";
 import { SkeletonList } from "@/components/ui/data-display/skeleton-list";
 import { StatusBadge } from "@/components/ui/data-display/status-badge";
 import { EmptyState } from "@/components/ui/feedback/empty-state";
 import { SelectField } from "@/components/ui/inputs";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { client } from "@/lib/api";
 import { PAGINATION_DEFAULTS } from "@/lib/constants";
-import { queryKeys } from "@/lib/query-keys";
-import type { AdminUserListResponseDto } from "@/types/api";
 import { UserDetailDialog } from "./user-detail-dialog";
 
 const PLAN_VARIANT: Record<string, "default" | "info" | "success"> = {

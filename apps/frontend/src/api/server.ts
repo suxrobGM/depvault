@@ -1,6 +1,6 @@
 import { createApiClient } from "@depvault/shared/api";
 import { cookies } from "next/headers";
-import { API_BASE_URL, COOKIE_NAMES } from "./constants";
+import { API_BASE_URL, COOKIE_NAMES } from "@/lib/constants";
 
 interface GetServerClientOptions {
   auth?: boolean;

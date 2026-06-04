@@ -2,12 +2,12 @@
 
 import { useState, type ReactElement } from "react";
 import { Button, DialogActions, MenuItem, Stack, TextField } from "@mui/material";
+import { client } from "@/api/client";
+import { useApiMutation } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { CreateAnalysisBody } from "@/api/types/analysis";
 import { FileUploadButton } from "@/components/ui/inputs";
-import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useToast } from "@/hooks/use-toast";
-import { client } from "@/lib/api";
-import { queryKeys } from "@/lib/query-keys";
-import type { CreateAnalysisBody } from "@/types/api/analysis";
 import { ECOSYSTEMS, type EcosystemValue } from "./utils";
 
 interface UploadTabContentProps {

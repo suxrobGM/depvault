@@ -13,7 +13,7 @@ import {
   type Node,
   type NodeProps,
 } from "@xyflow/react";
-import type { DependencyDto } from "@/types/api/analysis";
+import type { DependencyDto } from "@/api/types/analysis";
 
 interface DependencyGraphProps {
   dependencies: DependencyDto[];

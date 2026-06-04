@@ -9,14 +9,14 @@ import {
   TrendingUp as HealthIcon,
 } from "@mui/icons-material";
 import { Box, CardActions, CardContent, CardHeader, Grid, Stack, Typography } from "@mui/material";
+import { client } from "@/api/client";
+import { useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { AnalysisListResponseDto } from "@/api/types/analysis";
+import type { MemberListResponseDto } from "@/api/types/project";
 import { IconBox, Surface } from "@/components/ui/cards";
 import { LinkButton } from "@/components/ui/inputs";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import { queryKeys } from "@/lib/query-keys";
-import type { AnalysisListResponseDto } from "@/types/api/analysis";
-import type { MemberListResponseDto } from "@/types/api/project";
 
 interface QuickStatsCardProps {
   projectId: string;

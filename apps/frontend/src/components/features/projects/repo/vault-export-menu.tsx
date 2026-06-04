@@ -6,11 +6,11 @@ import {
   FolderZip as ExportIcon,
   Share as ShareIcon,
 } from "@mui/icons-material";
+import type { RepoMapAppDto } from "@/api/types/repo";
 import { CreateFileShareDialog, type ShareableFile } from "@/components/features/share-link";
 import { ActionMenu, type ActionMenuItem } from "@/components/ui/inputs";
 import { useToast } from "@/hooks/use-toast";
 import { useVault } from "@/hooks/use-vault";
-import type { RepoMapAppDto } from "@/types/api/repo";
 import { downloadFile } from "@/utils/download-file";
 import { buildVaultZip } from "./build-vault-zip";
 

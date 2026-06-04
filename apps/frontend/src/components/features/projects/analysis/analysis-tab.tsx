@@ -9,15 +9,15 @@ import {
 import { Box, Button, CardContent, Chip, Grid, Stack, Typography } from "@mui/material";
 import type { Route } from "next";
 import Link from "next/link";
+import { client } from "@/api/client";
+import { useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { AnalysisListResponseDto } from "@/api/types/analysis";
 import { Surface } from "@/components/ui/cards";
 import { StatusBadge } from "@/components/ui/data-display";
 import { EmptyState } from "@/components/ui/feedback";
 import { LinkButton } from "@/components/ui/inputs";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import { queryKeys } from "@/lib/query-keys";
-import type { AnalysisListResponseDto } from "@/types/api/analysis";
 import { CreateAnalysisDialog } from "./create-analysis-dialog";
 import { getEcosystemLabel, getHealthColor } from "./utils";
 

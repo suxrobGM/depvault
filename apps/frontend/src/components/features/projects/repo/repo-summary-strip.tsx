@@ -8,8 +8,8 @@ import {
   VpnKey as SecretIcon,
 } from "@mui/icons-material";
 import { Box, CardContent, Divider, Stack, Typography } from "@mui/material";
+import type { RepoMapAppDto } from "@/api/types/repo";
 import { Surface } from "@/components/ui/cards";
-import type { RepoMapAppDto } from "@/types/api/repo";
 import { formatRelativeTime } from "@/utils/formatters";
 
 interface RepoSummaryStripProps {

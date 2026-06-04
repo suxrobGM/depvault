@@ -10,8 +10,8 @@ import {
   VpnKey as VaultIcon,
 } from "@mui/icons-material";
 import { Box, CardContent, Stack, Typography } from "@mui/material";
+import { useAuth } from "@/auth/use-auth";
 import { GradientText, Surface } from "@/components/ui/cards";
-import { useAuth } from "@/hooks/use-auth";
 
 interface OnboardingStep {
   id: string;

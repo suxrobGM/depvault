@@ -1,9 +1,10 @@
 import { Suspense, type PropsWithChildren, type ReactElement } from "react";
 import { redirect } from "next/navigation";
+import { getServerClient } from "@/api/server";
+import { AuthProvider } from "@/auth";
 import { AppShell } from "@/components/layout/app-shell";
-import { getServerClient } from "@/lib/api-server";
 import { ROUTES } from "@/lib/constants";
-import { AuthProvider, ConfirmProvider, NotificationProvider, QueryProvider } from "@/providers";
+import { ConfirmProvider, NotificationProvider, QueryProvider } from "@/providers";
 import { PlanLimitProvider } from "@/providers/subscription-provider";
 import { VaultProvider } from "@/providers/vault-provider";
 

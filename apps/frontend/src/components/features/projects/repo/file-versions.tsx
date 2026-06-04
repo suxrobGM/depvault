@@ -19,12 +19,11 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useApiQuery } from "@/hooks/use-api-query";
+import { client } from "@/api/client";
+import { useApiMutation, useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { RepoFileVersionDto, RepoFileVersionListResponseDto } from "@/api/types/repo";
 import { useVault } from "@/hooks/use-vault";
-import { client } from "@/lib/api";
-import { queryKeys } from "@/lib/query-keys";
-import type { RepoFileVersionDto, RepoFileVersionListResponseDto } from "@/types/api/repo";
 import { formatBytes, formatDateTime } from "@/utils/formatters";
 import { FileDiffViewerLazy } from "./code-editor-lazy";
 import { binaryPlaceholder } from "./file-format";

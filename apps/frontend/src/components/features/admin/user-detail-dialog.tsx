@@ -15,12 +15,11 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { client } from "@/api/client";
+import { useApiMutation, useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { AdminUserDetailDto, CompSubscriptionBody } from "@/api/types";
 import { SelectField } from "@/components/ui/inputs";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { client } from "@/lib/api";
-import { queryKeys } from "@/lib/query-keys";
-import type { AdminUserDetailDto, CompSubscriptionBody } from "@/types/api";
 
 interface UserDetailDialogProps {
   open: boolean;

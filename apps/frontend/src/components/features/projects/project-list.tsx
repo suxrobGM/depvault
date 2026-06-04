@@ -10,13 +10,13 @@ import {
 import { CardContent, Grid, IconButton, Skeleton, Stack, Tooltip, Typography } from "@mui/material";
 import type { Route } from "next";
 import Link from "next/link";
+import { client } from "@/api/client";
+import { useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { ProjectListResponseDto } from "@/api/types/project";
 import { Surface } from "@/components/ui/cards";
 import { EmptyState } from "@/components/ui/feedback";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { client } from "@/lib/api";
 import { PAGINATION_DEFAULTS, ROUTES } from "@/lib/constants";
-import { queryKeys } from "@/lib/query-keys";
-import type { ProjectListResponseDto } from "@/types/api/project";
 import { CreateProjectDialog } from "./create-project-dialog";
 
 export function ProjectList(): ReactElement {

@@ -1,4 +1,4 @@
-import { API_BASE_URL, ROUTES } from "./constants";
+import { API_BASE_URL, ROUTES } from "@/lib/constants";
 
 const REFRESH_URL = `${API_BASE_URL}/api/auth/refresh`;
 

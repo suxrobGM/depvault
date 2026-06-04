@@ -1,7 +1,7 @@
 "use client";
 
 import { use } from "react";
-import { AuthContext, type AuthContextValue } from "@/providers/auth-provider";
+import { AuthContext, type AuthContextValue } from "@/auth/auth-provider";
 
 export function useAuth(): AuthContextValue {
   const context = use(AuthContext);

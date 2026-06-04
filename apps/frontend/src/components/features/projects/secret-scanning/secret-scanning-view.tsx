@@ -7,16 +7,15 @@ import {
   Shield as ShieldIcon,
 } from "@mui/icons-material";
 import { Box, Button, CardContent, Chip, Grid, Skeleton, Stack, Typography } from "@mui/material";
+import { client } from "@/api/client";
+import { useApiMutation, useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { ProjectDetailDto } from "@/api/types/project";
+import type { ScanDto, ScanSummaryDto } from "@/api/types/secret-scan";
 import { IconBox, Surface } from "@/components/ui/cards";
 import { PageHeader } from "@/components/ui/containers";
 import { LinkButton } from "@/components/ui/inputs";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import { queryKeys } from "@/lib/query-keys";
-import type { ProjectDetailDto } from "@/types/api/project";
-import type { ScanDto, ScanSummaryDto } from "@/types/api/secret-scan";
 import { DetectionsTable } from "./detections-table";
 import { PatternManager } from "./pattern-manager";
 import { ScanHistory } from "./scan-history";

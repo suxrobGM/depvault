@@ -3,13 +3,13 @@
 import type { ReactElement } from "react";
 import { ArrowForward as ArrowForwardIcon, FolderZip as FilesIcon } from "@mui/icons-material";
 import { CardActions, CardContent, CardHeader, Grid, Stack, Typography } from "@mui/material";
+import { client } from "@/api/client";
+import { useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { RepoMapResponseDto } from "@/api/types/repo";
 import { IconBox, Surface } from "@/components/ui/cards";
 import { LinkButton } from "@/components/ui/inputs";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import { queryKeys } from "@/lib/query-keys";
-import type { RepoMapResponseDto } from "@/types/api/repo";
 
 interface FilesCardProps {
   projectId: string;

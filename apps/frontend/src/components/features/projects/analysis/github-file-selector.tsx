@@ -12,8 +12,8 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import type { GitHubDependencyFileDto } from "@/api/types/github";
 import { LoadingSpinner } from "@/components/ui/feedback";
-import type { GitHubDependencyFileDto } from "@/types/api/github";
 
 interface GitHubFileSelectorProps {
   repoLabel: string;

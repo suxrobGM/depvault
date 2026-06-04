@@ -1,6 +1,6 @@
 "use server";
 
-import { getServerClient } from "@/lib/api-server";
+import { getServerClient } from "@/api/server";
 import type { ActionResult } from "@/types/action";
 
 export async function forgotPasswordAction(email: string): Promise<ActionResult> {

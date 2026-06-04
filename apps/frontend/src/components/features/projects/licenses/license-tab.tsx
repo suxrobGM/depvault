@@ -24,17 +24,17 @@ import {
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import type { Route } from "next";
+import { client } from "@/api/client";
+import { useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { LicenseComplianceSummaryDto } from "@/api/types/license-rule";
+import type { MemberListResponseDto, ProjectDetailDto } from "@/api/types/project";
+import { useAuth } from "@/auth/use-auth";
 import { CreateAnalysisDialog } from "@/components/features/projects/analysis";
 import { PageHeader } from "@/components/ui/containers";
 import { PaginationBar } from "@/components/ui/data-display";
 import { EmptyState } from "@/components/ui/feedback";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { useAuth } from "@/hooks/use-auth";
-import { client } from "@/lib/api";
 import { API_BASE_URL, ROUTES } from "@/lib/constants";
-import { queryKeys } from "@/lib/query-keys";
-import type { LicenseComplianceSummaryDto } from "@/types/api/license-rule";
-import type { MemberListResponseDto, ProjectDetailDto } from "@/types/api/project";
 import { ComplianceSummaryStats } from "./compliance-summary-stats";
 import { LicenseRulesTable } from "./license-rules-table";
 

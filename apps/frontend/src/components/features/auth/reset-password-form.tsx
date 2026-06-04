@@ -4,7 +4,7 @@ import { useState, type ReactElement } from "react";
 import { Alert, Button, Stack, Typography } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import Link from "next/link";
-import { resetPasswordAction } from "@/actions/auth";
+import { resetPasswordAction } from "@/auth/actions";
 import { FormTextField } from "@/components/ui/form";
 import { ROUTES } from "@/lib/constants";
 import { resetPasswordSchema } from "./schemas";

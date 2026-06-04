@@ -1,6 +1,6 @@
 ---
 description: Rules for Eden Treaty type aliases and API type inference
-paths: [apps/frontend/src/types/api/**]
+paths: [apps/frontend/src/api/types/**]
 ---
 
 # Eden Treaty Type Aliases
@@ -16,10 +16,10 @@ type ProjectById = ReturnType<Projects>; // unwrap parameterized (:id) routes
 
 Chain `ReturnType` for nested params: `ReturnType<ProjectById["analyses"]>`.
 
-## Utility types (`./utils`)
+## Utility types (`@depvault/shared/api`)
 
 ```typescript
-import type { Body, Data, Query } from "./utils";
+import type { Body, Data, Query } from "@depvault/shared/api";
 
 export type ProjectDetailDto = Data<ProjectById["get"]>; // response data
 export type CreateCiTokenBody = Body<ProjectById["ci-tokens"]["post"]>; // request body
@@ -36,7 +36,7 @@ Never hand-write an interface mirroring a request/response payload — derive it
 
 ## Query keys
 
-Never hardcode key arrays — use the `@/lib/query-keys` factory:
+Never hardcode key arrays — use the `@/api/query-keys` factory:
 
 ```typescript
 useApiQuery(queryKeys.projects.detail(projectId), () =>

@@ -20,12 +20,11 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useApiQuery } from "@/hooks/use-api-query";
+import { client } from "@/api/client";
+import { useApiMutation, useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { ShareLinkItemDto, ShareLinkListResponseDto } from "@/api/types/share-link";
 import { useConfirm } from "@/hooks/use-confirm";
-import { client } from "@/lib/api";
-import { queryKeys } from "@/lib/query-keys";
-import type { ShareLinkItemDto, ShareLinkListResponseDto } from "@/types/api/share-link";
 import { formatDate } from "@/utils/formatters";
 
 const STATUS_COLOR: Record<string, "warning" | "success" | "error" | "default"> = {

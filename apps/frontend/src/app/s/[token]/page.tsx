@@ -1,8 +1,8 @@
 import type { ReactElement } from "react";
 import { Lock as LockIcon } from "@mui/icons-material";
 import { Box, Container, Paper, Typography } from "@mui/material";
+import { getServerClient } from "@/api/server";
 import { ShareAccessView } from "@/components/features/share-link";
-import { getServerClient } from "@/lib/api-server";
 
 interface PageProps {
   params: Promise<{ token: string }>;

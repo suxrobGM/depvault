@@ -7,8 +7,10 @@ paths: [apps/frontend/src/**]
 
 ## API Clients
 
-- **Client** (`src/lib/api.ts`): Eden Treaty via `createApiClient()` from `@depvault/shared/api`, `credentials: "include"` for cookie auth
-- **Server** (`src/lib/api-server.ts`): reads + forwards cookies from `next/headers`. No `server-only` directive
+The API access layer lives in `src/api/` (barrel `@/api`): client, server, query keys, the React Query hook wrappers (`api/hooks/`), and backend response DTO types (`api/types/`).
+
+- **Client** (`src/api/client.ts`): Eden Treaty via `createApiClient()` from `@depvault/shared/api`, `credentials: "include"` for cookie auth. Re-exported from the `@/api` barrel
+- **Server** (`src/api/server.ts`): reads + forwards cookies from `next/headers`. No `server-only` directive. **Excluded from the `@/api` barrel** (server-only) — import directly via `@/api/server`
 
 ## Auth Flow
 
@@ -18,8 +20,10 @@ paths: [apps/frontend/src/**]
 
 ## Auth Provider
 
+- The auth module lives in `src/auth/` (barrel `@/auth`): `auth-provider.tsx`, `use-auth.ts`, and server actions in `actions.ts`
 - `auth-provider.tsx` manages user state with SSR hydration via `initialUser` (dashboard layout fetches user server-side)
-- `useAuth()` (`hooks/use-auth.ts`) uses React 19 `use(AuthContext)`
+- `useAuth()` (`src/auth/use-auth.ts`) uses React 19 `use(AuthContext)`
+- Server actions (`src/auth/actions.ts`, `"use server"`) are **excluded from the `@/auth` barrel** — import directly via `@/auth/actions`
 
 ## Vault Provider
 
@@ -30,4 +34,4 @@ paths: [apps/frontend/src/**]
 ## Type Inference & Fetching
 
 - Run `bun run build:types` in `apps/backend/` to emit declarations in `dist/`. `@elysiajs/eden` must be a frontend devDependency; `@depvault/shared` is a `workspace:*` dep
-- Never call `fetch` directly in components — use the Eden Treaty client through `useApiQuery` / `useApiMutation` (React Query wrappers)
+- Never call `fetch` directly in components — use the Eden Treaty client through `useApiQuery` / `useApiMutation` (React Query wrappers in `src/api/hooks/`)

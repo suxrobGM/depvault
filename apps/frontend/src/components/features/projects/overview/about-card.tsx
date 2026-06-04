@@ -8,11 +8,11 @@ import {
   Update as UpdateIcon,
 } from "@mui/icons-material";
 import { Button, CardContent, CardHeader, Stack, Typography } from "@mui/material";
+import { client } from "@/api/client";
+import { useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { ProjectDetailDto } from "@/api/types/project";
 import { Surface } from "@/components/ui/cards";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { client } from "@/lib/api";
-import { queryKeys } from "@/lib/query-keys";
-import type { ProjectDetailDto } from "@/types/api/project";
 
 interface AboutCardProps {
   projectId: string;

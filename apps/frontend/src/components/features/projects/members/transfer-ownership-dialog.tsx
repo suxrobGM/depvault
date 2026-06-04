@@ -17,10 +17,10 @@ import {
   Typography,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { client } from "@/lib/api";
-import { queryKeys } from "@/lib/query-keys";
-import type { MemberDto } from "@/types/api/project";
+import { client } from "@/api/client";
+import { useApiMutation } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { MemberDto } from "@/api/types/project";
 
 interface TransferOwnershipDialogProps {
   open: boolean;

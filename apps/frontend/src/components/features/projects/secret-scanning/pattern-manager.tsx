@@ -22,12 +22,11 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { client } from "@/api/client";
+import { useApiMutation, useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { PatternDto, PatternListResponseDto } from "@/api/types/secret-scan";
 import { Surface } from "@/components/ui/cards";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { client } from "@/lib/api";
-import { queryKeys } from "@/lib/query-keys";
-import type { PatternDto, PatternListResponseDto } from "@/types/api/secret-scan";
 import { CreatePatternDialog } from "./create-pattern-dialog";
 
 interface PatternManagerProps {

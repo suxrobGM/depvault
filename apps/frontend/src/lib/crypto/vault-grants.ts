@@ -8,7 +8,7 @@ import {
   unwrapKey,
   wrapKey,
 } from "@depvault/crypto";
-import { client } from "@/lib/api";
+import { client } from "@/api/client";
 import { KeyGrantMismatchError, KeyGrantMissingError } from "./errors";
 
 /**

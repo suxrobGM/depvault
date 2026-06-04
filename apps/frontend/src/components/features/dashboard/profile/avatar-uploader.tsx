@@ -22,8 +22,8 @@ import {
   Typography,
 } from "@mui/material";
 import Cropper, { type Area, type Point } from "react-easy-crop";
+import { client } from "@/api/client";
 import { useToast } from "@/hooks/use-toast";
-import { client } from "@/lib/api";
 import { getCroppedImg } from "./utils";
 
 interface AvatarUploaderProps {

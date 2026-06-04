@@ -1,5 +1,5 @@
-import type { client } from "@/lib/api";
-import type { Body, Data, Query } from "./utils";
+import type { Body, Data, Query } from "@depvault/shared/api";
+import type { client } from "@/api/client";
 
 type ProjectById = ReturnType<typeof client.api.projects>;
 

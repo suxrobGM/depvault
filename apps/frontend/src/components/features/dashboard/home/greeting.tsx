@@ -4,9 +4,9 @@ import type { ReactElement } from "react";
 import { DEFAULT_ROLES } from "@depvault/shared/constants";
 import { Add as AddIcon } from "@mui/icons-material";
 import { Box, Chip, Stack, Typography } from "@mui/material";
+import { useAuth } from "@/auth/use-auth";
 import { GradientText } from "@/components/ui/cards";
 import { LinkButton } from "@/components/ui/inputs";
-import { useAuth } from "@/hooks/use-auth";
 import { ROUTES } from "@/lib/constants";
 
 export function Greeting(): ReactElement {

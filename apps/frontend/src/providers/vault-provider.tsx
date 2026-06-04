@@ -9,7 +9,7 @@ import {
   type ReactElement,
 } from "react";
 import type { VaultInfo } from "@depvault/crypto";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/auth/use-auth";
 import { useIdleLock } from "@/hooks/use-idle-lock";
 import {
   changeVaultPasswordOps,

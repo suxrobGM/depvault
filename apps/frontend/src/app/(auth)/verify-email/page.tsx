@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import type { Metadata } from "next";
-import { verifyEmailAction } from "@/actions/auth";
+import { verifyEmailAction } from "@/auth/actions";
 import { AuthStatus } from "@/components/features/auth";
 import { ROUTES } from "@/lib/constants";
 

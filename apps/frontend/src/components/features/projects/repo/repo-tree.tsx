@@ -20,7 +20,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import type { RepoMapAppDto, RepoMapFileDto } from "@/types/api/repo";
+import type { RepoMapAppDto, RepoMapFileDto } from "@/api/types/repo";
 import { formatBytes } from "@/utils/formatters";
 import { basename } from "./file-format";
 

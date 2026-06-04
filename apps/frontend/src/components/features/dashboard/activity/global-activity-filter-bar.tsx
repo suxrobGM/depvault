@@ -3,7 +3,7 @@
 import type { ReactElement } from "react";
 import { Clear as ClearIcon } from "@mui/icons-material";
 import { Button, MenuItem, Stack, TextField } from "@mui/material";
-import type { AuditAction, AuditResourceType } from "@/types/api/audit-log";
+import type { AuditAction, AuditResourceType } from "@/api/types/audit-log";
 
 const ACTION_OPTIONS = [
   { value: "", label: "All Actions" },

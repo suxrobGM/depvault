@@ -7,8 +7,8 @@ import {
 } from "@mui/icons-material";
 import { Box, Chip, Collapse, IconButton, Tooltip, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
+import type { DependencyDto } from "@/api/types/analysis";
 import { StatusBadge } from "@/components/ui/data-display";
-import type { DependencyDto } from "@/types/api/analysis";
 import { getPackageUrl, STATUS_LABEL, STATUS_VARIANT } from "./utils";
 import { VulnerabilityPanel } from "./vulnerability-panel";
 

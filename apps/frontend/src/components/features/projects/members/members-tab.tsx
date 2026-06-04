@@ -11,21 +11,20 @@ import {
   SwapHoriz as SwapHorizIcon,
 } from "@mui/icons-material";
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
-import { Surface } from "@/components/ui/cards";
-import { SkeletonList, UserAvatar } from "@/components/ui/data-display";
-import { ActionMenu } from "@/components/ui/inputs";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { useAuth } from "@/hooks/use-auth";
-import { useConfirm } from "@/hooks/use-confirm";
-import { client } from "@/lib/api";
-import { queryKeys } from "@/lib/query-keys";
+import { client } from "@/api/client";
+import { useApiMutation, useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
 import type {
   InvitationDto,
   InvitationListResponseDto,
   MemberDto,
   MemberListResponseDto,
-} from "@/types/api/project";
+} from "@/api/types/project";
+import { useAuth } from "@/auth/use-auth";
+import { Surface } from "@/components/ui/cards";
+import { SkeletonList, UserAvatar } from "@/components/ui/data-display";
+import { ActionMenu } from "@/components/ui/inputs";
+import { useConfirm } from "@/hooks/use-confirm";
 import { InviteMemberDialog } from "./invite-member-dialog";
 import { TransferOwnershipDialog } from "./transfer-ownership-dialog";
 

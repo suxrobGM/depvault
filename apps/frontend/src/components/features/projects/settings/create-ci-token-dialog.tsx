@@ -16,15 +16,14 @@ import {
   Typography,
 } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
+import { client } from "@/api/client";
+import { useApiMutation, useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { CiTokenCreatedDto, CreateCiTokenBody } from "@/api/types/ci-token";
+import type { AppListResponseDto } from "@/api/types/repo";
 import { FormDateField, FormSelectField, FormTextField } from "@/components/ui/form";
 import { CopyButton } from "@/components/ui/inputs";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useApiQuery } from "@/hooks/use-api-query";
 import { useVault } from "@/hooks/use-vault";
-import { client } from "@/lib/api";
-import { queryKeys } from "@/lib/query-keys";
-import type { CiTokenCreatedDto, CreateCiTokenBody } from "@/types/api/ci-token";
-import type { AppListResponseDto } from "@/types/api/repo";
 import { CiTokenUsageSnippets } from "./ci-token-usage-snippets";
 
 const CUSTOM_VALUE = -1;

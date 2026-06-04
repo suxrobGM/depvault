@@ -1,5 +1,5 @@
-import type { client } from "@/lib/api";
-import type { Body, Data } from "./utils";
+import type { Body, Data } from "@depvault/shared/api";
+import type { client } from "@/api/client";
 
 type ProjectById = ReturnType<typeof client.api.projects>;
 type LicenseRuleById = ReturnType<ProjectById["license-rules"]>;

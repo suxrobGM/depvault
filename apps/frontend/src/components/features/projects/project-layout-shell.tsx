@@ -2,12 +2,12 @@
 
 import type { ReactElement, ReactNode } from "react";
 import { Box, Skeleton, Stack, Typography } from "@mui/material";
+import { client } from "@/api/client";
+import { useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { ProjectDetailDto } from "@/api/types/project";
 import { PageHeader } from "@/components/ui/containers";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import { queryKeys } from "@/lib/query-keys";
-import type { ProjectDetailDto } from "@/types/api/project";
 import { ProjectTabs } from "./project-tabs";
 
 interface ProjectLayoutShellProps {

@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { redirect } from "next/navigation";
+import { getServerClient } from "@/api/server";
 import { AuthStatus } from "@/components/features/auth";
-import { getServerClient } from "@/lib/api-server";
 import { ROUTES } from "@/lib/constants";
 
 interface Props {

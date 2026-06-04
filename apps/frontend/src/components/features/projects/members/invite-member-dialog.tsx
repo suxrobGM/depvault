@@ -3,10 +3,10 @@
 import type { ReactElement } from "react";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
+import { client } from "@/api/client";
+import { useApiMutation } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
 import { FormSelectField, FormTextField } from "@/components/ui/form";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { client } from "@/lib/api";
-import { queryKeys } from "@/lib/query-keys";
 import { inviteMemberSchema } from "../schemas";
 
 interface InviteMemberDialogProps {

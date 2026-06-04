@@ -2,8 +2,8 @@
 
 import type { ReactElement } from "react";
 import { Stack, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import type { NotificationType } from "@/api/types/notification";
 import { SelectField } from "@/components/ui/inputs";
-import type { NotificationType } from "@/types/api/notification";
 
 interface NotificationFiltersProps {
   readFilter: "all" | "read" | "unread";

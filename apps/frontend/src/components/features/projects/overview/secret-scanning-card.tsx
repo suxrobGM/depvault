@@ -3,13 +3,13 @@
 import type { ReactElement } from "react";
 import { ArrowForward as ArrowForwardIcon, Shield as ShieldIcon } from "@mui/icons-material";
 import { CardActions, CardContent, CardHeader, Chip, Grid, Stack, Typography } from "@mui/material";
+import { client } from "@/api/client";
+import { useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { ScanSummaryDto } from "@/api/types/secret-scan";
 import { IconBox, Surface } from "@/components/ui/cards";
 import { LinkButton } from "@/components/ui/inputs";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import { queryKeys } from "@/lib/query-keys";
-import type { ScanSummaryDto } from "@/types/api/secret-scan";
 
 interface SecretScanningCardProps {
   projectId: string;

@@ -4,8 +4,8 @@ import { useState, type ReactElement } from "react";
 import { Search as SearchIcon } from "@mui/icons-material";
 import { Box, InputAdornment, Stack, TextField, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
+import type { DependencyDto } from "@/api/types/analysis";
 import { PaginationBar, SortableHeader } from "@/components/ui/data-display";
-import type { DependencyDto } from "@/types/api/analysis";
 import { DependencyRow } from "./dependency-row";
 import { STATUS_ORDER } from "./utils";
 

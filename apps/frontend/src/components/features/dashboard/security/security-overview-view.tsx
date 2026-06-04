@@ -9,10 +9,10 @@ import {
   Security as SecurityIcon,
 } from "@mui/icons-material";
 import { Box, Card, CardContent, Chip, Grid, Stack, Typography } from "@mui/material";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { client } from "@/lib/api";
-import { queryKeys } from "@/lib/query-keys";
-import type { SecurityOverviewDto } from "@/types/api/security";
+import { client } from "@/api/client";
+import { useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { SecurityOverviewDto } from "@/api/types/security";
 
 export function SecurityOverviewView(): ReactElement {
   const { data, isLoading } = useApiQuery<SecurityOverviewDto>(

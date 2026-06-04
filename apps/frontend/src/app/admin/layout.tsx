@@ -1,10 +1,11 @@
 import { Suspense, type PropsWithChildren, type ReactElement } from "react";
 import { UserRole } from "@depvault/shared/constants";
 import { redirect } from "next/navigation";
+import { getServerClient } from "@/api/server";
+import { AuthProvider } from "@/auth";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
-import { getServerClient } from "@/lib/api-server";
 import { ROUTES } from "@/lib/constants";
-import { AuthProvider, ConfirmProvider, NotificationProvider, QueryProvider } from "@/providers";
+import { ConfirmProvider, NotificationProvider, QueryProvider } from "@/providers";
 import { PlanLimitProvider } from "@/providers/subscription-provider";
 
 async function getUser() {

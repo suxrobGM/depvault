@@ -16,7 +16,7 @@ import {
   type VaultKeys,
   type VaultSetupResult,
 } from "@depvault/crypto";
-import { client } from "@/lib/api";
+import { client } from "@/api/client";
 
 /** Fetches vault status from the API. Returns VaultInfo if vault exists, null otherwise. */
 export async function fetchVaultInfo(): Promise<VaultInfo | null> {

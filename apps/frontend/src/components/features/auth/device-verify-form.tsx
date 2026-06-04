@@ -5,8 +5,8 @@ import { CheckCircleOutlined as CheckIcon, Terminal as TerminalIcon } from "@mui
 import { Alert, Button, Stack, Typography } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
 import { useSearchParams } from "next/navigation";
+import { client } from "@/api/client";
 import { FormTextField } from "@/components/ui/form";
-import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
 import { deviceVerifySchema } from "./schemas";
 

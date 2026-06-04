@@ -14,16 +14,16 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { client } from "@/api/client";
+import { useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { AdminSubscriptionListResponseDto } from "@/api/types";
 import { PaginationBar } from "@/components/ui/data-display/pagination-bar";
 import { SkeletonList } from "@/components/ui/data-display/skeleton-list";
 import { StatusBadge } from "@/components/ui/data-display/status-badge";
 import { EmptyState } from "@/components/ui/feedback/empty-state";
 import { SelectField } from "@/components/ui/inputs";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { client } from "@/lib/api";
 import { PAGINATION_DEFAULTS } from "@/lib/constants";
-import { queryKeys } from "@/lib/query-keys";
-import type { AdminSubscriptionListResponseDto } from "@/types/api";
 
 const STATUS_VARIANT: Record<string, "success" | "error" | "warning" | "default"> = {
   ACTIVE: "success",

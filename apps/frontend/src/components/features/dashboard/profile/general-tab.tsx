@@ -12,12 +12,12 @@ import {
   Typography,
 } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
+import { client } from "@/api/client";
+import { useApiMutation } from "@/api/hooks";
+import { useAuth } from "@/auth/use-auth";
 import { Surface } from "@/components/ui/cards";
 import { LoadingSpinner } from "@/components/ui/feedback";
 import { FormTextField } from "@/components/ui/form";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useAuth } from "@/hooks/use-auth";
-import { client } from "@/lib/api";
 import { AvatarUploader } from "./avatar-uploader";
 import { updateProfileSchema } from "./schemas";
 

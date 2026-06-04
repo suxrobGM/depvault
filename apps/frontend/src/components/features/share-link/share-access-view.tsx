@@ -19,9 +19,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { client } from "@/lib/api";
-import type { AccessShareBody, ShareLinkInfoDto } from "@/types/api/share-link";
+import { client } from "@/api/client";
+import { useApiMutation } from "@/api/hooks";
+import type { AccessShareBody, ShareLinkInfoDto } from "@/api/types/share-link";
 import { downloadFile } from "@/utils/download-file";
 
 interface ShareAccessViewProps {

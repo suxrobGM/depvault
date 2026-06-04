@@ -9,26 +9,33 @@ paths: [apps/frontend/src/**]
 
 ```text
 src/
+├── api/                 # API access layer (barrel @/api)
+│   ├── client.ts        # Eden Treaty client ("use client")
+│   ├── server.ts        # Server client — next/headers (import directly, NOT via barrel)
+│   ├── query-keys.ts    # React Query key factory
+│   ├── hooks/           # useApiQuery / useApiMutation (React Query wrappers)
+│   └── types/           # Backend response DTO types (barrel @/api/types)
 ├── app/                 # Next.js App Router pages
 │   ├── (auth)/          # Auth pages (login, register, reset-password)
 │   ├── (dashboard)/     # Authenticated pages (projects, analysis, vault)
 │   └── layout.tsx       # Root layout with theme provider
+├── auth/                # Auth module (barrel @/auth): provider, useAuth, actions
 ├── components/
 │   ├── ui/              # Generic components (buttons, modals, forms)
 │   └── features/        # Feature-specific components
 │       └── vault/       # Vault setup, unlock, recovery dialogs
-├── hooks/               # Custom React hooks (use-auth, use-vault, use-api-query)
-├── lib/                 # API client, utils, constants
-│   └── crypto.ts        # WebCrypto E2E encryption module
-├── providers/           # React context providers (auth, theme, vault)
-└── types/               # Frontend-specific TypeScript types
+├── hooks/               # Cross-cutting React hooks (use-vault, use-toast, use-confirm)
+├── lib/                 # Utils, constants, crypto
+│   └── crypto/          # WebCrypto E2E encryption modules
+├── providers/           # React context providers (theme, query, vault, notification)
+└── types/               # Frontend-specific TypeScript types (non-API)
 ```
 
 ## Naming & Exports
 
 - **Kebab-case** filenames only (`app-shell.tsx`, `use-auth.ts`) — no PascalCase
 - **Named exports** for components/hooks/providers; **default exports** only for `page.tsx`/`layout.tsx`
-- **Barrels**: each feature folder has an `index.ts`. Import across features via the folder path (`@/components/features/share-link`), not deep file paths. Siblings in the same folder import relatively (`./file-editor`)
+- **Barrels**: each feature/module folder has an `index.ts`. Import across features via the folder path (`@/components/features/share-link`, `@/api`, `@/auth`), not deep file paths. Siblings in the same folder import relatively (`./file-editor`). **Exception**: server-only entries are excluded from their barrel and imported directly — `@/api/server` (uses `next/headers`) and `@/auth/actions` (`"use server"`)
 - Path alias `"@/*": ["./src/*"]` — import with `@/`, never `src/`
 
 ## Server Components by Default
@@ -84,4 +91,4 @@ const form = useForm({
 ## Testing
 
 - Vitest + React Testing Library; co-locate as `{component}.test.tsx`
-- Test utils, hooks, crypto module (`lib/crypto.test.ts`), and component interactions/output
+- Test utils, hooks, crypto modules (`lib/crypto/*.test.ts`), and component interactions/output

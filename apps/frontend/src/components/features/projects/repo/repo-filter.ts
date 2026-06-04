@@ -1,4 +1,4 @@
-import type { RepoMapAppDto } from "@/types/api/repo";
+import type { RepoMapAppDto } from "@/api/types/repo";
 
 /** Sentinel env-filter value meaning "show files from every environment". */
 export const ALL_ENVIRONMENTS = "__all__";

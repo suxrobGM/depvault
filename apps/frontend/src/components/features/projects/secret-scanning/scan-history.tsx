@@ -11,13 +11,13 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { client } from "@/api/client";
+import { useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { ScanListResponseDto } from "@/api/types/secret-scan";
 import { Surface } from "@/components/ui/cards";
 import { PaginationBar } from "@/components/ui/data-display";
 import { EmptyState } from "@/components/ui/feedback";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { client } from "@/lib/api";
-import { queryKeys } from "@/lib/query-keys";
-import type { ScanListResponseDto } from "@/types/api/secret-scan";
 
 interface ScanHistoryProps {
   projectId: string;

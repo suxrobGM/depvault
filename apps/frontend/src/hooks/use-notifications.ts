@@ -1,10 +1,9 @@
 "use client";
 
-import { client } from "@/lib/api";
-import { queryKeys } from "@/lib/query-keys";
-import type { NotificationType } from "@/types/api/notification";
-import { useApiMutation } from "./use-api-mutation";
-import { useApiQuery } from "./use-api-query";
+import { client } from "@/api/client";
+import { useApiMutation, useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { NotificationType } from "@/api/types/notification";
 
 interface NotificationFilters {
   type?: NotificationType;

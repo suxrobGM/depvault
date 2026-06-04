@@ -19,14 +19,13 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { client } from "@/api/client";
+import { useApiMutation, useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { CiTokenDto, CiTokenListResponseDto } from "@/api/types/ci-token";
 import { Surface } from "@/components/ui/cards";
 import { ActionMenu } from "@/components/ui/inputs";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useApiQuery } from "@/hooks/use-api-query";
 import { useConfirm } from "@/hooks/use-confirm";
-import { client } from "@/lib/api";
-import { queryKeys } from "@/lib/query-keys";
-import type { CiTokenDto, CiTokenListResponseDto } from "@/types/api/ci-token";
 import { formatDateTime } from "@/utils/formatters";
 import { CiTokenUsageSnippets } from "./ci-token-usage-snippets";
 import { CreateCiTokenDialog } from "./create-ci-token-dialog";

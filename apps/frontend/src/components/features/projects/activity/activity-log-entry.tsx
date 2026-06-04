@@ -3,8 +3,8 @@
 import type { ReactElement } from "react";
 import { Box, Chip, Stack, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
+import type { AuditLogEntryDto } from "@/api/types/audit-log";
 import { UserAvatar } from "@/components/ui/data-display";
-import type { AuditLogEntryDto } from "@/types/api/audit-log";
 import { formatRelativeTime } from "@/utils/formatters";
 import {
   ACTIVITY_ACTION_CONFIG,

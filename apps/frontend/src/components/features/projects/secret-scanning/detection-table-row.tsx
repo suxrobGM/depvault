@@ -19,7 +19,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import type { DetectionDto } from "@/types/api/secret-scan";
+import type { DetectionDto } from "@/api/types/secret-scan";
 
 const SEVERITY_COLORS: Record<string, "error" | "warning" | "info" | "success"> = {
   CRITICAL: "error",

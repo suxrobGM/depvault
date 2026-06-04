@@ -8,13 +8,12 @@ import {
 } from "@mui/icons-material";
 import { Alert, Box, Button, Card, CardContent, Chip, Stack, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { client } from "@/api/client";
+import { useApiMutation, useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { PendingInvitationListResponseDto } from "@/api/types/project";
 import { LoadingSpinner } from "@/components/ui/feedback";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useApiQuery } from "@/hooks/use-api-query";
-import { client } from "@/lib/api";
 import { ROUTES } from "@/lib/constants";
-import { queryKeys } from "@/lib/query-keys";
-import type { PendingInvitationListResponseDto } from "@/types/api/project";
 
 interface InvitationActionProps {
   token: string;

@@ -3,9 +3,9 @@
 import type { ReactElement } from "react";
 import { GitHub as GitHubIcon, Search as SearchIcon } from "@mui/icons-material";
 import { Box, Chip, InputAdornment, Stack, TextField, Typography } from "@mui/material";
+import type { GitHubRepoListResponseDto } from "@/api/types/github";
 import { Surface } from "@/components/ui/cards";
 import { LoadingSpinner } from "@/components/ui/feedback";
-import type { GitHubRepoListResponseDto } from "@/types/api/github";
 
 interface GitHubRepoSelectorProps {
   search: string;

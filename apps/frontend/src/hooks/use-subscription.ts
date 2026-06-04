@@ -1,10 +1,10 @@
 "use client";
 
 import { SubscriptionPlanName } from "@depvault/shared/constants";
-import { client } from "@/lib/api";
-import { queryKeys } from "@/lib/query-keys";
-import type { SubscriptionDto } from "@/types/api";
-import { useApiQuery } from "./use-api-query";
+import { client } from "@/api/client";
+import { useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { SubscriptionDto } from "@/api/types";
 
 /** Fetches the current user's subscription data including plan, limits, and usage. */
 export function useSubscription() {

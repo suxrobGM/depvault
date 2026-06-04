@@ -7,11 +7,11 @@ import {
 import { Box, CardContent, Grid, Stack, Typography } from "@mui/material";
 import type { Route } from "next";
 import Link from "next/link";
+import type { ProjectDto } from "@/api/types/project";
 import { Surface } from "@/components/ui/cards";
 import { EmptyState } from "@/components/ui/feedback";
 import { LinkButton } from "@/components/ui/inputs";
 import { ROUTES } from "@/lib/constants";
-import type { ProjectDto } from "@/types/api/project";
 import { Onboarding } from "./onboarding";
 
 interface DashboardRecentProjectsProps {

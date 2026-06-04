@@ -12,6 +12,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import type { NotificationType } from "@/api/types/notification";
 import { Surface } from "@/components/ui/cards";
 import { SkeletonList } from "@/components/ui/data-display";
 import {
@@ -20,7 +21,6 @@ import {
   useMarkRead,
   useNotifications,
 } from "@/hooks/use-notifications";
-import type { NotificationType } from "@/types/api/notification";
 import { NotificationFilters } from "./notification-filters";
 import { NotificationItem } from "./notification-item";
 

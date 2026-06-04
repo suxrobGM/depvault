@@ -1,10 +1,10 @@
 import type { ReactElement } from "react";
 import { Box } from "@mui/material";
+import { getServerClient } from "@/api/server";
 import { Greeting } from "@/components/features/dashboard/home/greeting";
 import { QuickActions } from "@/components/features/dashboard/home/quick-actions";
 import { RecentProjects } from "@/components/features/dashboard/home/recent-projects";
 import { Stats } from "@/components/features/dashboard/home/stats";
-import { getServerClient } from "@/lib/api-server";
 
 export default async function OverviewPage(): Promise<ReactElement> {
   const client = await getServerClient();

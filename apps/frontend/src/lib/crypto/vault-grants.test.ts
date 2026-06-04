@@ -44,7 +44,7 @@ const { api } = vi.hoisted(() => {
   };
 });
 
-vi.mock("@/lib/api", () => ({
+vi.mock("@/api/client", () => ({
   client: {
     api: {
       projects: (args: { id: string }) => api.projectsFactory(args.id),

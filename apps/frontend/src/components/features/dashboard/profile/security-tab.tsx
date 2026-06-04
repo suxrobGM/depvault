@@ -14,14 +14,14 @@ import {
   Typography,
 } from "@mui/material";
 import { useForm } from "@tanstack/react-form";
+import { client } from "@/api/client";
+import { useApiMutation } from "@/api/hooks";
+import { useAuth } from "@/auth/use-auth";
 import { VaultSecurityPanel } from "@/components/features/vault";
 import { Surface } from "@/components/ui/cards";
 import { LoadingSpinner } from "@/components/ui/feedback";
 import { FormTextField } from "@/components/ui/form";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useAuth } from "@/hooks/use-auth";
 import { useConfirm } from "@/hooks/use-confirm";
-import { client } from "@/lib/api";
 import { API_BASE_URL } from "@/lib/constants";
 import { changeEmailSchema, changePasswordSchema, setPasswordSchema } from "./schemas";
 

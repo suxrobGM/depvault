@@ -20,12 +20,11 @@ import {
   Typography,
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
-import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useApiQuery } from "@/hooks/use-api-query";
+import { client } from "@/api/client";
+import { useApiMutation, useApiQuery } from "@/api/hooks";
+import { queryKeys } from "@/api/query-keys";
+import type { LicenseRuleListResponseDto } from "@/api/types/license-rule";
 import { useConfirm } from "@/hooks/use-confirm";
-import { client } from "@/lib/api";
-import { queryKeys } from "@/lib/query-keys";
-import type { LicenseRuleListResponseDto } from "@/types/api/license-rule";
 
 interface LicenseRulesTableProps {
   projectId: string;
