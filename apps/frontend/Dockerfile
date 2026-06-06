@@ -35,12 +35,14 @@ FROM node:26-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
+RUN apk add --no-cache curl
+
 COPY --from=build /app/apps/frontend/.next/standalone ./
 COPY --from=build /app/apps/frontend/.next/static apps/frontend/.next/static
 COPY --from=build /app/apps/frontend/public apps/frontend/public
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD node -e "fetch('http://localhost:4001').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+  CMD curl -f http://localhost:4001 || exit 1
 
 EXPOSE 4001
 
