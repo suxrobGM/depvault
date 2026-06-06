@@ -1,7 +1,7 @@
-FROM oven/bun:1 AS base
+FROM oven/bun:1-slim AS base
 WORKDIR /app
 
-# Build stage — install deps, generate types, build Next.js
+# Build stage — install deps, generate backend types, build Next.js
 FROM base AS build
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
@@ -22,7 +22,7 @@ COPY packages/crypto/ packages/crypto/
 COPY apps/backend/ apps/backend/
 COPY apps/frontend/ apps/frontend/
 
-# Generate backend type declarations for Eden Treaty
+# Generate the backend type declarations consumed by Eden Treaty (@depvault/backend)
 WORKDIR /app/apps/backend
 RUN DATABASE_URL="postgresql://build:build@localhost:5432/build" bun db:generate
 RUN bun build:types
@@ -30,8 +30,8 @@ RUN bun build:types
 WORKDIR /app/apps/frontend
 RUN bun run build
 
-# Production
-FROM oven/bun:1-slim AS runner
+# Production — Next.js standalone output
+FROM node:26-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
@@ -40,8 +40,8 @@ COPY --from=build /app/apps/frontend/.next/static apps/frontend/.next/static
 COPY --from=build /app/apps/frontend/public apps/frontend/public
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD bun -e "fetch('http://localhost:4001').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+  CMD node -e "fetch('http://localhost:4001').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
 
 EXPOSE 4001
 
-CMD ["bun", "run", "apps/frontend/server.js"]
+CMD ["node", "apps/frontend/server.js"]
