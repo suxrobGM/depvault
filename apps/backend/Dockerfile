@@ -5,7 +5,7 @@ WORKDIR /app
 # Prisma's generator needs openssl present
 RUN apk add --no-cache openssl
 
-COPY package.json bun.lock ./
+COPY package.json bun.lock tsconfig.json ./
 COPY apps/backend/package.json ./apps/backend/
 COPY apps/frontend/package.json ./apps/frontend/
 COPY apps/docs/package.json ./apps/docs/
