@@ -8,6 +8,7 @@ namespace DepVault.Cli.Output;
 /// <summary>Injectable renderer for banner, status line, and section rules.</summary>
 public sealed class ConsoleRenderer(
     VaultState vaultState,
+    RememberedUnlockService rememberedUnlockService,
     ICredentialStore credentialStore,
     IConfigService configService,
     IRepositoryLocator repositoryLocator)
@@ -97,9 +98,16 @@ public sealed class ConsoleRenderer(
             parts.Add($"[cyan1]{Markup.Escape(email)}[/]");
         }
 
-        parts.Add(vaultState.IsUnlocked
-            ? "[green]Unlocked[/]"
-            : "[yellow]Locked[/]");
+        if (vaultState.IsUnlocked)
+        {
+            parts.Add("[green]Unlocked[/]");
+        }
+        else
+        {
+            parts.Add(rememberedUnlockService.HasSession()
+                ? "[yellow]Locked (remembered)[/]"
+                : "[yellow]Locked[/]");
+        }
 
         if (projectName is not null)
         {

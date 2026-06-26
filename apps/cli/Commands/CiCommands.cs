@@ -1,5 +1,6 @@
 using System.CommandLine;
 using DepVault.Cli.Auth;
+using DepVault.Cli.Common;
 using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
 using Spectre.Console;
@@ -138,8 +139,7 @@ public sealed class CiCommands(
         {
             var plaintext = VaultCrypto.DecryptBytes(encryptedContent, iv ?? "", authTag ?? "", dek);
 
-            var safeRelative = relativePath.Replace('\\', '/').TrimStart('/');
-            var fullPath = Path.GetFullPath(Path.Combine(outputDir, safeRelative));
+            var fullPath = RepoFileSelection.ResolveTargetPath(outputDir, relativePath);
 
             var dir = Path.GetDirectoryName(fullPath);
             if (!string.IsNullOrEmpty(dir))

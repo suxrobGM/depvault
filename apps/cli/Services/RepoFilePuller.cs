@@ -1,4 +1,5 @@
 using DepVault.Cli.Auth;
+using DepVault.Cli.Common;
 using DepVault.Cli.Crypto;
 using DepVault.Cli.Output;
 using FileEntry = DepVault.Cli.ApiClient.Api.Projects.Item.RepoMap.RepoMapGetResponse_apps_files;
@@ -76,8 +77,7 @@ public sealed class RepoFilePuller(
     /// <summary>Resolves the absolute target path and ensures its parent directory exists.</summary>
     private static string ResolveTargetPath(string outputDir, string relativePath)
     {
-        var normalized = relativePath.Replace('\\', '/').TrimStart('/');
-        var filePath = Path.GetFullPath(Path.Combine(outputDir, normalized));
+        var filePath = RepoFileSelection.ResolveTargetPath(outputDir, relativePath);
 
         var dir = Path.GetDirectoryName(filePath);
         if (!string.IsNullOrEmpty(dir))

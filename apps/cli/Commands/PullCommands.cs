@@ -1,13 +1,9 @@
 using System.CommandLine;
 using DepVault.Cli.Auth;
+using DepVault.Cli.Common;
 using DepVault.Cli.Crypto;
-using DepVault.Cli.Output;
 using DepVault.Cli.Services;
-using DepVault.Cli.Services.ProjectResolution;
-using Spectre.Console;
-using AppEntry = DepVault.Cli.ApiClient.Api.Projects.Item.RepoMap.RepoMapGetResponse_apps;
 using FileEntry = DepVault.Cli.ApiClient.Api.Projects.Item.RepoMap.RepoMapGetResponse_apps_files;
-using RepoFileKind = DepVault.Cli.ApiClient.Api.Projects.Item.RepoMap.RepoMapGetResponse_apps_files_kind;
 
 namespace DepVault.Cli.Commands;
 
@@ -20,13 +16,8 @@ public sealed class PullCommands(
     AuthContext ctx,
     DekService dekService,
     RepoFilePuller repoFilePuller,
-    IRepositoryLocator repositoryLocator,
-    IProjectContextResolver projectContextResolver,
-    IApiClientFactory clientFactory,
-    ConsoleRenderer renderer)
+    RepoFileCommandResolver repoFileCommandResolver)
 {
-    private const string BaseSlug = "base";
-
     public Command CreatePullCommand()
     {
         var projectOpt = new Option<string?>("--project") { Description = "Project ID (defaults to active)" };
@@ -61,19 +52,6 @@ public sealed class PullCommands(
                 return;
             }
 
-            var explicitId = parseResult.GetValue(projectOpt);
-            var resolution = await projectContextResolver.ResolveAsync(
-                explicitId, ResolutionPolicy.Interactive, ct);
-            if (resolution is null || !ProjectGuard.ConfirmOverride(ctx, explicitId))
-            {
-                Environment.ExitCode = 1;
-                return;
-            }
-
-            renderer.PrintStatusLine();
-            var projectId = resolution.ProjectId;
-            var client = clientFactory.Create();
-
             // --format is reserved for an explicit export/convert mode. Normal pull restores
             // blobs verbatim, so a format selector here is intentionally a no-op for now.
             if (!string.IsNullOrEmpty(parseResult.GetValue(formatOpt)))
@@ -84,42 +62,30 @@ public sealed class PullCommands(
                 return;
             }
 
-            var appFilter = parseResult.GetValue(appOpt);
-            var envFilter = NormalizeEnv(parseResult.GetValue(environmentOpt));
-            var includeBase = parseResult.GetValue(includeBaseOpt);
-            var includeSecrets = parseResult.GetValue(includeSecretsOpt);
-            var outputDir = Path.GetFullPath(parseResult.GetValue(outputDirOpt) ?? repositoryLocator.FindRepoRoot());
+            var selection = await repoFileCommandResolver.ResolveAsync(new RepoFileCommandRequest(
+                parseResult.GetValue(projectOpt),
+                parseResult.GetValue(appOpt),
+                parseResult.GetValue(environmentOpt),
+                parseResult.GetValue(includeBaseOpt),
+                parseResult.GetValue(includeSecretsOpt),
+                parseResult.GetValue(outputDirOpt),
+                "pull"), ct);
+            if (selection is null)
+            {
+                return;
+            }
+
             var force = parseResult.GetValue(forceOpt);
 
-            var repoMap = await AnsiConsole.Status()
-                .Spinner(Spinner.Known.Dots)
-                .StartAsync("Fetching repository map...", async _ =>
-                    await client.Api.Projects[projectId].RepoMap.GetAsync(cancellationToken: ct));
-
-            var apps = FilterApps(repoMap?.Apps, appFilter);
-            if (apps is null)
-            {
-                Environment.ExitCode = 1;
-                return;
-            }
-
-            var files = CollectFiles(apps, envFilter, includeBase, includeSecrets);
-
-            if (files.Count == 0)
-            {
-                AnsiConsole.MarkupLine("[grey]No files match the requested filters.[/]");
-                return;
-            }
-
             // Preview the manifest before any crypto; the overwrite confirm below gates the write.
-            PrintManifest(files);
+            repoFileCommandResolver.PrintManifest(selection.Files);
 
-            if (!force && !ConfirmOverwrite(outputDir, files))
+            if (!force && !ConfirmOverwrite(selection.OutputDir, selection.Files))
             {
                 return;
             }
 
-            var dek = await dekService.CollectPasswordAndResolveAsync(projectId, ct);
+            var dek = await dekService.CollectPasswordAndResolveAsync(selection.ProjectId, ct);
 
             if (dek is null)
             {
@@ -128,97 +94,16 @@ public sealed class PullCommands(
                 return;
             }
 
-            AnsiConsole.MarkupLine($"[cyan1]Restoring {files.Count} file(s)...[/]");
+            Spectre.Console.AnsiConsole.MarkupLine($"[cyan1]Restoring {selection.Files.Count} file(s)...[/]");
 
-            var pulled = await repoFilePuller.PullAsync(projectId, files, outputDir, dek, ct);
+            var pulled = await repoFilePuller.PullAsync(
+                selection.ProjectId, selection.Files, selection.OutputDir, dek, ct);
 
-            AnsiConsole.WriteLine();
+            Spectre.Console.AnsiConsole.WriteLine();
             ctx.Output.PrintSuccess($"Pulled {pulled} file(s).");
         });
 
         return cmd;
-    }
-
-    private static string? NormalizeEnv(string? environment)
-    {
-        return string.IsNullOrWhiteSpace(environment) ? null : environment.Trim().ToLowerInvariant();
-    }
-
-    /// <summary>Renders the restore manifest (file, env, kind) before any decryption happens.</summary>
-    private void PrintManifest(IReadOnlyList<FileEntry> files)
-    {
-        var rows = files.Select(f => new[]
-        {
-            f.RelativePath ?? "",
-            f.EnvironmentSlug ?? BaseSlug,
-            f.Kind == RepoFileKind.SECRET ? "secret" : "config"
-        }).ToList();
-
-        ctx.Output.PrintTable(["FILE", "ENV", "KIND"], rows);
-    }
-
-    /// <summary>
-    /// Filters repo-map apps by the optional <paramref name="appFilter"/>, matching against either
-    /// the app name or its repo-relative path (case-insensitive). Returns null on an error that
-    /// should abort the command.
-    /// </summary>
-    private List<AppEntry>? FilterApps(List<AppEntry>? apps, string? appFilter)
-    {
-        if (apps is null || apps.Count == 0)
-        {
-            ctx.Output.PrintError("This project has no apps to pull.");
-            return null;
-        }
-
-        if (string.IsNullOrEmpty(appFilter))
-        {
-            return apps;
-        }
-
-        var matched = apps.Where(a =>
-            string.Equals(a.Name, appFilter, StringComparison.OrdinalIgnoreCase)
-            || string.Equals(a.AppPath, appFilter, StringComparison.OrdinalIgnoreCase)).ToList();
-
-        if (matched.Count == 0)
-        {
-            var available = string.Join(", ", apps.Select(a => a.Name ?? a.AppPath ?? "?"));
-            ctx.Output.PrintError($"App '{appFilter}' not found. Available: {available}");
-            return null;
-        }
-
-        return matched;
-    }
-
-    private static List<FileEntry> CollectFiles(
-        IEnumerable<AppEntry> apps, string? envFilter, bool includeBase, bool includeSecrets)
-    {
-        return apps
-            .SelectMany(a => a.Files ?? [])
-            .Where(f => includeSecrets || f.Kind != RepoFileKind.SECRET)
-            .Where(f => MatchesEnvironment(f.EnvironmentSlug, envFilter, includeBase))
-            .ToList();
-    }
-
-    /// <summary>
-    /// Decides whether a file's environment slug passes the filter. With no filter every file is
-    /// included. With a filter, files matching that slug are included; base files are included too
-    /// unless <paramref name="includeBase"/> is false.
-    /// </summary>
-    private static bool MatchesEnvironment(string? slug, string? envFilter, bool includeBase)
-    {
-        if (envFilter is null)
-        {
-            return true;
-        }
-
-        var normalized = (slug ?? BaseSlug).ToLowerInvariant();
-
-        if (string.Equals(normalized, envFilter, StringComparison.Ordinal))
-        {
-            return true;
-        }
-
-        return includeBase && string.Equals(normalized, BaseSlug, StringComparison.Ordinal);
     }
 
     private bool ConfirmOverwrite(string outputDir, IReadOnlyList<FileEntry> files)
@@ -231,7 +116,7 @@ public sealed class PullCommands(
         var hasExisting = files
             .Select(f => f.RelativePath)
             .Where(p => !string.IsNullOrEmpty(p))
-            .Any(p => File.Exists(Path.Combine(outputDir, p!.Replace('\\', '/').TrimStart('/'))));
+            .Any(p => TargetExists(outputDir, p!));
 
         if (hasExisting)
         {
@@ -239,5 +124,18 @@ public sealed class PullCommands(
         }
 
         return true;
+    }
+
+    /// <summary>Existence probe that treats an out-of-tree path as no conflict (the pull write skips it).</summary>
+    private static bool TargetExists(string outputDir, string relativePath)
+    {
+        try
+        {
+            return File.Exists(RepoFileSelection.ResolveTargetPath(outputDir, relativePath));
+        }
+        catch (InvalidOperationException)
+        {
+            return false;
+        }
     }
 }

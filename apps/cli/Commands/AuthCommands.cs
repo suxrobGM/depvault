@@ -13,7 +13,8 @@ public sealed class AuthCommands(
     IApiClientFactory clientFactory,
     AuthContext ctx,
     ICredentialStore credentialStore,
-    VaultState vaultState)
+    VaultState vaultState,
+    RememberedUnlockService rememberedUnlockService)
 {
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(5);
 
@@ -117,6 +118,7 @@ public sealed class AuthCommands(
         {
             credentialStore.Delete();
             vaultState.Lock();
+            rememberedUnlockService.Clear();
             ctx.Output.PrintSuccess("Logged out.");
         });
         return cmd;

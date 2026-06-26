@@ -132,7 +132,7 @@ public static class VaultCrypto
             CryptographicOperations.ZeroMemory(raw);
             return true;
         }
-        catch (CryptographicException)
+        catch (Exception ex) when (ex is CryptographicException or FormatException)
         {
             return false;
         }

@@ -9,59 +9,68 @@ using GrantType = DepVault.Cli.ApiClient.Api.Projects.Item.Keygrants.KeygrantsPo
 
 namespace DepVault.Cli.Crypto;
 
-/// <summary>Resolves the Data Encryption Key (DEK) for client-side vault crypto.</summary>
+/// <summary>Resolves project DEKs for client-side vault crypto.</summary>
 public sealed class DekService(
     IApiClientFactory clientFactory,
     ICredentialStore credentialStore,
-    IConsolePrompter prompter,
     AuthContext commandContext,
     VaultState vaultState,
+    VaultUnlockService vaultUnlockService,
+    RememberedUnlockService rememberedUnlockService,
     IOutputFormatter output,
     ConsoleRenderer renderer)
 {
+    private sealed record DekResolutionResult(byte[]? Dek, bool DroppedStaleSession);
+
     /// <summary>
-    /// Collects the vault password interactively if needed. Returns null when the KEK is
-    /// already cached or in CI mode. Must be called outside Spectre dynamic displays.
+    /// Collects the vault password if needed, reporting whether it came from an interactive prompt (vs.
+    /// env/cache/session). Must be called outside Spectre dynamic displays.
     /// </summary>
-    public string? CollectVaultPassword()
+    public (string? Password, bool FromPrompt) CollectVaultPassword()
     {
-        if (commandContext.IsCiMode())
-        {
-            return null;
-        }
-
-        if (vaultState.IsUnlocked)
-        {
-            return null;
-        }
-
-        var password = Environment.GetEnvironmentVariable("DEPVAULT_PASSWORD");
-        if (!string.IsNullOrEmpty(password))
-        {
-            return password;
-        }
-
-        if (!prompter.IsInteractive)
-        {
-            output.PrintError("DEPVAULT_PASSWORD is required in non-interactive mode.");
-            return null;
-        }
-
-        return prompter.AskSecret("Enter vault password");
+        var input = vaultUnlockService.CollectVaultPassword();
+        return (input.Password, input.FromPrompt);
     }
 
     /// <summary>
-    /// Collects the vault password first (outside any Spectre <c>Status</c> — Spectre throws if a
-    /// prompt runs inside a live display), then resolves the DEK under a progress spinner. This is
-    /// the one-call entry point used by push, pull, and scan.
+    /// Collects the vault password first, then resolves the DEK under a progress spinner. This is the
+    /// one-call entry point used by push, pull, and scan.
     /// </summary>
     public async Task<byte[]?> CollectPasswordAndResolveAsync(string projectId, CancellationToken ct)
     {
-        var password = CollectVaultPassword();
-        return await AnsiConsole.Status()
-            .Spinner(Spinner.Known.Dots)
-            .StartAsync("Resolving encryption key...", async _ =>
-                await ResolveAsync(projectId, password, ct));
+        var hadSession = !commandContext.IsCiMode() && !vaultState.IsUnlocked
+            && rememberedUnlockService.HasSession();
+        var (password, fromPrompt) = CollectVaultPassword();
+
+        var result = await ResolveWithMetadataAsync(projectId, password, ct);
+        var dek = result.Dek;
+
+        // A remembered session that turned out stale is dropped during resolution. Since we suppressed
+        // the prompt on its behalf, prompt now and retry once rather than leaving the user stuck.
+        if (dek is null && hadSession && password is null && result.DroppedStaleSession
+            && commandContext.Prompter.IsInteractive && !commandContext.IsCiMode()
+            && !vaultState.IsUnlocked && !rememberedUnlockService.HasSession())
+        {
+            password = commandContext.Prompter.AskSecret("Enter vault password");
+            if (!string.IsNullOrEmpty(password))
+            {
+                fromPrompt = true;
+                result = await ResolveWithMetadataAsync(projectId, password, ct);
+                dek = result.Dek;
+            }
+        }
+
+        if (dek is not null && fromPrompt)
+        {
+            rememberedUnlockService.MaybeOfferRememberUnlock(null);
+        }
+
+        return dek;
+    }
+
+    public void MaybeOfferRememberUnlock(TimeSpan? ttlOverride)
+    {
+        rememberedUnlockService.MaybeOfferRememberUnlock(ttlOverride);
     }
 
     /// <summary>Resolves the DEK bytes by unwrapping from CI token or vault password.</summary>
@@ -69,7 +78,23 @@ public sealed class DekService(
     {
         return commandContext.IsCiMode()
             ? await ResolveCiDekAsync(ct)
-            : await ResolveJwtDekAsync(projectId, vaultPassword, ct);
+            : (await ResolveJwtDekAsync(projectId, vaultPassword, ct)).Dek;
+    }
+
+    private async Task<DekResolutionResult> ResolveWithMetadataAsync(
+        string projectId,
+        string? vaultPassword,
+        CancellationToken ct)
+    {
+        if (commandContext.IsCiMode())
+        {
+            return new DekResolutionResult(await ResolveCiDekAsync(ct), DroppedStaleSession: false);
+        }
+
+        return await AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .StartAsync("Resolving encryption key...", async _ =>
+                await ResolveJwtDekAsync(projectId, vaultPassword, ct));
     }
 
     /// <summary>Unwraps the project DEK from the CI secrets endpoint using the CI token wrap key.</summary>
@@ -92,76 +117,31 @@ public sealed class DekService(
             ciSecrets.WrappedDekTag ?? "", ciWrapKey);
     }
 
-    private async Task<byte[]?> ResolveJwtDekAsync(string projectId, string? password, CancellationToken ct)
+    private async Task<DekResolutionResult> ResolveJwtDekAsync(
+        string projectId,
+        string? password,
+        CancellationToken ct)
     {
-        // 1. Check DEK cache first
         var cachedDek = vaultState.GetCachedDek(projectId);
         if (cachedDek is not null)
         {
-            return cachedDek;
+            return new DekResolutionResult(cachedDek, DroppedStaleSession: false);
         }
 
-        // 2. Fetch vault status. We always need it — to detect a salt rotation
-        //    against a stale cached KEK, and to verify a freshly derived KEK.
         var token = credentialStore.Load()?.AccessToken;
         if (string.IsNullOrEmpty(token))
         {
             output.PrintError("Not authenticated. Run 'depvault login' first.");
-            return null;
+            return new DekResolutionResult(null, DroppedStaleSession: false);
+        }
+
+        var unlock = await vaultUnlockService.ResolveKekAsync(password, ct);
+        if (unlock.Kek is null)
+        {
+            return new DekResolutionResult(null, unlock.DroppedStaleSession);
         }
 
         var apiClient = clientFactory.Create();
-        var vaultStatus = await apiClient.Api.Vault.Status.GetAsync(cancellationToken: ct);
-
-        if (vaultStatus is null || string.IsNullOrEmpty(vaultStatus.KekSalt))
-        {
-            output.PrintError("Failed to fetch vault status. Ensure vault is initialized.");
-            return null;
-        }
-
-        // 3. Invalidate a cached KEK whose salt no longer matches the server's.
-        //    This happens when the vault password was rotated from another client.
-        if (vaultState.IsUnlocked && vaultState.KekSalt != vaultStatus.KekSalt)
-        {
-            AnsiConsole.MarkupLine(
-                "[yellow]Vault password appears to have changed elsewhere — re-unlocking.[/]");
-            vaultState.Lock();
-        }
-
-        // 4. Resolve KEK: use cached (now known-fresh) or derive from password
-        byte[] kek;
-        if (vaultState.IsUnlocked)
-        {
-            kek = vaultState.Kek!;
-        }
-        else
-        {
-            if (string.IsNullOrEmpty(password))
-            {
-                output.PrintError("Vault password required. Run 'unlock' or set DEPVAULT_PASSWORD.");
-                return null;
-            }
-
-            var salt = Convert.FromBase64String(vaultStatus.KekSalt);
-            var iterations = vaultStatus.KekIterations > 0 ? vaultStatus.KekIterations.Value : 600_000;
-            kek = VaultCrypto.DeriveKek(password, salt, iterations);
-
-            // Verify the KEK by unwrapping the server-stored wrapped private key.
-            // Without this, a wrong password silently produces a new SELF grant
-            // wrapped with an unusable KEK, corrupting future decrypts.
-            if (!VaultCrypto.VerifyKek(
-                    vaultStatus.WrappedPrivateKey ?? "", vaultStatus.WrappedPrivateKeyIv ?? "",
-                    vaultStatus.WrappedPrivateKeyTag ?? "", kek))
-            {
-                CryptographicOperations.ZeroMemory(kek);
-                output.PrintError("Incorrect vault password.");
-                return null;
-            }
-
-            vaultState.Unlock(kek, vaultStatus.KekSalt);
-        }
-
-        // 5. Fetch key grant and unwrap DEK
         try
         {
             var keyGrant = await apiClient.Api.Projects[projectId].Keygrants.My
@@ -170,17 +150,21 @@ public sealed class DekService(
             if (keyGrant is not null && !string.IsNullOrEmpty(keyGrant.WrappedDek))
             {
                 var dek = VaultCrypto.UnwrapKey(
-                    keyGrant.WrappedDek, keyGrant.WrappedDekIv ?? "", keyGrant.WrappedDekTag ?? "", kek);
+                    keyGrant.WrappedDek, keyGrant.WrappedDekIv ?? "", keyGrant.WrappedDekTag ?? "",
+                    unlock.Kek);
                 vaultState.CacheDek(projectId, dek);
-                return dek;
+                return new DekResolutionResult(dek, DroppedStaleSession: false);
             }
 
-            // No grant found — auto-create SELF grant
-            return await CreateSelfGrantAsync(projectId, kek, ct);
+            return new DekResolutionResult(
+                await CreateSelfGrantAsync(projectId, unlock.Kek, ct),
+                DroppedStaleSession: false);
         }
         catch (ApiException ex) when (ex.ResponseStatusCode is 404)
         {
-            return await CreateSelfGrantAsync(projectId, kek, ct);
+            return new DekResolutionResult(
+                await CreateSelfGrantAsync(projectId, unlock.Kek, ct),
+                DroppedStaleSession: false);
         }
     }
 

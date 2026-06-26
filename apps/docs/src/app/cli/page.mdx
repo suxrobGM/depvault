@@ -74,6 +74,7 @@ The CLI stores configuration in `~/.depvault/`:
 
 - **`config.json`** — Server URL, active project, default output format.
 - **`credentials.json`** — JWT tokens from interactive login. Created by `depvault login`, removed by `depvault logout`. Never commit this file.
+- **`vault-session.json`** — An opt-in [remembered unlock](#remembering-the-unlock): the encrypted KEK, its salt, and expiry. Removed by `lock`/`logout`. Never commit this file.
 
 ```bash
 depvault config set server https://depvault.example.com
@@ -111,6 +112,22 @@ depvault lock
 
 If you skip `unlock`, the CLI prompts for your vault password on the first command that requires decryption and caches it for subsequent commands.
 
+### Remembering the unlock
+
+The cached KEK normally lives only in the current process, so each invocation re-prompts. After a successful unlock the CLI offers to keep the vault unlocked on this machine; opt in to skip the prompt on later `pull`/`push`/`scan` commands.
+
+```bash
+depvault unlock --remember --ttl 24h
+```
+
+| Flag | Description | Default |
+| --- | --- | --- |
+| `--remember` | Persist the unlock without prompting. | Prompt |
+| `--no-remember` | Unlock for this session only. | — |
+| `--ttl` / `--remember-for` | Lifetime of the remembered unlock (`30m`, `8h`, `7d`). | `7d`, max `30d` |
+
+The password is never stored — only the derived KEK, encrypted at rest (Windows DPAPI; an owner-only key on macOS/Linux). It auto-expires at its TTL and is cleared by `lock`, `logout`, or a remote password change.
+
 ---
 
 ## Project Auto-Detection
@@ -126,6 +143,7 @@ The CLI automatically detects the active project by reading the remote origin UR
 | `depvault scan` | Scan repo: analyze deps, push files, detect secrets | [Scanning](/cli/scanning) |
 | `depvault push` | Push config & secret files as encrypted blobs | [Pull & Push](/cli/pull#push) |
 | `depvault pull` | Restore config & secret files byte-for-byte | [Pull & Push](/cli/pull) |
+| `depvault purge` | Remove pulled config & secret files from the repo | [Pull & Push](/cli/pull#purge) |
 | `depvault analyze` | Analyze dependency files | [Analysis](/guides/dependency-analysis) |
 | `depvault ci pull` | Restore files with a CI token | [CI/CD](/guides/ci-cd-integration) |
 | `depvault login` | Authenticate with email/password | [Auth](/cli/authentication) |

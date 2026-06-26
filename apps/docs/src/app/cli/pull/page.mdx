@@ -106,6 +106,37 @@ A normal pull always restores files verbatim — there is no format conversion o
 
 ---
 
+## purge
+
+The inverse of `pull`: it computes the same file set from the repository map and deletes those present on disk. No decryption — files are removed by path, so the vault stays locked. It previews the manifest and confirms (defaulting to **No**); in non-interactive mode it refuses unless `--force` is passed. Directories it empties are removed (never the repo root) unless `--no-prune` is given.
+
+```bash
+depvault purge
+```
+
+| Flag | Description | Default |
+| --- | --- | --- |
+| `--project` | Project ID. | Active project |
+| `--app` | Only purge files for this app (matches app name or repo-relative path). | All apps |
+| `--environment` | Only purge files for this environment slug. | All environments |
+| `--include-base` | Include `base`-environment files when filtering by `--environment`. | `true` |
+| `--include-secrets` | Also remove secret files. | `true` |
+| `--output-dir` | Base directory to purge from. | Repo root |
+| `--dry-run` | Preview deletions without removing anything. | `false` |
+| `--no-prune` | Keep directories left empty after deletion. | `false` |
+| `--force` / `--yes` / `-y` | Delete without confirmation (required in non-interactive mode). | `false` |
+
+### Examples
+
+```bash
+depvault purge --dry-run                          # preview only
+depvault purge --app apps/backend --environment prod
+depvault purge --include-secrets false            # keep secret files
+depvault purge --force                            # no confirmation
+```
+
+---
+
 ## Listing files
 
 Browse the config and secret files stored for a project in the web dashboard's project file views. For CI pipelines, see [`depvault ci pull`](/guides/ci-cd-integration).

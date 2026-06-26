@@ -41,6 +41,11 @@ internal static class Startup
             .AddSingleton<ConsoleRenderer>()
             .AddSingleton<AuthContext>()
             .AddSingleton<VaultState>()
+            .AddSingleton<IKekProtector>(_ =>
+                OperatingSystem.IsWindows() ? new WindowsKekProtector() : new PosixKekProtector())
+            .AddSingleton<IPersistentVaultStore, PersistentVaultStore>()
+            .AddSingleton<RememberedUnlockService>()
+            .AddSingleton<VaultUnlockService>()
             .AddSingleton<DekService>()
             .AddSingleton<AnalysisClient>()
             // Scan steps
@@ -51,7 +56,9 @@ internal static class Startup
             // Shared resolvers
             .AddSingleton<AppResolver>()
             .AddSingleton<RepoFileUploadService>()
+            .AddSingleton<RepoFileCommandResolver>()
             .AddSingleton<RepoFilePuller>()
+            .AddSingleton<RepoFilePurger>()
             // Commands
             .AddSingleton<AuthCommands>()
             .AddSingleton<ConfigCommands>()
@@ -59,6 +66,7 @@ internal static class Startup
             .AddSingleton<AnalysisCommands>()
             .AddSingleton<CiCommands>()
             .AddSingleton<PullCommands>()
+            .AddSingleton<PurgeCommands>()
             .AddSingleton<PushCommands>()
             .AddSingleton<ScanCommands>()
             .AddSingleton<UpdateCommands>()
@@ -77,6 +85,7 @@ internal static class Startup
         var analysis = services.GetRequiredService<AnalysisCommands>();
         var ci = services.GetRequiredService<CiCommands>();
         var pull = services.GetRequiredService<PullCommands>();
+        var purge = services.GetRequiredService<PurgeCommands>();
         var push = services.GetRequiredService<PushCommands>();
         var scan = services.GetRequiredService<ScanCommands>();
         var update = services.GetRequiredService<UpdateCommands>();
@@ -90,6 +99,7 @@ internal static class Startup
             config.CreateConfigCommand(),
             project.CreateProjectCommand(),
             pull.CreatePullCommand(),
+            purge.CreatePurgeCommand(),
             push.CreatePushCommand(),
             analysis.CreateAnalyzeCommand(),
             ci.CreateCiCommand(),
