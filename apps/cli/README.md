@@ -45,24 +45,38 @@ dotnet publish -c Release -r osx-arm64    # macOS Apple Silicon
 
 ```text
 apps/cli/
-├── Program.cs              # Entry point, DI container, command registration
+├── Program.cs             # Entry point
+├── Startup.cs             # DI container and command registration
 ├── Constants.cs          # Shared constants (env var names, paths)
 ├── Auth/
 │   ├── ApiClientFactory.cs  # Creates Kiota API client instances
 │   ├── AuthContext.cs       # Resolves auth mode (JWT vs CI token)
 │   └── TokenAuthProvider.cs # Kiota auth provider (Bearer token)
 ├── Commands/
-│   ├── CommandHelpers.cs    # Shared helpers (project ID, file validation, enum parsing)
 │   ├── AuthCommands.cs      # login, logout, whoami
 │   ├── ConfigCommands.cs    # config set/get
 │   ├── ProjectCommands.cs   # project list/select/info
-│   ├── Push/                # RepoFilePusher — push config & secret files as blobs
-│   ├── Pull/                # RepoFilePuller — byte-faithful restore of all files
+│   ├── PullCommands.cs      # restore encrypted config and secret files
+│   ├── PurgeCommands.cs     # remove restored files from disk
+│   ├── PushCommands.cs      # push config and secret files as blobs
 │   ├── AnalysisCommands.cs  # analyze
+│   ├── VaultCommands.cs     # unlock/lock vault keys
 │   └── CiCommands.cs        # ci pull
 ├── Config/
 │   ├── AppConfig.cs         # ~/.depvault/config.json management
 │   └── CredentialStore.cs   # ~/.depvault/credentials.json management
+├── Crypto/
+│   ├── Core/                # AES-GCM helpers and source-gen JSON context
+│   ├── Protection/          # local KEK protection and owner-only writes
+│   └── Vault/               # unlock/session state and DEK resolution
+├── Services/
+│   ├── Analysis/            # analysis API client wrapper
+│   ├── Discovery/           # repo/file/app discovery helpers
+│   ├── ProjectResolution/   # active, detected, and interactive project resolution
+│   ├── RepoFiles/           # push/pull/purge repo-file workflows
+│   ├── Scan/                # scan orchestration sections
+│   ├── SecretScanning/      # secret pattern/filter primitives
+│   └── Updates/             # release version checks and self-update
 ├── Output/
 │   └── OutputFormatter.cs   # Table, JSON, and file output
 ├── ApiClient/               # Kiota-generated (gitignored)
@@ -80,8 +94,11 @@ depvault config get <key>
 depvault project list [--output table|json]
 depvault project select <id>
 depvault project info [--project <id>]
+depvault unlock [--remember] [--ttl <duration>]
+depvault lock
 depvault push [--project] [--file <path>]
 depvault pull [--project] [--app] [--environment] [--include-base] [--include-secrets] [--output-dir] [--force]
+depvault purge [--project] [--app] [--environment] [--dry-run] [--force]
 depvault analyze [--file <path>] [--project] [--ecosystem] [--output]
 depvault ci pull [--output] [--format text|json]
 depvault version
