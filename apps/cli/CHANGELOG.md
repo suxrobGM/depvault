@@ -5,6 +5,11 @@ All notable changes to the DepVault CLI are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.5] - 2026-06-25
+
+- `unlock --remember [--ttl 7d]`: optionally persist the derived KEK (never the password) encrypted at rest — DPAPI on Windows, an owner-only AES-GCM key on POSIX — so the vault stays unlocked across invocations without retyping the password (default 7d, max 30d); `lock`/`logout` clear it
+- Add a `purge` command: the inverse of `pull`, deleting previously pulled files from disk; previews and confirms (defaults to No), requires `--force` non-interactively, and supports `--dry-run`/`--no-prune`
+
 ## [1.8.4] - 2026-06-04
 
 - Auto-switch the active project to the one matching the current repository (by remote URL, then name) when they diverge, instead of only printing a warning — supersedes the v1.8.2 mismatch warning, which now appears only when no project matches the repo
